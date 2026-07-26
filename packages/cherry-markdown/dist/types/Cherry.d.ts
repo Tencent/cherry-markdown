@@ -115,6 +115,14 @@ export default class Cherry extends CherryStatic {
             theme: string;
             panel: string;
             detail: string;
+            timeline: string;
+            timelineTitle: string;
+            timelineDefaultContent: string;
+            timelineStatusDone: string;
+            timelineStatusDoing: string;
+            timelineStatusTodo: string;
+            timelineStatusMilestone: string;
+            timelineStatusError: string;
             heading1: string;
             heading2: string;
             heading3: string;
@@ -129,6 +137,9 @@ export default class Cherry extends CherryStatic {
             alignCenter: string;
             alignRight: string;
             alignJustify: string;
+            align2Col: string;
+            alignCols: string;
+            alignTabs: string;
             alignFloatLeft: string;
             alignFloatRight: string;
             publish: string;
@@ -195,7 +206,6 @@ export default class Cherry extends CherryStatic {
             search: string;
             searchOnly: string;
             autoWrap: string;
-            footnoteTitle: string;
             searchFor: string;
             searchClear: string;
             replaceWith: string;
@@ -322,6 +332,14 @@ export default class Cherry extends CherryStatic {
             heading3: string;
             panel: string;
             detail: string;
+            timeline: string;
+            timelineTitle: string;
+            timelineDefaultContent: string;
+            timelineStatusDone: string;
+            timelineStatusDoing: string;
+            timelineStatusTodo: string;
+            timelineStatusMilestone: string;
+            timelineStatusError: string;
             complement: string;
             summary: string;
             justify: string;
@@ -333,6 +351,9 @@ export default class Cherry extends CherryStatic {
             alignCenter: string;
             alignRight: string;
             alignJustify: string;
+            align2Col: string;
+            alignCols: string;
+            alignTabs: string;
             alignFloatLeft: string;
             alignFloatRight: string;
             publish: string;
@@ -399,7 +420,6 @@ export default class Cherry extends CherryStatic {
             search: string;
             searchOnly: string;
             autoWrap: string;
-            footnoteTitle: string;
             searchFor: string;
             searchClear: string;
             replaceWith: string;
@@ -523,6 +543,14 @@ export default class Cherry extends CherryStatic {
             exportWordFile: string;
             panel: string;
             detail: string;
+            timeline: string;
+            timelineTitle: string;
+            timelineDefaultContent: string;
+            timelineStatusDone: string;
+            timelineStatusDoing: string;
+            timelineStatusTodo: string;
+            timelineStatusMilestone: string;
+            timelineStatusError: string;
             heading1: string;
             heading2: string;
             heading3: string;
@@ -537,6 +565,9 @@ export default class Cherry extends CherryStatic {
             alignCenter: string;
             alignRight: string;
             alignJustify: string;
+            align2Col: string;
+            alignCols: string;
+            alignTabs: string;
             alignFloatLeft: string;
             alignFloatRight: string;
             publish: string;
@@ -603,7 +634,6 @@ export default class Cherry extends CherryStatic {
             search: string;
             searchOnly: string;
             autoWrap: string;
-            footnoteTitle: string;
             searchFor: string;
             searchClear: string;
             replaceWith: string;
@@ -933,6 +963,29 @@ export default class Cherry extends CherryStatic {
      * @param {string} writingStyle normal 普通 | typewriter 打字机 | focus 专注
      */
     setWritingStyle(writingStyle: string): void;
+    /**
+     * 禁用/启用编辑器
+     * 开启禁用后：
+     *   - 编辑器切换为只读，禁止一切修改文档的操作
+     *   - 在编辑区上覆盖一个蒙层，展示 tips 文案，阻止鼠标交互
+     *   - tips 默认通过 sticky 停留在视窗中央；鼠标进入蒙层时 tips 跟随鼠标移动
+     * @public
+     * @param {boolean} isDisable 是否禁用编辑器
+     * @param {string} [tips=''] 禁用时显示在蒙层上的提示文案
+     * @returns {void}
+     */
+    public setDisable(isDisable: boolean, tips?: string): void;
+    disableMaskDom: any;
+    /**
+     * 绑定禁用蒙层的鼠标跟随行为
+     * - mouseenter：切换到跟随模式
+     * - mousemove：通过 CSS 变量更新 tips 位置（用 rAF 节流，避免抖动）
+     * - mouseleave：回到 sticky 居中模式
+     * @private
+     * @param {HTMLElement} maskDom 蒙层容器
+     * @param {HTMLElement} tipsDom tips 元素
+     */
+    private bindDisableMaskFollow;
     /**
      * 修改语言
      * @param {string} locale

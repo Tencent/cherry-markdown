@@ -82,6 +82,12 @@ export default class MermaidCodeEngine {
     /** 按 mermaid 源码内容缓存已渲染 HTML，布局参数变更时复用以避免闪回 codeBlock */
     contentRenderCache: Map<any, any>;
     contentRenderCacheMax: number;
+    /** 异步渲染最大并发数：达到上限后新任务排队，避免大量 mermaid 并发共享 DOM 引起竞态与内存压力 */
+    maxConcurrentRender: number;
+    /** 当前正在异步渲染的任务数 */
+    activeRenderCount: number;
+    /** 等待并发额度的任务队列，元素为 resolve 函数 */
+    pendingRenderQueue: any[];
     /**
      * 生成 mermaid 源码内容缓存 key（与布局 sign 无关）
      * @param {string} src
@@ -109,14 +115,34 @@ export default class MermaidCodeEngine {
     isAsyncRenderVersion(): boolean;
     mountMermaidCanvas($engine: any): void;
     /**
+     * 为一次异步渲染创建独立的临时画布，避免多个 mermaid 代码块并发渲染时共享同一 DOM 导致的竞态。
+     * @param {import('../Engine').default} $engine
+     * @returns {HTMLDivElement}
+     */
+    createAsyncRenderCanvas($engine: import("../Engine").default): HTMLDivElement;
+    /**
+     * 移除异步渲染使用的临时画布
+     * @param {HTMLElement} canvas
+     */
+    destroyAsyncRenderCanvas(canvas: HTMLElement): void;
+    /**
+     * 获取一个异步渲染的并发额度，若已达上限则挂起等待，直到有其他任务释放。
+     * @returns {Promise<void>}
+     */
+    acquireRenderSlot(): Promise<void>;
+    /**
+     * 释放一个并发额度，若队列有等待任务则唤醒队首（注意：唤醒时不减不加，直接把额度移交给下一个任务）。
+     */
+    releaseRenderSlot(): void;
+    /**
      * 转换svg为img，如果出错则直出svg
      * @param {string} svgCode
      * @param {string} graphId
      * @returns {string}
      */
-    convertMermaidSvgToImg(svgCode: string, graphId: string): string;
-    processSvgCode(svgCode: any, graphId: any): string;
-    syncRender(graphId: any, src: any, sign: any, $engine: any): any;
+    convertMermaidSvgToImg(svgCode: string, graphId: string, svg2img?: boolean): string;
+    processSvgCode(svgCode: any, graphId: any, svg2img?: boolean): string;
+    syncRender(graphId: any, src: any, sign: any, $engine: any, svg2img?: boolean): any;
     handleAsyncRenderDone(graphId: any, sign: any, $engine: any, props: any, html: any): void;
     /**
      * 尝试重新从全局获取 mermaid 实例（当外部异步加载 mermaid 时，构造时刻可能尚未就绪）
@@ -133,5 +159,4 @@ export default class MermaidCodeEngine {
     ensureMermaidLoaded(props?: any): boolean;
     asyncRender(graphId: any, src: any, sign: any, $engine: any, props: any, retryCount?: number): any;
     render(src: any, sign: any, $engine: any, props?: {}): any;
-    svg2img: any;
 }

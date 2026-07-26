@@ -483,25 +483,99 @@
 .cherry-markdown .check-list-item .ch-icon {
   margin: 0 6px 0 -20px;
 }
-.cherry-markdown .footnote:not(a) .footnote-title {
-  font-size: 20px;
-  margin-top: -38px;
+.cherry-markdown {
+  /* 正文内的脚注角标 [1] [2] ... */
+}
+.cherry-markdown sup.cherry-footnote-number a.footnote {
+  display: inline-block;
+  padding: 0 3px;
+  margin: 0 1px;
+  font-size: 0.75em;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--md-link-color);
+  text-decoration: none;
+  border-radius: 3px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.cherry-markdown sup.cherry-footnote-number a.footnote:hover, .cherry-markdown sup.cherry-footnote-number a.footnote:focus-visible {
   background-color: var(--md-inline-code-bg);
-  width: 60px;
-  margin-bottom: var(--spacing-lg);
+  text-decoration: none;
+  outline: none;
+}
+.cherry-markdown {
+  /* 页面底部脚注区 */
 }
 .cherry-markdown .footnote:not(a) {
-  padding-top: 20px;
+  margin-top: 1em;
+  padding-top: 1.25em;
   border-top: 1px solid var(--md-hr-border);
-  margin-top: 50px;
+  font-size: 0.9em;
+  /* Chrome 86+：用次级文字色弱化正文，避免 color-mix / 容器 opacity 影响链接对比度 */
+  color: var(--base-sub-font-color);
+}
+.cherry-markdown .footnote:not(a) .footnote-title {
+  display: block;
+  width: auto;
+  margin: 0 0 1em 0;
+  padding: 0;
+  background: transparent;
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--md-paragraph-color);
+  text-transform: none;
+}
+.cherry-markdown .footnote:not(a) .footnote-title::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 0.9em;
+  margin-right: 8px;
+  vertical-align: -1px;
+  background-color: var(--md-link-color);
+  border-radius: 2px;
 }
 .cherry-markdown .footnote:not(a) .one-footnote {
-  color: var(--md-paragraph-color);
-  margin-bottom: var(--spacing-lg);
-  border-bottom: 1px dotted var(--md-hr-border);
+  position: relative;
+  margin: 0;
+  padding: 0.55em 0 0.55em 0.25em;
+  border-bottom: none;
+  line-height: 1.65;
+  color: inherit;
+  word-break: break-word;
+}
+.cherry-markdown .footnote:not(a) .one-footnote p,
+.cherry-markdown .footnote:not(a) .one-footnote div,
+.cherry-markdown .footnote:not(a) .one-footnote blockquote,
+.cherry-markdown .footnote:not(a) .one-footnote pre,
+.cherry-markdown .footnote:not(a) .one-footnote table,
+.cherry-markdown .footnote:not(a) .one-footnote ul,
+.cherry-markdown .footnote:not(a) .one-footnote ol {
+  margin: 0;
 }
 .cherry-markdown .footnote:not(a) .one-footnote a.footnote-ref {
-  padding: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6em;
+  height: 1.6em;
+  padding: 0 0.4em;
+  margin-right: 0.5em;
+  font-size: 0.78em;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--md-link-color);
+  background-color: var(--md-inline-code-bg);
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.cherry-markdown .footnote:not(a) .one-footnote a.footnote-ref:hover, .cherry-markdown .footnote:not(a) .one-footnote a.footnote-ref:focus-visible {
+  background-color: var(--md-link-color);
+  color: var(--base-editor-bg);
+  text-decoration: none;
+  outline: none;
 }
 .cherry-markdown .cherry-table-container {
   max-width: 100%;
@@ -2953,15 +3027,17 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 .cherry-panel-cols {
   --panel-cols-gap: 32px;
   --panel-cols-divider: 1px dotted var(--md-hr-border, rgba(0, 0, 0, 0.011));
+  --panel-col-min-width: 180px;
   display: grid;
   gap: 0;
   margin: var(--panel-cols-margin, 16px 0);
   align-items: stretch;
   width: 100%;
   box-sizing: border-box;
+  overflow-x: auto;
 }
 .cherry-panel-cols .cherry-panel--col {
-  min-width: 0;
+  min-width: var(--panel-col-min-width, 180px);
   box-sizing: border-box;
   padding: var(--panel-col-padding, 0);
   background: var(--panel-col-bg, transparent);
@@ -2999,19 +3075,31 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   padding-right: calc(var(--panel-cols-gap) / 2);
 }
 
+.cherry-panel-cols__cols {
+  grid-template-columns: repeat(var(--cols, 2), minmax(var(--panel-col-min-width, 180px), 1fr));
+}
+
 .cherry-panel-cols__2cols {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(var(--panel-col-min-width, 180px), 1fr));
 }
 
 .cherry-panel-cols__3cols {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(var(--panel-col-min-width, 180px), 1fr));
 }
 
 @media (max-width: 640px) {
+  .cherry-panel-cols__cols,
   .cherry-panel-cols__2cols,
   .cherry-panel-cols__3cols {
     grid-template-columns: minmax(0, 1fr);
+    overflow-x: visible;
   }
+  .cherry-panel-cols__cols .cherry-panel--col,
+  .cherry-panel-cols__2cols .cherry-panel--col,
+  .cherry-panel-cols__3cols .cherry-panel--col {
+    min-width: 0;
+  }
+  .cherry-panel-cols__cols .cherry-panel--col + .cherry-panel--col,
   .cherry-panel-cols__2cols .cherry-panel--col + .cherry-panel--col,
   .cherry-panel-cols__3cols .cherry-panel--col + .cherry-panel--col {
     border-left: none;
@@ -3019,12 +3107,132 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
     padding-left: 0;
     padding-top: calc(var(--panel-cols-gap, 32px) / 2);
   }
+  .cherry-panel-cols__cols .cherry-panel--col:not(:last-child),
   .cherry-panel-cols__2cols .cherry-panel--col:not(:last-child),
   .cherry-panel-cols__3cols .cherry-panel--col:not(:last-child) {
     padding-right: 0;
     padding-bottom: calc(var(--panel-cols-gap, 32px) / 2);
   }
 }
+.cherry-tabs {
+  --tabs-gap: var(--panel-cols-gap, 32px);
+  --tabs-label-color: var(--md-text-color, inherit);
+  --tabs-label-active-color: var(--md-link-color, #0d6dfe);
+  --tabs-label-active-border-color: var(--md-link-color, #0d6dfe);
+  --tabs-label-hover-bg: var(--panel-primary-bg, rgba(13, 109, 254, 0.06));
+  --tabs-border-color: var(--md-hr-border, rgba(0, 0, 0, 0.12));
+  --tabs-panel-padding: 12px 0;
+  display: block;
+  margin: var(--tabs-margin, 16px 0);
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+}
+.cherry-tabs .cherry-tabs--radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.cherry-tabs .cherry-tabs--labels {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  border-bottom: 1px solid var(--tabs-border-color);
+  margin: 0;
+  padding: 0;
+}
+.cherry-tabs .cherry-tabs--label {
+  display: inline-block;
+  padding: 8px 16px;
+  margin: 0;
+  cursor: pointer;
+  color: var(--tabs-label-color);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  user-select: none;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.cherry-tabs .cherry-tabs--label:hover {
+  background: var(--tabs-label-hover-bg);
+}
+.cherry-tabs .cherry-tabs--panels {
+  position: relative;
+  padding: var(--tabs-panel-padding);
+}
+.cherry-tabs .cherry-tabs--panel {
+  display: none;
+  line-height: 1.7;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.cherry-tabs .cherry-tabs--panel > *:first-child {
+  margin-top: 0;
+}
+.cherry-tabs .cherry-tabs--panel > *:last-child {
+  margin-bottom: 0;
+}
+.cherry-tabs .cherry-tabs--panel img,
+.cherry-tabs .cherry-tabs--panel video,
+.cherry-tabs .cherry-tabs--panel iframe {
+  max-width: 100%;
+  height: auto;
+}
+.cherry-tabs .cherry-tabs--panel pre,
+.cherry-tabs .cherry-tabs--panel table {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.cherry-tabs .cherry-tabs--panel table {
+  width: 100%;
+  display: block;
+}
+.cherry-tabs .cherry-tabs--radio__0:checked ~ .cherry-tabs--labels .cherry-tabs--label__0,
+.cherry-tabs .cherry-tabs--radio__1:checked ~ .cherry-tabs--labels .cherry-tabs--label__1,
+.cherry-tabs .cherry-tabs--radio__2:checked ~ .cherry-tabs--labels .cherry-tabs--label__2,
+.cherry-tabs .cherry-tabs--radio__3:checked ~ .cherry-tabs--labels .cherry-tabs--label__3,
+.cherry-tabs .cherry-tabs--radio__4:checked ~ .cherry-tabs--labels .cherry-tabs--label__4,
+.cherry-tabs .cherry-tabs--radio__5:checked ~ .cherry-tabs--labels .cherry-tabs--label__5,
+.cherry-tabs .cherry-tabs--radio__6:checked ~ .cherry-tabs--labels .cherry-tabs--label__6,
+.cherry-tabs .cherry-tabs--radio__7:checked ~ .cherry-tabs--labels .cherry-tabs--label__7,
+.cherry-tabs .cherry-tabs--radio__8:checked ~ .cherry-tabs--labels .cherry-tabs--label__8,
+.cherry-tabs .cherry-tabs--radio__9:checked ~ .cherry-tabs--labels .cherry-tabs--label__9 {
+  color: var(--tabs-label-active-color);
+  border-bottom-color: var(--tabs-label-active-border-color);
+  background: transparent;
+}
+.cherry-tabs .cherry-tabs--radio__0:checked ~ .cherry-tabs--panels .cherry-tabs--panel__0,
+.cherry-tabs .cherry-tabs--radio__1:checked ~ .cherry-tabs--panels .cherry-tabs--panel__1,
+.cherry-tabs .cherry-tabs--radio__2:checked ~ .cherry-tabs--panels .cherry-tabs--panel__2,
+.cherry-tabs .cherry-tabs--radio__3:checked ~ .cherry-tabs--panels .cherry-tabs--panel__3,
+.cherry-tabs .cherry-tabs--radio__4:checked ~ .cherry-tabs--panels .cherry-tabs--panel__4,
+.cherry-tabs .cherry-tabs--radio__5:checked ~ .cherry-tabs--panels .cherry-tabs--panel__5,
+.cherry-tabs .cherry-tabs--radio__6:checked ~ .cherry-tabs--panels .cherry-tabs--panel__6,
+.cherry-tabs .cherry-tabs--radio__7:checked ~ .cherry-tabs--panels .cherry-tabs--panel__7,
+.cherry-tabs .cherry-tabs--radio__8:checked ~ .cherry-tabs--panels .cherry-tabs--panel__8,
+.cherry-tabs .cherry-tabs--radio__9:checked ~ .cherry-tabs--panels .cherry-tabs--panel__9 {
+  display: block;
+}
+.cherry-tabs .cherry-tabs--radio__0:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__0,
+.cherry-tabs .cherry-tabs--radio__1:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__1,
+.cherry-tabs .cherry-tabs--radio__2:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__2,
+.cherry-tabs .cherry-tabs--radio__3:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__3,
+.cherry-tabs .cherry-tabs--radio__4:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__4,
+.cherry-tabs .cherry-tabs--radio__5:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__5,
+.cherry-tabs .cherry-tabs--radio__6:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__6,
+.cherry-tabs .cherry-tabs--radio__7:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__7,
+.cherry-tabs .cherry-tabs--radio__8:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__8,
+.cherry-tabs .cherry-tabs--radio__9:focus-visible ~ .cherry-tabs--labels .cherry-tabs--label__9 {
+  outline: 2px solid var(--tabs-label-active-border-color);
+  outline-offset: -2px;
+}
+
 .cherry-panel {
   margin: var(--panel-margin, 10px 0);
   overflow: hidden;
@@ -3125,6 +3333,305 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --panel-icon: var(--panel-success-icon, '\EA67');
 }
 
+/* ========== Timeline 时间线 ========== */
+.cherry-markdown .cherry-timeline {
+  margin: 20px 0;
+  padding: 4px 0;
+  color: var(--timeline-content-color, var(--base-font-color));
+}
+
+.cherry-markdown .cherry-timeline--header {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 0 0 14px 4px;
+  color: var(--timeline-header-color, var(--base-font-color));
+  letter-spacing: 0.2px;
+}
+
+.cherry-markdown .cherry-timeline--body {
+  position: relative;
+  padding-left: 24px;
+}
+
+/* 时间轴主干：由每个 item 各自绘制一段线，实现按状态分段的实线/虚线效果
+   - .cherry-timeline--item::before：贯穿当前 item 的一段线（从 item 顶部到底部）
+   - todo 状态：显示为虚线（表示尚未到达）
+   - 其它状态：显示为实线（表示已发生的进程）
+   相邻 item 之间无缝拼接，形成"从实到虚"的自然过渡 */
+.cherry-markdown .cherry-timeline--item {
+  position: relative;
+  padding: 2px 8px 14px 8px;
+  border-radius: var(--radius-md, 6px);
+  transition: background-color 0.2s ease;
+}
+
+/* 每个 item 自绘的时间线段（默认实线） */
+.cherry-markdown .cherry-timeline--item::before {
+  content: "";
+  position: absolute;
+  left: -18px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--timeline-line-color, var(--base-border-color));
+  z-index: 0;
+}
+
+/* 首个 item：从节点下方开始画线（避免线段延伸到 header 里） */
+.cherry-markdown .cherry-timeline--item:first-child::before {
+  top: 22px;
+}
+
+/* 末个 item：只画到节点上边缘（避免线段延伸到内容末尾之外） */
+.cherry-markdown .cherry-timeline--item:last-child::before {
+  bottom: auto;
+  height: 6px;
+}
+
+/* 只有一个 item 时（既是首个也是末个），仅显示节点周围极短一段就够了；
+   直接隐藏这条线更简洁 */
+.cherry-markdown .cherry-timeline--item:first-child:last-child::before {
+  display: none;
+}
+
+.cherry-markdown .cherry-timeline--item:last-child {
+  padding-bottom: 0;
+}
+
+/* todo 状态：线段改为虚线，颜色变浅，表示"尚未到达"
+   使用 background linear-gradient 实现可精确控制间距的虚线（比 border-style: dashed 更可控） */
+.cherry-markdown .cherry-timeline--item__todo::before {
+  background: linear-gradient(to bottom, var(--timeline-line-color, var(--base-border-color)) 0, var(--timeline-line-color, var(--base-border-color)) 4px, transparent 4px, transparent 8px);
+  background-size: 2px 8px;
+  background-repeat: repeat-y;
+  opacity: 0.7;
+}
+
+/* hover：淡背景高亮
+   注意：不使用 transform 位移整条 item，避免带动节点脱离时间轴主干；
+   节点自身的 scale 通过 transform-origin: center 就地放大，保持与主干对齐 */
+.cherry-markdown .cherry-timeline--item:hover {
+  background: var(--secondary-color, rgba(53, 130, 251, 0.04));
+}
+
+/* 内容区在 hover 时轻微右移，保留"响应式"的视觉反馈；节点保持不动 */
+.cherry-markdown .cherry-timeline--item:hover .cherry-timeline--content {
+  transform: translateX(2px);
+}
+
+/* 节点：外层白色描边环形 + 微阴影，营造浮起感
+   left 计算：body 的 padding-left 是 24px，主干中心线在 body 的 left:6px+width:1px = 7px；
+   节点宽 14px，节点左边缘需落在 body 左边距 7-7=0 处，
+   相对 item（其起点 = body 左边缘 + 24px 内边距）需要 -24px 才能对齐主干中心 */
+.cherry-markdown .cherry-timeline--node {
+  position: absolute;
+  left: -24px;
+  top: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--timeline-node-bg, var(--base-previewer-bg));
+  border: 2px solid var(--timeline-node-color, var(--oc-gray-5));
+  box-shadow: 0 0 0 3px var(--base-previewer-bg, #fff), 0 1px 2px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+  z-index: 1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cherry-markdown .cherry-timeline--item:hover .cherry-timeline--node {
+  transform: scale(1.15);
+  animation: cherry-timeline-glow 1.8s ease-in-out infinite;
+}
+
+.cherry-markdown .cherry-timeline--content {
+  line-height: 1.65;
+  transition: transform 0.2s ease;
+}
+
+/* 时间戳：pill 徽章风格 */
+.cherry-markdown .cherry-timeline--time {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--timeline-time-color, var(--base-sub-font-color));
+  background: var(--oc-gray-1, rgba(0, 0, 0, 0.04));
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  letter-spacing: 0.2px;
+}
+
+.cherry-markdown .cherry-timeline--title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--timeline-title-color, var(--md-heading-color));
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+
+.cherry-markdown .cherry-timeline--desc {
+  font-size: 13px;
+  color: var(--timeline-desc-color, var(--base-sub-font-color));
+  line-height: 1.6;
+}
+
+/* 修复描述段落多段时空隙断层 */
+.cherry-markdown .cherry-timeline--desc p {
+  margin: 2px 0;
+}
+
+.cherry-markdown .cherry-timeline--desc p:first-child {
+  margin-top: 0;
+}
+
+.cherry-markdown .cherry-timeline--desc p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- 状态：已完成 ---------- */
+.cherry-markdown .cherry-timeline--item__done .cherry-timeline--node {
+  --timeline-glow-color: rgba(64, 192, 87, 0.35);
+  --timeline-glow-color-fade: rgba(64, 192, 87, 0);
+  background: var(--timeline-done-color, var(--color-success));
+  border-color: var(--timeline-done-color, var(--color-success));
+}
+
+.cherry-markdown .cherry-timeline--item__done .cherry-timeline--time {
+  color: var(--timeline-done-color, var(--color-success));
+  background: rgba(64, 192, 87, 0.1);
+}
+
+/* ---------- 状态：进行中（hover 脉冲光晕） ---------- */
+.cherry-markdown .cherry-timeline--item__doing .cherry-timeline--node {
+  --timeline-glow-color: rgba(53, 130, 251, 0.35);
+  --timeline-glow-color-fade: rgba(53, 130, 251, 0);
+  background: var(--timeline-doing-color, var(--primary-color));
+  border-color: var(--timeline-doing-color, var(--primary-color));
+}
+
+.cherry-markdown .cherry-timeline--item__doing .cherry-timeline--time {
+  color: var(--timeline-doing-color, var(--primary-color));
+  background: var(--secondary-color, rgba(53, 130, 251, 0.1));
+}
+
+.cherry-markdown .cherry-timeline--item__doing .cherry-timeline--title {
+  color: var(--timeline-doing-color, var(--primary-color));
+}
+
+@keyframes cherry-timeline-glow {
+  0% {
+    box-shadow: 0 0 0 3px var(--base-previewer-bg, #fff), 0 0 0 3px var(--timeline-glow-color, rgba(53, 130, 251, 0.35));
+  }
+  70% {
+    box-shadow: 0 0 0 3px var(--base-previewer-bg, #fff), 0 0 0 10px var(--timeline-glow-color-fade, rgba(53, 130, 251, 0));
+  }
+  100% {
+    box-shadow: 0 0 0 3px var(--base-previewer-bg, #fff), 0 0 0 10px var(--timeline-glow-color-fade, rgba(53, 130, 251, 0));
+  }
+}
+/* ---------- 状态：待办 ---------- */
+.cherry-markdown .cherry-timeline--item__todo .cherry-timeline--node {
+  --timeline-glow-color: rgba(134, 142, 150, 0.25);
+  --timeline-glow-color-fade: rgba(134, 142, 150, 0);
+  background: var(--timeline-todo-bg, var(--base-previewer-bg));
+  border-color: var(--timeline-todo-color, var(--oc-gray-5));
+}
+
+/* ---------- 状态：里程碑（菱形） ---------- */
+.cherry-markdown .cherry-timeline--item__milestone .cherry-timeline--node {
+  --timeline-glow-color: rgba(250, 173, 20, 0.4);
+  --timeline-glow-color-fade: rgba(250, 173, 20, 0);
+  /* 与普通节点保持相同的 left 值，确保菱形中心与时间轴主干对齐 */
+  width: 14px;
+  height: 14px;
+  left: -24px;
+  top: 6px;
+  background: var(--timeline-milestone-color, var(--oc-yellow-6));
+  border-color: var(--timeline-milestone-color, var(--oc-yellow-6));
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+
+.cherry-markdown .cherry-timeline--item__milestone:hover .cherry-timeline--node {
+  transform: rotate(45deg) scale(1.15);
+}
+
+.cherry-markdown .cherry-timeline--item__milestone .cherry-timeline--title {
+  color: var(--timeline-milestone-title-color, var(--oc-yellow-8));
+  font-weight: 700;
+}
+
+.cherry-markdown .cherry-timeline--item__milestone .cherry-timeline--time {
+  color: var(--timeline-milestone-title-color, var(--oc-yellow-8));
+  background: rgba(250, 173, 20, 0.12);
+}
+
+/* ---------- 状态：异常 ---------- */
+.cherry-markdown .cherry-timeline--item__error .cherry-timeline--node {
+  --timeline-glow-color: rgba(255, 77, 79, 0.35);
+  --timeline-glow-color-fade: rgba(255, 77, 79, 0);
+  background: var(--timeline-error-color, var(--color-error));
+  border-color: var(--timeline-error-color, var(--color-error));
+}
+
+.cherry-markdown .cherry-timeline--item__error .cherry-timeline--title {
+  color: var(--timeline-error-title-color, var(--oc-red-7));
+}
+
+.cherry-markdown .cherry-timeline--item__error .cherry-timeline--time {
+  color: var(--timeline-error-title-color, var(--oc-red-7));
+  background: rgba(255, 77, 79, 0.1);
+}
+
+/* ---------- 无障碍：尊重用户的减少动效偏好 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .cherry-markdown .cherry-timeline--item,
+  .cherry-markdown .cherry-timeline--node,
+  .cherry-markdown .cherry-timeline--content {
+    transition: none;
+  }
+  .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--content {
+    transform: none;
+  }
+  .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--node,
+  .cherry-markdown .cherry-timeline--item__milestone:hover .cherry-timeline--node {
+    transform: none;
+  }
+  .cherry-markdown .cherry-timeline--item__milestone .cherry-timeline--node {
+    transform: rotate(45deg);
+  }
+  .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--node {
+    animation: none;
+  }
+}
+/* ---------- 打印样式：去掉动画/hover 效果，保留结构 ---------- */
+@media print {
+  .cherry-markdown .cherry-timeline--item,
+  .cherry-markdown .cherry-timeline--node,
+  .cherry-markdown .cherry-timeline--content {
+    transition: none;
+  }
+  .cherry-markdown .cherry-timeline--item:hover {
+    background: transparent;
+  }
+  .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--content {
+    transform: none;
+  }
+  .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--node {
+    animation: none;
+  }
+  /* 打印时确保时间线段（每个 item 的 ::before）可见 */
+  .cherry-markdown .cherry-timeline--item::before {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .cherry-markdown .cherry-timeline--item__todo::before {
+    opacity: 1;
+  }
+}
 /** 引入自带的主题（保持与 cherry 一致的主题覆盖顺序） */
 /*
  * 默认主题
@@ -3304,6 +3811,26 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   /* ========== Mermaid 工具栏变量覆盖 ========== */
   --mermaid-toolbar-slider-bg: rgba(255, 255, 255, 0.15);
   --mermaid-toolbar-tab-active-color: #fff;
+  /* ========== Timeline 时间线变量覆盖 ========== */
+  --timeline-header-color: var(--oc-gray-3);
+  --timeline-line-color: var(--oc-gray-6);
+  --timeline-node-bg: var(--oc-gray-8);
+  --timeline-node-color: var(--oc-gray-5);
+  --timeline-content-color: var(--oc-gray-4);
+  --timeline-time-color: var(--oc-gray-5);
+  --timeline-title-color: var(--oc-gray-3);
+  --timeline-desc-color: var(--oc-gray-5);
+  --timeline-done-color: var(--oc-green-5);
+  --timeline-doing-color: var(--oc-blue-5);
+  --timeline-doing-shadow-color: rgba(59, 130, 246, 0.25);
+  --timeline-doing-pulse-from: rgba(59, 130, 246, 0.4);
+  --timeline-doing-pulse-to: rgba(59, 130, 246, 0);
+  --timeline-todo-bg: var(--oc-gray-8);
+  --timeline-todo-color: var(--oc-gray-6);
+  --timeline-milestone-color: var(--oc-yellow-5);
+  --timeline-milestone-title-color: var(--oc-yellow-4);
+  --timeline-error-color: var(--oc-red-5);
+  --timeline-error-title-color: var(--oc-red-4);
   /* 目录区域样式 */
 }
 

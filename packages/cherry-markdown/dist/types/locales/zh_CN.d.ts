@@ -81,6 +81,14 @@ declare const _default: {
     theme: string;
     panel: string;
     detail: string;
+    timeline: string;
+    timelineTitle: string;
+    timelineDefaultContent: string;
+    timelineStatusDone: string;
+    timelineStatusDoing: string;
+    timelineStatusTodo: string;
+    timelineStatusMilestone: string;
+    timelineStatusError: string;
     heading1: string;
     heading2: string;
     heading3: string;
@@ -95,6 +103,9 @@ declare const _default: {
     alignCenter: string;
     alignRight: string;
     alignJustify: string;
+    align2Col: string;
+    alignCols: string;
+    alignTabs: string;
     alignFloatLeft: string;
     alignFloatRight: string;
     publish: string;
@@ -161,7 +172,6 @@ declare const _default: {
     search: string;
     searchOnly: string;
     autoWrap: string;
-    footnoteTitle: string;
     searchFor: string;
     searchClear: string;
     replaceWith: string;

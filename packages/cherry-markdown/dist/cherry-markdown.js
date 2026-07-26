@@ -50968,8 +50968,8 @@
 	var diff = /*@__PURE__*/getDefaultExportFromCjs$1(diffExports$1);
 
 	var _excluded$2 = ["codemirror"];
-	function _callSuper$1H(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1I() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1I() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1I = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1I(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1J() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1J() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1J = function _isNativeReflectConstruct() { return !!t; })(); }
 	function ownKeys$g(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 	function _objectSpread$g(e) { for (var r = 1; r < arguments.length; r++) { var _context35, _context36; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context35 = ownKeys$g(Object(t), !0)).call(_context35, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context36 = ownKeys$g(Object(t))).call(_context36, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _createForOfIteratorHelper$1m(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1m(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
@@ -51448,8 +51448,9 @@
 	   * 创建 CM6Adapter 实例
 	   * @param {EditorView} view - EditorView 实例
 	   * @param {Compartment} [vimCompartment] - vim 模式的 Compartment（可选，用于多实例隔离）
+	   * @param {Compartment} [readOnlyCompartment] - 只读状态的 Compartment（可选，用于动态切换只读）
 	   */
-	  function CM6Adapter(view, vimCompartment) {
+	  function CM6Adapter(view, vimCompartment, readOnlyCompartment) {
 	    _classCallCheck$1(this, CM6Adapter);
 	    /** @type {EditorView} */
 	    this.view = view;
@@ -51459,6 +51460,8 @@
 	    this.currentKeyMap = 'sublime';
 	    /** @type {Compartment | null} */
 	    this.vimCompartment = vimCompartment || null;
+	    /** @type {Compartment | null} */
+	    this.readOnlyCompartment = readOnlyCompartment || null;
 	    /** @type {number} 实例级 markId 计数器 */
 	    this.markIdCounter = 0;
 	  }
@@ -51745,9 +51748,34 @@
 	        case 'keyMap':
 	          this.setKeyMap(/** @type {'sublime' | 'vim'} */value);
 	          break;
+	        case 'readOnly':
+	        case 'disableInput':
+	          this.setReadOnly(/** @type {boolean} */value);
+	          break;
 	        default:
 	          break;
 	      }
+	    }
+
+	    /**
+	     * 动态设置编辑器的只读状态
+	     * 开启后：
+	     *   - 用户键盘输入、粘贴、拖拽等所有会修改文档的操作都会被拒绝；
+	     *   - 通过 API（如 setOption('value', ...)）主动派发的变更仍会被拒绝，如需强制写入请先关闭只读；
+	     *   - 光标依然可以移动，文本依然可以选中和复制。
+	     * @param {boolean} readOnly - 是否只读
+	     * @returns {void}
+	     */
+	  }, {
+	    key: "setReadOnly",
+	    value: function setReadOnly(readOnly) {
+	      if (!this.readOnlyCompartment) {
+	        console.warn('readOnlyCompartment not available, cannot toggle readOnly');
+	        return;
+	      }
+	      this.view.dispatch({
+	        effects: this.readOnlyCompartment.reconfigure(EditorState.readOnly.of(Boolean(readOnly)))
+	      });
 	    }
 
 	    /**
@@ -52165,7 +52193,7 @@
 	  function ReplacementWidget(dom) {
 	    var _this3;
 	    _classCallCheck$1(this, ReplacementWidget);
-	    _this3 = _callSuper$1H(this, ReplacementWidget);
+	    _this3 = _callSuper$1I(this, ReplacementWidget);
 	    /** @type {HTMLElement} */
 	    _this3.dom = dom;
 	    return _this3;
@@ -52623,6 +52651,8 @@
 	    this.keymapCompartment = new Compartment();
 	    /** @type {Compartment} */
 	    this.vimCompartment = new Compartment();
+	    /** @type {Compartment} */
+	    this.readOnlyCompartment = new Compartment();
 
 	    /** @type {ReturnType<typeof setTimeout> | number} */
 	    this.dealSpecialWordsTimer = 0;
@@ -53159,7 +53189,7 @@
 	        run: function run(view) {
 	          var _self$arrowKeyInterce4;
 	          if ((_self$arrowKeyInterce4 = self.arrowKeyInterceptor) !== null && _self$arrowKeyInterce4 !== void 0 && _self$arrowKeyInterce4.call(self, 'Enter')) return true;
-	          var adapter = self.editor || new CM6Adapter(view, self.vimCompartment);
+	          var adapter = self.editor || new CM6Adapter(view, self.vimCompartment, self.readOnlyCompartment);
 	          return handleNewlineIndentList(adapter);
 	        }
 	      },
@@ -53232,7 +53262,7 @@
 	        drawRangeCursor: false
 	      }),
 	      // 拖拽文件时实时显示插入位置光标
-	      dropCursor(), searchHighlightField, frontMatterDecorationPlugin, indentOnInput(), highlightActiveLine(), highlightActiveLineGutter(), rectangularSelection()]).call(_context17, _toConsumableArray$1(this.options.codemirror.lineNumbers ? [foldGutter()] : []), _toConsumableArray$1(this.options.codemirror.lineNumbers ? [lineNumbers()] : []), [this.keymapCompartment.of(keymap.of(this.defaultKeymap)), this.vimCompartment.of([]), EditorState.allowMultipleSelections.of(true), EditorView.lineWrapping], _toConsumableArray$1(this.options.codemirror.placeholder ? [placeholder(this.options.codemirror.placeholder)] : []), [markField, EditorState.changeFilter.of(function (tr) {
+	      dropCursor(), searchHighlightField, frontMatterDecorationPlugin, indentOnInput(), highlightActiveLine(), highlightActiveLineGutter(), rectangularSelection()]).call(_context17, _toConsumableArray$1(this.options.codemirror.lineNumbers ? [foldGutter()] : []), _toConsumableArray$1(this.options.codemirror.lineNumbers ? [lineNumbers()] : []), [this.keymapCompartment.of(keymap.of(this.defaultKeymap)), this.vimCompartment.of([]), this.readOnlyCompartment.of(EditorState.readOnly.of(false)), EditorState.allowMultipleSelections.of(true), EditorView.lineWrapping], _toConsumableArray$1(this.options.codemirror.placeholder ? [placeholder(this.options.codemirror.placeholder)] : []), [markField, EditorState.changeFilter.of(function (tr) {
 	        if (!tr.docChanged) return true;
 
 	        // 所有定义了atomic=true 的装饰器都被认为是原子装饰器，不允许局部修改和局部删除
@@ -53417,7 +53447,7 @@
 	        parent: parentElement
 	      });
 	      textArea.style.display = 'none';
-	      var editor = new CM6Adapter(view, this.vimCompartment);
+	      var editor = new CM6Adapter(view, this.vimCompartment, this.readOnlyCompartment);
 	      this.previewer = previewer;
 	      this.editor = editor;
 
@@ -53474,6 +53504,21 @@
 	        editor.view.focus();
 	      }
 	      this.dealSpecialWords(true);
+	    }
+	  }, {
+	    key: "setReadOnly",
+	    value: function setReadOnly(readOnly) {
+	      if (this.editor) {
+	        this.editor.setReadOnly(readOnly);
+	      }
+	    }
+	  }, {
+	    key: "isReadOnly",
+	    value: function isReadOnly() {
+	      if (this.editor) {
+	        return this.editor.getOption('readOnly');
+	      }
+	      return false;
 	    }
 
 	    /**
@@ -55453,8 +55498,8 @@
 	  }]);
 	}();
 
-	function _callSuper$1G(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1H() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1H() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1H = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1H(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1I() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1I() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1I = function _isNativeReflectConstruct() { return !!t; })(); }
 	var cacheCounter = 0;
 	// ~~C${cacheCounter}I${cacheIndex}$
 	// let cacheMap = {};
@@ -55468,7 +55513,7 @@
 	      _ref$defaultCache = _ref.defaultCache,
 	      defaultCache = _ref$defaultCache === void 0 ? {} : _ref$defaultCache;
 	    _classCallCheck$1(this, ParagraphBase);
-	    _this = _callSuper$1G(this, ParagraphBase, [{}]);
+	    _this = _callSuper$1H(this, ParagraphBase, [{}]);
 	    _this.needCache = !!needCache;
 	    _this.sign = '';
 	    if (needCache) {
@@ -56705,17 +56750,17 @@
 	var constructExports = /*@__PURE__*/ requireConstruct();
 	var _Reflect$construct = /*@__PURE__*/getDefaultExportFromCjs$1(constructExports);
 
-	function _isNativeReflectConstruct$1G() {
+	function _isNativeReflectConstruct$1H() {
 	  try {
 	    var t = !Boolean.prototype.valueOf.call(_Reflect$construct(Boolean, [], function () {}));
 	  } catch (t) {}
-	  return (_isNativeReflectConstruct$1G = function _isNativeReflectConstruct() {
+	  return (_isNativeReflectConstruct$1H = function _isNativeReflectConstruct() {
 	    return !!t;
 	  })();
 	}
 
 	function _construct(t, e, r) {
-	  if (_isNativeReflectConstruct$1G()) return _Reflect$construct.apply(null, arguments);
+	  if (_isNativeReflectConstruct$1H()) return _Reflect$construct.apply(null, arguments);
 	  var o = [null];
 	  _pushInstanceProperty(o).apply(o, e);
 	  var p = new (_bindInstanceProperty$1(t).apply(t, o))();
@@ -56745,8 +56790,8 @@
 	  }, _wrapNativeSuper(t);
 	}
 
-	function _callSuper$1F(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1F() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1F() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1F = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1G(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1G() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1G() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1G = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * Copyright (C) 2021 Tencent.
 	 *
@@ -56793,7 +56838,7 @@
 	  function NestedError(message, nested) {
 	    var _this;
 	    _classCallCheck$1(this, NestedError);
-	    _this = _callSuper$1F(this, NestedError, [message]);
+	    _this = _callSuper$1G(this, NestedError, [message]);
 	    _this.name = 'Error';
 	    _this.stack = _this.buildStackTrace(nested);
 	    return _this;
@@ -57204,12 +57249,12 @@
 	  return replaceStringByBuffer(str, replaceBuffer);
 	}
 
-	function _callSuper$1E(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1E() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1E() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1E = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1F(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1F() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1F() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1F = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Color$4 = /*#__PURE__*/function (_SyntaxBase) {
 	  function Color() {
 	    _classCallCheck$1(this, Color);
-	    return _callSuper$1E(this, Color, arguments);
+	    return _callSuper$1F(this, Color, arguments);
 	  }
 	  _inherits(Color, _SyntaxBase);
 	  return _createClass$1(Color, [{
@@ -57246,12 +57291,12 @@
 	}(SyntaxBase);
 	_defineProperty$2(Color$4, "HOOK_NAME", 'fontColor');
 
-	function _callSuper$1D(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1D() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1D() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1D = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1E(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1E() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1E() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1E = function _isNativeReflectConstruct() { return !!t; })(); }
 	var BackgroundColor = /*#__PURE__*/function (_SyntaxBase) {
 	  function BackgroundColor() {
 	    _classCallCheck$1(this, BackgroundColor);
-	    return _callSuper$1D(this, BackgroundColor, arguments);
+	    return _callSuper$1E(this, BackgroundColor, arguments);
 	  }
 	  _inherits(BackgroundColor, _SyntaxBase);
 	  return _createClass$1(BackgroundColor, [{
@@ -57288,12 +57333,12 @@
 	}(SyntaxBase);
 	_defineProperty$2(BackgroundColor, "HOOK_NAME", 'bgColor');
 
-	function _callSuper$1C(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1C() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1C() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1C = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1D(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1D() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1D() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1D = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Size$2 = /*#__PURE__*/function (_SyntaxBase) {
 	  function Size() {
 	    _classCallCheck$1(this, Size);
-	    return _callSuper$1C(this, Size, arguments);
+	    return _callSuper$1D(this, Size, arguments);
 	  }
 	  _inherits(Size, _SyntaxBase);
 	  return _createClass$1(Size, [{
@@ -57335,8 +57380,8 @@
 
 	function ownKeys$d(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 	function _objectSpread$d(e) { for (var r = 1; r < arguments.length; r++) { var _context, _context2; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context = ownKeys$d(Object(t), !0)).call(_context, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context2 = ownKeys$d(Object(t))).call(_context2, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
-	function _callSuper$1B(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1B() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1B() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1B = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1C(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1C() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1C() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1C = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 删除线语法
 	 */
@@ -57348,7 +57393,7 @@
 	      },
 	      config = _ref.config;
 	    _classCallCheck$1(this, Strikethrough);
-	    _this = _callSuper$1B(this, Strikethrough, [{
+	    _this = _callSuper$1C(this, Strikethrough, [{
 	      config: config
 	    }]);
 	    if (!config) {
@@ -57401,12 +57446,12 @@
 	}(SyntaxBase);
 	_defineProperty$2(Strikethrough$1, "HOOK_NAME", 'strikethrough');
 
-	function _callSuper$1A(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1A() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1A() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1A = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1B(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1B() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1B() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1B = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Sup$1 = /*#__PURE__*/function (_SyntaxBase) {
 	  function Sup() {
 	    _classCallCheck$1(this, Sup);
-	    return _callSuper$1A(this, Sup, arguments);
+	    return _callSuper$1B(this, Sup, arguments);
 	  }
 	  _inherits(Sup, _SyntaxBase);
 	  return _createClass$1(Sup, [{
@@ -57443,12 +57488,12 @@
 	}(SyntaxBase);
 	_defineProperty$2(Sup$1, "HOOK_NAME", 'sup');
 
-	function _callSuper$1z(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1z() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1z() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1z = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1A(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1A() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1A() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1A = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Sub$1 = /*#__PURE__*/function (_SyntaxBase) {
 	  function Sub() {
 	    _classCallCheck$1(this, Sub);
-	    return _callSuper$1z(this, Sub, arguments);
+	    return _callSuper$1A(this, Sub, arguments);
 	  }
 	  _inherits(Sub, _SyntaxBase);
 	  return _createClass$1(Sub, [{
@@ -67602,8 +67647,8 @@
 
 	}(Prism));
 
-	function _callSuper$1y(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1y() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1y() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1y = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1z(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1z() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1z() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1z = function _isNativeReflectConstruct() { return !!t; })(); }
 	Prism$1.manual = true;
 	var CUSTOM_WRAPPER = {
 	  figure: 'figure'
@@ -67616,7 +67661,7 @@
 	      config = _ref.config,
 	      cherry = _ref.cherry;
 	    _classCallCheck$1(this, CodeBlock);
-	    _this = _callSuper$1y(this, CodeBlock, [{
+	    _this = _callSuper$1z(this, CodeBlock, [{
 	      needCache: true
 	    }]);
 	    CodeBlock.inlineCodeCache = {};
@@ -68275,12 +68320,12 @@
 	_defineProperty$2(CodeBlock, "HOOK_NAME", 'codeBlock');
 	_defineProperty$2(CodeBlock, "inlineCodeCache", {});
 
-	function _callSuper$1x(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1x() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1x() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1x = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1y(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1y() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1y() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1y = function _isNativeReflectConstruct() { return !!t; })(); }
 	var InlineCode$1 = /*#__PURE__*/function (_ParagraphBase) {
 	  function InlineCode() {
 	    _classCallCheck$1(this, InlineCode);
-	    return _callSuper$1x(this, InlineCode, arguments);
+	    return _callSuper$1y(this, InlineCode, arguments);
 	  }
 	  _inherits(InlineCode, _ParagraphBase);
 	  return _createClass$1(InlineCode, [{
@@ -68630,8 +68675,8 @@
 	  }]);
 	}();
 
-	function _callSuper$1w(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1w() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1w() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1w = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1x(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1x() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1x() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1x = function _isNativeReflectConstruct() { return !!t; })(); }
 
 	/**
 	 * 根据链接配置生成 target 属性字符串
@@ -68653,7 +68698,7 @@
 	    var config = _ref.config,
 	      globalConfig = _ref.globalConfig;
 	    _classCallCheck$1(this, Link);
-	    _this = _callSuper$1w(this, Link, [{
+	    _this = _callSuper$1x(this, Link, [{
 	      config: config
 	    }]);
 	    _this.target = resolveLinkTarget$1(config);
@@ -68794,8 +68839,8 @@
 	}(SyntaxBase);
 	_defineProperty$2(Link$2, "HOOK_NAME", 'link');
 
-	function _callSuper$1v(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1v() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1v() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1v = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1w(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1w() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1w() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1w = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Emphasis = /*#__PURE__*/function (_SyntaxBase) {
 	  function Emphasis() {
 	    var _this;
@@ -68804,7 +68849,7 @@
 	      },
 	      config = _ref.config;
 	    _classCallCheck$1(this, Emphasis);
-	    _this = _callSuper$1v(this, Emphasis, [{
+	    _this = _callSuper$1w(this, Emphasis, [{
 	      config: config
 	    }]);
 	    if (!config) {
@@ -68923,8 +68968,8 @@
 	}(SyntaxBase);
 	_defineProperty$2(Emphasis, "HOOK_NAME", 'fontEmphasis');
 
-	function _callSuper$1u(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1u() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1u() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1u = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1v(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1v() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1v() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1v = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 段落级语法
 	 * 段落级语法可以具备以下特性：
@@ -68941,7 +68986,7 @@
 	  function Paragraph(options) {
 	    var _this;
 	    _classCallCheck$1(this, Paragraph);
-	    _this = _callSuper$1u(this, Paragraph);
+	    _this = _callSuper$1v(this, Paragraph);
 	    _this.initBrReg(options.globalConfig.classicBr);
 	    return _this;
 	  }
@@ -69183,8 +69228,8 @@
 	  }, _get.apply(null, arguments);
 	}
 
-	function _callSuper$1t(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1t() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1t() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1t = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1u(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1u() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1u() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1u = function _isNativeReflectConstruct() { return !!t; })(); }
 	function _superPropGet$5(t, o, e, r) { var p = _get(_getPrototypeOf(1 & r ? t.prototype : t), o, e); return 2 & r && "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
 	var ATX_HEADER = 'atx';
 	var SETEXT_HEADER = 'setext';
@@ -69201,7 +69246,7 @@
 	      config = _ref.config,
 	      cherry = _ref.cherry;
 	    _classCallCheck$1(this, Header);
-	    _this = _callSuper$1t(this, Header, [{
+	    _this = _callSuper$1u(this, Header, [{
 	      needCache: true
 	    }]);
 	    _this.strict = config ? !!config.strict : true;
@@ -69448,12 +69493,12 @@
 	}(ParagraphBase);
 	_defineProperty$2(Header$1, "HOOK_NAME", 'header');
 
-	function _callSuper$1s(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1s() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1s() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1s = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1t(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1t() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1t() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1t = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Transfer = /*#__PURE__*/function (_SyntaxBase) {
 	  function Transfer() {
 	    _classCallCheck$1(this, Transfer);
-	    return _callSuper$1s(this, Transfer, arguments);
+	    return _callSuper$1t(this, Transfer, arguments);
 	  }
 	  _inherits(Transfer, _SyntaxBase);
 	  return _createClass$1(Transfer, [{
@@ -69640,8 +69685,8 @@
 	function _arrayLikeToArray$1n(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function ownKeys$c(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 	function _objectSpread$c(e) { for (var r = 1; r < arguments.length; r++) { var _context17, _context18; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context17 = ownKeys$c(Object(t), !0)).call(_context17, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context18 = ownKeys$c(Object(t))).call(_context18, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
-	function _callSuper$1r(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1r() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1r() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1r = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1s(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1s() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1s() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1s = function _isNativeReflectConstruct() { return !!t; })(); }
 	var TABLE_LOOSE = 'loose';
 	var TABLE_STRICT = 'strict';
 	var Table$1 = /*#__PURE__*/function (_ParagraphBase) {
@@ -69651,7 +69696,7 @@
 	      config = _ref.config,
 	      cherry = _ref.cherry;
 	    _classCallCheck$1(this, Table);
-	    _this = _callSuper$1r(this, Table, [{
+	    _this = _callSuper$1s(this, Table, [{
 	      needCache: true
 	    }]);
 	    var enableChart = config.enableChart,
@@ -70050,13 +70095,13 @@
 	  return (typeof window === "undefined" ? "undefined" : _typeof$2(window)) === 'object';
 	}
 
-	function _callSuper$1q(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1q() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1q() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1q = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1r(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1r() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1r() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1r = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Br$1 = /*#__PURE__*/function (_ParagraphBase) {
 	  function Br(options) {
 	    var _this;
 	    _classCallCheck$1(this, Br);
-	    _this = _callSuper$1q(this, Br, [{
+	    _this = _callSuper$1r(this, Br, [{
 	      needCache: true
 	    }]);
 	    _this.classicBr = testKeyInLocal('classicBr') ? getIsClassicBrFromLocal() : options.globalConfig.classicBr;
@@ -70135,15 +70180,15 @@
 	}(ParagraphBase);
 	_defineProperty$2(Br$1, "HOOK_NAME", 'br');
 
-	function _callSuper$1p(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1p() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1p() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1p = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1q(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1q() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1q() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1q = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 分割线语法
 	 */
 	var Hr$1 = /*#__PURE__*/function (_ParagraphBase) {
 	  function Hr() {
 	    _classCallCheck$1(this, Hr);
-	    return _callSuper$1p(this, Hr, [{
+	    return _callSuper$1q(this, Hr, [{
 	      needCache: true
 	    }]);
 	  }
@@ -70315,15 +70360,15 @@
 
 	function ownKeys$b(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 	function _objectSpread$b(e) { for (var r = 1; r < arguments.length; r++) { var _context21, _context22; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context21 = ownKeys$b(Object(t), !0)).call(_context21, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context22 = ownKeys$b(Object(t))).call(_context22, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
-	function _callSuper$1o(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1o() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1o() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1o = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1p(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1p() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1p() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1p = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Image$2 = /*#__PURE__*/function (_SyntaxBase) {
 	  function Image(_ref) {
 	    var _this;
 	    var config = _ref.config,
 	      globalConfig = _ref.globalConfig;
 	    _classCallCheck$1(this, Image);
-	    _this = _callSuper$1o(this, Image, [null]);
+	    _this = _callSuper$1p(this, Image, [null]);
 	    _this.config = config;
 	    // TODO: URL Validator
 	    _this.extendMedia = {
@@ -70486,8 +70531,8 @@
 
 	function ownKeys$a(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 	function _objectSpread$a(e) { for (var r = 1; r < arguments.length; r++) { var _context0, _context1; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context0 = ownKeys$a(Object(t), !0)).call(_context0, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context1 = ownKeys$a(Object(t))).call(_context1, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
-	function _callSuper$1n(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1n() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1n() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1n = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1o(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1o() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1o() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1o = function _isNativeReflectConstruct() { return !!t; })(); }
 	var INDENT_SPACE_NUM = 4; // commonmark default use 1~4 spaces for indent
 	var TAB_SPACE_NUM = 4; // 1 tab === 4 space
 
@@ -70577,7 +70622,7 @@
 	    var _this;
 	    var config = _ref.config;
 	    _classCallCheck$1(this, List);
-	    _this = _callSuper$1n(this, List, [{
+	    _this = _callSuper$1o(this, List, [{
 	      needCache: true
 	    }]);
 	    _this.config = config || {};
@@ -70749,12 +70794,12 @@
 	}(ParagraphBase);
 	_defineProperty$2(List$2, "HOOK_NAME", 'list');
 
-	function _callSuper$1m(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1m() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1m() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1m = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1n(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1n() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1n() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1n = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Blockquote = /*#__PURE__*/function (_ParagraphBase) {
 	  function Blockquote() {
 	    _classCallCheck$1(this, Blockquote);
-	    return _callSuper$1m(this, Blockquote, [{
+	    return _callSuper$1n(this, Blockquote, [{
 	      needCache: true
 	    }]); // TODO: String.prototype.repeat polyfill
 	  }
@@ -70816,8 +70861,8 @@
 	}(ParagraphBase);
 	_defineProperty$2(Blockquote, "HOOK_NAME", 'blockquote');
 
-	function _callSuper$1l(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1l() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1l() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1l = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1m(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1m() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1m() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1m = function _isNativeReflectConstruct() { return !!t; })(); }
 
 	/**
 	 * 根据链接配置生成 target 属性字符串
@@ -70839,7 +70884,7 @@
 	    var config = _ref.config,
 	      globalConfig = _ref.globalConfig;
 	    _classCallCheck$1(this, AutoLink);
-	    _this = _callSuper$1l(this, AutoLink, [{
+	    _this = _callSuper$1m(this, AutoLink, [{
 	      config: config
 	    }]);
 	    _this.enableShortLink = !!config.enableShortLink;
@@ -71181,8 +71226,8 @@
 	};
 	var mathjax = {};
 
-	function _callSuper$1k(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1k() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1k() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1k = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1l(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1l() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1l() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1l = function _isNativeReflectConstruct() { return !!t; })(); }
 	var MathBlock = /*#__PURE__*/function (_ParagraphBase) {
 	  function MathBlock(_ref) {
 	    var _config$engine;
@@ -71190,7 +71235,7 @@
 	    var config = _ref.config,
 	      cherry = _ref.cherry;
 	    _classCallCheck$1(this, MathBlock);
-	    _this = _callSuper$1k(this, MathBlock, [{
+	    _this = _callSuper$1l(this, MathBlock, [{
 	      needCache: true
 	    }]);
 	    // 非浏览器环境下配置为 node
@@ -71344,8 +71389,8 @@
 	}(ParagraphBase);
 	_defineProperty$2(MathBlock, "HOOK_NAME", 'mathBlock');
 
-	function _callSuper$1j(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1j() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1j() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1j = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1k(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1k() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1k() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1k = function _isNativeReflectConstruct() { return !!t; })(); }
 
 	/**
 	 * 行内公式的语法
@@ -71358,7 +71403,7 @@
 	    var config = _ref.config,
 	      cherry = _ref.cherry;
 	    _classCallCheck$1(this, InlineMath);
-	    _this = _callSuper$1j(this, InlineMath, [{
+	    _this = _callSuper$1k(this, InlineMath, [{
 	      needCache: true
 	    }]);
 	    // 非浏览器环境下配置为 node
@@ -71643,8 +71688,8 @@
 	var fillExports = requireFill();
 	var _fillInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(fillExports);
 
-	function _callSuper$1i(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1i() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1i() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1i = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1j(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1j() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1j() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1j = function _isNativeReflectConstruct() { return !!t; })(); }
 	function _superPropGet$4(t, o, e, r) { var p = _get(_getPrototypeOf(1 & r ? t.prototype : t), o, e); return 2 & r && "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
 	function defaultLinkProcessor(link) {
 	  return link;
@@ -71666,7 +71711,7 @@
 	    var externals = _ref.externals,
 	      config = _ref.config;
 	    _classCallCheck$1(this, Toc);
-	    _this = _callSuper$1i(this, Toc, [{
+	    _this = _callSuper$1j(this, Toc, [{
 	      needCache: true
 	    }]);
 	    _defineProperty$2(_this, "tocStyle", 'nested');
@@ -71971,8 +72016,8 @@
 	}(ParagraphBase);
 	_defineProperty$2(Toc$2, "HOOK_NAME", 'toc');
 
-	function _callSuper$1h(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1h() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1h() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1h = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1i(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1i() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1i() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1i = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Footnote = /*#__PURE__*/function (_ParagraphBase) {
 	  function Footnote(_ref) {
 	    var _this;
@@ -71980,7 +72025,7 @@
 	      config = _ref.config,
 	      cherry = _ref.cherry;
 	    _classCallCheck$1(this, Footnote);
-	    _this = _callSuper$1h(this, Footnote);
+	    _this = _callSuper$1i(this, Footnote);
 	    _this.config = config;
 	    _this.$cherry = cherry;
 	    _this.footnoteCache = {};
@@ -72058,7 +72103,7 @@
 	  }, {
 	    key: "formatFootNote",
 	    value: function formatFootNote() {
-	      var _this$config$refList2, _this$config$refList3, _this$config$refList4, _this$config$refList5, _this$$engine$$cherry, _this$$engine, _this$$engine$$cherry2, _this$$engine$$cherry3, _this$config$refList6, _this$config$refList7, _this$config$refList8, _context16, _context17, _context18, _context19, _context20;
+	      var _this$config$refList2, _this$config$refList3, _this$config$refList4, _this$config$refList5, _this$config$refList6, _this$config$refList$2, _this$config$refList7, _this$config$refList8, _this$config$refList9, _context16, _context17, _context18, _context19, _context20;
 	      var footnote = this.getFootNote();
 	      if (footnote.length <= 0) {
 	        return '';
@@ -72069,11 +72114,13 @@
 	        return _concatInstanceProperty(_context14 = _concatInstanceProperty(_context15 = "<div data-index=\"".concat(index + 1, "\" class=\"one-footnote ")).call(_context15, oneFootnoteClass, "\">")).call(_context14, note.note, "</div>");
 	      }).join('');
 	      var sign = this.$engine.hash(html);
-	      var title = ((_this$config$refList4 = this.config.refList) === null || _this$config$refList4 === void 0 ? void 0 : (_this$config$refList5 = _this$config$refList4.title) === null || _this$config$refList5 === void 0 ? void 0 : _this$config$refList5.render()) || ((_this$$engine$$cherry = (_this$$engine = this.$engine) === null || _this$$engine === void 0 ? void 0 : (_this$$engine$$cherry2 = _this$$engine.$cherry) === null || _this$$engine$$cherry2 === void 0 ? void 0 : (_this$$engine$$cherry3 = _this$$engine$$cherry2.locale) === null || _this$$engine$$cherry3 === void 0 ? void 0 : _this$$engine$$cherry3.footnoteTitle) !== null && _this$$engine$$cherry !== void 0 ? _this$$engine$$cherry : 'title');
 	      var hiddenClass = this.config.refList ? '' : 'hidden';
-	      var footnoteClass = ((_this$config$refList6 = this.config.refList) === null || _this$config$refList6 === void 0 ? void 0 : _this$config$refList6.appendClass) || '';
-	      var footnoteTitleClass = ((_this$config$refList7 = this.config.refList) === null || _this$config$refList7 === void 0 ? void 0 : (_this$config$refList8 = _this$config$refList7.title) === null || _this$config$refList8 === void 0 ? void 0 : _this$config$refList8.appendClass) || '';
-	      html = _concatInstanceProperty(_context16 = _concatInstanceProperty(_context17 = _concatInstanceProperty(_context18 = _concatInstanceProperty(_context19 = _concatInstanceProperty(_context20 = "<div class=\"footnote ".concat(footnoteClass, " ")).call(_context20, hiddenClass, "\" data-sign=\"")).call(_context19, sign, "\" data-lines=\"0\"><div class=\"footnote-title ")).call(_context18, footnoteTitleClass, "\">")).call(_context17, title, "</div>")).call(_context16, html, "</div>");
+	      var footnoteClass = ((_this$config$refList4 = this.config.refList) === null || _this$config$refList4 === void 0 ? void 0 : _this$config$refList4.appendClass) || '';
+	      var footnoteTitleClass = ((_this$config$refList5 = this.config.refList) === null || _this$config$refList5 === void 0 ? void 0 : (_this$config$refList6 = _this$config$refList5.title) === null || _this$config$refList6 === void 0 ? void 0 : _this$config$refList6.appendClass) || '';
+	      // 标题只看 title.render 返回值，不走 locale；空字符串/未配置则不展示标题
+	      var titleText = String((_this$config$refList$2 = (_this$config$refList7 = this.config.refList) === null || _this$config$refList7 === void 0 ? void 0 : (_this$config$refList8 = _this$config$refList7.title) === null || _this$config$refList8 === void 0 ? void 0 : (_this$config$refList9 = _this$config$refList8.render) === null || _this$config$refList9 === void 0 ? void 0 : _this$config$refList9.call(_this$config$refList8)) !== null && _this$config$refList$2 !== void 0 ? _this$config$refList$2 : '');
+	      var footnoteTitle = titleText ? _concatInstanceProperty(_context16 = "<div class=\"footnote-title ".concat(footnoteTitleClass, "\">")).call(_context16, titleText, "</div>") : '';
+	      html = _concatInstanceProperty(_context17 = _concatInstanceProperty(_context18 = _concatInstanceProperty(_context19 = _concatInstanceProperty(_context20 = "<div class=\"footnote ".concat(footnoteClass, " ")).call(_context20, hiddenClass, "\" data-sign=\"")).call(_context19, sign, "\" data-lines=\"0\">")).call(_context18, footnoteTitle)).call(_context17, html, "</div>");
 	      return html;
 	    }
 
@@ -72153,8 +72200,8 @@
 	_defineProperty$2(Footnote, "HOOK_NAME", 'footnote');
 
 	function _arrayLikeToArray$1m(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-	function _callSuper$1g(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1g() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1g() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1g = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1h(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1h() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1h() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1h = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 脚注和引用语法
 	 * 示例：
@@ -72171,7 +72218,7 @@
 	    var externals = _ref.externals,
 	      config = _ref.config;
 	    _classCallCheck$1(this, CommentReference);
-	    _this = _callSuper$1g(this, CommentReference);
+	    _this = _callSuper$1h(this, CommentReference);
 	    _this.commentCache = {};
 	    return _this;
 	  }
@@ -73752,8 +73799,8 @@
 	// for browser
 	var sanitizer = purify(window);
 
-	function _callSuper$1f(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1f() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1f() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1f = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1g(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1g() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1g() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1g = function _isNativeReflectConstruct() { return !!t; })(); }
 
 	/**
 	 * encode unsafe link-related attributes
@@ -73774,7 +73821,7 @@
 	    var _this;
 	    var config = _ref.config;
 	    _classCallCheck$1(this, HtmlBlock);
-	    _this = _callSuper$1f(this, HtmlBlock, [{
+	    _this = _callSuper$1g(this, HtmlBlock, [{
 	      needCache: true
 	    }]);
 	    _this.filterStyle = config.filterStyle || false;
@@ -75796,8 +75843,8 @@
 
 	function ownKeys$9(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 	function _objectSpread$9(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$9(Object(t), !0)).call(_context3, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$9(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
-	function _callSuper$1e(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1e() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1e() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1e = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1f(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1f() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1f() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1f = function _isNativeReflectConstruct() { return !!t; })(); }
 
 	// ref: https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String/fromCodePoint
 	function fromCodePoint$2() {
@@ -75839,7 +75886,7 @@
 	      },
 	      config = _ref.config;
 	    _classCallCheck$1(this, Emoji);
-	    _this = _callSuper$1e(this, Emoji, [{
+	    _this = _callSuper$1f(this, Emoji, [{
 	      config: config
 	    }]);
 	    _this.options = {
@@ -75918,12 +75965,12 @@
 	}(SyntaxBase);
 	_defineProperty$2(Emoji, "HOOK_NAME", 'emoji');
 
-	function _callSuper$1d(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1d() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1d() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1d = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1e(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1e() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1e() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1e = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Underline$1 = /*#__PURE__*/function (_SyntaxBase) {
 	  function Underline() {
 	    _classCallCheck$1(this, Underline);
-	    return _callSuper$1d(this, Underline, arguments);
+	    return _callSuper$1e(this, Underline, arguments);
 	  }
 	  _inherits(Underline, _SyntaxBase);
 	  return _createClass$1(Underline, [{
@@ -75954,12 +76001,12 @@
 	}(SyntaxBase);
 	_defineProperty$2(Underline$1, "HOOK_NAME", 'underline');
 
-	function _callSuper$1c(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1c() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1c() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1c = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1d(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1d() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1d() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1d = function _isNativeReflectConstruct() { return !!t; })(); }
 	var HighLight = /*#__PURE__*/function (_SyntaxBase) {
 	  function HighLight() {
 	    _classCallCheck$1(this, HighLight);
-	    return _callSuper$1c(this, HighLight, arguments);
+	    return _callSuper$1d(this, HighLight, arguments);
 	  }
 	  _inherits(HighLight, _SyntaxBase);
 	  return _createClass$1(HighLight, [{
@@ -76391,8 +76438,8 @@
 	function _createForOfIteratorHelper$1j(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1j(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 	function _unsupportedIterableToArray$1j(r, a) { if (r) { var _context10; if ("string" == typeof r) return _arrayLikeToArray$1k(r, a); var t = _sliceInstanceProperty(_context10 = {}.toString.call(r)).call(_context10, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1k(r, a) : void 0; } }
 	function _arrayLikeToArray$1k(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-	function _callSuper$1b(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1b() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1b() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1b = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1c(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1c() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1c() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1c = function _isNativeReflectConstruct() { return !!t; })(); }
 
 	/**
 	 * @typedef {import('@codemirror/view').EditorView} EditorView
@@ -76431,7 +76478,7 @@
 	     * - suggestListRender: 自定义渲染函数（可选）
 	     * - echo: 回填回调函数（可选）
 	     */
-	    _this = _callSuper$1b(this, Suggester, [{
+	    _this = _callSuper$1c(this, Suggester, [{
 	      needCache: true
 	    }]);
 	    _this.config = config;
@@ -77350,14 +77397,14 @@
 	  }]);
 	}();
 
-	function _callSuper$1a(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1a() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$1a() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1a = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1b(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1b() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1b() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1b = function _isNativeReflectConstruct() { return !!t; })(); }
 
 	// 拼音语法
 	var Ruby$1 = /*#__PURE__*/function (_SyntaxBase) {
 	  function Ruby() {
 	    _classCallCheck$1(this, Ruby);
-	    return _callSuper$1a(this, Ruby, arguments);
+	    return _callSuper$1b(this, Ruby, arguments);
 	  }
 	  _inherits(Ruby, _SyntaxBase);
 	  return _createClass$1(Ruby, [{
@@ -77383,8 +77430,8 @@
 	}(SyntaxBase);
 	_defineProperty$2(Ruby$1, "HOOK_NAME", 'ruby');
 
-	function _callSuper$19(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$19() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$19() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$19 = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$1a(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1a() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$1a() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1a = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 面板语法
 	 * 例：
@@ -77402,7 +77449,7 @@
 	  function Panel(options) {
 	    var _this;
 	    _classCallCheck$1(this, Panel);
-	    _this = _callSuper$19(this, Panel, [{
+	    _this = _callSuper$1a(this, Panel, [{
 	      needCache: true
 	    }]);
 	    var _options$config = options.config,
@@ -77411,9 +77458,20 @@
 	      _options$config$enabl2 = _options$config.enableAlign,
 	      enableAlign = _options$config$enabl2 === void 0 ? false : _options$config$enabl2,
 	      _options$config$enabl3 = _options$config.enablePanel,
-	      enablePanel = _options$config$enabl3 === void 0 ? true : _options$config$enabl3;
+	      enablePanel = _options$config$enabl3 === void 0 ? true : _options$config$enabl3,
+	      _options$config$enabl4 = _options$config.enableCols,
+	      enableCols = _options$config$enabl4 === void 0 ? true : _options$config$enabl4,
+	      _options$config$enabl5 = _options$config.enableTabs,
+	      enableTabs = _options$config$enabl5 === void 0 ? true : _options$config$enabl5,
+	      _options$config$enabl6 = _options$config.enableTimeline,
+	      enableTimeline = _options$config$enabl6 === void 0 ? true : _options$config$enabl6;
 	    _this.enableAlign = enableJustify || enableAlign;
 	    _this.enablePanel = enablePanel;
+	    _this.enableCols = enableCols;
+	    _this.enableTabs = enableTabs;
+	    _this.enableTimeline = enableTimeline;
+	    // 为每个 Panel 实例生成一个全局递增的 tabs 组序号，保证 radio name 在同页多个 tabs 之间互不干扰
+	    _this.$tabsSeed = 0;
 	    _this.initBrReg(options.globalConfig.classicBr);
 	    return _this;
 	  }
@@ -77428,7 +77486,17 @@
 	        if (!_this2.enablePanel && /primary|info|warning|danger|success/i.test(type)) {
 	          return match;
 	        }
-	        if (!_this2.enableAlign && /(left|right|center|justify|2cols|3cols)/i.test(type)) {
+	        if (!_this2.enableAlign && /^(left|right|center|justify|cols|tabs)$/i.test(type)) {
+	          return match;
+	        }
+	        // 独立开关：关闭 cols/tabs 后，相应语法将不被识别
+	        if (!_this2.enableCols && /^cols$/i.test(type)) {
+	          return match;
+	        }
+	        if (!_this2.enableTabs && /^tabs$/i.test(type)) {
+	          return match;
+	        }
+	        if (!_this2.enableTimeline && /^timeline$/i.test(type)) {
 	          return match;
 	        }
 	        var lineCount = _this2.getLineCount(match, preLines);
@@ -77449,11 +77517,17 @@
 	  }, {
 	    key: "$getClassByType",
 	    value: function $getClassByType(type) {
-	      if (/(left|right|center|justify)/i.test(type)) {
+	      if (/^(left|right|center|justify)$/i.test(type)) {
 	        return "cherry-text-align cherry-text-align__".concat(type);
 	      }
-	      if (/(2cols|3cols)/i.test(type)) {
-	        return "cherry-panel-cols cherry-panel-cols__".concat(type);
+	      if (/^cols$/i.test(type)) {
+	        return "cherry-panel-cols cherry-panel-cols__cols";
+	      }
+	      if (/^tabs$/i.test(type)) {
+	        return "cherry-tabs";
+	      }
+	      if (/^timeline$/i.test(type)) {
+	        return "cherry-timeline cherry-timeline__vertical";
 	      }
 	      return "cherry-panel cherry-panel__".concat(type);
 	    }
@@ -77461,7 +77535,7 @@
 	    key: "$getPanelInfo",
 	    value: function $getPanelInfo(name, str, sentenceMakeFunc) {
 	      var _this3 = this,
-	        _context8;
+	        _context19;
 	      var ret = {
 	        type: this.$getTargetType(name),
 	        title: sentenceMakeFunc(this.$getTitle(name)).html,
@@ -77470,8 +77544,19 @@
 	        className: ''
 	      };
 	      ret.className = this.$getClassByType(ret.type);
-	      if (/(left|right|center|justify)/i.test(ret.type)) {
+	      if (/^(left|right|center|justify)$/i.test(ret.type)) {
 	        ret.appendStyle = "style=\"text-align:".concat(ret.type, ";\"");
+	      }
+	      // 多列排版语法（cols，旧 2cols/3cols 作为别名）支持在类型后追加对齐关键字（left|center|right|justify），默认左对齐
+	      // 列数由 :: 分隔符自动推断；旧语法 2cols/3cols 指定固定列数
+	      // tabs 语法同样支持在类型后追加对齐关键字，仅作用于 panel 内容
+	      var colsAlignStyle = '';
+	      if (/^(cols|tabs)$/i.test(ret.type)) {
+	        var align = this.$getColsAlign(name);
+	        if (align && align !== 'left') {
+	          ret.className += " cherry-text-align cherry-text-align__".concat(align);
+	          colsAlignStyle = "text-align:".concat(align, ";");
+	        }
 	      }
 	      var paragraphProcessor = function paragraphProcessor(str) {
 	        var _context6, _context7;
@@ -77489,11 +77574,14 @@
 	        }
 	        return _concatInstanceProperty(_context6 = _concatInstanceProperty(_context7 = "<".concat(domName, ">")).call(_context7, _this3.$cleanParagraph(html), "</")).call(_context6, domName, ">");
 	      };
-	      // 多列排版语法（2cols/3cols）：使用 --- 分隔每一列
-	      if (/(2cols|3cols)/i.test(ret.type)) {
+	      // 多列排版语法（cols）：使用独占一行的 :: 分隔每一列，列数由分隔符数量自动推断
+	      if (/^cols$/i.test(ret.type)) {
+	        var _context8;
 	        ret.title = '';
-	        var colCount = ret.type === '3cols' ? 3 : 2;
-	        var rawCols = this.$splitCols(ret.body, colCount);
+	        // 兼容 fixedColCount：旧语法 2cols/3cols 会传入固定列数
+	        var fixedColCount = this.$getFixedColCount(name);
+	        var rawCols = this.$splitCols(ret.body, fixedColCount);
+	        var colCount = rawCols.length || 1;
 	        var colsHtml = _mapInstanceProperty(rawCols).call(rawCols, function (colStr) {
 	          var $col = '';
 	          if (_this3.isContainsCache(colStr)) {
@@ -77504,9 +77592,87 @@
 	          return "<div class=\"cherry-panel--col\">".concat($col, "</div>");
 	        }).join('');
 	        ret.body = colsHtml;
+	        // 通过 --cols CSS 变量驱动列数；同时向后兼容 __2cols/__3cols
+	        ret.className += " cherry-panel-cols__".concat(colCount, "cols");
+	        ret.appendStyle = _concatInstanceProperty(_context8 = "style=\"--cols:".concat(colCount, ";")).call(_context8, colsAlignStyle, "\"");
 	        return ret;
 	      }
-	      ret.title = _concatInstanceProperty(_context8 = "<div class=\"cherry-panel--title ".concat(ret.title ? 'cherry-panel--title__not-empty' : '', "\">")).call(_context8, ret.title, "</div>");
+	      // 时间线语法（timeline）：使用行首的 `:: ` 作为节点起始标记（区别于 cols/tabs 的独占一行 `::`）
+	      // 每个节点的首行为“:: [status] 时间 标题”，其后（缩进）行为描述
+	      if (/^timeline$/i.test(ret.type)) {
+	        // 标题走通用样式，包裹在 cherry-timeline--header 中
+	        var headerTitle = ret.title ? "<div class=\"cherry-timeline--header\">".concat(ret.title, "</div>") : '';
+	        var rawItems = this.$splitItemsByColonMark(ret.body);
+	        var itemsHtml = _mapInstanceProperty(rawItems).call(rawItems, function (_ref) {
+	          var _context9, _context0;
+	          var head = _ref.head,
+	            body = _ref.body;
+	          var _this3$$parseTimeline = _this3.$parseTimelineItem(head, body),
+	            status = _this3$$parseTimeline.status,
+	            time = _this3$$parseTimeline.time,
+	            title = _this3$$parseTimeline.title,
+	            desc = _this3$$parseTimeline.desc;
+	          var timeHtml = time ? "<div class=\"cherry-timeline--time\">".concat(sentenceMakeFunc(time).html, "</div>") : '';
+	          var titleHtml = title ? "<div class=\"cherry-timeline--title\">".concat(sentenceMakeFunc(title).html, "</div>") : '';
+	          var descHtml = '';
+	          if (desc && _trimInstanceProperty(desc).call(desc) !== '') {
+	            if (_this3.isContainsCache(desc)) {
+	              descHtml = _this3.makeExcludingCached(desc, paragraphProcessor);
+	            } else {
+	              descHtml = paragraphProcessor(desc);
+	            }
+	            descHtml = "<div class=\"cherry-timeline--desc\">".concat(descHtml, "</div>");
+	          }
+	          return "<div class=\"cherry-timeline--item cherry-timeline--item__".concat(status, "\">") + "<div class=\"cherry-timeline--node\"></div>" + _concatInstanceProperty(_context9 = _concatInstanceProperty(_context0 = "<div class=\"cherry-timeline--content\">".concat(timeHtml)).call(_context0, titleHtml)).call(_context9, descHtml, "</div>") + "</div>";
+	        }).join('');
+	        ret.title = headerTitle;
+	        ret.body = "<div class=\"cherry-timeline--body\">".concat(itemsHtml, "</div>");
+	        ret.appendStyle = '';
+	        return ret;
+	      }
+	      // 选项卡语法（tabs）：使用行首的 `:: ` 作为 tab 起始标记（与 timeline 一致）
+	      // `::` 所在行的剩余内容作为标题，其后（缩进）行作为 panel 内容
+	      // 采用 CSS-only 方案（radio + :checked ~ panel），无需 JS 即可完成切换
+	      if (/^tabs$/i.test(ret.type)) {
+	        var _context16, _context17, _context18;
+	        ret.title = '';
+	        var rawTabs = this.$splitItemsByColonMark(ret.body);
+	        var tabCount = rawTabs.length || 1;
+	        // 同页多个 tabs 之间使用递增序号区隔 name，避免 radio 分组冲突
+	        this.$tabsSeed += 1;
+	        var groupName = "cherry-tabs-group-".concat(this.$tabsSeed);
+	        var inputsHtml = [];
+	        var labelsHtml = [];
+	        var panelsHtml = [];
+	        _forEachInstanceProperty(rawTabs).call(rawTabs, function (_ref2, idx) {
+	          var _context1, _context10, _context11, _context12, _context13, _context14, _context15;
+	          var head = _ref2.head,
+	            body = _ref2.body;
+	          var tabTitle = _trimInstanceProperty(head).call(head) || "Tab ".concat(idx + 1);
+	          var tabBody = body;
+	          var inputId = _concatInstanceProperty(_context1 = "".concat(groupName, "-")).call(_context1, idx);
+	          var checkedAttr = idx === 0 ? ' checked' : '';
+	          var titleHtml = sentenceMakeFunc(tabTitle).html;
+	          var $panel = '';
+	          if (_trimInstanceProperty(tabBody).call(tabBody) === '') {
+	            $panel = '';
+	          } else if (_this3.isContainsCache(tabBody)) {
+	            $panel = _this3.makeExcludingCached(tabBody, paragraphProcessor);
+	          } else {
+	            $panel = paragraphProcessor(tabBody);
+	          }
+	          // input 必须与 .cherry-tabs--labels / .cherry-tabs--panels 同级，
+	          // 这样 :checked ~ .cherry-tabs--labels .label__N 与 :checked ~ .cherry-tabs--panels .panel__N 才能生效
+	          inputsHtml.push(_concatInstanceProperty(_context10 = _concatInstanceProperty(_context11 = _concatInstanceProperty(_context12 = "<input type=\"radio\" name=\"".concat(groupName, "\" id=\"")).call(_context12, inputId, "\" class=\"cherry-tabs--radio cherry-tabs--radio__")).call(_context11, idx, "\"")).call(_context10, checkedAttr, ">"));
+	          labelsHtml.push(_concatInstanceProperty(_context13 = _concatInstanceProperty(_context14 = "<label for=\"".concat(inputId, "\" class=\"cherry-tabs--label cherry-tabs--label__")).call(_context14, idx, "\">")).call(_context13, titleHtml, "</label>"));
+	          panelsHtml.push(_concatInstanceProperty(_context15 = "<div class=\"cherry-tabs--panel cherry-tabs--panel__".concat(idx, "\">")).call(_context15, $panel, "</div>"));
+	        });
+	        ret.body = _concatInstanceProperty(_context16 = _concatInstanceProperty(_context17 = "".concat(inputsHtml.join(''), "<div class=\"cherry-tabs--labels\">")).call(_context17, labelsHtml.join(''), "</div><div class=\"cherry-tabs--panels\">")).call(_context16, panelsHtml.join(''), "</div>");
+	        ret.className += " cherry-tabs__".concat(tabCount, "tabs");
+	        ret.appendStyle = _concatInstanceProperty(_context18 = "style=\"--tabs:".concat(tabCount, ";")).call(_context18, colsAlignStyle, "\"");
+	        return ret;
+	      }
+	      ret.title = _concatInstanceProperty(_context19 = "<div class=\"cherry-panel--title ".concat(ret.title ? 'cherry-panel--title__not-empty' : '', "\">")).call(_context19, ret.title, "</div>");
 	      var $body = '';
 	      if (this.isContainsCache(ret.body)) {
 	        $body = this.makeExcludingCached(ret.body, paragraphProcessor);
@@ -77518,25 +77684,88 @@
 	    }
 
 	    /**
+	     * 从 name 中解析多列排版语法的对齐关键字
+	     * 例如 name 为 "3cols center" 时返回 "center"
+	     * @param {string} name panel 头部关键字（例如 "3cols center"）
+	     * @returns {string} 对齐关键字（left|center|right|justify），未指定或非法时返回 'left'
+	     */
+	  }, {
+	    key: "$getColsAlign",
+	    value: function $getColsAlign(name) {
+	      var _context20, _context21;
+	      var $name = _trimInstanceProperty(_context20 = String(name || '')).call(_context20);
+	      if (!/\s/.test($name)) {
+	        return 'left';
+	      }
+	      // 取第一个空格后的第一个词作为对齐关键字
+	      var rest = _trimInstanceProperty(_context21 = $name.replace(/^\S+\s+/, '')).call(_context21);
+	      var first = rest.split(/\s+/)[0].toLowerCase();
+	      switch (first) {
+	        case 'left':
+	        case 'l':
+	          return 'left';
+	        case 'right':
+	        case 'r':
+	          return 'right';
+	        case 'center':
+	        case 'c':
+	          return 'center';
+	        case 'justify':
+	        case 'j':
+	          return 'justify';
+	        default:
+	          return 'left';
+	      }
+	    }
+
+	    /**
+	     * 从 name 中解析旧语法固定列数（2cols/3cols）
+	     * 新语法 cols 返回 0，表示由分隔符数量自动推断列数
+	     * @param {string} name panel 头部关键字
+	     * @returns {number} 固定列数（0 表示不固定）
+	     */
+	  }, {
+	    key: "$getFixedColCount",
+	    value: function $getFixedColCount(name) {
+	      var _context22;
+	      var $name = _trimInstanceProperty(_context22 = String(name || '')).call(_context22).toLowerCase();
+	      var first = /\s/.test($name) ? $name.replace(/\s.*$/, '') : $name;
+	      if (first === '2cols') return 2;
+	      if (first === '3cols') return 3;
+	      return 0;
+	    }
+
+	    /**
 	     * 按 :: 分隔符拆分多列排版语法的内容
+	     * - 新语法（cols）：列数由分隔符数量自动推断，末尾空列会被 trim 掉
+	     * - 旧语法（2cols/3cols）：将结果补齐/截断到固定列数
+	     * - tabs 语法复用本方法，仅使用推断模式（fixedColCount = 0）
 	     * @param {string} str 面板内容
-	     * @param {number} colCount 期望的列数（2 或 3）
+	     * @param {number} fixedColCount 固定列数（0 表示由分隔符推断）
 	     * @returns {string[]} 拆分后的各列内容
 	     */
 	  }, {
 	    key: "$splitCols",
-	    value: function $splitCols(str, colCount) {
+	    value: function $splitCols(str, fixedColCount) {
 	      // 匹配独占一行的 :: 分隔符（前后为空行/文本行边界均可）
 	      var parts = str.split(/\n[ \t]*::[ \t]*(?=\n|$)/);
-	      // 若列数不足，补齐空列；若超过则将多余部分合并到最后一列
-	      if (parts.length > colCount) {
-	        var _context9;
-	        var head = _sliceInstanceProperty(parts).call(parts, 0, colCount - 1);
-	        var tail = _sliceInstanceProperty(parts).call(parts, colCount - 1).join('\n::\n');
-	        return _concatInstanceProperty(_context9 = []).call(_context9, _toConsumableArray$1(head), [tail]);
+	      if (fixedColCount && fixedColCount > 0) {
+	        // 旧语法：列数不足则补齐，超过则合并到最后一列
+	        if (parts.length > fixedColCount) {
+	          var _context23;
+	          var head = _sliceInstanceProperty(parts).call(parts, 0, fixedColCount - 1);
+	          var tail = _sliceInstanceProperty(parts).call(parts, fixedColCount - 1).join('\n::\n');
+	          return _concatInstanceProperty(_context23 = []).call(_context23, _toConsumableArray$1(head), [tail]);
+	        }
+	        while (parts.length < fixedColCount) {
+	          parts.push('');
+	        }
+	        return parts;
 	      }
-	      while (parts.length < colCount) {
-	        parts.push('');
+	      // 新语法：trim 掉末尾空列（内容全为空白视为空列），至少保留 1 列
+	      while (parts.length > 1 && _trimInstanceProperty(_context24 = parts[parts.length - 1]).call(_context24) === '') {
+	        var _context24;
+	        parts.pop();
 	      }
 	      return parts;
 	    }
@@ -77578,12 +77807,148 @@
 	        case 'justify':
 	        case 'j':
 	          return 'justify';
+	        // 旧语法 2cols/3cols 作为 cols 的别名保留
+	        case 'cols':
 	        case '2cols':
-	          return '2cols';
 	        case '3cols':
-	          return '3cols';
+	          return 'cols';
+	        // 选项卡语法
+	        case 'tabs':
+	        case 't':
+	          return 'tabs';
+	        // 时间线语法
+	        case 'timeline':
+	          return 'timeline';
 	        default:
 	          return 'primary';
+	      }
+	    }
+
+	    /**
+	     * 按行首的 `::` 标记拆分各个节点（timeline/tabs 共用）
+	     * 与 cols 不同，这里的 `::` 是行首标记（后面直接跟首行内容），并非独占一行的分隔符
+	     * 例：
+	     *   :: 标题/首行内容
+	     *     后续行1
+	     *     后续行2
+	     *   :: 标题/首行内容2
+	     *
+	     * @param {string} str 原始 body 文本
+	     * @returns {{head: string, body: string}[]} 每个节点的首行（`::` 所在行的剩余内容）与后续行
+	     */
+	  }, {
+	    key: "$splitItemsByColonMark",
+	    value: function $splitItemsByColonMark(str) {
+	      var source = String(str || '').replace(/\r\n/g, '\n');
+	      var lines = source.split('\n');
+	      var items = [];
+	      var current = null;
+	      for (var i = 0; i < lines.length; i++) {
+	        var line = lines[i];
+	        var match = line.match(/^[ \t]*::[ \t]*(.*)$/);
+	        if (match) {
+	          if (current !== null) {
+	            items.push(current);
+	          }
+	          current = {
+	            head: match[1],
+	            bodyLines: []
+	          };
+	        } else if (current !== null) {
+	          current.bodyLines.push(line);
+	        }
+	        // current 为 null 时表示尚未遇到第一个 `::` 标记，忽略前置内容
+	      }
+	      if (current !== null) {
+	        items.push(current);
+	      }
+	      return _mapInstanceProperty(items).call(items, function (_ref3) {
+	        var head = _ref3.head,
+	          bodyLines = _ref3.bodyLines;
+	        return {
+	          head: head,
+	          body: bodyLines.join('\n')
+	        };
+	      });
+	    }
+
+	    /**
+	     * 解析时间线单个节点，提取状态、时间、标题、描述
+	     * 节点首行（head）形如：[done] 2024-01-15 项目立项
+	     * @param {string} head 节点首行（`::` 所在行的剩余内容）
+	     * @param {string} body 节点描述（后续多行）
+	     * @returns {{status: string, time: string, title: string, desc: string}}
+	     */
+	  }, {
+	    key: "$parseTimelineItem",
+	    value: function $parseTimelineItem(head, body) {
+	      var firstLine = String(head || '');
+	      var status = 'todo';
+	      // 匹配可选的状态修饰符 [xxx]
+	      var statusMatch = firstLine.match(/^\s*\[([^\]]*)\]\s*/);
+	      if (statusMatch) {
+	        // 引擎在 makeHtml 前已将 ~ → ~T，需还原
+	        status = this.$normalizeTimelineStatus(statusMatch[1].replace(/~T/g, '~'));
+	        firstLine = _sliceInstanceProperty(firstLine).call(firstLine, statusMatch[0].length);
+	      }
+	      // 首行 = 时间 + 标题（时间为首个空白分隔词组，形如 2024-01-15、2024/01、v1.0.0 等）
+	      var time = '';
+	      var title = _trimInstanceProperty(firstLine).call(firstLine);
+	      var timeMatch = firstLine.match(/^\s*(\S+)(?:\s+([\s\S]*))?$/);
+	      if (timeMatch) {
+	        var maybeTime = timeMatch[1];
+	        // 只有看起来像"时间/版本号"才当作 time，否则整行都作为 title
+	        if (/^[\d]/.test(maybeTime) || /^v\d/i.test(maybeTime)) {
+	          var _context25;
+	          time = maybeTime;
+	          title = _trimInstanceProperty(_context25 = timeMatch[2] || '').call(_context25);
+	        }
+	      }
+	      // 去掉 body 头尾多余空行，保留内部缩进
+	      var desc = String(body || '').replace(/^\s*\n/, '').replace(/\n\s*$/, '');
+	      return {
+	        status: status,
+	        time: time,
+	        title: title,
+	        desc: desc
+	      };
+	    }
+
+	    /**
+	     * 规范化时间线状态修饰符
+	     * @param {string} raw 状态修饰符内容（不含中括号）
+	     * @returns {string} 规范化后的状态
+	     */
+	  }, {
+	    key: "$normalizeTimelineStatus",
+	    value: function $normalizeTimelineStatus(raw) {
+	      var _context26;
+	      var key = _trimInstanceProperty(_context26 = raw || '').call(_context26).toLowerCase();
+	      switch (key) {
+	        case 'done':
+	        case '✓':
+	        case 'x':
+	          return 'done';
+	        case 'doing':
+	        case '…':
+	        case '...':
+	        case '~':
+	          return 'doing';
+	        case 'todo':
+	        case '':
+	          return 'todo';
+	        case 'milestone':
+	        case '★':
+	        case '*':
+	          return 'milestone';
+	        case 'error':
+	        case 'err':
+	        case '✗':
+	        case '×':
+	        case '!':
+	          return 'error';
+	        default:
+	          return 'todo';
 	      }
 	    }
 	  }, {
@@ -77595,8 +77960,8 @@
 	}(ParagraphBase);
 	_defineProperty$2(Panel$1, "HOOK_NAME", 'panel');
 
-	function _callSuper$18(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$18() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$18() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$18 = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$19(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$19() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$19() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$19 = function _isNativeReflectConstruct() { return !!t; })(); }
 
 	/**
 	 * +++(-) 点击查看详情
@@ -77611,7 +77976,7 @@
 	var Detail$1 = /*#__PURE__*/function (_ParagraphBase) {
 	  function Detail() {
 	    _classCallCheck$1(this, Detail);
-	    return _callSuper$18(this, Detail, [{
+	    return _callSuper$19(this, Detail, [{
 	      needCache: true
 	    }]);
 	  }
@@ -77880,12 +78245,12 @@
 	var stringifyExports = requireStringify();
 	var _JSON$stringify = /*@__PURE__*/getDefaultExportFromCjs$1(stringifyExports);
 
-	function _callSuper$17(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$17() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$17() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$17 = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$18(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$18() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$18() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$18 = function _isNativeReflectConstruct() { return !!t; })(); }
 	var FrontMatter = /*#__PURE__*/function (_ParagraphBase) {
 	  function FrontMatter(options) {
 	    _classCallCheck$1(this, FrontMatter);
-	    return _callSuper$17(this, FrontMatter, [{
+	    return _callSuper$18(this, FrontMatter, [{
 	      needCache: true
 	    }]);
 	  }
@@ -77953,15 +78318,15 @@
 	}(ParagraphBase);
 	_defineProperty$2(FrontMatter, "HOOK_NAME", 'frontMatter');
 
-	function _callSuper$16(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$16() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$16() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$16 = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$17(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$17() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$17() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$17 = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 连续空格
 	 */
 	var Space = /*#__PURE__*/function (_SyntaxBase) {
 	  function Space() {
 	    _classCallCheck$1(this, Space);
-	    return _callSuper$16(this, Space, arguments);
+	    return _callSuper$17(this, Space, arguments);
 	  }
 	  _inherits(Space, _SyntaxBase);
 	  return _createClass$1(Space, [{
@@ -77987,8 +78352,8 @@
 	}(SyntaxBase);
 	_defineProperty$2(Space, "HOOK_NAME", 'space');
 
-	function _callSuper$15(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$15() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$15() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$15 = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$16(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$16() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$16() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$16 = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * AI 流式输出场景，自动闭合语法，避免语法被截断，涉及语法：
 	 * - 加粗、斜体
@@ -78001,7 +78366,7 @@
 	    var config = _ref.config,
 	      cherry = _ref.cherry;
 	    _classCallCheck$1(this, AiFlowAutoClose);
-	    _this = _callSuper$15(this, AiFlowAutoClose, [{
+	    _this = _callSuper$16(this, AiFlowAutoClose, [{
 	      needCache: false
 	    }]);
 	    _this.$cherry = cherry;
@@ -83996,9 +84361,11 @@
 	        if (this.clearCursorTimer) {
 	          clearTimeout(this.clearCursorTimer);
 	        }
-	        this.clearCursorTimer = _setTimeout(function () {
-	          _this7.$cherry.clearFlowSessionCursor();
-	        }, 2560);
+	        if (typeof this.$cherry.clearFlowSessionCursor === 'function') {
+	          this.clearCursorTimer = _setTimeout(function () {
+	            _this7.$cherry.clearFlowSessionCursor();
+	          }, 2560);
+	        }
 	        return md.replace(/CHERRYFLOWSESSIONCURSOR/g, this.$cherry.options.engine.global.flowSessionCursor);
 	      }
 	      return md;
@@ -107021,8 +107388,8 @@
 	  return mac ? META_KEY : CONTROL_KEY;
 	};
 
-	function _callSuper$14(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$14() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$14() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$14 = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$15(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$15() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$15() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$15 = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 加粗按钮
 	 */
@@ -107034,7 +107401,7 @@
 	    var _context;
 	    var _this;
 	    _classCallCheck$1(this, Bold);
-	    _this = _callSuper$14(this, Bold, [$cherry]);
+	    _this = _callSuper$15(this, Bold, [$cherry]);
 	    _this.setName('bold', 'bold');
 	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('b')), {
 	      hookName: _this.name,
@@ -107093,8 +107460,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$13(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$13() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$13() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$13 = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$14(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$14() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$14() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$14 = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入斜体的按钮
 	 */
@@ -107106,7 +107473,7 @@
 	    var _context;
 	    var _this;
 	    _classCallCheck$1(this, Italic);
-	    _this = _callSuper$13(this, Italic, [$cherry]);
+	    _this = _callSuper$14(this, Italic, [$cherry]);
 	    _this.setName('italic', 'italic');
 	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('i')), {
 	      hookName: _this.name,
@@ -107164,8 +107531,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$12(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$12() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$12() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$12 = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$13(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$13() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$13() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$13 = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 工具栏里的分割线，用来切分不同类型按钮的区域
 	 * 一个实例中可以配置多个分割线
@@ -107174,7 +107541,7 @@
 	  function Split($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Split);
-	    _this = _callSuper$12(this, Split, [$cherry]);
+	    _this = _callSuper$13(this, Split, [$cherry]);
 	    _this.setName('split', '|');
 	    return _this;
 	  }
@@ -107195,8 +107562,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$11(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$11() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$11() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$11 = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$12(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$12() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$12() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$12 = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 删除线的按钮
 	 */
@@ -107208,7 +107575,7 @@
 	    var _context;
 	    var _this;
 	    _classCallCheck$1(this, Strikethrough);
-	    _this = _callSuper$11(this, Strikethrough, [$cherry]);
+	    _this = _callSuper$12(this, Strikethrough, [$cherry]);
 	    _this.setName('strikethrough', 'strike');
 	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('d')), {
 	      hookName: _this.name,
@@ -107268,8 +107635,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$10(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$10() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$10() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$10 = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$11(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$11() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$11() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$11 = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 下标的按钮
 	 **/
@@ -107277,7 +107644,7 @@
 	  function Sub($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Sub);
-	    _this = _callSuper$10(this, Sub, [$cherry]);
+	    _this = _callSuper$11(this, Sub, [$cherry]);
 	    _this.setName('sub', 'sub');
 	    return _this;
 	  }
@@ -107325,8 +107692,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$$(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$$() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$$() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$$ = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$10(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$10() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$10() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$10 = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 上标的按钮
 	 **/
@@ -107334,7 +107701,7 @@
 	  function Sup($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Sup);
-	    _this = _callSuper$$(this, Sup, [$cherry]);
+	    _this = _callSuper$10(this, Sup, [$cherry]);
 	    _this.setName('sup', 'sup');
 	    return _this;
 	  }
@@ -107479,8 +107846,8 @@
 
 	function ownKeys$5(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 	function _objectSpread$5(e) { for (var r = 1; r < arguments.length; r++) { var _context25, _context26; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context25 = ownKeys$5(Object(t), !0)).call(_context25, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context26 = ownKeys$5(Object(t))).call(_context26, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
-	function _callSuper$_(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$_() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$_() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$_ = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$$(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$$() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$$() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$$ = function _isNativeReflectConstruct() { return !!t; })(); }
 
 	/**
 	 * 插入字体颜色或者字体背景颜色的按钮
@@ -107489,7 +107856,7 @@
 	  function Color($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Color);
-	    _this = _callSuper$_(this, Color, [$cherry]);
+	    _this = _callSuper$$(this, Color, [$cherry]);
 	    _this.setName('color', 'color');
 	    // this.bubbleMenu = true;
 	    _this.bubbleColor = new BubbleColor($cherry);
@@ -108192,8 +108559,8 @@
 	  }]);
 	}();
 
-	function _callSuper$Z(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$Z() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$Z() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$Z = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$_(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$_() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$_() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$_ = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入1级~5级标题
 	 */
@@ -108205,7 +108572,7 @@
 	    var _context, _context2, _context3, _context4, _context5, _context6, _context7, _context8, _context9, _context0;
 	    var _this;
 	    _classCallCheck$1(this, Header);
-	    _this = _callSuper$Z(this, Header, [$cherry]);
+	    _this = _callSuper$_(this, Header, [$cherry]);
 	    _this.setName('header', 'header');
 	    _this.subMenuConfig = [{
 	      iconName: 'h1',
@@ -108486,8 +108853,8 @@
 	  }]);
 	}();
 
-	function _callSuper$Y(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$Y() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$Y() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$Y = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$Z(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$Z() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$Z() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$Z = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * "插入"按钮
 	 */
@@ -108496,7 +108863,7 @@
 	  function Insert($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Insert);
-	    _this = _callSuper$Y(this, Insert, [$cherry]);
+	    _this = _callSuper$Z(this, Insert, [$cherry]);
 	    _this.setName('insert', 'insert');
 	    _this.noIcon = true;
 	    _this.subBubbleTableMenu = new BubbleTableMenu({
@@ -108678,8 +109045,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$X(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$X() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$X() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$X = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$Y(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$Y() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$Y() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$Y = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入有序/无序/checklist列表的按钮
 	 */
@@ -108688,7 +109055,7 @@
 	    var _context, _context2, _context3;
 	    var _this;
 	    _classCallCheck$1(this, List);
-	    _this = _callSuper$X(this, List, [$cherry]);
+	    _this = _callSuper$Y(this, List, [$cherry]);
 	    _this.setName('list', 'list');
 	    _this.subMenuConfig = [{
 	      iconName: 'ol',
@@ -108740,8 +109107,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$W(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$W() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$W() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$W = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$X(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$X() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$X() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$X = function _isNativeReflectConstruct() { return !!t; })(); }
 
 	/**
 	 * 下标的按钮
@@ -108750,7 +109117,7 @@
 	  function Ol($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Ol);
-	    _this = _callSuper$W(this, Ol, [$cherry]);
+	    _this = _callSuper$X(this, Ol, [$cherry]);
 	    _this.setName('ol', 'ol');
 	    return _this;
 	  }
@@ -108779,8 +109146,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$V(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$V() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$V() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$V = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$W(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$W() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$W() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$W = function _isNativeReflectConstruct() { return !!t; })(); }
 
 	/**
 	 * 下标的按钮
@@ -108789,7 +109156,7 @@
 	  function Ul($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Ul);
-	    _this = _callSuper$V(this, Ul, [$cherry]);
+	    _this = _callSuper$W(this, Ul, [$cherry]);
 	    _this.setName('ul', 'ul');
 	    return _this;
 	  }
@@ -108818,8 +109185,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$U(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$U() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$U() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$U = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$V(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$V() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$V() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$V = function _isNativeReflectConstruct() { return !!t; })(); }
 
 	/**
 	 * 下标的按钮
@@ -108828,7 +109195,7 @@
 	  function Checklist($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Checklist);
-	    _this = _callSuper$U(this, Checklist, [$cherry]);
+	    _this = _callSuper$V(this, Checklist, [$cherry]);
 	    _this.setName('checklist', 'checklist');
 	    return _this;
 	  }
@@ -108857,8 +109224,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$T(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$T() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$T() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$T = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$U(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$U() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$U() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$U = function _isNativeReflectConstruct() { return !!t; })(); }
 	function generateExample(title, mermaidCode) {
 	  return [title, '```mermaid', mermaidCode, '```'].join('\n');
 	}
@@ -108892,7 +109259,7 @@
 	    var _context, _context2, _context3, _context4, _context5, _context6;
 	    var _this;
 	    _classCallCheck$1(this, Graph);
-	    _this = _callSuper$T(this, Graph, [$cherry]);
+	    _this = _callSuper$U(this, Graph, [$cherry]);
 	    _this.setName('graph', 'insertChart');
 	    _this.noIcon = true;
 	    _this.localeName = $cherry.options.locale;
@@ -108988,8 +109355,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$S(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$S() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$S() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$S = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$T(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$T() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$T() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$T = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Size$1 = /*#__PURE__*/function (_MenuBase) {
 	  /**
 	   * @param {import('@/toolbars/MenuBase').MenuBaseConstructorParams} $cherry
@@ -108998,7 +109365,7 @@
 	    var _context, _context2, _context3, _context4, _context5, _context6, _context7, _context8;
 	    var _this;
 	    _classCallCheck$1(this, Size);
-	    _this = _callSuper$S(this, Size, [$cherry]);
+	    _this = _callSuper$T(this, Size, [$cherry]);
 	    _this.setName('size', 'size');
 	    _this.subMenuConfig = [{
 	      name: _this.$cherry.locale.small,
@@ -109113,8 +109480,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$R(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$R() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$R() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$R = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$S(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$S() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$S() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$S = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入1级标题
 	 */
@@ -109122,7 +109489,7 @@
 	  function H1($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, H1);
-	    _this = _callSuper$R(this, H1, [$cherry]);
+	    _this = _callSuper$S(this, H1, [$cherry]);
 	    _this.setName('h1', 'h1');
 	    return _this;
 	  }
@@ -109184,8 +109551,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$Q(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$Q() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$Q() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$Q = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$R(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$R() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$R() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$R = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入2级标题
 	 */
@@ -109193,7 +109560,7 @@
 	  function H2($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, H2);
-	    _this = _callSuper$Q(this, H2, [$cherry]);
+	    _this = _callSuper$R(this, H2, [$cherry]);
 	    _this.setName('h2', 'h2');
 	    return _this;
 	  }
@@ -109254,8 +109621,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$P(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$P() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$P() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$P = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$Q(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$Q() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$Q() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$Q = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入3级标题
 	 */
@@ -109263,7 +109630,7 @@
 	  function H3($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, H3);
-	    _this = _callSuper$P(this, H3, [$cherry]);
+	    _this = _callSuper$Q(this, H3, [$cherry]);
 	    _this.setName('h3', 'h3');
 	    return _this;
 	  }
@@ -109407,8 +109774,8 @@
 	var everyExports = requireEvery();
 	var _everyInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(everyExports);
 
-	function _callSuper$O(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$O() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$O() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$O = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$P(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$P() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$P() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$P = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入“引用”的按钮
 	 */
@@ -109416,7 +109783,7 @@
 	  function Quote($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Quote);
-	    _this = _callSuper$O(this, Quote, [$cherry]);
+	    _this = _callSuper$P(this, Quote, [$cherry]);
 	    _this.setName('quote', 'blockquote');
 	    return _this;
 	  }
@@ -109449,8 +109816,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$N(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$N() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$N() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$N = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$O(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$O() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$O() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$O = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入“简单表格”的按钮
 	 * 所谓简单表格，是源于[TAPD](https://tapd.cn) wiki应用里的一种表格语法
@@ -109460,7 +109827,7 @@
 	  function QuickTable($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, QuickTable);
-	    _this = _callSuper$N(this, QuickTable, [$cherry]);
+	    _this = _callSuper$O(this, QuickTable, [$cherry]);
 	    _this.setName('quickTable', 'table');
 	    return _this;
 	  }
@@ -109482,8 +109849,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$M(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$M() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$M() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$M = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$N(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$N() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$N() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$N = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 关闭/展示预览区域的按钮
 	 */
@@ -109491,7 +109858,7 @@
 	  function TogglePreview($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, TogglePreview);
-	    _this = _callSuper$M(this, TogglePreview, [$cherry]);
+	    _this = _callSuper$N(this, TogglePreview, [$cherry]);
 	    /** @type {boolean} 当前预览状态 */
 	    _defineProperty$2(_this, "$previewerHidden", false);
 	    _this.setName('previewClose', 'previewClose');
@@ -109571,8 +109938,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$L(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$L() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$L() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$L = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$M(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$M() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$M() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$M = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 全屏按钮
 	 */
@@ -109580,7 +109947,7 @@
 	  function FullScreen($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, FullScreen);
-	    _this = _callSuper$L(this, FullScreen, [$cherry]);
+	    _this = _callSuper$M(this, FullScreen, [$cherry]);
 	    _this.updateMarkdown = false;
 	    _this.setName('fullScreen', 'fullscreen');
 	    return _this;
@@ -109614,8 +109981,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$K(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$K() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$K() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$K = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$L(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$L() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$L() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$L = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 撤销回退按钮，点击后触发编辑器的undo操作
 	 * 依赖codemirror的undo接口
@@ -109624,7 +109991,7 @@
 	  function Undo($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Undo);
-	    _this = _callSuper$K(this, Undo, [$cherry]);
+	    _this = _callSuper$L(this, Undo, [$cherry]);
 	    _this.setName('undo', 'undo');
 	    return _this;
 	  }
@@ -109638,8 +110005,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$J(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$J() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$J() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$J = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$K(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$K() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$K() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$K = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 撤销/重做 里的"重做"按键
 	 * 依赖codemirror的undo接口
@@ -109648,7 +110015,7 @@
 	  function Redo($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Redo);
-	    _this = _callSuper$J(this, Redo, [$cherry]);
+	    _this = _callSuper$K(this, Redo, [$cherry]);
 	    _this.setName('redo', 'redo');
 	    return _this;
 	  }
@@ -109666,8 +110033,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$I(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$I() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$I() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$I = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$J(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$J() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$J() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$J = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入代码块的按钮
 	 */
@@ -109679,7 +110046,7 @@
 	    var _context;
 	    var _this;
 	    _classCallCheck$1(this, Code);
-	    _this = _callSuper$I(this, Code, [$cherry]);
+	    _this = _callSuper$J(this, Code, [$cherry]);
 	    _this.setName('codeBlock', 'codeBlock');
 	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('k')), {
 	      hookName: 'code',
@@ -109709,8 +110076,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$H(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$H() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$H() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$H = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$I(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$I() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$I() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$I = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入行内代码的按钮
 	 */
@@ -109718,7 +110085,7 @@
 	  function InlineCode($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, InlineCode);
-	    _this = _callSuper$H(this, InlineCode, [$cherry]);
+	    _this = _callSuper$I(this, InlineCode, [$cherry]);
 	    _this.setName('inlineCode', 'code');
 	    _this.shortcutKeyMap = _defineProperty$2({}, "".concat(CONTROL_KEY, "-Backquote"), {
 	      hookName: _this.name,
@@ -109760,8 +110127,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$G(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$G() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$G() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$G = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$H(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$H() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$H() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$H = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 设置代码块的主题
 	 * 本功能依赖[prism组件](https://github.com/PrismJS/prism)
@@ -109771,7 +110138,7 @@
 	    var _context, _context2, _context3, _context4, _context5, _context6, _context7, _context8, _context9, _context0, _context1, _context10;
 	    var _this;
 	    _classCallCheck$1(this, CodeTheme);
-	    _this = _callSuper$G(this, CodeTheme, [$cherry]);
+	    _this = _callSuper$H(this, CodeTheme, [$cherry]);
 	    _this.setName('codeTheme', 'code-theme');
 	    _this.updateMarkdown = false;
 	    _this.noIcon = false;
@@ -109899,14 +110266,14 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$F(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$F() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$F() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$F = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$G(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$G() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$G() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$G = function _isNativeReflectConstruct() { return !!t; })(); }
 	var Export = /*#__PURE__*/function (_MenuBase) {
 	  function Export($cherry) {
 	    var _context2, _context3, _context4, _context5;
 	    var _this;
 	    _classCallCheck$1(this, Export);
-	    _this = _callSuper$F(this, Export, [$cherry]);
+	    _this = _callSuper$G(this, Export, [$cherry]);
 	    _this.setName('export');
 	    _this.noIcon = true;
 	    _this.updateMarkdown = false;
@@ -110698,8 +111065,8 @@
 	  }]);
 	}();
 
-	function _callSuper$E(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$E() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$E() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$E = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$F(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$F() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$F() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$F = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 设置按钮
 	 */
@@ -110711,7 +111078,7 @@
 	    var _this$engine$$cherry$, _context, _context2, _context3, _context4;
 	    var _this;
 	    _classCallCheck$1(this, Settings);
-	    _this = _callSuper$E(this, Settings, [$cherry]);
+	    _this = _callSuper$F(this, Settings, [$cherry]);
 	    _this.setName('settings', 'settings');
 	    _this.updateMarkdown = false;
 	    _this.engine = $cherry.engine;
@@ -110931,8 +111298,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$D(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$D() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$D() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$D = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$E(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$E() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$E() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$E = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 下划线按钮
 	 **/
@@ -110944,7 +111311,7 @@
 	    var _context;
 	    var _this;
 	    _classCallCheck$1(this, Underline);
-	    _this = _callSuper$D(this, Underline, [$cherry]);
+	    _this = _callSuper$E(this, Underline, [$cherry]);
 	    _this.setName('underline', 'underline');
 	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('u')), {
 	      hookName: _this.name,
@@ -110997,8 +111364,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$C(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$C() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$C() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$C = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$D(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$D() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$D() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$D = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 切换预览/编辑模式的按钮
 	 * 该按钮不支持切换到双栏编辑模式
@@ -111008,7 +111375,7 @@
 	  function SwitchModel($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, SwitchModel);
-	    _this = _callSuper$C(this, SwitchModel, [$cherry]);
+	    _this = _callSuper$D(this, SwitchModel, [$cherry]);
 	    _this.setName('switchPreview');
 	    _this.instanceId = $cherry.instanceId;
 	    _this.attachEventListeners();
@@ -111051,8 +111418,8 @@
 	function _createForOfIteratorHelper$1g(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1g(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 	function _unsupportedIterableToArray$1g(r, a) { if (r) { var _context8; if ("string" == typeof r) return _arrayLikeToArray$1g(r, a); var t = _sliceInstanceProperty(_context8 = {}.toString.call(r)).call(_context8, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1g(r, a) : void 0; } }
 	function _arrayLikeToArray$1g(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-	function _callSuper$B(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$B() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$B() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$B = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$C(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$C() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$C() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$C = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入图片
 	 */
@@ -111064,7 +111431,7 @@
 	    var _context;
 	    var _this;
 	    _classCallCheck$1(this, Image);
-	    _this = _callSuper$B(this, Image, [$cherry]);
+	    _this = _callSuper$C(this, Image, [$cherry]);
 	    _this.setName('image', 'image');
 	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('g')), {
 	      hookName: _this.name,
@@ -111163,8 +111530,8 @@
 	function _createForOfIteratorHelper$1f(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1f(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 	function _unsupportedIterableToArray$1f(r, a) { if (r) { var _context7; if ("string" == typeof r) return _arrayLikeToArray$1f(r, a); var t = _sliceInstanceProperty(_context7 = {}.toString.call(r)).call(_context7, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1f(r, a) : void 0; } }
 	function _arrayLikeToArray$1f(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-	function _callSuper$A(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$A() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$A() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$A = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$B(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$B() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$B() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$B = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入音频
 	 */
@@ -111172,7 +111539,7 @@
 	  function Audio($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Audio);
-	    _this = _callSuper$A(this, Audio, [$cherry]);
+	    _this = _callSuper$B(this, Audio, [$cherry]);
 	    _this.setName('audio', 'video');
 	    return _this;
 	  }
@@ -111267,8 +111634,8 @@
 	function _createForOfIteratorHelper$1e(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1e(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 	function _unsupportedIterableToArray$1e(r, a) { if (r) { var _context9; if ("string" == typeof r) return _arrayLikeToArray$1e(r, a); var t = _sliceInstanceProperty(_context9 = {}.toString.call(r)).call(_context9, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1e(r, a) : void 0; } }
 	function _arrayLikeToArray$1e(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-	function _callSuper$z(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$z() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$z() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$z = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$A(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$A() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$A() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$A = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入视频
 	 */
@@ -111276,7 +111643,7 @@
 	  function Video($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Video);
-	    _this = _callSuper$z(this, Video, [$cherry]);
+	    _this = _callSuper$A(this, Video, [$cherry]);
 	    _this.setName('video', 'video');
 	    return _this;
 	  }
@@ -111368,8 +111735,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$y(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$y() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$y() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$y = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$z(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$z() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$z() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$z = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入换行
 	 */
@@ -111377,7 +111744,7 @@
 	  function Br($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Br);
-	    _this = _callSuper$y(this, Br, [$cherry]);
+	    _this = _callSuper$z(this, Br, [$cherry]);
 	    _this.setName('br', 'br');
 	    return _this;
 	  }
@@ -111398,8 +111765,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$x(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$x() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$x() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$x = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$y(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$y() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$y() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$y = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入分割线
 	 */
@@ -111407,7 +111774,7 @@
 	  function Hr($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Hr);
-	    _this = _callSuper$x(this, Hr, [$cherry]);
+	    _this = _callSuper$y(this, Hr, [$cherry]);
 	    _this.setName('hr', 'line');
 	    return _this;
 	  }
@@ -112169,8 +112536,8 @@
 	  }]);
 	}();
 
-	function _callSuper$w(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$w() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$w() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$w = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$x(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$x() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$x() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$x = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入行内公式
 	 * @see https://github.com/QianJianTech/LaTeXLive/blob/master/README.md
@@ -112183,7 +112550,7 @@
 	    var _$cherry$options, _$cherry$options$tool, _$cherry$options$tool2, _context;
 	    var _this;
 	    _classCallCheck$1(this, Formula);
-	    _this = _callSuper$w(this, Formula, [$cherry]);
+	    _this = _callSuper$x(this, Formula, [$cherry]);
 	    _this.setName('formula', 'insertFormula');
 	    _this.subBubbleFormulaMenu = new BubbleFormula($cherry === null || $cherry === void 0 ? void 0 : (_$cherry$options = $cherry.options) === null || _$cherry$options === void 0 ? void 0 : (_$cherry$options$tool = _$cherry$options.toolbars) === null || _$cherry$options$tool === void 0 ? void 0 : (_$cherry$options$tool2 = _$cherry$options$tool.config) === null || _$cherry$options$tool2 === void 0 ? void 0 : _$cherry$options$tool2.formula);
 	    $cherry.editor.options.wrapperDom.appendChild(_this.subBubbleFormulaMenu.dom);
@@ -112239,8 +112606,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$v(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$v() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$v() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$v = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$w(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$w() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$w() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$w = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入超链接
 	 */
@@ -112252,7 +112619,7 @@
 	    var _context;
 	    var _this;
 	    _classCallCheck$1(this, Link);
-	    _this = _callSuper$v(this, Link, [$cherry]);
+	    _this = _callSuper$w(this, Link, [$cherry]);
 	    _this.setName('link', 'link');
 	    _this.shortcutKeyMap = _defineProperty$2({}, _concatInstanceProperty(_context = "".concat(getPlatformControlKey(), "-")).call(_context, getKeyCode('l')), {
 	      hookName: _this.name,
@@ -112283,8 +112650,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$u(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$u() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$u() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$u = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$v(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$v() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$v() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$v = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入普通表格
 	 */
@@ -112292,7 +112659,7 @@
 	  function Table($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Table);
-	    _this = _callSuper$u(this, Table, [$cherry]);
+	    _this = _callSuper$v(this, Table, [$cherry]);
 	    _this.setName('table', 'table');
 	    _this.subBubbleTableMenu = new BubbleTableMenu({
 	      row: 9,
@@ -112338,8 +112705,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$t(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$t() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$t() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$t = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$u(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$u() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$u() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$u = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入目录
 	 */
@@ -112347,7 +112714,7 @@
 	  function Toc($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Toc);
-	    _this = _callSuper$t(this, Toc, [$cherry]);
+	    _this = _callSuper$u(this, Toc, [$cherry]);
 	    _this.setName('toc', 'toc');
 	    return _this;
 	  }
@@ -112369,8 +112736,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$s(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$s() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$s() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$s = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$t(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$t() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$t() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$t = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 图表表格工具栏组合
 	 */
@@ -112379,7 +112746,7 @@
 	    var _context, _context2, _context3, _context4, _context5, _context6, _context7, _context8;
 	    var _this;
 	    _classCallCheck$1(this, ProTable);
-	    _this = _callSuper$s(this, ProTable, [$cherry]);
+	    _this = _callSuper$t(this, ProTable, [$cherry]);
 	    _this.setName('proTable', 'insertLineChart');
 	    _this.localeName = $cherry.options.locale;
 	    /** @type {import('@/toolbars/MenuBase').SubMenuConfigItem[]} */
@@ -112559,8 +112926,8 @@
 	function _createForOfIteratorHelper$1c(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1c(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 	function _unsupportedIterableToArray$1c(r, a) { if (r) { var _context5; if ("string" == typeof r) return _arrayLikeToArray$1c(r, a); var t = _sliceInstanceProperty(_context5 = {}.toString.call(r)).call(_context5, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1c(r, a) : void 0; } }
 	function _arrayLikeToArray$1c(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-	function _callSuper$r(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$r() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$r() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$r = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$s(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$s() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$s() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$s = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入pdf
 	 */
@@ -112568,7 +112935,7 @@
 	  function Pdf($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Pdf);
-	    _this = _callSuper$r(this, Pdf, [$cherry]);
+	    _this = _callSuper$s(this, Pdf, [$cherry]);
 	    _this.setName('pdf', 'pdf');
 	    return _this;
 	  }
@@ -112663,8 +113030,8 @@
 	function _createForOfIteratorHelper$1b(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1b(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 	function _unsupportedIterableToArray$1b(r, a) { if (r) { var _context5; if ("string" == typeof r) return _arrayLikeToArray$1b(r, a); var t = _sliceInstanceProperty(_context5 = {}.toString.call(r)).call(_context5, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1b(r, a) : void 0; } }
 	function _arrayLikeToArray$1b(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-	function _callSuper$q(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$q() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$q() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$q = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$r(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$r() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$r() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$r = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入pdf
 	 */
@@ -112672,7 +113039,7 @@
 	  function File($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, File);
-	    _this = _callSuper$q(this, File, [$cherry]);
+	    _this = _callSuper$r(this, File, [$cherry]);
 	    _this.setName('file', 'phone');
 	    return _this;
 	  }
@@ -112767,8 +113134,8 @@
 	function _createForOfIteratorHelper$1a(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1a(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 	function _unsupportedIterableToArray$1a(r, a) { if (r) { var _context5; if ("string" == typeof r) return _arrayLikeToArray$1a(r, a); var t = _sliceInstanceProperty(_context5 = {}.toString.call(r)).call(_context5, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1a(r, a) : void 0; } }
 	function _arrayLikeToArray$1a(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-	function _callSuper$p(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$p() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$p() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$p = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$q(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$q() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$q() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$q = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入word
 	 */
@@ -112776,7 +113143,7 @@
 	  function Word($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Word);
-	    _this = _callSuper$p(this, Word, [$cherry]);
+	    _this = _callSuper$q(this, Word, [$cherry]);
 	    _this.setName('word', 'word');
 	    return _this;
 	  }
@@ -112867,8 +113234,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$o(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$o() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$o() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$o = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$p(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$p() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$p() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$p = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 生成ruby，使用场景：给中文增加拼音、给中文增加英文、给英文增加中文等等
 	 */
@@ -112876,7 +113243,7 @@
 	  function Ruby($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Ruby);
-	    _this = _callSuper$o(this, Ruby, [$cherry]);
+	    _this = _callSuper$p(this, Ruby, [$cherry]);
 	    _this.setName('pinyin', 'pinyin');
 	    return _this;
 	  }
@@ -112927,8 +113294,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$n(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$n() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$n() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$n = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$o(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$o() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$o() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$o = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 修改主题
 	 */
@@ -112936,7 +113303,7 @@
 	  function Theme($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Theme);
-	    _this = _callSuper$n(this, Theme, [$cherry]);
+	    _this = _callSuper$o(this, Theme, [$cherry]);
 	    _this.setName('theme', 'main-theme');
 	    _this.subMenuConfig = [];
 	    var self = _this;
@@ -112986,8 +113353,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$m(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$m() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$m() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$m = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$n(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$n() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$n() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$n = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 字数统计
 	 */
@@ -112995,7 +113362,7 @@
 	  function wordCount($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, wordCount);
-	    _this = _callSuper$m(this, wordCount, [$cherry]);
+	    _this = _callSuper$n(this, wordCount, [$cherry]);
 	    _this.setName('wordCount', 'wordCount');
 	    _this.noIcon = true;
 	    _this.countEvent = new Event('count');
@@ -113094,8 +113461,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$l(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$l() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$l() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$l = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$m(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$m() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$m() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$m = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 光标位置回显
 	 */
@@ -113103,7 +113470,7 @@
 	  function CursorPosition($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, CursorPosition);
-	    _this = _callSuper$l(this, CursorPosition, [$cherry]);
+	    _this = _callSuper$m(this, CursorPosition, [$cherry]);
 	    _this.setName('cursorPosition', 'cursorPosition');
 	    _this.noIcon = true;
 	    _this.updateMarkdown = false;
@@ -113145,8 +113512,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$k(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$k() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$k() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$k = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$l(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$l() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$l() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$l = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 预览区域切换到“移动端视图”的按钮
 	 */
@@ -113154,7 +113521,7 @@
 	  function MobilePreview($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, MobilePreview);
-	    _this = _callSuper$k(this, MobilePreview, [$cherry]);
+	    _this = _callSuper$l(this, MobilePreview, [$cherry]);
 	    _this.previewer = $cherry.previewer;
 	    _this.updateMarkdown = false;
 	    _this.setName('mobilePreview', 'phone');
@@ -113176,8 +113543,8 @@
 	  }]);
 	}(MenuBase);
 
-	function _callSuper$j(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$j() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$j() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$j = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$k(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$k() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$k() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$k = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 复制按钮，用来复制预览区的html内容
 	 * 该操作会将预览区的css样式以行内样式的形式插入到html内容里，从而保证粘贴时样式一致
@@ -113186,7 +113553,7 @@
 	  function Copy($cherry) {
 	    var _this;
 	    _classCallCheck$1(this, Copy);
-	    _this = _callSuper$j(this, Copy, [$cherry]);
+	    _this = _callSuper$k(this, Copy, [$cherry]);
 	    _this.previewer = $cherry.previewer;
 	    _this.isLoading = false;
 	    _this.updateMarkdown = false;
@@ -113355,8 +113722,8 @@
 	  });
 	}
 
-	function _callSuper$i(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$i() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-	function _isNativeReflectConstruct$i() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$i = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _callSuper$j(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$j() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$j() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$j = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
 	 * 插入面板
 	 */
@@ -113365,7 +113732,7 @@
 	    var _context, _context2, _context3, _context4, _context5;
 	    var _this;
 	    _classCallCheck$1(this, Panel);
-	    _this = _callSuper$i(this, Panel, [$cherry]);
+	    _this = _callSuper$j(this, Panel, [$cherry]);
 	    _this.setName('panel', 'tips');
 	    _this.panelRule = getPanelRule().reg;
 	    _this.subMenuConfig = [{
@@ -113436,11 +113803,17 @@
 	      var shortKey = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
 	      var threeCols = '第一列\n::\n第二列\n::\n第三列';
 	      var twoCols = '第一列\n::\n第二列';
+	      // 行首 `:: ` 后的内容作为标签标题，后续行作为该 tab 面板的内容
+	      var twoTabs = ':: 标签一\n第一个 tab 的内容\n:: 标签二\n第二个 tab 的内容';
 	      var defaultContent = '内容';
 	      if (shortKey === '3cols') {
 	        defaultContent = threeCols;
-	      } else if (shortKey === '2cols') {
+	      } else if (shortKey === '2cols' || shortKey === 'cols') {
+	        // 新语法 cols 默认插入两列内容，用户可通过继续追加 :: 增加列数
 	        defaultContent = twoCols;
+	      } else if (shortKey === 'tabs') {
+	        // tabs 默认插入两个选项卡模板
+	        defaultContent = twoTabs;
 	      }
 	      var $selection = this.getSelection(selection, 'line', true) || defaultContent;
 	      var currentName = this.$getNameFromStr($selection);
@@ -113503,6 +113876,69 @@
 	  }]);
 	}(MenuBase);
 
+	function _callSuper$i(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$i() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+	function _isNativeReflectConstruct$i() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$i = function _isNativeReflectConstruct() { return !!t; })(); }
+
+	/**
+	 * 插入时间线
+	 * 复用 Panel 的 :::xxx ... ::: 交互逻辑，插入的模板内部包含多条 "- [status] time title" 条目
+	 */
+	var Timeline = /*#__PURE__*/function (_MenuBase) {
+	  function Timeline($cherry) {
+	    var _this;
+	    _classCallCheck$1(this, Timeline);
+	    _this = _callSuper$i(this, Timeline, [$cherry]);
+	    _this.setName('timeline', 'timeline');
+	    _this.panelRule = getPanelRule().reg;
+	    _this.noSubMenu = true;
+	    return _this;
+	  }
+	  _inherits(Timeline, _MenuBase);
+	  return _createClass$1(Timeline, [{
+	    key: "$getTitle",
+	    value: function $getTitle() {
+	      var _locale$timelineTitle;
+	      var locale = this.$cherry.locale;
+	      return (_locale$timelineTitle = locale === null || locale === void 0 ? void 0 : locale.timelineTitle) !== null && _locale$timelineTitle !== void 0 ? _locale$timelineTitle : '时间线';
+	    }
+
+	    /**
+	     * 点击工具栏按钮时，插入一个时间线模板。
+	     * 复用父类 Panel.onClick 的骨架：把 shortKey 固定为 'timeline'，
+	     * 并把默认的 "内容" 替换为多条示例条目。
+	     */
+	  }, {
+	    key: "onClick",
+	    value: function onClick(selection) {
+	      var _locale$timelineDefau,
+	        _this2 = this,
+	        _context;
+	      var locale = this.$cherry.locale;
+	      var defaultContent = (_locale$timelineDefau = locale === null || locale === void 0 ? void 0 : locale.timelineDefaultContent) !== null && _locale$timelineDefau !== void 0 ? _locale$timelineDefau : ':: [done] 2024-01-15 项目立项\n  完成需求评审\n' + ':: [doing] 2024-03-20 Alpha 版本\n  正在联调\n' + ':: [todo] 2024-06-01 正式上线\n' + ':: [error] 2024-07-01 严重回滚事件\n' + ':: [milestone] 2024-08-01 用户破万';
+	      var $selection = this.getSelection(selection, 'line', true) || defaultContent;
+	      // 直接走父类逻辑，type 固定为 timeline
+	      this.registerAfterClickCb(function () {
+	        _this2.setLessSelection('::: ', '\n');
+	      });
+	      var title = '';
+	      var body = $selection.replace(/^\n+/, '');
+	      if (/\n/.test(body)) {
+	        title = body.replace(/\n[\w\W]+$/, '');
+	        // 如果首行不是 ":: " 起始，则把它当标题
+	        if (!/^\s*::\s+/.test(title)) {
+	          body = body.replace(/^[^\n]+\n/, '');
+	        } else {
+	          title = this.$getTitle();
+	        }
+	      } else {
+	        title = this.$getTitle();
+	        body = defaultContent;
+	      }
+	      return _concatInstanceProperty(_context = "::: timeline ".concat(title, "\n")).call(_context, body, "\n:::").replace(/\n{2,}:::/g, '\n:::');
+	    }
+	  }]);
+	}(MenuBase);
+
 	function _callSuper$h(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$h() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$h() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$h = function _isNativeReflectConstruct() { return !!t; })(); }
 	/**
@@ -113510,7 +113946,7 @@
 	 */
 	var Align = /*#__PURE__*/function (_Panel) {
 	  function Align($cherry) {
-	    var _locale$alignLeft, _context, _locale$alignCenter, _context2, _locale$alignRight, _context3, _locale$alignJustify, _context4, _locale$align2Col, _context5, _locale$align3Col, _context6;
+	    var _locale$alignLeft, _context, _locale$alignCenter, _context2, _locale$alignRight, _context3, _locale$alignJustify, _context4, _locale$align2Col, _context5, _locale$alignCols, _context6, _locale$alignTabs, _context7;
 	    var _this;
 	    _classCallCheck$1(this, Align);
 	    _this = _callSuper$h(this, Align, [$cherry]);
@@ -113539,8 +113975,12 @@
 	      onclick: _bindInstanceProperty(_context5 = _this.bindSubClick).call(_context5, _this, '2cols')
 	    }, {
 	      iconName: 'alignJustify',
-	      name: (_locale$align3Col = locale === null || locale === void 0 ? void 0 : locale.align3Col) !== null && _locale$align3Col !== void 0 ? _locale$align3Col : '三列排版',
-	      onclick: _bindInstanceProperty(_context6 = _this.bindSubClick).call(_context6, _this, '3cols')
+	      name: (_locale$alignCols = locale === null || locale === void 0 ? void 0 : locale.alignCols) !== null && _locale$alignCols !== void 0 ? _locale$alignCols : '多列排版',
+	      onclick: _bindInstanceProperty(_context6 = _this.bindSubClick).call(_context6, _this, 'cols')
+	    }, {
+	      iconName: 'alignJustify',
+	      name: (_locale$alignTabs = locale === null || locale === void 0 ? void 0 : locale.alignTabs) !== null && _locale$alignTabs !== void 0 ? _locale$alignTabs : '选项卡',
+	      onclick: _bindInstanceProperty(_context7 = _this.bindSubClick).call(_context7, _this, 'tabs')
 	    }];
 	    return _this;
 	  }
@@ -114710,6 +115150,8 @@
 	    this.searchTimer = null;
 	    /** @type {boolean} */
 	    this.pendingKeepActiveIndex = false;
+	    /** @type {boolean} */
+	    this.pendingScrollToMatch = true;
 	    this.handlePanelShortcutKey = _bindInstanceProperty(_context = this.handlePanelShortcutKey).call(_context, this);
 	    this.dom = this.createDOM();
 	    this.cacheElements();
@@ -115079,11 +115521,13 @@
 	    value: function scheduleSearch() {
 	      var _this3 = this;
 	      var keepActiveIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+	      var scrollToMatch = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 	      this.pendingKeepActiveIndex = keepActiveIndex;
+	      this.pendingScrollToMatch = scrollToMatch;
 	      this.cancelScheduledSearch();
 	      this.searchTimer = _setTimeout(function () {
 	        _this3.searchTimer = null;
-	        _this3.runSearch(_this3.pendingKeepActiveIndex);
+	        _this3.runSearch(_this3.pendingKeepActiveIndex, _this3.pendingScrollToMatch);
 	      }, SEARCH_DEBOUNCE_MS);
 	    }
 
@@ -115105,11 +115549,12 @@
 	    key: "flushScheduledSearch",
 	    value: function flushScheduledSearch() {
 	      var keepActiveIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+	      var scrollToMatch = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 	      if (!this.searchTimer) {
 	        return;
 	      }
 	      this.cancelScheduledSearch();
-	      this.runSearch(keepActiveIndex);
+	      this.runSearch(keepActiveIndex, scrollToMatch);
 	    }
 
 	    /**
@@ -115123,6 +115568,7 @@
 	    value: function syncMatches() {
 	      var keepActiveIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 	      var applyToEditor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+	      var scrollToMatch = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 	      if (!this.editorAdapter) {
 	        return;
 	      }
@@ -115150,7 +115596,9 @@
 	      }
 	      if (applyToEditor) {
 	        this.applyHighlight(regex);
-	        this.focusCurrentMatch();
+	        if (scrollToMatch) {
+	          this.focusCurrentMatch();
+	        }
 	      }
 	      this.updateCounter();
 	    }
@@ -115164,7 +115612,8 @@
 	    key: "runSearch",
 	    value: function runSearch() {
 	      var keepActiveIndex = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-	      this.syncMatches(keepActiveIndex, true);
+	      var scrollToMatch = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+	      this.syncMatches(keepActiveIndex, true, scrollToMatch);
 	    }
 
 	    /**
@@ -115334,6 +115783,7 @@
 	      var replacement = this.getReplacementText();
 	      var anchor = match.from + replacement.length;
 	      this.editorAdapter.replaceRange(replacement, match.from, match.to);
+	      this.cancelScheduledSearch();
 	      var text = this.editorAdapter.getDocString();
 	      var _this$state3 = this.state,
 	        query = _this$state3.query,
@@ -115348,7 +115798,6 @@
 	        this.state.activeMatchIndex = findNearestMatchIndex(matches, anchor);
 	      }
 	      this.applyHighlight();
-	      this.focusCurrentMatch();
 	      this.updateCounter();
 	      this.refocusPanelInput();
 	      return true;
@@ -115390,7 +115839,8 @@
 	          to = _matches$i.to;
 	        this.editorAdapter.replaceRange(replacement, from, to);
 	      }
-	      this.runSearch(true);
+	      this.cancelScheduledSearch();
+	      this.syncMatches(true, true, false);
 	      this.refocusPanelInput();
 	    }
 
@@ -115796,7 +116246,7 @@
 	        return;
 	      }
 	      if (this.panel.isVisible()) {
-	        this.panel.scheduleSearch(true);
+	        this.panel.scheduleSearch(true, false);
 	        return;
 	      }
 	      this.panel.syncMatches(true, false);
@@ -116005,6 +116455,7 @@
 	  theme: Theme$1,
 	  file: File,
 	  panel: Panel,
+	  timeline: Timeline,
 	  justify: Justify,
 	  align: Align,
 	  detail: Detail,
@@ -118143,7 +118594,13 @@
 	        // 是否支持对齐语法
 	        enableAlign: true,
 	        // 是否支持信息面板语法
-	        enablePanel: true
+	        enablePanel: true,
+	        // 是否支持多列排版语法（::: cols / ::: 2cols / ::: 3cols）
+	        enableCols: true,
+	        // 是否支持选项卡语法（::: tabs）
+	        enableTabs: true,
+	        // 是否支持时间线语法（::: timeline）
+	        enableTimeline: true
 	      },
 	      footnote: {
 	        /**
@@ -118176,7 +118633,7 @@
 	            // 添加到脚注列表标题的类名
 	            render: function render() {
 	              return '';
-	            } // 标题的内容，为空则渲染cherry默认的标题
+	            } // 标题内容；仅使用该返回值，空字符串则不渲染标题
 	          },
 	          listItem: {
 	            appendClass: '',
@@ -118990,6 +119447,16 @@
 	  // 导出长图
 	  detail: '手风琴',
 	  // 手风琴
+	  timeline: '时间线',
+	  // 时间线
+	  timelineTitle: '时间线',
+	  // 时间线默认标题
+	  timelineDefaultContent: ':: [done] 2024-01-15 项目立项\n  完成需求评审\n:: [doing] 2024-03-20 Alpha 版本\n  正在联调\n:: [todo] 2024-06-01 正式上线\n:: [error] 2024-07-01 严重回滚事件\n:: [milestone] 2024-08-01 用户破万',
+	  timelineStatusDone: '已完成',
+	  timelineStatusDoing: '进行中',
+	  timelineStatusTodo: '待办',
+	  timelineStatusMilestone: '里程碑',
+	  timelineStatusError: '异常',
 	  heading1: '一级标题',
 	  heading2: '二级标题',
 	  heading3: '三级标题',
@@ -119004,6 +119471,9 @@
 	  alignCenter: '居中',
 	  alignRight: '右对齐',
 	  alignJustify: '两端对齐',
+	  align2Col: '两列排版',
+	  alignCols: '多列排版',
+	  alignTabs: '选项卡',
 	  alignFloatLeft: '左浮动',
 	  alignFloatRight: '右浮动',
 	  publish: '发布',
@@ -119070,7 +119540,6 @@
 	  search: '搜索/替换',
 	  searchOnly: '搜索',
 	  autoWrap: '自动换行',
-	  footnoteTitle: '脚注',
 	  searchFor: '查找',
 	  searchClear: '清空',
 	  replaceWith: '替换为',
@@ -119213,6 +119682,14 @@
 	  heading3: 'H3 Heading',
 	  panel: 'Panel',
 	  detail: 'Detail',
+	  timeline: 'Timeline',
+	  timelineTitle: 'Timeline',
+	  timelineDefaultContent: ':: [done] 2024-01-15 Project kickoff\n  Requirements review completed\n:: [doing] 2024-03-20 Alpha release\n  Integration testing in progress\n:: [todo] 2024-06-01 Go live\n:: [error] 2024-07-01 Critical rollback event\n:: [milestone] 2024-08-01 10K users',
+	  timelineStatusDone: 'Done',
+	  timelineStatusDoing: 'Doing',
+	  timelineStatusTodo: 'Todo',
+	  timelineStatusMilestone: 'Milestone',
+	  timelineStatusError: 'Error',
 	  complement: 'Complement',
 	  summary: 'Summary',
 	  justify: 'justify',
@@ -119224,6 +119701,9 @@
 	  alignCenter: 'Align Center',
 	  alignRight: 'Align Right',
 	  alignJustify: 'Align Justify',
+	  align2Col: 'Two Columns',
+	  alignCols: 'Multi Columns',
+	  alignTabs: 'Tabs',
 	  alignFloatLeft: 'Align Float Left',
 	  alignFloatRight: 'Align Float Right',
 	  publish: 'Publish',
@@ -119290,7 +119770,6 @@
 	  search: 'Search/Replace',
 	  searchOnly: 'Search',
 	  autoWrap: 'Auto Wrap',
-	  footnoteTitle: 'Footnote',
 	  searchFor: 'Search for',
 	  searchClear: 'Clear',
 	  replaceWith: 'Replace with',
@@ -119430,6 +119909,14 @@
 	  exportWordFile: 'Экспорт в Word',
 	  panel: 'Панель',
 	  detail: 'Аккордеон',
+	  timeline: 'Хронология',
+	  timelineTitle: 'Хронология',
+	  timelineDefaultContent: ':: [done] 2024-01-15 Запуск проекта\n  Обзор требований завершён\n:: [doing] 2024-03-20 Альфа-версия\n  Идёт интеграция\n:: [todo] 2024-06-01 Официальный запуск\n:: [error] 2024-07-01 Серьёзный сбой\n:: [milestone] 2024-08-01 10 тыс. пользователей',
+	  timelineStatusDone: 'Готово',
+	  timelineStatusDoing: 'В процессе',
+	  timelineStatusTodo: 'Ожидает',
+	  timelineStatusMilestone: 'Веха',
+	  timelineStatusError: 'Ошибка',
 	  heading1: 'H1 Заголовок',
 	  heading2: 'H2 Заголовок',
 	  heading3: 'H3 Заголовок',
@@ -119444,6 +119931,9 @@
 	  alignCenter: 'В центре',
 	  alignRight: 'Выровнять вправо',
 	  alignJustify: 'Выровнять концы',
+	  align2Col: 'Две колонки',
+	  alignCols: 'Несколько колонок',
+	  alignTabs: 'Вкладки',
 	  alignFloatLeft: 'Выровнять вправо',
 	  alignFloatRight: 'Выровнять слева',
 	  publish: 'Публиковать',
@@ -119510,7 +120000,6 @@
 	  search: 'Поиск/Заменить',
 	  searchOnly: 'Поиск',
 	  autoWrap: 'Автоперенос строк',
-	  footnoteTitle: 'Сноска',
 	  searchFor: 'Найти',
 	  searchClear: 'Очистить',
 	  replaceWith: 'Заменить на',
@@ -123481,6 +123970,103 @@
 	    }
 
 	    /**
+	     * 禁用/启用编辑器
+	     * 开启禁用后：
+	     *   - 编辑器切换为只读，禁止一切修改文档的操作
+	     *   - 在编辑区上覆盖一个蒙层，展示 tips 文案，阻止鼠标交互
+	     *   - tips 默认通过 sticky 停留在视窗中央；鼠标进入蒙层时 tips 跟随鼠标移动
+	     * @public
+	     * @param {boolean} isDisable 是否禁用编辑器
+	     * @param {string} [tips=''] 禁用时显示在蒙层上的提示文案
+	     * @returns {void}
+	     */
+	  }, {
+	    key: "setDisable",
+	    value: function setDisable(isDisable) {
+	      var tips = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+	      // 1. 切换 CodeMirror 只读状态
+	      var cm6Adapter = this.editor && this.editor.editor;
+	      if (cm6Adapter && typeof cm6Adapter.setReadOnly === 'function') {
+	        cm6Adapter.setReadOnly(Boolean(isDisable));
+	      }
+
+	      // 2. 处理整体蒙层（覆盖工具栏 + 编辑区 + 预览区）
+	      var rootDom = this.wrapperDom;
+	      if (!rootDom) {
+	        return;
+	      }
+	      if (isDisable) {
+	        // 确保根容器为定位上下文，方便蒙层 absolute 覆盖整个 Cherry
+	        var _getComputedStyle = getComputedStyle(rootDom),
+	          position = _getComputedStyle.position;
+	        if (!position || position === 'static') {
+	          rootDom.style.position = 'relative';
+	        }
+	        var maskDom = this.disableMaskDom;
+	        if (!maskDom || !rootDom.contains(maskDom)) {
+	          maskDom = createElement('div', 'cherry-editor-disable-mask');
+	          var _tipsDom = createElement('div', 'cherry-editor-disable-mask__tips');
+	          maskDom.appendChild(_tipsDom);
+	          rootDom.appendChild(maskDom);
+	          this.disableMaskDom = maskDom;
+	          // 绑定鼠标事件，让 tips 跟随鼠标；离开时恢复 sticky 居中
+	          this.bindDisableMaskFollow(maskDom, _tipsDom);
+	        }
+	        // 更新提示文案（使用 textContent 避免 XSS）
+	        var tipsDom = maskDom.querySelector('.cherry-editor-disable-mask__tips');
+	        if (tipsDom) {
+	          tipsDom.innerHTML = tips || '';
+	          tipsDom.style.display = tips ? '' : 'none';
+	        }
+	        maskDom.classList.add('cherry-editor-disable-mask--show');
+	      } else if (this.disableMaskDom) {
+	        this.disableMaskDom.classList.remove('cherry-editor-disable-mask--show');
+	        // 关闭禁用时同步关闭跟随态，避免下次开启时残留位置
+	        this.disableMaskDom.classList.remove('cherry-editor-disable-mask--follow');
+	      }
+	    }
+
+	    /**
+	     * 绑定禁用蒙层的鼠标跟随行为
+	     * - mouseenter：切换到跟随模式
+	     * - mousemove：通过 CSS 变量更新 tips 位置（用 rAF 节流，避免抖动）
+	     * - mouseleave：回到 sticky 居中模式
+	     * @private
+	     * @param {HTMLElement} maskDom 蒙层容器
+	     * @param {HTMLElement} tipsDom tips 元素
+	     */
+	  }, {
+	    key: "bindDisableMaskFollow",
+	    value: function bindDisableMaskFollow(maskDom, tipsDom) {
+	      var rafId = 0;
+	      var pendingX = 0;
+	      var pendingY = 0;
+	      var applyPosition = function applyPosition() {
+	        rafId = 0;
+	        tipsDom.style.setProperty('--tips-x', "".concat(pendingX, "px"));
+	        tipsDom.style.setProperty('--tips-y', "".concat(pendingY, "px"));
+	      };
+	      maskDom.addEventListener('mouseenter', function () {
+	        maskDom.classList.add('cherry-editor-disable-mask--follow');
+	      });
+	      maskDom.addEventListener('mousemove', function (evt) {
+	        var rect = maskDom.getBoundingClientRect();
+	        pendingX = evt.clientX - rect.left;
+	        pendingY = evt.clientY - rect.top;
+	        if (!rafId) {
+	          rafId = requestAnimationFrame(applyPosition);
+	        }
+	      });
+	      maskDom.addEventListener('mouseleave', function () {
+	        maskDom.classList.remove('cherry-editor-disable-mask--follow');
+	        if (rafId) {
+	          cancelAnimationFrame(rafId);
+	          rafId = 0;
+	        }
+	      });
+	    }
+
+	    /**
 	     * 修改语言
 	     * @param {string} locale
 	     * @returns {boolean} false: 修改失败，因为没有对应的语言；true: 修改成功
@@ -123629,6 +124215,12 @@
 	    /** 按 mermaid 源码内容缓存已渲染 HTML，布局参数变更时复用以避免闪回 codeBlock */
 	    _defineProperty$2(this, "contentRenderCache", new _Map$2());
 	    _defineProperty$2(this, "contentRenderCacheMax", 100);
+	    /** 异步渲染最大并发数：达到上限后新任务排队，避免大量 mermaid 并发共享 DOM 引起竞态与内存压力 */
+	    _defineProperty$2(this, "maxConcurrentRender", 1);
+	    /** 当前正在异步渲染的任务数 */
+	    _defineProperty$2(this, "activeRenderCount", 0);
+	    /** 等待并发额度的任务队列，元素为 resolve 函数 */
+	    _defineProperty$2(this, "pendingRenderQueue", []);
 	    var mermaid = mermaidOptions.mermaid,
 	      mermaidAPI = mermaidOptions.mermaidAPI;
 	    // 是否由用户显式传入了 mermaid / mermaidAPI 实例，用于判断是否需要通过 src 动态加载
@@ -123738,6 +124330,65 @@
 	    }
 
 	    /**
+	     * 为一次异步渲染创建独立的临时画布，避免多个 mermaid 代码块并发渲染时共享同一 DOM 导致的竞态。
+	     * @param {import('../Engine').default} $engine
+	     * @returns {HTMLDivElement}
+	     */
+	  }, {
+	    key: "createAsyncRenderCanvas",
+	    value: function createAsyncRenderCanvas($engine) {
+	      var canvas = document.createElement('div');
+	      canvas.style = 'width:1024px;opacity:0;position:fixed;top:100%;';
+	      var container = this.options.mermaidCanvasAppendDom || $engine.$cherry.wrapperDom || document.body;
+	      container.appendChild(canvas);
+	      return canvas;
+	    }
+
+	    /**
+	     * 移除异步渲染使用的临时画布
+	     * @param {HTMLElement} canvas
+	     */
+	  }, {
+	    key: "destroyAsyncRenderCanvas",
+	    value: function destroyAsyncRenderCanvas(canvas) {
+	      if (canvas && canvas.parentNode) {
+	        canvas.parentNode.removeChild(canvas);
+	      }
+	    }
+
+	    /**
+	     * 获取一个异步渲染的并发额度，若已达上限则挂起等待，直到有其他任务释放。
+	     * @returns {Promise<void>}
+	     */
+	  }, {
+	    key: "acquireRenderSlot",
+	    value: function acquireRenderSlot() {
+	      var _this = this;
+	      if (this.activeRenderCount < this.maxConcurrentRender) {
+	        this.activeRenderCount += 1;
+	        return _Promise.resolve();
+	      }
+	      return new _Promise(function (resolve) {
+	        _this.pendingRenderQueue.push(resolve);
+	      });
+	    }
+
+	    /**
+	     * 释放一个并发额度，若队列有等待任务则唤醒队首（注意：唤醒时不减不加，直接把额度移交给下一个任务）。
+	     */
+	  }, {
+	    key: "releaseRenderSlot",
+	    value: function releaseRenderSlot() {
+	      if (this.pendingRenderQueue.length > 0) {
+	        var next = this.pendingRenderQueue.shift();
+	        // 直接把额度交给下一个任务，activeRenderCount 保持不变
+	        next();
+	        return;
+	      }
+	      this.activeRenderCount = Math.max(0, this.activeRenderCount - 1);
+	    }
+
+	    /**
 	     * 转换svg为img，如果出错则直出svg
 	     * @param {string} svgCode
 	     * @param {string} graphId
@@ -123746,6 +124397,7 @@
 	  }, {
 	    key: "convertMermaidSvgToImg",
 	    value: function convertMermaidSvgToImg(svgCode, graphId) {
+	      var svg2img = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 	      var domParser = new DOMParser();
 	      var svgHtml;
 	      var injectSvgFallback = function injectSvgFallback(svg) {
@@ -123772,7 +124424,7 @@
 	          // fix end
 	          svgHtml = svgDoc.documentElement.outerHTML;
 	          // 屏蔽转img标签功能，如需要转换为img解除屏蔽即可
-	          if (this.svg2img) {
+	          if (svg2img) {
 	            var _context3;
 	            var dataUrl = "data:image/svg+xml,".concat(encodeURIComponent(svgDoc.documentElement.outerHTML));
 	            svgHtml = _concatInstanceProperty(_context3 = "<img class=\"svg-img\" style=\"max-width:100%;height:auto;\" src=\"".concat(dataUrl, "\" alt=\"")).call(_context3, graphId, "\" />");
@@ -123788,18 +124440,20 @@
 	  }, {
 	    key: "processSvgCode",
 	    value: function processSvgCode(svgCode, graphId) {
+	      var svg2img = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 	      var fixedSvg = svgCode.replace(/\s*markerUnits="0"/g, '').replace(/\s*x="NaN"/g, '').replace(/<br>/g, '<br/>');
-	      var html = this.convertMermaidSvgToImg(fixedSvg, graphId);
+	      var html = this.convertMermaidSvgToImg(fixedSvg, graphId, svg2img);
 	      return html;
 	    }
 	  }, {
 	    key: "syncRender",
 	    value: function syncRender(graphId, src, sign, $engine) {
-	      var _this = this;
+	      var _this2 = this;
+	      var svg2img = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
 	      var html;
 	      try {
 	        this.mermaidAPIRefs.render(graphId, src, function (svgCode) {
-	          html = _this.processSvgCode(svgCode, graphId);
+	          html = _this2.processSvgCode(svgCode, graphId, svg2img);
 	        }, this.mermaidCanvas);
 	        this.lastRenderedCode = html;
 	        this.$setCachedRenderHtml(src, $engine, html);
@@ -123896,7 +124550,7 @@
 	    key: "ensureMermaidLoaded",
 	    value: function ensureMermaidLoaded(props) {
 	      var _props$mermaidConfig,
-	        _this2 = this;
+	        _this3 = this;
 	      if (!isBrowser()) {
 	        return false;
 	      }
@@ -123912,19 +124566,21 @@
 	      }
 	      this.mermaidScriptLoading = true;
 	      loadScript(src, 'cherry-mermaid-external-script').then(function () {
-	        _this2.mermaidScriptLoaded = true;
-	        _this2.mermaidScriptLoading = false;
+	        _this3.mermaidScriptLoaded = true;
+	        _this3.mermaidScriptLoading = false;
 	        // 触发一次解析，尽早绑定 mermaidAPIRefs（异步渲染的重试逻辑也会兜底）
-	        _this2.tryResolveMermaidAPIRefs();
+	        _this3.tryResolveMermaidAPIRefs();
 	      })["catch"](function () {
-	        _this2.mermaidScriptLoading = false;
+	        _this3.mermaidScriptLoading = false;
 	      });
 	      return true;
 	    }
 	  }, {
 	    key: "asyncRender",
 	    value: function asyncRender(graphId, src, sign, $engine, props) {
-	      var _this3 = this;
+	      var _this4 = this,
+	        _props$mermaidConfig$,
+	        _props$mermaidConfig2;
 	      var retryCount = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
 	      var cachedHtml = retryCount === 0 ? this.$getCachedRenderHtml(src, $engine) : '';
 	      if (cachedHtml) {
@@ -123941,7 +124597,7 @@
 	        }
 	        if (retryCount < MAX_RETRY) {
 	          _setTimeout(function () {
-	            _this3.asyncRender(graphId, src, sign, $engine, props, retryCount + 1);
+	            _this4.asyncRender(graphId, src, sign, $engine, props, retryCount + 1);
 	          }, RETRY_INTERVAL);
 	        } else {
 	          // 超过最大重试次数，回退到源码并完成异步渲染流程
@@ -123954,29 +124610,38 @@
 	      if (retryCount === 0) {
 	        $engine.asyncRenderHandler.add(graphId);
 	      }
-	      this.mermaidAPIRefs.render(graphId, src, this.mermaidCanvas).then(function (_ref) {
-	        var svgCode = _ref.svg;
-	        // 渲染完成后，替换为渲染结果
-	        var html = _this3.processSvgCode(svgCode, graphId);
-	        _this3.lastRenderedCode = html;
-	        _this3.$setCachedRenderHtml(src, $engine, html);
-	        _this3.handleAsyncRenderDone(graphId, sign, $engine, props, html);
-	      })["catch"](function () {
-	        /**
-	         * 如果开启了流式渲染，当前有上次渲染结果时，使用上次渲染结果
-	         * 这里有赌的成分,流式输出场景，只有最后一个mermaid代码块在流式输出，随着最后一个mermaid流式输出，mermaid的渲染有概率会失败
-	         *  这里赌的是：
-	         *    1、只有一个mermaid代码块需要渲染
-	         *    2、纯预览模式，且流式输出场景，所有mermaid都正常输出
-	         */
-	        if ($engine.$cherry.options.engine.global.flowSessionContext && !!_this3.lastRenderedCode && $engine.$cherry.status.editor === 'hide') {
-	          _this3.needReturnLastRenderedCode = true;
-	        } else {
-	          // 渲染失败后，回退到源码
-	          _this3.needReturnLastRenderedCode = false;
-	          var _html = props.fallback();
-	          _this3.handleAsyncRenderDone(graphId, sign, $engine, props, _html);
-	        }
+	      var svg2img = (_props$mermaidConfig$ = props === null || props === void 0 ? void 0 : (_props$mermaidConfig2 = props.mermaidConfig) === null || _props$mermaidConfig2 === void 0 ? void 0 : _props$mermaidConfig2.svg2img) !== null && _props$mermaidConfig$ !== void 0 ? _props$mermaidConfig$ : false;
+	      // 通过并发闸门 + 独立临时画布，避免多个 mermaid 代码块共用同一 DOM 导致的竞态。
+	      // 达到 maxConcurrentRender 上限后，超出的任务会在此挂起等待。
+	      this.acquireRenderSlot().then(function () {
+	        var canvas = _this4.createAsyncRenderCanvas($engine);
+	        _this4.mermaidAPIRefs.render(graphId, src, canvas).then(function (_ref) {
+	          var svgCode = _ref.svg;
+	          // 渲染完成后，替换为渲染结果
+	          var html = _this4.processSvgCode(svgCode, graphId, svg2img);
+	          _this4.lastRenderedCode = html;
+	          _this4.$setCachedRenderHtml(src, $engine, html);
+	          _this4.handleAsyncRenderDone(graphId, sign, $engine, props, html);
+	        })["catch"](function () {
+	          /**
+	           * 如果开启了流式渲染，当前有上次渲染结果时，使用上次渲染结果
+	           * 这里有赌的成分,流式输出场景，只有最后一个mermaid代码块在流式输出，随着最后一个mermaid流式输出，mermaid的渲染有概率会失败
+	           *  这里赌的是：
+	           *    1、只有一个mermaid代码块需要渲染
+	           *    2、纯预览模式，且流式输出场景，所有mermaid都正常输出
+	           */
+	          if ($engine.$cherry.options.engine.global.flowSessionContext && !!_this4.lastRenderedCode && $engine.$cherry.status.editor === 'hide') {
+	            _this4.needReturnLastRenderedCode = true;
+	          } else {
+	            // 渲染失败后，回退到源码
+	            _this4.needReturnLastRenderedCode = false;
+	            var _html = props.fallback();
+	            _this4.handleAsyncRenderDone(graphId, sign, $engine, props, _html);
+	          }
+	        })["finally"](function () {
+	          _this4.destroyAsyncRenderCanvas(canvas);
+	          _this4.releaseRenderSlot();
+	        });
 	      });
 	      if (this.needReturnLastRenderedCode) {
 	        return this.lastRenderedCode;
@@ -123987,7 +124652,7 @@
 	  }, {
 	    key: "render",
 	    value: function render(src, sign, $engine) {
-	      var _context4, _props$mermaidConfig$, _props$mermaidConfig2;
+	      var _context4, _props$mermaidConfig$2, _props$mermaidConfig3;
 	      var props = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	      var $sign = sign;
 	      if (!$sign) {
@@ -123997,13 +124662,14 @@
 	      if (cachedHtml) {
 	        return cachedHtml;
 	      }
+	      // v9 同步渲染路径仍复用共享 canvas（syncRender 天然无并发），v10+ 异步路径会在 asyncRender 内为每个任务创建独立 canvas
 	      this.mountMermaidCanvas($engine);
 	      // 多实例的情况下相同的内容ID相同会导致mermaid渲染异常
 	      // 需要通过添加时间戳使得多次渲染相同内容的图像ID唯一
 	      // 图像渲染节流在CodeBlock Hook内部控制
 	      var graphId = _concatInstanceProperty(_context4 = "mermaid-".concat(sign, "-")).call(_context4, new Date().getTime());
-	      this.svg2img = (_props$mermaidConfig$ = (_props$mermaidConfig2 = props.mermaidConfig) === null || _props$mermaidConfig2 === void 0 ? void 0 : _props$mermaidConfig2.svg2img) !== null && _props$mermaidConfig$ !== void 0 ? _props$mermaidConfig$ : false;
-	      return this.isAsyncRenderVersion() ? this.asyncRender(graphId, src, $sign, $engine, props) : this.syncRender(graphId, src, $sign, $engine);
+	      var svg2img = (_props$mermaidConfig$2 = (_props$mermaidConfig3 = props.mermaidConfig) === null || _props$mermaidConfig3 === void 0 ? void 0 : _props$mermaidConfig3.svg2img) !== null && _props$mermaidConfig$2 !== void 0 ? _props$mermaidConfig$2 : false;
+	      return this.isAsyncRenderVersion() ? this.asyncRender(graphId, src, $sign, $engine, props) : this.syncRender(graphId, src, $sign, $engine, svg2img);
 	    }
 	  }], [{
 	    key: "install",

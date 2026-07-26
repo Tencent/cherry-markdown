@@ -56,6 +56,8 @@ export default class SearcherPanel {
     searchTimer: ReturnType<typeof setTimeout> | null;
     /** @type {boolean} */
     pendingKeepActiveIndex: boolean;
+    /** @type {boolean} */
+    pendingScrollToMatch: boolean;
     /**
      * 面板内拦截 Mod+F / Mod+H，避免唤起浏览器查找并支持再次 Mod+F 关闭
      * @param {KeyboardEvent} event
@@ -124,27 +126,27 @@ export default class SearcherPanel {
      * 防抖调度搜索（输入或文档变更时使用）
      * @param {boolean} [keepActiveIndex=false]
      */
-    scheduleSearch(keepActiveIndex?: boolean): void;
+    scheduleSearch(keepActiveIndex?: boolean, scrollToMatch?: boolean): void;
     /** 取消待执行的防抖搜索 */
     cancelScheduledSearch(): void;
     /**
      * 立即执行待定的防抖搜索
      * @param {boolean} [keepActiveIndex=true]
      */
-    flushScheduledSearch(keepActiveIndex?: boolean): void;
+    flushScheduledSearch(keepActiveIndex?: boolean, scrollToMatch?: boolean): void;
     /**
      * 同步匹配结果；面板隐藏时仅更新 state，不写入编辑器高亮
      *
      * @param {boolean} [keepActiveIndex=false]
      * @param {boolean} [applyToEditor=true]
      */
-    syncMatches(keepActiveIndex?: boolean, applyToEditor?: boolean): void;
+    syncMatches(keepActiveIndex?: boolean, applyToEditor?: boolean, scrollToMatch?: boolean): void;
     /**
      * 执行搜索：收集匹配、定位最近项、高亮并更新计数器
      *
      * @param {boolean} [keepActiveIndex=false] 为 true 且当前序号仍有效时，不根据光标重新定位匹配项
      */
-    runSearch(keepActiveIndex?: boolean): void;
+    runSearch(keepActiveIndex?: boolean, scrollToMatch?: boolean): void;
     /**
      * 将当前搜索词同步到编辑器搜索高亮层
      *

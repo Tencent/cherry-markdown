@@ -32,6 +32,8 @@ export default class Editor {
     keymapCompartment: Compartment;
     /** @type {Compartment} */
     vimCompartment: Compartment;
+    /** @type {Compartment} */
+    readOnlyCompartment: Compartment;
     /** @type {ReturnType<typeof setTimeout> | number} */
     dealSpecialWordsTimer: ReturnType<typeof setTimeout> | number;
     /** @type {number} */
@@ -204,6 +206,8 @@ export default class Editor {
      */
     init(previewer: any): void;
     previewer: any;
+    setReadOnly(readOnly: any): void;
+    isReadOnly(): string | boolean | object;
     /**
      * 跳转到指定行，支持行内百分比偏移
      * @param {number | null} beginLine 起始行（0-indexed），传入null时跳转到文档尾部
@@ -361,8 +365,9 @@ declare class CM6Adapter implements CM6AdapterType {
      * 创建 CM6Adapter 实例
      * @param {EditorView} view - EditorView 实例
      * @param {Compartment} [vimCompartment] - vim 模式的 Compartment（可选，用于多实例隔离）
+     * @param {Compartment} [readOnlyCompartment] - 只读状态的 Compartment（可选，用于动态切换只读）
      */
-    constructor(view: EditorView, vimCompartment?: Compartment);
+    constructor(view: EditorView, vimCompartment?: Compartment, readOnlyCompartment?: Compartment);
     /** @type {EditorView} */
     view: EditorView;
     /** @type {Map<string, Array<(...args: unknown[]) => void>>} */
@@ -371,6 +376,8 @@ declare class CM6Adapter implements CM6AdapterType {
     currentKeyMap: "sublime" | "vim";
     /** @type {Compartment | null} */
     vimCompartment: Compartment | null;
+    /** @type {Compartment | null} */
+    readOnlyCompartment: Compartment | null;
     /** @type {number} 实例级 markId 计数器 */
     markIdCounter: number;
     /**
@@ -487,6 +494,16 @@ declare class CM6Adapter implements CM6AdapterType {
      * @returns {void}
      */
     setOption(option: "value" | "keyMap" | string, value: string | boolean | object): void;
+    /**
+     * 动态设置编辑器的只读状态
+     * 开启后：
+     *   - 用户键盘输入、粘贴、拖拽等所有会修改文档的操作都会被拒绝；
+     *   - 通过 API（如 setOption('value', ...)）主动派发的变更仍会被拒绝，如需强制写入请先关闭只读；
+     *   - 光标依然可以移动，文本依然可以选中和复制。
+     * @param {boolean} readOnly - 是否只读
+     * @returns {void}
+     */
+    setReadOnly(readOnly: boolean): void;
     /**
      * 设置键盘映射模式
      * @param {'sublime' | 'vim'} mode - 'sublime' 或 'vim' 模式
