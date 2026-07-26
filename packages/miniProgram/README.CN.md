@@ -60,33 +60,43 @@ this.setData({ blocks: stream.setMarkdownView('# Hello\nMarkdown content') });
 
 ## 支持功能
 
-### 原生 WXML 渲染
+| 功能 | 语法 | 渲染方式 | 状态 |
+| 段落 | 普通文本 | 原生 `view` + `text` runs | ✅ |
+| 标题 | `#` `##` `###` | 原生 `view`，按级别设 class | ✅ |
+| 引用 | `>` | 原生 `view`，递归渲染子块 | ✅ |
+| 列表 | `-` / `1.` | Flexbox + marker 文本 | ✅ |
+| 任务列表 | `- [x]` / `- [ ]` | Flexbox，`☑`/`☐` 标记 | ✅ |
+| 表格 | `\| 列1 \| 列2 \|` | Flexbox + 横向滚动，单元格可交互 | ✅ |
+| 代码块 | ` ```语言 ``` ` | Token 级高亮，支持复制 | ✅ |
+| 图片 | `![alt](src)` | 原生 `image`，点击预览 | ✅ |
+| 链接 | `[text](url)` | 原生 `text` + `bindtap` | ✅ |
+| 行内公式 | `$E=mc^2$` | 等宽 `text` + class | ✅ |
+| 公式块 | `$$...$$` | 等宽 `text` + class | ✅ |
+| Mermaid | ` ```mermaid ``` ` | 源码卡片，支持复制 | ✅ |
+| 加粗 | `**文字**` | `class="md-strong"` | ✅ |
+| 斜体 | `*文字*` | `class="md-em"` | ✅ |
+| 行内代码 | `` `代码` `` | `class="md-inline-code"` | ✅ |
+| 下划线 | `++文字++` | `class="md-underline"` | ✅ |
+| 删除线 | `~~文字~~` | `class="md-strike"` | ✅ |
+| 上标 / 下标 | `~上标~` / `^下标^` | 行内 text 带 class | ✅ |
+| 换行 | 行尾两空格 | `\n` 文本 | ✅ |
+| 自动链接 | `https://...` | 同链接处理 | ✅ |
+| Emoji | `:smile:` | Image 组件 | ✅ |
+| 流光标 | （流模式专用） | `|` 光标符 | ✅ |
+| 脚注引用 | `[^key]` | Sup + link 渲染 | ✅ |
+| Panel | `:::tip/warning/danger/success` | 普通段落，样式丢失 | ❌ |
+| 脚注正文 | （自动生成） | 普通段落，样式丢失 | ❌ |
+| 颜色 / 字号 | `==color=red text==` | Attribute 保留，WXML 忽略 | ❌ |
+| 对齐 | `:::left/center/right` | CSS class 不被消费 | ❌ |
+| 目录 | `[TOC]` | 列表结构正常，样式丢失 | ❌ |
+| 分割线 | `---` | Rich-text 回退 | ❌ |
+| 折叠详情 | `+++` | Rich-text 回退，静态展示 | ❌ |
+| 注音 | `{ Ruby }` | Rich-text 回退 | ❌ |
+| 原始 HTML | `<div>...</div>` | Rich-text 回退 | ❌ |
+| 建议列表 | （编辑器专用） | 不参与渲染 | — |
+| FrontMatter | `---yaml---` | 默认不渲染 | — |
 
-- 段落、标题 (h1-h6)、引用、列表、任务列表
-- 表格（flexbox，支持横向滚动，单元格可交互）
-- 代码块（token 级语法高亮，支持复制）
-- 图片（原生 `<image>`，点击预览）
-- 链接（原生 `<text>`，点击处理）
-- 数学公式（行内 & 块级，等宽字体）
-- Mermaid 图表（源码卡片）
-- 加粗、斜体、行内代码、下划线、删除线、sub、sup、br
-- 自动链接、Emoji
-
-### `<rich-text>` 回退（内容可见，无交互）
-
-- 分割线、Detail/Details、Ruby 注音、原始 HTML
-
-### 内容可见但样式/语义丢失
-
-- Panel（`:::tip/warning/danger/success`）— 内容渲染为普通段落，panel 样式丢失
-- Color / BackgroundColor / Size — attribute 保留，但 WXML `<text>` 不支持 `style`
-- 脚注列表 — 脚注容器样式丢失（行内引用正常渲染为 sup + link）
-- 对齐 / 两端对齐 — CSS class 不被 WXML 消费
-- 目录 Toc — 列表结构正常，容器样式丢失
-
-### 编辑器特性（非渲染范畴）
-
-- SuggestList、Suggester、FrontMatter、CommentReference
+核心 markdown 语法（标题、段落、列表、表格、代码块、图片、链接、数学公式、行内样式）全部原生 WXML 渲染，支持完整交互（代码复制、图片预览、链接跳转）。
 
 ## Demo
 

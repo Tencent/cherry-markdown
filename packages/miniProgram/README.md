@@ -60,33 +60,42 @@ this.setData({ blocks: stream.setMarkdownView('# Hello\nMarkdown content') });
 
 ## Supported Features
 
-### Native WXML rendering
+| Paragraph | plain text | Native `view` + `text` runs | ✅ |
+| Heading | `#` `##` `###` | Native `view` with level class | ✅ |
+| Blockquote | `>` | Native `view`, recursive children | ✅ |
+| List | `-` / `1.` | Flexbox + marker text | ✅ |
+| Task List | `- [x]` / `- [ ]` | Flexbox, `☑`/`☐` markers | ✅ |
+| Table | `\| A \| B \|` | Flexbox + scroll, interactive cells | ✅ |
+| Code Block | ` ```lang ``` ` | Token highlight, copy button | ✅ |
+| Image | `![alt](src)` | Native `image`, preview on tap | ✅ |
+| Link | `[text](url)` | Native `text` + `bindtap` | ✅ |
+| Math Inline | `$E=mc^2$` | Monospace `text` with class | ✅ |
+| Math Block | `$$...$$` | Monospace `text` with class | ✅ |
+| Mermaid | ` ```mermaid ``` ` | Source code card, copy source | ✅ |
+| Bold | `**text**` | `class="md-strong"` | ✅ |
+| Italic | `*text*` | `class="md-em"` | ✅ |
+| Inline Code | `` `code` `` | `class="md-inline-code"` | ✅ |
+| Underline | `++text++` | `class="md-underline"` | ✅ |
+| Strikethrough | `~~text~~` | `class="md-strike"` | ✅ |
+| Sub / Sup | `~text~` / `^text^` | Inline text with class | ✅ |
+| Line Break | two trailing spaces | `\n` in text run | ✅ |
+| AutoLink | `https://...` | Same as link | ✅ |
+| Emoji | `:smile:` | Image component | ✅ |
+| Cursor | (stream only) | `|` cursor symbol | ✅ |
+| Footnote ref | `[^key]` | Sup + link | ✅ |
+| Panel | `:::tip/warning/danger/success` | Plain paragraph, styling lost | ❌ |
+| Footnote body | (auto-generated) | Plain paragraphs, styling lost | ❌ |
+| Color / Size | `==color=red text==` | Attr preserved, WXML ignores | ❌ |
+| Align | `:::left/center/right` | CSS class not consumed | ❌ |
+| Toc | `[TOC]` | List structure ok, styling lost | ❌ |
+| Hr | `---` | Rich-text fallback | ❌ |
+| Detail | `+++` | Rich-text fallback, static | ❌ |
+| Ruby | `{ Ruby }` | Rich-text fallback | ❌ |
+| Raw HTML | `<div>...</div>` | Rich-text fallback | ❌ |
+| SuggestList | (editor only) | Not rendering | — |
+| FrontMatter | `---yaml---` | Not rendered by default | — |
 
-- Paragraph, headings (h1-h6), blockquote, lists, task lists
-- Tables (flexbox, scrollable, interactive cells)
-- Code blocks (token-level syntax highlighting, copy)
-- Images (native `<image>`, preview on tap)
-- Links (native `<text>`, tap handler)
-- Math inline & block (monospace)
-- Mermaid diagrams (source card)
-- Strong, em, inline code, underline, strikethrough, sub, sup, br
-- AutoLink, Emoji
-
-### `<rich-text>` fallback (visible, no interaction)
-
-- Hr, Detail/Details, Ruby, raw HTML
-
-### Content visible but styling/behavior lost
-
-- Panel (`:::tip/warning/danger/success`) — content renders as plain paragraphs, panel styling lost
-- Color / BackgroundColor / Size — attribute preserved but WXML `<text>` does not support `style`
-- Footnote list — footnote container styling lost (inline references render as sup link)
-- Align / Justify — CSS class not consumed by WXML
-- Toc — list structure renders, container styling lost
-
-### Editor-only (not rendering)
-
-- SuggestList, Suggester, FrontMatter, CommentReference
+Core markdown features (headings, paragraphs, lists, tables, code blocks, images, links, math, inline formatting) are all natively rendered with full interaction (code copy, image preview, link navigation).
 
 ## Demo
 
