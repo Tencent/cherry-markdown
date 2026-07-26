@@ -60,17 +60,33 @@ this.setData({ blocks: stream.setMarkdownView('# Hello\nMarkdown content') });
 
 ## Supported Features
 
-- **Paragraph, headings (h1-h6), blockquote, lists, task lists** — native view components
-- **Tables** — flexbox layout with scroll, interactive cells (links, images)
-- **Code blocks** — token-level syntax highlighting, copy button
-- **Images** — native `<image>` component, preview on tap
-- **Links** — native `<text>` with tap handler
-- **Math (inline & block)** — monospace rendering
-- **Mermaid diagrams** — source code card
-- **Streaming** — chunk accumulation, incomplete syntax normalization, image deferral during stream
-- **SSE integration** — built-in `createSseParser` for `text/event-stream`
+### Native WXML rendering
 
-> Some Cherry syntax features (Panel, Color, Detail, Ruby) fall back to `<rich-text>` rendering. See PR comments for full compatibility matrix.
+- Paragraph, headings (h1-h6), blockquote, lists, task lists
+- Tables (flexbox, scrollable, interactive cells)
+- Code blocks (token-level syntax highlighting, copy)
+- Images (native `<image>`, preview on tap)
+- Links (native `<text>`, tap handler)
+- Math inline & block (monospace)
+- Mermaid diagrams (source card)
+- Strong, em, inline code, underline, strikethrough, sub, sup, br
+- AutoLink, Emoji
+
+### `<rich-text>` fallback (visible, no interaction)
+
+- Hr, Detail/Details, Ruby, raw HTML
+
+### Content visible but styling/behavior lost
+
+- Panel (`:::tip/warning/danger/success`) — content renders as plain paragraphs, panel styling lost
+- Color / BackgroundColor / Size — attribute preserved but WXML `<text>` does not support `style`
+- Footnote list — footnote container styling lost (inline references render as sup link)
+- Align / Justify — CSS class not consumed by WXML
+- Toc — list structure renders, container styling lost
+
+### Editor-only (not rendering)
+
+- SuggestList, Suggester, FrontMatter, CommentReference
 
 ## Demo
 

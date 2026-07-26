@@ -60,17 +60,33 @@ this.setData({ blocks: stream.setMarkdownView('# Hello\nMarkdown content') });
 
 ## 支持功能
 
-- **段落、标题 (h1-h6)、引用、列表、任务列表** — 原生 view 组件
-- **表格** — flexbox 布局支持横向滚动，单元格内链接/图片可交互
-- **代码块** — token 级语法高亮，支持复制
-- **图片** — 原生 `<image>` 组件，点击预览
-- **链接** — 原生 `<text>` + 点击处理
-- **数学公式（行内 & 块级）** — 等宽字体渲染
-- **Mermaid 图表** — 源码卡片
-- **流式渲染** — chunk 累积、不完整语法自动规整、流中图片延迟加载
-- **SSE 集成** — 内置 `createSseParser` 解析 `text/event-stream`
+### 原生 WXML 渲染
 
-> 部分 Cherry 语法特性（Panel、Color、Detail、Ruby）会降级为 `<rich-text>` 渲染，详见 PR 评论中的完整兼容性表格。
+- 段落、标题 (h1-h6)、引用、列表、任务列表
+- 表格（flexbox，支持横向滚动，单元格可交互）
+- 代码块（token 级语法高亮，支持复制）
+- 图片（原生 `<image>`，点击预览）
+- 链接（原生 `<text>`，点击处理）
+- 数学公式（行内 & 块级，等宽字体）
+- Mermaid 图表（源码卡片）
+- 加粗、斜体、行内代码、下划线、删除线、sub、sup、br
+- 自动链接、Emoji
+
+### `<rich-text>` 回退（内容可见，无交互）
+
+- 分割线、Detail/Details、Ruby 注音、原始 HTML
+
+### 内容可见但样式/语义丢失
+
+- Panel（`:::tip/warning/danger/success`）— 内容渲染为普通段落，panel 样式丢失
+- Color / BackgroundColor / Size — attribute 保留，但 WXML `<text>` 不支持 `style`
+- 脚注列表 — 脚注容器样式丢失（行内引用正常渲染为 sup + link）
+- 对齐 / 两端对齐 — CSS class 不被 WXML 消费
+- 目录 Toc — 列表结构正常，容器样式丢失
+
+### 编辑器特性（非渲染范畴）
+
+- SuggestList、Suggester、FrontMatter、CommentReference
 
 ## Demo
 
