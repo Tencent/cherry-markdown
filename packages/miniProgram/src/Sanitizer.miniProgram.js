@@ -89,6 +89,7 @@ function serializeNode(node, config) {
 
   const tagName = String(node.name || '').toLowerCase();
   const attrs = sanitizeAttributes(node.attribs || {}, config);
+  // eslint-disable-next-line no-param-reassign
   node.attribs = attrs;
   hooks.afterSanitizeAttributes.forEach((hook) => hook(createNodeShim(node)));
   const serializedAttrs = Object.keys(node.attribs || {})
