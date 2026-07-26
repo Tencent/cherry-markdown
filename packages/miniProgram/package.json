@@ -1,6 +1,6 @@
 {
   "name": "@cherry-markdown/miniProgram",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "type": "module",
   "description": "MiniProgram adapters for Cherry Markdown",
   "license": "Apache-2.0",
