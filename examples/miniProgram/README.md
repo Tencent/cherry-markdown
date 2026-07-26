@@ -18,7 +18,7 @@ Minimal WeChat MiniProgram demo for stream rendering Markdown with `@cherry-mark
 
 ```sh
 yarn workspace @cherry-markdown/miniProgram build
-cp packages/miniProgram/dist/stream.js examples/miniProgram/miniprogram/vendor/cherry-mini-program-stream.js
+cp packages/miniProgram/dist/miniProgram-stream.js examples/miniProgram/miniprogram/vendor/cherry-mini-program-stream.js
 ```
 
 Open `examples/miniProgram` in WeChat DevTools. Build npm is **not** required — the demo uses a local vendor bundle.
@@ -55,7 +55,7 @@ task.onChunkReceived((res) => parser.push(res.data));
 
 ```sh
 yarn workspace @cherry-markdown/miniProgram build
-cp packages/miniProgram/dist/stream.js examples/miniProgram/miniprogram/vendor/cherry-mini-program-stream.js
+cp packages/miniProgram/dist/miniProgram-stream.js examples/miniProgram/miniprogram/vendor/cherry-mini-program-stream.js
 ```
 
 在微信开发者工具中打开 `examples/miniProgram`。Demo 使用本地 vendor 文件，**无需 Build npm**。

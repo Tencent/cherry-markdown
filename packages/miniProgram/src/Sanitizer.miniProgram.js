@@ -49,22 +49,6 @@ function sanitizeAttributes(attrs = {}, config = {}) {
   return safeAttrs;
 }
 
-function createNodeShim(node) {
-  return {
-    hasAttribute(name) {
-      return Object.prototype.hasOwnProperty.call(node.attribs || {}, name);
-    },
-    getAttribute(name) {
-      return (node.attribs || {})[name];
-    },
-    setAttribute(name, value) {
-      // eslint-disable-next-line no-param-reassign
-      node.attribs = node.attribs || {};
-      node.attribs[name] = value;
-    },
-  };
-}
-
 function serializeNode(node, config) {
   if (!node) {
     return '';
@@ -88,12 +72,18 @@ function serializeNode(node, config) {
   }
 
   const tagName = String(node.name || '').toLowerCase();
-  const attrs = sanitizeAttributes(node.attribs || {}, config);
-  // eslint-disable-next-line no-param-reassign
-  node.attribs = attrs;
-  hooks.afterSanitizeAttributes.forEach((hook) => hook(createNodeShim(node)));
-  const serializedAttrs = Object.keys(node.attribs || {})
-    .map((key) => ` ${key}="${escapeHtml(node.attribs[key])}"`)
+  const attribs = sanitizeAttributes(node.attribs || {}, config);
+  hooks.afterSanitizeAttributes.forEach((hook) => {
+    hook({
+      hasAttribute: (name) => Object.prototype.hasOwnProperty.call(attribs, name),
+      getAttribute: (name) => attribs[name],
+      setAttribute: (name, value) => {
+        attribs[name] = value;
+      },
+    });
+  });
+  const serializedAttrs = Object.keys(attribs)
+    .map((key) => ` ${key}="${escapeHtml(attribs[key])}"`)
     .join('');
 
   if (VOID_TAGS.has(tagName)) {

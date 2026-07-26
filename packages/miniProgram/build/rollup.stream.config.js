@@ -84,7 +84,7 @@ export default [
     input: 'src/stream.js',
     output: {
       exports: 'named',
-      file: 'dist/stream.js',
+      file: 'dist/miniProgram-stream.js',
       format: 'umd',
       name: 'CherryMiniProgram',
       sourcemap: false,
@@ -100,7 +100,7 @@ export default [
     input: 'src/stream.js',
     output: {
       exports: 'named',
-      file: 'dist/stream.esm.js',
+      file: 'dist/miniProgram-stream.esm.js',
       format: 'esm',
       name: 'CherryMiniProgram',
       sourcemap: false,

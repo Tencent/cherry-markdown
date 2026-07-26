@@ -9,19 +9,19 @@
     "url": "git+https://github.com/Tencent/cherry-markdown.git",
     "directory": "packages/miniProgram"
   },
-  "main": "./dist/stream.js",
-  "module": "./dist/stream.esm.js",
-  "types": "./dist/types/stream.d.ts",
+  "main": "./dist/miniProgram-stream.js",
+  "module": "./dist/miniProgram-stream.esm.js",
+  "types": "./dist/types/miniProgram-stream.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/stream.d.ts",
-      "import": "./dist/stream.esm.js",
-      "require": "./dist/stream.js"
+      "types": "./dist/types/miniProgram-stream.d.ts",
+      "import": "./dist/miniProgram-stream.esm.js",
+      "require": "./dist/miniProgram-stream.js"
     },
     "./stream": {
-      "types": "./dist/types/stream.d.ts",
-      "import": "./dist/stream.esm.js",
-      "require": "./dist/stream.js"
+      "types": "./dist/types/miniProgram-stream.d.ts",
+      "import": "./dist/miniProgram-stream.esm.js",
+      "require": "./dist/miniProgram-stream.js"
     },
     "./package.json": "./package.json"
   },
@@ -53,5 +53,9 @@
     "rollup": "4.52.3",
     "typescript": "^6.0.2",
     "vitest": "^3.1.3"
+  },
+  "engines": {
+    "node": ">=22",
+    "yarn": ">=1.22.18"
   }
 }

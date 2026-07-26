@@ -240,4 +240,4 @@ export default class MiniProgramStream {
 }
 `;
 
-writeFileSync(resolve(distTypesDir, 'stream.d.ts'), source);
+writeFileSync(resolve(distTypesDir, 'miniProgram-stream.d.ts'), source);

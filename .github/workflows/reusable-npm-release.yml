@@ -53,6 +53,7 @@ jobs:
         run: yarn install && yarn workspace "${{ inputs.package_name }}" build
 
       - name: Prepare package for publish
+        if: inputs.package_name == 'cherry-markdown'
         working-directory: ${{ inputs.package_dir }}
         run: cp ../../README*.md . || { echo "❌ Failed to copy README files" >&2; exit 1; }
 
