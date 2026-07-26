@@ -1,5 +1,15 @@
 # @cherry-markdown/client
 
+## 0.4.1
+
+### Patch Changes
+
+- feat: 增加等宽字体，增加记忆能力 [@sunsonliu](https://github.com/sunsonliu)([#1809](https://github.com/Tencent/cherry-markdown/pull/1809))([`ad3195b`](https://github.com/Tencent/cherry-markdown/commit/ad3195bbd288ee9f7360f38eb8d242b2d2f2e7ef))
+- feat: 客户端增加设置图床功能 [@sunsonliu](https://github.com/sunsonliu)([#1810](https://github.com/Tencent/cherry-markdown/pull/1810))([`faa668e`](https://github.com/Tencent/cherry-markdown/commit/faa668e88c8209535d4f06c2cbe7392c19c2d6f7))
+- style: 优化样式，cherry的主题可以和编辑器主体联动 [@sunsonliu](https://github.com/sunsonliu)([#1805](https://github.com/Tencent/cherry-markdown/pull/1805))([`6d18071`](https://github.com/Tencent/cherry-markdown/commit/6d18071e3b0a1b43d923987f3a201df5f3b6e124))
+- Updated dependencies [[`6c06ae1`](https://github.com/Tencent/cherry-markdown/commit/6c06ae15e2af1d76d733238ff7e9d38750039d42), [`ea5e28e`](https://github.com/Tencent/cherry-markdown/commit/ea5e28eaead001447990a2655cf50f1b5a4dc7a5), [`d26584f`](https://github.com/Tencent/cherry-markdown/commit/d26584f0c534f6af9d408310a3f38e6d3d6458e5), [`1d5addf`](https://github.com/Tencent/cherry-markdown/commit/1d5addf70fa3ef27ec56fdb880876870e12d85c6), [`90f8a1d`](https://github.com/Tencent/cherry-markdown/commit/90f8a1d471d8c078f53e7fc58ece34a23cbe6281), [`8455fd5`](https://github.com/Tencent/cherry-markdown/commit/8455fd5a68b9d0a4ab0a8b50f238febd445c3340), [`b651278`](https://github.com/Tencent/cherry-markdown/commit/b651278206aab6fbf27a95b674b88f66b3735473), [`497170a`](https://github.com/Tencent/cherry-markdown/commit/497170a391e1cb84575182f8d6a8772f6b31b15c)]:
+  - cherry-markdown@0.11.7
+
 ## 0.4.0
 
 ### Minor Changes
