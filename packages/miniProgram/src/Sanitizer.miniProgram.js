@@ -58,6 +58,7 @@ function createNodeShim(node) {
       return (node.attribs || {})[name];
     },
     setAttribute(name, value) {
+      // eslint-disable-next-line no-param-reassign
       node.attribs = node.attribs || {};
       node.attribs[name] = value;
     },
