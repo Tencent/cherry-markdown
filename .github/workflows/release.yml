@@ -6,6 +6,7 @@
 #   - 使用 Changesets 进行版本管理和 tag 推送
 #   - 按发布的包名分别调用子工作流:
 #     • cherry-markdown → reusable-npm-release.yml
+#     • @cherry-markdown/miniProgram → reusable-npm-release.yml
 #     • @cherry-markdown/client → reusable-client-build.yml (mode=release)
 #     • cherry-markdown-vscode-plugin → reusable-vscode-plugin.yml (mode=release)
 #   - 发布完成后强制同步 main → dev（仅在有包发布时执行）
@@ -32,6 +33,7 @@ jobs:
       publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
       publishedClientVersion: ${{ steps.extract_version.outputs.clientVersion }}
       publishedCoreVersion: ${{ steps.extract_version.outputs.coreVersion }}
+      publishedMiniProgramVersion: ${{ steps.extract_version.outputs.miniProgramVersion }}
     steps:
       - uses: actions/checkout@v6
 
@@ -63,17 +65,37 @@ jobs:
           coreVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="cherry-markdown") | .version')
           echo "coreVersion=$coreVersion" >> $GITHUB_OUTPUT
 
+          miniProgramVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/miniProgram") | .version')
+          echo "miniProgramVersion=$miniProgramVersion" >> $GITHUB_OUTPUT
+
           # Debugging output
           echo "publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}"
           echo "clientVersion=$clientVersion"
           echo "coreVersion=$coreVersion"
+          echo "miniProgramVersion=$miniProgramVersion"
 
   build-core-release:
     needs: release
     if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"cherry-markdown"') }}
     uses: ./.github/workflows/reusable-npm-release.yml
     with:
-      core_version: ${{ needs.release.outputs.publishedCoreVersion }}
+      package_name: 'cherry-markdown'
+      package_dir: './packages/cherry-markdown'
+      package_version: ${{ needs.release.outputs.publishedCoreVersion }}
+      dist_asset_name: 'cherry-markdown'
+      release_tag: 'cherry-markdown@${{ needs.release.outputs.publishedCoreVersion }}'
+    secrets: inherit
+
+  build-miniProgram-release:
+    needs: release
+    if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/miniProgram"') }}
+    uses: ./.github/workflows/reusable-npm-release.yml
+    with:
+      package_name: '@cherry-markdown/miniProgram'
+      package_dir: './packages/miniProgram'
+      package_version: ${{ needs.release.outputs.publishedMiniProgramVersion }}
+      dist_asset_name: 'cherry-markdown-mini-program'
+      release_tag: '@cherry-markdown/miniProgram@${{ needs.release.outputs.publishedMiniProgramVersion }}'
     secrets: inherit
 
   build-client-release:

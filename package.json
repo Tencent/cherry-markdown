@@ -17,16 +17,22 @@
     "changeset": "npx @changesets/cli",
     "changeset-version": "npx @changesets/cli version",
     "dev": "yarn workspace cherry-markdown dev",
-    "build": "yarn workspace cherry-markdown build",
+    "build": "yarn build:core && yarn build:miniProgram",
+    "build:core": "yarn workspace cherry-markdown build",
+    "build:miniProgram": "yarn workspace @cherry-markdown/miniProgram build",
     "dev:client": "yarn workspace @cherry-markdown/client tauri dev",
     "build:client": "yarn workspace @cherry-markdown/client tauri build",
     "build:vscodePlugin": "yarn workspace cherry-markdown build && yarn workspace cherry-markdown-vscode-plugin build",
     "example:react": "yarn workspace @cherry-markdown/react_demo dev",
-    "test": "yarn workspace cherry-markdown test",
+    "test": "yarn test:core && yarn test:miniProgram",
+    "test:core": "yarn workspace cherry-markdown test",
+    "test:miniProgram": "yarn workspace @cherry-markdown/miniProgram test",
     "test:update": "yarn workspace cherry-markdown test:update",
     "lint": "prettier --check . && eslint .",
     "lint:fix": "prettier --write . && eslint --fix .",
-    "typecheck": "yarn workspace cherry-markdown run typecheck",
+    "typecheck": "yarn typecheck:core && yarn typecheck:miniProgram",
+    "typecheck:core": "yarn workspace cherry-markdown run typecheck",
+    "typecheck:miniProgram": "yarn workspace @cherry-markdown/miniProgram typecheck",
     "validate": "yarn lint && yarn typecheck"
   },
   "devDependencies": {
@@ -60,8 +66,9 @@
     "vue-tsc": "^3.2.2"
   },
   "lint-staged": {
-    "{packages/{cherry-markdown/{src,test},client/src,vscodePlugin/src}/**/*.{js,ts,vue},eslint.config.mjs,prettier.config.mjs}": [
-      "eslint --fix"
+    "{packages/{cherry-markdown/{src,test},miniProgram/{src,test,build},client/src,vscodePlugin/src}/**/*.{js,ts,vue},eslint.config.mjs,prettier.config.mjs}": [
+      "eslint --fix",
+      "prettier --write"
     ],
     "**/*.{md,mdx}": [
       "prettier --write"

@@ -401,9 +401,11 @@ export default class Engine {
       if (this.clearCursorTimer) {
         clearTimeout(this.clearCursorTimer);
       }
-      this.clearCursorTimer = setTimeout(() => {
-        this.$cherry.clearFlowSessionCursor();
-      }, 2560);
+      if (typeof this.$cherry.clearFlowSessionCursor === 'function') {
+        this.clearCursorTimer = setTimeout(() => {
+          this.$cherry.clearFlowSessionCursor();
+        }, 2560);
+      }
       return md.replace(/CHERRYFLOWSESSIONCURSOR/g, this.$cherry.options.engine.global.flowSessionCursor);
     }
     return md;

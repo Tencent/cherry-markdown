@@ -35,3 +35,6 @@ examples/cherry-markdown-publish/src/common/config/*.yaml
 .codebuddy/
 
 *.vsix
+
+# MiniProgram demo vendor bundle (built from packages/miniProgram)
+examples/miniProgram/miniprogram/vendor/
