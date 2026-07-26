@@ -1,5 +1,18 @@
 # Change Log
 
+## 0.11.7
+
+### Patch Changes
+
+- style: 优化脚注样式；默认不渲染脚注标题，标题仅由 title.render 决定，不再回退 locale.footnoteTitle [@sunsonliu](https://github.com/sunsonliu)([#1817](https://github.com/Tencent/cherry-markdown/pull/1817))([`6c06ae1`](https://github.com/Tencent/cherry-markdown/commit/6c06ae15e2af1d76d733238ff7e9d38750039d42))
+- fix(cherry-markdown): 修复非 DOM 环境下 clearFlowSessionCursor 未做类型判断的问题 [@RSS1102](https://github.com/RSS1102)([#1799](https://github.com/Tencent/cherry-markdown/pull/1799))([`ea5e28e`](https://github.com/Tencent/cherry-markdown/commit/ea5e28eaead001447990a2655cf50f1b5a4dc7a5))
+- feat: 提供setDisable方法支持禁用编辑器; stream包默认关闭下划线语法 [@sunsonliu](https://github.com/sunsonliu)([#1816](https://github.com/Tencent/cherry-markdown/pull/1816))([`d26584f`](https://github.com/Tencent/cherry-markdown/commit/d26584f0c534f6af9d408310a3f38e6d3d6458e5))
+- fix: 优化并发渲染mermaid时出现报错的问题 [@sunsonliu](https://github.com/sunsonliu)([#1806](https://github.com/Tencent/cherry-markdown/pull/1806))([`1d5addf`](https://github.com/Tencent/cherry-markdown/commit/1d5addf70fa3ef27ec56fdb880876870e12d85c6))
+- feat: 增加时间线语法 [@sunsonliu](https://github.com/sunsonliu)([#1819](https://github.com/Tencent/cherry-markdown/pull/1819))([`90f8a1d`](https://github.com/Tencent/cherry-markdown/commit/90f8a1d471d8c078f53e7fc58ece34a23cbe6281))
+- fix: ⚠️ 降低 engines.node 约束从 >=24 到 >=22，兼容 Node.js 22 用户安装 [@RSS1102](https://github.com/RSS1102)([#1823](https://github.com/Tencent/cherry-markdown/pull/1823))([`8455fd5`](https://github.com/Tencent/cherry-markdown/commit/8455fd5a68b9d0a4ab0a8b50f238febd445c3340))
+- fix: 搜索替换匹配项后不再自动滚动视口 [@RSS1102](https://github.com/RSS1102)([#1824](https://github.com/Tencent/cherry-markdown/pull/1824))([`b651278`](https://github.com/Tencent/cherry-markdown/commit/b651278206aab6fbf27a95b674b88f66b3735473))
+- feat: 多列布局支持配置对齐方式；多列布局支持无限列；新增选项卡语法 [@sunsonliu](https://github.com/sunsonliu)([#1820](https://github.com/Tencent/cherry-markdown/pull/1820))([`497170a`](https://github.com/Tencent/cherry-markdown/commit/497170a391e1cb84575182f8d6a8772f6b31b15c))
+
 ## 0.11.6
 
 ### Patch Changes
