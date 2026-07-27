@@ -2,6 +2,6 @@
 '@cherry-markdown/miniProgram': patch
 ---
 
-fix(cherry-markdown/miniProgram): 收敛小程序包 ESM 输出与发布元数据
+feat(cherry-markdown/miniProgram): 新增小程序原生渲染包，支持流式渲染
 
 - 仅保留当前实际支持的 `miniProgram-stream` ESM 产物。
