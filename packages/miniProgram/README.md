@@ -18,7 +18,9 @@ Core Markdown structures can be rendered with native MiniProgram components and 
 npm install @cherry-markdown/miniProgram
 ```
 
-The package exposes `CherryStream`, which creates and owns its Cherry engine. Its `setMarkdown()` input model matches Web CherryStream; it returns MiniProgram view data instead of updating a DOM previewer. SSE requests, framing, and payload extraction are application responsibilities.
+The package is ESM-only and exposes `CherryStream`, which creates and owns its Cherry engine. Its `setMarkdown()` input model matches Web CherryStream; it returns MiniProgram view data instead of updating a DOM previewer. SSE requests, framing, and payload extraction are application responsibilities.
+
+The native MiniProgram runtime does not execute ESM packages directly. Bundle application source that imports this package into the MiniProgram runtime format; the Demo uses Rollup for that build step.
 
 ### Stream rendering
 
@@ -28,24 +30,21 @@ import CherryStream from '@cherry-markdown/miniProgram';
 const page = this;
 const cherry = new CherryStream();
 let markdownContent = '';
-let finished = false;
-
-function applyState(state) {
-  if (state) {
-    page.setData({ blocks: state.blocks, streaming: state.streaming });
-  }
+function render(streaming) {
+  page.setData({
+    blocks: cherry.setMarkdown(markdownContent, { deferImages: !streaming }),
+    streaming,
+  });
 }
 
 function finishStream() {
-  if (finished) return;
-  finished = true;
-  page.setData({ blocks: cherry.setMarkdown(markdownContent), streaming: false });
+  render(false);
 }
 
 // Your SSE client extracts Markdown strings from the transport.
 function onMarkdownChunk(chunk) {
   markdownContent += chunk;
-  page.setData({ blocks: cherry.setMarkdown(markdownContent), streaming: true });
+  render(true);
 }
 
 function onStreamComplete() {
@@ -55,7 +54,7 @@ function onStreamComplete() {
 
 Pass the complete accumulated Markdown to `setMarkdown()`, matching Web `CherryStream.setMarkdown()`. It re-renders the current complete content, which preserves valid rendering for incomplete syntax. The package does not implement SSE requests, decoding, framing, or provider payload extraction.
 
-`append()` re-renders the accumulated Markdown for correctness with incomplete syntax. For high-frequency model output, batch page-level `setData` calls (for example, every 50-100 ms) instead of updating for every chunk.
+`setMarkdown()` re-renders the accumulated Markdown for correctness with incomplete syntax. While a stream is active, pass `deferImages: true` to render image placeholders; call it once with `deferImages: false` when the stream completes. For high-frequency model output, batch page-level `setData` calls (for example, every 50-100 ms) instead of updating for every chunk.
 
 ## Module Formats
 
@@ -65,54 +64,48 @@ Pass the complete accumulated Markdown to `setMarkdown()`, matching Web `CherryS
 
 ## Supported Features
 
-| Feature       | Syntax                          | Render                                   | Status |
-| ------------- | ------------------------------- | ---------------------------------------- | ------ |
-| Paragraph     | plain text                      | Native `view` + `text` runs              | ✅     |
-| Heading       | `#` `##` `###`                  | Native `view` with level class           | ✅     |
-| Blockquote    | `>`                             | Native child-block data                  | ✅     |
-| List          | `-` / `1.`                      | Flexbox + marker text                    | ✅     |
-| Task List     | `- [x]` / `- [ ]`               | Flexbox, `☑`/`☐` markers                 | ✅     |
-| Table         | `\| A \| B \|`                  | Native table rows and cell runs          | ✅     |
-| Code Block    | ` ```lang ``` `                 | Highlight runs; template adds copy       | ✅     |
-| Image         | `![alt](src)`                   | Native image run; template adds preview  | ✅     |
-| Link          | `[text](url)`                   | Text run with `href`; template binds tap | ✅     |
-| Math Inline   | `$E=mc^2$`                      | Formula source in a text run             | ✅     |
-| Math Block    | `$$...$$`                       | Formula source block, not typeset        | ✅     |
-| Mermaid       | ` ```mermaid ``` `              | Mermaid source block, not a diagram      | ✅     |
-| Bold          | `**text**`                      | `class="md-strong"`                      | ✅     |
-| Italic        | `*text*`                        | `class="md-em"`                          | ✅     |
-| Inline Code   | `` `code` ``                    | `class="md-inline-code"`                 | ✅     |
-| Underline     | `++text++`                      | `class="md-underline"`                   | ✅     |
-| Strikethrough | `~~text~~`                      | `class="md-strike"`                      | ✅     |
-| Sub / Sup     | `~text~` / `^text^`             | Inline text with class                   | ✅     |
-| Line Break    | two trailing spaces             | `\n` in text run                         | ✅     |
-| AutoLink      | `https://...`                   | Same as link                             | ✅     |
-| Emoji         | `:smile:`                       | Image component                          | ✅     |
-| Cursor        | stream only                     | `\|` cursor symbol                       | ✅     |
-| Footnote ref  | `[^key]`                        | Sup/link data; template owns navigation  | ✅     |
-| Panel         | `:::tip/warning/danger/success` | Plain paragraph, styling lost            | ❌     |
-| Footnote body | generated content               | Plain paragraphs, styling lost           | ❌     |
-| Color / Size  | `==color=red text==`            | Attr preserved, WXML ignores             | ❌     |
-| Align         | `:::left/center/right`          | CSS class not consumed                   | ❌     |
-| Toc           | `[TOC]`                         | List structure ok, styling lost          | ❌     |
-| Hr            | `---`                           | Rich-text fallback                       | ❌     |
-| Detail        | `+++`                           | Rich-text fallback, static               | ❌     |
-| Ruby          | `{ Ruby }`                      | Rich-text fallback                       | ❌     |
-| Raw HTML      | `<div>...</div>`                | Rich-text fallback                       | ❌     |
-| SuggestList   | editor only                     | Not rendering                            | —      |
-| FrontMatter   | `---yaml---`                    | Not rendered by default                  | —      |
+| Feature       | Syntax                          | Render                                                         | Status |
+| ------------- | ------------------------------- | -------------------------------------------------------------- | ------ |
+| Paragraph     | plain text                      | Native `view` + `text` runs                                    | ✅     |
+| Heading       | `#` `##` `###`                  | Native `view` with level class                                 | ✅     |
+| Blockquote    | `>`                             | Native child-block data                                        | ✅     |
+| List          | `-` / `1.`                      | Flexbox + marker text                                          | ✅     |
+| Task List     | `- [x]` / `- [ ]`               | Flexbox, `☑`/`☐` markers                                       | ✅     |
+| Table         | `\| A \| B \|`                  | Native table rows and cell runs                                | ✅     |
+| Code Block    | ` ```lang ``` `                 | Highlight runs; template adds copy                             | ✅     |
+| Image         | `![alt](src)`                   | Placeholder while streaming; native image run after completion | ✅     |
+| Link          | `[text](url)`                   | Text run with `href`; template binds tap                       | ✅     |
+| Math Inline   | `$E=mc^2$`                      | Formula source in a text run                                   | ✅     |
+| Math Block    | `$$...$$`                       | Formula source block, not typeset                              | ✅     |
+| Mermaid       | ` ```mermaid ``` `              | Mermaid source block, not a diagram                            | ✅     |
+| Bold          | `**text**`                      | `class="md-strong"`                                            | ✅     |
+| Italic        | `*text*`                        | `class="md-em"`                                                | ✅     |
+| Inline Code   | `` `code` ``                    | `class="md-inline-code"`                                       | ✅     |
+| Underline     | `++text++`                      | `class="md-underline"`                                         | ✅     |
+| Strikethrough | `~~text~~`                      | `class="md-strike"`                                            | ✅     |
+| Sub / Sup     | `~text~` / `^text^`             | Inline text with class                                         | ✅     |
+| Line Break    | two trailing spaces             | `\n` in text run                                               | ✅     |
+| AutoLink      | `https://...`                   | Same as link                                                   | ✅     |
+| Emoji         | `:smile:`                       | Image component                                                | ✅     |
+| Cursor        | stream only                     | `\|` cursor symbol                                             | ✅     |
+| Footnote ref  | `[^key]`                        | Sup/link data; template owns navigation                        | ✅     |
+| Panel         | `:::tip/warning/danger/success` | Plain paragraph, styling lost                                  | ❌     |
+| Footnote body | generated content               | Plain paragraphs, styling lost                                 | ❌     |
+| Color / Size  | `==color=red text==`            | Attr preserved, WXML ignores                                   | ❌     |
+| Align         | `:::left/center/right`          | CSS class not consumed                                         | ❌     |
+| Toc           | `[TOC]`                         | List structure ok, styling lost                                | ❌     |
+| Hr            | `---`                           | Rich-text fallback                                             | ❌     |
+| Detail        | `+++`                           | Rich-text fallback, static                                     | ❌     |
+| Ruby          | `{ Ruby }`                      | Rich-text fallback                                             | ❌     |
+| Raw HTML      | `<div>...</div>`                | Rich-text fallback                                             | ❌     |
+| SuggestList   | editor only                     | Not rendering                                                  | —      |
+| FrontMatter   | `---yaml---`                    | Not rendered by default                                        | —      |
 
 The package returns WXML-friendly data only. The bundled Demo shows one template implementation for common blocks, code copy, image preview, link handling, and `html` fallback; applications must provide their own template, styles, and event handlers.
 
 ## Demo
 
-A complete WeChat MiniProgram demo is available at `examples/miniProgram`.
-
-```sh
-cp node_modules/@cherry-markdown/miniProgram/dist/miniProgram.esm.js examples/miniProgram/miniprogram/vendor/cherry-mini-program.js
-```
-
-Open `examples/miniProgram` in WeChat DevTools.
+A complete WeChat MiniProgram demo is available at `examples/miniProgram`. Install its dependencies and run `yarn --cwd examples/miniProgram build` before opening `examples/miniProgram` in WeChat DevTools. See the [Demo README](../../examples/miniProgram/README.md) for local-package and preview-tarball verification.
 
 ## License
 
