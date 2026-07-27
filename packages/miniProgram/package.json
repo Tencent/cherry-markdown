@@ -1,5 +1,5 @@
 {
-  "name": "@cherry-markdown/miniProgram",
+  "name": "@cherry-markdown/miniprogram",
   "version": "0.0.0",
   "type": "module",
   "description": "MiniProgram adapters for Cherry Markdown",

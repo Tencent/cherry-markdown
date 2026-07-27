@@ -1,4 +1,4 @@
-import CherryStream from '@cherry-markdown/miniProgram';
+import CherryStream from '@cherry-markdown/miniprogram';
 import { createMockMarkdownChunks } from '../../utils/mock-stream.js';
 
 const DEMO_MARKDOWN = `# Cherry Markdown MiniProgram

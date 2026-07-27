@@ -6,7 +6,7 @@
 #   - 使用 Changesets 进行版本管理和 tag 推送
 #   - 按发布的包名分别调用子工作流:
 #     • cherry-markdown → reusable-npm-release.yml
-#     • @cherry-markdown/miniProgram → reusable-npm-release.yml
+#     • @cherry-markdown/miniprogram → reusable-npm-release.yml
 #     • @cherry-markdown/client → reusable-client-build.yml (mode=release)
 #     • cherry-markdown-vscode-plugin → reusable-vscode-plugin.yml (mode=release)
 #   - 发布完成后强制同步 main → dev（仅在有包发布时执行）
@@ -65,7 +65,7 @@ jobs:
           coreVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="cherry-markdown") | .version')
           echo "coreVersion=$coreVersion" >> $GITHUB_OUTPUT
 
-          miniProgramVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/miniProgram") | .version')
+          miniProgramVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/miniprogram") | .version')
           echo "miniProgramVersion=$miniProgramVersion" >> $GITHUB_OUTPUT
 
           # Debugging output
@@ -88,14 +88,14 @@ jobs:
 
   build-miniProgram-release:
     needs: release
-    if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/miniProgram"') }}
+    if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/miniprogram"') }}
     uses: ./.github/workflows/reusable-npm-release.yml
     with:
-      package_name: '@cherry-markdown/miniProgram'
+      package_name: '@cherry-markdown/miniprogram'
       package_dir: './packages/miniProgram'
       package_version: ${{ needs.release.outputs.publishedMiniProgramVersion }}
       dist_asset_name: 'cherry-markdown-mini-program'
-      release_tag: '@cherry-markdown/miniProgram@${{ needs.release.outputs.publishedMiniProgramVersion }}'
+      release_tag: '@cherry-markdown/miniprogram@${{ needs.release.outputs.publishedMiniProgramVersion }}'
     secrets: inherit
 
   build-client-release:

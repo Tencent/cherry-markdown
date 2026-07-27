@@ -1,4 +1,4 @@
-# @cherry-markdown/miniProgram
+# @cherry-markdown/miniprogram
 
 > [!WARNING]
 >
@@ -8,14 +8,14 @@
 
 ## Purpose
 
-`@cherry-markdown/miniProgram` converts Cherry Markdown into structured, WXML-friendly view data. It does not ship a WXML component, styles, or interaction handlers: consumers render the returned blocks and runs with their own MiniProgram templates.
+`@cherry-markdown/miniprogram` converts Cherry Markdown into structured, WXML-friendly view data. It does not ship a WXML component, styles, or interaction handlers: consumers render the returned blocks and runs with their own MiniProgram templates.
 
 Core Markdown structures can be rendered with native MiniProgram components and do not require WebView or DOM. Unknown or complex HTML is returned as an `html` block; consumers may render that block with `rich-text` as a fallback.
 
 ## Usage
 
 ```sh
-npm install @cherry-markdown/miniProgram
+npm install @cherry-markdown/miniprogram
 ```
 
 The package is ESM-only and exposes `CherryStream`, which creates and owns its Cherry engine. Its `setMarkdown()` input model matches Web CherryStream; it returns MiniProgram view data instead of updating a DOM previewer. SSE requests, framing, and payload extraction are application responsibilities.
@@ -25,7 +25,7 @@ The native MiniProgram runtime does not execute ESM packages directly. Bundle ap
 ### Stream rendering
 
 ```js
-import CherryStream from '@cherry-markdown/miniProgram';
+import CherryStream from '@cherry-markdown/miniprogram';
 
 const page = this;
 const cherry = new CherryStream();
@@ -60,7 +60,7 @@ Pass the complete accumulated Markdown to `setMarkdown()`, matching Web `CherryS
 
 | Entry                          | ESM                       |
 | ------------------------------ | ------------------------- |
-| `@cherry-markdown/miniProgram` | `dist/miniProgram.esm.js` |
+| `@cherry-markdown/miniprogram` | `dist/miniProgram.esm.js` |
 
 ## Supported Features
 

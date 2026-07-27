@@ -12,7 +12,7 @@ English | [简体中文](#简体中文)
 
 ## English
 
-Minimal WeChat MiniProgram demo for stream rendering Markdown with `@cherry-markdown/miniProgram`.
+Minimal WeChat MiniProgram demo for stream rendering Markdown with `@cherry-markdown/miniprogram`.
 
 ### Run
 
@@ -21,19 +21,19 @@ yarn --cwd examples/miniProgram install
 yarn --cwd examples/miniProgram build
 ```
 
-The Demo source imports `@cherry-markdown/miniProgram` directly. Its build script compiles that ESM source into the ignored `miniprogram/pages/index/index.js` runtime file because native MiniProgram runtime does not directly load ESM files. Open `examples/miniProgram` in WeChat DevTools and compile; **Build npm is not required**.
+The Demo source imports `@cherry-markdown/miniprogram` directly. Its build script compiles that ESM source into the ignored `miniprogram/pages/index/index.js` runtime file because native MiniProgram runtime does not directly load ESM files. Open `examples/miniProgram` in WeChat DevTools and compile; **Build npm is not required**.
 
 To use the local package source instead, replace the package dependency and rebuild:
 
 ```sh
-yarn --cwd examples/miniProgram add "@cherry-markdown/miniProgram@file:../../packages/miniProgram"
+yarn --cwd examples/miniProgram add "@cherry-markdown/miniprogram@file:../../packages/miniProgram"
 yarn --cwd examples/miniProgram build
 ```
 
 To verify a pkg-pr-new tarball instead, install it into this Demo project, then rebuild the MiniProgram runtime file:
 
 ```sh
-yarn --cwd examples/miniProgram add "@cherry-markdown/miniProgram@https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniProgram@1827.tgz"
+yarn --cwd examples/miniProgram add "@cherry-markdown/miniprogram@https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniprogram@1827.tgz"
 yarn --cwd examples/miniProgram build
 ```
 
@@ -47,7 +47,7 @@ yarn --cwd examples/miniProgram build
 ### Stream Integration
 
 ```js
-import CherryStream from '@cherry-markdown/miniProgram';
+import CherryStream from '@cherry-markdown/miniprogram';
 
 const cherry = new CherryStream();
 let markdownContent = '';
@@ -67,7 +67,7 @@ onStreamComplete(() => {
 
 ## 简体中文
 
-使用 `@cherry-markdown/miniProgram` 在小程序中流式渲染 Markdown 的最小示例。
+使用 `@cherry-markdown/miniprogram` 在小程序中流式渲染 Markdown 的最小示例。
 
 ### 运行
 
@@ -76,19 +76,19 @@ yarn --cwd examples/miniProgram install
 yarn --cwd examples/miniProgram build
 ```
 
-Demo 源码会直接 import 已安装的 `@cherry-markdown/miniProgram`。由于小程序原生运行时不能直接加载 ESM 文件，构建脚本会把 ESM 源码编译为被忽略的 `miniprogram/pages/index/index.js` 运行文件。在微信开发者工具中打开 `examples/miniProgram` 后直接编译，**无需构建 npm**。
+Demo 源码会直接 import 已安装的 `@cherry-markdown/miniprogram`。由于小程序原生运行时不能直接加载 ESM 文件，构建脚本会把 ESM 源码编译为被忽略的 `miniprogram/pages/index/index.js` 运行文件。在微信开发者工具中打开 `examples/miniProgram` 后直接编译，**无需构建 npm**。
 
 若要使用本地包源码，替换依赖后重新构建：
 
 ```sh
-yarn --cwd examples/miniProgram add "@cherry-markdown/miniProgram@file:../../packages/miniProgram"
+yarn --cwd examples/miniProgram add "@cherry-markdown/miniprogram@file:../../packages/miniProgram"
 yarn --cwd examples/miniProgram build
 ```
 
 若要验证 pkg-pr-new tarball，在该 Demo 项目中安装预览包后重新生成小程序运行文件：
 
 ```sh
-yarn --cwd examples/miniProgram add "@cherry-markdown/miniProgram@https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniProgram@1827.tgz"
+yarn --cwd examples/miniProgram add "@cherry-markdown/miniprogram@https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniprogram@1827.tgz"
 yarn --cwd examples/miniProgram build
 ```
 
@@ -102,7 +102,7 @@ yarn --cwd examples/miniProgram build
 ### 流式接入示例
 
 ```js
-import CherryStream from '@cherry-markdown/miniProgram';
+import CherryStream from '@cherry-markdown/miniprogram';
 
 const cherry = new CherryStream();
 let markdownContent = '';

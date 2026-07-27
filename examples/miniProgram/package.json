@@ -6,7 +6,7 @@
     "build": "node build.mjs"
   },
   "dependencies": {
-    "@cherry-markdown/miniProgram": "https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniProgram@1827.tgz"
+    "@cherry-markdown/miniprogram": "https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniprogram@1827.tgz"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^16.0.1",

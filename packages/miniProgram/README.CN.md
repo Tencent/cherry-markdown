@@ -1,4 +1,4 @@
-# @cherry-markdown/miniProgram
+# @cherry-markdown/miniprogram
 
 > [!WARNING]
 >
@@ -8,14 +8,14 @@
 
 ## 用途
 
-`@cherry-markdown/miniProgram` 将 Cherry Markdown 转换为结构化、WXML 友好的视图数据。它不提供现成的 WXML 组件、样式或交互事件；接入方需要使用自己的小程序模板渲染返回的 blocks 和 runs。
+`@cherry-markdown/miniprogram` 将 Cherry Markdown 转换为结构化、WXML 友好的视图数据。它不提供现成的 WXML 组件、样式或交互事件；接入方需要使用自己的小程序模板渲染返回的 blocks 和 runs。
 
 核心 Markdown 结构可使用小程序原生组件渲染，无需 WebView 或 DOM。未知或复杂 HTML 会返回为 `html` block，接入方可选择用 `rich-text` 降级渲染。
 
 ## 使用方式
 
 ```sh
-npm install @cherry-markdown/miniProgram
+npm install @cherry-markdown/miniprogram
 ```
 
 该包仅提供 ESM，并只公开 `CherryStream`，它会自行创建并持有 Cherry engine。其 `setMarkdown()` 输入模型与 Web CherryStream 一致，但返回小程序视图数据而不是更新 DOM Previewer。SSE 请求、分帧和内容提取由应用负责。
@@ -25,7 +25,7 @@ npm install @cherry-markdown/miniProgram
 ### 流式渲染
 
 ```js
-import CherryStream from '@cherry-markdown/miniProgram';
+import CherryStream from '@cherry-markdown/miniprogram';
 
 const page = this;
 const cherry = new CherryStream();
@@ -60,7 +60,7 @@ function onStreamComplete() {
 
 | 入口                           | ESM                       |
 | ------------------------------ | ------------------------- |
-| `@cherry-markdown/miniProgram` | `dist/miniProgram.esm.js` |
+| `@cherry-markdown/miniprogram` | `dist/miniProgram.esm.js` |
 
 ## 支持功能
 

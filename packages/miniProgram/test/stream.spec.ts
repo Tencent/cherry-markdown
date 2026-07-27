@@ -5,7 +5,7 @@ import { blocksToMiniProgramView, resolvePendingImages } from '../src/shared/vie
 import { htmlToMiniProgramBlocks } from '../src/shared/transform';
 import { markdownToHtml } from '../src/renderer';
 
-describe('@cherry-markdown/miniProgram stream', () => {
+describe('@cherry-markdown/miniprogram stream', () => {
   it('returns MiniProgram block AST from the isolated stream entry', () => {
     vi.stubGlobal('BUILD_ENV', 'production');
     const stream = new CherryStream({
