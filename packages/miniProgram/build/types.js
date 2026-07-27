@@ -205,7 +205,6 @@ export declare function createMiniProgramEngine(options?: Record<string, any>): 
   getLocales(): Record<string, any>;
 };
 
-
 export declare class MiniProgramStreamAdapter {
   constructor(options?: MiniProgramStreamAdapterOptions);
   setMarkdown(

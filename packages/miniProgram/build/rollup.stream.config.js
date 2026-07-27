@@ -42,6 +42,9 @@ const terserPlugin = (options = {}) =>
     ...options,
   });
 
+const globalFooter =
+  "var __CherryMiniProgramGlobal__ = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : this; __CherryMiniProgramGlobal__.CherryMiniProgram = CherryMiniProgram;";
+
 const sharedPlugins = [
   json(),
   replace({
@@ -85,12 +88,12 @@ export default [
     output: {
       exports: 'named',
       file: 'dist/miniProgram-stream.js',
-      format: 'umd',
+      format: 'iife',
       name: 'CherryMiniProgram',
+      footer: globalFooter,
       sourcemap: false,
       compact: true,
       plugins: [terserPlugin()],
-      manualChunks: undefined,
     },
     treeshake: false,
     plugins: sharedPlugins,

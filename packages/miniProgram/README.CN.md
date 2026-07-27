@@ -23,10 +23,18 @@ npm install @cherry-markdown/miniProgram
 cp node_modules/@cherry-markdown/miniProgram/dist/miniProgram-stream.js <your-miniprogram>/vendor/
 ```
 
+使用构建工具时可直接引入 ESM 入口：
+
+```js
+import MiniProgramStream, { createMiniProgramEngine } from '@cherry-markdown/miniProgram';
+import { createMiniProgramStreamAdapter } from '@cherry-markdown/miniProgram/stream';
+```
+
 ### 流式渲染
 
 ```js
-const { createMiniProgramStreamAdapter, createSseParser } = require('./vendor/miniProgram');
+require('./vendor/miniProgram');
+const { createMiniProgramStreamAdapter, createSseParser } = globalThis.CherryMiniProgram;
 
 const adapter = createMiniProgramStreamAdapter();
 const parser = createSseParser({
@@ -53,48 +61,59 @@ wx.request({
 ### 静态渲染
 
 ```js
-const MiniProgramStream = require('./vendor/miniProgram').default;
+require('./vendor/miniProgram');
+const MiniProgramStream = globalThis.CherryMiniProgram.default;
 const stream = new MiniProgramStream();
 this.setData({ blocks: stream.setMarkdownView('# Hello\nMarkdown content') });
 ```
 
+## 模块格式
+
+| 入口                                  | ESM                              | IIFE                         |
+| ------------------------------------- | -------------------------------- | ---------------------------- |
+| `@cherry-markdown/miniProgram`        | `dist/miniProgram-stream.esm.js` | `dist/miniProgram-stream.js` |
+| `@cherry-markdown/miniProgram/stream` | `dist/miniProgram-stream.esm.js` | `dist/miniProgram-stream.js` |
+
+IIFE 构建会将命名导出挂载到 `globalThis.CherryMiniProgram`，浏览器环境也可通过 `window.CherryMiniProgram` 访问。
+
 ## 支持功能
 
-| 功能 | 语法 | 渲染方式 | 状态 |
-| 段落 | 普通文本 | 原生 `view` + `text` runs | ✅ |
-| 标题 | `#` `##` `###` | 原生 `view`，按级别设 class | ✅ |
-| 引用 | `>` | 原生 `view`，递归渲染子块 | ✅ |
-| 列表 | `-` / `1.` | Flexbox + marker 文本 | ✅ |
-| 任务列表 | `- [x]` / `- [ ]` | Flexbox，`☑`/`☐` 标记 | ✅ |
-| 表格 | `\| 列1 \| 列2 \|` | Flexbox + 横向滚动，单元格可交互 | ✅ |
-| 代码块 | ` ```语言 ``` ` | Token 级高亮，支持复制 | ✅ |
-| 图片 | `![alt](src)` | 原生 `image`，点击预览 | ✅ |
-| 链接 | `[text](url)` | 原生 `text` + `bindtap` | ✅ |
-| 行内公式 | `$E=mc^2$` | 等宽 `text` + class | ✅ |
-| 公式块 | `$$...$$` | 等宽 `text` + class | ✅ |
-| Mermaid | ` ```mermaid ``` ` | 源码卡片，支持复制 | ✅ |
-| 加粗 | `**文字**` | `class="md-strong"` | ✅ |
-| 斜体 | `*文字*` | `class="md-em"` | ✅ |
-| 行内代码 | `` `代码` `` | `class="md-inline-code"` | ✅ |
-| 下划线 | `++文字++` | `class="md-underline"` | ✅ |
-| 删除线 | `~~文字~~` | `class="md-strike"` | ✅ |
-| 上标 / 下标 | `~上标~` / `^下标^` | 行内 text 带 class | ✅ |
-| 换行 | 行尾两空格 | `\n` 文本 | ✅ |
-| 自动链接 | `https://...` | 同链接处理 | ✅ |
-| Emoji | `:smile:` | Image 组件 | ✅ |
-| 流光标 | （流模式专用） | `|` 光标符 | ✅ |
-| 脚注引用 | `[^key]` | Sup + link 渲染 | ✅ |
-| Panel | `:::tip/warning/danger/success` | 普通段落，样式丢失 | ❌ |
-| 脚注正文 | （自动生成） | 普通段落，样式丢失 | ❌ |
-| 颜色 / 字号 | `==color=red text==` | Attribute 保留，WXML 忽略 | ❌ |
-| 对齐 | `:::left/center/right` | CSS class 不被消费 | ❌ |
-| 目录 | `[TOC]` | 列表结构正常，样式丢失 | ❌ |
-| 分割线 | `---` | Rich-text 回退 | ❌ |
-| 折叠详情 | `+++` | Rich-text 回退，静态展示 | ❌ |
-| 注音 | `{ Ruby }` | Rich-text 回退 | ❌ |
-| 原始 HTML | `<div>...</div>` | Rich-text 回退 | ❌ |
-| 建议列表 | （编辑器专用） | 不参与渲染 | — |
-| FrontMatter | `---yaml---` | 默认不渲染 | — |
+| 功能        | 语法                            | 渲染方式                         | 状态 |
+| ----------- | ------------------------------- | -------------------------------- | ---- |
+| 段落        | 普通文本                        | 原生 `view` + `text` runs        | ✅   |
+| 标题        | `#` `##` `###`                  | 原生 `view`，按级别设 class      | ✅   |
+| 引用        | `>`                             | 原生 `view`，递归渲染子块        | ✅   |
+| 列表        | `-` / `1.`                      | Flexbox + marker 文本            | ✅   |
+| 任务列表    | `- [x]` / `- [ ]`               | Flexbox，`☑`/`☐` 标记            | ✅   |
+| 表格        | `\| 列1 \| 列2 \|`              | Flexbox + 横向滚动，单元格可交互 | ✅   |
+| 代码块      | ` ```语言 ``` `                 | Token 级高亮，支持复制           | ✅   |
+| 图片        | `![alt](src)`                   | 原生 `image`，点击预览           | ✅   |
+| 链接        | `[text](url)`                   | 原生 `text` + `bindtap`          | ✅   |
+| 行内公式    | `$E=mc^2$`                      | 等宽 `text` + class              | ✅   |
+| 公式块      | `$$...$$`                       | 等宽 `text` + class              | ✅   |
+| Mermaid     | ` ```mermaid ``` `              | 源码卡片，支持复制               | ✅   |
+| 加粗        | `**文字**`                      | `class="md-strong"`              | ✅   |
+| 斜体        | `*文字*`                        | `class="md-em"`                  | ✅   |
+| 行内代码    | `` `代码` ``                    | `class="md-inline-code"`         | ✅   |
+| 下划线      | `++文字++`                      | `class="md-underline"`           | ✅   |
+| 删除线      | `~~文字~~`                      | `class="md-strike"`              | ✅   |
+| 上标 / 下标 | `~上标~` / `^下标^`             | 行内 text 带 class               | ✅   |
+| 换行        | 行尾两空格                      | `\n` 文本                        | ✅   |
+| 自动链接    | `https://...`                   | 同链接处理                       | ✅   |
+| Emoji       | `:smile:`                       | Image 组件                       | ✅   |
+| 流光标      | （流模式专用）                  | `\|` 光标符                      | ✅   |
+| 脚注引用    | `[^key]`                        | Sup + link 渲染                  | ✅   |
+| Panel       | `:::tip/warning/danger/success` | 普通段落，样式丢失               | ❌   |
+| 脚注正文    | （自动生成）                    | 普通段落，样式丢失               | ❌   |
+| 颜色 / 字号 | `==color=red text==`            | Attribute 保留，WXML 忽略        | ❌   |
+| 对齐        | `:::left/center/right`          | CSS class 不被消费               | ❌   |
+| 目录        | `[TOC]`                         | 列表结构正常，样式丢失           | ❌   |
+| 分割线      | `---`                           | Rich-text 回退                   | ❌   |
+| 折叠详情    | `+++`                           | Rich-text 回退，静态展示         | ❌   |
+| 注音        | `{ Ruby }`                      | Rich-text 回退                   | ❌   |
+| 原始 HTML   | `<div>...</div>`                | Rich-text 回退                   | ❌   |
+| 建议列表    | （编辑器专用）                  | 不参与渲染                       | —    |
+| FrontMatter | `---yaml---`                    | 默认不渲染                       | —    |
 
 核心 markdown 语法（标题、段落、列表、表格、代码块、图片、链接、数学公式、行内样式）全部原生 WXML 渲染，支持完整交互（代码复制、图片预览、链接跳转）。
 

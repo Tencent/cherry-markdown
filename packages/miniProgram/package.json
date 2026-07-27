@@ -16,25 +16,32 @@
     ".": {
       "types": "./dist/types/miniProgram-stream.d.ts",
       "import": "./dist/miniProgram-stream.esm.js",
-      "require": "./dist/miniProgram-stream.js"
+      "default": "./dist/miniProgram-stream.js"
     },
     "./stream": {
       "types": "./dist/types/miniProgram-stream.d.ts",
       "import": "./dist/miniProgram-stream.esm.js",
-      "require": "./dist/miniProgram-stream.js"
+      "default": "./dist/miniProgram-stream.js"
     },
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md",
+    "README.md",
+    "README.CN.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "run-s clean build:stream build:types",
     "build:stream": "cross-env NODE_ENV=production rollup --config build/rollup.stream.config.js",
     "build:types": "node build/types.js",
     "clean": "rimraf ./dist",
     "test": "vitest run --config vitest.config.ts",
-    "typecheck": "tsc --project test/tsconfig.json --noEmit"
+    "typecheck": "tsc --project test/tsconfig.json --noEmit",
+    "verify:iife": "node scripts/verify-iife.mjs"
   },
   "dependencies": {
     "htmlparser2": "^10.0.0"
