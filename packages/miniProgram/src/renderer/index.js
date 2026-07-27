@@ -32,9 +32,9 @@ export function markdownToHtml(markdown, options = {}) {
 }
 
 /**
- * MiniProgramStream - data-only Cherry stream renderer for MiniProgram native components.
+ * CherryStream - data-only Cherry stream renderer for MiniProgram native components.
  */
-export default class MiniProgramStream {
+export default class CherryStream {
   /**
    * @readonly
    */
@@ -93,7 +93,11 @@ export default class MiniProgramStream {
    */
   setMarkdown(content, options = {}) {
     this.lastMarkdownText = content || '';
-    return this.makeBlocks(this.lastMarkdownText, options);
+    return this.makeView(this.lastMarkdownText, options);
+  }
+
+  setMarkdownView(content, options = {}) {
+    return this.setMarkdown(content, options);
   }
 
   /**
@@ -110,11 +114,6 @@ export default class MiniProgramStream {
    * @param {import('../shared/transform').MiniProgramTransformOptions & import('../shared/view').MiniProgramViewOptions} [options]
    * @returns {import('../shared/view').MiniProgramViewBlock[]}
    */
-  setMarkdownView(content, options = {}) {
-    this.lastMarkdownText = content || '';
-    return this.makeView(this.lastMarkdownText, options);
-  }
-
   /**
    * @returns {string}
    */

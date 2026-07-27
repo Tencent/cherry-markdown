@@ -18,17 +18,16 @@
 npm install @cherry-markdown/miniProgram
 ```
 
-根据渲染流程选择入口。两个构造入口都会自行创建并持有 Cherry engine，正常使用不需要调用 `createMiniProgramEngine`。
-
-一次性渲染使用 `MiniProgramStream`，持续累积流内容使用 `createMiniProgramStreamAdapter`。适配器在包内处理 SSE 分帧和不完整 Markdown 的兜底。
+包只公开 `CherryStream`，它会自行创建并持有 Cherry engine。其 `setMarkdown()` 输入模型与 Web CherryStream 一致，但返回小程序视图数据而不是更新 DOM Previewer。SSE 请求、分帧和内容提取由应用负责。
 
 ### 流式渲染
 
 ```js
-import { createMiniProgramStreamAdapter } from '@cherry-markdown/miniProgram';
+import CherryStream from '@cherry-markdown/miniProgram';
 
 const page = this;
-const adapter = createMiniProgramStreamAdapter();
+const cherry = new CherryStream();
+let markdownContent = '';
 let finished = false;
 
 function applyState(state) {
@@ -40,45 +39,23 @@ function applyState(state) {
 function finishStream() {
   if (finished) return;
   finished = true;
-  applyState(adapter.complete());
+  page.setData({ blocks: cherry.setMarkdown(markdownContent), streaming: false });
 }
 
-const requestTask = wx.request({
-  url: 'https://your-llm-endpoint',
-  enableChunked: true,
-  responseType: 'arraybuffer',
-  success() {
-    // 响应分块已由 onChunkReceived 接收。
-  },
-  fail(error) {
-    wx.showToast({ title: error.errMsg || '请求失败', icon: 'none' });
-  },
-  complete() {
-    finishStream();
-  },
-});
+// 业务侧 SSE 客户端提取 Markdown 字符串后调用。
+function onMarkdownChunk(chunk) {
+  markdownContent += chunk;
+  page.setData({ blocks: cherry.setMarkdown(markdownContent), streaming: true });
+}
 
-requestTask.onChunkReceived(({ data }) => {
-  const state = adapter.appendSseChunk(data);
-  applyState(state);
-  if (state?.done) {
-    finished = true;
-  }
-});
+function onStreamComplete() {
+  finishStream();
+}
 ```
 
-`onChunkReceived` 会在每个 `ArrayBuffer` 到达时调用。`appendSseChunk()` 在包内处理 UTF-8 边界、SSE 帧、JSON 的 `content`/`delta`/`text` 字段和 `[DONE]`；`complete()` 用于刷新尾部帧，并在服务端未发送 `[DONE]` 时结束适配器。
+将完整累积的 Markdown 传给 `setMarkdown()`，与 Web `CherryStream.setMarkdown()` 一致。它会重新渲染当前完整内容，以保证未闭合语法也能得到正确的当前视图；包不处理 SSE 请求、字节解码、分帧或不同服务端的 JSON 协议。
 
 为了正确处理未闭合的 Markdown 语法，`append()` 会重新渲染已累积的 Markdown。模型高频输出时，应由页面层合并 `setData` 更新（例如每 50-100 ms 一次），不要每个 chunk 都刷新。
-
-### 静态渲染
-
-```js
-import CherryMiniProgramStream from '@cherry-markdown/miniProgram';
-
-const stream = new CherryMiniProgramStream();
-this.setData({ blocks: stream.setMarkdownView('# Hello\nMarkdown content') });
-```
 
 ## 模块格式
 

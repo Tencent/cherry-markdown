@@ -18,17 +18,16 @@ Core Markdown structures can be rendered with native MiniProgram components and 
 npm install @cherry-markdown/miniProgram
 ```
 
-Choose the entry that matches your rendering flow. Both constructors create and own their Cherry engine; normal usage does not call `createMiniProgramEngine`.
-
-Use `MiniProgramStream` for one-shot Markdown and `createMiniProgramStreamAdapter` for an accumulated stream. The adapter keeps SSE framing and incomplete Markdown handling inside the package.
+The package exposes `CherryStream`, which creates and owns its Cherry engine. Its `setMarkdown()` input model matches Web CherryStream; it returns MiniProgram view data instead of updating a DOM previewer. SSE requests, framing, and payload extraction are application responsibilities.
 
 ### Stream rendering
 
 ```js
-import { createMiniProgramStreamAdapter } from '@cherry-markdown/miniProgram';
+import CherryStream from '@cherry-markdown/miniProgram';
 
 const page = this;
-const adapter = createMiniProgramStreamAdapter();
+const cherry = new CherryStream();
+let markdownContent = '';
 let finished = false;
 
 function applyState(state) {
@@ -40,45 +39,23 @@ function applyState(state) {
 function finishStream() {
   if (finished) return;
   finished = true;
-  applyState(adapter.complete());
+  page.setData({ blocks: cherry.setMarkdown(markdownContent), streaming: false });
 }
 
-const requestTask = wx.request({
-  url: 'https://your-llm-endpoint',
-  enableChunked: true,
-  responseType: 'arraybuffer',
-  success() {
-    // Response chunks have already been received by onChunkReceived.
-  },
-  fail(error) {
-    wx.showToast({ title: error.errMsg || 'Request failed', icon: 'none' });
-  },
-  complete() {
-    finishStream();
-  },
-});
+// Your SSE client extracts Markdown strings from the transport.
+function onMarkdownChunk(chunk) {
+  markdownContent += chunk;
+  page.setData({ blocks: cherry.setMarkdown(markdownContent), streaming: true });
+}
 
-requestTask.onChunkReceived(({ data }) => {
-  const state = adapter.appendSseChunk(data);
-  applyState(state);
-  if (state?.done) {
-    finished = true;
-  }
-});
+function onStreamComplete() {
+  finishStream();
+}
 ```
 
-`onChunkReceived` receives each `ArrayBuffer` as it arrives. `appendSseChunk()` internally handles UTF-8 boundaries, SSE frames, JSON `content`/`delta`/`text` payloads, and `[DONE]`. `complete()` flushes a trailing frame and closes the adapter when the server does not send `[DONE]`.
+Pass the complete accumulated Markdown to `setMarkdown()`, matching Web `CherryStream.setMarkdown()`. It re-renders the current complete content, which preserves valid rendering for incomplete syntax. The package does not implement SSE requests, decoding, framing, or provider payload extraction.
 
 `append()` re-renders the accumulated Markdown for correctness with incomplete syntax. For high-frequency model output, batch page-level `setData` calls (for example, every 50-100 ms) instead of updating for every chunk.
-
-### Static rendering
-
-```js
-import MiniProgramStream from '@cherry-markdown/miniProgram';
-
-const stream = new MiniProgramStream();
-this.setData({ blocks: stream.setMarkdownView('# Hello\nMarkdown content') });
-```
 
 ## Module Formats
 

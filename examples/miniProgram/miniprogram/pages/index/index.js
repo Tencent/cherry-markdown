@@ -1,5 +1,5 @@
-import { createMiniProgramStreamAdapter } from '../../vendor/cherry-mini-program.js';
-import { createMockSseFrames } from '../../utils/mock-sse.js';
+import CherryStream from '../../vendor/cherry-mini-program.js';
+import { createMockMarkdownChunks } from '../../utils/mock-stream.js';
 
 const DEMO_MARKDOWN = `# Cherry Markdown MiniProgram
 
@@ -51,7 +51,7 @@ graph TD;
 `;
 
 const DEMO_STREAM_INTERVAL = 60;
-const SSE_FRAMES = createMockSseFrames(DEMO_MARKDOWN);
+const MARKDOWN_CHUNKS = createMockMarkdownChunks(DEMO_MARKDOWN);
 
 Page({
   data: {
@@ -62,9 +62,7 @@ Page({
   },
 
   onLoad() {
-    this.streamAdapter = createMiniProgramStreamAdapter({
-      imagePlaceholderText: '图片链接解析中',
-    });
+    this.cherry = new CherryStream();
     this.resetStreamPipeline();
     this.autoStartStream();
   },
@@ -74,21 +72,13 @@ Page({
     this.resetStreamPipeline();
   },
 
-  applyStreamState(state, callback) {
-    if (!state) {
-      if (callback) callback();
-      return;
-    }
+  renderMarkdown(markdown, streaming, callback) {
     this.setData({
-      markdown: state.markdown,
-      blocks: state.blocks,
-      streaming: state.streaming,
-      streamButtonText: state.streaming ? '流式渲染中' : '重新流式渲染',
+      markdown,
+      blocks: this.cherry.setMarkdown(markdown),
+      streaming,
+      streamButtonText: streaming ? '流式渲染中' : '重新流式渲染',
     }, callback);
-  },
-
-  renderMarkdown(markdown, callback) {
-    this.applyStreamState(this.streamAdapter.setMarkdown(markdown), callback);
   },
 
   autoStartStream() {
@@ -105,27 +95,29 @@ Page({
     }
 
     this.resetStreamPipeline();
+    this.markdownContent = '';
     this.setData({ streaming: true, streamButtonText: '流式渲染中', markdown: '', blocks: [] }, () => {
-      this.pushNextSseFrame();
+      this.pushNextMarkdownChunk();
     });
   },
 
-  pushNextSseFrame() {
-    const frame = SSE_FRAMES[this.sseFrameIndex];
-    if (!frame) {
+  pushNextMarkdownChunk() {
+    const chunk = MARKDOWN_CHUNKS[this.sseFrameIndex];
+    if (!chunk) {
       this.finishStream();
       return;
     }
 
     this.sseFrameIndex += 1;
-    this.applyStreamState(this.streamAdapter.appendSseChunk(frame), () => {
+    this.markdownContent += chunk;
+    this.renderMarkdown(this.markdownContent, true, () => {
       this.scheduleNextSseFrame();
     });
   },
 
   finishStream() {
     this.clearStreamTimer();
-    this.applyStreamState(this.streamAdapter.finish());
+    this.renderMarkdown(this.markdownContent, false);
   },
 
   scheduleNextSseFrame() {
@@ -135,7 +127,7 @@ Page({
     }
     this.streamTimer = setTimeout(() => {
       this.streamTimer = null;
-      this.pushNextSseFrame();
+      this.pushNextMarkdownChunk();
     }, DEMO_STREAM_INTERVAL);
   },
 
@@ -156,9 +148,7 @@ Page({
   resetStreamPipeline() {
     this.clearStreamTimer();
     this.sseFrameIndex = 0;
-    if (this.streamAdapter) {
-      this.streamAdapter.reset();
-    }
+    this.markdownContent = '';
   },
 
   resetDemo() {

@@ -1,17 +1,14 @@
 /* global globalThis */
 import { describe, expect, it, vi } from 'vitest';
-import MiniProgramStream, {
-  blocksToMiniProgramView,
-  createMiniProgramStreamAdapter,
-  htmlToMiniProgramBlocks,
-  markdownToHtml,
-  resolvePendingImages,
-} from '../src';
+import CherryStream from '../src';
+import { blocksToMiniProgramView, resolvePendingImages } from '../src/shared/view';
+import { htmlToMiniProgramBlocks } from '../src/shared/transform';
+import { markdownToHtml } from '../src/renderer';
 
 describe('@cherry-markdown/miniProgram stream', () => {
   it('returns MiniProgram block AST from the isolated stream entry', () => {
     vi.stubGlobal('BUILD_ENV', 'production');
-    const stream = new MiniProgramStream({
+    const stream = new CherryStream({
       engine: {
         syntax: {
           header: {
@@ -39,7 +36,7 @@ describe('@cherry-markdown/miniProgram stream', () => {
 
   it('updates markdown through setMarkdown', () => {
     vi.stubGlobal('BUILD_ENV', 'production');
-    const stream = new MiniProgramStream({
+    const stream = new CherryStream({
       engine: {
         syntax: {
           header: {
@@ -49,7 +46,8 @@ describe('@cherry-markdown/miniProgram stream', () => {
       },
     });
 
-    expect(stream.setMarkdown('![Alt](/img.png)')).toEqual([
+    stream.setMarkdown('![Alt](/img.png)');
+    expect(stream.makeBlocks(stream.getMarkdown())).toEqual([
       {
         type: 'image',
         src: '/img.png',
@@ -62,7 +60,7 @@ describe('@cherry-markdown/miniProgram stream', () => {
   });
 
   it('returns WXML-friendly view blocks from setMarkdownView', () => {
-    const stream = new MiniProgramStream();
+    const stream = new CherryStream();
 
     expect(stream.setMarkdownView('**hello** [go](/page)')).toEqual([
       {
@@ -77,7 +75,7 @@ describe('@cherry-markdown/miniProgram stream', () => {
   });
 
   it('normalizes unfinished Markdown syntax during token streaming', () => {
-    const stream = new MiniProgramStream();
+    const stream = new CherryStream();
 
     expect(stream.setMarkdownView('#')).toEqual([]);
     expect(stream.setMarkdownView('# ')).toEqual([]);
@@ -116,7 +114,7 @@ describe('@cherry-markdown/miniProgram stream', () => {
     const blocks = htmlToMiniProgramBlocks(html);
     expect(blocks[0].type).toBe('table');
 
-    const stream = new MiniProgramStream();
+    const stream = new CherryStream();
     expect(stream.setMarkdownView('| A | B |\n| --- | --- |\n| **x** | [go](/page) |')).toEqual([
       {
         type: 'table',
@@ -144,8 +142,9 @@ describe('@cherry-markdown/miniProgram stream', () => {
     ]);
 
     expect(
-      createMiniProgramStreamAdapter().setMarkdown('| A | B |\n| --- | --- |\n| [go](/page) | ![alt](img.png) |')
-        .blocks[0],
+      new CherryStream().setMarkdownView('| A | B |\n| --- | --- |\n| [go](/page) | ![alt](img.png) |', {
+        deferImages: false,
+      })[0],
     ).toEqual(
       expect.objectContaining({
         type: 'table',
@@ -170,7 +169,7 @@ describe('@cherry-markdown/miniProgram stream', () => {
   });
 
   it('renders Cherry task lists as native checked list items', () => {
-    const stream = new MiniProgramStream();
+    const stream = new CherryStream();
 
     expect(stream.setMarkdownView('- [x] done\n- [ ] todo')).toEqual([
       {
@@ -195,7 +194,7 @@ describe('@cherry-markdown/miniProgram stream', () => {
   });
 
   it('returns list markers from the view model instead of requiring WXML marker logic', () => {
-    const stream = new MiniProgramStream();
+    const stream = new CherryStream();
 
     expect(stream.setMarkdownView('- one\n- two')[0]).toEqual({
       type: 'list',
@@ -217,7 +216,7 @@ describe('@cherry-markdown/miniProgram stream', () => {
   });
 
   it('returns highlighted code runs for native code block rendering', () => {
-    const stream = new MiniProgramStream();
+    const stream = new CherryStream();
 
     expect(stream.setMarkdownView('```js\nconst message = "hello";\n```')[0]).toEqual({
       type: 'code_block',
@@ -231,7 +230,7 @@ describe('@cherry-markdown/miniProgram stream', () => {
   });
 
   it('returns math and Mermaid view blocks from Cherry-rendered HTML', () => {
-    const stream = new MiniProgramStream();
+    const stream = new CherryStream();
 
     expect(stream.setMarkdownView('Inline $E=mc^2$ test')[0]).toEqual({
       type: 'paragraph',
@@ -256,71 +255,7 @@ describe('@cherry-markdown/miniProgram stream', () => {
     });
   });
 
-  it('adapts chunk streaming into CherryStream-like MiniProgram view states', () => {
-    const adapter = createMiniProgramStreamAdapter();
-
-    expect(adapter.append('#').blocks).toEqual([]);
-    expect(adapter.append(' H')).toEqual({
-      markdown: '# H',
-      blocks: [{ type: 'heading', level: 1, inlines: [{ type: 'text', text: 'H', className: '', href: '' }] }],
-      streaming: true,
-      done: false,
-    });
-
-    const textState = adapter.append('\n\nhello');
-    expect(textState.blocks[textState.blocks.length - 1]).toEqual({
-      type: 'paragraph',
-      inlines: [{ type: 'text', text: 'hello', className: '', href: '' }],
-    });
-  });
-
-  it('renders complete native images during streaming and keeps final output stable', () => {
-    const adapter = createMiniProgramStreamAdapter();
-
-    expect(adapter.append('![Alt](/img.png)').blocks).toEqual([{ type: 'image', src: '/img.png', alt: 'Alt' }]);
-    expect(adapter.finish()).toEqual({
-      markdown: '![Alt](/img.png)',
-      blocks: [{ type: 'image', src: '/img.png', alt: 'Alt' }],
-      streaming: false,
-      done: true,
-    });
-  });
-
-  it('does not mount native images for incomplete image markdown', () => {
-    const adapter = createMiniProgramStreamAdapter();
-
-    expect(adapter.append('![Alt](/img').blocks).toEqual([]);
-  });
-
-  it('handles chunked SSE frames inside the stream adapter', () => {
-    const adapter = createMiniProgramStreamAdapter();
-
-    expect(adapter.appendSseChunk('event: message\ndata: {"content":"hel')).toBeNull();
-    expect(adapter.appendSseChunk('lo"}\n\ndata: [DONE]\n\n')).toEqual({
-      markdown: 'hello',
-      blocks: [{ type: 'paragraph', inlines: [{ type: 'text', text: 'hello', className: '', href: '' }] }],
-      streaming: false,
-      done: true,
-    });
-  });
-
-  it('handles split utf-8 SSE chunks without TextDecoder', () => {
-    const originalTextDecoder = globalThis.TextDecoder;
-    const bytes = new Uint8Array([100, 97, 116, 97, 58, 32, 228, 189, 160, 229, 165, 189, 10, 10]);
-    const adapter = createMiniProgramStreamAdapter();
-
-    try {
-      delete globalThis.TextDecoder;
-      adapter.appendSseChunk(bytes.slice(0, 8).buffer);
-      adapter.appendSseChunk(bytes.slice(8).buffer);
-    } finally {
-      globalThis.TextDecoder = originalTextDecoder;
-    }
-
-    expect(adapter.getState().markdown).toBe('你好');
-  });
-
-  it('exports html transform helper for future entry reuse', () => {
+  it('keeps transforms internal to the public package entry', () => {
     expect(htmlToMiniProgramBlocks('<p><a href="/page">go</a></p>')).toEqual([
       {
         type: 'paragraph',
@@ -345,8 +280,8 @@ describe('@cherry-markdown/miniProgram stream', () => {
       delete globalThis.window;
       delete globalThis.self;
 
-      const stream = new MiniProgramStream();
-      expect(stream.setMarkdown('**hello**')).toEqual([
+      const stream = new CherryStream();
+      expect(stream.makeBlocks('**hello**')).toEqual([
         {
           type: 'paragraph',
           attrs: {},

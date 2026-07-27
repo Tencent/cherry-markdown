@@ -17,7 +17,7 @@ import { htmlToMiniProgramBlocks } from './transform';
 import { blocksToMiniProgramView } from './view';
 
 /**
- * Shared rendering utility used by both MiniProgramStream and MiniProgramStreamAdapter.
+ * Shared rendering utility used by CherryStream.
  * Renders markdown through a Cherry engine and returns WXML-friendly view blocks.
  *
  * @param {{ makeHtml: (markdown: string, returnType?: string, forceNoCursor?: boolean) => string }} engine

@@ -27,18 +27,23 @@ Open `examples/miniProgram` in WeChat DevTools. Build npm is **not** required �
 
 - Paragraph, heading, list/task list, blockquote, table, code block, image, link — all rendered as native WXML components
 - Streaming: chunks are accumulated, incomplete syntax normalized, images deferred until stream ends
-- SSE: `createMiniProgramStreamAdapter` internally handles framing and payload concatenation; local frame simulation stays in the Demo-only `utils/mock-sse.js`
+- Streaming: the page accumulates Markdown strings and calls `CherryStream.setMarkdown`; local chunk simulation stays in Demo-only `utils/mock-stream.js`
 - Interactions: code copy, image preview, link tap
 
-### SSE Integration
+### Stream Integration
 
 ```js
-import { createMiniProgramStreamAdapter } from '../../vendor/cherry-mini-program.js';
+import CherryStream from '../../vendor/cherry-mini-program.js';
 
-const adapter = createMiniProgramStreamAdapter();
+const cherry = new CherryStream();
+let markdownContent = '';
 
 const task = wx.request({ url: 'https://...', enableChunked: true, responseType: 'arraybuffer' });
-task.onChunkReceived((res) => this.setData(adapter.appendSseChunk(res.data)));
+// Extract a Markdown string from your transport, then append it.
+onMarkdownChunk((chunk) => {
+  markdownContent += chunk;
+  this.setData({ blocks: cherry.setMarkdown(markdownContent) });
+});
 ```
 
 ---
@@ -60,16 +65,21 @@ cp packages/miniProgram/dist/miniProgram.esm.js examples/miniProgram/miniprogram
 
 - 段落、标题、列表/任务列表、引用、表格、代码块、图片、链接 — 全部原生 WXML 组件渲染
 - 流式：chunk 累积、不完整语法自动规整、流中图片延迟加载
-- SSE：`createMiniProgramStreamAdapter` 在包内处理分帧和内容拼接；本地帧模拟仅在 Demo 的 `utils/mock-sse.js` 中实现
+- 流式：页面累积 Markdown 字符串并调用 `CherryStream.setMarkdown`；本地分片模拟仅在 Demo 的 `utils/mock-stream.js` 中实现
 - 交互：代码复制、图片预览、链接跳转
 
-### SSE 接入示例
+### 流式接入示例
 
 ```js
-import { createMiniProgramStreamAdapter } from '../../vendor/cherry-mini-program.js';
+import CherryStream from '../../vendor/cherry-mini-program.js';
 
-const adapter = createMiniProgramStreamAdapter();
+const cherry = new CherryStream();
+let markdownContent = '';
 
 const task = wx.request({ url: 'https://...', enableChunked: true, responseType: 'arraybuffer' });
-task.onChunkReceived((res) => this.setData(adapter.appendSseChunk(res.data)));
+// 从传输层提取 Markdown 字符串后追加。
+onMarkdownChunk((chunk) => {
+  markdownContent += chunk;
+  this.setData({ blocks: cherry.setMarkdown(markdownContent) });
+});
 ```
