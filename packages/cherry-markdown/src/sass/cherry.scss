@@ -208,9 +208,25 @@
       color: var(--dropdown-item-active-color);
     }
 
+    // 二级菜单里图标与文字的垂直对齐：
+    // 1. <i.ch-icon> 使用固定盒（宽高 = 图标视觉尺寸），并按视觉中线对齐周围文字；
+    // 2. ::before 承载字形，用 vertical-align: middle 让字形按视觉中线而非字体基线对齐，
+    //    消除图标字体自身"偏上"的字形度量，从根本上解决"图标比文字高一些"的问题。
     .ch-icon {
-      margin-right: 8px;
+      display: inline-block;
+      width: var(--toolbar-icon-size);
+      height: var(--toolbar-icon-size);
+      line-height: var(--toolbar-icon-size);
+      font-size: var(--toolbar-icon-size);
+      text-align: center;
       vertical-align: middle;
+      margin-right: 8px;
+      overflow: visible;
+
+      &::before {
+        vertical-align: middle;
+        line-height: var(--toolbar-icon-size);
+      }
     }
   }
 
@@ -316,6 +332,9 @@
     color: var(--toolbar-btn-color);
     background: var(--toolbar-btn-bg);
     border-radius: var(--toolbar-btn-radius);
+    // 覆盖父级 .cherry-toolbar 的 line-height: 2.8，
+    // 避免行盒撑高纯文字按钮，导致三种图标模式高度不一致
+    line-height: 1;
     -webkit-transition:
       color 150ms ease,
       background-color 150ms ease,
@@ -330,6 +349,35 @@
     &:hover {
       color: var(--toolbar-btn-hover-color);
       background: var(--toolbar-btn-hover-bg);
+    }
+
+    // 字体图标 <i.ch-icon>：给一个和 SVG 完全相同的盒（宽高均为 --toolbar-icon-size），
+    // 用 line-height = height 让字形在盒内垂直居中（经典 CSS 图标垂直居中技巧），
+    // text-align: center 让字形水平居中。字形若超过 em box 也不会撑破盒子。
+    > i.ch-icon {
+      display: inline-block;
+      width: var(--toolbar-icon-size);
+      height: var(--toolbar-icon-size);
+      line-height: var(--toolbar-icon-size);
+      font-size: var(--toolbar-icon-size);
+      text-align: center;
+      flex-shrink: 0;
+      overflow: visible;
+
+      // ::before 是承载图标字形的伪元素，用 vertical-align: middle 让字形按视觉中线对齐，
+      // 而不是按字体基线对齐，从而消除"字形偏上"的视觉偏差
+      &::before {
+        vertical-align: middle;
+        line-height: var(--toolbar-icon-size);
+      }
+    }
+
+    // SVG 图标：显式指定与字体图标相同的像素尺寸，消除 baseline 间距与 viewBox 尺寸差异
+    > svg {
+      display: block;
+      width: var(--toolbar-icon-size);
+      height: var(--toolbar-icon-size);
+      flex-shrink: 0;
     }
 
     &.cherry-toolbar-split {
