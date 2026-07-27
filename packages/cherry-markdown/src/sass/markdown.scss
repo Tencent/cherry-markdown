@@ -1445,7 +1445,6 @@ div[data-type='codeBlock'] {
 }
 .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--node {
   transform: scale(1.15);
-  animation: cherry-timeline-glow 1.8s ease-in-out infinite;
 }
 .cherry-markdown .cherry-timeline--content {
   line-height: 1.65;
@@ -1489,8 +1488,6 @@ div[data-type='codeBlock'] {
 
 /* ---------- 状态：已完成 ---------- */
 .cherry-markdown .cherry-timeline--item__done .cherry-timeline--node {
-  --timeline-glow-color: rgba(64, 192, 87, 0.35);
-  --timeline-glow-color-fade: rgba(64, 192, 87, 0);
   background: var(--timeline-done-color, var(--color-success));
   border-color: var(--timeline-done-color, var(--color-success));
 }
@@ -1499,12 +1496,14 @@ div[data-type='codeBlock'] {
   background: rgba(64, 192, 87, 0.1);
 }
 
-/* ---------- 状态：进行中（hover 脉冲光晕） ---------- */
+/* ---------- 状态：进行中（脉冲 + 主色时间戳） ---------- */
 .cherry-markdown .cherry-timeline--item__doing .cherry-timeline--node {
-  --timeline-glow-color: rgba(53, 130, 251, 0.35);
-  --timeline-glow-color-fade: rgba(53, 130, 251, 0);
   background: var(--timeline-doing-color, var(--primary-color));
   border-color: var(--timeline-doing-color, var(--primary-color));
+  box-shadow:
+    0 0 0 3px var(--base-previewer-bg, #fff),
+    0 0 0 6px var(--timeline-doing-shadow-color, rgba(53, 130, 251, 0.18));
+  animation: cherry-timeline-pulse 1.8s ease-in-out infinite;
 }
 .cherry-markdown .cherry-timeline--item__doing .cherry-timeline--time {
   color: var(--timeline-doing-color, var(--primary-color));
@@ -1513,36 +1512,32 @@ div[data-type='codeBlock'] {
 .cherry-markdown .cherry-timeline--item__doing .cherry-timeline--title {
   color: var(--timeline-doing-color, var(--primary-color));
 }
-@keyframes cherry-timeline-glow {
+@keyframes cherry-timeline-pulse {
   0% {
     box-shadow:
       0 0 0 3px var(--base-previewer-bg, #fff),
-      0 0 0 3px var(--timeline-glow-color, rgba(53, 130, 251, 0.35));
+      0 0 0 3px var(--timeline-doing-pulse-from, rgba(53, 130, 251, 0.35));
   }
   70% {
     box-shadow:
       0 0 0 3px var(--base-previewer-bg, #fff),
-      0 0 0 10px var(--timeline-glow-color-fade, rgba(53, 130, 251, 0));
+      0 0 0 10px var(--timeline-doing-pulse-to, rgba(53, 130, 251, 0));
   }
   100% {
     box-shadow:
       0 0 0 3px var(--base-previewer-bg, #fff),
-      0 0 0 10px var(--timeline-glow-color-fade, rgba(53, 130, 251, 0));
+      0 0 0 10px var(--timeline-doing-pulse-to, rgba(53, 130, 251, 0));
   }
 }
 
 /* ---------- 状态：待办 ---------- */
 .cherry-markdown .cherry-timeline--item__todo .cherry-timeline--node {
-  --timeline-glow-color: rgba(134, 142, 150, 0.25);
-  --timeline-glow-color-fade: rgba(134, 142, 150, 0);
   background: var(--timeline-todo-bg, var(--base-previewer-bg));
   border-color: var(--timeline-todo-color, var(--oc-gray-5));
 }
 
 /* ---------- 状态：里程碑（菱形） ---------- */
 .cherry-markdown .cherry-timeline--item__milestone .cherry-timeline--node {
-  --timeline-glow-color: rgba(250, 173, 20, 0.4);
-  --timeline-glow-color-fade: rgba(250, 173, 20, 0);
   /* 与普通节点保持相同的 left 值，确保菱形中心与时间轴主干对齐 */
   width: 14px;
   height: 14px;
@@ -1552,6 +1547,9 @@ div[data-type='codeBlock'] {
   border-color: var(--timeline-milestone-color, var(--oc-yellow-6));
   border-radius: 2px;
   transform: rotate(45deg);
+  box-shadow:
+    0 0 0 3px var(--base-previewer-bg, #fff),
+    0 0 8px var(--timeline-milestone-color, rgba(250, 173, 20, 0.5));
 }
 .cherry-markdown .cherry-timeline--item__milestone:hover .cherry-timeline--node {
   transform: rotate(45deg) scale(1.15);
@@ -1567,8 +1565,6 @@ div[data-type='codeBlock'] {
 
 /* ---------- 状态：异常 ---------- */
 .cherry-markdown .cherry-timeline--item__error .cherry-timeline--node {
-  --timeline-glow-color: rgba(255, 77, 79, 0.35);
-  --timeline-glow-color-fade: rgba(255, 77, 79, 0);
   background: var(--timeline-error-color, var(--color-error));
   border-color: var(--timeline-error-color, var(--color-error));
 }
@@ -1597,7 +1593,7 @@ div[data-type='codeBlock'] {
   .cherry-markdown .cherry-timeline--item__milestone .cherry-timeline--node {
     transform: rotate(45deg);
   }
-  .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--node {
+  .cherry-markdown .cherry-timeline--item__doing .cherry-timeline--node {
     animation: none;
   }
 }
@@ -1615,7 +1611,7 @@ div[data-type='codeBlock'] {
   .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--content {
     transform: none;
   }
-  .cherry-markdown .cherry-timeline--item:hover .cherry-timeline--node {
+  .cherry-markdown .cherry-timeline--item__doing .cherry-timeline--node {
     animation: none;
   }
   /* 打印时确保时间线段（每个 item 的 ::before）可见 */
