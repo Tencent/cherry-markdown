@@ -31,6 +31,9 @@
   --toolbar-min-height: 48px; // 单行工具栏的高度
   // 侧边栏列表高度（由 JS 动态写入），默认 120px 作为无侧栏时的回退
   --sidebar-list-height: 120px;
+  // 工具栏图标（字体图标字形大小 + SVG 图标宽高）的统一视觉尺寸，
+  // 保证字体图标、SVG 图标、纯文字三种模式在同一按钮行内视觉高度一致
+  --toolbar-icon-size: 14px;
 
   // 工具栏按钮
   --toolbar-btn-color: #3f4a56;
