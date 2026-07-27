@@ -28,7 +28,7 @@ const currentDir = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_ROOT = path.resolve(currentDir, '..');
 const REPO_ROOT = path.resolve(PACKAGE_ROOT, '../..');
 const CHERRY_SRC = path.resolve(REPO_ROOT, 'packages/cherry-markdown/src');
-const MINI_PROGRAM_SANITIZER = path.resolve(PACKAGE_ROOT, 'src/Sanitizer.miniProgram.js');
+const MINI_PROGRAM_SANITIZER = path.resolve(PACKAGE_ROOT, 'src/shared/Sanitizer.miniProgram.js');
 
 const terserPlugin = (options = {}) =>
   terser({
@@ -79,36 +79,17 @@ const sharedPlugins = [
 
 const sharedExternal = ['mermaid', 'codemirror', /^codemirror\/.*/];
 
-export default [
-  {
-    input: 'src/stream.js',
-    output: {
-      exports: 'named',
-      file: 'dist/miniProgram-stream.js',
-      format: 'umd',
-      name: 'CherryMiniProgram',
-      sourcemap: false,
-      compact: true,
-      plugins: [terserPlugin()],
-      manualChunks: undefined,
-    },
-    treeshake: false,
-    plugins: sharedPlugins,
-    external: sharedExternal,
+export default {
+  input: 'src/index.js',
+  output: {
+    exports: 'named',
+    file: 'dist/miniProgram.esm.js',
+    format: 'esm',
+    sourcemap: false,
+    compact: true,
+    plugins: [terserPlugin({ module: true, ecma: 2015 })],
   },
-  {
-    input: 'src/stream.js',
-    output: {
-      exports: 'named',
-      file: 'dist/miniProgram-stream.esm.js',
-      format: 'esm',
-      name: 'CherryMiniProgram',
-      sourcemap: false,
-      compact: true,
-      plugins: [terserPlugin({ module: true, ecma: 2015 })],
-    },
-    treeshake: false,
-    plugins: sharedPlugins,
-    external: sharedExternal,
-  },
-];
+  treeshake: false,
+  plugins: sharedPlugins,
+  external: sharedExternal,
+};

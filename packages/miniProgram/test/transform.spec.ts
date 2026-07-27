@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { htmlToMiniProgramBlocks } from '../src/transform';
+import { htmlToMiniProgramBlocks } from '../src/shared/transform';
 
 describe('miniProgramTransform', () => {
   it('converts paragraph inline formatting', () => {

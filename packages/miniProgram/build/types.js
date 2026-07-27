@@ -157,72 +157,7 @@ export type MiniProgramViewBlock =
   | MiniProgramImagePlaceholderRun
   | MiniProgramHtmlBlock;
 
-export type MiniProgramSseEvent = { data: string; event: string; id: string; retry?: number };
-export type MiniProgramSseParser = {
-  push(chunk: string | ArrayBuffer): void;
-  end(): void;
-  reset(): void;
-};
-export type MiniProgramStreamState = {
-  markdown: string;
-  blocks: MiniProgramViewBlock[];
-  streaming: boolean;
-  done: boolean;
-};
-export type MiniProgramStreamAdapterOptions = {
-  stream?: { setMarkdownView(markdown: string, options?: Record<string, any>): MiniProgramViewBlock[] };
-  value?: string;
-  viewOptions?: MiniProgramTransformOptions & MiniProgramViewOptions;
-  imagePlaceholderText?: string;
-};
-
-export declare function htmlToMiniProgramBlocks(html: string, options?: MiniProgramTransformOptions): MiniProgramBlock[];
-export declare function markdownToHtml(markdown: string, options?: Record<string, any>): string;
-export declare function markdownToMiniProgramBlocks(
-  engine: { makeHtml(markdown: string, returnType?: string, forceNoCursor?: boolean): string },
-  markdown: string,
-  options?: MiniProgramTransformOptions,
-): MiniProgramBlock[];
-export declare function blocksToMiniProgramView(
-  blocks: MiniProgramBlock[],
-  options?: MiniProgramViewOptions,
-): MiniProgramViewBlock[];
-export declare function resolvePendingImages(blocks: MiniProgramViewBlock[]): MiniProgramViewBlock[];
-export declare function createSseParser(options?: {
-  onMessage?: (event: MiniProgramSseEvent) => void;
-  onDone?: () => void;
-}): MiniProgramSseParser;
-export declare function createMiniProgramStreamChunks(markdown?: string): string[];
-export declare function createMiniProgramSseFrames(
-  markdown?: string,
-  options?: { field?: 'content' | 'delta' | 'text'; includeDone?: boolean },
-): string[];
-export declare function createMiniProgramStreamAdapter(
-  options?: MiniProgramStreamAdapterOptions,
-): MiniProgramStreamAdapter;
-export declare function createMiniProgramEngine(options?: Record<string, any>): {
-  makeHtml(markdown: string, returnType?: string, forceNoCursor?: boolean): string;
-  getLocales(): Record<string, any>;
-};
-
-
-export declare class MiniProgramStreamAdapter {
-  constructor(options?: MiniProgramStreamAdapterOptions);
-  setMarkdown(
-    markdown: string,
-    options?: MiniProgramTransformOptions & MiniProgramViewOptions,
-  ): MiniProgramStreamState;
-  append(chunk: string, options?: MiniProgramTransformOptions & MiniProgramViewOptions): MiniProgramStreamState;
-  appendSseEvent(
-    event: { data?: string },
-    options?: MiniProgramTransformOptions & MiniProgramViewOptions,
-  ): MiniProgramStreamState | null;
-  finish(options?: MiniProgramTransformOptions & MiniProgramViewOptions): MiniProgramStreamState;
-  reset(markdown?: string): MiniProgramStreamState;
-  getState(): MiniProgramStreamState;
-}
-
-export default class MiniProgramStream {
+export default class CherryStream {
   static readonly config: { defaults: unknown };
   options: any;
   lastMarkdownText: string;
@@ -230,14 +165,8 @@ export default class MiniProgramStream {
     makeHtml(markdown: string, returnType?: string, forceNoCursor?: boolean): string;
   };
   constructor(options?: Record<string, any>);
-  makeHtml(markdown: string, returnType?: string, forceNoCursor?: boolean): any;
-  makeBlocks(markdown: string, options?: MiniProgramTransformOptions): MiniProgramBlock[];
-  setMarkdown(content: string, options?: MiniProgramTransformOptions): MiniProgramBlock[];
-  makeView(markdown: string, options?: MiniProgramTransformOptions & MiniProgramViewOptions): MiniProgramViewBlock[];
-  setMarkdownView(content: string, options?: MiniProgramTransformOptions & MiniProgramViewOptions): MiniProgramViewBlock[];
-  getMarkdown(): string;
-  clearFlowSessionCursor(): void;
+  setMarkdown(content: string, options?: MiniProgramTransformOptions & MiniProgramViewOptions): MiniProgramViewBlock[];
 }
 `;
 
-writeFileSync(resolve(distTypesDir, 'miniProgram-stream.d.ts'), source);
+writeFileSync(resolve(distTypesDir, 'miniProgram.d.ts'), source);

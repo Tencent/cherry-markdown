@@ -1,3 +1,7 @@
 node_modules/
+miniprogram/miniprogram_npm/
+miniprogram/vendor/
+miniprogram/pages/index/index.js
 package-lock.json
+yarn.lock
 project.private.config.json

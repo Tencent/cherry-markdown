@@ -1,5 +1,5 @@
-const miniProgramModule = require('../../vendor/cherry-mini-program-stream');
-const { createMiniProgramSseFrames, createMiniProgramStreamAdapter, createSseParser } = miniProgramModule;
+import CherryStream from '@cherry-markdown/miniprogram';
+import { createMockMarkdownChunks } from '../../utils/mock-stream.js';
 
 const DEMO_MARKDOWN = `# Cherry Markdown MiniProgram
 
@@ -11,7 +11,7 @@ const DEMO_MARKDOWN = `# Cherry Markdown MiniProgram
 - 图片预览
 - 代码复制
 
-![Cherry logo](../../assets/logo-square.png)
+![Cherry logo](/assets/logo-square.png)
 
 \`\`\`js
 const message = 'hello mini program';
@@ -30,7 +30,7 @@ console.log(message);
 | 能力 | 渲染方式 | 交互 |
 | --- | --- | --- |
 | 链接 | [原生 text](/pages/index/index) | 点击处理 |
-| 图片 | ![logo](../../assets/logo-square.png) | 点击预览 |
+| 图片 | ![logo](/assets/logo-square.png) | 点击预览 |
 | 代码块 | 原生 view/text | 点击复制 |
 | 表格 | 原生 view | 单元格内链接/图片保留交互 |
 
@@ -51,7 +51,7 @@ graph TD;
 `;
 
 const DEMO_STREAM_INTERVAL = 60;
-const SSE_FRAMES = createMiniProgramSseFrames(DEMO_MARKDOWN);
+const MARKDOWN_CHUNKS = createMockMarkdownChunks(DEMO_MARKDOWN);
 
 Page({
   data: {
@@ -62,13 +62,7 @@ Page({
   },
 
   onLoad() {
-    this.streamAdapter = createMiniProgramStreamAdapter({
-      imagePlaceholderText: '图片链接解析中',
-    });
-    this.sseParser = createSseParser({
-      onMessage: (event) => this.handleSseMessage(event),
-      onDone: () => this.finishStream(),
-    });
+    this.cherry = new CherryStream();
     this.resetStreamPipeline();
     this.autoStartStream();
   },
@@ -78,21 +72,13 @@ Page({
     this.resetStreamPipeline();
   },
 
-  applyStreamState(state, callback) {
-    if (!state) {
-      if (callback) callback();
-      return;
-    }
+  renderMarkdown(markdown, streaming, callback) {
     this.setData({
-      markdown: state.markdown,
-      blocks: state.blocks,
-      streaming: state.streaming,
-      streamButtonText: state.streaming ? '流式渲染中' : '重新流式渲染',
+      markdown,
+      blocks: this.cherry.setMarkdown(markdown, { deferImages: !streaming }),
+      streaming,
+      streamButtonText: streaming ? '流式渲染中' : '重新流式渲染',
     }, callback);
-  },
-
-  renderMarkdown(markdown, callback) {
-    this.applyStreamState(this.streamAdapter.setMarkdown(markdown), callback);
   },
 
   autoStartStream() {
@@ -109,31 +95,29 @@ Page({
     }
 
     this.resetStreamPipeline();
+    this.markdownContent = '';
     this.setData({ streaming: true, streamButtonText: '流式渲染中', markdown: '', blocks: [] }, () => {
-      this.pushNextSseFrame();
+      this.pushNextMarkdownChunk();
     });
   },
 
-  pushNextSseFrame() {
-    const frame = SSE_FRAMES[this.sseFrameIndex];
-    if (!frame) {
+  pushNextMarkdownChunk() {
+    const chunk = MARKDOWN_CHUNKS[this.sseFrameIndex];
+    if (!chunk) {
       this.finishStream();
       return;
     }
 
     this.sseFrameIndex += 1;
-    this.sseParser.push(frame);
-  },
-
-  handleSseMessage(event) {
-    this.applyStreamState(this.streamAdapter.appendSseEvent(event), () => {
+    this.markdownContent += chunk;
+    this.renderMarkdown(this.markdownContent, true, () => {
       this.scheduleNextSseFrame();
     });
   },
 
   finishStream() {
     this.clearStreamTimer();
-    this.applyStreamState(this.streamAdapter.finish());
+    this.renderMarkdown(this.markdownContent, false);
   },
 
   scheduleNextSseFrame() {
@@ -143,7 +127,7 @@ Page({
     }
     this.streamTimer = setTimeout(() => {
       this.streamTimer = null;
-      this.pushNextSseFrame();
+      this.pushNextMarkdownChunk();
     }, DEMO_STREAM_INTERVAL);
   },
 
@@ -164,12 +148,7 @@ Page({
   resetStreamPipeline() {
     this.clearStreamTimer();
     this.sseFrameIndex = 0;
-    if (this.streamAdapter) {
-      this.streamAdapter.reset();
-    }
-    if (this.sseParser) {
-      this.sseParser.reset();
-    }
+    this.markdownContent = '';
   },
 
   resetDemo() {

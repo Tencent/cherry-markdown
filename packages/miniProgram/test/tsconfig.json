@@ -7,5 +7,5 @@
     "rootDir": "..",
     "types": ["vitest/globals"]
   },
-  "include": ["./**/*.ts", "../src/transform.js"]
+  "include": ["./**/*.ts", "../src/shared/transform.js"]
 }
