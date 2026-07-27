@@ -781,6 +781,63 @@
   }
 }
 
+.cherry-editor-disable-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99999;
+  display: none;
+  background: rgba(255, 255, 255, 0.55);
+  cursor: not-allowed;
+  user-select: none;
+  backdrop-filter: blur(1px);
+  // 兜底：让蒙层内可以承载 sticky 定位的 tips
+  overflow: hidden;
+
+  &.cherry-editor-disable-mask--show {
+    display: block;
+  }
+
+  .cherry-editor-disable-mask__tips {
+    // 默认状态：sticky 让 tips 始终停留在视窗中央
+    position: sticky;
+    top: 50%;
+    left: 50%;
+    // sticky 元素本身是块级流内元素，需要用 transform + margin auto 让它居中并偏移到视觉中心
+    display: inline-block;
+    margin: 0 auto;
+    transform: translate(-50%, -50%);
+    padding: 8px 16px;
+    max-width: 80%;
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.65);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    word-break: break-word;
+    pointer-events: none;
+    // 跟随鼠标时切换到该状态：由 JS 写入 --tips-x / --tips-y
+    transition: opacity 0.15s ease;
+  }
+
+  // 鼠标在蒙层内时，切换为跟随鼠标模式
+  &.cherry-editor-disable-mask--follow {
+    .cherry-editor-disable-mask__tips {
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0;
+      // 使用 CSS 变量承载 JS 计算出的鼠标位置，避免频繁读写 style
+      transform: translate3d(var(--tips-x, 0), var(--tips-y, 0), 0) translate(12px, 16px);
+      will-change: transform;
+    }
+  }
+}
+
 .cherry-previewer-mask {
   z-index: 10;
   position: absolute;

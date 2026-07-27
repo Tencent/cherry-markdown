@@ -313,6 +313,19 @@ alert(cherryObj.getFirstLineText());</textarea>
         <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
       </div>
     </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">setDisable(isDisable:boolean, tips:string = '')</h2>
+      <p class="one-api__desc">禁用/启用编辑器<br>isDisable=true 编辑器切换为只读，并在编辑器上覆盖一个蒙层，阻止一切交互<br>isDisable=false 恢复编辑器正常状态<br>tips 禁用时显示在蒙层上的提示文案</p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="4">
+cherryObj.setDisable(true, '编辑器已被禁用<br>3秒后恢复');
+setTimeout(() => {
+  cherryObj.setDisable(false);
+}, 3000);</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
     <h1>事件监听</h1>
     <div class="one-api">
       <h2 class="one-api__name">on(eventName:string, callback:function)</h2>

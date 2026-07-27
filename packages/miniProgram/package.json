@@ -1,0 +1,61 @@
+{
+  "name": "@cherry-markdown/miniProgram",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "MiniProgram adapters for Cherry Markdown",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tencent/cherry-markdown.git",
+    "directory": "packages/miniProgram"
+  },
+  "main": "./dist/miniProgram-stream.js",
+  "module": "./dist/miniProgram-stream.esm.js",
+  "types": "./dist/types/miniProgram-stream.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/miniProgram-stream.d.ts",
+      "import": "./dist/miniProgram-stream.esm.js",
+      "require": "./dist/miniProgram-stream.js"
+    },
+    "./stream": {
+      "types": "./dist/types/miniProgram-stream.d.ts",
+      "import": "./dist/miniProgram-stream.esm.js",
+      "require": "./dist/miniProgram-stream.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "run-s clean build:stream build:types",
+    "build:stream": "cross-env NODE_ENV=production rollup --config build/rollup.stream.config.js",
+    "build:types": "node build/types.js",
+    "clean": "rimraf ./dist",
+    "test": "vitest run --config vitest.config.ts",
+    "typecheck": "tsc --project test/tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "htmlparser2": "^10.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-alias": "5.1.1",
+    "@rollup/plugin-babel": "6.0.4",
+    "@rollup/plugin-commonjs": "28.0.6",
+    "@rollup/plugin-json": "6.1.0",
+    "@rollup/plugin-node-resolve": "16.0.1",
+    "@rollup/plugin-replace": "6.0.2",
+    "@rollup/plugin-terser": "^0.4.3",
+    "cross-env": "^7.0.2",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
+    "rollup": "4.52.3",
+    "typescript": "^6.0.2",
+    "vitest": "^3.1.3"
+  },
+  "engines": {
+    "node": ">=22",
+    "yarn": ">=1.22.18"
+  }
+}

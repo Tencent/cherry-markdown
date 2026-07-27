@@ -1,0 +1,37 @@
+{
+  "appid": "wx17e47091548760f5",
+  "compileType": "miniprogram",
+  "libVersion": "latest",
+  "miniprogramRoot": "miniprogram/",
+  "projectname": "cherry-markdown-mini-program-demo",
+  "setting": {
+    "enhance": true,
+    "es6": true,
+    "minified": true,
+    "postcss": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "editorSetting": {}
+}

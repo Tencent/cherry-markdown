@@ -157,6 +157,34 @@
   --mermaid-toolbar-tab-active-color: #333;  // active 状态深色文字，确保在亮色 slider 上可见
   --mermaid-container-border: rgba(128, 128, 128, 0.2);
 
+  /* ========== Timeline 时间线 ========== */
+  // 基础样式
+  --timeline-header-color: var(--base-font-color);
+  --timeline-line-color: var(--base-border-color);
+  --timeline-node-bg: var(--base-previewer-bg);
+  --timeline-node-color: var(--oc-gray-5);
+  --timeline-content-color: var(--md-paragraph-color);
+  --timeline-time-color: var(--base-sub-font-color);
+  --timeline-title-color: var(--md-heading-color);
+  --timeline-desc-color: var(--base-sub-font-color);
+
+  // 状态：已完成
+  --timeline-done-color: var(--oc-green-6);
+  // 状态：进行中
+  --timeline-doing-color: var(--primary-color);
+  --timeline-doing-shadow-color: rgba(24, 144, 255, 0.2);
+  --timeline-doing-pulse-from: rgba(24, 144, 255, 0.35);
+  --timeline-doing-pulse-to: rgba(24, 144, 255, 0);
+  // 状态：待办
+  --timeline-todo-bg: var(--base-previewer-bg);
+  --timeline-todo-color: var(--oc-gray-5);
+  // 状态：里程碑
+  --timeline-milestone-color: var(--oc-yellow-6);
+  --timeline-milestone-title-color: var(--oc-yellow-8);
+  // 状态：异常
+  --timeline-error-color: var(--oc-red-5);
+  --timeline-error-title-color: var(--oc-red-7);
+
   /* ========== 其余单个组件 ========== */
   --drag-border-color: #ebedee;
 }

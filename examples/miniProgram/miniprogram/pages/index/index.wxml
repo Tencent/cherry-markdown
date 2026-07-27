@@ -1,0 +1,169 @@
+<template name="inlineRuns">
+  <block wx:for="{{nodes}}" wx:key="index">
+    <text wx:if="{{item.type === 'text'}}" class="{{item.className}}">{{item.text}}</text>
+    <text wx:elif="{{item.type === 'link'}}" class="{{item.className}}" data-href="{{item.href}}" bindtap="handleLinkTap">{{item.text}}</text>
+    <text wx:elif="{{item.type === 'math_inline'}}" class="{{item.className}}" space="nbsp">{{item.text}}</text>
+    <text wx:elif="{{item.type === 'cursor'}}" class="md-cursor">|</text>
+    <text wx:elif="{{item.type === 'image_placeholder'}}" class="md-image-placeholder">{{item.text}}</text>
+    <image
+      wx:elif="{{item.type === 'image'}}"
+      class="md-inline-image"
+      src="{{item.src}}"
+      mode="widthFix"
+      data-src="{{item.src}}"
+      bindload="handleImageLoad"
+      binderror="handleImageError"
+      bindtap="previewImage"
+    />
+  </block>
+</template>
+
+<view class="page">
+  <view class="toolbar">
+    <button class="action" bindtap="startOrNextStream" disabled="{{streaming}}">{{streamButtonText}}</button>
+    <button class="action secondary" bindtap="resetDemo">重置</button>
+  </view>
+
+  <view class="preview">
+    <block wx:for="{{blocks}}" wx:key="index">
+      <view wx:if="{{item.type === 'paragraph'}}" class="md-p">
+        <template is="inlineRuns" data="{{nodes: item.inlines}}" />
+      </view>
+
+      <view wx:elif="{{item.type === 'heading'}}" class="md-heading md-h{{item.level}}">
+        <template is="inlineRuns" data="{{nodes: item.inlines}}" />
+      </view>
+
+      <view wx:elif="{{item.type === 'blockquote'}}" class="md-blockquote">
+        <block wx:for="{{item.children}}" wx:for-item="quoteBlock" wx:key="index">
+          <view wx:if="{{quoteBlock.type === 'paragraph'}}" class="md-p">
+            <template is="inlineRuns" data="{{nodes: quoteBlock.inlines}}" />
+          </view>
+          <view wx:elif="{{quoteBlock.type === 'heading'}}" class="md-heading md-h{{quoteBlock.level}}">
+            <template is="inlineRuns" data="{{nodes: quoteBlock.inlines}}" />
+          </view>
+          <image
+            wx:elif="{{quoteBlock.type === 'image'}}"
+            class="md-image"
+            src="{{quoteBlock.src}}"
+            mode="widthFix"
+            data-src="{{quoteBlock.src}}"
+            bindload="handleImageLoad"
+            binderror="handleImageError"
+            bindtap="previewImage"
+          />
+          <view wx:elif="{{quoteBlock.type === 'image_placeholder'}}" class="md-image-placeholder">
+            <text>{{quoteBlock.text}}</text>
+          </view>
+          <view wx:elif="{{quoteBlock.type === 'code_block'}}" class="md-code-card">
+            <view class="md-code-head">
+              <text>{{quoteBlock.lang || 'text'}}</text>
+              <button class="md-copy" size="mini" data-text="{{quoteBlock.text}}" bindtap="copyCode">复制</button>
+            </view>
+            <view class="md-code">
+              <block wx:for="{{quoteBlock.runs}}" wx:for-item="codeRun" wx:key="index">
+                <text class="{{codeRun.className}}" space="nbsp">{{codeRun.text}}</text>
+              </block>
+            </view>
+          </view>
+          <view wx:elif="{{quoteBlock.type === 'math_block'}}" class="md-math-block">
+            <text space="nbsp" user-select>{{quoteBlock.text}}</text>
+          </view>
+          <view wx:elif="{{quoteBlock.type === 'diagram'}}" class="md-diagram-card">
+            <view class="md-diagram-head">
+              <text>{{quoteBlock.kind}}</text>
+              <button class="md-copy" size="mini" data-text="{{quoteBlock.text}}" bindtap="copyCode">复制源码</button>
+            </view>
+            <view class="md-diagram-source">
+              <text space="nbsp" user-select>{{quoteBlock.text}}</text>
+            </view>
+          </view>
+          <rich-text wx:elif="{{quoteBlock.type === 'html'}}" class="md-html" nodes="{{quoteBlock.nodes}}" />
+        </block>
+      </view>
+
+      <view wx:elif="{{item.type === 'list'}}" class="md-list">
+        <view wx:for="{{item.children}}" wx:for-item="listItem" wx:for-index="listIndex" wx:key="index" class="md-list-item">
+          <text class="md-list-marker {{listItem.task ? 'md-task-marker' : ''}} {{listItem.checked ? 'md-task-checked' : ''}} {{listItem.task && !listItem.checked ? 'md-task-unchecked' : ''}}">{{listItem.marker}}</text>
+          <view class="md-list-body">
+            <template is="inlineRuns" data="{{nodes: listItem.inlines}}" />
+          </view>
+        </view>
+      </view>
+
+      <scroll-view wx:elif="{{item.type === 'table'}}" class="md-table-scroll" scroll-x>
+        <view class="md-table">
+          <block wx:for="{{item.header}}" wx:for-item="tableRow" wx:key="index">
+            <view class="md-table-row md-table-head">
+              <view
+                wx:for="{{tableRow.cells}}"
+                wx:for-item="tableCell"
+                wx:key="index"
+                class="md-table-cell md-table-th"
+                style="text-align: {{tableCell.align || 'left'}};"
+              >
+                <template is="inlineRuns" data="{{nodes: tableCell.inlines}}" />
+              </view>
+            </view>
+          </block>
+          <block wx:for="{{item.rows}}" wx:for-item="tableRow" wx:key="index">
+            <view class="md-table-row">
+              <view
+                wx:for="{{tableRow.cells}}"
+                wx:for-item="tableCell"
+                wx:key="index"
+                class="md-table-cell"
+                style="text-align: {{tableCell.align || 'left'}};"
+              >
+                <template is="inlineRuns" data="{{nodes: tableCell.inlines}}" />
+              </view>
+            </view>
+          </block>
+        </view>
+      </scroll-view>
+
+      <view wx:elif="{{item.type === 'code_block'}}" class="md-code-card">
+        <view class="md-code-head">
+          <text>{{item.lang || 'text'}}</text>
+          <button class="md-copy" size="mini" data-text="{{item.text}}" bindtap="copyCode">复制</button>
+        </view>
+        <view class="md-code">
+          <block wx:for="{{item.runs}}" wx:for-item="codeRun" wx:key="index">
+            <text class="{{codeRun.className}}" space="nbsp">{{codeRun.text}}</text>
+          </block>
+        </view>
+      </view>
+
+      <view wx:elif="{{item.type === 'math_block'}}" class="md-math-block">
+        <text space="nbsp" user-select>{{item.text}}</text>
+      </view>
+
+      <view wx:elif="{{item.type === 'diagram'}}" class="md-diagram-card">
+        <view class="md-diagram-head">
+          <text>{{item.kind}}</text>
+          <button class="md-copy" size="mini" data-text="{{item.text}}" bindtap="copyCode">复制源码</button>
+        </view>
+        <view class="md-diagram-source">
+          <text space="nbsp" user-select>{{item.text}}</text>
+        </view>
+      </view>
+
+      <image
+        wx:elif="{{item.type === 'image'}}"
+        class="md-image"
+        src="{{item.src}}"
+        mode="widthFix"
+        data-src="{{item.src}}"
+        bindload="handleImageLoad"
+        binderror="handleImageError"
+        bindtap="previewImage"
+      />
+
+      <view wx:elif="{{item.type === 'image_placeholder'}}" class="md-image-placeholder">
+        <text>{{item.text}}</text>
+      </view>
+
+      <rich-text wx:elif="{{item.type === 'html'}}" class="md-html" nodes="{{item.nodes}}" />
+    </block>
+  </view>
+</view>

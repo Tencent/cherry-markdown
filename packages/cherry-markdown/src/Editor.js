@@ -344,8 +344,9 @@ class CM6Adapter {
    * 创建 CM6Adapter 实例
    * @param {EditorView} view - EditorView 实例
    * @param {Compartment} [vimCompartment] - vim 模式的 Compartment（可选，用于多实例隔离）
+   * @param {Compartment} [readOnlyCompartment] - 只读状态的 Compartment（可选，用于动态切换只读）
    */
-  constructor(view, vimCompartment) {
+  constructor(view, vimCompartment, readOnlyCompartment) {
     /** @type {EditorView} */
     this.view = view;
     /** @type {Map<string, Array<(...args: unknown[]) => void>>} */
@@ -354,6 +355,8 @@ class CM6Adapter {
     this.currentKeyMap = 'sublime';
     /** @type {Compartment | null} */
     this.vimCompartment = vimCompartment || null;
+    /** @type {Compartment | null} */
+    this.readOnlyCompartment = readOnlyCompartment || null;
     /** @type {number} 实例级 markId 计数器 */
     this.markIdCounter = 0;
   }
@@ -582,9 +585,32 @@ class CM6Adapter {
       case 'keyMap':
         this.setKeyMap(/** @type {'sublime' | 'vim'} */ (value));
         break;
+      case 'readOnly':
+      case 'disableInput':
+        this.setReadOnly(/** @type {boolean} */ (value));
+        break;
       default:
         break;
     }
+  }
+
+  /**
+   * 动态设置编辑器的只读状态
+   * 开启后：
+   *   - 用户键盘输入、粘贴、拖拽等所有会修改文档的操作都会被拒绝；
+   *   - 通过 API（如 setOption('value', ...)）主动派发的变更仍会被拒绝，如需强制写入请先关闭只读；
+   *   - 光标依然可以移动，文本依然可以选中和复制。
+   * @param {boolean} readOnly - 是否只读
+   * @returns {void}
+   */
+  setReadOnly(readOnly) {
+    if (!this.readOnlyCompartment) {
+      console.warn('readOnlyCompartment not available, cannot toggle readOnly');
+      return;
+    }
+    this.view.dispatch({
+      effects: this.readOnlyCompartment.reconfigure(EditorState.readOnly.of(Boolean(readOnly))),
+    });
   }
 
   /**
@@ -1072,6 +1098,8 @@ export default class Editor {
     this.keymapCompartment = new Compartment();
     /** @type {Compartment} */
     this.vimCompartment = new Compartment();
+    /** @type {Compartment} */
+    this.readOnlyCompartment = new Compartment();
 
     /** @type {ReturnType<typeof setTimeout> | number} */
     this.dealSpecialWordsTimer = 0;
@@ -1843,7 +1871,7 @@ export default class Editor {
         key: 'Enter',
         run: (view) => {
           if (self.arrowKeyInterceptor?.('Enter')) return true;
-          const adapter = self.editor || new CM6Adapter(view, self.vimCompartment);
+          const adapter = self.editor || new CM6Adapter(view, self.vimCompartment, self.readOnlyCompartment);
           return handleNewlineIndentList(adapter);
         },
       },
@@ -1919,6 +1947,7 @@ export default class Editor {
 
       this.keymapCompartment.of(keymap.of(this.defaultKeymap)),
       this.vimCompartment.of([]),
+      this.readOnlyCompartment.of(EditorState.readOnly.of(false)),
       EditorState.allowMultipleSelections.of(true),
       EditorView.lineWrapping,
 
@@ -2110,7 +2139,7 @@ export default class Editor {
 
     textArea.style.display = 'none';
 
-    const editor = new CM6Adapter(view, this.vimCompartment);
+    const editor = new CM6Adapter(view, this.vimCompartment, this.readOnlyCompartment);
     this.previewer = previewer;
     this.editor = editor;
 
@@ -2177,6 +2206,19 @@ export default class Editor {
       editor.view.focus();
     }
     this.dealSpecialWords(true);
+  }
+
+  setReadOnly(readOnly) {
+    if (this.editor) {
+      this.editor.setReadOnly(readOnly);
+    }
+  }
+
+  isReadOnly() {
+    if (this.editor) {
+      return this.editor.getOption('readOnly');
+    }
+    return false;
   }
 
   /**
