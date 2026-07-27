@@ -1,5 +1,5 @@
-const miniProgramModule = require('../../vendor/cherry-mini-program-stream');
-const { createMiniProgramSseFrames, createMiniProgramStreamAdapter, createSseParser } = miniProgramModule;
+import { createMiniProgramStreamAdapter } from '../../vendor/cherry-mini-program.js';
+import { createMockSseFrames } from '../../utils/mock-sse.js';
 
 const DEMO_MARKDOWN = `# Cherry Markdown MiniProgram
 
@@ -51,7 +51,7 @@ graph TD;
 `;
 
 const DEMO_STREAM_INTERVAL = 60;
-const SSE_FRAMES = createMiniProgramSseFrames(DEMO_MARKDOWN);
+const SSE_FRAMES = createMockSseFrames(DEMO_MARKDOWN);
 
 Page({
   data: {
@@ -64,10 +64,6 @@ Page({
   onLoad() {
     this.streamAdapter = createMiniProgramStreamAdapter({
       imagePlaceholderText: '图片链接解析中',
-    });
-    this.sseParser = createSseParser({
-      onMessage: (event) => this.handleSseMessage(event),
-      onDone: () => this.finishStream(),
     });
     this.resetStreamPipeline();
     this.autoStartStream();
@@ -122,11 +118,7 @@ Page({
     }
 
     this.sseFrameIndex += 1;
-    this.sseParser.push(frame);
-  },
-
-  handleSseMessage(event) {
-    this.applyStreamState(this.streamAdapter.appendSseEvent(event), () => {
+    this.applyStreamState(this.streamAdapter.appendSseChunk(frame), () => {
       this.scheduleNextSseFrame();
     });
   },
@@ -166,9 +158,6 @@ Page({
     this.sseFrameIndex = 0;
     if (this.streamAdapter) {
       this.streamAdapter.reset();
-    }
-    if (this.sseParser) {
-      this.sseParser.reset();
     }
   },
 

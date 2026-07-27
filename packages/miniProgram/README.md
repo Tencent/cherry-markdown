@@ -8,7 +8,9 @@
 
 ## Purpose
 
-`@cherry-markdown/miniProgram` provides WeChat MiniProgram native rendering adapters for Cherry Markdown. It converts Markdown into structured WXML-friendly view data, rendered entirely with native MiniProgram components. Core features do not require WebView, DOM, or `rich-text` HTML rendering.
+`@cherry-markdown/miniProgram` converts Cherry Markdown into structured, WXML-friendly view data. It does not ship a WXML component, styles, or interaction handlers: consumers render the returned blocks and runs with their own MiniProgram templates.
+
+Core Markdown structures can be rendered with native MiniProgram components and do not require WebView or DOM. Unknown or complex HTML is returned as an `html` block; consumers may render that block with `rich-text` as a fallback.
 
 ## Usage
 
@@ -16,113 +18,125 @@
 npm install @cherry-markdown/miniProgram
 ```
 
-The stream IIFE build is available at `node_modules/@cherry-markdown/miniProgram/dist/miniProgram-stream.js` after install.
-Copy it to your MiniProgram project:
+Choose the entry that matches your rendering flow. Both constructors create and own their Cherry engine; normal usage does not call `createMiniProgramEngine`.
 
-```sh
-cp node_modules/@cherry-markdown/miniProgram/dist/miniProgram-stream.js <your-miniprogram>/vendor/
-```
-
-Bundler users can import the ESM entries:
-
-```js
-import MiniProgramStream, { createMiniProgramEngine } from '@cherry-markdown/miniProgram';
-import { createMiniProgramStreamAdapter } from '@cherry-markdown/miniProgram/stream';
-```
+Use `MiniProgramStream` for one-shot Markdown and `createMiniProgramStreamAdapter` for an accumulated stream. The adapter keeps SSE framing and incomplete Markdown handling inside the package.
 
 ### Stream rendering
 
 ```js
-require('./vendor/miniProgram');
-const { createMiniProgramStreamAdapter, createSseParser } = globalThis.CherryMiniProgram;
+import { createMiniProgramStreamAdapter } from '@cherry-markdown/miniProgram';
 
+const page = this;
 const adapter = createMiniProgramStreamAdapter();
-const parser = createSseParser({
-  onMessage: (event) => {
-    const state = adapter.appendSseEvent(event);
-    this.setData({ blocks: state.blocks, streaming: true });
-  },
-  onDone: () => {
-    const state = adapter.finish();
-    this.setData({ blocks: state.blocks, streaming: false });
-  },
-});
+let finished = false;
 
-wx.request({
+function applyState(state) {
+  if (state) {
+    page.setData({ blocks: state.blocks, streaming: state.streaming });
+  }
+}
+
+function finishStream() {
+  if (finished) return;
+  finished = true;
+  applyState(adapter.complete());
+}
+
+const requestTask = wx.request({
   url: 'https://your-llm-endpoint',
   enableChunked: true,
   responseType: 'arraybuffer',
-  success(res) {
-    parser.push(res.data);
+  success() {
+    // Response chunks have already been received by onChunkReceived.
+  },
+  fail(error) {
+    wx.showToast({ title: error.errMsg || 'Request failed', icon: 'none' });
+  },
+  complete() {
+    finishStream();
   },
 });
+
+requestTask.onChunkReceived(({ data }) => {
+  const state = adapter.appendSseChunk(data);
+  applyState(state);
+  if (state?.done) {
+    finished = true;
+  }
+});
 ```
+
+`onChunkReceived` receives each `ArrayBuffer` as it arrives. `appendSseChunk()` internally handles UTF-8 boundaries, SSE frames, JSON `content`/`delta`/`text` payloads, and `[DONE]`. `complete()` flushes a trailing frame and closes the adapter when the server does not send `[DONE]`.
+
+`append()` re-renders the accumulated Markdown for correctness with incomplete syntax. For high-frequency model output, batch page-level `setData` calls (for example, every 50-100 ms) instead of updating for every chunk.
 
 ### Static rendering
 
 ```js
-require('./vendor/miniProgram');
-const MiniProgramStream = globalThis.CherryMiniProgram.default;
+import MiniProgramStream from '@cherry-markdown/miniProgram';
+
 const stream = new MiniProgramStream();
 this.setData({ blocks: stream.setMarkdownView('# Hello\nMarkdown content') });
 ```
 
 ## Module Formats
 
-| Entry                                 | ESM                              | IIFE                         |
-| ------------------------------------- | -------------------------------- | ---------------------------- |
-| `@cherry-markdown/miniProgram`        | `dist/miniProgram-stream.esm.js` | `dist/miniProgram-stream.js` |
-| `@cherry-markdown/miniProgram/stream` | `dist/miniProgram-stream.esm.js` | `dist/miniProgram-stream.js` |
-
-IIFE builds mount named exports on `globalThis.CherryMiniProgram` and `window.CherryMiniProgram` in browsers.
+| Entry                          | ESM                       |
+| ------------------------------ | ------------------------- |
+| `@cherry-markdown/miniProgram` | `dist/miniProgram.esm.js` |
 
 ## Supported Features
 
-| Feature       | Syntax                          | Render                              | Status |
-| ------------- | ------------------------------- | ----------------------------------- | ------ |
-| Paragraph     | plain text                      | Native `view` + `text` runs         | ✅     |
-| Heading       | `#` `##` `###`                  | Native `view` with level class      | ✅     |
-| Blockquote    | `>`                             | Native `view`, recursive children   | ✅     |
-| List          | `-` / `1.`                      | Flexbox + marker text               | ✅     |
-| Task List     | `- [x]` / `- [ ]`               | Flexbox, `☑`/`☐` markers            | ✅     |
-| Table         | `\| A \| B \|`                  | Flexbox + scroll, interactive cells | ✅     |
-| Code Block    | ` ```lang ``` `                 | Token highlight, copy button        | ✅     |
-| Image         | `![alt](src)`                   | Native `image`, preview on tap      | ✅     |
-| Link          | `[text](url)`                   | Native `text` + `bindtap`           | ✅     |
-| Math Inline   | `$E=mc^2$`                      | Monospace `text` with class         | ✅     |
-| Math Block    | `$$...$$`                       | Monospace `text` with class         | ✅     |
-| Mermaid       | ` ```mermaid ``` `              | Source code card, copy source       | ✅     |
-| Bold          | `**text**`                      | `class="md-strong"`                 | ✅     |
-| Italic        | `*text*`                        | `class="md-em"`                     | ✅     |
-| Inline Code   | `` `code` ``                    | `class="md-inline-code"`            | ✅     |
-| Underline     | `++text++`                      | `class="md-underline"`              | ✅     |
-| Strikethrough | `~~text~~`                      | `class="md-strike"`                 | ✅     |
-| Sub / Sup     | `~text~` / `^text^`             | Inline text with class              | ✅     |
-| Line Break    | two trailing spaces             | `\n` in text run                    | ✅     |
-| AutoLink      | `https://...`                   | Same as link                        | ✅     |
-| Emoji         | `:smile:`                       | Image component                     | ✅     |
-| Cursor        | stream only                     | `\|` cursor symbol                  | ✅     |
-| Footnote ref  | `[^key]`                        | Sup + link                          | ✅     |
-| Panel         | `:::tip/warning/danger/success` | Plain paragraph, styling lost       | ❌     |
-| Footnote body | generated content               | Plain paragraphs, styling lost      | ❌     |
-| Color / Size  | `==color=red text==`            | Attr preserved, WXML ignores        | ❌     |
-| Align         | `:::left/center/right`          | CSS class not consumed              | ❌     |
-| Toc           | `[TOC]`                         | List structure ok, styling lost     | ❌     |
-| Hr            | `---`                           | Rich-text fallback                  | ❌     |
-| Detail        | `+++`                           | Rich-text fallback, static          | ❌     |
-| Ruby          | `{ Ruby }`                      | Rich-text fallback                  | ❌     |
-| Raw HTML      | `<div>...</div>`                | Rich-text fallback                  | ❌     |
-| SuggestList   | editor only                     | Not rendering                       | —      |
-| FrontMatter   | `---yaml---`                    | Not rendered by default             | —      |
+| Feature       | Syntax                          | Render                                   | Status |
+| ------------- | ------------------------------- | ---------------------------------------- | ------ |
+| Paragraph     | plain text                      | Native `view` + `text` runs              | ✅     |
+| Heading       | `#` `##` `###`                  | Native `view` with level class           | ✅     |
+| Blockquote    | `>`                             | Native child-block data                  | ✅     |
+| List          | `-` / `1.`                      | Flexbox + marker text                    | ✅     |
+| Task List     | `- [x]` / `- [ ]`               | Flexbox, `☑`/`☐` markers                 | ✅     |
+| Table         | `\| A \| B \|`                  | Native table rows and cell runs          | ✅     |
+| Code Block    | ` ```lang ``` `                 | Highlight runs; template adds copy       | ✅     |
+| Image         | `![alt](src)`                   | Native image run; template adds preview  | ✅     |
+| Link          | `[text](url)`                   | Text run with `href`; template binds tap | ✅     |
+| Math Inline   | `$E=mc^2$`                      | Formula source in a text run             | ✅     |
+| Math Block    | `$$...$$`                       | Formula source block, not typeset        | ✅     |
+| Mermaid       | ` ```mermaid ``` `              | Mermaid source block, not a diagram      | ✅     |
+| Bold          | `**text**`                      | `class="md-strong"`                      | ✅     |
+| Italic        | `*text*`                        | `class="md-em"`                          | ✅     |
+| Inline Code   | `` `code` ``                    | `class="md-inline-code"`                 | ✅     |
+| Underline     | `++text++`                      | `class="md-underline"`                   | ✅     |
+| Strikethrough | `~~text~~`                      | `class="md-strike"`                      | ✅     |
+| Sub / Sup     | `~text~` / `^text^`             | Inline text with class                   | ✅     |
+| Line Break    | two trailing spaces             | `\n` in text run                         | ✅     |
+| AutoLink      | `https://...`                   | Same as link                             | ✅     |
+| Emoji         | `:smile:`                       | Image component                          | ✅     |
+| Cursor        | stream only                     | `\|` cursor symbol                       | ✅     |
+| Footnote ref  | `[^key]`                        | Sup/link data; template owns navigation  | ✅     |
+| Panel         | `:::tip/warning/danger/success` | Plain paragraph, styling lost            | ❌     |
+| Footnote body | generated content               | Plain paragraphs, styling lost           | ❌     |
+| Color / Size  | `==color=red text==`            | Attr preserved, WXML ignores             | ❌     |
+| Align         | `:::left/center/right`          | CSS class not consumed                   | ❌     |
+| Toc           | `[TOC]`                         | List structure ok, styling lost          | ❌     |
+| Hr            | `---`                           | Rich-text fallback                       | ❌     |
+| Detail        | `+++`                           | Rich-text fallback, static               | ❌     |
+| Ruby          | `{ Ruby }`                      | Rich-text fallback                       | ❌     |
+| Raw HTML      | `<div>...</div>`                | Rich-text fallback                       | ❌     |
+| SuggestList   | editor only                     | Not rendering                            | —      |
+| FrontMatter   | `---yaml---`                    | Not rendered by default                  | —      |
 
-Core Markdown features are rendered with native WXML-friendly data and support interactions such as code copy, image preview, and link navigation.
+The package returns WXML-friendly data only. The bundled Demo shows one template implementation for common blocks, code copy, image preview, link handling, and `html` fallback; applications must provide their own template, styles, and event handlers.
 
 ## Demo
 
 A complete WeChat MiniProgram demo is available at `examples/miniProgram`.
 
 ```sh
-cp node_modules/@cherry-markdown/miniProgram/dist/miniProgram-stream.js examples/miniProgram/miniprogram/vendor/cherry-mini-program-stream.js
+cp node_modules/@cherry-markdown/miniProgram/dist/miniProgram.esm.js examples/miniProgram/miniprogram/vendor/cherry-mini-program.js
 ```
 
 Open `examples/miniProgram` in WeChat DevTools.
+
+## License
+
+Apache-2.0. See [LICENSE](./LICENSE).

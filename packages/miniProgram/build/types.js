@@ -157,12 +157,6 @@ export type MiniProgramViewBlock =
   | MiniProgramImagePlaceholderRun
   | MiniProgramHtmlBlock;
 
-export type MiniProgramSseEvent = { data: string; event: string; id: string; retry?: number };
-export type MiniProgramSseParser = {
-  push(chunk: string | ArrayBuffer): void;
-  end(): void;
-  reset(): void;
-};
 export type MiniProgramStreamState = {
   markdown: string;
   blocks: MiniProgramViewBlock[];
@@ -188,15 +182,6 @@ export declare function blocksToMiniProgramView(
   options?: MiniProgramViewOptions,
 ): MiniProgramViewBlock[];
 export declare function resolvePendingImages(blocks: MiniProgramViewBlock[]): MiniProgramViewBlock[];
-export declare function createSseParser(options?: {
-  onMessage?: (event: MiniProgramSseEvent) => void;
-  onDone?: () => void;
-}): MiniProgramSseParser;
-export declare function createMiniProgramStreamChunks(markdown?: string): string[];
-export declare function createMiniProgramSseFrames(
-  markdown?: string,
-  options?: { field?: 'content' | 'delta' | 'text'; includeDone?: boolean },
-): string[];
 export declare function createMiniProgramStreamAdapter(
   options?: MiniProgramStreamAdapterOptions,
 ): MiniProgramStreamAdapter;
@@ -212,10 +197,11 @@ export declare class MiniProgramStreamAdapter {
     options?: MiniProgramTransformOptions & MiniProgramViewOptions,
   ): MiniProgramStreamState;
   append(chunk: string, options?: MiniProgramTransformOptions & MiniProgramViewOptions): MiniProgramStreamState;
-  appendSseEvent(
-    event: { data?: string },
+  appendSseChunk(
+    chunk: string | ArrayBuffer,
     options?: MiniProgramTransformOptions & MiniProgramViewOptions,
   ): MiniProgramStreamState | null;
+  complete(options?: MiniProgramTransformOptions & MiniProgramViewOptions): MiniProgramStreamState;
   finish(options?: MiniProgramTransformOptions & MiniProgramViewOptions): MiniProgramStreamState;
   reset(markdown?: string): MiniProgramStreamState;
   getState(): MiniProgramStreamState;
@@ -239,4 +225,4 @@ export default class MiniProgramStream {
 }
 `;
 
-writeFileSync(resolve(distTypesDir, 'miniProgram-stream.d.ts'), source);
+writeFileSync(resolve(distTypesDir, 'miniProgram.d.ts'), source);

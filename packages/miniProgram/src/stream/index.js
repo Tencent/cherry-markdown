@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 import { parseDocument } from 'htmlparser2';
-import { createMiniProgramEngine } from './engine';
-import { markdownToMiniProgramView } from './renderer';
-import { createMiniProgramSseFrames, createMiniProgramStreamChunks, createSseParser } from './sse';
-import { htmlToMiniProgramBlocks, markdownToMiniProgramBlocks } from './transform';
-import { blocksToMiniProgramView, resolvePendingImages } from './view';
-import { MiniProgramStreamAdapter, createMiniProgramStreamAdapter } from './adapter';
+import { createMiniProgramEngine } from '../shared/engine';
+import { markdownToMiniProgramView } from '../shared/renderer';
+import { markdownToMiniProgramBlocks } from '../shared/transform';
 
 export function markdownToHtml(markdown, options = {}) {
   return createMiniProgramEngine({
@@ -81,8 +78,8 @@ export default class MiniProgramStream {
 
   /**
    * @param {string} markdown
-   * @param {import('./transform').MiniProgramTransformOptions} [options]
-   * @returns {import('./transform').MiniProgramBlock[]}
+   * @param {import('../shared/transform').MiniProgramTransformOptions} [options]
+   * @returns {import('../shared/transform').MiniProgramBlock[]}
    */
   makeBlocks(markdown, options = {}) {
     const forceNoCursor = options.forceNoCursor !== false;
@@ -91,8 +88,8 @@ export default class MiniProgramStream {
 
   /**
    * @param {string} content
-   * @param {import('./transform').MiniProgramTransformOptions} [options]
-   * @returns {import('./transform').MiniProgramBlock[]}
+   * @param {import('../shared/transform').MiniProgramTransformOptions} [options]
+   * @returns {import('../shared/transform').MiniProgramBlock[]}
    */
   setMarkdown(content, options = {}) {
     this.lastMarkdownText = content || '';
@@ -101,8 +98,8 @@ export default class MiniProgramStream {
 
   /**
    * @param {string} markdown
-   * @param {import('./transform').MiniProgramTransformOptions & import('./view').MiniProgramViewOptions} [options]
-   * @returns {import('./view').MiniProgramViewBlock[]}
+   * @param {import('../shared/transform').MiniProgramTransformOptions & import('../shared/view').MiniProgramViewOptions} [options]
+   * @returns {import('../shared/view').MiniProgramViewBlock[]}
    */
   makeView(markdown, options = {}) {
     return markdownToMiniProgramView(this.engine, markdown || '', options);
@@ -110,8 +107,8 @@ export default class MiniProgramStream {
 
   /**
    * @param {string} content
-   * @param {import('./transform').MiniProgramTransformOptions & import('./view').MiniProgramViewOptions} [options]
-   * @returns {import('./view').MiniProgramViewBlock[]}
+   * @param {import('../shared/transform').MiniProgramTransformOptions & import('../shared/view').MiniProgramViewOptions} [options]
+   * @returns {import('../shared/view').MiniProgramViewBlock[]}
    */
   setMarkdownView(content, options = {}) {
     this.lastMarkdownText = content || '';
@@ -130,16 +127,3 @@ export default class MiniProgramStream {
    */
   clearFlowSessionCursor() {}
 }
-
-export {
-  createMiniProgramEngine,
-  MiniProgramStreamAdapter,
-  blocksToMiniProgramView,
-  createMiniProgramStreamAdapter,
-  createMiniProgramSseFrames,
-  createMiniProgramStreamChunks,
-  createSseParser,
-  htmlToMiniProgramBlocks,
-  markdownToMiniProgramBlocks,
-  resolvePendingImages,
-};

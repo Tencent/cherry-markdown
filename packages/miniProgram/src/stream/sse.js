@@ -135,76 +135,11 @@ function parseSseFrame(frame) {
   return event;
 }
 
-function normalizeSsePayloadField(field) {
-  return field === 'delta' || field === 'text' ? field : 'content';
-}
-
 /**
- * Splits markdown into stream chunks for local MiniProgram demos and tests.
- * This helper is not a Markdown parser; Cherry still owns all rendering semantics.
- * It only keeps syntactic spans together when simulating SSE locally so demos do not
- * need Markdown-aware regexes in page code.
- * @param {string} markdown
- * @returns {string[]}
+ * Internal parser for text/event-stream chunks from wx.request({ enableChunked: true }).
+ * @returns {{ push(chunk: string | ArrayBuffer): Array<{ data: string; done: boolean }>; end(): Array<{ data: string; done: boolean }>; reset(): void }}
  */
-export function createMiniProgramStreamChunks(markdown = '') {
-  const source = String(markdown || '');
-  const chunks = [];
-  let index = 0;
-
-  while (index < source.length) {
-    const rest = source.slice(index);
-    const fencedBlock = rest.match(/^```[\s\S]*?```/);
-    const mathBlock = rest.match(/^\$\$[\s\S]*?\$\$/);
-    const image = rest.match(/^!\[[^\]]*\]\([^)]+\)/);
-    const link = rest.match(/^\[[^\]]+\]\([^)]+\)/);
-    const inlineMath = rest.match(/^\$[^$\n]+\$/);
-    const chunk = fencedBlock?.[0] || mathBlock?.[0] || image?.[0] || link?.[0] || inlineMath?.[0];
-
-    if (chunk) {
-      chunks.push(chunk);
-      index += chunk.length;
-      continue;
-    }
-
-    const [char] = Array.from(rest);
-    chunks.push(char);
-    index += char.length;
-  }
-
-  return chunks;
-}
-
-/**
- * Creates text/event-stream frames for local demos from markdown chunks.
- * @param {string} markdown
- * @param {{ field?: 'content' | 'delta' | 'text'; includeDone?: boolean }} [options]
- * @returns {string[]}
- */
-export function createMiniProgramSseFrames(markdown = '', options = {}) {
-  const field = normalizeSsePayloadField(options.field);
-  const frames = createMiniProgramStreamChunks(markdown).map((chunk) => {
-    const payload = { [field]: chunk };
-    return `data: ${JSON.stringify(payload)}\n\n`;
-  });
-
-  if (options.includeDone !== false) {
-    frames.push('data: [DONE]\n\n');
-  }
-
-  return frames;
-}
-
-/**
- * @typedef {{ data: string; event: string; id: string; retry?: number }} MiniProgramSseEvent
- * @typedef {{ onMessage?: (event: MiniProgramSseEvent) => void; onDone?: () => void }} MiniProgramSseParserOptions
- */
-
-/**
- * Parses text/event-stream chunks from wx.request({ enableChunked: true }).
- * @param {MiniProgramSseParserOptions} [options]
- */
-export function createSseParser(options = {}) {
+export function createSseChunkParser() {
   const decoder = createDecoder();
   let buffer = '';
 
@@ -218,19 +153,15 @@ export function createSseParser(options = {}) {
     return '';
   };
 
-  const emitFrame = (frame) => {
+  const parseFrame = (frame) => {
     const event = parseSseFrame(frame);
     if (event.data === '[DONE]') {
-      if (options.onDone) {
-        options.onDone();
-      }
-      return;
+      return { data: '', done: true };
     }
     if (event.data || event.event !== 'message') {
-      if (options.onMessage) {
-        options.onMessage(event);
-      }
+      return { data: event.data, done: false };
     }
+    return null;
   };
 
   return {
@@ -238,17 +169,19 @@ export function createSseParser(options = {}) {
       buffer += decodeChunk(chunk).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
       const frames = buffer.split('\n\n');
       buffer = frames.pop() || '';
-      frames.forEach(emitFrame);
+      return frames.map(parseFrame).filter(Boolean);
     },
 
     end() {
       if (decoder) {
         buffer += decoder.decode();
       }
+      const frames = [];
       if (buffer.trim()) {
-        emitFrame(buffer);
+        frames.push(parseFrame(buffer));
       }
       buffer = '';
+      return frames.filter(Boolean);
     },
 
     reset() {

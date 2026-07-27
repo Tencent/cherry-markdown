@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import { createMiniProgramEngine } from './engine';
-import { markdownToMiniProgramView } from './renderer';
+import { createMiniProgramEngine } from '../shared/engine';
+import { markdownToMiniProgramView } from '../shared/renderer';
+import { createSseChunkParser } from './sse';
 
 /**
- * @typedef {{ markdown: string; blocks: import('./view').MiniProgramViewBlock[]; streaming: boolean; done: boolean }} MiniProgramStreamState
+ * @typedef {{ markdown: string; blocks: import('../shared/view').MiniProgramViewBlock[]; streaming: boolean; done: boolean }} MiniProgramStreamState
  * @typedef {{
- *   stream?: { setMarkdownView(markdown: string, options?: Record<string, any>): import('./view').MiniProgramViewBlock[] };
+ *   stream?: { setMarkdownView(markdown: string, options?: Record<string, any>): import('../shared/view').MiniProgramViewBlock[] };
  *   value?: string;
- *   viewOptions?: import('./transform').MiniProgramTransformOptions & import('./view').MiniProgramViewOptions;
+ *   viewOptions?: import('../shared/transform').MiniProgramTransformOptions & import('../shared/view').MiniProgramViewOptions;
  *   imagePlaceholderText?: string;
  * }} MiniProgramStreamAdapterOptions
  */
@@ -71,12 +72,13 @@ export class MiniProgramStreamAdapter {
       });
     this.streaming = false;
     this.done = false;
+    this.sseParser = createSseChunkParser();
   }
 
   /**
    * @private
    * @param {boolean} streaming
-   * @param {import('./transform').MiniProgramTransformOptions & import('./view').MiniProgramViewOptions} [options]
+   * @param {import('../shared/transform').MiniProgramTransformOptions & import('../shared/view').MiniProgramViewOptions} [options]
    * @returns {MiniProgramStreamState}
    */
   render(streaming, options = {}) {
@@ -99,7 +101,7 @@ export class MiniProgramStreamAdapter {
 
   /**
    * @param {string} markdown
-   * @param {import('./transform').MiniProgramTransformOptions & import('./view').MiniProgramViewOptions} [options]
+   * @param {import('../shared/transform').MiniProgramTransformOptions & import('../shared/view').MiniProgramViewOptions} [options]
    * @returns {MiniProgramStreamState}
    */
   setMarkdown(markdown, options = {}) {
@@ -111,7 +113,7 @@ export class MiniProgramStreamAdapter {
 
   /**
    * @param {string} chunk
-   * @param {import('./transform').MiniProgramTransformOptions & import('./view').MiniProgramViewOptions} [options]
+   * @param {import('../shared/transform').MiniProgramTransformOptions & import('../shared/view').MiniProgramViewOptions} [options]
    * @returns {MiniProgramStreamState}
    */
   append(chunk, options = {}) {
@@ -122,26 +124,52 @@ export class MiniProgramStreamAdapter {
   }
 
   /**
-   * @param {{ data?: string }} event
-   * @param {import('./transform').MiniProgramTransformOptions & import('./view').MiniProgramViewOptions} [options]
+   * Accepts raw SSE transport chunks and returns the updated Markdown view state.
+   * SSE framing, UTF-8 boundaries, JSON payload extraction, and [DONE] are internal.
+   * @param {string | ArrayBuffer} chunk
+   * @param {import('../shared/transform').MiniProgramTransformOptions & import('../shared/view').MiniProgramViewOptions} [options]
    * @returns {MiniProgramStreamState | null}
    */
-  appendSseEvent(event, options = {}) {
-    const chunk = getPayloadContent(event?.data || '');
-    if (!chunk) {
-      return null;
-    }
-    return this.append(chunk, options);
+  appendSseChunk(chunk, options = {}) {
+    let state = null;
+    this.sseParser.push(chunk).forEach((event) => {
+      if (event.done) {
+        state = this.complete(options);
+        return;
+      }
+      const content = getPayloadContent(event.data);
+      if (content) {
+        state = this.append(content, options);
+      }
+    });
+    return state;
   }
 
   /**
-   * @param {import('./transform').MiniProgramTransformOptions & import('./view').MiniProgramViewOptions} [options]
+   * Flushes a pending SSE frame, then completes the Markdown stream.
+   * @param {import('../shared/transform').MiniProgramTransformOptions & import('../shared/view').MiniProgramViewOptions} [options]
    * @returns {MiniProgramStreamState}
    */
-  finish(options = {}) {
+  complete(options = {}) {
+    this.sseParser.end().forEach((event) => {
+      if (!event.done) {
+        const content = getPayloadContent(event.data);
+        if (content) {
+          this.append(content, options);
+        }
+      }
+    });
     this.streaming = false;
     this.done = true;
     return this.render(false, { deferImages: false, forceNoCursor: true, ...options });
+  }
+
+  /**
+   * @param {import('../shared/transform').MiniProgramTransformOptions & import('../shared/view').MiniProgramViewOptions} [options]
+   * @returns {MiniProgramStreamState}
+   */
+  finish(options = {}) {
+    return this.complete(options);
   }
 
   /**
@@ -152,6 +180,7 @@ export class MiniProgramStreamAdapter {
     this.markdown = normalizeChunk(markdown);
     this.streaming = false;
     this.done = false;
+    this.sseParser.reset();
     return this.render(false, { deferImages: false, forceNoCursor: true });
   }
 

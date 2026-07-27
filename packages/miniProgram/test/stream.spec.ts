@@ -2,14 +2,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import MiniProgramStream, {
   blocksToMiniProgramView,
-  createMiniProgramSseFrames,
   createMiniProgramStreamAdapter,
-  createMiniProgramStreamChunks,
-  createSseParser,
   htmlToMiniProgramBlocks,
   markdownToHtml,
   resolvePendingImages,
-} from '../src/stream';
+} from '../src';
 
 describe('@cherry-markdown/miniProgram stream', () => {
   it('returns MiniProgram block AST from the isolated stream entry', () => {
@@ -295,51 +292,32 @@ describe('@cherry-markdown/miniProgram stream', () => {
     expect(adapter.append('![Alt](/img').blocks).toEqual([]);
   });
 
-  it('parses chunked SSE data frames from the stream entry', () => {
-    const messages = [];
-    let done = false;
-    const parser = createSseParser({
-      onMessage: (event) => messages.push(event),
-      onDone: () => {
-        done = true;
-      },
+  it('handles chunked SSE frames inside the stream adapter', () => {
+    const adapter = createMiniProgramStreamAdapter();
+
+    expect(adapter.appendSseChunk('event: message\ndata: {"content":"hel')).toBeNull();
+    expect(adapter.appendSseChunk('lo"}\n\ndata: [DONE]\n\n')).toEqual({
+      markdown: 'hello',
+      blocks: [{ type: 'paragraph', inlines: [{ type: 'text', text: 'hello', className: '', href: '' }] }],
+      streaming: false,
+      done: true,
     });
-
-    parser.push('event: message\ndata: {"content":"hel');
-    parser.push('lo"}\n\ndata: [DONE]\n\n');
-
-    expect(messages).toEqual([{ data: '{"content":"hello"}', event: 'message', id: '', retry: undefined }]);
-    expect(done).toBe(true);
   });
 
-  it('creates local SSE demo frames without page-level Markdown token logic', () => {
-    const chunks = createMiniProgramStreamChunks('A ![alt](img.png) `x` $E=mc^2$');
-
-    expect(chunks).toEqual(['A', ' ', '![alt](img.png)', ' ', '`', 'x', '`', ' ', '$E=mc^2$']);
-    expect(createMiniProgramSseFrames('hi', { field: 'delta' })).toEqual([
-      'data: {"delta":"h"}\n\n',
-      'data: {"delta":"i"}\n\n',
-      'data: [DONE]\n\n',
-    ]);
-  });
-
-  it('parses split utf-8 ArrayBuffer SSE chunks without TextDecoder', () => {
+  it('handles split utf-8 SSE chunks without TextDecoder', () => {
     const originalTextDecoder = globalThis.TextDecoder;
     const bytes = new Uint8Array([100, 97, 116, 97, 58, 32, 228, 189, 160, 229, 165, 189, 10, 10]);
-    const messages = [];
+    const adapter = createMiniProgramStreamAdapter();
 
     try {
       delete globalThis.TextDecoder;
-      const parser = createSseParser({
-        onMessage: (event) => messages.push(event.data),
-      });
-      parser.push(bytes.slice(0, 8).buffer);
-      parser.push(bytes.slice(8).buffer);
+      adapter.appendSseChunk(bytes.slice(0, 8).buffer);
+      adapter.appendSseChunk(bytes.slice(8).buffer);
     } finally {
       globalThis.TextDecoder = originalTextDecoder;
     }
 
-    expect(messages).toEqual(['你好']);
+    expect(adapter.getState().markdown).toBe('你好');
   });
 
   it('exports html transform helper for future entry reuse', () => {

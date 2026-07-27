@@ -1,33 +1,39 @@
 {
   "name": "@cherry-markdown/miniProgram",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "type": "module",
   "description": "MiniProgram adapters for Cherry Markdown",
+  "keywords": [
+    "cherry-markdown",
+    "markdown",
+    "wechat-miniprogram",
+    "miniprogram"
+  ],
   "license": "Apache-2.0",
+  "author": "Cherry Oteam",
+  "homepage": "https://github.com/Tencent/cherry-markdown#readme",
+  "bugs": {
+    "url": "https://github.com/Tencent/cherry-markdown/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Tencent/cherry-markdown.git",
     "directory": "packages/miniProgram"
   },
-  "main": "./dist/miniProgram-stream.js",
-  "module": "./dist/miniProgram-stream.esm.js",
-  "types": "./dist/types/miniProgram-stream.d.ts",
+  "main": "./dist/miniProgram.esm.js",
+  "module": "./dist/miniProgram.esm.js",
+  "types": "./dist/types/miniProgram.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/miniProgram-stream.d.ts",
-      "import": "./dist/miniProgram-stream.esm.js",
-      "default": "./dist/miniProgram-stream.js"
-    },
-    "./stream": {
-      "types": "./dist/types/miniProgram-stream.d.ts",
-      "import": "./dist/miniProgram-stream.esm.js",
-      "default": "./dist/miniProgram-stream.js"
+      "types": "./dist/types/miniProgram.d.ts",
+      "import": "./dist/miniProgram.esm.js"
     },
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
     "CHANGELOG.md",
+    "LICENSE",
     "README.md",
     "README.CN.md"
   ],
@@ -35,13 +41,12 @@
     "access": "public"
   },
   "scripts": {
-    "build": "run-s clean build:stream build:types",
-    "build:stream": "cross-env NODE_ENV=production rollup --config build/rollup.stream.config.js",
+    "build": "run-s clean build:esm build:types",
+    "build:esm": "cross-env NODE_ENV=production rollup --config build/rollup.config.js",
     "build:types": "node build/types.js",
     "clean": "rimraf ./dist",
     "test": "vitest run --config vitest.config.ts",
-    "typecheck": "tsc --project test/tsconfig.json --noEmit",
-    "verify:iife": "node scripts/verify-iife.mjs"
+    "typecheck": "tsc --project test/tsconfig.json --noEmit"
   },
   "dependencies": {
     "htmlparser2": "^10.0.0"
