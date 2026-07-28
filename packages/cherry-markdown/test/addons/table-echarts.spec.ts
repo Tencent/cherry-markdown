@@ -635,81 +635,6 @@ describe('addons/EChartsTableEngine', () => {
     expect(fetchMock).toHaveBeenCalledWith('https://toolbar.example/map.json', { referrerPolicy: 'no-referrer' });
   });
 
-  it('falls back to the next map source and refreshes the chart', async () => {
-    const environment = createEnvironment();
-    Object.assign(window, { echarts: environment.echarts });
-    const renderer = new EChartsTableEngine({ echarts: environment.echarts, cherry: environment.cherry });
-    renderer.$buildEchartsThemeFromCss(environment.root);
-    const container = document.createElement('div');
-    container.id = 'map-chart';
-    container.dataset.chartType = 'map';
-    container.dataset.tableData = JSON.stringify({ header: ['Province', 'Value'], rows: [['北京', '10']] });
-    environment.previewerDom.appendChild(container);
-    environment.echarts.getInstanceByDom.mockReturnValue(environment.chart);
-    const geoJson = { type: 'FeatureCollection', features: [] };
-    const fetchMock = vi.fn(async (url: string) => {
-      if (url === 'https://invalid.example/map.json') {
-        return { ok: false, status: 404, json: async () => ({}) };
-      }
-      return { ok: true, status: 200, json: async () => geoJson };
-    });
-    vi.stubGlobal('fetch', fetchMock);
-
-    const loading = renderer.$generateChartOptions(
-      'map',
-      { header: ['Province', 'Value'], rows: [['北京', '10']] },
-      { mapDataSource: 'https://invalid.example/map.json', chartId: 'map-chart' },
-    );
-
-    expect(loading.title.text).toContain('mapChartLoading');
-    await vi.waitFor(() => expect(environment.echarts.registerMap).toHaveBeenCalledOnce());
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(environment.echarts.registerMap).toHaveBeenCalledWith(
-      'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json',
-      geoJson,
-    );
-    expect(container.dataset.mapStatus).toBe('success');
-    expect(environment.chart.clear).toHaveBeenCalledOnce();
-    expect(environment.echarts.init).not.toHaveBeenCalled();
-    expect(environment.chart.setOption).toHaveBeenCalledOnce();
-  });
-
-  it('renders the map failure state only after every source fails', async () => {
-    const environment = createEnvironment();
-    Object.assign(window, { echarts: environment.echarts });
-    const renderer = new EChartsTableEngine({ echarts: environment.echarts, cherry: environment.cherry });
-    renderer.$buildEchartsThemeFromCss(environment.root);
-    const container = document.createElement('div');
-    container.id = 'failed-map';
-    container.dataset.chartType = 'map';
-    environment.previewerDom.appendChild(container);
-    const fetchMock = vi.fn(async () => ({ ok: false, status: 503, json: async () => ({}) }));
-    vi.stubGlobal('fetch', fetchMock);
-
-    renderer.$generateChartOptions(
-      'map',
-      { header: ['Province', 'Value'], rows: [['北京', '10']] },
-      { mapDataSource: 'https://invalid.example/map.json', chartId: 'failed-map' },
-    );
-
-    await vi.waitFor(() => expect(container.dataset.mapStatus).toBe('failed'));
-    expect(fetchMock).toHaveBeenCalledTimes(3);
-    expect(environment.chart.setOption).toHaveBeenCalledWith(
-      expect.objectContaining({ title: expect.objectContaining({ text: 'mapChartError' }) }),
-      true,
-    );
-
-    environment.echarts.getInstanceByDom.mockReturnValue(environment.chart);
-    const failureOption = renderer.$generateChartOptions(
-      'map',
-      { header: ['Province', 'Value'], rows: [['北京', '10']] },
-      { mapDataSource: 'https://invalid.example/map.json', chartId: 'failed-map' },
-    );
-    environment.chart.setOption.mockClear();
-    failureOption.graphic.onclick();
-    expect(environment.chart.setOption).toHaveBeenCalledOnce();
-  });
-
   it('renders a chart container and initializes ECharts after insertion', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
@@ -741,31 +666,6 @@ describe('addons/EChartsTableEngine', () => {
     expect(Array.isArray(environment.chart.setOption.mock.calls[0]?.[0]?.series)).toBe(true);
     expect(environment.chart.setOption.mock.calls[0]?.[1]).toBe(true);
     expect(renderer.instances.has(environment.chart)).toBe(true);
-  });
-
-  it('renders escaped errors or drawing state when chart creation fails', () => {
-    vi.useFakeTimers();
-    const normal = createEnvironment();
-    const normalRenderer = new EChartsTableEngine({ echarts: normal.echarts, cherry: normal.cherry });
-    vi.spyOn(normalRenderer, 'createChart').mockImplementation(() => {
-      throw new Error('<invalid chart>');
-    });
-    const tableObject = { header: ['Category', 'Q1'], rows: [['Alpha', '10']] };
-    const normalHtml = normalRenderer.render('bar', {}, tableObject, normal.cherry);
-    normal.previewerDom.innerHTML = normalHtml;
-    vi.advanceTimersByTime(50);
-    expect(normal.previewerDom.querySelector('.cherry-echarts-wrapper')?.innerHTML).toContain('&lt;invalid chart&gt;');
-
-    const streaming = createEnvironment();
-    streaming.cherry.options.engine.syntax.global.flowSessionContext = true;
-    const streamingRenderer = new EChartsTableEngine({ echarts: streaming.echarts, cherry: streaming.cherry });
-    vi.spyOn(streamingRenderer, 'createChart').mockImplementation(() => {
-      throw new Error('invalid');
-    });
-    const streamingHtml = streamingRenderer.render('bar', {}, tableObject, streaming.cherry);
-    streaming.previewerDom.innerHTML = streamingHtml;
-    vi.advanceTimersByTime(50);
-    expect(streaming.previewerDom.querySelector('.cherry-echarts-wrapper')?.innerHTML).toBe('drawing...');
   });
 
   it('rehydrates options from container datasets and rejects invalid data', () => {

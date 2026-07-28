@@ -37,13 +37,13 @@ export default class Video extends MenuBase {
       if (this.hasCacheOnce()) {
         const arr = this.getAndCleanCacheOnce();
         let res = '';
-        for (const { url, params, file } of arr) {
+        for (const { url, params } of arr) {
           const begin = '!video[';
-          const end = params?.poster ? `](${url}){poster=${params.poster}}` : `](${url})`;
+          const end = params.poster ? `](${url}){poster=${params.poster}}` : `](${url})`;
           this.registerAfterClickCb(() => {
             this.setLessSelection(begin, end);
           });
-          const finalName = params?.name ?? file?.name ?? 'video';
+          const finalName = params.name ? params.name : name;
           res += `${begin}${finalName}${handleParams(params)}${end}\n`;
         }
         return res;

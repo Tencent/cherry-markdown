@@ -37,13 +37,13 @@ export default class Pdf extends MenuBase {
       if (this.hasCacheOnce()) {
         const arr = this.getAndCleanCacheOnce();
         let res = '';
-        for (const { url, params, file } of arr) {
+        for (const { url, params } of arr) {
           const begin = '[';
           const end = `](${url})`;
           this.registerAfterClickCb(() => {
             this.setLessSelection(begin, end);
           });
-          const finalName = params?.name ?? file?.name ?? 'file';
+          const finalName = params && params.name ? params.name : 'file';
           res += `${begin}${finalName}${end}\n`;
         }
         return res;

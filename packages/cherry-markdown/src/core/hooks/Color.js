@@ -36,7 +36,7 @@ export default class Color extends SyntaxBase {
 
   rule() {
     const ret = {
-      begin: isLookbehindSupported() ? '((?<![\\\\!]))!!' : '(^|[^\\\\!])!!',
+      begin: isLookbehindSupported() ? '((?<!\\\\))!!' : '(^|[^\\\\])!!',
       end: '!!',
       content: '(#[0-9a-zA-Z]{3,6}|[a-z]{3,20})[\\s]([\\w\\W]+?)',
     };

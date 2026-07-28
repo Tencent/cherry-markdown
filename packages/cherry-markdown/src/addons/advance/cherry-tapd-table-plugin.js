@@ -227,8 +227,8 @@ export default class TapdTablePlugin extends ParagraphBase {
   }
 
   $dealTh(oneTh) {
-    const hasLeft = /^\s*~TT?/.test(oneTh);
-    const hasRight = /~TT?\s*$/.test(oneTh);
+    const hasLeft = /^\s*~T/.test(oneTh);
+    const hasRight = /~T\s*$/.test(oneTh);
     const ret = { style: '', content: '' };
     if (hasLeft && hasRight) {
       ret.align = 'align="center"';
@@ -238,8 +238,8 @@ export default class TapdTablePlugin extends ParagraphBase {
       ret.align = 'align="left"';
     }
     ret.content = oneTh
-      .replace(/^\s*~TT?/, '')
-      .replace(/~TT?\s*$/, '')
+      .replace(/^\s*~T/, '')
+      .replace(/~T\s*$/, '')
       .trim();
     return ret;
   }
@@ -247,9 +247,9 @@ export default class TapdTablePlugin extends ParagraphBase {
   makeHtml(html, sentenceMakeFunc) {
     return html.replace(/(^|\n)\s*?((?:\|\|[^\n]+(?:$|\n))+)/g, (match, prev, content) => {
       const sign = this.$engine.md5(content);
-      const lineCount = (content.match(/\n/g) ?? []).length;
+      const lineCount = content.match(/\n/g).length;
       const autoMerge = /^\|\|\|/.test(content);
-      const hasHead = /\|{2,3}\s*~TT?/.test(content) || /~TT?\s*\|\|/.test(content);
+      const hasHead = /\|{2,3}\s*~T/.test(content) || /~T\s*\|\|/.test(content);
       let trs = content.split(/\n/);
       let thead = '';
       const tbody = [];

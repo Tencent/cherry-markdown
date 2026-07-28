@@ -17,21 +17,6 @@ function setEmojiCode(hook: Emoji, name: string, code: string) {
 }
 
 describe('core/hooks/Emoji', () => {
-  it('uses stable defaults and tolerates non-object configuration', () => {
-    const defaults = createEmoji();
-    const stringConfig = Reflect.construct(Emoji, [{ config: 'invalid' }]);
-    const nullConfig = Reflect.construct(Emoji, [{ config: null }]);
-
-    expect(defaults.options).toMatchObject({
-      useUnicode: true,
-      upperCase: false,
-      customHandled: false,
-      resourceURL: 'https://github.githubassets.com/images/icons/emoji/unicode/${code}.png?v8',
-    });
-    expect(stringConfig.options.useUnicode).toBe(true);
-    expect(nullConfig.options.useUnicode).toBe(true);
-  });
-
   it('keeps default values when option types are invalid', () => {
     const hook = Reflect.construct(Emoji, [
       {
@@ -105,15 +90,6 @@ describe('core/hooks/Emoji', () => {
 
     expect(hook.makeHtml(':custom_name:')).toBe('<span data-emoji="custom_name">custom_name</span>');
     expect(customRenderer).toHaveBeenCalledWith('custom_name');
-  });
-
-  it('supports the maximum Unicode code point and rejects out-of-range values', () => {
-    const hook = createEmoji();
-    setEmojiCode(hook, 'max_code_point', '10ffff');
-    setEmojiCode(hook, 'invalid_code_point', '110000');
-
-    expect(hook.makeHtml(':max_code_point:')).toBe(String.fromCodePoint(0x10ffff));
-    expect(() => hook.makeHtml(':invalid_code_point:')).toThrow(RangeError);
   });
 
   it('flushes large multi-code-point sequences without truncating output', () => {

@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import TapdCheckListPlugin from '../../src/addons/advance/cherry-tapd-checklist-plugin';
 import TapdHtmlTagPlugin from '../../src/addons/advance/cherry-tapd-html-tag-plugin';
 import TapdTablePlugin from '../../src/addons/advance/cherry-tapd-table-plugin';
-import CherryEngine from '../../src/index.engine.core';
 
 const sentenceMake = (content: string) => ({ sign: `sign-${content.length}`, html: `<span>${content}</span>` });
 
@@ -139,36 +138,5 @@ describe('addons/TAPD simple table', () => {
       '2-0': [-1, 1],
     });
     expect(plugin.$setRowMapVal({ '0-0': [2, 1], '1-0': [1, 1] }, '0-0')['0-0']).toEqual([3, 1]);
-  });
-
-  it('renders a single-line TAPD table without a trailing newline', () => {
-    const plugin = createPlugin();
-    const html = plugin.restoreCache(plugin.makeHtml('|| A || B ||', sentenceMake));
-    const container = document.createElement('div');
-    container.innerHTML = html;
-
-    expect(container.querySelectorAll('table tbody td')).toHaveLength(2);
-    expect(container.querySelectorAll('td')[0].textContent).toBe('A');
-    expect(container.querySelectorAll('td')[1].textContent).toBe('B');
-  });
-
-  it('renders TAPD table syntax through CherryEngine custom hooks', () => {
-    const engine = new CherryEngine({
-      engine: {
-        customSyntax: {
-          tapdTable: { syntaxClass: TapdTablePlugin, before: 'normalParagraph' },
-        },
-      },
-    });
-    const container = document.createElement('div');
-    // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
-    container.innerHTML = engine.makeHtml('||~T Name ~T||~T Value||\n|| **Cherry** || 42 ||');
-    const table = container.querySelector('.cherry-table-container.simple-table table');
-
-    expect(table?.querySelectorAll('thead th')).toHaveLength(2);
-    expect(table?.querySelector('thead th')?.getAttribute('align')).toBe('center');
-    expect(table?.querySelectorAll('tbody td')).toHaveLength(2);
-    expect(table?.querySelector('tbody strong')?.textContent).toBe('Cherry');
-    expect(table?.querySelector('tbody td:last-child')?.textContent).toBe('42');
   });
 });

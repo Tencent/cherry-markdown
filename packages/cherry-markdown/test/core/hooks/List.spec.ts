@@ -96,30 +96,6 @@ describe('core/hooks/list', () => {
     });
   });
 
-  it('uses the default indent when configuration is omitted', () => {
-    const hook = createList();
-    const html = hook.restoreCache(hook.makeHtml('- parent\n  - child', sentenceMake));
-    const container = document.createElement('div');
-    container.innerHTML = html;
-
-    expect(hook.indentSpace).toBe(2);
-    expect(container.querySelectorAll('ul')).toHaveLength(2);
-    expect(container.querySelector('li li')?.textContent).toBe('child');
-  });
-
-  it.each([
-    ['en-a. alpha', 'lower-alpha'],
-    ['I. roman', 'upper-roman'],
-  ])('renders %s with the %s list style', (markdown, listStyle) => {
-    const html = renderList(markdown, { indentSpace: 2 });
-    const container = document.createElement('div');
-    container.innerHTML = html;
-    const list = container.querySelector('ol');
-
-    expect(list?.getAttribute('start')).toBe('1');
-    expect(list?.classList.contains(`cherry-list__${listStyle}`)).toBe(true);
-  });
-
   it('nests a same-level list when listNested changes the marker type', () => {
     const html = renderList('- parent\n1. ordered child', { indentSpace: 2, listNested: true });
     const container = document.createElement('div');

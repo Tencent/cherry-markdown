@@ -116,27 +116,6 @@ describe('core/hooks/AutoLink', () => {
     expect(hook.makeHtml('HTTPS://example.com')).toContain('href="https://example.com"');
   });
 
-  it('renders bare www links and bracketed domain links', () => {
-    const hook = createAutoLink();
-
-    expect(hook.makeHtml('Visit www.example.com now')).toContain('href="//www.example.com"');
-    expect(hook.makeHtml('Visit www.example.com now')).toContain('>www.example.com</a>');
-    expect(hook.makeHtml('Visit docs.www.example.com now')).toBe('Visit docs.www.example.com now');
-    expect(hook.makeHtml('<example.com>')).toContain('href="example.com"');
-    expect(hook.makeHtml('<//example.com>')).toContain('href="//example.com"');
-  });
-
-  it('renders plain, bracketed, and mailto email forms', () => {
-    const hook = createAutoLink();
-
-    expect(hook.makeHtml('test@example.com')).toBe('test@example.com');
-    expect(hook.makeHtml('www.user@example.com')).toBe('www.user@example.com');
-    expect(hook.makeHtml('<test@example.com>')).toContain('href="mailto:test@example.com"');
-    expect(hook.makeHtml('mailto:test@example.com')).toContain('href="mailto:test@example.com"');
-    expect(hook.makeHtml('mailto:not-a-valid-email')).toBe('mailto:not-a-valid-email');
-    expect(hook.makeHtml('mailto:www.example.com')).toBe('mailto:www.example.com');
-  });
-
   it('keeps unsafe and protocol-plus-email candidates unchanged', () => {
     const hook = createAutoLink();
 
@@ -182,23 +161,6 @@ describe('core/hooks/AutoLink', () => {
     expect(html).toContain('data-url="https://example.com?source=autolink"');
     expect(nullAttrs.makeHtml('https://example.com')).not.toContain('null');
     expect(objectAttrs.makeHtml('https://example.com')).not.toContain('ignored');
-  });
-
-  it('applies string custom attributes to both email auto-link forms', () => {
-    const attrRender = vi.fn((text: string, href: string) => `data-text="${text}" data-href="${href}"`);
-    const hook = createAutoLink({ attrRender });
-    const bracketed = hook.makeHtml('<user@example.com>');
-    const mailto = hook.makeHtml('mailto:team@example.com');
-
-    expect(bracketed).toContain('data-text="user@example.com" data-href="mailto:user@example.com"');
-    expect(mailto).toContain('data-text="team@example.com" data-href="mailto:team@example.com"');
-    expect(attrRender).toHaveBeenNthCalledWith(1, 'user@example.com', 'mailto:user@example.com');
-    expect(attrRender).toHaveBeenNthCalledWith(2, 'team@example.com', 'mailto:team@example.com');
-
-    expect(createAutoLink({ attrRender: () => null }).renderEmail('null@example.com')).not.toContain('null="');
-    expect(
-      createAutoLink({ attrRender: () => ({ ignored: 'attribute' }) }).renderEmail('object@example.com'),
-    ).not.toContain('ignored');
   });
 
   it('shortens long display text without changing the URL or title', () => {

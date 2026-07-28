@@ -81,7 +81,7 @@ function handleMark(str, node) {
     return str;
   }
   return str.replace(listRegex, (wholeMatch, m1, m2, m3, m4) => {
-    node.type = /^[*+-]$/.test(m3) ? 'ul' : 'ol';
+    node.type = m2.search(/[*+-]/g) > -1 ? 'ul' : 'ol';
     node.listStyle = getListStyle(m2);
     node.start = Number(m2.replace('.', '')) ? Number(m2.replace('.', '')) : 1;
     return m4;
@@ -110,7 +110,7 @@ export default class List extends ParagraphBase {
     this.config = config || {};
     this.tree = [];
     this.emptyLines = 0;
-    this.indentSpace = Math.max(this.config.indentSpace ?? 2, 2);
+    this.indentSpace = Math.max(this.config.indentSpace, 2);
   }
 
   addNode(node, current, parent, last) {

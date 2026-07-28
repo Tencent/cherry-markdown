@@ -69,6 +69,7 @@ import CursorPosition from './hooks/CursorPosition';
 import MobilePreview from './hooks/MobilePreview';
 import Copy from './hooks/Copy';
 import Panel from './hooks/Panel';
+import Timeline from './hooks/Timeline';
 import Justify from './hooks/Justify';
 import Align from './hooks/Align';
 import Detail from './hooks/Detail';
@@ -131,6 +132,7 @@ const HookList = {
   theme: Theme,
   file: File,
   panel: Panel,
+  timeline: Timeline,
   justify: Justify,
   align: Align,
   detail: Detail,

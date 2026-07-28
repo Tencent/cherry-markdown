@@ -28,6 +28,10 @@ export default function cloneDeep(value, stack = new WeakMap()) {
     return value;
   }
 
+  if (typeof value === 'function') {
+    return value;
+  }
+
   if (stack.has(value)) {
     return /** @type {T} */ (stack.get(value));
   }

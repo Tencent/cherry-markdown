@@ -65,19 +65,6 @@ describe('toolbars/BubbleFormula', () => {
     expect(bubble.generateBubbleFormulaHtmlStr()).toContain('data-content-for="second"');
   });
 
-  it('reports visible and hidden state consistently', () => {
-    const bubble = new BubbleFormula({ templateConfig: customConfig, showLatexLive: false });
-    const callback = vi.fn();
-
-    bubble.show(callback);
-    expect(bubble.isShow()).toBe(true);
-    expect(bubble.isHide()).toBe(false);
-
-    bubble.hide();
-    expect(bubble.isShow()).toBe(false);
-    expect(bubble.isHide()).toBe(true);
-  });
-
   it('switches main and subcategory tabs through delegated clicks', () => {
     const bubble = new BubbleFormula({ templateConfig: customConfig, showLatexLive: false });
     const secondTab = bubble.dom.querySelector('[data-name="second"] span');

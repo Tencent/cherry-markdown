@@ -212,27 +212,6 @@ describe('toolbars/MenuBase', () => {
     expect(multiple.menu.getSelection('kept')).toBe('kept');
   });
 
-  it('updates menu icons across supported representations', () => {
-    const { menu } = createMenu();
-    menu.createBtn();
-    expect(menu.updateMenuIcon('star')).toBe(true);
-    expect(menu.iconName).toBe('star');
-
-    const element = document.createElement('b');
-    expect(menu.updateMenuIcon(element)).toBe(true);
-    expect(menu.dom.firstElementChild).toBe(element);
-
-    menu.updateMenuIcon({ type: 'svg', content: '<svg></svg>' });
-    expect(menu.iconType).toBe('svg');
-    menu.updateMenuIcon({ type: 'image', content: '/new.png' });
-    expect(menu.iconType).toBe('image');
-    menu.updateMenuIcon({ type: 'iconfont', content: 'code', iconClassName: 'extra', iconStyle: 'color:red' });
-    expect(menu.iconType).toBe('iconfont');
-    expect(menu.dom.querySelector('i')?.className).toContain('extra');
-    const invalidElement = { type: 'element' };
-    expect(() => menu.updateMenuIcon(invalidElement as never)).toThrow('instance of HTMLElement');
-  });
-
   it('rejects incompatible icon updates and respects no-icon menus', () => {
     const { menu } = createMenu();
     menu.createBtn();

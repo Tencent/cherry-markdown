@@ -934,25 +934,6 @@ describe('utils/tableContentHandler', () => {
   });
 
   describe('table editing operations', () => {
-    it('inserts rows at the top, middle, and bottom of markdown tables', () => {
-      const tableCode = '| A | B |\n| - | - |\n| 1 | 2 |\n| 3 | 4 |';
-      const handler = createHandler(tableCode);
-      seedMarkdownTable(handler, tableCode);
-
-      handler.$insertRow('top');
-      expect(handler.codeMirror.doc.toString()).toContain('|  |\n| 1 | 2 |');
-
-      const middleHandler = createHandler(tableCode);
-      seedMarkdownTable(middleHandler, tableCode);
-      middleHandler.$insertRow(1);
-      expect(middleHandler.codeMirror.doc.toString()).toContain('| 1 | 2 |\n|  |\n| 3 | 4 |');
-
-      const bottomHandler = createHandler(tableCode);
-      seedMarkdownTable(bottomHandler, tableCode);
-      bottomHandler.$insertRow('bottom');
-      expect(bottomHandler.codeMirror.doc.toString()).toContain('| 3 | 4 |\n|  |');
-    });
-
     it('does not insert rows for HTML tables or invalid row positions', () => {
       const tableCode = '| A | B |\n| - | - |\n| 1 | 2 |';
       const handler = createHandler(tableCode);

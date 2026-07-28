@@ -1135,13 +1135,8 @@ export default class TableHandler {
     }
 
     const { doc } = this.codeMirror.view.state;
-    const targetLine = insertLine + 1;
-    if (targetLine > doc.lines) {
-      this.codeMirror.replaceRange(`\n${newRow.trimEnd()}`, doc.length);
-    } else {
-      const offset = doc.line(targetLine).from;
-      this.codeMirror.replaceRange(newRow, offset);
-    }
+    const offset = doc.line(insertLine + 1).from;
+    this.codeMirror.replaceRange(newRow, offset);
     this.$afterTableOperation();
   }
 

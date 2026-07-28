@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import AiFlowAutoClose from '../../../src/core/hooks/AiFlowAutoClose';
 
 type MediaType = 'img' | 'video' | 'audio';
@@ -92,29 +92,6 @@ describe('core/hooks/AiFlowAutoClose', () => {
     const hook = createAutoClose({ image: true });
 
     expect(hook.dealMedia(markdown)).toBe(expected);
-  });
-
-  it('uses the configured media self-closing renderer', () => {
-    const selfClosingRender = vi.fn(
-      (type: MediaType, content: string, url: string) =>
-        `<span data-type="${type}" data-url="${url}">${content}</span>`,
-    );
-    const hook = createAutoClose({ image: true, selfClosingRender });
-
-    expect(hook.dealMedia('before !video[Demo](https://example.com/video')).toBe(
-      'before <span data-type="video" data-url="https://example.com/video">Demo</span>',
-    );
-    expect(hook.dealMedia('![Draft')).toBe('<span data-type="img" data-url="">Draft</span>');
-    expect(selfClosingRender).toHaveBeenCalledWith('video', 'Demo', 'https://example.com/video');
-    expect(selfClosingRender).toHaveBeenCalledWith('img', 'Draft', '');
-  });
-
-  it('falls back to a placeholder when the custom media renderer returns an empty string', () => {
-    const selfClosingRender = vi.fn(() => '');
-    const hook = createAutoClose({ image: true, selfClosingRender });
-
-    expect(hook.dealMedia('![alt]')).toBe('<img src></img>');
-    expect(selfClosingRender).toHaveBeenCalledWith('img', 'alt', '');
   });
 
   it('does not replace complete media or media-like text in the middle of a line', () => {

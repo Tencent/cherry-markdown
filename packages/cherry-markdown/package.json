@@ -1,7 +1,7 @@
 {
   "name": "cherry-markdown",
   "license": "Apache-2.0",
-  "version": "0.11.6",
+  "version": "0.11.8",
   "type": "module",
   "description": "a new markdown editor",
   "repository": {
@@ -55,7 +55,7 @@
   ],
   "author": "Cherry Oteam",
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.8.3",

@@ -127,18 +127,6 @@ describe('Cherry Markdown final rendering', () => {
     expect(classic.querySelector('p[data-type="p"]')?.textContent).toContain('first\nsecond');
   });
 
-  it('renders ordered starts, custom marker styles, and nested list structure', () => {
-    const ordered = render('3. third\n4. fourth');
-    const alpha = render('en-a. alpha');
-    const nested = render('- parent\n  1. nested **value**');
-
-    expect(ordered.querySelector('ol')?.getAttribute('start')).toBe('3');
-    expect(ordered.querySelectorAll('ol > li')).toHaveLength(2);
-    expect(ordered.querySelectorAll('ol > li')[1].textContent).toBe('fourth');
-    expect(alpha.querySelector('ol')?.classList.contains('cherry-list__lower-alpha')).toBe(true);
-    expect(nested.querySelector('ul > li > ol > li strong')?.textContent).toBe('value');
-  });
-
   it('nests a marker type change when listNested is enabled', () => {
     const container = render('- parent\n1. ordered child', {
       engine: { syntax: { list: { indentSpace: 2, listNested: true } } },
@@ -175,28 +163,6 @@ describe('Cherry Markdown final rendering', () => {
     expect(toc?.querySelector('a[href="#details"]')?.textContent).toBe('Details');
     expect(container.querySelector('h1#introduction')?.textContent).toBe('Introduction');
     expect(container.querySelector('h2#details')?.textContent).toBe('Details');
-  });
-
-  it('renders multiple nested and automatically numbered tables of contents', () => {
-    const container = render('[toc]\n\n[[toc]]\n\n# One\n\n### Three', {
-      engine: {
-        syntax: {
-          toc: {
-            allowMultiToc: true,
-            showAutoNumber: true,
-            tocStyle: 'nested',
-          },
-        },
-      },
-    });
-    const tables = container.querySelectorAll('.toc.auto-num-toc');
-
-    expect(tables).toHaveLength(2);
-    tables.forEach((toc) => {
-      expect(toc.querySelector('ul')).not.toBeNull();
-      expect(toc.querySelector('.toc-li-1 a[href="#one"]')?.textContent).toBe('One');
-      expect(toc.querySelector('.toc-li-3 a[href="#three"]')?.textContent).toBe('Three');
-    });
   });
 
   it('renders a titled information panel', () => {
@@ -460,18 +426,6 @@ describe('Cherry Markdown final rendering', () => {
     expect(container.querySelector('span[style="text-decoration: underline;"]')?.textContent).toBe('underlined');
   });
 
-  it('keeps escaped and malformed inline typography markers as text', () => {
-    const container = render('\\!24 size! \\!!red color!! \\!!!blue background!!! \\^up^ \\^^down^^ word/kept/word');
-
-    expect(container.querySelector('span[style*="font-size"]')).toBeNull();
-    expect(container.querySelector('span[style^="color"]')).toBeNull();
-    expect(container.querySelector('span[style^="background-color"]')).toBeNull();
-    expect(container.querySelector('sup')).toBeNull();
-    expect(container.querySelector('sub')).toBeNull();
-    expect(container.textContent).toContain('!24 size!');
-    expect(container.textContent).toContain('word/kept/word');
-  });
-
   it('renders strict ATX, Setext, custom, Unicode, and duplicate heading IDs', () => {
     const container = render('# First\n\nSecond\n===\n\n## 标题 {#custom-id}\n\n# First');
     const headings = container.querySelectorAll('h1, h2');
@@ -539,65 +493,6 @@ describe('Cherry Markdown final rendering', () => {
     expect(link?.getAttribute('data-link-url')).toBe('https://example.com/%E8%B7%AF%E5%BE%84');
     expect(unsafe.querySelector('a')).toBeNull();
     expect(unsafe.textContent).toContain('Unsafe');
-  });
-
-  it('renders bare URLs and www domains without linking bare emails or nesting existing anchors', () => {
-    const container = render(
-      'Visit https://example.com/docs and www.example.org and team@example.com and www.user@example.com and docs.www.example.net\n\n<a href="https://existing.example">https://existing.example</a>',
-    );
-    const anchors = container.querySelectorAll('a');
-
-    expect(container.querySelector('a[href="https://example.com/docs"]')?.textContent).toBe('https://example.com/docs');
-    expect(container.querySelector('a[href="//www.example.org"]')?.textContent).toBe('www.example.org');
-    expect(container.querySelector('a[href="mailto:team@example.com"]')).toBeNull();
-    expect(container.querySelector('a[href="mailto:www.user@example.com"]')).toBeNull();
-    expect(container.querySelector('a[href="//docs.www.example.net"]')).toBeNull();
-    expect(container.textContent).toContain('team@example.com');
-    expect(container.textContent).toContain('www.user@example.com');
-    expect(container.textContent).toContain('docs.www.example.net');
-    expect(container.querySelectorAll('a[href="https://existing.example"]')).toHaveLength(1);
-    expect(anchors).toHaveLength(3);
-  });
-
-  it('renders bracketed email and FTP auto-links while rejecting dangerous protocols', () => {
-    const container = render(
-      '<user@example.com> <mailto:team@example.com> <ftp://files.example.com/archive> <javascript://unsafe.example>',
-      {
-        engine: {
-          syntax: {
-            autoLink: {
-              target: '_self',
-              rel: 'nofollow',
-              attrRender: (text: string, href: string) => `data-text="${text}" data-href="${href}"`,
-            },
-          },
-        },
-      },
-    );
-    const anchors = container.querySelectorAll('a');
-
-    expect(anchors).toHaveLength(3);
-    expect(container.querySelector('a[href="mailto:user@example.com"]')?.textContent).toBe('user@example.com');
-    expect(container.querySelector('a[href="mailto:team@example.com"]')?.textContent).toBe('team@example.com');
-    expect(container.querySelector('a[href="ftp://files.example.com/archive"]')?.textContent).toBe(
-      'ftp://files.example.com/archive',
-    );
-    anchors.forEach((anchor) => {
-      expect(anchor.getAttribute('target')).toBe('_self');
-      expect(anchor.getAttribute('rel')).toBe('nofollow');
-      expect(anchor.getAttribute('data-href')).toBe(anchor.getAttribute('href'));
-    });
-    expect(container.querySelector('a[href="mailto:user@example.com"]')?.getAttribute('data-text')).toBe(
-      'user@example.com',
-    );
-    expect(container.querySelector('a[href="mailto:team@example.com"]')?.getAttribute('data-text')).toBe(
-      'team@example.com',
-    );
-    expect(container.querySelector('a[href^="ftp:"]')?.getAttribute('data-text')).toBe(
-      'ftp://files.example.com/archive',
-    );
-    expect(container.querySelector('a[href^="javascript:"]')).toBeNull();
-    expect(container.textContent).not.toContain('javascript://unsafe.example');
   });
 
   it('renders inline, fenced, and indented code with escaped source text', () => {

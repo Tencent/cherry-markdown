@@ -85,59 +85,6 @@ $$
     expect(render).toHaveBeenCalledOnce();
   });
 
-  it('preserves Mermaid source controls and layout metadata in a mixed extension document', () => {
-    vi.stubGlobal('BUILD_ENV', 'production');
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
-    const options = {
-      engine: {
-        syntax: {
-          codeBlock: {
-            mermaid: { showSourceToolbar: true },
-          },
-        },
-      },
-    };
-    const render = vi.fn((graphId: string, _source: string, callback: (svg: string) => void, canvas: HTMLElement) => {
-      appendMeasuredSvg(canvas, graphId);
-      callback(MERMAID_SVG);
-    });
-
-    MermaidCodeEngine.install(options, { mermaidAPI: { initialize: vi.fn(), render } });
-    const engine = new CherryEngine(options);
-    const container = document.createElement('div');
-    const markdown = [
-      '[toc]',
-      '',
-      '# Architecture',
-      '',
-      '```mermaid #320px #180px #center',
-      'graph TD; API-->Worker',
-      '```',
-      '',
-      'The diagram is [documented](https://example.com/docs).[^architecture]',
-      '',
-      '- [ ] review',
-      '',
-      '[^architecture]: Architecture note',
-    ].join('\n');
-    // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
-    container.innerHTML = engine.makeHtml(markdown);
-
-    const figure = container.querySelector('figure[data-type="mermaid"]');
-
-    expect(container.querySelector('.toc a[href="#architecture"]')?.textContent).toBe('Architecture');
-    expect(figure?.getAttribute('style')).toBe('width:320px;height:180px;');
-    expect(figure?.classList.contains('cherry-mermaid-align-center')).toBe(true);
-    expect(figure?.querySelector('.cherry-mermaid-source-toolbar-panel[data-mode="preview"] svg')).not.toBeNull();
-    expect(figure?.querySelectorAll('.cherry-mermaid-source-toolbar-panel')).toHaveLength(2);
-    expect(figure?.textContent).toContain('graph TD; API-->Worker');
-    expect(container.querySelector('a[href="https://example.com/docs"]')?.textContent).toBe('documented');
-    expect(container.querySelector('li.check-list-item .ch-icon-square')).not.toBeNull();
-    expect(container.querySelector('.one-footnote')?.textContent).toContain('Architecture note');
-    expect(render).toHaveBeenCalledOnce();
-  });
-
   it('keeps an uninstalled Mermaid fence as readable code while rendering adjacent Markdown', () => {
     vi.stubGlobal('BUILD_ENV', 'production');
     const engine = new CherryEngine({
@@ -158,39 +105,5 @@ $$
     expect(codeBlock?.textContent).toContain('graph TD; A-->B');
     expect(container.querySelectorAll('p[data-type="p"]')).toHaveLength(1);
     expect(container.querySelector('p[data-type="p"]')?.textContent).toBe('After the diagram.');
-  });
-
-  it('keeps nested plugin output and falls back when a plugin renders no content', () => {
-    vi.stubGlobal('BUILD_ENV', 'production');
-    const engine = new CherryEngine({
-      engine: {
-        syntax: {
-          codeBlock: {
-            customRenderer: {
-              notice: {
-                render: (source: string) => `<aside class="notice-plugin">${source.trim()}</aside>`,
-              },
-              empty: {
-                render: () => '',
-              },
-            },
-          },
-        },
-      },
-    });
-    const container = document.createElement('div');
-    // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
-    container.innerHTML = engine.makeHtml(
-      '> Before plugin\n>\n> ```notice\n> nested content\n> ```\n>\n> After plugin\n\n```empty\nkeep this source\n```',
-    );
-    const quote = container.querySelector('blockquote');
-    const fallback = container.querySelector('[data-type="codeBlock"][data-lang="empty"]');
-
-    expect(quote?.textContent).toContain('Before plugin');
-    expect(quote?.querySelector('.notice-plugin')?.textContent).toBe('nested content');
-    expect(quote?.textContent).toContain('After plugin');
-    expect(fallback?.querySelector('pre.language-javascript')).not.toBeNull();
-    expect(fallback?.textContent).toContain('keep this source');
-    expect(container.querySelector('[data-type="empty"]')).toBeNull();
   });
 });

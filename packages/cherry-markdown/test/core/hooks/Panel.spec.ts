@@ -2,7 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Panel from '../../../src/core/hooks/Panel';
 import { hashHex } from '../../../src/utils/hash';
 
-function createPanel(config: { enablePanel?: boolean; enableAlign?: boolean; enableJustify?: boolean } = {}) {
+function createPanel(
+  config: {
+    enablePanel?: boolean;
+    enableAlign?: boolean;
+    enableJustify?: boolean;
+    enableCols?: boolean;
+    enableTabs?: boolean;
+    enableTimeline?: boolean;
+  } = {},
+) {
   const hook = new Panel({
     config: {
       enablePanel: true,
@@ -28,47 +37,71 @@ describe('core/hooks/Panel', () => {
     vi.stubGlobal('BUILD_ENV', 'production');
   });
 
-  it.each([
-    ['primary', 'primary'],
-    ['P', 'primary'],
-    ['info', 'info'],
-    ['i', 'info'],
-    ['warning', 'warning'],
-    ['W', 'warning'],
-    ['danger', 'danger'],
-    ['d', 'danger'],
-    ['success', 'success'],
-    ['S', 'success'],
-    ['right', 'right'],
-    ['r', 'right'],
-    ['center', 'center'],
-    ['c', 'center'],
-    ['left', 'left'],
-    ['l', 'left'],
-    ['justify', 'justify'],
-    ['j', 'justify'],
-    ['2cols', '2cols'],
-    ['3cols', '3cols'],
-    ['unknown', 'primary'],
-  ])('maps panel type %s to %s', (source, expected) => {
-    expect(createPanel().$getTargetType(`${source} Optional title`)).toBe(expected);
-  });
-
-  it('extracts optional titles and chooses classes by panel type', () => {
-    const hook = createPanel();
-
-    expect(hook.$getTitle('warning Build failed')).toBe('Build failed');
-    expect(hook.$getTitle('warning')).toBe('');
-    expect(hook.$getClassByType('warning')).toBe('cherry-panel cherry-panel__warning');
-    expect(hook.$getClassByType('center')).toBe('cherry-text-align cherry-text-align__center');
-    expect(hook.$getClassByType('3cols')).toBe('cherry-panel-cols cherry-panel-cols__3cols');
-  });
-
   it('pads missing columns and merges overflow into the final column', () => {
     const hook = createPanel();
 
     expect(hook.$splitCols('one', 3)).toEqual(['one', '', '']);
     expect(hook.$splitCols('one\n::\ntwo\n::\nthree\n::\nfour', 3)).toEqual(['one', '\ntwo', '\nthree\n::\n\nfour']);
+    expect(hook.$splitCols('one\n::\ntwo\n::\n  ', 0)).toEqual(['one', '\ntwo']);
+    expect(hook.$splitCols('', 0)).toEqual(['']);
+  });
+
+  it.each([
+    ['cols', 0],
+    ['2cols', 2],
+    ['3COLS center', 3],
+    ['', 0],
+  ])('gets the fixed column count from %s', (name, expected) => {
+    expect(createPanel().$getFixedColCount(name)).toBe(expected);
+  });
+
+  it.each([
+    ['cols', 'left'],
+    ['cols left', 'left'],
+    ['cols l', 'left'],
+    ['cols right', 'right'],
+    ['cols r extra', 'right'],
+    ['cols center', 'center'],
+    ['cols c', 'center'],
+    ['cols justify', 'justify'],
+    ['cols j', 'justify'],
+    ['cols invalid', 'left'],
+    ['', 'left'],
+  ])('normalizes the column alignment in %s', (name, expected) => {
+    expect(createPanel().$getColsAlign(name)).toBe(expected);
+  });
+
+  it.each([
+    ['primary title', 'primary', 'title'],
+    ['p', 'primary', ''],
+    ['info', 'info', ''],
+    ['i', 'info', ''],
+    ['warning', 'warning', ''],
+    ['w', 'warning', ''],
+    ['danger', 'danger', ''],
+    ['d', 'danger', ''],
+    ['success', 'success', ''],
+    ['s', 'success', ''],
+    ['right', 'right', ''],
+    ['r', 'right', ''],
+    ['center', 'center', ''],
+    ['c', 'center', ''],
+    ['left', 'left', ''],
+    ['l', 'left', ''],
+    ['justify', 'justify', ''],
+    ['j', 'justify', ''],
+    ['cols', 'cols', ''],
+    ['2cols', 'cols', ''],
+    ['3cols', 'cols', ''],
+    ['tabs', 'tabs', ''],
+    ['t', 'tabs', ''],
+    ['timeline', 'timeline', ''],
+    ['unknown title', 'primary', 'title'],
+  ])('normalizes panel name %s', (name, type, title) => {
+    const hook = createPanel();
+
+    expect(hook.$getTargetType(name)).toBe(type);
+    expect(hook.$getTitle(name)).toBe(title);
   });
 
   it('renders titled and empty information panels', () => {
@@ -99,18 +132,6 @@ describe('core/hooks/Panel', () => {
     expect(aligned.body).toContain('<div><blockquote>body</blockquote></div>');
   });
 
-  it('renders three columns including a padded empty column', () => {
-    const hook = createPanel();
-    const panel = hook.$getPanelInfo('3cols', 'one\n::\ntwo', sentenceMake);
-
-    expect(panel.title).toBe('');
-    expect(panel.className).toBe('cherry-panel-cols cherry-panel-cols__3cols');
-    expect(panel.body.match(/class="cherry-panel--col"/g)).toHaveLength(3);
-    expect(panel.body).toContain('<p>one</p>');
-    expect(panel.body).toContain('<p>two</p>');
-    expect(panel.body).toContain('<div class="cherry-panel--col"></div>');
-  });
-
   it('preserves nested paragraph cache entries inside panel bodies and columns', () => {
     const hook = createPanel();
     const nestedCache = hook.pushCache('<blockquote>cached</blockquote>', 'nested', 1);
@@ -120,6 +141,92 @@ describe('core/hooks/Panel', () => {
     expect(hook.restoreCache(body.body)).toContain('<p>before</p><blockquote>cached</blockquote><p>after</p>');
     expect(hook.restoreCache(columns.body)).toContain('<p>left</p><blockquote>cached</blockquote>');
     expect(hook.restoreCache(columns.body)).toContain('<p>right</p>');
+  });
+
+  it('splits colon-marked items and ignores content before the first marker', () => {
+    const hook = createPanel();
+
+    expect(hook.$splitItemsByColonMark('ignored\r\n:: First\r\nline 1\r\n:: Second\r\nline 2')).toEqual([
+      { head: 'First', body: 'line 1' },
+      { head: 'Second', body: 'line 2' },
+    ]);
+    expect(hook.$splitItemsByColonMark('no markers')).toEqual([]);
+    expect(hook.$splitItemsByColonMark('')).toEqual([]);
+  });
+
+  it.each([
+    ['done', 'done'],
+    ['✓', 'done'],
+    ['x', 'done'],
+    ['doing', 'doing'],
+    ['…', 'doing'],
+    ['...', 'doing'],
+    ['~', 'doing'],
+    ['todo', 'todo'],
+    ['', 'todo'],
+    ['milestone', 'milestone'],
+    ['★', 'milestone'],
+    ['*', 'milestone'],
+    ['error', 'error'],
+    ['err', 'error'],
+    ['✗', 'error'],
+    ['×', 'error'],
+    ['!', 'error'],
+    ['unknown', 'todo'],
+  ])('normalizes timeline status %s', (status, expected) => {
+    expect(createPanel().$normalizeTimelineStatus(status)).toBe(expected);
+  });
+
+  it('parses timeline status, time, title, and description', () => {
+    const hook = createPanel();
+
+    expect(hook.$parseTimelineItem('[done] 2024-01-15 Released', '\nDetails\n')).toEqual({
+      status: 'done',
+      time: '2024-01-15',
+      title: 'Released',
+      desc: 'Details',
+    });
+    expect(hook.$parseTimelineItem('[~T] v1.0.0', '')).toEqual({
+      status: 'doing',
+      time: 'v1.0.0',
+      title: '',
+      desc: '',
+    });
+    expect(hook.$parseTimelineItem('Planning phase', '  description  ')).toEqual({
+      status: 'todo',
+      time: '',
+      title: 'Planning phase',
+      desc: '  description  ',
+    });
+    expect(hook.$parseTimelineItem('', null)).toEqual({
+      status: 'todo',
+      time: '',
+      title: '',
+      desc: '',
+    });
+  });
+
+  it('renders columns, tabs, and timeline panels using their existing markup', () => {
+    const hook = createPanel();
+    const columns = hook.$getPanelInfo('cols center', 'left\n::\nright', sentenceMake);
+    const tabs = hook.$getPanelInfo('tabs right', ':: First\nbody\n::\n', sentenceMake);
+    const timeline = hook.$getPanelInfo(
+      'timeline Roadmap',
+      ':: [done] 2024-01-01 Started\nfirst\n:: [doing] Next step',
+      sentenceMake,
+    );
+
+    expect(columns.className).toContain('cherry-panel-cols__2cols');
+    expect(columns.appendStyle).toBe('style="--cols:2;text-align:center;"');
+    expect(tabs.className).toContain('cherry-tabs__2tabs');
+    expect(tabs.body).toContain('name="cherry-tabs-group-1"');
+    expect(tabs.body).toContain(' checked');
+    expect(tabs.body).toContain('Tab 2');
+    expect(timeline.title).toContain('Roadmap');
+    expect(timeline.body).toContain('cherry-timeline--item__done');
+    expect(timeline.body).toContain('cherry-timeline--item__doing');
+    expect(timeline.body).toContain('cherry-timeline--time');
+    expect(timeline.body).not.toContain('cherry-timeline--desc"></div>');
   });
 
   it('renders final panel HTML and reuses its cached result', () => {
@@ -143,5 +250,13 @@ describe('core/hooks/Panel', () => {
 
     expect(disabledPanel.makeHtml(panelMarkdown, sentenceMake)).toBe(panelMarkdown);
     expect(disabledAlign.makeHtml(alignMarkdown, sentenceMake)).toBe(alignMarkdown);
+  });
+
+  it.each([
+    [{ enableCols: false }, ':::cols\nleft\n::\nright\n:::'],
+    [{ enableTabs: false }, ':::tabs\n:: First\nbody\n:::'],
+    [{ enableTimeline: false }, ':::timeline\n:: 2024 Started\n:::'],
+  ])('leaves independently disabled panel syntax unchanged', (config, markdown) => {
+    expect(createPanel(config).makeHtml(markdown, sentenceMake)).toBe(markdown);
   });
 });

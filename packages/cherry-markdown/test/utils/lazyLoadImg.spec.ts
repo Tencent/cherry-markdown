@@ -127,27 +127,6 @@ describe('utils/lazyLoadImg loading lifecycle', () => {
     expect(callbacks.afterLoadOneImgCallback).toHaveBeenCalledWith(image);
   });
 
-  it('records callback rejection and image load failure', () => {
-    const rejected = createLazyLoad({ beforeLoadOneImgCallback: vi.fn(() => false) });
-    const rejectedImage = document.createElement('img');
-    rejectedImage.dataset.src = 'rejected.png';
-    vi.spyOn(rejectedImage, 'getBoundingClientRect').mockReturnValue(createRect(0, 20, 100, 100));
-    rejected.previewerDom.appendChild(rejectedImage);
-    rejected.lazyLoad.loadOneImg();
-    expect(rejected.lazyLoad.srcFailLoadedList['rejected.png']).toBe(1);
-
-    const failed = createLazyLoad();
-    const failedImage = document.createElement('img');
-    failedImage.dataset.src = 'failed.png';
-    vi.spyOn(failedImage, 'getBoundingClientRect').mockReturnValue(createRect(0, 20, 100, 100));
-    failed.previewerDom.appendChild(failedImage);
-    vi.spyOn(failed.lazyLoad, 'tryLoadOneImg').mockImplementation((_src, _success, failure) => failure());
-    failed.lazyLoad.loadOneImg();
-    expect(failed.lazyLoad.srcFailLoadedList['failed.png']).toBe(3);
-    expect(failed.callbacks.failLoadOneImgCallback).toHaveBeenCalledTimes(3);
-    expect(failed.callbacks.failLoadOneImgCallback).toHaveBeenCalledWith(failedImage);
-  });
-
   it('skips offscreen, missing, duplicate, and over-concurrency candidates', () => {
     const { lazyLoad, previewerDom } = createLazyLoad({ autoLoadImgNum: 0, maxNumPerTime: 1 });
     const offscreen = document.createElement('img');

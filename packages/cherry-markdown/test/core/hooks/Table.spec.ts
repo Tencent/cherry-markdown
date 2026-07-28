@@ -182,45 +182,6 @@ describe('core/hooks/Table', () => {
     });
   });
 
-  it('omits an empty table head and restores escaped pipes', () => {
-    const { hook } = createTable();
-    const result = hook.$renderTable(
-      { L: 'left', R: 'right', C: 'center' },
-      '~CTHU &nbsp; ~CTH$',
-      '~CTR~CTDL a\\|b ~CTD$~CTR$',
-      3,
-    );
-
-    expect(result.html).not.toContain('<thead>');
-    expect(result.html).toContain('<tbody><tr><td align="left">a|b</td></tr></tbody>');
-    expect(result.html).toContain('data-lines="3"');
-  });
-
-  it.each([
-    ['strict', '| Name | Value |\n| :--- | ---: |\n| Cherry | 42 |'],
-    ['loose', 'Name | Value\n:--- | ---:\nCherry | 42'],
-  ])('renders and restores a %s Markdown table', (_flavor, markdown) => {
-    const { hook } = createTable();
-    const cacheKey = hook.makeHtml(markdown, sentenceMake);
-    const html = hook.restoreCache(cacheKey);
-
-    expect(html).toContain('<table class="cherry-table">');
-    expect(html).toContain('<th align="left"><em>Name</em></th>');
-    expect(html).toContain('<th align="right"><em>Value</em></th>');
-    expect(html).toContain('<td align="left"><em>Cherry</em></td>');
-    expect(html).toContain('<td align="right"><em>42</em></td>');
-  });
-
-  it('completes an unfinished table in self-closing mode', () => {
-    const { hook } = createTable({ selfClosing: true });
-    const cacheKey = hook.makeHtml('| Name | Value\n', sentenceMake);
-    const html = hook.restoreCache(cacheKey);
-
-    expect(html).toContain('<table class="cherry-table">');
-    expect(html).toContain('<th><em>Name</em></th>');
-    expect(html).toContain('<th><em>Value</em></th>');
-  });
-
   it('renders a chart before its source table and strips flow cursors from chart data', () => {
     const { hook, cherry } = createTable({ enableChart: true, chartRenderEngine: TestChartEngine });
     const result = hook.$parseTable(

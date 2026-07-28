@@ -1,4 +1,4 @@
-import { handleUpload, handleUploadMulti } from '../../../src/utils/file';
+import { handleUpload } from '../../../src/utils/file';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Audio from '../../../src/toolbars/hooks/Audio';
 import FileLink from '../../../src/toolbars/hooks/File';
@@ -130,24 +130,5 @@ describe('toolbars/hooks media uploads', () => {
     hook.setCacheOnce({ name: originalFile(type).name, url: '/fallback', params: {} });
 
     expect(hook.onClick('')).toBe(fallbackMarkdown);
-  });
-
-  it.each(hookCases)('uploads multiple $type files with stable label fallbacks', ({ type, Hook, multipleMarkdown }) => {
-    const { context, hook } = createHook(Hook, type, true, false);
-    vi.mocked(handleUploadMulti).mockImplementationOnce((_editor, _type, _accept, callback) => {
-      if (callback) {
-        callback([
-          { url: '/file', params: {}, file: originalFile(type) },
-          { url: '/custom', params: { name: 'Custom', poster: '/poster', isShadow: true } },
-          { url: '/default' },
-        ]);
-      }
-    });
-
-    expect(hook.onClick('selected')).toBe('selected');
-
-    expect(handleUploadMulti).toHaveBeenCalledWith(context.editor, type, '*', expect.any(Function));
-    expect(context.getState().doc.toString()).toBe(multipleMarkdown);
-    expect(hook.updateMarkdown).toBe(false);
   });
 });

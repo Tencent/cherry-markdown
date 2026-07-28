@@ -91,6 +91,8 @@ export default class MyersDiff {
       }
       allSnakes[d] = tmp;
     }
+
+    return [];
   }
 
   /**
@@ -141,6 +143,7 @@ export default class MyersDiff {
     const result = []; // 返回的操作集
     let change = {}; // 本次操作
     let lastChange = {}; // 缓存上一次操作
+    let firstDeleteChange = {}; // 连续删除时用来缓存最初的删除
     snakes.forEach((snake, index) => {
       let currentPos = snake.xStart;
 
@@ -159,6 +162,10 @@ export default class MyersDiff {
           oldIndex: snake.xStart,
           newIndex: 0,
         };
+        if (lastChange.type === 'delete' && lastChange.oldIndex === change.oldIndex - 1) {
+          // 检测到连续删除,缓存最初的删除
+          firstDeleteChange = firstDeleteChange ? lastChange : firstDeleteChange;
+        }
         result.push(change);
         lastChange = change;
         // consoleStr += `%c${this.getElement(oldObj, snake.xStart)}, `;
@@ -174,15 +181,17 @@ export default class MyersDiff {
         if (lastChange.type === 'delete' && lastChange.oldIndex === change.oldIndex - 1) {
           // 和上一条删除合并为"更新"
           result.pop();
+          firstDeleteChange = firstDeleteChange ? lastChange : firstDeleteChange;
           change = {
             type: 'update',
-            oldIndex: lastChange.oldIndex,
+            oldIndex: firstDeleteChange.oldIndex, // 合并时,更新目标定位连续删除块中的首个元素
             newIndex: yOffset,
           };
           // args.push(blueColor);
         } else {
           // args.push(greenColor);
         }
+        firstDeleteChange = {};
         result.push(change);
         lastChange = change;
         // consoleStr += `%c${this.getElement(newObj, yOffset)}, `;

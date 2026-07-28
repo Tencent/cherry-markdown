@@ -45,6 +45,7 @@ export default class LRUCache {
 
       for (let i = 0; i < deleteCount; i++) {
         const result = iterator.next();
+        if (result.done) break;
         const oldKey = result.value;
         this.cache.delete(oldKey);
       }

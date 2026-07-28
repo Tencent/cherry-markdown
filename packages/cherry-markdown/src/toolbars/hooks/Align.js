@@ -52,8 +52,13 @@ export default class Align extends Panel {
       },
       {
         iconName: 'alignJustify',
-        name: locale?.align3Col ?? '三列排版',
-        onclick: this.bindSubClick.bind(this, '3cols'),
+        name: locale?.alignCols ?? '多列排版',
+        onclick: this.bindSubClick.bind(this, 'cols'),
+      },
+      {
+        iconName: 'alignJustify',
+        name: locale?.alignTabs ?? '选项卡',
+        onclick: this.bindSubClick.bind(this, 'tabs'),
       },
     ];
   }

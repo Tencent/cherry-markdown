@@ -67,8 +67,8 @@ export default class EChartsCodeBlockEngine {
     try {
       return JSON5.parse(trimmed);
     } catch (e) {
-      // eslint-disable-next-line no-new-func
-      const result = Function(`return (${trimmed})`)();
+      const JsFunction = function () {}.constructor;
+      const result = JsFunction(`return (${trimmed})`)();
       if (result && typeof result === 'object') {
         return result;
       }

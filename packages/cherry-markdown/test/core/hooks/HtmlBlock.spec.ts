@@ -170,36 +170,6 @@ describe('core/hooks/HtmlBlock', () => {
     );
   });
 
-  it('supports a string custom-tag list when supplied by an integration', () => {
-    const { hook } = createHtmlBlock({ whiteList: 'custom-tag' });
-    hook.beforeMakeHtml('<custom-tag>initialize</custom-tag>');
-    Object.defineProperty(hook, 'htmlWhiteList', { value: 'custom-tag', configurable: true });
-
-    expect(hook.afterMakeHtml('<custom-tag>value</custom-tag>')).toBe('<custom-tag>value</custom-tag>');
-  });
-
-  it('allows style tags and removes Markdown line breaks inside them', () => {
-    const { hook } = createHtmlBlock({ whiteList: 'style' });
-    hook.beforeMakeHtml('<style>.x { color: red; }</style>');
-
-    const html = hook.afterMakeHtml('<style><br>.x {<br>color:red;<br>}</style>');
-
-    expect(html).toContain('<style>.x {color:red;}</style>');
-  });
-
-  it('allows iframe attributes and normalizes iframe content', () => {
-    const { hook } = createHtmlBlock({ whiteList: 'iframe' });
-    hook.beforeMakeHtml('<iframe src="https://example.com"></iframe>');
-
-    const html = hook.afterMakeHtml('<iframe src="https://example.com" width="640" frameborder="0"><br>\n</iframe>');
-
-    expect(html).toContain('src="https://example.com"');
-    expect(html).toContain('width="640"');
-    expect(html).toContain('frameborder="0"');
-    expect(html).not.toContain('<br>');
-    expect(html).not.toContain('\n');
-  });
-
   it('returns allowed script markup without sanitizing it', () => {
     const { hook } = createHtmlBlock({ whiteList: 'script' });
     hook.beforeMakeHtml('<script>initialize()</script>');

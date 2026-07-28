@@ -67,9 +67,6 @@ export default class PreviewerBubble {
     this.imgLeadingSpacePos = -1;
     /** 记录 beginChangeImgValue 时的文档状态，用于位置映射追踪 */
     this.imgChangeBaseState = null;
-    this.imgSize = '';
-    this.imgDeco = '';
-    this.imgAlign = '';
     /** @type {MermaidBubbleSession} */
     this.mermaidSession = new MermaidBubbleSession(this);
     this.init();
@@ -453,7 +450,7 @@ export default class PreviewerBubble {
             const refNum = target.getAttribute('data-index');
             const refTitle = target.getAttribute('data-key');
             const content =
-              this.previewer.getDomContainer().querySelector(`.one-footnote[data-index="${refNum}"]`)?.innerHTML ?? '';
+              this.previewer.getDomContainer().querySelector(`.one-footnote[data-index="${refNum}"]`).innerHTML ?? '';
             // 如果有自定义的clickRefNumberCallback回调函数，则先执行
             // @ts-ignore
             const ret = this.previewer.$cherry.options.engine.syntax.footnote.refNumber.clickRefNumberCallback(
@@ -578,7 +575,7 @@ export default class PreviewerBubble {
     if (node.tagName === targetNodeName) {
       return node;
     }
-    if (!node.parentNode || node.parentNode.tagName === 'BODY') {
+    if (node.parentNode.tagName === 'BODY') {
       return false;
     }
     return this.$getClosestNode(node.parentNode, targetNodeName);

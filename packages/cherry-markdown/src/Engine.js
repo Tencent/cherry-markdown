@@ -376,7 +376,7 @@ export default class Engine {
       }
       // 针对表格做特殊处理
       // 针对表格的第二行做特殊处理
-      if (/(?:^|\n)(?=[^\n]*\|)[| \t:-]+\n*$/.test(md)) {
+      if (/\|[\s-:]+\|*\n*$/.test(md)) {
         return md;
       }
       if (/\|\n*$/.test(md)) {
@@ -401,9 +401,11 @@ export default class Engine {
       if (this.clearCursorTimer) {
         clearTimeout(this.clearCursorTimer);
       }
-      this.clearCursorTimer = setTimeout(() => {
-        this.$cherry.clearFlowSessionCursor();
-      }, 2560);
+      if (typeof this.$cherry.clearFlowSessionCursor === 'function') {
+        this.clearCursorTimer = setTimeout(() => {
+          this.$cherry.clearFlowSessionCursor();
+        }, 2560);
+      }
       return md.replace(/CHERRYFLOWSESSIONCURSOR/g, this.$cherry.options.engine.global.flowSessionCursor);
     }
     return md;

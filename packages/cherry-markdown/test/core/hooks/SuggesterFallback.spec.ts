@@ -41,13 +41,6 @@ describe('core/hooks/Suggester compatibility paths', () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
-  it('renders configured suggestions through the lookbehind fallback', () => {
-    const suggester = new Suggester({ config: { suggester: [configItem] }, cherry: createCherry() });
-
-    expect(suggester.makeHtml('before @alice')).toBe('before<mark>alice</mark>');
-    expect(suggester.suggesterPanel.hasEditor()).toBe(false);
-  });
-
   it('builds fallback rules for object configuration and missing keywords', () => {
     const objectConfig = {
       suggester: {

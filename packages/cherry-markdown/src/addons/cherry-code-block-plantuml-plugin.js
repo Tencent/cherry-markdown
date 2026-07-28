@@ -61,7 +61,10 @@ function encode6bit(b1) {
   if (b === 0) {
     return '-';
   }
-  return '_';
+  if (b === 1) {
+    return '_';
+  }
+  return '?';
 }
 
 function compress(s1, url) {

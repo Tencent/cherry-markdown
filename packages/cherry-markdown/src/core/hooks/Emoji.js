@@ -28,7 +28,7 @@ function fromCodePoint(...args) {
     // correctly handles all cases including `NaN`, `-Infinity`, `+Infinity`
     // The surrounding `!(...)` is required to correctly handle `NaN` cases
     // The (codePoint>>>0) === codePoint clause handles decimals and negatives
-    if (!(codePoint <= 0x10ffff && codePoint >>> 0 === codePoint)) {
+    if (!(codePoint < 0x10ffff && codePoint >>> 0 === codePoint)) {
       throw new RangeError(`Invalid code point: ${codePoint}`);
     }
     if (codePoint <= 0xffff) {
@@ -63,7 +63,7 @@ export default class Emoji extends SyntaxBase {
       resourceURL: 'https://github.githubassets.com/images/icons/emoji/unicode/${code}.png?v8',
       emojis: { ...gfmUnicode.emojis },
     };
-    if (!config || typeof config !== 'object') {
+    if (typeof config !== 'object') {
       return;
     }
     const { useUnicode, customResourceURL, customRenderer, upperCase } = config;

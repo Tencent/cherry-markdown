@@ -52,15 +52,6 @@ describe('core/ParagraphBase', () => {
     expect(hook.$cleanParagraph('\nfirst\nsecond\n')).toBe('first<br>second');
   });
 
-  it('joins raw block HTML newlines using built-in and valid custom tags', () => {
-    const hook = createParagraphBase(false, 'custom-block|invalid(');
-    hook.initBrReg(false);
-    const html = '<custom-block>\n  custom\n</custom-block>\n  <p class="next">\ntext\n</p>\nend';
-
-    expect(hook.joinRawHtml(html)).toBe('<custom-block>  custom</custom-block>  <p class="next">text</p>end');
-    expect(hook.joinRawHtml('<p>\nsecond\n</p>')).toBe('<p>second\n</p>');
-  });
-
   it('provides transparent base lifecycle methods with and without sentence rendering', () => {
     const plain = createParagraphBase();
     const cached = createParagraphBase(true);

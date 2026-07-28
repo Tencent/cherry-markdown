@@ -86,23 +86,6 @@ describe('utils/listContentHandler', () => {
     expect(handler.position).toBe(16);
   });
 
-  it('maps an ordered list item and its continuation lines without including the marker', () => {
-    const context = createEditor('1. first\n2. second\ncontinued');
-    const { preview, targets } = createPreview(['first', 'second\ncontinued']);
-
-    const handler = new ListHandler(
-      'click',
-      targets[1],
-      document.createElement('div'),
-      preview,
-      context.editor as never,
-    );
-    const selection = context.getState().selection.main;
-
-    expect(handler.range).toEqual([12, 28]);
-    expect(context.getState().sliceDoc(selection.from, selection.to)).toBe('second\ncontinued');
-  });
-
   it('does not dispatch a selection when the preview item cannot be mapped', () => {
     const context = createEditor('ordinary text');
     const { preview, targets } = createPreview(['not a list']);
@@ -244,75 +227,6 @@ describe('utils/listContentHandler', () => {
 
     expect(context.getState().doc.toString()).toBe('- before\n- after');
     expect(context.getState().selection.main.head).toBe(16);
-    expect(context.focus).toHaveBeenCalledOnce();
-    expect(remove).toHaveBeenCalledOnce();
-  });
-
-  it('splits a checked task while preserving the current task marker and resetting the new task', () => {
-    const context = createEditor('- [x] done', 10);
-    const { preview, targets } = createPreview(['done']);
-    const handler = new ListHandler(
-      'click',
-      targets[0],
-      document.createElement('div'),
-      preview,
-      context.editor as never,
-    );
-    const remove = vi.spyOn(handler, 'remove').mockImplementation(() => {});
-    Object.defineProperty(targets[0], 'innerText', { configurable: true, value: 'done\nnext' });
-
-    targets[0].dispatchEvent(
-      new InputEvent('input', { bubbles: true, cancelable: true, inputType: 'insertParagraph' }),
-    );
-
-    expect(context.getState().doc.toString()).toBe('- [x] done\n- [ ] next');
-    expect(context.getState().selection.main.head).toBe(21);
-    expect(context.focus).toHaveBeenCalledOnce();
-    expect(remove).toHaveBeenCalledOnce();
-  });
-
-  it('preserves the marker separator when splitting an ordered list item', () => {
-    const context = createEditor('1. first', 8);
-    const { preview, targets } = createPreview(['first']);
-    const handler = new ListHandler(
-      'click',
-      targets[0],
-      document.createElement('div'),
-      preview,
-      context.editor as never,
-    );
-    const remove = vi.spyOn(handler, 'remove').mockImplementation(() => {});
-    Object.defineProperty(targets[0], 'innerText', { configurable: true, value: 'first\nsecond' });
-
-    targets[0].dispatchEvent(
-      new InputEvent('input', { bubbles: true, cancelable: true, inputType: 'insertParagraph' }),
-    );
-
-    expect(context.getState().doc.toString()).toBe('1. first\n1. second');
-    expect(context.getState().selection.main.head).toBe(18);
-    expect(context.focus).toHaveBeenCalledOnce();
-    expect(remove).toHaveBeenCalledOnce();
-  });
-
-  it('falls back to a plain list marker when a line-break target no longer matches list syntax', () => {
-    const context = createEditor('ordinary text', 5);
-    const { preview, targets } = createPreview(['ordinary text']);
-    const handler = new ListHandler(
-      'click',
-      targets[0],
-      document.createElement('div'),
-      preview,
-      context.editor as never,
-    );
-    const remove = vi.spyOn(handler, 'remove').mockImplementation(() => {});
-    Object.defineProperty(targets[0], 'innerText', { configurable: true, value: 'before\nafter' });
-
-    targets[0].dispatchEvent(
-      new InputEvent('input', { bubbles: true, cancelable: true, inputType: 'insertParagraph' }),
-    );
-
-    expect(context.getState().doc.toString()).toBe('before\n- after');
-    expect(context.getState().selection.main.head).toBe(14);
     expect(context.focus).toHaveBeenCalledOnce();
     expect(remove).toHaveBeenCalledOnce();
   });

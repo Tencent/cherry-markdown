@@ -15,7 +15,7 @@
   font-family: "ch-icon";
   font-style: normal;
   font-weight: normal;
-  //line-height: 1;
+  line-height: 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -140,3 +140,4 @@
 .ch-icon-menu:before { content: "\EA92" }
 .ch-icon-main-theme:before { content: "\EA94" }
 .ch-icon-code-theme:before { content: "\EA95" }
+.ch-icon-timeline:before { content: "\EA96" }

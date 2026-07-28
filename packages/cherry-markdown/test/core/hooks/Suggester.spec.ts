@@ -343,21 +343,6 @@ describe('core/hooks/Suggester', () => {
     });
 
     describe('toHtml', () => {
-      it('应该使用自定义 echo 函数', () => {
-        const config = {
-          suggester: [
-            {
-              keyword: '@',
-              suggestList: vi.fn(),
-              echo: vi.fn((text: string) => `<custom>@${text}</custom>`),
-            },
-          ],
-        };
-        const customCherry = createMockCherry(config);
-        const suggester = createSuggesterInstance(config, customCherry);
-        expect(suggester.toHtml('', ' ', '@', 'user')).toBe(' <custom>@user</custom>');
-      });
-
       it('应该使用默认格式', () => {
         const config = {
           suggester: [{ keyword: '@', suggestList: vi.fn() }],

@@ -31,6 +31,9 @@
   --toolbar-min-height: 48px; // 单行工具栏的高度
   // 侧边栏列表高度（由 JS 动态写入），默认 120px 作为无侧栏时的回退
   --sidebar-list-height: 120px;
+  // 工具栏图标（字体图标字形大小 + SVG 图标宽高）的统一视觉尺寸，
+  // 保证字体图标、SVG 图标、纯文字三种模式在同一按钮行内视觉高度一致
+  --toolbar-icon-size: 14px;
 
   // 工具栏按钮
   --toolbar-btn-color: #3f4a56;
@@ -156,6 +159,34 @@
   --mermaid-toolbar-tab-color: inherit;
   --mermaid-toolbar-tab-active-color: #333;  // active 状态深色文字，确保在亮色 slider 上可见
   --mermaid-container-border: rgba(128, 128, 128, 0.2);
+
+  /* ========== Timeline 时间线 ========== */
+  // 基础样式
+  --timeline-header-color: var(--base-font-color);
+  --timeline-line-color: var(--base-border-color);
+  --timeline-node-bg: var(--base-previewer-bg);
+  --timeline-node-color: var(--oc-gray-5);
+  --timeline-content-color: var(--md-paragraph-color);
+  --timeline-time-color: var(--base-sub-font-color);
+  --timeline-title-color: var(--md-heading-color);
+  --timeline-desc-color: var(--base-sub-font-color);
+
+  // 状态：已完成
+  --timeline-done-color: var(--oc-green-6);
+  // 状态：进行中
+  --timeline-doing-color: var(--primary-color);
+  --timeline-doing-shadow-color: rgba(24, 144, 255, 0.2);
+  --timeline-doing-pulse-from: rgba(24, 144, 255, 0.35);
+  --timeline-doing-pulse-to: rgba(24, 144, 255, 0);
+  // 状态：待办
+  --timeline-todo-bg: var(--base-previewer-bg);
+  --timeline-todo-color: var(--oc-gray-5);
+  // 状态：里程碑
+  --timeline-milestone-color: var(--oc-yellow-6);
+  --timeline-milestone-title-color: var(--oc-yellow-8);
+  // 状态：异常
+  --timeline-error-color: var(--oc-red-5);
+  --timeline-error-title-color: var(--oc-red-7);
 
   /* ========== 其余单个组件 ========== */
   --drag-border-color: #ebedee;

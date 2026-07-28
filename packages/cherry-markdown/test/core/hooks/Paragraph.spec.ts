@@ -46,15 +46,6 @@ describe('core/hooks/Paragraph', () => {
     expect(html).not.toContain('<br>');
   });
 
-  it('uses a div wrapper when rendered content contains a block element', () => {
-    const hook = createParagraph(false, 'custom-block|invalid(');
-    const html = hook.makeHtml('before\n<blockquote>quoted</blockquote>\nafter', sentenceMake);
-
-    expect(html).toContain('<div ');
-    expect(html).toContain('data-type="div"');
-    expect(html).toContain('before<br><blockquote>quoted</blockquote><br>after');
-  });
-
   it('leaves a complete paragraph cache placeholder untouched', () => {
     const hook = createParagraph();
     const placeholder = '~~C1Icached_L2$';

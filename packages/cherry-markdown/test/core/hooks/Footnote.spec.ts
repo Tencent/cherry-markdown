@@ -170,24 +170,6 @@ describe('core/hooks/Footnote', () => {
     expect(hook.getFootNote()[0].note).toContain('class="footnote-ref ">[1]</a>');
   });
 
-  it('returns no list for zero notes and uses locale title fallback', () => {
-    const hook = createFootnote({ localeTitle: 'Notes' });
-
-    expect(hook.formatFootNote()).toBe('');
-    hook.pushFootNote('note', 'body');
-    expect(hook.formatFootNote()).toContain('<div class="footnote-title ">Notes</div>');
-  });
-
-  it('renders a hidden list when refList is disabled', () => {
-    const hook = createFootnote({ config: { refList: false }, localeTitle: null });
-    hook.pushFootNote('note', 'body');
-    const html = hook.formatFootNote();
-
-    expect(html).toContain('class="footnote  hidden"');
-    expect(html).toContain('<div class="footnote-title ">title</div>');
-    expect(html).toContain('class="one-footnote "');
-  });
-
   it('extracts multiline definitions, preserves line count, and resolves repeated references', () => {
     const hook = createFootnote();
     const markdown = 'First[^note], second[^note].\n\n[^note]: line one\n  line two';

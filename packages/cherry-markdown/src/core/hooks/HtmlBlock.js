@@ -172,15 +172,11 @@ export default class HtmlBlock extends ParagraphBase {
     if (this.htmlWhiteListAppend !== false) {
       config.ADD_TAGS = this.htmlWhiteList;
       if (this.htmlWhiteListAppend.test('style') || this.htmlWhiteListAppend.test('ALL')) {
-        // DOMPurify otherwise drops root-level style elements while parsing them outside a body context.
-        config.FORCE_BODY = true;
-        $str = $str.replace(/<style(>| [^>]*>)[\s\S]*?<\/style>/gi, (match) => {
+        $str = $str.replace(/<style(>| [^>]*>).*?<\/style>/gi, (match) => {
           return match.replace(/<br>/gi, '');
         });
       }
       if (this.htmlWhiteListAppend.test('iframe') || this.htmlWhiteListAppend.test('ALL')) {
-        // DOMPurify otherwise drops root-level iframe elements while parsing them outside a body context.
-        config.FORCE_BODY = true;
         config.ADD_ATTR = config.ADD_ATTR.concat([
           'align',
           'frameborder',
@@ -196,13 +192,14 @@ export default class HtmlBlock extends ParagraphBase {
           'srcdoc',
           'width',
         ]);
-        $str = $str.replace(/<iframe(>| [^>]*>)[\s\S]*?<\/iframe>/gi, (match) => {
+        config.SANITIZE_DOM = false;
+        $str = $str.replace(/<iframe(>| [^>]*>).*?<\/iframe>/gi, (match) => {
           return match.replace(/<br>/gi, '').replace(/\n/g, '');
         });
       }
       if (this.htmlWhiteListAppend.test('script') || this.htmlWhiteListAppend.test('ALL')) {
         // 如果允许script或者输入了ALL，则不做任何过滤了
-        $str = $str.replace(/<script(>| [^>]*>)[\s\S]*?<\/script>/gi, (match) => {
+        $str = $str.replace(/<script(>| [^>]*>).*?<\/script>/gi, (match) => {
           return match.replace(/<br>/gi, '');
         });
         return $str;
@@ -218,9 +215,8 @@ export default class HtmlBlock extends ParagraphBase {
       config.ADD_TAGS = [];
     }
     if (typeof config.ADD_TAGS === 'string') {
-      config.ADD_TAGS = config.ADD_TAGS.split('|').filter(Boolean);
-    }
-    if (Array.isArray(config.ADD_TAGS)) {
+      config.ADD_TAGS += '|foreignObject';
+    } else if (Array.isArray(config.ADD_TAGS)) {
       config.ADD_TAGS.push('foreignObject');
     }
     if (!config.HTML_INTEGRATION_POINTS) {

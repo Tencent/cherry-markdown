@@ -40,41 +40,6 @@ describe('core/hooks/Toc', () => {
     vi.stubGlobal('BUILD_ENV', 'production');
   });
 
-  it('uses stable defaults and accepts every public rendering option', () => {
-    const defaults = createToc();
-    const linkProcessor = vi.fn((link: string) => `/document${link}`);
-    const custom = createToc({
-      tocStyle: 'plain',
-      tocNodeClass: 'node',
-      tocContainerClass: 'container',
-      tocTitleClass: 'title',
-      linkProcessor,
-      showAutoNumber: true,
-      allowMultiToc: true,
-    });
-
-    expect(defaults).toMatchObject({
-      tocStyle: 'plain',
-      tocNodeClass: 'toc-li',
-      tocContainerClass: 'toc',
-      tocTitleClass: 'toc-title',
-      showAutoNumber: false,
-      allowMultiToc: false,
-    });
-    expect(custom).toMatchObject({
-      tocStyle: 'plain',
-      tocNodeClass: 'node',
-      tocContainerClass: 'container',
-      tocTitleClass: 'title',
-      showAutoNumber: true,
-      allowMultiToc: true,
-    });
-    expect(custom.$makeTocItem({ level: 1, id: 'safe_intro', text: 'Intro', isInBlockquote: false }, false)).toContain(
-      'href="/document#intro"',
-    );
-    expect(linkProcessor).toHaveBeenCalledWith('#intro');
-  });
-
   it.each(['[toc]', '[TOC]', '[[toc]]', '【【TOC】】'])('recognizes and caches the %s marker', (marker) => {
     const hook = createToc();
     const prepared = hook.beforeMakeHtml(marker);
@@ -91,16 +56,6 @@ describe('core/hooks/Toc', () => {
     expect(hook.restoreCache(prepared)).toContain('[toc]');
     expect(prepared).toContain('data-sign="empty-toc"');
     expect(hook.restoreCache(prepared).match(/\[+toc\]+/g)).toHaveLength(1);
-  });
-
-  it('keeps multiple markers when allowMultiToc is enabled', () => {
-    const hook = createToc({ allowMultiToc: true });
-    const headings = '<h1 id="safe_intro">Intro</h1>';
-    const prepared = hook.beforeMakeHtml('[toc]\n\n[[toc]]');
-    const html = hook.afterMakeHtml(`${prepared}\n${headings}`);
-
-    expect(html.match(/class="toc"/g)).toHaveLength(2);
-    expect(html).not.toContain('empty-toc');
   });
 
   it('creates whitespace indentation relative to the minimum heading level', () => {

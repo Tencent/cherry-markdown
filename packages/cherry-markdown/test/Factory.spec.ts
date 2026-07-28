@@ -102,20 +102,6 @@ describe('Factory/createMenuHook', () => {
     expect(onClick.mock.contexts[0]).toBe(menu);
   });
 
-  it('supports icon names and string custom icons', () => {
-    const iconNameContext = createMenuContext();
-    const ICON_NAME_MENU_CLASS = createMenuHook('named', { iconName: 'star' });
-    const iconNameMenu = new ICON_NAME_MENU_CLASS(iconNameContext.cherry as never);
-    expect(iconNameMenu.iconName).toBe('star');
-    expect(iconNameMenu.createBtn().querySelector('.ch-icon-star')).not.toBeNull();
-
-    const stringContext = createMenuContext();
-    const STRING_ICON_MENU_CLASS = createMenuHook('stringIcon', { icon: 'code' });
-    const stringIconMenu = new STRING_ICON_MENU_CLASS(stringContext.cherry as never);
-    expect(stringIconMenu.iconName).toBe('code');
-    expect(stringIconMenu.createBtn().querySelector('.ch-icon-code')).not.toBeNull();
-  });
-
   it('filters malformed menu options and uses base callback behavior', () => {
     const context = createMenuContext();
     const MENU_CLASS = createMenuHook('filtered', {

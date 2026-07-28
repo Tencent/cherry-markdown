@@ -67,7 +67,8 @@ export default class CherryStream extends CherryStatic {
     super();
     CherryStream.initialized = true;
     const defaultConfigCopy = cloneDeep(CherryStream.config.defaults);
-
+    // stream版默认不开启下划线
+    defaultConfigCopy.engine.syntax.underline = false;
     /**
      * @property
      * @type {CherryOptions}

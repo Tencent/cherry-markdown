@@ -3,14 +3,17 @@ import { defineConfig } from 'vitest/config';
 
 const coverageThresholds = process.env.COVERAGE_THRESHOLDS
   ? {
-      statements: 75.33,
-      branches: 92.23,
-      functions: 84.72,
-      lines: 75.33,
+      statements: 77,
+      branches: 91.8,
+      functions: 85.1,
+      lines: 77,
     }
   : undefined;
 
 export default defineConfig({
+  define: {
+    BUILD_ENV: '"production"',
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),

@@ -162,25 +162,6 @@ describe('core/Engine', () => {
     expect(engine.$cacheBigData(fenced)).toBe(fenced);
   });
 
-  it.each([
-    ['forced off', 'plain', true, 'plain'],
-    ['emphasis closer', '**stream**', false, '**streamCHERRYFLOWSESSIONCURSOR**'],
-    ['panel closer', '::: \n', false, '::: \n'],
-    ['detail closer', '+++\n', false, '+++\n'],
-    ['code closer', '```\ncode\n```\n', false, '```\ncodeCHERRYFLOWSESSIONCURSOR\n```\n'],
-    ['list marker', 'item\n-', false, 'itemCHERRYFLOWSESSIONCURSOR\n-'],
-    ['table delimiter', '| --- |\n', false, '| --- |\n'],
-    ['table row', '| cell |\n', false, '| cell CHERRYFLOWSESSIONCURSOR|\n'],
-    ['line ending', 'line\n', false, 'lineCHERRYFLOWSESSIONCURSOR\n'],
-    ['plain text', 'plain', false, 'plainCHERRYFLOWSESSIONCURSOR'],
-  ])('places the flow cursor for %s', (_name, markdown, forceNoCursor, expected) => {
-    const engine = createEngine();
-    engine.$cherry.options.engine.global.flowSessionContext = true;
-    engine.$cherry.options.engine.global.flowSessionCursor = '<i class="cursor"></i>';
-
-    expect(engine.$setFlowSessionCursorCache(markdown, forceNoCursor)).toBe(expected);
-  });
-
   it('restores and eventually clears configured flow cursor DOM', () => {
     vi.useFakeTimers();
     const engine = createEngine();

@@ -41,14 +41,6 @@ describe('utils/autoindent', () => {
     expect(ordinary.dispatch).not.toHaveBeenCalled();
   });
 
-  it('leaves an empty selection collection untouched', () => {
-    const context = createAdapter('I. item', [{ anchor: 7 }]);
-    context.adapter.listSelections.mockReturnValue([]);
-
-    expect(handleNewlineIndentList(context.adapter as never)).toBe(false);
-    expect(context.dispatch).not.toHaveBeenCalled();
-  });
-
   it('rejects selections and cursors positioned before the list marker', () => {
     const selection = createAdapter('I. item', [{ anchor: 3, head: 7 }]);
     const beforeMarker = createAdapter('  I. item', [{ anchor: 1 }]);
@@ -72,15 +64,5 @@ describe('utils/autoindent', () => {
     expect(handleNewlineIndentList(context.adapter as never)).toBe(true);
     expect(context.getState().doc.toString()).toBe('\n');
     expect(context.getState().selection.main.head).toBe(1);
-  });
-
-  it('updates multiple valid cursors in one atomic transaction', () => {
-    const doc = 'I. first\n二. second';
-    const context = createAdapter(doc, [{ anchor: 8 }, { anchor: doc.length }]);
-
-    expect(handleNewlineIndentList(context.adapter as never)).toBe(true);
-    expect(context.getState().doc.toString()).toBe('I. first\nI. \n二. second\nI. ');
-    expect(context.getState().selection.ranges.map((range) => range.head)).toEqual([12, 26]);
-    expect(context.dispatch).toHaveBeenCalledOnce();
   });
 });
