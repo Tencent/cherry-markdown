@@ -66,6 +66,7 @@
     "clean": "rimraf ./dist",
     "check-bundle": "es-check es5 dist/cherry-markdown.iife.js",
     "test": "vp test",
+    "test:coverage": "COVERAGE_THRESHOLDS=true vp test run --coverage",
     "test:update": "vp test -u",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project test/tsconfig.json --noEmit",
     "examples": "serve -p 3000 ."

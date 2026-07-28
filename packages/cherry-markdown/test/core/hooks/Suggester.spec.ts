@@ -343,21 +343,6 @@ describe('core/hooks/Suggester', () => {
     });
 
     describe('toHtml', () => {
-      it('应该使用自定义 echo 函数', () => {
-        const config = {
-          suggester: [
-            {
-              keyword: '@',
-              suggestList: vi.fn(),
-              echo: vi.fn((text: string) => `<custom>@${text}</custom>`),
-            },
-          ],
-        };
-        const customCherry = createMockCherry(config);
-        const suggester = createSuggesterInstance(config, customCherry);
-        expect(suggester.toHtml('', ' ', '@', 'user')).toBe('<custom>@user</custom>');
-      });
-
       it('应该使用默认格式', () => {
         const config = {
           suggester: [{ keyword: '@', suggestList: vi.fn() }],
@@ -824,6 +809,353 @@ describe('core/hooks/Suggester', () => {
         suggester.suggesterPanel.$suggesterPanel = createPanelDom(['item1', 'item2']);
 
         expect(suggester.suggesterPanel.findSelectedItemIndex()).toBe(-1);
+      });
+    });
+
+    describe('browser lifecycle coverage', () => {
+      it('filters default suggestions and stops immediately for a space', () => {
+        const suggester = createSuggesterInstance({ suggester: {} }, mockCherry);
+        const slashSuggest = suggester.suggester['/'].suggestList;
+        const callback = vi.fn();
+
+        slashSuggest('/head', callback);
+        const headingResults = callback.mock.calls[0][0];
+        expect(headingResults.some((item: { keyword: string }) => item.keyword === '/head1')).toBe(true);
+
+        slashSuggest(' ', callback);
+        expect(callback).toHaveBeenLastCalledWith(false);
+        slashSuggest('/no-such-suggestion', callback);
+        expect(callback).toHaveBeenLastCalledWith(false);
+
+        const codeCallback = vi.fn();
+        suggester.suggester['`'].suggestList('```j', codeCallback);
+        expect(codeCallback.mock.calls[0][0].every((item: { exactMatch?: boolean }) => item.exactMatch)).toBe(true);
+        expect(suggester.toHtml('', ' ', '/', 'head')).toContain('cherry-suggestion');
+      });
+
+      it('initializes editor bindings from makeHtml and mounted', () => {
+        const config = {
+          suggester: [{ keyword: '@', suggestList: vi.fn(), echo: (text: string) => `<b>${text}</b>` }],
+        };
+        const customCherry = createMockCherry(config);
+        const fromHtml = createSuggesterInstance(config, customCherry);
+        fromHtml.suggesterPanel.$suggesterPanel = createPanelDom();
+        Object.defineProperty(fromHtml, '$engine', { value: { $cherry: customCherry } });
+
+        expect(fromHtml.makeHtml(' @alice')).toContain('<b>alice</b>');
+        expect(fromHtml.suggesterPanel.hasEditor()).toBe(true);
+        expect(customCherry.editor.editor.on).toHaveBeenCalledWith('change', expect.any(Function));
+
+        const fromMounted = createSuggesterInstance(config, customCherry);
+        fromMounted.suggesterPanel.$suggesterPanel = createPanelDom();
+        Object.defineProperty(fromMounted, '$engine', { value: { $cherry: customCherry } });
+        fromMounted.mounted();
+        expect(fromMounted.suggesterPanel.hasEditor()).toBe(true);
+      });
+
+      it('reinitializes stale editor state when configuration is refreshed', () => {
+        const suggester = createSuggesterInstance();
+        suggester.suggesterPanel.editor = editorShell(mockCherry);
+
+        suggester.initConfig({
+          suggester: [{ keyword: '@', suggestList: vi.fn(), suggestListRender: vi.fn(), echo: vi.fn() }],
+        });
+
+        expect(suggester.suggesterPanel.editor).toBeNull();
+      });
+
+      it('creates, updates, positions, hides, and clicks panel items', () => {
+        const wrapper = document.createElement('div');
+        document.body.appendChild(wrapper);
+        const customCherry = createMockCherry();
+        customCherry.wrapperDom.appendChild.mockImplementation((node) => wrapper.appendChild(node));
+        customCherry.wrapperDom.querySelector.mockImplementation((selector) => wrapper.querySelector(selector));
+        const suggester = createSuggesterInstance(undefined, customCherry);
+        const panel = suggester.suggesterPanel;
+        panel.editor = editorShell(customCherry);
+        panel.keyword = '@';
+        panel.optionList = [{ label: 'Alice', icon: 'user', value: '@alice' }, 'Bob'];
+
+        panel.showSuggesterPanel({ left: 12, top: 34, items: panel.optionList });
+        const panelElement = wrapper.querySelector('.cherry-suggester-panel');
+        expect(panelElement?.querySelector('.ch-icon-user')).not.toBeNull();
+        expect(panelElement?.querySelectorAll('.cherry-suggester-panel__item')).toHaveLength(2);
+        expect(panelElement?.getAttribute('style')).toContain('left: 12px');
+
+        panel.onClickPanelItem();
+        panel.cursorFrom = 0;
+        panel.searchKeyCache = ['@'];
+        panelElement?.querySelector('.ch-icon-user')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        expect(customCherry.editor.editor.replaceRange).toHaveBeenCalledWith('@alice', 0, 1);
+
+        panel.hideSuggesterPanel();
+        expect(panelElement?.getAttribute('style')).toContain('display: none');
+        expect(panel.findClickedItemIndex(panel.$suggesterPanel)).toBe(-1);
+      });
+
+      it('accepts custom panel renderers returning arrays and single elements', () => {
+        const suggester = createSuggesterInstance();
+        const panel = suggester.suggesterPanel;
+        panel.$suggesterPanel = createPanelDom();
+        panel.keyword = '@';
+        const first = document.createElement('button');
+        first.textContent = 'first';
+        const second = document.createElement('button');
+        second.textContent = 'second';
+        panel.suggesterConfig = {
+          '@': { suggestListRender: () => [first, second] },
+        };
+
+        panel.updatePanel(['fallback']);
+        expect(panel.$suggesterPanel.querySelectorAll('button')).toHaveLength(2);
+
+        const single = document.createElement('output');
+        single.textContent = 'single';
+        panel.suggesterConfig = { '@': { suggestListRender: () => single } };
+        panel.updatePanel(['fallback']);
+        expect(panel.$suggesterPanel.querySelector('output')?.textContent).toBe('single');
+      });
+
+      it('relocates the panel above and below and reports cursor coordinates', () => {
+        const suggester = createSuggesterInstance();
+        const panel = suggester.suggesterPanel;
+        panel.editor = editorShell(mockCherry);
+        panel.$suggesterPanel = createPanelDom();
+        panel.optionList = ['one'];
+        mockCherry.editor.editor.view.coordsAtPos.mockReturnValue({ left: 150, top: 200, bottom: 220 });
+
+        panel.panelPosition = 'below';
+        panel.relocatePanel(mockCherry.editor.editor);
+        expect(panel.$suggesterPanel.style.left).toBe('50px');
+        expect(panel.$suggesterPanel.style.top).toBe('125px');
+
+        Object.defineProperty(panel.$suggesterPanel, 'offsetHeight', { configurable: true, value: 40 });
+        panel.panelPosition = 'above';
+        panel.relocatePanel(mockCherry.editor.editor);
+        expect(panel.$suggesterPanel.style.top).toBe('55px');
+        expect(panel.getCursorPos(mockCherry.editor.editor)).toEqual({ left: 150, top: 220 });
+
+        panel.editor = null;
+        expect(panel.relocatePanel(mockCherry.editor.editor)).toBe(false);
+        expect(panel.getCursorPos(mockCherry.editor.editor)).toBeNull();
+      });
+
+      it.each([
+        [{ left: 140, top: 150, bottom: 170 }, 600, 'below'],
+        [{ left: 140, top: 650, bottom: 670 }, 600, 'above'],
+        [{ left: 140, top: 110, bottom: 130 }, 300, 'below'],
+        [{ left: 140, top: 250, bottom: 270 }, 300, 'above'],
+      ])('chooses panel boundary position for cursor %o', (coords, editorHeight, expectedPosition) => {
+        const suggester = createSuggesterInstance();
+        const panel = suggester.suggesterPanel;
+        panel.editor = editorShell(mockCherry);
+        panel.$suggesterPanel = createPanelDom();
+        panel.optionList = ['one'];
+        mockCherry.wrapperDom.clientHeight = editorHeight;
+        mockCherry.editor.editor.view.coordsAtPos.mockReturnValue(coords);
+
+        panel.relocatePanelWithBoundaryCheck();
+
+        expect(panel.panelPosition).toBe(expectedPosition);
+        expect(panel.$suggesterPanel.style.visibility).toBe('visible');
+      });
+
+      it('runs bound callbacks, intercepts Enter, and destroys all bindings', () => {
+        vi.useFakeTimers();
+        const suggester = createSuggesterInstance();
+        const panel = suggester.suggesterPanel;
+        panel.editor = editorShell(mockCherry);
+        panel.$suggesterPanel = createPanelDom(['one'], 0);
+        panel.optionList = [{ value: 'selected' }];
+        panel.cursorFrom = 0;
+        panel.searchKeyCache = ['@'];
+        document.body.appendChild(panel.$suggesterPanel);
+        panel.bindEvent();
+
+        const cursorCallback = mockCherry.$event.on.mock.calls.find(([name]) => name === 'beforeSelectionChange')?.[1];
+        const scrollCallback = mockCherry.$event.on.mock.calls.find(([name]) => name === 'onScroll')?.[1];
+        const stopSpy = vi.spyOn(panel, 'stopRelate');
+        panel.searchCache = true;
+        expect(panel.editor.arrowKeyInterceptor('Enter')).toBe(true);
+        expect(mockCherry.editor.editor.replaceRange).toHaveBeenCalledWith('selected', 0, 1);
+        vi.runAllTimers();
+
+        cursorCallback(mockCherry.editor.editor, { text: [], from: 0, to: 0 });
+        expect(stopSpy).toHaveBeenCalled();
+
+        panel.searchCache = true;
+        const relocateSpy = vi.spyOn(panel, 'relocatePanel').mockImplementation(() => false);
+        scrollCallback();
+        expect(relocateSpy).toHaveBeenCalled();
+
+        const panelElement = panel.$suggesterPanel;
+        panel.destroy();
+        expect(mockCherry.editor.editor.off).toHaveBeenCalledWith('change', expect.any(Function));
+        expect(mockCherry.$event.off).toHaveBeenCalledWith('beforeSelectionChange', expect.any(Function));
+        expect(mockCherry.$event.off).toHaveBeenCalledWith('onScroll', expect.any(Function));
+        expect(panelElement.isConnected).toBe(false);
+        expect(panel.editor).toBeNull();
+        vi.useRealTimers();
+      });
+
+      it('handles replacement bounds, adjacent spaces, and vertical cursor movement', () => {
+        const suggester = createSuggesterInstance();
+        const panel = suggester.suggesterPanel;
+        panel.editor = editorShell(mockCherry);
+        panel.keyword = '/';
+        panel.cursorFrom = 1;
+        panel.cursorTo = 2;
+        panel.searchKeyCache = [];
+        panel.optionList = [{ value: 'done ' }];
+        mockCherry.editor.editor.state.doc.length = 6;
+        mockCherry.editor.editor.state.doc.sliceString.mockReturnValue(' ');
+
+        panel.pasteSelectResult(0, createMockKeyboardEvent());
+        expect(mockCherry.editor.editor.replaceRange).toHaveBeenCalledWith('done ', 1, 3);
+
+        mockCherry.editor.editor.replaceRange.mockClear();
+        panel.cursorFrom = 3;
+        mockCherry.editor.editor.state.doc.length = 2;
+        panel.pasteSelectResult(0, createMockKeyboardEvent());
+        expect(mockCherry.editor.editor.replaceRange).not.toHaveBeenCalled();
+        expect(panel.searchCache).toBe(false);
+
+        panel.cursorFrom = 0;
+        mockCherry.editor.editor.state.doc.length = 20;
+        panel.optionList = [{ value: 'block', goTop: 2 }];
+        mockCherry.editor.editor.view.state.selection.main.head = 12;
+        mockCherry.editor.editor.state.doc.lineAt.mockReturnValue({ number: 4, from: 10 });
+        mockCherry.editor.editor.state.doc.line.mockReturnValue({ from: 3, length: 1 });
+        panel.pasteSelectResult(0, createMockKeyboardEvent());
+        expect(mockCherry.editor.editor.view.dispatch).toHaveBeenCalledWith({ selection: { anchor: 4 } });
+
+        mockCherry.editor.editor.replaceRange.mockClear();
+        panel.optionList = [];
+        panel.pasteSelectResult(0, createMockKeyboardEvent());
+        expect(mockCherry.editor.editor.replaceRange).not.toHaveBeenCalled();
+      });
+
+      it.each([
+        [38, 0, 2],
+        [40, 2, 0],
+        [38, 1, 0],
+        [40, 1, 2],
+      ])('moves an existing selection with key %i from %i to %i', (keyCode, selectedIndex, expectedIndex) => {
+        const suggester = createSuggesterInstance();
+        setupPanelForKeyboardTest(suggester, mockCherry, {
+          optionList: ['one', 'two', 'three'],
+          panelItems: ['one', 'two', 'three'],
+          selectedIdx: selectedIndex,
+        });
+
+        suggester.suggesterPanel.onKeyDown(mockCherry.editor.editor, createMockKeyboardEvent(keyCode));
+
+        expect(suggester.suggesterPanel.findSelectedItemIndex()).toBe(expectedIndex);
+      });
+
+      it('covers missing panel, editor, and coordinate guards', () => {
+        const suggester = createSuggesterInstance();
+        const panel = suggester.suggesterPanel;
+        panel.tryCreatePanel = vi.fn();
+        panel.$suggesterPanel = null;
+        expect(panel.onKeyDown(mockCherry.editor.editor, createMockKeyboardEvent(40))).toBe(false);
+
+        panel.$suggesterPanel = createPanelDom();
+        expect(panel.relocatePanelWithBoundaryCheck()).toBe(false);
+        expect(panel.$suggesterPanel.style.display).toBe('none');
+
+        panel.editor = editorShell(mockCherry);
+        mockCherry.editor.editor.view.coordsAtPos.mockReturnValue(null);
+        expect(panel.relocatePanel(mockCherry.editor.editor)).toBe(false);
+        expect(panel.getCursorPos(mockCherry.editor.editor)).toBeNull();
+        expect(panel.relocatePanelWithBoundaryCheck()).toBe(false);
+      });
+
+      it('executes change, cursor, scroll, and inactive key interceptors', () => {
+        const suggester = createSuggesterInstance();
+        const panel = suggester.suggesterPanel;
+        panel.editor = editorShell(mockCherry);
+        panel.$suggesterPanel = createPanelDom();
+        panel.setSuggester(suggester.suggester);
+        panel.bindEvent();
+        const changeCallback = mockCherry.editor.editor.on.mock.calls.find(([name]) => name === 'change')?.[1];
+        const cursorCallback = mockCherry.$event.on.mock.calls.find(([name]) => name === 'beforeSelectionChange')?.[1];
+        const scrollCallback = mockCherry.$event.on.mock.calls.find(([name]) => name === 'onScroll')?.[1];
+        const stopSpy = vi.spyOn(panel, 'stopRelate');
+        const relocateSpy = vi.spyOn(panel, 'relocatePanel').mockImplementation(() => false);
+
+        changeCallback(mockCherry.editor.editor, { text: ['x'], from: 0, to: 0, origin: '+input' });
+        cursorCallback();
+        expect(stopSpy).not.toHaveBeenCalled();
+        cursorCallback();
+        expect(stopSpy).toHaveBeenCalledOnce();
+
+        scrollCallback();
+        expect(relocateSpy).not.toHaveBeenCalled();
+        expect(panel.editor.arrowKeyInterceptor('ArrowDown')).toBe(false);
+      });
+
+      it('covers panel and keyboard fallback branches', () => {
+        vi.useFakeTimers();
+        const suggester = createSuggesterInstance();
+        const panel = suggester.suggesterPanel;
+        panel.editor = editorShell(mockCherry);
+        panel.$suggesterPanel = createPanelDom();
+        panel.keyword = '@';
+        panel.suggesterConfig = { '@': { suggestListRender: () => '' } };
+        panel.updatePanel(['fallback']);
+        expect(panel.$suggesterPanel.textContent).toContain('fallback');
+
+        panel.$suggesterPanel = null;
+        expect(panel.findSelectedItemIndex()).toBe(-1);
+        expect(panel.findClickedItemIndex(document.body)).toBe(-1);
+
+        panel.tryCreatePanel = vi.fn();
+        panel.$suggesterPanel = createPanelDom();
+        panel.optionList = ['orphan'];
+        panel.onKeyDown(mockCherry.editor.editor, createMockKeyboardEvent(40));
+        vi.runAllTimers();
+        expect(panel.searchCache).toBe(false);
+
+        panel.$suggesterPanel = createPanelDom(['scroll']);
+        panel.optionList = ['scroll'];
+        const item = panel.$suggesterPanel.firstElementChild;
+        Object.defineProperty(panel.$suggesterPanel, 'offsetHeight', { configurable: true, value: 10 });
+        Object.defineProperty(item, 'offsetTop', { configurable: true, value: 30 });
+        Object.defineProperty(item, 'offsetHeight', { configurable: true, value: 10 });
+        panel.onKeyDown(mockCherry.editor.editor, createMockKeyboardEvent(40));
+        expect(panel.$suggesterPanel.scrollTop).toBe(25);
+
+        panel.searchCache = true;
+        panel.onKeyDown(mockCherry.editor.editor, createMockKeyboardEvent(39));
+        vi.runAllTimers();
+        expect(mockCherry.editor.editor.view.focus).toHaveBeenCalled();
+        vi.useRealTimers();
+      });
+
+      it('handles multi-character editor changes and Enter without a selected item', () => {
+        vi.useFakeTimers();
+        const suggester = createSuggesterInstance();
+        const panel = suggester.suggesterPanel;
+        panel.editor = editorShell(mockCherry);
+        panel.$suggesterPanel = createPanelDom(['one']);
+        panel.setSuggester(suggester.suggester);
+        panel.bindEvent();
+
+        panel.onCodeMirrorChange(mockCherry.editor.editor, {
+          text: ['two', 'lines'],
+          from: 0,
+          to: 0,
+          origin: '+input',
+        });
+        expect(panel.searchCache).toBe(false);
+
+        panel.searchCache = true;
+        expect(panel.editor.arrowKeyInterceptor('Enter')).toBe(true);
+        expect(mockCherry.editor.editor.replaceRange).not.toHaveBeenCalled();
+        vi.runAllTimers();
+        expect(panel.searchCache).toBe(false);
+        vi.useRealTimers();
       });
     });
   });

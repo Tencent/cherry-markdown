@@ -37,4 +37,28 @@ describe('utils/toolkit/cloneDeep', () => {
     expect(cloneDeep('hello')).toBe('hello');
     expect(cloneDeep(null)).toBe(null);
   });
+
+  it('拷贝空原型对象及嵌套数组', () => {
+    const dictionary: Record<string, unknown> = Object.create(null);
+    dictionary.items = [[{ value: 1 }]];
+
+    const cloned = cloneDeep(dictionary);
+
+    expect(cloned).toEqual({ items: [[{ value: 1 }]] });
+    expect(cloned).not.toBe(dictionary);
+    expect(cloned.items).not.toBe(dictionary.items);
+  });
+
+  it('保留不支持的对象实例引用', () => {
+    class Configuration {
+      constructor(readonly name: string) {}
+    }
+
+    const instance = new Configuration('cherry');
+    const map = new Map([['mode', 'preview']]);
+    const cloned = cloneDeep({ instance, map });
+
+    expect(cloned.instance).toBe(instance);
+    expect(cloned.map).toBe(map);
+  });
 });

@@ -613,9 +613,17 @@ export default class Previewer {
           continue;
         }
       }
-      if (/^(class|id|href|rel|target|src|title|controls|align|width|height|style|open|contenteditable)$/i.test(name)) {
-        name = name === 'class' ? 'className' : name;
-        name = name === 'contenteditable' ? 'contentEditable' : name;
+      if (
+        /^(class|id|href|rel|target|src|title|controls|align|width|height|style|open|for|name|type|disabled|checked|selected|contenteditable)$/i.test(
+          name,
+        )
+      ) {
+        const nameMap = {
+          class: 'className',
+          for: 'htmlFor',
+          contenteditable: 'contentEditable',
+        };
+        name = nameMap[name.toLowerCase()] || name;
         if (name === 'style') {
           ret.style = ret.style ? ret.style : [];
           ret.style.push(value);

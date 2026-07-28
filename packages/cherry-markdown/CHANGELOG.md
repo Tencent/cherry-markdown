@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.11.8
+
+### Patch Changes
+
+- style: 优化工具栏图标没有垂直对齐的问题 [@sunsonliu](https://github.com/sunsonliu)([#1829](https://github.com/Tencent/cherry-markdown/pull/1829))([`19f6ea5`](https://github.com/Tencent/cherry-markdown/commit/19f6ea5fcc5002b5a6654dc49766f90cdb449536))
+
 ## 0.11.7
 
 ### Patch Changes
