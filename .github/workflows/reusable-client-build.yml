@@ -60,13 +60,13 @@ jobs:
 
       - uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: '22'
+          node-version: '24'
           cache: true
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'yarn'
 
       - name: Setup Rust
