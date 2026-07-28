@@ -91,6 +91,7 @@ describe('core/SyntaxBase', () => {
     it('当 HOOK_TYPE 未定义时应返回默认类型', () => {
       class NoTypeSyntax extends SyntaxBase {}
       assignHookClassProps(NoTypeSyntax, { hookName: 'noType' });
+      Object.defineProperty(NoTypeSyntax, 'HOOK_TYPE', { value: '' });
       const instance = new NoTypeSyntax(createEditorConfig());
 
       expect(instance.getType()).toBe(HOOKS_TYPE_LIST.DEFAULT);
@@ -200,6 +201,13 @@ describe('core/SyntaxBase', () => {
 
       const event = new KeyboardEvent('keydown');
       expect(instance.onKeyDown(event, 'test')).toBeUndefined();
+    });
+
+    it('getOnKeyDown returns false when an integration disables the handler', () => {
+      const instance = createTestSyntaxInstance();
+      Object.defineProperty(instance, 'onKeyDown', { value: null });
+
+      expect(instance.getOnKeyDown()).toBe(false);
     });
   });
 

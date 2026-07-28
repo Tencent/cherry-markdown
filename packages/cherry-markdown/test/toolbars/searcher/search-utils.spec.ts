@@ -2,7 +2,7 @@
  * Searcher 插件搜索工具函数测试
  */
 import { describe, it, expect } from 'vitest';
-import { buildSearchRegex, findMatches, findNearestMatchIndex } from '@/toolbars/searcher/search-utils';
+import { buildSearchRegex, collectMatches, findMatches, findNearestMatchIndex } from '@/toolbars/searcher/search-utils';
 
 describe('searcher/search-utils', () => {
   it('findMatches: 应找到所有匹配项', () => {
@@ -54,5 +54,25 @@ describe('searcher/search-utils', () => {
 
   it('buildSearchRegex: 无效正则返回 null', () => {
     expect(buildSearchRegex('[', false, false, true)).toBeNull();
+  });
+
+  it('buildSearchRegex: 区分大小写并支持原始正则', () => {
+    expect(buildSearchRegex('Cherry', true, false)?.flags).toBe('g');
+    expect(findMatches('Cherry cherry', 'Cherry', true, false)).toEqual([{ from: 0, to: 6 }]);
+    expect(findMatches('cat cot cut', 'c.t', false, false, true)).toEqual([
+      { from: 0, to: 3 },
+      { from: 4, to: 7 },
+      { from: 8, to: 11 },
+    ]);
+  });
+
+  it('findMatches: 空查询和无效正则均无匹配', () => {
+    expect(findMatches('content', '', false, false)).toEqual([]);
+    expect(findMatches('content', '[', false, false, true)).toEqual([]);
+  });
+
+  it('collectMatches 与 nearest matcher 处理空结果', () => {
+    expect(collectMatches('content', /missing/g)).toEqual([]);
+    expect(findNearestMatchIndex([], 0)).toBe(-1);
   });
 });

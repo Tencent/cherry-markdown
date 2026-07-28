@@ -45,6 +45,7 @@
     "clean": "rimraf ./dist",
     "check-bundle": "es-check es5 dist/cherry-markdown.js",
     "test": "vitest",
+    "test:coverage": "cross-env COVERAGE_THRESHOLDS=true vitest run --coverage",
     "test:update": "vitest -u",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project test/tsconfig.json --noEmit",
     "examples": "serve -p 3000 ."

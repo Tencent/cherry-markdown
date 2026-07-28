@@ -1,216 +1,283 @@
-import { describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Footnote from '../../../src/core/hooks/Footnote';
+import { hashHex } from '../../../src/utils/hash';
 
-const defaultConfig = {
-  selfClosing: false,
-  refNumber: {
+interface RefNumberConfig {
+  appendClass?: string;
+  render: (number: number, title: string) => string;
+}
+
+interface RefListTitleConfig {
+  appendClass?: string;
+  render: () => string;
+}
+
+interface RefListItemConfig {
+  appendClass?: string;
+  render: (number: number, title: string, content: string, renderReference: () => string) => string;
+}
+
+interface RefListConfig {
+  appendClass?: string;
+  title: RefListTitleConfig;
+  listItem: RefListItemConfig;
+}
+
+interface FootnoteConfig {
+  selfClosing: boolean;
+  refNumber: RefNumberConfig;
+  refList: RefListConfig | false;
+  bubbleCard: boolean | Record<string, string>;
+}
+
+interface FootnoteFixtureOptions {
+  config?: Partial<FootnoteConfig>;
+  flowSessionContext?: boolean;
+  localeTitle?: string | null;
+}
+
+function defaultRefList(): RefListConfig {
+  return {
     appendClass: '',
-    render: (refNum: number) => `[${refNum}]`,
-    clickRefNumberCallback: () => true,
-  },
-  refList: {
-    appendClass: '',
-    title: {
-      appendClass: '',
-      render: () => '',
-    },
+    title: { appendClass: '', render: () => '' },
     listItem: {
       appendClass: '',
-      render: (refNum: number, refTitle: string, content: string, refNumberLinkRender: Function) => {
-        return `${refNumberLinkRender(refNum, refTitle)}${content}`;
-      },
+      render: (_number, _title, content, renderReference) => `${renderReference()}${content}`,
     },
-  },
-  bubbleCard: false as const,
-};
-
-function cloneConfig(config: any = defaultConfig) {
-  return {
-    ...config,
-    refNumber: { ...config.refNumber },
-    refList:
-      config.refList === false
-        ? false
-        : {
-            ...config.refList,
-            title: { ...(config.refList?.title || {}) },
-            listItem: { ...(config.refList?.listItem || {}) },
-          },
   };
 }
 
-function createFootnoteHook(config: any = defaultConfig, cherryExtra: Record<string, unknown> = {}) {
+function createFootnote({
+  config = {},
+  flowSessionContext = false,
+  localeTitle = 'Footnotes',
+}: FootnoteFixtureOptions = {}) {
+  const resolvedConfig: FootnoteConfig = {
+    selfClosing: false,
+    refNumber: { appendClass: '', render: (number) => `[${number}]` },
+    refList: defaultRefList(),
+    bubbleCard: false,
+    ...config,
+  };
   const cherry = {
-    options: {
-      engine: {
-        global: {
-          flowSessionContext: false,
-        },
-      },
+    options: { engine: { global: { flowSessionContext } } },
+  };
+  const hook = new Footnote({ externals: {}, config: resolvedConfig, cherry });
+  Object.defineProperty(hook, '$engine', {
+    value: {
+      hash: (value: string) => hashHex(value),
+      makeHtmlForFootnote: (markdown: string) => markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+      $cherry: { locale: { footnoteTitle: localeTitle } },
     },
-    ...cherryExtra,
-  };
-  const hook = new Footnote({ externals: {}, config: cloneConfig(config), cherry }) as any;
-  hook.$engine = {
-    hash: (str: string) => `sign-${str.length}`,
-    makeHtmlForFootnote: (md: string) => md,
-    $cherry: cherry,
-  };
-  hook.RULE = hook.rule();
+  });
   return hook;
 }
 
-const sampleMd = `正文引用脚注[^note]。
-
-[^note]: 脚注内容`;
-
-describe('core/hooks/footnote', () => {
-  describe('title rendering', () => {
-    it('默认 title.render 返回空字符串时不渲染 .footnote-title', () => {
-      const hook = createFootnoteHook();
-      const html = hook.beforeMakeHtml(sampleMd);
-      expect(html).toContain('class="footnote');
-      expect(html).not.toContain('footnote-title');
-      expect(html).toContain('one-footnote');
-    });
-
-    it('title.render 返回非空时渲染对应标题，且只调用一次 render', () => {
-      const render = vi.fn(() => '参考资料');
-      const config = cloneConfig(defaultConfig);
-      config.refList.title.render = render;
-      config.refList.title.appendClass = 'ref-title';
-      const hook = createFootnoteHook(config);
-      const html = hook.beforeMakeHtml(sampleMd);
-      expect(render).toHaveBeenCalledTimes(1);
-      expect(html).toContain('class="footnote-title ref-title"');
-      expect(html).toContain('>参考资料</div>');
-    });
-
-    it('title.render 返回 null/undefined 时按空字符串处理且不渲染标题', () => {
-      for (const value of [null, undefined] as const) {
-        const config = cloneConfig(defaultConfig);
-        config.refList.title.render = () => value as any;
-        const hook = createFootnoteHook(config);
-        const html = hook.beforeMakeHtml(sampleMd);
-        expect(html).not.toContain('footnote-title');
-      }
-    });
-
-    it('title.render 未配置时不抛错且不渲染标题', () => {
-      const config = cloneConfig(defaultConfig);
-      config.refList.title = { appendClass: 'custom-title' };
-      const hook = createFootnoteHook(config);
-      expect(() => hook.beforeMakeHtml(sampleMd)).not.toThrow();
-      const html = hook.beforeMakeHtml(sampleMd);
-      expect(html).not.toContain('footnote-title');
-    });
-
-    it('即使 cherry.locale 存在 footnoteTitle 也不会自动回退使用', () => {
-      const hook = createFootnoteHook(defaultConfig, {
-        locale: { footnoteTitle: '脚注' },
-      });
-      const html = hook.beforeMakeHtml(sampleMd);
-      expect(html).not.toContain('footnote-title');
-      expect(html).not.toContain('>脚注<');
-    });
+describe('core/hooks/Footnote', () => {
+  beforeEach(() => {
+    vi.stubGlobal('BUILD_ENV', 'production');
   });
 
-  describe('ref list visibility and classes', () => {
-    it('refList 为 false 时脚注列表带 hidden class', () => {
-      const config = cloneConfig(defaultConfig);
-      config.refList = false;
-      const hook = createFootnoteHook(config);
-      const html = hook.beforeMakeHtml(sampleMd);
-      expect(html).toMatch(/class="footnote\s+hidden"/);
-      expect(html).not.toContain('footnote-title');
-    });
+  it('stores, retrieves, and clears definition and reference state', () => {
+    const hook = createFootnote();
 
-    it('支持 refList.appendClass 与 listItem.appendClass', () => {
-      const config = cloneConfig(defaultConfig);
-      config.refList.appendClass = 'ref-list';
-      config.refList.listItem.appendClass = 'ref-item';
-      const hook = createFootnoteHook(config);
-      const html = hook.beforeMakeHtml(sampleMd);
-      expect(html).toContain('class="footnote ref-list');
-      expect(html).toContain('class="one-footnote ref-item"');
-    });
+    expect(hook.getFootnoteCache('missing')).toBeNull();
+    hook.pushFootnoteCache('note', 'content');
+    expect(hook.getFootnoteCache('note')).toBe('content');
+    hook.pushFootNote('note', 'content');
+
+    hook.$cleanCache();
+
+    expect(hook.getFootnoteCache('note')).toBeNull();
+    expect(hook.getFootNote()).toEqual([]);
+    expect(hook.footnoteMap).toEqual({});
   });
 
-  describe('inline ref and list content', () => {
-    it('渲染正文角标占位，并在 afterMakeHtml 替换为真实链接', () => {
-      const hook = createFootnoteHook();
-      const before = hook.beforeMakeHtml(sampleMd);
-      expect(before).toContain('\0~fn#0#\0');
-      expect(before).toContain('id="fn:1"');
-      expect(before).toContain('脚注内容');
-
-      const after = hook.afterMakeHtml(before);
-      expect(after).not.toContain('\0~fn#');
-      expect(after).toContain('class="cherry-footnote-number"');
-      expect(after).toContain('href="#fn:1"');
-      expect(after).toContain('id="fnref:1"');
-      expect(after).toContain('>[1]<');
+  it('creates one footnote for duplicate references and normalizes quoted titles', () => {
+    const hook = createFootnote({
+      config: {
+        refNumber: { appendClass: 'custom-ref', render: (number, title) => `${title}-${number}` },
+        bubbleCard: {},
+      },
     });
+    const first = hook.pushFootNote('a"b', ' **body** ');
+    const duplicate = hook.pushFootNote('a"b', 'ignored');
+    const [note] = hook.getFootNote();
 
-    it('底部回跳链接指向正文角标', () => {
-      const hook = createFootnoteHook();
-      const html = hook.beforeMakeHtml(sampleMd);
-      expect(html).toContain('href="#fnref:1"');
-      expect(html).toContain('class="footnote-ref');
-      expect(html).toContain('data-index="1"');
-    });
-
-    it('重复引用同一脚注只生成一条列表项', () => {
-      const md = `第一次[^note] 第二次[^note]
-
-[^note]: 共用内容`;
-      const hook = createFootnoteHook();
-      const before = hook.beforeMakeHtml(md);
-      expect(before.match(/\0~fn#0#\0/g)?.length).toBe(2);
-      expect(before.match(/class="one-footnote/g)?.length).toBe(1);
-      expect(hook.getFootNote()).toHaveLength(1);
-
-      const after = hook.afterMakeHtml(before);
-      // 两处正文引用都指向同一脚注编号
-      expect(after.match(/class="cherry-footnote-number"/g)?.length).toBe(2);
-      expect(after.match(/href="#fn:1"/g)?.length).toBe(2);
-    });
-
-    it('支持自定义 refNumber.render', () => {
-      const config = cloneConfig(defaultConfig);
-      config.refNumber.render = (num: number) => `*${num}*`;
-      const hook = createFootnoteHook(config);
-      const after = hook.afterMakeHtml(hook.beforeMakeHtml(sampleMd));
-      expect(after).toContain('>*1*<');
-      expect(after).toContain('class="footnote-ref');
-    });
-
-    it('无脚注引用时不输出脚注列表', () => {
-      const hook = createFootnoteHook();
-      const html = hook.beforeMakeHtml('普通段落，没有脚注');
-      expect(html).not.toContain('class="footnote');
-      expect(html).not.toContain('one-footnote');
-    });
+    expect(duplicate).toBe(first);
+    expect(hook.getFootNote()).toHaveLength(1);
+    expect(note.fn).toContain('title="a\'b"');
+    expect(note.fn).toContain('class="footnote custom-ref cherry-show-bubble-card"');
+    expect(note.fn).toContain("a'b-1");
+    expect(note.note).toContain('<strong>body</strong>');
   });
 
-  describe('selfClosing unmatched refs', () => {
-    it('非自闭合时未定义角标保持原样', () => {
-      const hook = createFootnoteHook();
-      const html = hook.beforeMakeHtml('未定义[^missing]');
-      expect(html).toContain('[^missing]');
-      expect(html).not.toContain('cherry-footnote-number');
+  it('falls back to default number and reference-link content for empty renderers', () => {
+    const hook = createFootnote({
+      config: {
+        refNumber: { render: () => '' },
+        refList: {
+          title: { render: () => '' },
+          listItem: { render: () => '' },
+        },
+      },
+    });
+    hook.pushFootNote('note', ' body ');
+    const [note] = hook.getFootNote();
+
+    expect(note.fn).toContain('>[1]</a>');
+    expect(note.note).toContain('class="footnote-ref ">[1]</a>body');
+  });
+
+  it('supports a custom list item renderer and its reference callback', () => {
+    const render = vi.fn(
+      (number: number, title: string, content: string, renderReference: () => string) =>
+        `<section data-number="${number}" data-title="${title}">${renderReference()}<em>${content.trim()}</em></section>`,
+    );
+    const hook = createFootnote({
+      config: {
+        refList: {
+          appendClass: 'custom-list',
+          title: { appendClass: 'custom-title', render: () => 'References' },
+          listItem: { appendClass: 'custom-item', render },
+        },
+      },
+    });
+    hook.pushFootNote('note', ' body ');
+    const html = hook.formatFootNote();
+
+    expect(render).toHaveBeenCalledOnce();
+    expect(html).toContain('class="footnote custom-list "');
+    expect(html).toContain('class="footnote-title custom-title">References</div>');
+    expect(html).toContain('class="one-footnote custom-item"');
+    expect(html).toContain('<section data-number="1" data-title="note">');
+    expect(html).toContain('<em>body</em>');
+  });
+
+  it('renders a configured list title once without falling back to the locale title', () => {
+    const renderTitle = vi.fn(() => 'References');
+    const hook = createFootnote({
+      localeTitle: 'Footnotes from locale',
+      config: {
+        refList: {
+          appendClass: '',
+          title: { appendClass: 'custom-title', render: renderTitle },
+          listItem: defaultRefList().listItem,
+        },
+      },
     });
 
-    it('自闭合时未定义角标也会渲染角标', () => {
-      const config = cloneConfig(defaultConfig);
-      config.selfClosing = true;
-      const hook = createFootnoteHook(config);
-      const html = hook.beforeMakeHtml('未定义[^missing]');
-      expect(html).toContain('class="cherry-footnote-number"');
-      expect(html).toContain('id="fnref:1"');
-      expect(html).toContain('>[1]<');
-      // 无定义内容时不生成底部列表
-      expect(html).not.toContain('one-footnote');
+    const html = hook.beforeMakeHtml('Text[^note].\n\n[^note]: body');
+
+    expect(renderTitle).toHaveBeenCalledOnce();
+    expect(html).toContain('class="footnote-title custom-title">References</div>');
+    expect(html).not.toContain('Footnotes from locale');
+  });
+
+  it('does not render a title when the configured title renderer is empty', () => {
+    const hook = createFootnote({ localeTitle: 'Footnotes from locale' });
+
+    const html = hook.beforeMakeHtml('Text[^note].\n\n[^note]: body');
+
+    expect(html).not.toContain('footnote-title');
+    expect(html).not.toContain('Footnotes from locale');
+  });
+
+  it('marks the reference list as hidden when refList is disabled', () => {
+    const hook = createFootnote({ config: { refList: false } });
+
+    const html = hook.beforeMakeHtml('Text[^note].\n\n[^note]: body');
+
+    expect(html).toMatch(/class="footnote\s+hidden"/);
+    expect(html).not.toContain('footnote-title');
+  });
+
+  it('does not render a reference list when the document has no footnotes', () => {
+    const hook = createFootnote();
+
+    expect(hook.beforeMakeHtml('Plain paragraph.')).not.toContain('class="footnote');
+  });
+
+  it('uses the default number inside custom reference callbacks when number rendering is empty', () => {
+    const hook = createFootnote({
+      config: {
+        refNumber: { render: () => '' },
+        refList: {
+          title: { render: () => 'References' },
+          listItem: { render: (_number, _title, _content, renderReference) => renderReference() },
+        },
+      },
     });
+
+    hook.pushFootNote('note', 'body');
+
+    expect(hook.getFootNote()[0].note).toContain('class="footnote-ref ">[1]</a>');
+  });
+
+  it('extracts multiline definitions, preserves line count, and resolves repeated references', () => {
+    const hook = createFootnote();
+    const markdown = 'First[^note], second[^note].\n\n[^note]: line one\n  line two';
+    const prepared = hook.beforeMakeHtml(markdown);
+    const html = hook.afterMakeHtml(prepared);
+
+    expect(prepared).not.toContain('[^note]:');
+    expect(prepared.match(/\0~fn#0#\0/g)).toHaveLength(2);
+    expect(html.match(/class="cherry-footnote-number"/g)).toHaveLength(2);
+    expect(html).toContain('line one\n  line two');
+    expect(html).toContain('class="one-footnote "');
+  });
+
+  it('removes a single-line definition without introducing a newline', () => {
+    const hook = createFootnote();
+
+    expect(hook.beforeMakeHtml('[^note]: body')).toBe('');
+    expect(hook.getFootnoteCache('note')).toBe('body');
+  });
+
+  it('leaves undefined references unchanged outside self-closing modes', () => {
+    const hook = createFootnote();
+
+    expect(hook.beforeMakeHtml('Unknown[^later].')).toBe('Unknown[^later].');
+  });
+
+  it('numbers repeated undefined references consistently in self-closing mode', () => {
+    const hook = createFootnote({
+      config: {
+        selfClosing: true,
+        refNumber: { appendClass: 'draft-ref', render: (number, title) => `${title}-${number}` },
+      },
+    });
+    const html = hook.beforeMakeHtml('First[^a"b], again[^a"b], next[^next].');
+
+    expect(html.match(/href="#fn:1"/g)).toHaveLength(2);
+    expect(html.match(/href="#fn:2"/g)).toHaveLength(1);
+    expect(html).toContain('class="footnote draft-ref"');
+    expect(html).toContain("a'b-1");
+    expect(hook.getFootNote()).toEqual([]);
+  });
+
+  it('enables undefined references in flow-session context', () => {
+    const hook = createFootnote({ flowSessionContext: true });
+
+    expect(hook.beforeMakeHtml('Draft[^later].')).toContain('href="#fn:1"');
+  });
+
+  it('uses the default number for undefined self-closing references when number rendering is empty', () => {
+    const hook = createFootnote({
+      config: {
+        selfClosing: true,
+        refNumber: { render: () => '' },
+      },
+    });
+
+    expect(hook.beforeMakeHtml('Draft[^later].')).toContain('class="footnote ">[1]</a>');
+  });
+
+  it('keeps makeHtml stable and replaces stored placeholders after rendering', () => {
+    const hook = createFootnote();
+    const placeholder = hook.pushFootNote('note', 'body');
+
+    expect(hook.makeHtml('unchanged')).toBe('unchanged');
+    expect(hook.afterMakeHtml(placeholder)).toContain('class="cherry-footnote-number"');
   });
 });
