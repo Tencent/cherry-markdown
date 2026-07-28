@@ -58,10 +58,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: '22'
+          cache: true
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .node-version
+          node-version: '22'
           cache: 'yarn'
 
       - name: Setup Rust
@@ -85,13 +90,13 @@ jobs:
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Install Dependencies
-        run: yarn --network-timeout 100000
+        run: vp install
 
       - name: Build Cherry Markdown
-        run: yarn build
+        run: vp run build
 
       - name: Build Tauri Client
-        run: yarn build:client ${{ matrix.args }}
+        run: vp run build:client ${{ matrix.args }}
 
       # =========================================================================
       # Preview 模式: 上传 artifact（保留 5 天）

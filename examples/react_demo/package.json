@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "vp dev",
+    "build": "tsc -b && vp build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vp preview"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -25,6 +25,7 @@
     "globals": "^15.14.0",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.18.2",
-    "vite": "^6.0.5"
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.2.6",
+    "vite-plus": "0.2.6"
   }
 }

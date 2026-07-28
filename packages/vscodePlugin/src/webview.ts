@@ -27,7 +27,7 @@ export function getWebviewContent(mdInfo: object, currentPanel: vscode.WebviewPa
     'scripts/index.js': currentPanel.webview.asWebviewUri(
       vscode.Uri.file(path.join(extensionPath, 'web-resources', 'dist', 'index.js')),
     ),
-    // rspack CssExtractRspackPlugin 产出的 CSS（包含 cherry-markdown 样式 + 用户 CSS import）
+    // Vite 构建产出的 CSS（包含 cherry-markdown 样式 + 用户 CSS import）
     'dist/index.css': currentPanel.webview.asWebviewUri(
       vscode.Uri.file(path.join(extensionPath, 'web-resources', 'dist', 'index.css')),
     ),

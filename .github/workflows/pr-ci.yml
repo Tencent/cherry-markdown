@@ -33,19 +33,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: true
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn
+        run: vp install
 
       - name: Lint
-        run: yarn lint
+        run: vp run lint
 
       - name: Typecheck
-        run: yarn typecheck
+        run: vp run typecheck
 
       - name: Build
-        run: yarn build
+        run: vp run build

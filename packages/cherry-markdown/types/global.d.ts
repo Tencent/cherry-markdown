@@ -1,5 +1,5 @@
 /**
- * 面向 UMD/CDN script 用户的全局类型声明。
+ * 面向 IIFE/CDN script 用户的全局类型声明。
  *
  * 该声明为可选引入，不会被默认 ESM 类型入口包含。
  * 仅在通过 `<script>` 加载 Cherry Markdown 并使用 `window.Cherry`
@@ -34,9 +34,9 @@ declare global {
     /**
      * Cherry Markdown 编辑器构造函数。
      *
-     * 通过 UMD/CDN 构建产物引入时，根据文件不同，类型有所区别：
-     * - 完整版（cherry-markdown.js / cherry-markdown.core.js）→ `Cherry`
-     * - 流式版（cherry-markdown.stream.js）→ `CherryStream`
+     * 通过 IIFE/CDN 构建产物引入时，根据文件不同，类型有所区别：
+     * - 完整版（cherry-markdown.iife.js / cherry-markdown.core.iife.js）→ `Cherry`
+     * - 流式版（cherry-markdown.stream.iife.js）→ `CherryStream`
      *
      * @example
      * ```ts
@@ -64,7 +64,7 @@ declare global {
     CherryEngine?: typeof CherryEngine;
 
     /**
-     * Mermaid 代码块插件（UMD 构建产物自动挂载）
+     * Mermaid 代码块插件（IIFE 构建产物自动挂载）
      *
      * @example
      * ```ts
@@ -76,7 +76,7 @@ declare global {
     CherryCodeBlockMermaidPlugin?: typeof MermaidCodeEngine;
 
     /**
-     * PlantUML 代码块插件（UMD 构建产物自动挂载）
+     * PlantUML 代码块插件（IIFE 构建产物自动挂载）
      *
      * @example
      * ```ts

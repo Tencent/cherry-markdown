@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import mergeWith from '@/utils/toolkit/mergeWith';
 import cloneDeep from '@/utils/toolkit/cloneDeep';
 import defaultConfig from '@/Cherry.config';

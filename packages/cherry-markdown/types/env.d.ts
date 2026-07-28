@@ -15,7 +15,7 @@ import type CherryEngine from '../src/index.engine.core';
 // ─── 全局类型扩展 ─────────────────────────────────────────
 // 注：global.d.ts 也声明了 Window.Cherry（用户面向，仅 typeof Cherry）。
 // 两者不冲突——global.d.ts 不在 tsconfig files 中，开发时不参与编译。
-// env.d.ts 的声明使用联合类型，覆盖 UMD/CDN 调试入口中的 full/core 和 stream 产物。
+// env.d.ts 的声明使用联合类型，覆盖 IIFE/CDN 调试入口中的 full/core 和 stream 产物。
 
 declare namespace NodeJS {
   interface ProcessEnv {
@@ -25,7 +25,7 @@ declare namespace NodeJS {
 
 declare global {
   const BUILD_ENV: string;
-  /** 构建脚本注入，Rollup define 会替换 process.env */
+  /** 构建脚本注入，Vite define 会替换 process.env */
   const process: {
     env: NodeJS.ProcessEnv;
   };
@@ -35,8 +35,8 @@ declare global {
 
     /**
      * Cherry Markdown 编辑器构造函数。
-     * - UMD/CDN full/core 产物挂载为完整版 Cherry 类
-     * - UMD/CDN stream 产物挂载为精简版 CherryStream 类
+     * - IIFE/CDN full/core 产物挂载为完整版 Cherry 类
+     * - IIFE/CDN stream 产物挂载为精简版 CherryStream 类
      */
     Cherry?: typeof Cherry | typeof CherryStream;
 

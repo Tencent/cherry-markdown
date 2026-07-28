@@ -18,7 +18,7 @@ import { readFileSync } from 'fs';
 import { execSync } from 'child_process';
 const PackageInfo = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
 
-// ref: https://gitlab.com/IvanSanchez/rollup-plugin-git-version/-/blob/master/src/version.mjs
+// Version metadata is injected by the Vite+ build environment.
 // const branchRegexp = /ref: .*\/(\w*)/;
 // const shortRegexp = /0000000000000000000000000000000000000000 ([0-9a-f]{8})/;
 const shortHEADRegexp = /([0-9a-f]{8})/;

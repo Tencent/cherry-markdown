@@ -3,9 +3,9 @@
   "version": "0.4.1",
   "type": "module",
   "scripts": {
-    "dev": "npx node ./scripts/sync-version.js && vite",
-    "build": "npx node ./scripts/sync-version.js && vue-tsc --noEmit && vite build",
-    "preview": "vite preview",
+    "dev": "npx node ./scripts/sync-version.js && vp dev",
+    "build": "npx node ./scripts/sync-version.js && vue-tsc --noEmit && vp build",
+    "preview": "vp preview",
     "version:sync": "node ./scripts/sync-version.js"
   },
   "dependencies": {

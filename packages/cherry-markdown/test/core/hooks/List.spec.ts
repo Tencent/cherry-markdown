@@ -1,6 +1,6 @@
 import List from '../../../src/core/hooks/List';
 import { hashHex } from '../../../src/utils/hash';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vite-plus/test';
 
 const cases: string[] = [];
 cases[0] = `

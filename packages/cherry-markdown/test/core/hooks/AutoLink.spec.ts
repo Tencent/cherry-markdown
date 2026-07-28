@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vite-plus/test';
 import AutoLink from '../../../src/core/hooks/AutoLink';
 
 function createAutoLinkHook(config = {}) {
