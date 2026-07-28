@@ -154,6 +154,50 @@ describe('core/hooks/Footnote', () => {
     expect(html).toContain('<em>body</em>');
   });
 
+  it('renders a configured list title once without falling back to the locale title', () => {
+    const renderTitle = vi.fn(() => 'References');
+    const hook = createFootnote({
+      localeTitle: 'Footnotes from locale',
+      config: {
+        refList: {
+          appendClass: '',
+          title: { appendClass: 'custom-title', render: renderTitle },
+          listItem: defaultRefList().listItem,
+        },
+      },
+    });
+
+    const html = hook.beforeMakeHtml('Text[^note].\n\n[^note]: body');
+
+    expect(renderTitle).toHaveBeenCalledOnce();
+    expect(html).toContain('class="footnote-title custom-title">References</div>');
+    expect(html).not.toContain('Footnotes from locale');
+  });
+
+  it('does not render a title when the configured title renderer is empty', () => {
+    const hook = createFootnote({ localeTitle: 'Footnotes from locale' });
+
+    const html = hook.beforeMakeHtml('Text[^note].\n\n[^note]: body');
+
+    expect(html).not.toContain('footnote-title');
+    expect(html).not.toContain('Footnotes from locale');
+  });
+
+  it('marks the reference list as hidden when refList is disabled', () => {
+    const hook = createFootnote({ config: { refList: false } });
+
+    const html = hook.beforeMakeHtml('Text[^note].\n\n[^note]: body');
+
+    expect(html).toMatch(/class="footnote\s+hidden"/);
+    expect(html).not.toContain('footnote-title');
+  });
+
+  it('does not render a reference list when the document has no footnotes', () => {
+    const hook = createFootnote();
+
+    expect(hook.beforeMakeHtml('Plain paragraph.')).not.toContain('class="footnote');
+  });
+
   it('uses the default number inside custom reference callbacks when number rendering is empty', () => {
     const hook = createFootnote({
       config: {

@@ -26,6 +26,7 @@ const ignores = [
   '**/dist/**',
   '**/out/**',
   '**/coverage/**',
+  '**/target/**',
 
   // 第三方、示例站点与打包进来的静态资源
   'examples/**',

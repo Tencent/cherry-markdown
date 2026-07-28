@@ -2,7 +2,7 @@
 # PR: Compressed Size — 构建产物体积监控
 #
 # 触发时机: PR 打开 / 有新推送时自动运行
-# 功能: 对比 dist/**/*.{js,css,d.ts} 的压缩体积变化，在 PR 中显示 diff
+# 功能: 对比各发布包 dist/**/*.{js,css,d.ts} 的压缩体积变化，在 PR 中显示 diff
 # =============================================================================
 
 name: 'PR: Compressed Size'
@@ -32,5 +32,5 @@ jobs:
           cache: 'yarn'
       - uses: preactjs/compressed-size-action@v2
         with:
-          pattern: './packages/cherry-markdown/dist/**/*.{js,css,d.ts}'
+          pattern: './packages/{cherry-markdown,miniProgram}/dist/**/*.{js,css,d.ts}'
           install-script: 'yarn --frozen-lockfile --ignore-engines'
