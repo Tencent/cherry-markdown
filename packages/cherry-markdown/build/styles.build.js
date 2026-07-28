@@ -1,8 +1,9 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import * as sass from 'sass';
 
-const root = resolve(new URL('.', import.meta.url).pathname, '..');
+const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const outputDir = resolve(root, 'dist');
 
 const styles = [

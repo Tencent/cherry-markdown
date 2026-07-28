@@ -2,8 +2,9 @@ import { build } from 'vite';
 import glob from 'glob';
 import { basename, dirname, extname, join, resolve } from 'node:path';
 import { mkdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-const root = resolve(new URL('.', import.meta.url).pathname, '..');
+const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const src = resolve(root, 'src');
 const addonEntries = glob.sync('src/addons/**/*-plugin.js', { cwd: root });
 

@@ -29,13 +29,13 @@ ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 echo "📦 Step1: 更新根 package.json scripts..."
 cd "$ROOT_DIR"
 tmp=$(mktemp) && jq '
-  .scripts["postinstall"] = "yarn workspace cherry-markdown-core run iconfont" |
-  .scripts["build"] = "yarn workspace cherry-markdown-core build" |
-  .scripts["build:vscodePlugin"] = "cd packages/vscodePlugin && yarn build"
+  .scripts["postinstall"] = "vp run -F cherry-markdown-core iconfont" |
+  .scripts["build"] = "vp run -F cherry-markdown-core build" |
+  .scripts["build:vscodePlugin"] = "vp run -F cherry-markdown-core build && vp run -F cherry-markdown build"
 ' package.json > "$tmp" && mv "$tmp" package.json
-echo "   ✅ postinstall → cherry-markdown-core run iconfont"
-echo "   ✅ build → cherry-markdown-core build"
-echo "   ✅ build:vscodePlugin → cd packages/vscodePlugin && yarn build"
+echo "   ✅ postinstall → vp run -F cherry-markdown-core iconfont"
+echo "   ✅ build → vp run -F cherry-markdown-core build"
+echo "   ✅ build:vscodePlugin → core build + vscode build"
 
 # ── 2. 核心库改名: cherry-markdown → cherry-markdown-core ──
 echo "📦 Step2: 核心库改名..."
@@ -62,4 +62,4 @@ tmp=$(mktemp) && jq '.name = "cherry-markdown"' package.json > "$tmp" && mv "$tm
 echo "   ✅ name → cherry-markdown"
 
 echo ""
-echo "🎉 准备完成！接下来执行: yarn install → yarn build → yarn build:vscodePlugin"
+echo "🎉 准备完成！接下来执行: vp install → vp run build → vp run build:vscodePlugin"

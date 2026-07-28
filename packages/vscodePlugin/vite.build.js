@@ -1,8 +1,9 @@
 import { build } from 'vite';
 import { resolve } from 'node:path';
 import { rename } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 
-const root = resolve(new URL('.', import.meta.url).pathname);
+const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const extensionDist = resolve(root, 'dist');
 const webviewDist = resolve(root, 'web-resources/dist');
 

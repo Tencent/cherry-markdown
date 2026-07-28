@@ -1,7 +1,8 @@
 import { build } from 'vite';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root = resolve(new URL('.', import.meta.url).pathname, '..');
+const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const repoRoot = resolve(root, '../..');
 const cherrySrc = resolve(repoRoot, 'packages/cherry-markdown/src');
 const sanitizer = resolve(root, 'src/shared/Sanitizer.miniProgram.js');

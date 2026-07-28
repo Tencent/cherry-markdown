@@ -4,9 +4,9 @@
   "version": "0.4.1",
   "identifier": "com.cherry-markdown.app",
   "build": {
-    "beforeDevCommand": "vp run dev:client",
+    "beforeDevCommand": "vp run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "vp run build:client",
+    "beforeBuildCommand": "vp run build",
     "frontendDist": "../dist"
   },
   "app": {
