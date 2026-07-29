@@ -5,7 +5,7 @@
  *
  * ### 1. 引入 Cherry Markdown
  * ```html
- * <script src="path/to/cherry-markdown.stream.iife.js"></script>
+ * <script src="path/to/cherry-markdown.stream.js"></script>
  * ```
  *
  * ### 2. 创建 HTML 结构
@@ -132,7 +132,7 @@ const msgList = [
   {
     title: '概述：流式渲染配置',
     content:
-      '### 概述\n\n#### 1. 引入 Stream 版本\n```html\n<script src="path/to/cherry-markdown.stream.iife.js"></script>\n```\n\n#### 2. 启用流式渲染能力\n```javascript\nconst cherry = new Cherry({\n  editor: {\n    height: "auto",\n    defaultModel: "previewOnly", // 纯预览模式\n  },\n  engine: {\n    global: {\n      flowSessionContext: true,  // 开启流式渲染\n      flowSessionCursor: "default",\n    },\n  },\n});\n```\n\n#### 3. 流式更新内容\n```javascript\n// 逐字更新内容\ncherry.setMarkdown(text.substring(0, index));\n```\n',
+      '### 概述\n\n#### 1. 引入 Stream 版本\n```html\n<script src="path/to/cherry-markdown.stream.js"></script>\n```\n\n#### 2. 启用流式渲染能力\n```javascript\nconst cherry = new Cherry({\n  editor: {\n    height: "auto",\n    defaultModel: "previewOnly", // 纯预览模式\n  },\n  engine: {\n    global: {\n      flowSessionContext: true,  // 开启流式渲染\n      flowSessionCursor: "default",\n    },\n  },\n});\n```\n\n#### 3. 流式更新内容\n```javascript\n// 逐字更新内容\ncherry.setMarkdown(text.substring(0, index));\n```\n',
   },
   {
     title: '数学公式',

@@ -4,6 +4,8 @@ import { basename, dirname, extname, join, resolve } from 'node:path';
 import { mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
+import { legacyUmdPlugin } from './legacy-umd.plugin.js';
+
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const src = resolve(root, 'src');
 const addonEntries = glob.sync('src/addons/**/*-plugin.js', { cwd: root });
@@ -20,11 +22,12 @@ for (const entry of addonEntries) {
 
   mkdirSync(outputDir, { recursive: true });
 
-  for (const format of ['es', 'iife']) {
-    const suffix = format === 'es' ? '.esm.js' : '.iife.js';
+  for (const format of ['es', 'umd']) {
+    const suffix = format === 'es' ? '.esm.js' : '.js';
     await build({
       configFile: false,
       root,
+      plugins: [legacyUmdPlugin()],
       define: {
         BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
       },

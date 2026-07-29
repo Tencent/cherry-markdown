@@ -9,7 +9,7 @@
     "url": "git+https://github.com/Tencent/cherry-markdown.git",
     "directory": "packages/cherry-markdown"
   },
-  "main": "./dist/cherry-markdown.esm.js",
+  "main": "./dist/cherry-markdown.js",
   "module": "./dist/cherry-markdown.esm.js",
   "style": "./dist/cherry-markdown.min.css",
   "exports": {
@@ -18,7 +18,7 @@
       "import": "./dist/cherry-markdown.esm.js",
       "default": "./dist/cherry-markdown.esm.js"
     },
-    "./iife": "./dist/cherry-markdown.iife.js",
+    "./umd": "./dist/cherry-markdown.js",
     "./core": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/cherry-markdown.core.esm.js",
@@ -64,7 +64,7 @@
     "build:types": "tsc --project tsconfig.json && node build/replacePaths.js",
     "build:styles": "NODE_ENV=production node build/styles.build.js",
     "clean": "rimraf ./dist",
-    "check-bundle": "es-check es5 dist/cherry-markdown.iife.js",
+    "check-bundle": "es-check es5 dist/cherry-markdown.js",
     "test": "vp test",
     "test:coverage": "COVERAGE_THRESHOLDS=true vp test run --coverage",
     "test:update": "vp test -u",

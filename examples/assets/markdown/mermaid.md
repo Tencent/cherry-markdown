@@ -3,7 +3,7 @@
 ### 方式一，window下已经安装了mermaid
 ```html
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11.16.0/dist/mermaid.min.js"></script>
-<script src="yourPath/cherry-markdown.core.iife.js"></script>
+<script src="yourPath/cherry-markdown.core.js"></script>
 <script src="yourPath/addons/cherry-code-block-mermaid-plugin.js"></script>
 <script>
 Cherry.usePlugin(CherryCodeBlockMermaidPlugin, {
@@ -16,7 +16,7 @@ var cherryEditor = new Cherry({id: 'markdown'});
 
 ### 方式二，让cherry自动安装mermaid
 ```html
-<script src="yourPath/cherry-markdown.core.iife.js"></script>
+<script src="yourPath/cherry-markdown.core.js"></script>
 <script src="yourPath/addons/cherry-code-block-mermaid-plugin.js"></script>
 <script>
 Cherry.usePlugin(CherryCodeBlockMermaidPlugin);

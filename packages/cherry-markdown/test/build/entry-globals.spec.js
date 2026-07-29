@@ -16,38 +16,77 @@ describe('browser global entry split', () => {
     });
   });
 
-  it('keeps window globals in IIFE-only entries', () => {
-    const iifeEntries = ['src/index.iife.js', 'src/index.core.iife.js', 'src/index.stream.iife.js'];
+  it('keeps explicit globals in browser-only entries', () => {
+    const browserEntries = {
+      'src/index.browser.js': {
+        globalAssignment: /window\.Cherry\s*=\s*Cherry/,
+        namedExports: /export \* from '\.\/index'/,
+      },
+      'src/index.core.browser.js': {
+        globalAssignment: /window\.Cherry\s*=\s*Cherry/,
+        namedExports: /export \{ MenuHookBase, SyntaxHookBase \}/,
+      },
+      'src/index.engine.browser.js': {
+        globalAssignment: /window\.CherryEngine\s*=\s*CherryEngine/,
+        namedExports: /export \* from '\.\/index\.engine'/,
+      },
+      'src/index.stream.browser.js': {
+        globalAssignment: /window\.Cherry\s*=\s*CherryStream/,
+        namedExports: /export \{ SyntaxHookBase \}/,
+      },
+    };
 
-    iifeEntries.forEach((entry) => {
-      expect(readProjectFile(entry), entry).toMatch(/window\.Cherry\s*=/);
+    Object.entries(browserEntries).forEach(([entry, { globalAssignment, namedExports }]) => {
+      const source = readProjectFile(entry);
+      expect(source, entry).toMatch(/export default/);
+      expect(source, entry).toMatch(globalAssignment);
+      expect(source, entry).toMatch(namedExports);
     });
   });
 });
 
 describe('browser global Vite outputs', () => {
-  it('builds full IIFE and ESM bundles from separate entries', () => {
+  it('builds full UMD and ESM bundles from separate entries', () => {
     const config = readProjectFile('build/vite.build.js');
 
-    expect(config).toMatch(/index\.iife\.js/);
-    expect(config).toMatch(/cherry-markdown\.iife\.js/);
-    expect(config).toMatch(/format: 'iife'/);
+    expect(config).toMatch(/index\.browser\.js/);
+    expect(config).toMatch(/file: 'cherry-markdown\.js'/);
+    expect(config).toMatch(/format: 'umd'/);
+    expect(config).toMatch(/exports: 'named'/);
     expect(config).toMatch(/index\.js/);
     expect(config).toMatch(/cherry-markdown\.esm\.js/);
     expect(config).toMatch(/format: 'es'/);
   });
 
-  it('does not retain UMD entry or output configuration', () => {
-    expect(readProjectFile('build/vite.build.js')).not.toMatch(/format: 'umd'/);
-    expect(readProjectFile('build/vite.build.js')).not.toMatch(/cherry-markdown\.js/);
-  });
-
-  it('includes core and stream ESM/IIFE outputs', () => {
+  it('preserves the UMD module and CDN contract', () => {
     const config = readProjectFile('build/vite.build.js');
 
-    expect(config).toMatch(/cherry-markdown\.core\.iife\.js/);
+    expect(config).toMatch(/format: 'umd'/);
+    expect(config).not.toMatch(/format: 'iife'/);
+    expect(config).toMatch(/file: 'cherry-markdown\.js'/);
+  });
+
+  it('preserves full, core, engine, and stream browser filenames', () => {
+    const config = readProjectFile('build/vite.build.js');
+
+    expect(config).toMatch(/file: 'cherry-markdown\.core\.js'/);
     expect(config).toMatch(/cherry-markdown\.core\.esm\.js/);
-    expect(config).toMatch(/cherry-markdown\.stream\.iife\.js/);
+    expect(config).toMatch(/file: 'cherry-markdown\.engine\.js'/);
+    expect(config).toMatch(/cherry-markdown\.engine\.esm\.js/);
+    expect(config).toMatch(/file: 'cherry-markdown\.stream\.js'/);
     expect(config).toMatch(/cherry-markdown\.stream\.esm\.js/);
+  });
+
+  it('keeps package and addon browser entries on legacy filenames', () => {
+    const packageJson = JSON.parse(readProjectFile('package.json'));
+    const addonConfig = readProjectFile('build/addons.build.js');
+
+    expect(packageJson.main).toBe('./dist/cherry-markdown.js');
+    expect(packageJson.exports['./umd']).toBe('./dist/cherry-markdown.js');
+    expect(packageJson.exports['./iife']).toBeUndefined();
+    expect(packageJson.scripts['check-bundle']).toContain('dist/cherry-markdown.js');
+    expect(addonConfig).toMatch(/format === 'es' \? '\.esm\.js' : '\.js'/);
+    expect(addonConfig).toMatch(/\['es', 'umd'\]/);
+    expect(addonConfig).not.toMatch(/iife/);
   });
 });
