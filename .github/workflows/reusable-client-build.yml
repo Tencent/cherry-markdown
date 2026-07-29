@@ -96,7 +96,7 @@ jobs:
         run: vp run build
 
       - name: Build Tauri Client
-        run: cd packages/client && npx tauri build ${{ matrix.args }}
+        run: vp run -F @cherry-markdown/client tauri:build ${{ matrix.args }}
 
       # =========================================================================
       # Preview 模式: 上传 artifact（保留 5 天）
