@@ -115,19 +115,7 @@ body {
 }
 
 #markdown-editor .cherry .cherry-toolbar-button {
-  align-items: baseline;
-}
-
-#markdown-editor .cherry .cherry-toolbar-button.cherry-toolbar-customSave {
-  align-items: center;
-}
-
-#markdown-editor .cherry .cherry-sidebar-list .cherry-toolbar-button {
-  align-items: end;
-}
-
-#markdown-editor .cherry .cherry-bubble .cherry-toolbar-button {
-  align-items: center;
+  border-radius: 8px;
 }
 
 #markdown-editor .cherry-flex-toc .cherry-toc-list {
