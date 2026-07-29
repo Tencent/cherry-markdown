@@ -256,6 +256,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
       { ol: ['ol', 'ul', 'checklist'] },
       'panel',
       'align',
+      'timeline',
       'detail',
       '|',
       {

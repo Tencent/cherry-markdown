@@ -740,6 +740,7 @@ export type CherryDefaultToolbar =
   | 'switchModel'
   | 'table'
   | 'theme'
+  | 'timeline'
   | 'toc'
   | 'togglePreview'
   | 'underline'
