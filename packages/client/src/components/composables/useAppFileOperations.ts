@@ -4,11 +4,16 @@ import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { ref } from 'vue';
 import { DIALOGS, MESSAGES } from '../../constants/i18n';
 import { SUPPORTED_FILE_EXTENSIONS } from '../../constants/files';
-import { useFileStore } from '../../store';
-import { notifyError, notifySuccess } from '../../utils/notifications';
+import { usePreferencesStore, useFileStore } from '../../store';
+import { notifyError, notifyInfo, notifySuccess } from '../../utils/notifications';
 import { normalizePath } from '../fileUtils';
 import type { FileOperationResult } from '../types';
 import type { OpenFileFromSidebarEvent } from './useAppEvents';
+
+/** 当前适合 Milkdown 引擎的最大字节数（近似 200KB）
+ * 超过阈值时自动切回 Cherry 引擎，避免 Milkdown 将大文件全量重建 AST 导致卡顶。
+ */
+const MILKDOWN_MAX_BYTES = 200 * 1024;
 
 interface UseAppFileOperationsOptions {
   getMarkdown: () => string;
@@ -28,7 +33,19 @@ export function useAppFileOperations({
   updateTitle,
 }: UseAppFileOperationsOptions) {
   const fileStore = useFileStore();
+  const preferences = usePreferencesStore();
   const isLoading = ref(false);
+
+  /** 大文件保护：若当前引擎为 milkdown 且内容体积超过阈值，自动切回 Cherry。 */
+  const guardLargeFileForMilkdown = (markdown: string): void => {
+    if (preferences.engine !== 'milkdown') return;
+    const { size } = new Blob([markdown]);
+    if (size <= MILKDOWN_MAX_BYTES) return;
+    preferences.setEngine('cherry');
+    notifyInfo(
+      `文件大小 ${(size / 1024).toFixed(1)}KB 超过 Milkdown 推荐阈值（${MILKDOWN_MAX_BYTES / 1024}KB），已自动切换到 Cherry 引擎。`,
+    );
+  };
 
   const markClean = async (path: string | null): Promise<void> => {
     setUnsavedChanges(false);
@@ -125,6 +142,7 @@ export function useAppFileOperations({
 
       const normalizedPath = normalizePath(path);
       const markdown = await readTextFile(normalizedPath);
+      guardLargeFileForMilkdown(markdown);
       setMarkdown(markdown);
       fileStore.clearUntitledDraft();
       fileStore.setCurrentFilePath(normalizedPath);
@@ -151,6 +169,7 @@ export function useAppFileOperations({
     try {
       const normalizedPath = normalizePath(filePath);
       const markdown = await readTextFile(normalizedPath);
+      guardLargeFileForMilkdown(markdown);
       setMarkdown(markdown);
       fileStore.clearUntitledDraft();
       fileStore.setCurrentFilePath(normalizedPath);
@@ -186,6 +205,7 @@ export function useAppFileOperations({
     try {
       const normalizedPath = normalizePath(fileStore.currentFilePath);
       const markdown = await readTextFile(normalizedPath);
+      guardLargeFileForMilkdown(markdown);
       setMarkdown(markdown);
       if (normalizedPath !== fileStore.currentFilePath) {
         fileStore.setCurrentFilePath(normalizedPath);
@@ -204,6 +224,7 @@ export function useAppFileOperations({
     if (!(await canLeaveCurrentFile())) return;
 
     const normalizedPath = normalizePath(filePath);
+    guardLargeFileForMilkdown(content);
     setMarkdown(content);
     scrollPreviewToTop();
     fileStore.clearUntitledDraft();

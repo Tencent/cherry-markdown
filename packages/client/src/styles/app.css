@@ -24,3 +24,51 @@
   display: block;
   height: auto;
 }
+
+/* Milkdown 容器：与 #markdown-editor 共享 flex 布局 */
+#milkdown-editor {
+  height: 100%;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  /* 只允许纵向滚动；横向禁用，避免 table-block 的 line-handle 定位到负 x
+     坐标（如 -20px）时触发横向滚动条闪现。宽表格内部自身可滚动。 */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Milkdown 编辑区内边距与阅读宽度（MVP 阶段与 Cherry 的 fixed-width 视觉近似） */
+#milkdown-editor .milkdown {
+  min-height: 100%;
+}
+
+#milkdown-editor .milkdown-editor-root {
+  padding: 32px 48px 96px;
+  max-width: 900px;
+  margin: 0 auto;
+  outline: none;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+/* 引擎切换：仅显示当前激活引擎对应的容器 */
+body.engine-cherry #milkdown-editor {
+  display: none;
+}
+
+body.engine-milkdown #markdown-editor {
+  display: none;
+}
+
+/* 专注模式下 Milkdown 的宽度模式：与 Cherry 的 fixed-width / auto-width 保持视觉一致 */
+#milkdown-editor.fixed-width .milkdown-editor-root {
+  max-width: 800px;
+  padding-left: max(20px, 32px);
+  padding-right: max(45px, 48px);
+}
+
+#milkdown-editor.auto-width .milkdown-editor-root {
+  max-width: none;
+  padding-left: 10%;
+  padding-right: 10%;
+}

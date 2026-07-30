@@ -5,7 +5,7 @@ import StatusBar from './components/StatusBar';
 import { useAppEvents } from './components/composables/useAppEvents';
 import { useAppFileOperations } from './components/composables/useAppFileOperations';
 import { useAppWindowLifecycle } from './components/composables/useAppWindowLifecycle';
-import { useCherryEditor } from './components/composables/useCherryEditor';
+import { useEditorAdapter } from './components/composables/useEditorAdapter';
 import { useUnsavedGuard } from './components/composables/useUnsavedGuard';
 import ToastContainer from './components/ui/ToastContainer';
 import UnsavedChangesDialog from './components/ui/UnsavedChangesDialog';
@@ -20,7 +20,7 @@ export default defineComponent({
 
     let updateEditorTitle: (unsaved?: boolean) => void = () => undefined;
     let updateWindowTitle: (path: string | null, unsaved?: boolean) => Promise<void> = async () => undefined;
-    const editor = useCherryEditor({
+    const editor = useEditorAdapter({
       onContentChanged: () => {
         unsavedGuard.setUnsavedChanges(true);
         fileStore.touchUntitledDraft();
@@ -104,6 +104,7 @@ export default defineComponent({
         }),
         h('div', { class: 'editor-container' }, [
           h('div', { id: 'markdown-editor' }),
+          h('div', { id: 'milkdown-editor' }),
           h(StatusBar, {
             unsaved: unsavedGuard.hasUnsavedChanges.value,
             toolbarVisible: editor.toolbarVisible.value,
