@@ -47,6 +47,7 @@ describe('utils/sanitize', () => {
     expect(isValidScheme('relative/path')).toBe(true);
     expect(isValidScheme('https://example.com')).toBe(true);
     expect(isValidScheme('javascript:alert(1)')).toBe(false);
+    expect(isValidScheme('vbscript:msgbox(1)')).toBe(false);
     expect(isValidScheme('data:text/html;base64,abc')).toBe(false);
     expect(isValidScheme('&#x6a;avascript:alert(1)')).toBe(false);
     expect(isValidScheme('java\t script:alert(1)')).toBe(false);

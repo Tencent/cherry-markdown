@@ -15,6 +15,7 @@
  */
 import ParagraphBase from '@/core/ParagraphBase';
 import { compileRegExp } from '@/utils/regexp';
+import { isValidScheme } from '@/utils/sanitize';
 import UrlCache from '@/UrlCache';
 /**
  * 脚注和引用语法
@@ -57,7 +58,13 @@ export default class CommentReference extends ParagraphBase {
 
   pushCommentReferenceCache(key, cache) {
     const [url, ...args] = cache.split(/[ ]+/g);
-    const innerUrl = UrlCache.set(this.unwrapUrl(url));
+    const unwrappedUrl = this.unwrapUrl(url);
+    // 引用式链接的 url 会被放入 UrlCache，从而绕过 Link 的协议校验和 DOMPurify，
+    // 所以必须在写入缓存前校验协议，拒绝 javascript: 等危险协议
+    if (!isValidScheme(unwrappedUrl)) {
+      return;
+    }
+    const innerUrl = UrlCache.set(unwrappedUrl);
     this.commentCache[`${key}`.toLowerCase()] = [innerUrl, ...args].join(' ');
   }
 
