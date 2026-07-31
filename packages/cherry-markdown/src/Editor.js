@@ -2520,8 +2520,10 @@ export default class Editor {
   setCursor(line, ch) {
     if (!this.editor) return;
     const { doc } = this.editor.state;
-    const targetLine = doc.line(line + 1);
-    const pos = targetLine.from + ch;
+    // 与 setSelection 保持一致，对行号和列号做边界钳制，避免越界时 CodeMirror 抛异常
+    const lineNum = Math.max(1, Math.min(line + 1, doc.lines));
+    const targetLine = doc.line(lineNum);
+    const pos = targetLine.from + Math.max(0, Math.min(ch, targetLine.length));
     this.editor.dispatch({
       selection: { anchor: pos, head: pos },
     });
