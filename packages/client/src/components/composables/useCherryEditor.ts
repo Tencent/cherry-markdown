@@ -126,6 +126,9 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
   };
 
   const initEditor = (): void => {
+    // 每次 initEditor 都需要重置：切换引擎时会先 dispose 再 init，Cherry 首次挂载
+    // 会自发触发一次 afterChange，应当被忽略，避免误标记 unsaved。
+    skipNextChange = true;
     // 初始 toolbarVisible 先取持久化值，cherry 初始化后再以实际 DOM 为准校正
     let persistedToolbarVisible = true;
     let persistedEditorMode: EditorMode = 'edit&preview';
@@ -254,6 +257,12 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
     setCurrentLightbox(null);
     setEditorInstance(null);
     editor = null;
+    // 清空 Cherry 注入到容器内的所有 DOM 节点。
+    // Cherry 没有官方 destroy()，且 cherryInstance() 每次调用都会 new Cherry() 并向
+    // #markdown-editor 追加一整套结构；如果切换引擎时不手动清空，再次切回 Cherry
+    // 会在同一容器内出现两套编辑器 DOM。
+    const container = document.getElementById('markdown-editor');
+    if (container) container.innerHTML = '';
   };
 
   return {

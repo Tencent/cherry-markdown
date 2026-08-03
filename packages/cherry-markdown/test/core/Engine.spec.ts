@@ -162,6 +162,14 @@ describe('core/Engine', () => {
     expect(engine.$cacheBigData(fenced)).toBe(fenced);
   });
 
+  it('keeps original text when a big-data placeholder has no cache entry', () => {
+    const engine = createEngine();
+    // 用户原文中恰好包含占位符形态的文本时，不应被替换成 "undefined"
+    const literal = '前文 bigDataBegin123abcbigDataEnd 后文';
+
+    expect(engine.$deCacheBigData(literal)).toBe(literal);
+  });
+
   it('restores and eventually clears configured flow cursor DOM', () => {
     vi.useFakeTimers();
     const engine = createEngine();

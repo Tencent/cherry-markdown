@@ -661,4 +661,32 @@ describe('Cherry Markdown final rendering', () => {
     expect(container.querySelector('div.blocked')).toBeNull();
     expect(container.textContent).toContain('<div class="blocked">Blocked</div>');
   });
+
+  it.each(['javascript:alert(document.cookie)', 'vbscript:msgbox(1)', 'data:text/html;base64,PHNjcmlwdD4='])(
+    'blocks the dangerous scheme "%s" in reference-style links',
+    (dangerousUrl) => {
+      const container = render(`[click me][ref]\n\n[ref]: ${dangerousUrl}`);
+      const anchor = container.querySelector('a');
+
+      // 危险协议的引用定义不会被解析成链接，原文按普通文本保留
+      expect(anchor).toBeNull();
+      expect(container.innerHTML).not.toContain(`${dangerousUrl.split(':')[0]}:`);
+      expect(container.textContent).toContain('[click me][ref]');
+    },
+  );
+
+  it('still renders reference-style links and images with safe schemes', () => {
+    const container = render(
+      '[guide][docs] and [docs]\n\n![logo][img]\n\n[docs]: <https://example.com/guide?q=1> "Guide"\n[img]: https://example.com/logo.png',
+    );
+    const anchors = [...container.querySelectorAll('a')];
+    const image = container.querySelector('img');
+
+    expect(anchors.map((anchor) => anchor.getAttribute('href'))).toEqual([
+      'https://example.com/guide?q=1',
+      'https://example.com/guide?q=1',
+    ]);
+    expect(anchors[0]?.getAttribute('title')).toBe('Guide');
+    expect(image?.getAttribute('src')).toBe('https://example.com/logo.png');
+  });
 });
