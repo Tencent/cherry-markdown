@@ -55,7 +55,7 @@
     "build": "run-s clean build:types",
     "build:types": "tsc --project tsconfig.build.json",
     "clean": "rimraf ./dist",
-    "test": "vitest run --config vitest.config.ts",
+    "test": "yarn workspace cherry-markdown build:engine && vitest run --config vitest.config.ts",
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "peerDependencies": {
