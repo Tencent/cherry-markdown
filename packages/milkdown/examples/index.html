@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cherry Milkdown Vanilla Example</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <style>
+      main {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        max-width: 1200px;
+        margin: 32px auto;
+      }
+
+      #editor,
+      #preview {
+        min-height: 420px;
+        border: 1px solid #d8dce5;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div id="editor"></div>
+      <div id="preview"></div>
+    </main>
+    <script type="module" src="./vanilla.js"></script>
+  </body>
+</html>

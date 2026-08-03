@@ -1,0 +1,73 @@
+{
+  "name": "@cherry-markdown/milkdown",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Milkdown adapter with Cherry Markdown rendering and syntax preservation",
+  "keywords": [
+    "cherry-markdown",
+    "markdown",
+    "milkdown",
+    "prosemirror",
+    "wysiwyg"
+  ],
+  "license": "Apache-2.0",
+  "author": "Cherry Oteam",
+  "homepage": "https://github.com/Tencent/cherry-markdown#readme",
+  "bugs": {
+    "url": "https://github.com/Tencent/cherry-markdown/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tencent/cherry-markdown.git",
+    "directory": "packages/milkdown"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "style": "./styles.css",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./raw": {
+      "types": "./dist/raw/index.d.ts",
+      "import": "./dist/raw/index.js"
+    },
+    "./styles.css": "./styles.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "examples",
+    "styles.css",
+    "README.md",
+    "README.CN.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "./styles.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "run-s clean build:types",
+    "build:types": "tsc --project tsconfig.build.json",
+    "clean": "rimraf ./dist",
+    "test": "vitest run --config vitest.config.ts",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "@milkdown/kit": "^7.21.3",
+    "cherry-markdown": "^0.11.7"
+  },
+  "devDependencies": {
+    "@milkdown/kit": "^7.21.3",
+    "cherry-markdown": "*"
+  },
+  "engines": {
+    "node": ">=22",
+    "yarn": ">=1.22.18"
+  }
+}

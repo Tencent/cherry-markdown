@@ -1,0 +1,99 @@
+.cherry-milkdown {
+  min-height: 160px;
+  color: #1f2329;
+  background: #fff;
+}
+
+.cherry-milkdown .ProseMirror {
+  min-height: inherit;
+  padding: 16px;
+  outline: none;
+}
+
+.cherry-milkdown-raw {
+  box-sizing: border-box;
+  border: 1px solid #d8dce5;
+  border-radius: 4px;
+  color: #4e5969;
+  background: #f7f8fa;
+  cursor: default;
+  user-select: none;
+}
+
+.cherry-milkdown-raw--block {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px 12px;
+}
+
+.cherry-milkdown-raw--inline {
+  display: inline-flex;
+  gap: 4px;
+  align-items: baseline;
+  padding: 1px 4px;
+}
+
+.cherry-milkdown-raw.is-selected {
+  border-color: #366ef4;
+  box-shadow: 0 0 0 2px rgb(54 110 244 / 16%);
+}
+
+.cherry-milkdown-raw__badge {
+  flex: none;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: #fff;
+  background: #366ef4;
+  font: 11px/18px sans-serif;
+}
+
+.cherry-milkdown-raw__summary {
+  overflow: hidden;
+  color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cherry-milkdown-raw-dialog {
+  width: min(720px, calc(100vw - 32px));
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  box-shadow: 0 12px 36px rgb(0 0 0 / 24%);
+}
+
+.cherry-milkdown-raw-dialog::backdrop {
+  background: rgb(0 0 0 / 38%);
+}
+
+.cherry-milkdown-raw-dialog__form {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.cherry-milkdown-raw-dialog__header,
+.cherry-milkdown-raw-dialog__footer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cherry-milkdown-raw-dialog__footer {
+  justify-content: flex-end;
+}
+
+.cherry-milkdown-raw-dialog__source {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 240px;
+  padding: 10px;
+  border: 1px solid #d8dce5;
+  border-radius: 4px;
+  resize: vertical;
+  font: 13px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
