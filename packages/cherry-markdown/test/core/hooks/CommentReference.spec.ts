@@ -65,4 +65,18 @@ describe('core/hooks/CommentReference', () => {
 
     expect(hook.beforeMakeHtml('[docs]: https://example.com')).toBe('');
   });
+
+  it.each(['javascript:alert(1)', 'vbscript:msgbox(1)', 'data:text/html;base64,PHNjcmlwdD4='])(
+    'rejects reference definitions with the dangerous scheme %s',
+    (dangerousUrl) => {
+      const hook = createCommentReference();
+      const markdown = `A [link][ref].\n\n[ref]: ${dangerousUrl} "title"`;
+      const transformed = hook.beforeMakeHtml(markdown);
+
+      // 危险协议不写入缓存，引用保持未解析状态，不会被改写成 [text](url) 形式
+      expect(hook.getCommentReferenceCache('ref')).toBeNull();
+      expect(hook.afterMakeHtml(transformed)).not.toContain(dangerousUrl);
+      expect(transformed).toContain('[link][ref]');
+    },
+  );
 });

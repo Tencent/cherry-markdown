@@ -451,7 +451,7 @@ export function isValidScheme(url) {
   if (!match) {
     return true;
   }
-  const SCHEME_BLACKLIST = ['javascript', 'data'];
+  const SCHEME_BLACKLIST = ['javascript', 'vbscript', 'data'];
   const scheme = match[1].replace(/[\s\x00-\x1f]/g, ''); // 协议中间可能会出现空白字符或控制字符绕过检查
   if (SCHEME_BLACKLIST.indexOf(scheme.toLowerCase()) !== -1) {
     return false;
