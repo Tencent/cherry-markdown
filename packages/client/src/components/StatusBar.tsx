@@ -43,17 +43,29 @@ export default defineComponent({
     const wordWords = ref(0);
     const wordLine = ref(0);
     const lastChangeTime = ref<number | null>(null);
+    // 当前编辑器引擎（cherry / milkdown），点击按钮时写回持久化
+    const engine = ref<'cherry' | 'milkdown'>(preferences.engine);
+    const toggleEngine = (): void => {
+      const next = engine.value === 'cherry' ? 'milkdown' : 'cherry';
+      engine.value = next;
+      preferences.setEngine(next);
+    };
     // 从持久化存储初始化专注模式与宽度模式
     const focusMode = ref<boolean>(preferences.focusMode);
     // 记录进入专注模式时 cherry 是否处于纯预览模式（此时不切换编辑器 model）
     const enteredInPreviewOnly = ref(false);
-    // 专注模式下的宽度模式：'fixed' → #markdown-editor.fixed-width；'auto' → #markdown-editor.auto-width
+    // 专注模式下的宽度模式：'fixed' → 容器.fixed-width；'auto' → 容器.auto-width
     // 默认 fixed（限制正文宽度，阅读体验更好）
     const widthMode = ref<'fixed' | 'auto'>(preferences.widthMode);
     let waitTimer: number | undefined;
 
     const FOCUS_MODE_CLASS = 'cherry-focus-mode';
     const WIDTH_CLASSES = ['fixed-width', 'auto-width'] as const;
+
+    // 根据当前引擎返回激活的编辑器容器 id：cherry → #markdown-editor，milkdown → #milkdown-editor
+    const getActiveContainerId = (): string => (engine.value === 'milkdown' ? 'milkdown-editor' : 'markdown-editor');
+
+    const getActiveContainer = (): HTMLElement | null => document.getElementById(getActiveContainerId());
 
     // 若持久化的专注模式为 true，setup 阶段立即隐藏侧栏，避免首屏“侧栏闪现”
     // 编辑器就绪后再由 enterFocusMode 完成 editor model 切换和宽度类应用
@@ -62,24 +74,31 @@ export default defineComponent({
     }
 
     const applyWidthModeToDom = (mode: 'fixed' | 'auto'): void => {
-      const el = document.getElementById('markdown-editor');
-      if (!el) return;
-      el.classList.remove(...WIDTH_CLASSES);
-      el.classList.add(mode === 'fixed' ? 'fixed-width' : 'auto-width');
+      // 同时清理两个容器上的宽度类，避免切换引擎后残留
+      ['markdown-editor', 'milkdown-editor'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove(...WIDTH_CLASSES);
+      });
+      const active = getActiveContainer();
+      if (!active) return;
+      active.classList.add(mode === 'fixed' ? 'fixed-width' : 'auto-width');
     };
 
     const clearWidthModeOnDom = (): void => {
-      const el = document.getElementById('markdown-editor');
-      if (!el) return;
-      el.classList.remove(...WIDTH_CLASSES);
+      ['markdown-editor', 'milkdown-editor'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove(...WIDTH_CLASSES);
+      });
     };
 
     const toggleWidthMode = (): void => {
       widthMode.value = widthMode.value === 'fixed' ? 'auto' : 'fixed';
       applyWidthModeToDom(widthMode.value);
       preferences.setWidthMode(widthMode.value);
-      // 宽度变化后刷新 CodeMirror，避免测量残留
-      setTimeout(() => getEditorInstance()?.editor?.refresh?.(), 50);
+      // 宽度变化后刷新 CodeMirror，避免测量残留（仅 Cherry 需要）
+      if (engine.value === 'cherry') {
+        setTimeout(() => getEditorInstance()?.editor?.refresh?.(), 50);
+      }
     };
 
     const fileName = computed(() => {
@@ -174,6 +193,14 @@ export default defineComponent({
     const onAfterChange = (): void => updateStats();
 
     const waitForEditor = (): void => {
+      // Milkdown 模式下不存在 Cherry 实例，直接走恢复分支
+      if (engine.value === 'milkdown') {
+        if (preferences.focusMode) {
+          focusMode.value = false;
+          enterFocusMode(false);
+        }
+        return;
+      }
       const editor = getEditorInstance();
       if (editor) {
         editor.on?.('afterChange', onAfterChange);
@@ -198,54 +225,74 @@ export default defineComponent({
     /**
      * 进入专注模式
      * @param persist 是否写回持久化存储（自动恢复时为 false，避免多余写入）
+     *
+     * 与引擎解耦：
+     *  - 侧栏隐藏（body class）+ 宽度类：对两种引擎都生效
+     *  - Cherry 独占：切换 editor model 到 editOnly、刷新 CodeMirror
+     *  - Milkdown 独占：暂无额外操作（本身就是所见即所得单栏）
      */
     const enterFocusMode = (persist = true): void => {
-      const editor = getEditorInstance();
-      if (!editor) return;
       if (focusMode.value) return;
-
-      editor.focusMode = true;
-      // 若 cherry 当前处于纯预览模式（editor === 'hide'），只隐藏侧栏，不改动编辑器 model
-      const isPreviewOnly = editor.status?.editor !== 'show';
-      enteredInPreviewOnly.value = isPreviewOnly;
 
       // 通过 body class 彻底隐藏整个 .side-panel（含活动栏），
       // 不修改 fileStore.sidebarCollapsed，避免污染持久化的折叠偏好
       document.body.classList.add(FOCUS_MODE_CLASS);
 
-      if (!isPreviewOnly) {
-        try {
-          editor.switchModel('editOnly', false);
-          setTimeout(() => editor.editor?.refresh?.(), 200);
-        } catch {
-          // 切换失败则回退侧栏隐藏
-          document.body.classList.remove(FOCUS_MODE_CLASS);
-          return;
+      // Cherry 引擎才需要处理 editor model 切换
+      if (engine.value === 'cherry') {
+        const editor = getEditorInstance();
+        if (editor) {
+          editor.focusMode = true;
+          // 若 cherry 当前处于纯预览模式（editor === 'hide'），只隐藏侧栏，不改动编辑器 model
+          const isPreviewOnly = editor.status?.editor !== 'show';
+          enteredInPreviewOnly.value = isPreviewOnly;
+          if (!isPreviewOnly) {
+            try {
+              editor.switchModel('editOnly', false);
+              setTimeout(() => editor.editor?.refresh?.(), 200);
+            } catch {
+              // 切换失败则回退侧栏隐藏
+              document.body.classList.remove(FOCUS_MODE_CLASS);
+              return;
+            }
+          }
+        } else {
+          // Cherry 尚未就绪：保守起见按“非纯预览”处理，稍后由 waitForEditor 补上
+          enteredInPreviewOnly.value = false;
         }
+      } else {
+        // Milkdown 引擎不涉及 model 切换
+        enteredInPreviewOnly.value = false;
       }
-      // 进入专注模式时应用当前宽度模式
+
+      // 进入专注模式时应用当前宽度模式（作用于当前激活的容器）
       applyWidthModeToDom(widthMode.value);
       focusMode.value = true;
       if (persist) preferences.setFocusMode(true);
     };
 
     const exitFocusMode = (persist = true): void => {
-      const editor = getEditorInstance();
       if (!focusMode.value) return;
 
-      if (editor) {
-        editor.focusMode = false;
-      }
-      // 退出专注模式：恢复侧栏；若进入时非纯预览，则切回 edit&preview
+      // 退出专注模式：恢复侧栏
       document.body.classList.remove(FOCUS_MODE_CLASS);
-      if (editor && !enteredInPreviewOnly.value) {
-        try {
-          editor.switchModel('edit&preview', true);
-          setTimeout(() => editor.editor?.refresh?.(), 200);
-        } catch {
-          // 忽略还原失败
+
+      // Cherry 引擎才需要还原 editor model
+      if (engine.value === 'cherry') {
+        const editor = getEditorInstance();
+        if (editor) {
+          editor.focusMode = false;
+          if (!enteredInPreviewOnly.value) {
+            try {
+              editor.switchModel('edit&preview', true);
+              setTimeout(() => editor.editor?.refresh?.(), 200);
+            } catch {
+              // 忽略还原失败
+            }
+          }
         }
       }
+
       // 退出专注模式时清理宽度类，恢复默认布局
       clearWidthModeOnDom();
       focusMode.value = false;
@@ -259,6 +306,44 @@ export default defineComponent({
         enterFocusMode(true);
       }
     };
+
+    // 引擎切换时同步专注模式副作用：
+    //  1. 保持本地 engine.value 与持久化一致（其他入口可能修改 preferences.engine）
+    //  2. 若正处于专注模式，将宽度类从旧容器迁移到新容器（applyWidthModeToDom 内部会先清理再应用）
+    //  3. 切回 Cherry 时，若专注模式仍开且 Cherry 已就绪，需要重新走一次 model 切换到 editOnly
+    watch(
+      () => preferences.engine,
+      (next, prev) => {
+        engine.value = next;
+        if (!focusMode.value) return;
+        // 宽度类迁移到新容器
+        // 新容器可能在下一帧才渲染完成（引擎 mount 是异步），因此延迟一次
+        setTimeout(() => applyWidthModeToDom(widthMode.value), 0);
+
+        // 从 milkdown 切回 cherry：等 Cherry 就绪后，把 model 切到 editOnly
+        if (prev === 'milkdown' && next === 'cherry') {
+          const trySync = (): void => {
+            const editor = getEditorInstance();
+            if (!editor) {
+              window.setTimeout(trySync, 100);
+              return;
+            }
+            editor.focusMode = true;
+            const isPreviewOnly = editor.status?.editor !== 'show';
+            enteredInPreviewOnly.value = isPreviewOnly;
+            if (!isPreviewOnly) {
+              try {
+                editor.switchModel('editOnly', false);
+                setTimeout(() => editor.editor?.refresh?.(), 200);
+              } catch {
+                // ignore
+              }
+            }
+          };
+          trySync();
+        }
+      },
+    );
 
     onUnmounted(() => {
       if (waitTimer) window.clearTimeout(waitTimer);
@@ -319,6 +404,25 @@ export default defineComponent({
                 ],
               )
             : null,
+          h(
+            'button',
+            {
+              type: 'button',
+              class: ['status-action', 'status-action-engine', { active: engine.value === 'milkdown' }],
+              title:
+                engine.value === 'cherry'
+                  ? '当前：源码/分屏模式（Cherry），点击切换为所见即所得（Milkdown）'
+                  : '当前：所见即所得（Milkdown），点击切换回源码/分屏模式（Cherry）',
+              onClick: toggleEngine,
+            },
+            [
+              h(
+                'span',
+                { class: 'status-action-label' },
+                engine.value === 'cherry' ? 'Cherry 双栏编辑' : 'Milkdown 所见即所得编辑',
+              ),
+            ],
+          ),
         ]),
         h('div', { class: 'status-right' }, [
           h('span', { class: 'status-item' }, `${wordCount.value} 字`),

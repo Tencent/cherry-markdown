@@ -9,6 +9,10 @@
     "version:sync": "node ./scripts/sync-version.js"
   },
   "dependencies": {
+    "@milkdown/components": "^7.21.3",
+    "@milkdown/kit": "^7.21.3",
+    "@milkdown/plugin-math": "^7.5.9",
+    "@milkdown/theme-nord": "^7.21.3",
     "@tauri-apps/api": "2.2.0",
     "@tauri-apps/plugin-dialog": "2.2.0",
     "@tauri-apps/plugin-fs": "2.2.0",

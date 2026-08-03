@@ -15,6 +15,12 @@ import cherryMarkdownCss from 'cherry-markdown/dist/cherry-markdown.css?inline';
 import globalCss from './styles/global.css?inline';
 import { createPinia } from 'pinia';
 
+// Side-effect: register Milkdown adapter so switching engine via StatusBar
+// can boot a real Milkdown editor. Placed after the CSS injection so that
+// Milkdown's own theme stylesheet (imported inside the adapter) applies
+// on top of the cherry/global cascade.
+import './components/composables/milkdownAdapter';
+
 function injectStyle(css: string, id: string) {
   const style = document.createElement('style');
   style.setAttribute('data-inject-id', id);

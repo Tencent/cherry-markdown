@@ -1,0 +1,642 @@
+﻿/* Milkdown 交互增强插件的公共样式 —— 与 Cherry 主题变量（--fg / --bg / --primary 等）对齐。*/
+
+:root {
+  --mkd-panel-bg: #ffffff;
+  --mkd-panel-fg: #1f2328;
+  --mkd-panel-fg-muted: #6b7280;
+  --mkd-panel-border: rgba(0, 0, 0, 0.08);
+  --mkd-panel-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  --mkd-panel-hover-bg: rgba(99, 102, 241, 0.08);
+  --mkd-panel-active-bg: rgba(99, 102, 241, 0.16);
+  --mkd-panel-accent: #6366f1;
+  --mkd-panel-radius: 8px;
+  --mkd-panel-icon-radius: 6px;
+}
+
+body[data-cherry-theme='dark'] {
+  --mkd-panel-bg: #22252d;
+  --mkd-panel-fg: #e5e7eb;
+  --mkd-panel-fg-muted: #9ca3af;
+  --mkd-panel-border: rgba(255, 255, 255, 0.08);
+  --mkd-panel-shadow: 0 6px 20px rgba(0, 0, 0, 0.55);
+  --mkd-panel-hover-bg: rgba(129, 140, 248, 0.16);
+  --mkd-panel-active-bg: rgba(129, 140, 248, 0.28);
+  --mkd-panel-accent: #a5b4fc;
+}
+
+/* ------------------------------------------------------------------ */
+/* 1. 选区工具栏 (SelectionTooltip)                                     */
+/* ------------------------------------------------------------------ */
+.milkdown-selection-tooltip {
+  position: absolute;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: var(--mkd-panel-bg);
+  color: var(--mkd-panel-fg);
+  border: 1px solid var(--mkd-panel-border);
+  border-radius: var(--mkd-panel-radius);
+  box-shadow: var(--mkd-panel-shadow);
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  pointer-events: none;
+}
+
+.milkdown-selection-tooltip[data-show='true'] {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.milkdown-selection-tooltip button {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  background: transparent;
+  color: inherit;
+  border: none;
+  border-radius: var(--mkd-panel-icon-radius);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.1s ease;
+}
+
+.milkdown-selection-tooltip button:hover {
+  background: var(--mkd-panel-hover-bg);
+}
+
+.milkdown-selection-tooltip button[data-active='true'] {
+  background: var(--mkd-panel-active-bg);
+  color: var(--mkd-panel-accent);
+}
+
+.milkdown-selection-tooltip .mkd-divider {
+  width: 1px;
+  height: 18px;
+  margin: 0 2px;
+  background: var(--mkd-panel-border);
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. 斜杠菜单 (SlashMenu)                                              */
+/* ------------------------------------------------------------------ */
+.milkdown-slash-menu {
+  position: absolute;
+  z-index: 1000;
+  min-width: 240px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--mkd-panel-bg);
+  color: var(--mkd-panel-fg);
+  border: 1px solid var(--mkd-panel-border);
+  border-radius: var(--mkd-panel-radius);
+  box-shadow: var(--mkd-panel-shadow);
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  pointer-events: none;
+}
+
+.milkdown-slash-menu[data-show='true'] {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.milkdown-slash-menu-empty {
+  padding: 12px;
+  color: var(--mkd-panel-fg-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.milkdown-slash-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--mkd-panel-icon-radius);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.08s ease;
+}
+
+.milkdown-slash-item:hover,
+.milkdown-slash-item[data-active='true'] {
+  background: var(--mkd-panel-hover-bg);
+}
+
+.milkdown-slash-item[data-active='true'] {
+  background: var(--mkd-panel-active-bg);
+}
+
+.milkdown-slash-item-icon {
+  flex: 0 0 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--mkd-panel-hover-bg);
+  color: var(--mkd-panel-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.milkdown-slash-item-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.milkdown-slash-item-title {
+  font-weight: 500;
+  color: var(--mkd-panel-fg);
+  line-height: 1.3;
+}
+
+.milkdown-slash-item-desc {
+  font-size: 12px;
+  color: var(--mkd-panel-fg-muted);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. 段落拖拽把手 (BlockHandle)                                        */
+/* ------------------------------------------------------------------ */
+.milkdown-block-handle {
+  display: none !important;
+  position: absolute;
+  z-index: 999;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mkd-panel-fg-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.milkdown-block-handle[data-show='true'] {
+  opacity: 1;
+}
+
+.milkdown-block-handle:hover {
+  background: var(--mkd-panel-hover-bg);
+  color: var(--mkd-panel-accent);
+  border-color: var(--mkd-panel-border);
+}
+
+.milkdown-block-handle:active {
+  cursor: grabbing;
+}
+
+.milkdown-block-handle-dots {
+  display: grid;
+  grid-template-columns: repeat(2, 3px);
+  grid-template-rows: repeat(3, 3px);
+  gap: 2px;
+}
+
+.milkdown-block-handle-dots span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Block 菜单（点击把手弹出） */
+.milkdown-block-menu {
+  position: absolute;
+  z-index: 1001;
+  min-width: 180px;
+  padding: 6px;
+  background: var(--mkd-panel-bg);
+  color: var(--mkd-panel-fg);
+  border: 1px solid var(--mkd-panel-border);
+  border-radius: var(--mkd-panel-radius);
+  box-shadow: var(--mkd-panel-shadow);
+  font-size: 13px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  pointer-events: none;
+}
+
+.milkdown-block-menu[data-show='true'] {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.milkdown-block-menu-item {
+  padding: 7px 10px;
+  border-radius: var(--mkd-panel-icon-radius);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.08s ease;
+}
+
+.milkdown-block-menu-item:hover {
+  background: var(--mkd-panel-hover-bg);
+}
+
+.milkdown-block-menu-item[data-danger='true']:hover {
+  background: rgba(239, 68, 68, 0.14);
+  color: #ef4444;
+}
+
+.milkdown-block-menu-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--mkd-panel-border);
+}
+
+/* 拖拽期间给 ProseMirror dom 一点视觉提示 */
+.milkdown[data-dragging='true'] .ProseMirror {
+  cursor: grabbing;
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. TableBlock（@milkdown/components/table-block）                    */
+/* ------------------------------------------------------------------ */
+/* 真实 DOM 结构（见 @milkdown/components/lib/table-block/index.js）：   */
+/*   .milkdown-table-block                        → NodeView 根        */
+/*     .table-wrapper                             → 内层容器           */
+/*       .drag-preview[data-direction=...]                              */
+/*       .handle.cell-handle[data-role=col-drag-handle]  → col 6-dot   */
+/*         > svg + .button-group                                        */
+/*       .handle.cell-handle[data-role=row-drag-handle]  → row 6-dot   */
+/*         > svg + .button-group                                        */
+/*       .handle.line-handle[data-role=x-line-drag-handle]  → 横条     */
+/*         > button.add-button                                          */
+/*       .handle.line-handle[data-role=y-line-drag-handle]  → 竖条     */
+/*         > button.add-button                                          */
+/*       table.children > thead + tbody                                 */
+/*                                                                      */
+/* 交互模型：                                                           */
+/*  - 鼠标在单元格内部 → cell-handle 显示（6-dot 把手）；               */
+/*  - 鼠标靠近单元格边界 8px → line-handle 显示（含 add-button "+"）；  */
+/*  - line-handle 的宽/高由 JS 动态设置（铺满整行/整列）；              */
+/*  - 拖拽时 → line-handle 变为 indicator（细分割线）+ drag-preview     */
+
+.milkdown .milkdown-table-block {
+  position: relative;
+  margin: 12px 0;
+  /* 给行/列的 6-dot 把手和 line-handle 留出溢出空间。                       */
+  /* line-handle 会用 floating-ui + offset(-handleSize=20) 溢出到最外侧 20px；*/
+  /* cell-handle 通过 handle-position 位于列头上方/行首左侧，约 -22px。      */
+  padding: 24px 0 0 24px;
+  /* 注意：不能用 overflow-x: auto —— 否则 line-handle 刚显示（left:-20px） */
+  /* 的瞬间会瞬时拉大 scrollWidth，触发横向滚动条闪现。大表格的横向          */
+  /* 滚动交给外层编辑器容器。                                               */
+  overflow: visible;
+}
+
+.milkdown .table-wrapper {
+  position: relative;
+  /* 关键：让 handle（line-handle / cell-handle）自由溢出，不产生本层滚动条 */
+  overflow: visible;
+}
+.milkdown .table-wrapper table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.milkdown .table-wrapper th,
+.milkdown .table-wrapper td {
+  border: 1px solid var(--mkd-panel-border);
+  padding: 8px 12px;
+  min-width: 60px;
+  vertical-align: top;
+  position: relative;
+  word-break: break-word;
+}
+
+.milkdown .table-wrapper th {
+  background: var(--mkd-panel-hover-bg);
+  font-weight: 600;
+}
+
+/* =============== 通用 handle 基础 =============== */
+/* 所有 handle 默认 display:none，组件通过 [data-show='true'] 控制显示 */
+.milkdown .milkdown-table-block .handle {
+  position: absolute;
+  display: none;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  user-select: none;
+}
+
+.milkdown .milkdown-table-block .handle[data-show='true'] {
+  display: flex;
+}
+
+/* =============== cell-handle：6-dot 把手 =============== */
+.milkdown .milkdown-table-block .handle.cell-handle {
+  display: none;
+  color: var(--mkd-panel-fg-muted);
+  background: var(--mkd-panel-bg);
+  border: 1px solid var(--mkd-panel-border);
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  cursor: grab;
+  transition: color 0.08s ease, background-color 0.08s ease;
+}
+
+.milkdown .milkdown-table-block .handle.cell-handle:hover {
+  color: var(--mkd-panel-accent);
+  background: var(--mkd-panel-hover-bg);
+}
+
+.milkdown .milkdown-table-block .handle.cell-handle:active {
+  cursor: grabbing;
+}
+
+/* col 把手：贴在列头顶部（横向条） */
+.milkdown .milkdown-table-block .handle[data-role='col-drag-handle'] {
+  width: 24px;
+  height: 14px;
+  /* JS 每次显示都会写 left/top，但初值给稳一些避免首次布局错位 */
+  top: 0;
+  left: 0;
+  /* 让 cell-handle 底边压入列头 boundary 8px 带（handle 高 14px，压 8px 后 */
+  /* 顶边仍在列头外 6px，视觉不遮挡列头内容）。这样鼠标从单元格中央向上   */
+  /* 移动、进入 8px 边界带时，会先进入 cell-handle 的 DOM 几何范围，触发   */
+  /* 组件已注册的 onPointermove: e.stopPropagation()，避免外层 pointerMove   */
+  /* 判定 closeToBoundary 而切换到 line-handle 模式，从而保持 cell-handle   */
+  /* 稳定可 hover。                                                          */
+  margin-top: 8px;
+}
+
+/* row 把手：贴在行首左侧（竖向条） */
+.milkdown .milkdown-table-block .handle[data-role='row-drag-handle'] {
+  width: 14px;
+  height: 24px;
+  top: 0;
+  left: 0;
+  /* 同理，把 cell-handle 右边压入行首左边 boundary 8px 带 */
+  margin-left: 8px;
+}
+.milkdown .milkdown-table-block .handle.cell-handle > svg {
+  width: 12px;
+  height: 12px;
+  display: block;
+  pointer-events: none;
+}
+
+/* =============== cell-handle 上的 button-group =============== */
+/* 组件在点击/选中列/行后，会给内部 .button-group 加 data-show=true */
+.milkdown .milkdown-table-block .handle.cell-handle .button-group {
+  position: absolute;
+  display: none;
+  gap: 2px;
+  padding: 4px;
+  background: var(--mkd-panel-bg);
+  color: var(--mkd-panel-fg);
+  border: 1px solid var(--mkd-panel-border);
+  border-radius: var(--mkd-panel-radius);
+  box-shadow: var(--mkd-panel-shadow);
+  white-space: nowrap;
+  z-index: 4;
+}
+
+.milkdown .milkdown-table-block .handle.cell-handle .button-group[data-show='true'] {
+  display: inline-flex;
+}
+
+/* col 的 button-group 从下方弹出 */
+.milkdown .milkdown-table-block .handle[data-role='col-drag-handle'] .button-group {
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, 6px);
+}
+
+/* row 的 button-group 从右侧弹出 */
+.milkdown .milkdown-table-block .handle[data-role='row-drag-handle'] .button-group {
+  left: 100%;
+  top: 50%;
+  transform: translate(6px, -50%);
+}
+
+.milkdown .milkdown-table-block .handle.cell-handle .button-group button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  color: var(--mkd-panel-fg);
+  border: none;
+  border-radius: var(--mkd-panel-icon-radius);
+  cursor: pointer;
+  transition: background-color 0.08s ease, color 0.08s ease;
+}
+
+.milkdown .milkdown-table-block .handle.cell-handle .button-group button:hover {
+  background: var(--mkd-panel-hover-bg);
+  color: var(--mkd-panel-accent);
+}
+
+.ProseMirror-selectednode {
+  outline: none;
+}
+
+.milkdown .milkdown-table-block .handle.cell-handle .button-group button svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  pointer-events: none;
+}
+
+/* =============== line-handle：边界分割条 + 内含 add-button =============== */
+/* 组件按 data-display-type 区分两种形态：                                */
+/*   tool：hover 边界时展示为"添加行/列"入口，需要有可视宽度承载 "+"       */
+/*   indicator：拖拽时展示为一条细分割线，做 drop 位置提示                */
+
+.milkdown .milkdown-table-block .handle.line-handle {
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  cursor: pointer;
+  /* line-handle 内含 add-button，需要可交互，不能 pointer-events:none */
+}
+
+/* x-line-handle 是"横向线"，用来在两行之间显示，JS 会动态设置 width       */
+/* y-line-handle 是"竖向线"，用来在两列之间显示，JS 会动态设置 height      */
+/* 注意：组件通过 floating-ui + offset(-handleSize) 已把 handle 贴到边界， */
+/* 这里不能再加 translate(-50%)，否则 handle 会向外溢出半个宽度，触发     */
+/* .table-wrapper 出现横向滚动条闪现。居中效果由内部 ::before 完成。      */
+/* 重要：JS 在显示 line-handle 时只会设置 handle 单一方向的坐标。         */
+/*  - yHandle（竖线）只写 height/left，不设 top → CSS 必须预设 top:0        */
+/*  - xHandle（横线）只写 width/top，不设 left → CSS 必须预设 left:0       */
+/* 否则 handle 会因为缺一维坐标而错位到意外位置（如表格上方）。             */
+/*                                                                          */
+/* 关键修正：组件返回的 top/left 是把 handle 的"顶边/左边"贴到目标线，     */
+/* 而不是把 handle 中心对齐目标线。handle 自身有 20px 高/宽，因此需要用     */
+/* 负 margin 把它整体上移/左移 10px，让 handle 中线正好压在目标线上。      */
+/* 此时内部 ::before 高亮条（居中于 handle）就会精确覆盖目标线。           */
+.milkdown .milkdown-table-block .handle[data-role='x-line-drag-handle'] {
+  height: 20px;
+  /* xHandle 在两行之间，JS 设 top；left 必须预设为 0 以对齐表格左边 */
+  left: 0;
+  /* 把 handle 中线上移到组件计算的 top 位置（handle 高度 20px 的一半） */
+  margin-top: -10px;
+}
+
+.milkdown .milkdown-table-block .handle[data-role='y-line-drag-handle'] {
+  width: 20px;
+  /* yHandle 在两列之间，JS 设 left；top 必须预设为 0 以对齐表格顶边 */
+  top: 0;
+  /* 把 handle 中线左移到组件计算的 left 位置（handle 宽度 20px 的一半） */
+  margin-left: -10px;
+}
+
+/* tool 形态：一条 hover 高亮的粗条 —— 仅在 handle 显示时可见 */
+.milkdown .milkdown-table-block .handle.line-handle[data-display-type='tool']::before {
+  content: '';
+  position: absolute;
+  background: var(--mkd-panel-accent);
+  opacity: 0.35;
+  border-radius: 2px;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.milkdown .milkdown-table-block .handle.line-handle[data-display-type='tool']:hover::before {
+  opacity: 0.6;
+}
+
+/* 横条高亮：宽度铺满 handle，垂直居中，3px 厚 */
+.milkdown .milkdown-table-block .handle[data-role='x-line-drag-handle'][data-display-type='tool']::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  transform: translateY(-50%);
+}
+
+/* 竖条高亮：高度铺满 handle，水平居中，3px 粗 */
+.milkdown .milkdown-table-block .handle[data-role='y-line-drag-handle'][data-display-type='tool']::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  transform: translateX(-50%);
+}
+
+/* indicator 形态：细分割线（拖拽 drop 提示） */
+.milkdown .milkdown-table-block .handle.line-handle[data-display-type='indicator']::before {
+  content: '';
+  position: absolute;
+  background: var(--mkd-panel-accent);
+  opacity: 0.9;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.milkdown .milkdown-table-block .handle[data-role='x-line-drag-handle'][data-display-type='indicator']::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.milkdown .milkdown-table-block .handle[data-role='y-line-drag-handle'][data-display-type='indicator']::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+}
+
+/* =============== add-button（line-handle 内的 "+"） =============== */
+.milkdown .milkdown-table-block .handle.line-handle .add-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: var(--mkd-panel-bg);
+  color: var(--mkd-panel-fg-muted);
+  border: 1px solid var(--mkd-panel-border);
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  z-index: 1;
+  transition: background-color 0.08s ease, color 0.08s ease, border-color 0.08s ease;
+}
+
+.milkdown .milkdown-table-block .handle.line-handle .add-button:hover {
+  background: var(--mkd-panel-accent);
+  color: #fff;
+  border-color: var(--mkd-panel-accent);
+}
+
+.milkdown .milkdown-table-block .handle.line-handle .add-button svg {
+  width: 12px;
+  height: 12px;
+  display: block;
+  pointer-events: none;
+}
+
+/* add-button 仅在 tool 形态下可见；indicator 形态下隐藏 */
+.milkdown .milkdown-table-block .handle.line-handle[data-display-type='indicator'] .add-button {
+  display: none;
+}
+
+/* =============== drag-preview：拖拽整行/整列时的浮层 =============== */
+.milkdown .milkdown-table-block .drag-preview {
+  position: absolute;
+  display: none;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0.7;
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  background: var(--mkd-panel-bg);
+  overflow: hidden;
+}
+
+.milkdown .milkdown-table-block .drag-preview[data-show='true'] {
+  display: block;
+}
+
+.milkdown .milkdown-table-block .drag-preview table {
+  border-collapse: collapse;
+}
+
+.milkdown .milkdown-table-block .drag-preview th,
+.milkdown .milkdown-table-block .drag-preview td {
+  border: 1px solid var(--mkd-panel-border);
+  padding: 8px 12px;
+}
+
+/* 拖拽期间禁用文本选择 */
+.milkdown .table-wrapper[data-dragging='true'] {
+  user-select: none;
+}
