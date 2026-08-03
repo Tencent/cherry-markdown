@@ -344,7 +344,8 @@ export default class Engine {
    */
   $deCacheBigData(md) {
     return md.replace(/bigDataBegin[^\n]+?bigDataEnd/g, (whole) => {
-      return this.cachedBigData[whole];
+      // 未命中缓存时（如用户原文中恰好包含该形态的文本）保留原文，避免被替换成 "undefined"
+      return this.cachedBigData[whole] ?? whole;
     });
   }
 
