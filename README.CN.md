@@ -101,7 +101,6 @@ UMD 产物会暴露全局变量 `Cherry`。需要使用原生 ESM 时：
 </script>
 ```
 
-请不要使用 `cherry-markdown.min.js`：当前发布包没有这个 JavaScript 文件，规范入口是 `cherry-markdown.js`。`min.css` 仅表示压缩后的 CSS 文件。
 
 Cherry 提供多种构建产物（完整包 / 核心包 / 流式输出包 / 引擎包），以适配浏览器、Node.js、AI Chat 流式输出等不同场景。使用示例、构建包差异、mermaid 集成方式及异步动态加载等详细内容，请参考 **[构建产物介绍](https://github.com/Tencent/cherry-markdown/wiki/%E6%9E%84%E5%BB%BA%E4%BA%A7%E7%89%A9%E4%BB%8B%E7%BB%8D)**。
 
