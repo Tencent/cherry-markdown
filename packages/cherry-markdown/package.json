@@ -19,16 +19,6 @@
       "default": "./dist/cherry-markdown.esm.js"
     },
     "./umd": "./dist/cherry-markdown.js",
-    "./core": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/cherry-markdown.core.esm.js",
-      "default": "./dist/cherry-markdown.core.esm.js"
-    },
-    "./stream": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/cherry-markdown.stream.esm.js",
-      "default": "./dist/cherry-markdown.stream.esm.js"
-    },
     "./types/*": "./types/*.d.ts",
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
