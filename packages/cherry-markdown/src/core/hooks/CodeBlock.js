@@ -523,7 +523,6 @@ export default class CodeBlock extends ParagraphBase {
         }
         // 渲染出错则按正常code进行渲染
       }
-      // $code = this.$replaceSpecialChar($code);
       cacheCode = this.cacheAndGetData(sign, () => this.$codeReplace($code, $lang, sign, lines), 2000, -300);
       const result = this.getCacheWithSpace(this.pushCache(cacheCode, sign, lines), match);
       return addBlockQuoteSignToResult(result);
@@ -571,8 +570,9 @@ export default class CodeBlock extends ParagraphBase {
           return match;
         }
         let $code = code.replace(/~~not~inlineCode/g, '\\`');
-        $code = this.$replaceSpecialChar($code);
         $code = $code.replace(/~CHERRYNormalLine/g, '|');
+        // 行内语法里的换行不应该生效，需要替换成空格
+        $code = $code.replace(/\n/g, ' ');
         $code = $code.replace(/\\/g, '\\\\');
 
         // 如果行内代码只有一个颜色值，则在code末尾追加一个颜色圆点
@@ -625,17 +625,6 @@ export default class CodeBlock extends ParagraphBase {
 
   makeHtml(str) {
     return str;
-  }
-
-  $replaceSpecialChar(str) {
-    let $str = str.replace(/~Q/g, '\\~');
-    $str = $str.replace(/~Y/g, '\\!');
-    $str = $str.replace(/~Z/g, '\\#');
-    $str = $str.replace(/~&/g, '\\&');
-    $str = $str.replace(/~K/g, '\\/');
-    // $str = $str.replace(/~D/g, '$');
-    // $str = $str.replace(/~T/g, '~');
-    return $str;
   }
 
   rule() {
