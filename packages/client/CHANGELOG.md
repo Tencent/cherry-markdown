@@ -1,5 +1,17 @@
 # @cherry-markdown/client
 
+## 0.5.0
+
+### Minor Changes
+
+- feat: 客户端增加所见即所得编辑模式 [@sunsonliu](https://github.com/sunsonliu)([#1835](https://github.com/Tencent/cherry-markdown/pull/1835))([`9931722`](https://github.com/Tencent/cherry-markdown/commit/9931722e36d53882c8ecf7e1e8af753105739240))
+
+### Patch Changes
+
+- style: 优化工具栏样式；同步时间线toolbar [@sunsonliu](https://github.com/sunsonliu)([#1834](https://github.com/Tencent/cherry-markdown/pull/1834))([`b773156`](https://github.com/Tencent/cherry-markdown/commit/b77315616c84369024a31b5d06b4786115b93d5e))
+- Updated dependencies [[`3dd4cb7`](https://github.com/Tencent/cherry-markdown/commit/3dd4cb72d26cd16cf324d271fe01e31d64f85ddf), [`03fe16e`](https://github.com/Tencent/cherry-markdown/commit/03fe16e16eacbcf2ba04b3262bc8ab152bf486be), [`d87f2e9`](https://github.com/Tencent/cherry-markdown/commit/d87f2e9bb11309cfd8566d8a9f84520a71ab44aa), [`6c4f049`](https://github.com/Tencent/cherry-markdown/commit/6c4f0490f8f189ddcad216dcb55ffc1d41c04786), [`3e9105c`](https://github.com/Tencent/cherry-markdown/commit/3e9105c47582b0e76045e301f2569b80c8ea163f), [`4100bfd`](https://github.com/Tencent/cherry-markdown/commit/4100bfd07019a48aa06ea982f5abeaccb67ab185)]:
+  - cherry-markdown@0.11.9
+
 ## 0.4.1
 
 ### Patch Changes
