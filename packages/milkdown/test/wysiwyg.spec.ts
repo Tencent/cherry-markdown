@@ -14,7 +14,7 @@ describe('Cherry WYSIWYG markdown transform', () => {
       'cherry_ruby',
       'cherry_underline',
       'cherry_highlight',
-      'cherry_visual_inline',
+      'cherry_emoji',
     ]);
   });
 
@@ -49,8 +49,8 @@ describe('Cherry WYSIWYG markdown transform', () => {
       ],
     };
     transformCherryWysiwygTree(tree, source);
-    expect(tree.children.map(({ type }) => type)).toEqual(['cherry_visual_block', 'code', 'cherry_visual_block']);
-    expect((tree.children[2] as { syntax?: string } | undefined)?.syntax).toBe('mermaid');
+    expect(tree.children.map(({ type }) => type)).toEqual(['cherryToc', 'code', 'cherryDiagram']);
+    expect((tree.children[2] as { diagramType?: string } | undefined)?.diagramType).toBe('mermaid');
   });
 
   it('does not consume math because Milkdown math owns its visual schema', () => {

@@ -1,19 +1,27 @@
+export { cherryWysiwygConfigCtx } from './config.js';
+export type { CherryWysiwygConfig } from './config.js';
+export { cherryMath, cherryMathBlockSchema, cherryMathInlineSchema } from './math.js';
 export { cherryWysiwygMarkInputRules, cherryWysiwygMarkSchemas } from './marks.js';
 export {
-  cherryVisualBlockSchema,
-  cherryVisualBlockView,
-  cherryVisualInlineSchema,
-  cherryVisualInlineView,
+  cherryCommentDefinitionSchema,
+  cherryCompoundItemSchema,
+  cherryDetailSchema,
+  cherryDiagramSchema,
+  cherryEmojiSchema,
+  cherryFrontmatterSchema,
+  cherryHtmlBlockSchema,
+  cherryHtmlInlineSchema,
+  cherryPanelSchema,
+  cherryStructureSchemas,
   cherryTocRefreshPlugin,
-  cherryWysiwygConfigCtx,
+  cherryTocSchema,
 } from './nodes.js';
 export { cherryWysiwyg } from './plugin.js';
 export { findCherryInlineMatches, transformCherryWysiwygTree } from './transform.js';
 export type {
+  CherryDiagramRenderContext,
   CherryInlineMatch,
-  CherryVisualNodeAttrs,
   CherryVisualRenderer,
   CherryVisualRenderContext,
   CherryVisualRendererResult,
-  CherryWysiwygConfig,
 } from './types.js';

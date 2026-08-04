@@ -13,23 +13,27 @@ export interface MarkdownNode {
   [key: string]: unknown;
 }
 
+export type ParseMarkdown = (source: string) => MarkdownNode[];
+
 interface BlockMatch {
   from: number;
   to: number;
-  syntax: string;
+  syntax: 'frontmatter' | 'toc' | 'comment-reference' | 'panel' | 'detail' | 'diagram';
   source: string;
+  diagramType?: string;
 }
 
 const BLOCK_PATTERNS = [
-  { syntax: 'frontmatter', pattern: /^---[^\n]*\n[\s\S]+?\n---[^\n]*(?=\n|$)/gm },
-  { syntax: 'toc', pattern: /^[ \t]*(?:\[\[(?:toc|TOC)\]\]|【【(?:toc|TOC)】】|\[(?:toc|TOC)\])[ \t]*$/gm },
-  { syntax: 'comment-reference', pattern: /^[ \t]*\[(?!\^)[^\]\n]+?\]:[^\S\n]*[^\n]+$/gm },
-  { syntax: 'panel', pattern: /^[ \t]*:::[^:\n][^\n]*\n[\s\S]*?^[ \t]*:::[ \t]*$/gm },
-  { syntax: 'detail', pattern: /^[ \t]*\+\+\+-?[ \t]+[^\n]+\n[\s\S]*?^[ \t]*\+\+\+[ \t]*$/gm },
-  ...['mermaid', 'plantuml', 'echarts'].map((syntax) => ({
-    syntax,
+  { syntax: 'frontmatter' as const, pattern: /^---[^\n]*\n[\s\S]+?\n---[^\n]*(?=\n|$)/gm },
+  { syntax: 'toc' as const, pattern: /^[ \t]*(?:\[\[(?:toc|TOC)\]\]|【【(?:toc|TOC)】】|\[(?:toc|TOC)\])[ \t]*$/gm },
+  { syntax: 'comment-reference' as const, pattern: /^[ \t]*\[(?!\^)[^\]\n]+?\]:[^\S\n]*[^\n]+$/gm },
+  { syntax: 'panel' as const, pattern: /^[ \t]*:::[^:\n][^\n]*\n[\s\S]*?^[ \t]*:::[ \t]*$/gm },
+  { syntax: 'detail' as const, pattern: /^[ \t]*\+\+\+-?[ \t]+[^\n]+\n[\s\S]*?^[ \t]*\+\+\+[ \t]*$/gm },
+  ...['mermaid', 'plantuml', 'echarts'].map((diagramType) => ({
+    syntax: 'diagram' as const,
+    diagramType,
     pattern: new RegExp(
-      `^( {0,3})(\u0060{3,}|~{3,})[ \\t]*${syntax}(?:[ \\t][^\\n]*)?\\n[\\s\\S]*?^\\1\\2[ \\t]*$`,
+      `^( {0,3})(\u0060{3,}|~{3,})[ \\t]*${diagramType}(?:[ \\t][^\\n]*)?\\n[\\s\\S]*?^\\1\\2[ \\t]*$`,
       'gim',
     ),
   })),
@@ -54,11 +58,7 @@ const INLINE_MATCHERS = [
     attrs: (match: RegExpExecArray) => ({ size: match[1] ?? '' }),
     text: (match: RegExpExecArray) => match[2] ?? '',
   },
-  {
-    type: 'cherry_subscript',
-    pattern: /\^\^([^\n]+?)\^\^/,
-    text: (match: RegExpExecArray) => match[1] ?? '',
-  },
+  { type: 'cherry_subscript', pattern: /\^\^([^\n]+?)\^\^/, text: (match: RegExpExecArray) => match[1] ?? '' },
   {
     type: 'cherry_superscript',
     pattern: /(?<!\^)\^([^\n^]+?)\^(?!\^)/,
@@ -80,11 +80,7 @@ const INLINE_MATCHERS = [
     pattern: /(?<!\S)==([^=\n]+?)==(?!\S)/,
     text: (match: RegExpExecArray) => match[1] ?? '',
   },
-  {
-    type: 'cherry_visual_inline',
-    pattern: /:[+\w-]+:/,
-    attrs: () => ({ syntax: 'emoji' }),
-  },
+  { type: 'cherry_emoji', pattern: /:[+\w-]+:/, attrs: () => ({}) },
 ];
 
 function collectBlocks(source: string): BlockMatch[] {
@@ -97,6 +93,7 @@ function collectBlocks(source: string): BlockMatch[] {
         from: match.index,
         to: match.index + match[0].length,
         syntax: descriptor.syntax,
+        diagramType: 'diagramType' in descriptor ? descriptor.diagramType : undefined,
         source: match[0],
       });
     }
@@ -136,13 +133,123 @@ export function findCherryInlineMatches(source: string): CherryInlineMatch[] {
   return matches;
 }
 
+function parseChildren(body: string, parse: ParseMarkdown): MarkdownNode[] {
+  return parse(body).length ? parse(body) : [{ type: 'paragraph', children: [{ type: 'text', value: '' }] }];
+}
+
+function parsePanel(source: string, parse: ParseMarkdown): MarkdownNode {
+  const lines = source.split(/\r?\n/);
+  const header = (lines.shift() ?? ':::panel').replace(/^\s*:::\s*/, '').trim();
+  lines.pop();
+  const [rawType = 'panel', ...titleParts] = header.split(/\s+/);
+  const legacyCols = /^(\d+)cols$/i.exec(rawType);
+  const kind = legacyCols ? 'cols' : rawType.toLowerCase();
+  const title = titleParts.join(' ');
+  const body = lines.join('\n');
+  const node: MarkdownNode = {
+    type: 'cherryPanel',
+    kind,
+    rawType,
+    title,
+    source,
+    originalBody: body,
+  };
+  if (kind === 'cols') {
+    node.children = body.split(/^\s*::\s*$/gm).map((item) => ({
+      type: 'cherryCompoundItem',
+      role: 'column',
+      label: '',
+      children: parseChildren(item.trim(), parse),
+    }));
+  } else if (kind === 'tabs' || kind === 'timeline') {
+    const segments = body.split(/^\s*::\s+([^\n]+)\s*$/gm);
+    const items: MarkdownNode[] = [];
+    for (let index = 1; index < segments.length; index += 2) {
+      items.push({
+        type: 'cherryCompoundItem',
+        role: kind === 'tabs' ? 'tab' : 'timeline-item',
+        label: segments[index]?.trim() ?? '',
+        children: parseChildren((segments[index + 1] ?? '').trim(), parse),
+      });
+    }
+    node.children = items.length
+      ? items
+      : [
+          {
+            type: 'cherryCompoundItem',
+            role: kind === 'tabs' ? 'tab' : 'timeline-item',
+            label: '',
+            children: parseChildren(body, parse),
+          },
+        ];
+  } else {
+    node.children = parseChildren(body, parse);
+  }
+  return node;
+}
+
+function parseDetail(source: string, parse: ParseMarkdown): MarkdownNode {
+  const lines = source.split(/\r?\n/);
+  const header = (lines.shift() ?? '+++ Detail').trim();
+  lines.pop();
+  const firstOpen = /^\+\+\+-/.test(header);
+  const firstTitle = header.replace(/^\+\+\+-?\s*/, '');
+  const body = lines.join('\n');
+  const segments = body.split(/^\s*(\+\+-?\s+[^\n]+)\s*$/gm);
+  const items: MarkdownNode[] = [
+    {
+      type: 'cherryCompoundItem',
+      role: 'detail-item',
+      label: firstTitle,
+      open: firstOpen,
+      children: parseChildren((segments.shift() ?? '').trim(), parse),
+    },
+  ];
+  for (let index = 0; index < segments.length; index += 2) {
+    const itemHeader = segments[index] ?? '';
+    items.push({
+      type: 'cherryCompoundItem',
+      role: 'detail-item',
+      label: itemHeader.replace(/^\+\+-?\s*/, ''),
+      open: /^\+\+-/.test(itemHeader),
+      children: parseChildren((segments[index + 1] ?? '').trim(), parse),
+    });
+  }
+  return { type: 'cherryDetail', source, originalBody: body, children: items };
+}
+
+function createBlockNode(match: BlockMatch, parse: ParseMarkdown): MarkdownNode {
+  if (match.syntax === 'panel') return parsePanel(match.source, parse);
+  if (match.syntax === 'detail') return parseDetail(match.source, parse);
+  if (match.syntax === 'diagram') {
+    const lines = match.source.split(/\r?\n/);
+    return {
+      type: 'cherryDiagram',
+      diagramType: match.diagramType ?? 'diagram',
+      source: match.source,
+      value: lines.slice(1, -1).join('\n'),
+    };
+  }
+  if (match.syntax === 'comment-reference') {
+    const parsed = /^\s*\[([^\]]+)\]:\s*(\S+)(?:\s+["'(](.*?)["')])?\s*$/.exec(match.source);
+    return {
+      type: 'cherryCommentDefinition',
+      source: match.source,
+      label: parsed?.[1] ?? '',
+      url: parsed?.[2] ?? '',
+      title: parsed?.[3] ?? '',
+    };
+  }
+  return { type: match.syntax === 'toc' ? 'cherryToc' : 'cherryFrontmatter', source: match.source };
+}
+
 function nodeRange(node: MarkdownNode) {
   const from = node.position?.start?.offset;
   const to = node.position?.end?.offset;
   return typeof from === 'number' && typeof to === 'number' ? { from, to } : null;
 }
 
-function replaceRootBlocks(tree: MarkdownNode, source: string) {
+function replaceRootBlocks(tree: MarkdownNode, source: string, parse: ParseMarkdown) {
   if (!tree.children) return;
   const blocks = collectBlocks(source);
   if (!blocks.length) return;
@@ -168,7 +275,7 @@ function replaceRootBlocks(tree: MarkdownNode, source: string) {
       if (!range || range.from >= block.to) break;
       childIndex += 1;
     }
-    next.push({ type: 'cherry_visual_block', syntax: block.syntax, value: block.source });
+    next.push(createBlockNode(block, parse));
   }
   next.push(...tree.children.slice(childIndex));
   tree.children = next;
@@ -182,14 +289,10 @@ function splitText(node: MarkdownNode): MarkdownNode[] {
   let cursor = 0;
   for (const match of matches) {
     if (match.from > cursor) next.push({ type: 'text', value: value.slice(cursor, match.from) });
-    if (match.type === 'cherry_visual_inline') {
-      next.push({ type: match.type, value: match.source, ...match.attrs });
+    if (match.type === 'cherry_emoji') {
+      next.push({ type: 'cherryEmoji', value: match.source, source: match.source });
     } else {
-      next.push({
-        type: match.type,
-        children: [{ type: 'text', value: match.text ?? '' }],
-        ...match.attrs,
-      });
+      next.push({ type: match.type, children: [{ type: 'text', value: match.text ?? '' }], ...match.attrs });
     }
     cursor = match.to;
   }
@@ -199,15 +302,34 @@ function splitText(node: MarkdownNode): MarkdownNode[] {
 
 function transformInline(node: MarkdownNode, root = false) {
   if (!node.children) return;
+  if (
+    node.type === 'paragraph' &&
+    node.children.length === 1 &&
+    node.children[0]?.type === 'html' &&
+    /^\s*<(?:address|article|aside|blockquote|details|div|figure|footer|form|h[1-6]|header|hr|iframe|main|nav|ol|p|pre|script|section|style|table|ul)\b/i.test(
+      String(node.children[0].value ?? ''),
+    )
+  ) {
+    const source = String(node.children[0].value ?? '');
+    node.type = 'cherryHtmlBlock';
+    node.source = source;
+    node.value = source;
+    delete node.children;
+    return;
+  }
   const next: MarkdownNode[] = [];
   for (const child of node.children) {
-    if (child.type === 'code' || child.type === 'inlineCode' || child.type === 'cherry_visual_block') {
+    if (
+      child.type === 'code' ||
+      child.type === 'inlineCode' ||
+      /^cherry(?:Panel|Detail|Diagram|Toc|Frontmatter)/.test(child.type)
+    ) {
       next.push(child);
     } else if (child.type === 'html') {
       next.push({
-        type: root ? 'cherry_visual_block' : 'cherry_visual_inline',
+        type: root ? 'cherryHtmlBlock' : 'cherryHtmlInline',
         value: child.value ?? '',
-        syntax: 'html',
+        source: child.value ?? '',
       });
     } else if (child.type === 'text') {
       next.push(...splitText(child));
@@ -219,8 +341,8 @@ function transformInline(node: MarkdownNode, root = false) {
   node.children = next;
 }
 
-export function transformCherryWysiwygTree(tree: MarkdownNode, source: string) {
-  replaceRootBlocks(tree, source);
+export function transformCherryWysiwygTree(tree: MarkdownNode, source: string, parse: ParseMarkdown = () => []) {
+  replaceRootBlocks(tree, source, parse);
   transformInline(tree, true);
   return tree;
 }

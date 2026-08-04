@@ -1,11 +1,4 @@
-import type { CherryEngineLike, CherryMilkdownErrorPhase } from '../types.js';
-
-export interface CherryWysiwygConfig {
-  engine: CherryEngineLike;
-  readonly: boolean;
-  renderers?: Record<string, CherryVisualRenderer>;
-  onError?: (error: unknown, phase: CherryMilkdownErrorPhase) => void;
-}
+import type { CherryEngineLike } from '../types.js';
 
 export interface CherryVisualRenderContext {
   container: HTMLElement;
@@ -14,15 +7,12 @@ export interface CherryVisualRenderContext {
   syntax: string;
 }
 
+export type CherryDiagramRenderContext = CherryVisualRenderContext;
+
 export type CherryVisualRendererResult = void | string | (() => void);
 export type CherryVisualRenderer = (
   context: CherryVisualRenderContext,
 ) => CherryVisualRendererResult | Promise<CherryVisualRendererResult>;
-
-export interface CherryVisualNodeAttrs {
-  syntax: string;
-  source: string;
-}
 
 export interface CherryInlineMatch {
   from: number;

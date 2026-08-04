@@ -60,9 +60,8 @@
   },
   "peerDependencies": {
     "@milkdown/kit": "^7.21.3",
-    "@milkdown/plugin-math": "^7.5.9",
     "cherry-markdown": "^0.11.7",
-    "katex": "^0.16.27",
+    "mathlive": "^0.110.0",
     "mermaid": "^11.14.0"
   },
   "peerDependenciesMeta": {
@@ -72,10 +71,13 @@
   },
   "devDependencies": {
     "@milkdown/kit": "^7.21.3",
-    "@milkdown/plugin-math": "^7.5.9",
     "cherry-markdown": "*",
-    "katex": "^0.16.27",
+    "mathlive": "^0.110.0",
+    "remark-math": "^6.0.0",
     "mermaid": "^11.14.0"
+  },
+  "dependencies": {
+    "remark-math": "^6.0.0"
   },
   "engines": {
     "node": ">=22",

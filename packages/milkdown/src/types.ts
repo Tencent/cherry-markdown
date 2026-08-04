@@ -13,12 +13,18 @@ export interface CherryMilkdownChange {
   markdown: string;
 }
 
+export interface CherryMilkdownMathliveOptions {
+  macros?: Record<string, string>;
+  virtualKeyboardMode?: 'auto' | 'manual' | 'onfocus' | 'off';
+}
+
 export interface CherryMilkdownOptions {
   root: HTMLElement;
   value?: string;
   cherryOptions?: Partial<CherryOptions>;
   readonly?: boolean;
   debounce?: number;
+  mathlive?: CherryMilkdownMathliveOptions;
   plugins?: MilkdownPlugin[];
   renderers?: Record<string, CherryVisualRenderer>;
   onChange?: (result: CherryMilkdownChange) => void;
@@ -34,4 +40,9 @@ export interface CherryMilkdownInstance {
   destroy(): Promise<void>;
 }
 
-export type { CherryVisualRenderer, CherryVisualRenderContext, CherryVisualRendererResult } from './wysiwyg/index.js';
+export type {
+  CherryDiagramRenderContext,
+  CherryVisualRenderer,
+  CherryVisualRenderContext,
+  CherryVisualRendererResult,
+} from './wysiwyg/index.js';

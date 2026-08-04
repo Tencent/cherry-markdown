@@ -1,12 +1,16 @@
 import { createCherryMilkdown } from '@cherry-markdown/milkdown';
 import '@cherry-markdown/milkdown/styles.css';
 import '@milkdown/kit/prose/view/style/prosemirror.css';
-import 'katex/dist/katex.min.css';
 
 async function main() {
   const editor = await createCherryMilkdown({
     root: document.querySelector('#editor'),
     value: [
+      '---',
+      'title: Cherry Milkdown',
+      'owner: Cherry Oteam',
+      '---',
+      '',
       '# Cherry Milkdown WYSIWYG',
       '',
       '[[toc]]',
@@ -15,22 +19,51 @@ async function main() {
       '',
       '文字样式：!!#d54941 红色!!、!!!#fff1b8 背景色!!!、==高亮==、^^下标^^ 和 ^上标^。',
       '',
-      '行内公式 $E=mc^2$ 会直接渲染。',
+      '点击行内公式 $E=mc^2$，可以直接在公式中输入和修改。',
+      '',
+      '$$',
+      '\\int_0^1 x^2 \\, dx',
+      '$$',
       '',
       '| Feature | Status |',
       '| --- | --- |',
       '| CommonMark / GFM | WYSIWYG |',
-      '| Cherry extensions | Visual nodes and marks |',
+      '| Cherry extensions | Structured editing |',
       '',
       '::: warning',
-      'Cherry panel 默认显示渲染结果，选中后可编辑其配置。',
+      'Panel 的标题、类型和正文都可以直接修改。',
       ':::',
+      '',
+      ':::tabs',
+      ':: 表格',
+      '将鼠标移到表格边缘，可增加、删除或拖拽行列。',
+      ':: 公式',
+      'MathLive 提供可视化公式输入和虚拟键盘。',
+      ':::',
+      '',
+      '+++- 更多能力',
+      'Detail 正文直接编辑，也可以增加、删除和排序项目。',
+      '+++',
       '',
       '```mermaid',
       'flowchart LR',
       '  Markdown --> Milkdown --> WYSIWYG',
       '```',
+      '',
+      '```echarts',
+      '{"series":[{"type":"bar","data":[3,5,2]}]}',
+      '```',
+      '',
+      '```plantuml',
+      '@startuml',
+      'Alice -> Bob: Cherry Milkdown',
+      '@enduml',
+      '```',
     ].join('\n'),
+    renderers: {
+      echarts: ({ source }) => `<pre class="example-renderer">ECharts 配置实时更新\n${source}</pre>`,
+      plantuml: ({ source }) => `<pre class="example-renderer">PlantUML 配置实时更新\n${source}</pre>`,
+    },
   });
   window.cherryMilkdown = editor;
 }
