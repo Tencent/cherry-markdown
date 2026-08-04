@@ -18,6 +18,40 @@ import { escapeHTMLSpecialCharOnce as $e, encodeURIOnce } from '@/utils/sanitize
 import { compileRegExp, EMAIL, EMAIL_INLINE, URL_INLINE_NO_SLASH, URL, URL_NO_SLASH, URL_INLINE } from '@/utils/regexp';
 
 /**
+ * 内置的中文全角符号预设，当 breakChars 数组中包含 'full-width' 时启用
+ * 用于在autoLink识别时，遇到这些中文全角符号时中断URL的识别
+ */
+const FULL_WIDTH_BREAK_CHARS = '，。！？；：、（）【】《》「」“”‘’·～｜…—';
+
+/**
+ * 将breakChars配置数组解析为一个用于中断URL识别的字符集合字符串
+ * @param {Array<string>|undefined} breakChars
+ * @returns {string} 需要中断的字符集合，若不启用则返回空字符串
+ */
+function resolveBreakChars(breakChars) {
+  if (!Array.isArray(breakChars) || breakChars.length === 0) {
+    return '';
+  }
+  const chars = new Set();
+  breakChars.forEach((item) => {
+    if (typeof item !== 'string' || item.length === 0) {
+      return;
+    }
+    if (item === 'full-width') {
+      for (const ch of FULL_WIDTH_BREAK_CHARS) {
+        chars.add(ch);
+      }
+      return;
+    }
+    // 其他情况：把字符串里的每个字符都作为中断字符
+    for (const ch of item) {
+      chars.add(ch);
+    }
+  });
+  return Array.from(chars).join('');
+}
+
+/**
  * 根据链接配置生成 target 属性字符串
  * @param {{ target?: string, openNewPage?: boolean }} config
  * @returns {string}
@@ -48,6 +82,26 @@ export default class AutoLink extends SyntaxBase {
     this.shortLinkLength = config.shortLinkLength;
     this.target = resolveLinkTarget(config);
     this.rel = config.rel ? `rel="${config.rel}"` : '';
+    // 中断字符集合：命中这些字符时，会将其从URL尾部剥离，不作为URL的一部分
+    this.breakChars = resolveBreakChars(config.breakChars);
+  }
+
+  /**
+   * 根据 breakChars 配置，将出现在 address 中的中断字符（及其之后的内容）从 URL 中剥离
+   * 剥离出的部分会作为普通文本返回，跟在生成的<a>标签之后
+   * @param {string} address
+   * @returns {{ address: string, trailing: string }}
+   */
+  stripBreakChars(address) {
+    if (!this.breakChars || typeof address !== 'string' || address.length === 0) {
+      return { address, trailing: '' };
+    }
+    for (let i = 0; i < address.length; i++) {
+      if (this.breakChars.indexOf(address[i]) !== -1) {
+        return { address: address.slice(0, i), trailing: address.slice(i) };
+      }
+    }
+    return { address, trailing: '' };
   }
 
   /**
@@ -134,7 +188,7 @@ export default class AutoLink extends SyntaxBase {
     return str.replace(this.RULE.reg, (match, left, protocol, _address, right, index, str) => {
       // 数字实体字符系临时处理方法，详情参见HTMLBlock注释
       // maybe a html attr, skip it
-      const address = _address?.replace(/CHERRYFLOWSESSIONCURSOR/g, '');
+      let address = _address?.replace(/CHERRYFLOWSESSIONCURSOR/g, '');
       if (
         // ((left !== '<' || left !== '&#60;') && (right !== '>' || right !== '&#62;')) ||
         this.isLinkInHtmlAttribute(str, index, protocol.length + address.length) ||
@@ -152,6 +206,18 @@ export default class AutoLink extends SyntaxBase {
         suffix = right;
         isWrappedByBracket = false;
       }
+      // 根据 breakChars 配置，把中断字符及其后内容从URL尾部剥离，作为普通文本追加到<a>标签之后
+      // 仅在URL无<>包裹时启用（<>包裹属于显式指定URL边界，不应被中断）
+      let breakTrailing = '';
+      if (!isWrappedByBracket) {
+        const stripped = this.stripBreakChars(address);
+        address = stripped.address;
+        breakTrailing = stripped.trailing;
+        // 剥离后地址为空，则不识别
+        if (address === '') {
+          return match;
+        }
+      }
       // not a valid address
       // 不被尖括号包裹，不带协议头，且不以www.开头的不识别
       if (address.trim() === '' || (!isWrappedByBracket && $protocol === '' && !/www\./.test(address))) {
@@ -164,7 +230,7 @@ export default class AutoLink extends SyntaxBase {
           if (EMAIL.test(address)) {
             return `${prefix}<a href="${encodeURIOnce(`${$protocol}${address}`)}" ${this.target} ${this.rel}>${$e(
               address,
-            )}</a>${suffix}`;
+            )}</a>${suffix}${breakTrailing}`;
           }
           return match;
         case '': // 协议为空
@@ -174,11 +240,11 @@ export default class AutoLink extends SyntaxBase {
             if (EMAIL.test(address)) {
               return `${prefix}<a href="mailto:${encodeURIOnce(address)}" ${this.target} ${this.rel}>${$e(
                 address,
-              )}</a>${suffix}`;
+              )}</a>${suffix}${breakTrailing}`;
             }
             // 不识别无协议头的URL，且开头不应该含有斜杠
             if (URL_NO_SLASH.test(address)) {
-              return `${prefix}${this.renderLink(`//${address}`, address)}${suffix}`;
+              return `${prefix}${this.renderLink(`//${address}`, address)}${suffix}${breakTrailing}`;
             }
             // 其他的属于非法情况
             return match;
@@ -202,7 +268,7 @@ export default class AutoLink extends SyntaxBase {
             return match;
           }
           // TODO: Url Validator
-          return `${prefix}${this.renderLink(`${$protocol}${address}`)}${suffix}`;
+          return `${prefix}${this.renderLink(`${$protocol}${address}`)}${suffix}${breakTrailing}`;
       }
       // this should never happen
       return match;
