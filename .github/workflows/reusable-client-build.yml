@@ -74,6 +74,7 @@ jobs:
         with:
           target: ${{ matrix.target }}
           toolchain: stable
+          cache: false
 
       # Preview 模式: 使用独立的 rust-cache（只读，不保存新缓存）
       - name: Cache Rust Dependencies (Preview)
@@ -93,6 +94,8 @@ jobs:
         run: vp install
 
       - name: Build Cherry Markdown
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
         run: vp run build
 
       - name: Build Tauri Client
