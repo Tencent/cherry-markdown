@@ -8,6 +8,17 @@ export default class AutoLink extends SyntaxBase {
     shortLinkLength: any;
     target: string;
     rel: string;
+    breakChars: string;
+    /**
+     * 根据 breakChars 配置，将出现在 address 中的中断字符（及其之后的内容）从 URL 中剥离
+     * 剥离出的部分会作为普通文本返回，跟在生成的<a>标签之后
+     * @param {string} address
+     * @returns {{ address: string, trailing: string }}
+     */
+    stripBreakChars(address: string): {
+        address: string;
+        trailing: string;
+    };
     /**
      * 检查指定位置和长度的字符串是否位于HTML标签的属性值中
      * @param {string} str - 要检查的完整字符串

@@ -7983,14 +7983,14 @@
 	var isArrayExports = /*@__PURE__*/ requireIsArray$1();
 	var _Array$isArray = /*@__PURE__*/getDefaultExportFromCjs$1(isArrayExports);
 
-	function _arrayLikeToArray$1q(r, a) {
+	function _arrayLikeToArray$1r(r, a) {
 	  (null == a || a > r.length) && (a = r.length);
 	  for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
 	  return n;
 	}
 
 	function _arrayWithoutHoles$1(r) {
-	  if (_Array$isArray(r)) return _arrayLikeToArray$1q(r);
+	  if (_Array$isArray(r)) return _arrayLikeToArray$1r(r);
 	}
 
 	var getIteratorMethodExports = /*@__PURE__*/ requireGetIteratorMethod$1();
@@ -8373,12 +8373,12 @@
 	var sliceExports$1 = /*@__PURE__*/ requireSlice$1();
 	var _sliceInstanceProperty$1 = /*@__PURE__*/getDefaultExportFromCjs$1(sliceExports$1);
 
-	function _unsupportedIterableToArray$1n(r, a) {
+	function _unsupportedIterableToArray$1o(r, a) {
 	  if (r) {
 	    var _context;
-	    if ("string" == typeof r) return _arrayLikeToArray$1q(r, a);
+	    if ("string" == typeof r) return _arrayLikeToArray$1r(r, a);
 	    var t = _sliceInstanceProperty$1(_context = {}.toString.call(r)).call(_context, 8, -1);
-	    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from$1(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1q(r, a) : void 0;
+	    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from$1(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1r(r, a) : void 0;
 	  }
 	}
 
@@ -8387,7 +8387,7 @@
 	}
 
 	function _toConsumableArray$1(r) {
-	  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$1n(r) || _nonIterableSpread$1();
+	  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$1o(r) || _nonIterableSpread$1();
 	}
 
 	var getOwnPropertySymbols$2;
@@ -8746,7 +8746,7 @@
 	}
 
 	function _slicedToArray$1(r, e) {
-	  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$1n(r, e) || _nonIterableRest$1();
+	  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$1o(r, e) || _nonIterableRest$1();
 	}
 
 	var es_aggregateError = {};
@@ -50972,9 +50972,9 @@
 	function _isNativeReflectConstruct$1J() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1J = function _isNativeReflectConstruct() { return !!t; })(); }
 	function ownKeys$g(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 	function _objectSpread$g(e) { for (var r = 1; r < arguments.length; r++) { var _context35, _context36; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context35 = ownKeys$g(Object(t), !0)).call(_context35, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context36 = ownKeys$g(Object(t))).call(_context36, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
-	function _createForOfIteratorHelper$1m(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1m(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1m(r, a) { if (r) { var _context34; if ("string" == typeof r) return _arrayLikeToArray$1p(r, a); var t = _sliceInstanceProperty(_context34 = {}.toString.call(r)).call(_context34, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1p(r, a) : void 0; } }
-	function _arrayLikeToArray$1p(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _createForOfIteratorHelper$1n(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1n(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1n(r, a) { if (r) { var _context34; if ("string" == typeof r) return _arrayLikeToArray$1q(r, a); var t = _sliceInstanceProperty(_context34 = {}.toString.call(r)).call(_context34, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1q(r, a) : void 0; } }
+	function _arrayLikeToArray$1q(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 	/**
 	 * 自定义语法高亮器 - 将 Lezer tags 映射为 cm-* 类名
@@ -51317,7 +51317,7 @@
 	        return;
 	      }
 	      var decorations = [];
-	      var _iterator = _createForOfIteratorHelper$1m(view.visibleRanges),
+	      var _iterator = _createForOfIteratorHelper$1n(view.visibleRanges),
 	        _step;
 	      try {
 	        for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -52232,7 +52232,7 @@
 	    var updatedMarks = _mapInstanceProperty(currentMarks).call(currentMarks, tr.changes);
 	    var toAdd = [];
 	    var removeMarkIds = new _Set();
-	    var _iterator2 = _createForOfIteratorHelper$1m(tr.effects),
+	    var _iterator2 = _createForOfIteratorHelper$1n(tr.effects),
 	      _step2;
 	    try {
 	      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -53203,7 +53203,7 @@
 	          var selections = state.selection.ranges;
 	          var cursorRanges = [];
 	          var visitedLines = new _Set();
-	          var _iterator3 = _createForOfIteratorHelper$1m(selections),
+	          var _iterator3 = _createForOfIteratorHelper$1n(selections),
 	            _step3;
 	          try {
 	            for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -53312,7 +53312,7 @@
 	        var adapter = _this8.editor;
 	        if (!adapter) return;
 	        if (update.docChanged) {
-	          var _iterator4 = _createForOfIteratorHelper$1m(update.transactions),
+	          var _iterator4 = _createForOfIteratorHelper$1n(update.transactions),
 	            _step4;
 	          try {
 	            var _loop2 = function _loop2() {
@@ -53870,8 +53870,10 @@
 	    value: function setCursor(line, ch) {
 	      if (!this.editor) return;
 	      var doc = this.editor.state.doc;
-	      var targetLine = doc.line(line + 1);
-	      var pos = targetLine.from + ch;
+	      // 与 setSelection 保持一致，对行号和列号做边界钳制，避免越界时 CodeMirror 抛异常
+	      var lineNum = Math.max(1, Math.min(line + 1, doc.lines));
+	      var targetLine = doc.line(lineNum);
+	      var pos = targetLine.from + Math.max(0, Math.min(ch, targetLine.length));
 	      this.editor.dispatch({
 	        selection: {
 	          anchor: pos,
@@ -55126,7 +55128,7 @@
 	  if (!match) {
 	    return true;
 	  }
-	  var SCHEME_BLACKLIST = ['javascript', 'data'];
+	  var SCHEME_BLACKLIST = ['javascript', 'vbscript', 'data'];
 	  var scheme = match[1].replace(/[\s\x00-\x1f]/g, ''); // 协议中间可能会出现空白字符或控制字符绕过检查
 	  if (_indexOfInstanceProperty(SCHEME_BLACKLIST).call(SCHEME_BLACKLIST, scheme.toLowerCase()) !== -1) {
 	    return false;
@@ -57156,12 +57158,12 @@
 	}();
 
 	function _toArray(r) {
-	  return _arrayWithHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$1n(r) || _nonIterableRest$1();
+	  return _arrayWithHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$1o(r) || _nonIterableRest$1();
 	}
 
 	function ownKeys$e(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 	function _objectSpread$e(e) { for (var r = 1; r < arguments.length; r++) { var _context3, _context4; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context3 = ownKeys$e(Object(t), !0)).call(_context3, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context4 = ownKeys$e(Object(t))).call(_context4, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
-	function _arrayLikeToArray$1o(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _arrayLikeToArray$1p(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	/**
 	 * Copyright (C) 2021 Tencent.
 	 *
@@ -57228,7 +57230,7 @@
 	      var _args = args,
 	        _args2 = _toArray(_args),
 	        match = _args2[0],
-	        restArgs = _sliceInstanceProperty(_context = _arrayLikeToArray$1o(_args2)).call(_context, 2);
+	        restArgs = _sliceInstanceProperty(_context = _arrayLikeToArray$1p(_args2)).call(_context, 2);
 	      // 丢弃 leadingChar，需要调整begin和length
 	      replaceBuffer.push({
 	        begin: replaceInfo.begin + rollbackLength,
@@ -68192,7 +68194,6 @@
 	          }
 	          // 渲染出错则按正常code进行渲染
 	        }
-	        // $code = this.$replaceSpecialChar($code);
 	        cacheCode = _this4.cacheAndGetData(sign, function () {
 	          return _this4.$codeReplace($code, $lang, sign, lines);
 	        }, 2000, -300);
@@ -68243,8 +68244,9 @@
 	            return match;
 	          }
 	          var $code = code.replace(/~~not~inlineCode/g, '\\`');
-	          $code = _this5.$replaceSpecialChar($code);
 	          $code = $code.replace(/~CHERRYNormalLine/g, '|');
+	          // 行内语法里的换行不应该生效，需要替换成空格
+	          $code = $code.replace(/\n/g, ' ');
 	          $code = $code.replace(/\\/g, '\\\\');
 
 	          // 如果行内代码只有一个颜色值，则在code末尾追加一个颜色圆点
@@ -68297,18 +68299,6 @@
 	    key: "makeHtml",
 	    value: function makeHtml(str) {
 	      return str;
-	    }
-	  }, {
-	    key: "$replaceSpecialChar",
-	    value: function $replaceSpecialChar(str) {
-	      var $str = str.replace(/~Q/g, '\\~');
-	      $str = $str.replace(/~Y/g, '\\!');
-	      $str = $str.replace(/~Z/g, '\\#');
-	      $str = $str.replace(/~&/g, '\\&');
-	      $str = $str.replace(/~K/g, '\\/');
-	      // $str = $str.replace(/~D/g, '$');
-	      // $str = $str.replace(/~T/g, '~');
-	      return $str;
 	    }
 	  }, {
 	    key: "rule",
@@ -69495,20 +69485,17 @@
 
 	function _callSuper$1t(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1t() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1t() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1t = function _isNativeReflectConstruct() { return !!t; })(); }
-	var Transfer = /*#__PURE__*/function (_SyntaxBase) {
+	var Transfer = /*#__PURE__*/function (_ParagraphBase) {
 	  function Transfer() {
 	    _classCallCheck$1(this, Transfer);
-	    return _callSuper$1t(this, Transfer, arguments);
+	    return _callSuper$1t(this, Transfer, [{
+	      needCache: false
+	    }]);
 	  }
-	  _inherits(Transfer, _SyntaxBase);
+	  _inherits(Transfer, _ParagraphBase);
 	  return _createClass$1(Transfer, [{
 	    key: "rule",
-	    value:
-	    // constructor() {
-	    //     super();
-	    // }
-
-	    function rule() {
+	    value: function rule() {
 	      return {
 	        begin: '',
 	        content: '',
@@ -69519,21 +69506,16 @@
 	  }, {
 	    key: "beforeMakeHtml",
 	    value: function beforeMakeHtml(str) {
+	      // fix: 转义字符边界情况的特殊处理 Fixed #144
 	      return str.replace(/\\\n/g, '\\ \n');
 	    }
 	  }, {
-	    key: "afterMakeHtml",
-	    value: function afterMakeHtml(str) {
-	      var $str = str.replace(/~Q/g, '~');
-	      $str = $str.replace(/~X/g, '`');
-	      $str = $str.replace(/~Y/g, '!');
-	      $str = $str.replace(/~Z/g, '#');
-	      $str = $str.replace(/~&/g, '&');
-	      $str = $str.replace(/~K/g, '/');
-	      return $str;
+	    key: "makeHtml",
+	    value: function makeHtml(str) {
+	      return str;
 	    }
 	  }]);
-	}(SyntaxBase);
+	}(ParagraphBase);
 	_defineProperty$2(Transfer, "HOOK_NAME", 'transfer');
 
 	var es_array_reduce = {};
@@ -69680,9 +69662,9 @@
 	var reduceExports = requireReduce();
 	var _reduceInstanceProperty = /*@__PURE__*/getDefaultExportFromCjs$1(reduceExports);
 
-	function _createForOfIteratorHelper$1l(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1l(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-	function _unsupportedIterableToArray$1l(r, a) { if (r) { var _context19; if ("string" == typeof r) return _arrayLikeToArray$1n(r, a); var t = _sliceInstanceProperty(_context19 = {}.toString.call(r)).call(_context19, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1n(r, a) : void 0; } }
-	function _arrayLikeToArray$1n(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+	function _createForOfIteratorHelper$1m(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1m(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1m(r, a) { if (r) { var _context19; if ("string" == typeof r) return _arrayLikeToArray$1o(r, a); var t = _sliceInstanceProperty(_context19 = {}.toString.call(r)).call(_context19, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1o(r, a) : void 0; } }
+	function _arrayLikeToArray$1o(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 	function ownKeys$c(e, r) { var t = _Object$keys(e); if (_Object$getOwnPropertySymbols$1) { var o = _Object$getOwnPropertySymbols$1(e); r && (o = _filterInstanceProperty(o).call(o, function (r) { return _Object$getOwnPropertyDescriptor$1(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 	function _objectSpread$c(e) { for (var r = 1; r < arguments.length; r++) { var _context17, _context18; var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? _forEachInstanceProperty(_context17 = ownKeys$c(Object(t), !0)).call(_context17, function (r) { _defineProperty$2(e, r, t[r]); }) : _Object$getOwnPropertyDescriptors ? _Object$defineProperties$1(e, _Object$getOwnPropertyDescriptors(t)) : _forEachInstanceProperty(_context18 = ownKeys$c(Object(t))).call(_context18, function (r) { _Object$defineProperty$1(e, r, _Object$getOwnPropertyDescriptor$1(t, r)); }); } return e; }
 	function _callSuper$1s(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1s() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
@@ -69800,7 +69782,7 @@
 	          return _trimInstanceProperty(s).call(s);
 	        })).call(_context2, Boolean);
 	        var kvRegex = /^(\w+|\s*".*?"\s*|\s*'.*?'\s*)\s*:\s*(.+?)$/;
-	        var _iterator = _createForOfIteratorHelper$1l(pairs),
+	        var _iterator = _createForOfIteratorHelper$1m(pairs),
 	          _step;
 	        try {
 	          for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -70863,6 +70845,61 @@
 
 	function _callSuper$1m(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1m() ? _Reflect$construct$1(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 	function _isNativeReflectConstruct$1m() { try { var t = !Boolean.prototype.valueOf.call(_Reflect$construct$1(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1m = function _isNativeReflectConstruct() { return !!t; })(); }
+	function _createForOfIteratorHelper$1l(r, e) { var t = "undefined" != typeof _Symbol$3 && _getIteratorMethod$1(r) || r["@@iterator"]; if (!t) { if (_Array$isArray$1(r) || (t = _unsupportedIterableToArray$1l(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+	function _unsupportedIterableToArray$1l(r, a) { if (r) { var _context30; if ("string" == typeof r) return _arrayLikeToArray$1n(r, a); var t = _sliceInstanceProperty(_context30 = {}.toString.call(r)).call(_context30, 8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? _Array$from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1n(r, a) : void 0; } }
+	function _arrayLikeToArray$1n(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+	/**
+	 * 内置的中文全角符号预设，当 breakChars 数组中包含 'full-width' 时启用
+	 * 用于在autoLink识别时，遇到这些中文全角符号时中断URL的识别
+	 */
+	var FULL_WIDTH_BREAK_CHARS = '，。！？；：、（）【】《》「」“”‘’·～｜…—';
+
+	/**
+	 * 将breakChars配置数组解析为一个用于中断URL识别的字符集合字符串
+	 * @param {Array<string>|undefined} breakChars
+	 * @returns {string} 需要中断的字符集合，若不启用则返回空字符串
+	 */
+	function resolveBreakChars(breakChars) {
+	  if (!_Array$isArray$1(breakChars) || breakChars.length === 0) {
+	    return '';
+	  }
+	  var chars = new _Set();
+	  _forEachInstanceProperty(breakChars).call(breakChars, function (item) {
+	    if (typeof item !== 'string' || item.length === 0) {
+	      return;
+	    }
+	    if (item === 'full-width') {
+	      var _iterator = _createForOfIteratorHelper$1l(FULL_WIDTH_BREAK_CHARS),
+	        _step;
+	      try {
+	        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+	          var ch = _step.value;
+	          chars.add(ch);
+	        }
+	      } catch (err) {
+	        _iterator.e(err);
+	      } finally {
+	        _iterator.f();
+	      }
+	      return;
+	    }
+	    // 其他情况：把字符串里的每个字符都作为中断字符
+	    var _iterator2 = _createForOfIteratorHelper$1l(item),
+	      _step2;
+	    try {
+	      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+	        var _ch = _step2.value;
+	        chars.add(_ch);
+	      }
+	    } catch (err) {
+	      _iterator2.e(err);
+	    } finally {
+	      _iterator2.f();
+	    }
+	  });
+	  return _Array$from(chars).join('');
+	}
 
 	/**
 	 * 根据链接配置生成 target 属性字符串
@@ -70891,18 +70928,50 @@
 	    _this.shortLinkLength = config.shortLinkLength;
 	    _this.target = resolveLinkTarget(config);
 	    _this.rel = config.rel ? "rel=\"".concat(config.rel, "\"") : '';
+	    // 中断字符集合：命中这些字符时，会将其从URL尾部剥离，不作为URL的一部分
+	    _this.breakChars = resolveBreakChars(config.breakChars);
 	    return _this;
 	  }
 
 	  /**
-	   * 检查指定位置和长度的字符串是否位于HTML标签的属性值中
-	   * @param {string} str - 要检查的完整字符串
-	   * @param {number} index - 链接字符串的起始位置
-	   * @param {number} linkLength - 链接字符串的长度
-	   * @returns {boolean} 如果链接位于HTML属性值中则返回true，否则返回false
+	   * 根据 breakChars 配置，将出现在 address 中的中断字符（及其之后的内容）从 URL 中剥离
+	   * 剥离出的部分会作为普通文本返回，跟在生成的<a>标签之后
+	   * @param {string} address
+	   * @returns {{ address: string, trailing: string }}
 	   */
 	  _inherits(AutoLink, _SyntaxBase);
 	  return _createClass$1(AutoLink, [{
+	    key: "stripBreakChars",
+	    value: function stripBreakChars(address) {
+	      if (!this.breakChars || typeof address !== 'string' || address.length === 0) {
+	        return {
+	          address: address,
+	          trailing: ''
+	        };
+	      }
+	      for (var i = 0; i < address.length; i++) {
+	        var _context;
+	        if (_indexOfInstanceProperty(_context = this.breakChars).call(_context, address[i]) !== -1) {
+	          return {
+	            address: _sliceInstanceProperty(address).call(address, 0, i),
+	            trailing: _sliceInstanceProperty(address).call(address, i)
+	          };
+	        }
+	      }
+	      return {
+	        address: address,
+	        trailing: ''
+	      };
+	    }
+
+	    /**
+	     * 检查指定位置和长度的字符串是否位于HTML标签的属性值中
+	     * @param {string} str - 要检查的完整字符串
+	     * @param {number} index - 链接字符串的起始位置
+	     * @param {number} linkLength - 链接字符串的长度
+	     * @returns {boolean} 如果链接位于HTML属性值中则返回true，否则返回false
+	     */
+	  }, {
 	    key: "isLinkInHtmlAttribute",
 	    value: function isLinkInHtmlAttribute(str, index, linkLength) {
 	      var xmlTagRegex = new RegExp(['<',
@@ -70981,7 +71050,7 @@
 	        return str;
 	      }
 	      return str.replace(this.RULE.reg, function (match, left, protocol, _address, right, index, str) {
-	        var _context15, _context16, _context17;
+	        var _context19, _context20, _context21, _context22;
 	        // 数字实体字符系临时处理方法，详情参见HTMLBlock注释
 	        // maybe a html attr, skip it
 	        var address = _address === null || _address === void 0 ? void 0 : _address.replace(/CHERRYFLOWSESSIONCURSOR/g, '');
@@ -71000,6 +71069,18 @@
 	          suffix = right;
 	          isWrappedByBracket = false;
 	        }
+	        // 根据 breakChars 配置，把中断字符及其后内容从URL尾部剥离，作为普通文本追加到<a>标签之后
+	        // 仅在URL无<>包裹时启用（<>包裹属于显式指定URL边界，不应被中断）
+	        var breakTrailing = '';
+	        if (!isWrappedByBracket) {
+	          var stripped = _this2.stripBreakChars(address);
+	          address = stripped.address;
+	          breakTrailing = stripped.trailing;
+	          // 剥离后地址为空，则不识别
+	          if (address === '') {
+	            return match;
+	          }
+	        }
 	        // not a valid address
 	        // 不被尖括号包裹，不带协议头，且不以www.开头的不识别
 	        if (_trimInstanceProperty(address).call(address) === '' || !isWrappedByBracket && $protocol === '' && !/www\./.test(address)) {
@@ -71011,8 +71092,8 @@
 	          case 'mailto:':
 	            // email
 	            if (EMAIL.test(address)) {
-	              var _context, _context2, _context3, _context4, _context5, _context6;
-	              return _concatInstanceProperty(_context = _concatInstanceProperty(_context2 = _concatInstanceProperty(_context3 = _concatInstanceProperty(_context4 = _concatInstanceProperty(_context5 = "".concat(prefix, "<a href=\"")).call(_context5, encodeURIOnce(_concatInstanceProperty(_context6 = "".concat($protocol)).call(_context6, address)), "\" ")).call(_context4, _this2.target, " ")).call(_context3, _this2.rel, ">")).call(_context2, escapeHTMLSpecialCharOnce(address), "</a>")).call(_context, suffix);
+	              var _context2, _context3, _context4, _context5, _context6, _context7, _context8;
+	              return _concatInstanceProperty(_context2 = _concatInstanceProperty(_context3 = _concatInstanceProperty(_context4 = _concatInstanceProperty(_context5 = _concatInstanceProperty(_context6 = _concatInstanceProperty(_context7 = "".concat(prefix, "<a href=\"")).call(_context7, encodeURIOnce(_concatInstanceProperty(_context8 = "".concat($protocol)).call(_context8, address)), "\" ")).call(_context6, _this2.target, " ")).call(_context5, _this2.rel, ">")).call(_context4, escapeHTMLSpecialCharOnce(address), "</a>")).call(_context3, suffix)).call(_context2, breakTrailing);
 	            }
 	            return match;
 	          case '':
@@ -71021,13 +71102,13 @@
 	            if (prefix === suffix || !isWrappedByBracket) {
 	              // mailto
 	              if (EMAIL.test(address)) {
-	                var _context7, _context8, _context9, _context0, _context1;
-	                return _concatInstanceProperty(_context7 = _concatInstanceProperty(_context8 = _concatInstanceProperty(_context9 = _concatInstanceProperty(_context0 = _concatInstanceProperty(_context1 = "".concat(prefix, "<a href=\"mailto:")).call(_context1, encodeURIOnce(address), "\" ")).call(_context0, _this2.target, " ")).call(_context9, _this2.rel, ">")).call(_context8, escapeHTMLSpecialCharOnce(address), "</a>")).call(_context7, suffix);
+	                var _context9, _context0, _context1, _context10, _context11, _context12;
+	                return _concatInstanceProperty(_context9 = _concatInstanceProperty(_context0 = _concatInstanceProperty(_context1 = _concatInstanceProperty(_context10 = _concatInstanceProperty(_context11 = _concatInstanceProperty(_context12 = "".concat(prefix, "<a href=\"mailto:")).call(_context12, encodeURIOnce(address), "\" ")).call(_context11, _this2.target, " ")).call(_context10, _this2.rel, ">")).call(_context1, escapeHTMLSpecialCharOnce(address), "</a>")).call(_context0, suffix)).call(_context9, breakTrailing);
 	              }
 	              // 不识别无协议头的URL，且开头不应该含有斜杠
 	              if (URL_NO_SLASH.test(address)) {
-	                var _context10, _context11;
-	                return _concatInstanceProperty(_context10 = _concatInstanceProperty(_context11 = "".concat(prefix)).call(_context11, _this2.renderLink("//".concat(address), address))).call(_context10, suffix);
+	                var _context13, _context14, _context15;
+	                return _concatInstanceProperty(_context13 = _concatInstanceProperty(_context14 = _concatInstanceProperty(_context15 = "".concat(prefix)).call(_context15, _this2.renderLink("//".concat(address), address))).call(_context14, suffix)).call(_context13, breakTrailing);
 	              }
 	              // 其他的属于非法情况
 	              return match;
@@ -71036,8 +71117,8 @@
 	            if (isWrappedByBracket) {
 	              // mailto
 	              if (EMAIL.test(address)) {
-	                var _context12, _context13, _context14;
-	                return _concatInstanceProperty(_context12 = _concatInstanceProperty(_context13 = _concatInstanceProperty(_context14 = "<a href=\"mailto:".concat(encodeURIOnce(address), "\" ")).call(_context14, _this2.target, " ")).call(_context13, _this2.rel, ">")).call(_context12, escapeHTMLSpecialCharOnce(address), "</a>");
+	                var _context16, _context17, _context18;
+	                return _concatInstanceProperty(_context16 = _concatInstanceProperty(_context17 = _concatInstanceProperty(_context18 = "<a href=\"mailto:".concat(encodeURIOnce(address), "\" ")).call(_context18, _this2.target, " ")).call(_context17, _this2.rel, ">")).call(_context16, escapeHTMLSpecialCharOnce(address), "</a>");
 	              }
 	              // 可识别任意协议的URL，或不以斜杠开头的URL
 	              if (URL$2.test(address) || URL_NO_SLASH.test(address)) {
@@ -71052,7 +71133,7 @@
 	              return match;
 	            }
 	            // TODO: Url Validator
-	            return _concatInstanceProperty(_context15 = _concatInstanceProperty(_context16 = "".concat(prefix)).call(_context16, _this2.renderLink(_concatInstanceProperty(_context17 = "".concat($protocol)).call(_context17, address)))).call(_context15, suffix);
+	            return _concatInstanceProperty(_context19 = _concatInstanceProperty(_context20 = _concatInstanceProperty(_context21 = "".concat(prefix)).call(_context21, _this2.renderLink(_concatInstanceProperty(_context22 = "".concat($protocol)).call(_context22, address)))).call(_context20, suffix)).call(_context19, breakTrailing);
 	        }
 	        // this should never happen
 	        return match;
@@ -71061,7 +71142,7 @@
 	  }, {
 	    key: "rule",
 	    value: function rule() {
-	      var _context18;
+	      var _context23;
 	      // (?<protocol>\\w+:)\\/\\/
 	      var ret = {
 	        // ?<left>
@@ -71072,7 +71153,7 @@
 	        // '(?<slash>(?:\\/{2})?)',
 	        // ?<address>
 	        // '([^\\s\\x00-\\x1f"<>]+)',
-	        _concatInstanceProperty(_context18 = "((?:".concat(URL_INLINE.source, ")|(?:")).call(_context18, EMAIL_INLINE.source, "))") // [
+	        _concatInstanceProperty(_context23 = "((?:".concat(URL_INLINE.source, ")|(?:")).call(_context23, EMAIL_INLINE.source, "))") // [
 	        //     `(?<url>${ URL_INLINE.source })`,
 	        //     `(?<email>${ EMAIL_INLINE.source })`, // email
 	        // ].join('|'),
@@ -71094,13 +71175,13 @@
 	  }, {
 	    key: "renderLink",
 	    value: function renderLink(url, text) {
-	      var _context20, _this$$engine$$cherry, _context21, _context22, _context23, _context24;
+	      var _context25, _this$$engine$$cherry, _context26, _context27, _context28, _context29;
 	      var linkText = text === null || text === void 0 ? void 0 : text.replace(/CHERRYFLOWSESSIONCURSOR/g, '');
 	      if (typeof linkText !== 'string') {
 	        if (this.enableShortLink) {
-	          var _context19;
+	          var _context24;
 	          var Url = url.replace(/^https?:\/\//i, '');
-	          linkText = _concatInstanceProperty(_context19 = "".concat(Url.substring(0, this.shortLinkLength))).call(_context19, Url.length > this.shortLinkLength ? '...' : '');
+	          linkText = _concatInstanceProperty(_context24 = "".concat(Url.substring(0, this.shortLinkLength))).call(_context24, Url.length > this.shortLinkLength ? '...' : '');
 	        } else {
 	          linkText = url;
 	        }
@@ -71108,10 +71189,10 @@
 	      var processedURL = this.$engine.urlProcessor(url, 'autolink');
 	      var safeUri = encodeURIOnce(processedURL);
 	      var displayUri = escapeHTMLSpecialCharOnce(linkText);
-	      var additionalAttrs = _filterInstanceProperty(_context20 = [this.target, this.rel]).call(_context20, Boolean).join(' ');
+	      var additionalAttrs = _filterInstanceProperty(_context25 = [this.target, this.rel]).call(_context25, Boolean).join(' ');
 	      var customAttrs = // @ts-ignore
 	      (_this$$engine$$cherry = this.$engine.$cherry.options.engine.syntax.autoLink.attrRender(processedURL, processedURL)) !== null && _this$$engine$$cherry !== void 0 ? _this$$engine$$cherry : '';
-	      return _concatInstanceProperty(_context21 = _concatInstanceProperty(_context22 = _concatInstanceProperty(_context23 = _concatInstanceProperty(_context24 = "<a href=\"".concat(AutoLink.escapePreservedSymbol(safeUri), "\" title=\"")).call(_context24, AutoLink.escapePreservedSymbol(escapeHTMLSpecialCharOnce(url)), "\" ")).call(_context23, typeof customAttrs === 'string' ? customAttrs : '', "  ")).call(_context22, additionalAttrs, ">")).call(_context21, AutoLink.escapePreservedSymbol(displayUri), "</a>");
+	      return _concatInstanceProperty(_context26 = _concatInstanceProperty(_context27 = _concatInstanceProperty(_context28 = _concatInstanceProperty(_context29 = "<a href=\"".concat(AutoLink.escapePreservedSymbol(safeUri), "\" title=\"")).call(_context29, AutoLink.escapePreservedSymbol(escapeHTMLSpecialCharOnce(url)), "\" ")).call(_context28, typeof customAttrs === 'string' ? customAttrs : '', "  ")).call(_context27, additionalAttrs, ">")).call(_context26, AutoLink.escapePreservedSymbol(displayUri), "</a>");
 	    }
 	  }]);
 	}(SyntaxBase);
@@ -72255,7 +72336,13 @@
 	        _cache$split2 = _toArray(_cache$split),
 	        url = _cache$split2[0],
 	        args = _sliceInstanceProperty(_context = _arrayLikeToArray$1m(_cache$split2)).call(_context, 1);
-	      var innerUrl = UrlCache.set(this.unwrapUrl(url));
+	      var unwrappedUrl = this.unwrapUrl(url);
+	      // 引用式链接的 url 会被放入 UrlCache，从而绕过 Link 的协议校验和 DOMPurify，
+	      // 所以必须在写入缓存前校验协议，拒绝 javascript: 等危险协议
+	      if (!isValidScheme(unwrappedUrl)) {
+	        return;
+	      }
+	      var innerUrl = UrlCache.set(unwrappedUrl);
 	      this.commentCache["".concat(key).toLowerCase()] = _concatInstanceProperty(_context2 = [innerUrl]).call(_context2, _toConsumableArray$1(args)).join(' ');
 	    }
 	  }, {
@@ -78523,7 +78610,7 @@
 	 * 但实际交换顺序后，发现没啥问题，还顺带解决了[这个issue #1090](https://github.com/Tencent/cherry-markdown/issues/1090)的问题
 	 * 没问题的原因是对于段落公式（比如$$(a+b)^2=a^2+2ab+b^2$$），行内公式的确会命中，会识别出来两个'$$'，所以无事发生
 	 */
-	InlineMath, MathBlock, AiFlowAutoClose, HtmlBlock, Footnote, CommentReference, Transfer, Br$1, Table$1, Toc$2, Blockquote, Header$1,
+	InlineMath, MathBlock, Transfer, AiFlowAutoClose, HtmlBlock, Footnote, CommentReference, Br$1, Table$1, Toc$2, Blockquote, Header$1,
 	// 处理标题, 传入strict属性严格要求ATX风格标题#后带空格
 	Hr$1, List$2, Detail$1, Panel$1, Paragraph,
 	// 普通段落
@@ -84298,7 +84385,9 @@
 	    value: function $deCacheBigData(md) {
 	      var _this6 = this;
 	      return md.replace(/bigDataBegin[^\n]+?bigDataEnd/g, function (whole) {
-	        return _this6.cachedBigData[whole];
+	        var _this6$cachedBigData$;
+	        // 未命中缓存时（如用户原文中恰好包含该形态的文本）保留原文，避免被替换成 "undefined"
+	        return (_this6$cachedBigData$ = _this6.cachedBigData[whole]) !== null && _this6$cachedBigData$ !== void 0 ? _this6$cachedBigData$ : whole;
 	      });
 	    }
 
@@ -105439,9 +105528,13 @@
 	            continue;
 	          }
 	        }
-	        if (/^(class|id|href|rel|target|src|title|controls|align|width|height|style|open|contenteditable)$/i.test(name)) {
-	          name = name === 'class' ? 'className' : name;
-	          name = name === 'contenteditable' ? 'contentEditable' : name;
+	        if (/^(class|id|href|rel|target|src|title|controls|align|width|height|style|open|for|name|type|disabled|checked|selected|contenteditable)$/i.test(name)) {
+	          var nameMap = {
+	            "class": 'className',
+	            "for": 'htmlFor',
+	            contenteditable: 'contentEditable'
+	          };
+	          name = nameMap[name.toLowerCase()] || name;
 	          if (name === 'style') {
 	            ret.style = ret.style ? ret.style : [];
 	            ret.style.push(value);
@@ -118417,7 +118510,18 @@
 	        /** 自定义<a>标签的属性，默认为空 */
 	        attrRender: function attrRender(text, href) {
 	          return '';
-	        }
+	        },
+	        /**
+	         * 遇到指定字符时中断autolink的识别（这些字符及其后续内容不会作为URL的一部分）
+	         * - 默认 []：保持标准markdown行为，不做任何中断
+	         * - 数组元素：
+	         *    - 'full-width'：使用内置的中文全角符号预设（，。！？；：、（）【】《》「」""''·～｜…—）
+	         *    - 其他字符串：将该字符串中的每个字符作为中断字符
+	         * - 示例：breakChars: ['full-width', '-', ':']
+	         * 注意：该配置仅影响裸URL的autolink识别，不影响 [text](url) 显式链接语法；
+	         *      且仅在URL不被 <> 包裹时生效（<>包裹属于显式指定URL边界）
+	         */
+	        breakChars: []
 	      },
 	      image: {
 	        selfClosing: false,

@@ -1,4 +1,5 @@
-export default class Transfer extends SyntaxBase {
+export default class Transfer extends ParagraphBase {
+    constructor();
     rule(): {
         begin: string;
         content: string;
@@ -6,6 +7,6 @@ export default class Transfer extends SyntaxBase {
         reg: RegExp;
     };
     beforeMakeHtml(str: any): any;
-    afterMakeHtml(str: any): any;
+    makeHtml(str: any): any;
 }
-import SyntaxBase from '../SyntaxBase.js';
+import ParagraphBase from '@/core/ParagraphBase';

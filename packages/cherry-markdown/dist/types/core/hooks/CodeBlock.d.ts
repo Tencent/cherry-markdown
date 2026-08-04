@@ -107,7 +107,6 @@ export default class CodeBlock extends ParagraphBase {
     formatLang(lang: string): string;
     makeInlineCode(str: any, needAutoClose?: boolean): any;
     makeHtml(str: any): any;
-    $replaceSpecialChar(str: any): any;
     rule(): {
         begin: string;
         content: string;
