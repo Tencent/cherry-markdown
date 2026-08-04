@@ -2,7 +2,7 @@
   "name": "@cherry-markdown/milkdown",
   "version": "0.0.0",
   "type": "module",
-  "description": "Milkdown adapter with Cherry Markdown rendering and syntax preservation",
+  "description": "WYSIWYG Milkdown editor for Cherry Markdown",
   "keywords": [
     "cherry-markdown",
     "markdown",
@@ -30,9 +30,9 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./raw": {
-      "types": "./dist/raw/index.d.ts",
-      "import": "./dist/raw/index.js"
+    "./wysiwyg": {
+      "types": "./dist/wysiwyg/index.d.ts",
+      "import": "./dist/wysiwyg/index.js"
     },
     "./styles.css": "./styles.css",
     "./package.json": "./package.json"
@@ -60,11 +60,22 @@
   },
   "peerDependencies": {
     "@milkdown/kit": "^7.21.3",
-    "cherry-markdown": "^0.11.7"
+    "@milkdown/plugin-math": "^7.5.9",
+    "cherry-markdown": "^0.11.7",
+    "katex": "^0.16.27",
+    "mermaid": "^11.14.0"
+  },
+  "peerDependenciesMeta": {
+    "mermaid": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@milkdown/kit": "^7.21.3",
-    "cherry-markdown": "*"
+    "@milkdown/plugin-math": "^7.5.9",
+    "cherry-markdown": "*",
+    "katex": "^0.16.27",
+    "mermaid": "^11.14.0"
   },
   "engines": {
     "node": ">=22",

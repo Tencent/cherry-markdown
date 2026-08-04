@@ -1,7 +1,7 @@
 import type { Editor } from '@milkdown/kit/core';
 import type { MilkdownPlugin } from '@milkdown/kit/ctx';
 import type { CherryOptions } from 'cherry-markdown/types/cherry';
-import type { CherryRawPattern } from './raw/index.js';
+import type { CherryVisualRenderer } from './wysiwyg/index.js';
 
 export type CherryMilkdownErrorPhase = 'create' | 'parse' | 'render';
 
@@ -11,18 +11,16 @@ export interface CherryEngineLike {
 
 export interface CherryMilkdownChange {
   markdown: string;
-  html: string;
 }
 
 export interface CherryMilkdownOptions {
   root: HTMLElement;
   value?: string;
-  previewRoot?: HTMLElement;
   cherryOptions?: Partial<CherryOptions>;
   readonly?: boolean;
   debounce?: number;
   plugins?: MilkdownPlugin[];
-  rawPatterns?: CherryRawPattern[];
+  renderers?: Record<string, CherryVisualRenderer>;
   onChange?: (result: CherryMilkdownChange) => void;
   onError?: (error: unknown, phase: CherryMilkdownErrorPhase) => void;
 }
@@ -32,7 +30,8 @@ export interface CherryMilkdownInstance {
   engine: CherryEngineLike;
   getMarkdown(): string;
   setMarkdown(markdown: string): void;
-  renderPreview(): string;
   focus(): void;
   destroy(): Promise<void>;
 }
+
+export type { CherryVisualRenderer, CherryVisualRenderContext, CherryVisualRendererResult } from './wysiwyg/index.js';

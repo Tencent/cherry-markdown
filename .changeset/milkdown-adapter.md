@@ -2,4 +2,4 @@
 '@cherry-markdown/milkdown': minor
 ---
 
-新增 Milkdown 适配包，提供 CommonMark/GFM 可视化编辑、Cherry 扩展语法原文保留和 CherryEngine 预览桥接。
+新增 Milkdown 所见即所得编辑包：CommonMark/GFM、数学公式和 Cherry 行内排版均可直接编辑，TOC、frontmatter、panel、detail、HTML 与图表以可视化嵌入节点呈现并保持 Markdown 可逆。

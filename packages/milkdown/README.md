@@ -1,24 +1,32 @@
 # @cherry-markdown/milkdown
 
-> [!WARNING]
->
-> This package is in early development. It currently imports CherryEngine from a private `cherry-markdown/dist` path, so keep both packages on compatible versions.
-
 [简体中文](./README.CN.md)
 
-Framework-neutral Milkdown editing with Cherry Markdown rendering. CommonMark and GFM use Milkdown's native document model. Cherry-only syntax is preserved as raw atomic nodes and rendered by CherryEngine.
+A framework-neutral Milkdown WYSIWYG editor for Cherry Markdown. The editor surface is the content view; a separate preview pane is not required.
+
+## Features
+
+- Native editable Milkdown nodes for CommonMark and GFM.
+- Direct editing for tables, task lists, links, images, quotes, and code blocks.
+- Inline and block math rendered with KaTeX.
+- Editable marks for Cherry colors, backgrounds, font size, subscript, superscript, ruby, underline, and highlight.
+- Visual nodes for TOC, frontmatter, panels, details, HTML, comment references, and special diagram fences.
+- Mermaid renders as a diagram by default. PlantUML and ECharts can use application renderers. Embedded objects expose source configuration only while editing the object.
+
+Cherry extensions are not presented as raw source cards. Business-specific syntax must provide a Milkdown schema, parser, serializer, and NodeView through a plugin; unregistered syntax is not claimed as supported.
 
 ## Install
 
 ```sh
-npm install @cherry-markdown/milkdown @milkdown/kit cherry-markdown
+npm install @cherry-markdown/milkdown @milkdown/kit @milkdown/plugin-math cherry-markdown katex mermaid
 ```
 
-Import the base styles once:
+Import the styles once:
 
 ```js
 import '@cherry-markdown/milkdown/styles.css';
 import '@milkdown/kit/prose/view/style/prosemirror.css';
+import 'katex/dist/katex.min.css';
 ```
 
 ## Usage
@@ -28,38 +36,43 @@ import { createCherryMilkdown } from '@cherry-markdown/milkdown';
 
 const editor = await createCherryMilkdown({
   root: document.querySelector('#editor'),
-  previewRoot: document.querySelector('#preview'),
-  value: '# Hello\n\n[[toc]]',
-  onChange({ markdown, html }) {
-    console.log(markdown, html);
+  value: '# Title\n\nInline math $E=mc^2$ and !!red colored text!!.',
+  onChange({ markdown }) {
+    console.log(markdown);
   },
 });
 
 editor.setMarkdown('# Updated');
 console.log(editor.getMarkdown());
-
-// Later:
 await editor.destroy();
 ```
 
-`previewRoot` is optional. Without it, CherryEngine still renders the HTML passed to `onChange`, while the package behaves as a standalone Milkdown editor.
+Plugins passed through `plugins` are loaded after the built-in WYSIWYG plugins and can register business NodeViews.
 
-Double-click a Cherry raw node to edit its original Markdown. Built-in raw preservation covers frontmatter, math, TOC, comment references, panels, details, Cherry inline formatting, raw HTML, and Mermaid/PlantUML/ECharts code blocks.
-
-## Custom syntax
-
-Register business-specific syntax explicitly:
+Use `renderers` to render special diagram formats asynchronously. A renderer may return an HTML string, a cleanup function, or write directly to `container`:
 
 ```js
-await createCherryMilkdown({
+createCherryMilkdown({
   root,
-  rawPatterns: [{ name: 'mention', kind: 'inline', pattern: /@\[[^\]]+\]/ }],
+  renderers: {
+    echarts: async ({ container, source }) => {
+      const chart = createECharts(container, source);
+      return () => chart.dispose();
+    },
+  },
 });
 ```
 
-The package does not inspect private Cherry hooks. Unregistered custom syntax may be normalized by Milkdown.
+## Local example
 
-Run `yarn build && npx vite examples` in this package to open the minimal Vanilla example.
+```sh
+yarn build
+npx vite examples
+```
+
+## Current boundary
+
+CherryEngine is still loaded from the private `cherry-markdown/dist/cherry-markdown.engine.core.esm.js` path to render embedded objects. Complex diagrams are visual atomic nodes: Mermaid rendering is built in, while PlantUML and ECharts require `renderers`. Regular text and inline formatting remain directly editable.
 
 ## License
 

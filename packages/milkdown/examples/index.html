@@ -7,24 +7,20 @@
     <link rel="stylesheet" href="../styles.css" />
     <style>
       main {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        max-width: 1200px;
+        max-width: 960px;
         margin: 32px auto;
       }
 
-      #editor,
-      #preview {
-        min-height: 420px;
+      #editor {
+        min-height: 680px;
         border: 1px solid #d8dce5;
+        border-radius: 8px;
       }
     </style>
   </head>
   <body>
     <main>
       <div id="editor"></div>
-      <div id="preview"></div>
     </main>
     <script type="module" src="./vanilla.js"></script>
   </body>

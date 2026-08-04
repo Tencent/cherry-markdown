@@ -1,7 +1,13 @@
 import { editorViewCtx } from '@milkdown/kit/core';
-import { NodeSelection } from '@milkdown/kit/prose/state';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { createCherryMilkdown, type CherryMilkdownInstance } from '../src';
+
+vi.mock('mermaid', () => ({
+  default: {
+    initialize: vi.fn(),
+    render: vi.fn(async () => ({ svg: '<svg data-rendered-mermaid="true"></svg>' })),
+  },
+}));
 
 const instances: CherryMilkdownInstance[] = [];
 
@@ -12,12 +18,6 @@ beforeAll(() => {
     disconnect() {}
   }
   vi.stubGlobal('ResizeObserver', ResizeObserverMock);
-  HTMLDialogElement.prototype.showModal = function showModal() {
-    this.setAttribute('open', '');
-  };
-  HTMLDialogElement.prototype.close = function close() {
-    this.removeAttribute('open');
-  };
 });
 
 afterEach(async () => {
@@ -26,164 +26,183 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 
-function roots() {
-  const root = document.createElement('div');
-  const previewRoot = document.createElement('div');
-  document.body.append(root, previewRoot);
-  return { root, previewRoot };
+function root() {
+  const element = document.createElement('div');
+  document.body.append(element);
+  return element;
 }
 
-describe('createCherryMilkdown', () => {
-  it('creates a framework-neutral editor and renders Cherry HTML', async () => {
-    const { root, previewRoot } = roots();
+describe('createCherryMilkdown WYSIWYG', () => {
+  it('renders a single editable content surface with no raw cards or preview pane', async () => {
+    const element = root();
     const instance = await createCherryMilkdown({
-      root,
-      previewRoot,
-      value: '# Hello\n\n[[toc]]',
+      root: element,
+      value: '# Hello\n\n[[toc]]\n\nText !!red color!! and $E=mc^2$.',
     });
     instances.push(instance);
 
-    expect(instance.getMarkdown()).toContain('# Hello');
-    expect(instance.getMarkdown()).toContain('[[toc]]');
-    expect(previewRoot.innerHTML).toContain('<h1');
-    expect(root.querySelector('[data-cherry-raw="block"]')).not.toBeNull();
+    expect(element.querySelector('h1')?.textContent).toBe('Hello');
+    expect(element.querySelector('.cherry-wysiwyg-toc')).not.toBeNull();
+    expect(element.querySelector('.cherry-wysiwyg-color')?.textContent).toBe('color');
+    expect(element.querySelector('[data-type="math_inline"]')).not.toBeNull();
+    expect(element.querySelector('[data-cherry-raw]')).toBeNull();
+    expect(element.querySelector('textarea')).toBeNull();
   });
 
-  it('preserves every built-in Cherry extension category as raw Markdown', async () => {
-    const { root } = roots();
-    const snippets = [
-      '---\ntitle: Demo\n---',
+  it('keeps Cherry visual syntax reversible through Markdown serialization', async () => {
+    const element = root();
+    const value = [
       '[[toc]]',
-      '[comment]: Comment body',
-      '::: warning\nPanel body\n:::',
-      '+++- Details\nDetail body\n+++',
-      '$$\na+b\n$$',
-      '<section>HTML</section>',
-      'Text $a+b$.',
-      'Text !!!#fff background!!!.',
-      'Text !!red color!!.',
-      'Text !18 size!.',
-      'Text ^^sub^^ and ^sup^.',
-      'Text {字|zi} and /underline/ and ==mark==.',
-      '```mermaid\ngraph TD; A-->B;\n```',
-    ];
-    const instance = await createCherryMilkdown({ root, value: snippets.join('\n\n') });
+      '',
+      'Text !!#f00 red!!, !!!#fff bg!!!, !18 size!, ^^sub^^, ^sup^, {字|zi}, /under/, ==mark==.',
+    ].join('\n');
+    const instance = await createCherryMilkdown({ root: element, value });
     instances.push(instance);
     const markdown = instance.getMarkdown();
 
-    for (const snippet of snippets) expect(markdown).toContain(snippet);
-    expect(root.querySelectorAll('[data-cherry-raw]').length).toBeGreaterThan(10);
+    for (const syntax of ['[[toc]]', '!!#f00 red!!', '!!!#fff bg!!!', '!18 size!', '^^sub^^', '^sup^']) {
+      expect(markdown).toContain(syntax);
+    }
+    expect(markdown).toContain('{字|zi}');
+    expect(markdown).toContain('/under/');
+    expect(markdown).toContain('==mark==');
   });
 
-  it('updates content, notifies changes, and works without a preview root', async () => {
-    const { root } = roots();
-    const onChange = vi.fn();
-    const instance = await createCherryMilkdown({ root, debounce: 0, onChange });
+  it('edits Cherry typography directly while preserving its Markdown mark', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({ root: element, value: 'Text !!red color!!.' });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let colorTextPosition = 0;
+    view.state.doc.descendants((node, position) => {
+      if (node.isText && node.text === 'color') colorTextPosition = position;
+    });
+
+    view.dispatch(view.state.tr.insertText(' vivid', colorTextPosition + 2));
+
+    expect(element.querySelector('.cherry-wysiwyg-color')?.textContent).toBe('co vividlor');
+    expect(instance.getMarkdown()).toContain('!!red co vividlor!!');
+  });
+
+  it('preserves parameterized Cherry marks when parsing editor DOM', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({ root: element, value: '!!#f00 red!! !20 large! {字|zi}' });
     instances.push(instance);
 
-    instance.setMarkdown('Text $a+b$');
-    await new Promise((resolve) => setTimeout(resolve, 10));
-    expect(instance.getMarkdown()).toContain('$a+b$');
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ markdown: expect.stringContaining('$a+b$'), html: expect.any(String) }),
+    const color = element.querySelector('.cherry-wysiwyg-color');
+    const size = element.querySelector('.cherry-wysiwyg-size');
+    const ruby = element.querySelector('.cherry-wysiwyg-ruby');
+    expect(color?.getAttribute('data-cherry-color')).toBe('#f00');
+    expect(size?.getAttribute('data-cherry-size')).toBe('20');
+    expect(ruby?.getAttribute('data-cherry-annotation')).toBe('zi');
+  });
+
+  it('uses native editable GFM table nodes', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: '| Name | Value |\n| --- | --- |\n| Milkdown | WYSIWYG |',
+    });
+    instances.push(instance);
+    expect(element.querySelector('table')).not.toBeNull();
+    expect(element.querySelectorAll('td')).toHaveLength(2);
+    expect(element.querySelector('table')?.closest('[data-cherry-visual]')).toBeNull();
+  });
+
+  it('updates the visual TOC when a heading is edited', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({ root: element, value: '# Before\n\n[[toc]]' });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let headingTextPosition = 0;
+    view.state.doc.descendants((node, position) => {
+      if (node.isText && node.text === 'Before') headingTextPosition = position;
+    });
+
+    view.dispatch(view.state.tr.insertText('After', headingTextPosition, headingTextPosition + 'Before'.length));
+
+    expect(element.querySelector('.cherry-wysiwyg-toc')?.textContent).toContain('After');
+  });
+
+  it('shows Cherry panels and Mermaid as rendered visual nodes by default', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: '::: warning\nPanel body\n:::\n\n```mermaid\ngraph TD; A-->B;\n```',
+    });
+    instances.push(instance);
+    const nodes = element.querySelectorAll<HTMLElement>('[data-cherry-visual="block"]');
+    expect(nodes).toHaveLength(2);
+    expect(nodes[0]?.textContent).toContain('Panel body');
+    expect(nodes[0]?.querySelector('textarea')).toBeNull();
+    expect(nodes[1]?.dataset.syntax).toBe('mermaid');
+    await vi.waitFor(() => expect(nodes[1]?.querySelector('[data-rendered-mermaid]')).not.toBeNull());
+  });
+
+  it('uses a custom renderer for other visual diagram nodes', async () => {
+    const element = root();
+    const renderer = vi.fn(async () => '<div data-rendered-echarts="true">Chart</div>');
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: '```echarts\n{"series": []}\n```',
+      renderers: { echarts: renderer },
+    });
+    instances.push(instance);
+
+    await vi.waitFor(() => expect(element.querySelector('[data-rendered-echarts]')).not.toBeNull());
+    expect(renderer).toHaveBeenCalledWith(
+      expect.objectContaining({ syntax: 'echarts', source: expect.stringContaining('"series"') }),
     );
   });
 
-  it('edits a raw node through the source dialog', async () => {
-    const { root } = roots();
-    const instance = await createCherryMilkdown({ root, value: '[[toc]]', debounce: 0 });
+  it('reveals source only while editing an embedded visual object', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({ root: element, value: '::: warning\nBefore\n:::', debounce: 0 });
     instances.push(instance);
-    const raw = root.querySelector<HTMLElement>('[data-cherry-raw="block"]');
-    raw?.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
-
-    const dialog = root.querySelector<HTMLDialogElement>('dialog');
-    const textarea = dialog?.querySelector<HTMLTextAreaElement>('textarea');
-    expect(dialog?.hasAttribute('open')).toBe(true);
-    if (textarea) textarea.value = '[TOC]';
-    dialog
-      ?.querySelector<HTMLFormElement>('form')
-      ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    const node = element.querySelector<HTMLElement>('[data-cherry-visual="block"]');
+    node?.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    const textarea = node?.querySelector<HTMLTextAreaElement>('textarea');
+    expect(textarea?.value).toContain('Before');
+    if (textarea) textarea.value = '::: success\nAfter\n:::';
+    node?.querySelector<HTMLButtonElement>('.cherry-wysiwyg-node__source-editor button:last-child')?.click();
     await new Promise((resolve) => setTimeout(resolve, 10));
-    expect(instance.getMarkdown()).toContain('[TOC]');
+    expect(instance.getMarkdown()).toContain('After');
+    expect(node?.querySelector('textarea')).toBeNull();
   });
 
-  it('copies a selected raw node as its original Markdown', async () => {
-    const { root } = roots();
-    const instance = await createCherryMilkdown({ root, value: '[[toc]]' });
+  it('updates Markdown and emits debounced changes without rendering a second pane', async () => {
+    const element = root();
+    const onChange = vi.fn();
+    const instance = await createCherryMilkdown({ root: element, debounce: 0, onChange });
+    instances.push(instance);
+    instance.setMarkdown('# Updated\n\n$E=mc^2$');
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(element.querySelector('h1')?.textContent).toBe('Updated');
+    expect(onChange).toHaveBeenCalledWith({ markdown: expect.stringContaining('# Updated') });
+  });
+
+  it('keeps embedded source editing disabled in readonly mode', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({ root: element, value: '[[toc]]', readonly: true });
     instances.push(instance);
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
-    view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, 0)));
-    const clipboard = new Map<string, string>();
-    const event = new Event('copy', { bubbles: true, cancelable: true });
-    Object.defineProperty(event, 'clipboardData', {
-      value: { setData: (type: string, value: string) => clipboard.set(type, value) },
-    });
-    view.dom.dispatchEvent(event);
-    expect(clipboard.get('text/plain')).toBe('[[toc]]');
-  });
-
-  it('parses pasted custom raw syntax and cuts it back as Markdown', async () => {
-    const { root } = roots();
-    const instance = await createCherryMilkdown({
-      root,
-      value: 'Start',
-      rawPatterns: [{ name: 'mention', kind: 'inline', pattern: /@\[[^\]]+\]/ }],
-    });
-    instances.push(instance);
-    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
-    const paste = new Event('paste', { bubbles: true, cancelable: true });
-    Object.defineProperty(paste, 'clipboardData', {
-      value: { getData: (type: string) => (type === 'text/plain' ? '@[alice]' : '') },
-    });
-    view.dom.dispatchEvent(paste);
-    expect(instance.getMarkdown()).toContain('@[alice]');
-
-    let rawPosition = -1;
-    view.state.doc.descendants((node, pos) => {
-      if (node.type.name === 'cherryRawInline') rawPosition = pos;
-    });
-    view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, rawPosition)));
-    const clipboard = new Map<string, string>();
-    const cut = new Event('cut', { bubbles: true, cancelable: true });
-    Object.defineProperty(cut, 'clipboardData', {
-      value: { setData: (type: string, value: string) => clipboard.set(type, value) },
-    });
-    view.dom.dispatchEvent(cut);
-    expect(clipboard.get('text/plain')).toBe('@[alice]');
-    expect(instance.getMarkdown()).not.toContain('@[alice]');
-  });
-
-  it('does not open the raw source dialog in readonly mode', async () => {
-    const { root } = roots();
-    const instance = await createCherryMilkdown({ root, value: '[[toc]]', readonly: true });
-    instances.push(instance);
-    root
-      .querySelector<HTMLElement>('[data-cherry-raw="block"]')
+    expect(view.editable).toBe(false);
+    element
+      .querySelector<HTMLElement>('[data-cherry-visual="block"]')
       ?.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
-    expect(root.querySelector('dialog')?.hasAttribute('open')).toBe(false);
+    expect(element.querySelector('textarea')).toBeNull();
   });
 
-  it('keeps the previous preview when Cherry rendering fails', async () => {
-    const { root, previewRoot } = roots();
-    const onError = vi.fn();
-    const instance = await createCherryMilkdown({ root, previewRoot, value: '# Stable', onError });
-    instances.push(instance);
-    const previous = previewRoot.innerHTML;
-    vi.spyOn(instance.engine, 'makeHtml').mockImplementation(() => {
-      throw new Error('render failed');
-    });
-
-    expect(instance.renderPreview()).toBe(previous);
-    expect(previewRoot.innerHTML).toBe(previous);
-    expect(onError).toHaveBeenCalledWith(expect.any(Error), 'render');
-  });
-
-  it('rejects invalid roots and cleans owned DOM on destroy', async () => {
-    await expect(createCherryMilkdown({ root: null as unknown as HTMLElement })).rejects.toThrow(TypeError);
-    const { root, previewRoot } = roots();
-    const instance = await createCherryMilkdown({ root, previewRoot, value: '# Cleanup' });
+  it('focuses and destroys the editor cleanly', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({ root: element, value: '# Cleanup' });
+    instance.focus();
+    expect(instance.editor.action((ctx) => ctx.get(editorViewCtx)).hasFocus()).toBe(true);
     await instance.destroy();
-    expect(root.childElementCount).toBe(0);
-    expect(previewRoot.childElementCount).toBe(0);
+    expect(element.childElementCount).toBe(0);
+  });
+
+  it('rejects invalid roots', async () => {
+    await expect(createCherryMilkdown({ root: null as unknown as HTMLElement })).rejects.toThrow(TypeError);
   });
 });

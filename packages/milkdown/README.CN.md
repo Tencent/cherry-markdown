@@ -1,24 +1,32 @@
 # @cherry-markdown/milkdown
 
-> [!WARNING]
->
-> 该包仍在早期开发中。目前会从 `cherry-markdown/dist` 私有路径导入 CherryEngine，请保持两个包的版本兼容。
-
 [English](./README.md)
 
-这是一个框架无关的 Milkdown 与 Cherry Markdown 适配包。CommonMark/GFM 使用 Milkdown 原生文档模型，Cherry 独有语法以 raw 原子节点保留，并统一交给 CherryEngine 渲染。
+Cherry Markdown 的框架无关 Milkdown 所见即所得编辑器。编辑区本身就是最终内容视图，不需要独立预览栏。
+
+## 能力
+
+- CommonMark/GFM 使用 Milkdown 原生可编辑节点。
+- 表格、任务列表、链接、图片、引用和代码块直接编辑。
+- 行内和块级公式通过 KaTeX 直接渲染。
+- Cherry 颜色、背景色、字号、上下标、ruby、下划线和高亮使用可编辑 mark。
+- TOC、frontmatter、panel、detail、HTML、comment reference 和特殊图表代码块显示为可视化节点。
+- Mermaid 默认渲染为图形；PlantUML、ECharts 可通过 `renderers` 接入业务渲染器。嵌入对象选中后可以按需编辑配置源码。
+
+该包不会把 Cherry 扩展默认显示成 raw 源码卡片。业务自定义语法需要通过 Milkdown 插件提供 schema、parser、serializer 和 NodeView，未注册语法不宣称支持。
 
 ## 安装
 
 ```sh
-npm install @cherry-markdown/milkdown @milkdown/kit cherry-markdown
+npm install @cherry-markdown/milkdown @milkdown/kit @milkdown/plugin-math cherry-markdown katex mermaid
 ```
 
-全局引入一次基础样式：
+全局引入一次样式：
 
 ```js
 import '@cherry-markdown/milkdown/styles.css';
 import '@milkdown/kit/prose/view/style/prosemirror.css';
+import 'katex/dist/katex.min.css';
 ```
 
 ## 使用
@@ -28,38 +36,43 @@ import { createCherryMilkdown } from '@cherry-markdown/milkdown';
 
 const editor = await createCherryMilkdown({
   root: document.querySelector('#editor'),
-  previewRoot: document.querySelector('#preview'),
-  value: '# 标题\n\n[[toc]]',
-  onChange({ markdown, html }) {
-    console.log(markdown, html);
+  value: '# 标题\n\n行内公式 $E=mc^2$ 和 !!red 红色文字!!。',
+  onChange({ markdown }) {
+    console.log(markdown);
   },
 });
 
 editor.setMarkdown('# 更新后的内容');
 console.log(editor.getMarkdown());
-
-// 页面销毁时：
 await editor.destroy();
 ```
 
-`previewRoot` 可选。不传时仍会创建 CherryEngine，并通过 `onChange` 返回渲染后的 HTML，同时可以把它作为纯 Milkdown 编辑器使用。
+`plugins` 会在内置 WYSIWYG 插件之后加载，可用于注册业务 NodeView。
 
-双击 Cherry raw 节点可编辑原始 Markdown。内置保真范围包括 frontmatter、公式、TOC、评论引用、panel、detail、Cherry 行内格式、原始 HTML，以及 Mermaid/PlantUML/ECharts 代码块。
-
-## 自定义语法
-
-业务自定义语法需要显式注册：
+`renderers` 可为特殊图表提供异步渲染；回调返回 HTML 字符串、清理函数或直接写入 `container`：
 
 ```js
-await createCherryMilkdown({
+createCherryMilkdown({
   root,
-  rawPatterns: [{ name: 'mention', kind: 'inline', pattern: /@\[[^\]]+\]/ }],
+  renderers: {
+    echarts: async ({ container, source }) => {
+      const chart = createECharts(container, source);
+      return () => chart.dispose();
+    },
+  },
 });
 ```
 
-该包不会读取 Cherry 私有 Hook；未注册的自定义语法可能被 Milkdown 规范化。
+## 本地示例
 
-仓库内可运行 `yarn build && npx vite examples` 查看最小 Vanilla 示例。
+```sh
+yarn build
+npx vite examples
+```
+
+## 当前边界
+
+CherryEngine 仍通过 `cherry-markdown/dist/cherry-markdown.engine.core.esm.js` 深层入口提供嵌入对象渲染。图表等复杂对象属于可视化原子节点：Mermaid 内置渲染，PlantUML/ECharts 需要 `renderers`；普通文本和行内格式可直接编辑。
 
 ## 许可证
 
