@@ -255,6 +255,17 @@ const defaultConfig = {
         attrRender: (text, href) => {
           return '';
         },
+        /**
+         * 遇到指定字符时中断autolink的识别（这些字符及其后续内容不会作为URL的一部分）
+         * - 默认 []：保持标准markdown行为，不做任何中断
+         * - 数组元素：
+         *    - 'full-width'：使用内置的中文全角符号预设（，。！？；：、（）【】《》「」""''·～｜…—）
+         *    - 其他字符串：将该字符串中的每个字符作为中断字符
+         * - 示例：breakChars: ['full-width', '-', ':']
+         * 注意：该配置仅影响裸URL的autolink识别，不影响 [text](url) 显式链接语法；
+         *      且仅在URL不被 <> 包裹时生效（<>包裹属于显式指定URL边界）
+         */
+        breakChars: [],
       },
       image: {
         selfClosing: false, // 自动闭合

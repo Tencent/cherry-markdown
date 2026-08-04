@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.11.9
+
+### Patch Changes
+
+- fix: #1842 修复代码块语法中多了空格的问题 [@sunsonliu](https://github.com/sunsonliu)([#1843](https://github.com/Tencent/cherry-markdown/pull/1843))([`3dd4cb7`](https://github.com/Tencent/cherry-markdown/commit/3dd4cb72d26cd16cf324d271fe01e31d64f85ddf))
+- fix: 修复tabs语法无法更新的问题 [@sunsonliu](https://github.com/sunsonliu)([#1831](https://github.com/Tencent/cherry-markdown/pull/1831))([`03fe16e`](https://github.com/Tencent/cherry-markdown/commit/03fe16e16eacbcf2ba04b3262bc8ab152bf486be))
+- fix: 修复 `setCursor` 传入越界行号/列号时抛异常的问题 [@hobostay](https://github.com/hobostay)([#1838](https://github.com/Tencent/cherry-markdown/pull/1838))([`d87f2e9`](https://github.com/Tencent/cherry-markdown/commit/d87f2e9bb11309cfd8566d8a9f84520a71ab44aa))
+- fix: 修复用户文本包含 bigData 占位符形态内容时被替换成 "undefined" 的问题 [@hobostay](https://github.com/hobostay)([#1839](https://github.com/Tencent/cherry-markdown/pull/1839))([`6c4f049`](https://github.com/Tencent/cherry-markdown/commit/6c4f0490f8f189ddcad216dcb55ffc1d41c04786))
+- feat: #1836 autolink支持配置breakChars，可以让自动链接在识别到特殊字符时中断匹配 [@sunsonliu](https://github.com/sunsonliu)([#1841](https://github.com/Tencent/cherry-markdown/pull/1841))([`3e9105c`](https://github.com/Tencent/cherry-markdown/commit/3e9105c47582b0e76045e301f2569b80c8ea163f))
+- fix: 修复引用式链接可绕过协议校验注入 `javascript:` 等危险协议的问题 [@hobostay](https://github.com/hobostay)([#1837](https://github.com/Tencent/cherry-markdown/pull/1837))([`4100bfd`](https://github.com/Tencent/cherry-markdown/commit/4100bfd07019a48aa06ea982f5abeaccb67ab185))
+
 ## 0.11.8
 
 ### Patch Changes

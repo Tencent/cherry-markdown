@@ -299,6 +299,16 @@ export interface CherryEngineOptions {
           shortLinkLength?: number;
           /** 自定义<a>标签的属性，默认为空 */
           attrRender?: (text: string, href: string) => string;
+          /**
+           * 遇到指定字符时中断autolink的识别（这些字符及其后续内容不会作为URL的一部分）
+           * - 默认 []：保持标准markdown行为，不做任何中断
+           * - 数组元素：
+           *    - 'full-width'：使用内置的中文全角符号预设
+           *    - 其他字符串：将该字符串中的每个字符作为中断字符
+           * - 示例：breakChars: ['full-width', '-', ':']
+           * 该配置仅影响裸URL的autolink识别，且仅在URL不被 <> 包裹时生效
+           */
+          breakChars?: Array<'full-width' | string>;
         };
     image?:
       | false
