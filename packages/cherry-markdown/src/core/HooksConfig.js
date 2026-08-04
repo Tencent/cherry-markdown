@@ -70,11 +70,11 @@ const hooksConfig = [
    */
   InlineMath,
   MathBlock,
+  Transfer,
   AiFlowAutoClose,
   HtmlBlock,
   Footnote,
   CommentReference,
-  Transfer,
   Br,
   Table,
   Toc,
