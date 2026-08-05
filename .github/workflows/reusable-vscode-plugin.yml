@@ -38,13 +38,13 @@ jobs:
 
       - uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: '24'
+          node-version-file: '.node-version'
           cache: true
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version-file: '.node-version'
           cache: 'yarn'
 
       # ── 1. 改名：解决 workspace 同名冲突 ──

@@ -39,13 +39,13 @@ jobs:
 
       - uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: '24'
+          node-version-file: '.node-version'
           cache: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version-file: '.node-version'
 
       - name: Install dependencies
         run: vp install
