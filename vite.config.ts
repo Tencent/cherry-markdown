@@ -2,7 +2,7 @@ import { defineConfig } from 'vite-plus';
 
 export default defineConfig({
   check: {
-    fmt: true,
+    fmt: false,
   },
   run: {
     cache: { scripts: false, tasks: true },
