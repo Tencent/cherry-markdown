@@ -27,9 +27,10 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [lts/*, 24.x]
-        # lts/*: 当前最新 Active LTS（自动跟随）
+        node-version: [22.x, 24.x, lts/*]
+        # 22.x: package.json engines 声明的最低支持版本
         # 24.x: 固定开发基准版本
+        # lts/*: 当前最新 Active LTS（自动跟随）
 
     steps:
       - uses: actions/checkout@v6
