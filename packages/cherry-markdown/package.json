@@ -78,7 +78,7 @@
     "rimraf": "^3.0.2",
     "sass": "^1.99.0",
     "serve": "^14.2.0",
-    "svgicons2svgfont": "^16.0.0",
+    "svgicons2svgfont": "^15.0.1",
     "virtual-dom": "^2.1.1"
   },
   "dependencies": {
