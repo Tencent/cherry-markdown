@@ -132,7 +132,7 @@ describe('toolbars/FloatMenu', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     expect(compat.coordsAtPos(0)).toBeNull();
     compat.getDoc().eachLine(0, 1, ({ height }: { height: number }) => heights.push(height));
-    expect(heights.at(-1)).toBe(20);
+    expect(heights[heights.length - 1]).toBe(20);
     expect(warn).toHaveBeenCalled();
 
     menu.editor = null;

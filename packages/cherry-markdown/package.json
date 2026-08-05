@@ -79,6 +79,7 @@
     "sass": "^1.99.0",
     "serve": "^14.2.0",
     "svgicons2svgfont": "^15.0.1",
+    "terser": "^5.49.2",
     "virtual-dom": "^2.1.1"
   },
   "dependencies": {

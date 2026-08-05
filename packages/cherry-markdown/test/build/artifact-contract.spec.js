@@ -48,19 +48,21 @@ describe('Cherry Markdown published artifact contract', () => {
       "const coreExternal = [...baseExternal, 'mermaid', '@replit/codemirror-vim', 'codemirror', /^codemirror\\//]",
     );
     expect(viteBuild).toContain("const engineExternal = [...baseExternal, 'mermaid']");
-    expect(viteBuild).toContain(
-      "const streamExternal = [...engineExternal, 'codemirror', /^codemirror\\//]",
-    );
+    expect(viteBuild).toContain("const streamExternal = [...engineExternal, 'codemirror', /^codemirror\\//]");
     expect(viteBuild).toMatch(/emptyOutDir: false/);
+    expect(viteBuild).toContain("minify: current.id === 'full-umd' ? false : 'terser'");
+    expect(viteBuild).toContain("pure_funcs: ['console.log', 'console.info']");
+    expect(readProjectFile('build/legacy-umd.plugin.js')).toMatch(/async transform/);
+    expect(viteBuild).toMatch(/treeshake: false/);
     expect(viteBuild).toMatch(/codeSplitting: false/);
+    expect(viteBuild).toContain("generatedCode: { preset: 'es5' }");
     expect(viteBuild).toMatch(/exports: 'named'/);
   });
 
   it('pins package version injection', () => {
-    expect(viteBuild).toMatch(/import '\.\/revision\.js'/);
-    expect(viteBuild).toMatch(
-      /'process\.env\.BUILD_VERSION': JSON\.stringify\(process\.env\.BUILD_VERSION \|\| ''\)/,
-    );
+    expect(viteBuild).toMatch(/import \{ getBuildVersion \} from '\.\/revision\.js'/);
+    expect(viteBuild).toMatch(/const buildVersion = getBuildVersion\(process\.env\.NODE_ENV\)/);
+    expect(viteBuild).toMatch(/'process\.env\.BUILD_VERSION': JSON\.stringify\(buildVersion\)/);
   });
 
   it('pins the public package entrypoints', () => {
@@ -92,11 +94,20 @@ describe('Cherry Markdown published artifact contract', () => {
     [...publishedDeclarations, ...additiveDeclarations].forEach((file) => {
       expect(typeBuild, file).toContain(`'${file}'`);
     });
+    expect(typeBuild).toContain("['cherry-markdown.d.ts', 'index'");
+    expect(typeBuild).toContain("['cherry-markdown.core.d.ts', 'index.core'");
+    expect(typeBuild).toContain("['cherry-markdown.stream.d.ts', 'index.stream'");
+    expect(typeBuild).not.toMatch(/index\.(?:umd|core\.umd|stream\.umd)/);
   });
 
   it('pins the full and markdown-only stylesheet filenames and declarations', () => {
     const modules = readProjectFile('types/modules.d.ts');
-    const styles = ['cherry-markdown.css', 'cherry-markdown.min.css', 'cherry-markdown.markdown.css', 'cherry-markdown.markdown.min.css'];
+    const styles = [
+      'cherry-markdown.css',
+      'cherry-markdown.min.css',
+      'cherry-markdown.markdown.css',
+      'cherry-markdown.markdown.min.css',
+    ];
 
     expect(stylesBuild).toContain("['src/sass/index.scss', 'cherry-markdown']");
     expect(stylesBuild).toContain("['src/sass/markdown_pure.scss', 'cherry-markdown.markdown']");

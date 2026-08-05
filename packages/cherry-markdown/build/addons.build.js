@@ -27,7 +27,7 @@ for (const entry of addonEntries) {
     await build({
       configFile: false,
       root,
-      plugins: [legacyUmdPlugin()],
+      plugins: format === 'umd' ? [legacyUmdPlugin()] : [],
       define: {
         BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
       },

@@ -15,6 +15,7 @@
 import { defineConfig } from 'vite-plus';
 import path from 'path';
 import { cherryDevPlugin, printLinksPlugin } from './vite.plugins';
+import { getBuildVersion } from './build/revision.js';
 
 // Cherry Markdown 源码目录
 const cherryMarkdownDir = path.resolve(__dirname);
@@ -87,7 +88,7 @@ export default defineConfig({
 
   // 定义全局常量
   define: {
-    'process.env.BUILD_VERSION': JSON.stringify(process.env.BUILD_VERSION || ''),
+    'process.env.BUILD_VERSION': JSON.stringify(getBuildVersion('development')),
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
     BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
   },
