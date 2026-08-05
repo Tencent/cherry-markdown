@@ -15,13 +15,13 @@ describe('Cherry Markdown published artifact contract', () => {
 
   it('pins the full, core, engine, and stream ESM/UMD matrix', () => {
     const outputs = [
-      ['full-esm', 'index.js', 'cherry-markdown.esm.js', 'es', 'Cherry'],
+      ['full-esm', 'index.js', 'cherry-markdown.esm.js', 'es'],
       ['full-umd', 'index.browser.js', 'cherry-markdown.js', 'umd', 'Cherry'],
-      ['core-esm', 'index.core.js', 'cherry-markdown.core.esm.js', 'es', 'Cherry'],
+      ['core-esm', 'index.core.js', 'cherry-markdown.core.esm.js', 'es'],
       ['core-umd', 'index.core.browser.js', 'cherry-markdown.core.js', 'umd', 'Cherry'],
-      ['engine-esm', 'index.engine.js', 'cherry-markdown.engine.esm.js', 'es', 'CherryEngine'],
+      ['engine-esm', 'index.engine.js', 'cherry-markdown.engine.esm.js', 'es'],
       ['engine-umd', 'index.engine.browser.js', 'cherry-markdown.engine.js', 'umd', 'CherryEngine'],
-      ['stream-esm', 'index.stream.js', 'cherry-markdown.stream.esm.js', 'es', 'Cherry'],
+      ['stream-esm', 'index.stream.js', 'cherry-markdown.stream.esm.js', 'es'],
       ['stream-umd', 'index.stream.browser.js', 'cherry-markdown.stream.js', 'umd', 'Cherry'],
     ];
 
@@ -30,12 +30,14 @@ describe('Cherry Markdown published artifact contract', () => {
       expect(viteBuild, id).toContain(`entry: resolve(src, '${entry}')`);
       expect(viteBuild, id).toContain(`file: '${file}'`);
       expect(viteBuild, id).toContain(`format: '${format}'`);
-      expect(viteBuild, id).toContain(`name: '${name}'`);
+      if (name) {
+        expect(viteBuild, id).toContain(`name: '${name}'`);
+      }
     });
     expect(viteBuild.match(/id: '(?:full|core|engine|stream)-(?:esm|umd)'/g)).toHaveLength(8);
   });
 
-  it('pins external dependencies and single-file output options', () => {
+  it('pins external dependencies and preserves sequential build outputs', () => {
     expect(viteBuild).toContain("const baseExternal = ['jsdom']");
     expect(viteBuild).toContain(
       "const coreExternal = [...baseExternal, 'mermaid', '@replit/codemirror-vim', 'codemirror', /^codemirror\\//]",
@@ -46,7 +48,6 @@ describe('Cherry Markdown published artifact contract', () => {
     );
     expect(viteBuild).toMatch(/emptyOutDir: false/);
     expect(viteBuild).toMatch(/codeSplitting: false/);
-    expect(viteBuild).toMatch(/manualChunks: undefined/);
     expect(viteBuild).toMatch(/exports: 'named'/);
   });
 

@@ -18,7 +18,6 @@ const builds = [
     entry: resolve(src, 'index.js'),
     file: 'cherry-markdown.esm.js',
     format: 'es',
-    name: 'Cherry',
     external: baseExternal,
   },
   {
@@ -34,7 +33,6 @@ const builds = [
     entry: resolve(src, 'index.core.js'),
     file: 'cherry-markdown.core.esm.js',
     format: 'es',
-    name: 'Cherry',
     external: coreExternal,
   },
   {
@@ -50,7 +48,6 @@ const builds = [
     entry: resolve(src, 'index.engine.js'),
     file: 'cherry-markdown.engine.esm.js',
     format: 'es',
-    name: 'CherryEngine',
     external: engineExternal,
   },
   {
@@ -66,7 +63,6 @@ const builds = [
     entry: resolve(src, 'index.stream.js'),
     file: 'cherry-markdown.stream.esm.js',
     format: 'es',
-    name: 'Cherry',
     external: streamExternal,
   },
   {
@@ -109,13 +105,9 @@ for (const current of builds) {
       rollupOptions: {
         external: current.external,
         output: {
-          format: current.format,
-          name: current.name,
-          entryFileNames: current.file,
           codeSplitting: false,
-          manualChunks: undefined,
           exports: 'named',
-          globals: { mermaid: 'mermaid' },
+          globals: current.format === 'umd' && current.external.includes('mermaid') ? { mermaid: 'mermaid' } : {},
         },
       },
     },
