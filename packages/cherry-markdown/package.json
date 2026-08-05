@@ -12,17 +12,6 @@
   "main": "./dist/cherry-markdown.js",
   "module": "./dist/cherry-markdown.esm.js",
   "style": "./dist/cherry-markdown.min.css",
-  "exports": {
-    ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/cherry-markdown.esm.js",
-      "default": "./dist/cherry-markdown.esm.js"
-    },
-    "./umd": "./dist/cherry-markdown.js",
-    "./types/*": "./types/*.d.ts",
-    "./dist/*": "./dist/*",
-    "./package.json": "./package.json"
-  },
   "types": "./dist/types/index.d.ts",
   "directories": {
     "example": "examples"

@@ -13,16 +13,15 @@ describe('Cherry Markdown published artifact contract', () => {
   const addonsBuild = readProjectFile('build/addons.build.js');
   const packageJson = JSON.parse(readProjectFile('package.json'));
 
-  it('pins the full, core, engine, and stream ESM/UMD matrix', () => {
+  it('pins the bundle filenames published in 0.11.9', () => {
     const outputs = [
       ['full-esm', 'index.js', 'cherry-markdown.esm.js', 'es'],
-      ['full-umd', 'index.browser.js', 'cherry-markdown.js', 'umd', 'Cherry'],
-      ['core-esm', 'index.core.js', 'cherry-markdown.core.esm.js', 'es'],
-      ['core-umd', 'index.core.browser.js', 'cherry-markdown.core.js', 'umd', 'Cherry'],
-      ['engine-esm', 'index.engine.js', 'cherry-markdown.engine.esm.js', 'es'],
-      ['engine-umd', 'index.engine.browser.js', 'cherry-markdown.engine.js', 'umd', 'CherryEngine'],
+      ['full-umd', 'index.umd.js', 'cherry-markdown.js', 'umd', 'Cherry'],
+      ['core-umd', 'index.core.umd.js', 'cherry-markdown.core.js', 'umd', 'Cherry'],
+      ['engine-core-esm', 'index.engine.core.js', 'cherry-markdown.engine.core.esm.js', 'es'],
+      ['engine-core-umd', 'index.engine.core.js', 'cherry-markdown.engine.core.js', 'umd', 'CherryEngine'],
       ['stream-esm', 'index.stream.js', 'cherry-markdown.stream.esm.js', 'es'],
-      ['stream-umd', 'index.stream.browser.js', 'cherry-markdown.stream.js', 'umd', 'Cherry'],
+      ['stream-umd', 'index.stream.umd.js', 'cherry-markdown.stream.js', 'umd', 'Cherry'],
     ];
 
     outputs.forEach(([id, entry, file, format, name]) => {
@@ -34,7 +33,8 @@ describe('Cherry Markdown published artifact contract', () => {
         expect(viteBuild, id).toContain(`name: '${name}'`);
       }
     });
-    expect(viteBuild.match(/id: '(?:full|core|engine|stream)-(?:esm|umd)'/g)).toHaveLength(8);
+    expect(viteBuild.match(/id: '(?:full|core|engine-core|stream)-(?:esm|umd)'/g)).toHaveLength(7);
+    expect(viteBuild).toMatch(/id: 'full-umd'[\s\S]*?sourcemap: true/);
   });
 
   it('pins external dependencies and preserves sequential build outputs', () => {
@@ -63,18 +63,23 @@ describe('Cherry Markdown published artifact contract', () => {
     expect(packageJson.module).toBe('./dist/cherry-markdown.esm.js');
     expect(packageJson.style).toBe('./dist/cherry-markdown.min.css');
     expect(packageJson.types).toBe('./dist/types/index.d.ts');
-    expect(packageJson.exports).toEqual({
-      '.': {
-        types: './dist/types/index.d.ts',
-        import: './dist/cherry-markdown.esm.js',
-        default: './dist/cherry-markdown.esm.js',
-      },
-      './umd': './dist/cherry-markdown.js',
-      './types/*': './types/*.d.ts',
-      './dist/*': './dist/*',
-      './package.json': './package.json',
-    });
+    expect(packageJson.exports).toBeUndefined();
     expect(packageJson.files).toEqual(['dist', 'types', '!types/env.d.ts']);
+  });
+
+  it('pins the top-level declarations published in 0.11.9', () => {
+    const declarations = [
+      'cherry-markdown.d.ts',
+      'cherry-markdown.esm.d.ts',
+      'cherry-markdown.core.d.ts',
+      'cherry-markdown.engine.core.d.ts',
+      'cherry-markdown.engine.core.esm.d.ts',
+      'cherry-markdown.stream.d.ts',
+      'cherry-markdown.stream.esm.d.ts',
+    ];
+    const typeBuild = readProjectFile('build/replacePaths.js');
+
+    declarations.forEach((file) => expect(typeBuild, file).toContain(`'${file}'`));
   });
 
   it('pins the full and markdown-only stylesheet filenames and declarations', () => {
@@ -96,29 +101,34 @@ describe('Cherry Markdown published artifact contract', () => {
     expect(readProjectFile('tsconfig.json')).toContain('"declarationDir": "dist/types"');
   });
 
+  it('pins the five font formats published in 0.11.9', () => {
+    const iconfontBuild = readProjectFile('build/run-iconfont.js');
+
+    expect(iconfontBuild).toContain("const fontName = 'ch-icon'");
+    expect(iconfontBuild).toContain("const formats = ['ttf', 'woff', 'woff2', 'eot', 'svg']");
+  });
+
   it('pins browser global and ESM side-effect boundaries', () => {
-    const esmEntries = ['src/index.js', 'src/index.core.js', 'src/index.engine.js', 'src/index.stream.js'];
-    const browserEntries = {
-      'src/index.browser.js': /window\.Cherry\s*=\s*Cherry/,
-      'src/index.core.browser.js': /window\.Cherry\s*=\s*Cherry/,
-      'src/index.engine.browser.js': /window\.CherryEngine\s*=\s*CherryEngine/,
-      'src/index.stream.browser.js': /window\.Cherry\s*=\s*CherryStream/,
+    const esmEntries = ['src/index.js', 'src/index.engine.core.js', 'src/index.stream.js'];
+    const umdEntries = {
+      'src/index.umd.js': /window\.Cherry\s*=\s*Cherry/,
+      'src/index.core.umd.js': /window\.Cherry\s*=\s*Cherry/,
+      'src/index.stream.umd.js': /window\.Cherry\s*=\s*CherryStream/,
     };
 
     esmEntries.forEach((entry) => expect(readProjectFile(entry), entry).not.toMatch(/window\.Cherry/));
-    Object.entries(browserEntries).forEach(([entry, assignment]) => {
+    Object.entries(umdEntries).forEach(([entry, assignment]) => {
       expect(readProjectFile(entry), entry).toMatch(assignment);
     });
   });
 
-  it('forbids alternate IIFE, explicit UMD, and minified JavaScript filenames', () => {
+  it('forbids bundle filenames that were not published in 0.11.9', () => {
     const buildSources = `${viteBuild}\n${stylesBuild}\n${addonsBuild}\n${JSON.stringify(packageJson)}`;
 
     expect(buildSources).not.toMatch(/\.iife\.js/);
     expect(buildSources).not.toMatch(/cherry-markdown\.umd\.js/);
     expect(buildSources).not.toMatch(/cherry-markdown\.min\.js/);
-    expect(packageJson.exports['./core']).toBeUndefined();
-    expect(packageJson.exports['./stream']).toBeUndefined();
-    expect(packageJson.exports['./iife']).toBeUndefined();
+    expect(buildSources).not.toMatch(/cherry-markdown\.core\.esm\.js/);
+    expect(buildSources).not.toMatch(/cherry-markdown\.engine(?:\.esm)?\.js/);
   });
 });

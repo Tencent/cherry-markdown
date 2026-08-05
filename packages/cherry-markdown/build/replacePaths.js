@@ -16,6 +16,16 @@
 import replaceInFile from 'replace-in-file';
 import { readFileSync, writeFileSync } from 'fs';
 
+const declarationEntries = [
+  ['cherry-markdown.d.ts', 'index.umd', 'Cherry', ['MenuHookBase', 'SyntaxHookBase']],
+  ['cherry-markdown.esm.d.ts', 'index', 'Cherry', ['MenuHookBase', 'SyntaxHookBase']],
+  ['cherry-markdown.core.d.ts', 'index.core.umd', 'Cherry', ['MenuHookBase', 'SyntaxHookBase']],
+  ['cherry-markdown.engine.core.d.ts', 'index.engine.core', 'CherryEngine', ['MenuHookBase', 'SyntaxHookBase']],
+  ['cherry-markdown.engine.core.esm.d.ts', 'index.engine.core', 'CherryEngine', ['MenuHookBase', 'SyntaxHookBase']],
+  ['cherry-markdown.stream.d.ts', 'index.stream.umd', 'Cherry', ['SyntaxHookBase']],
+  ['cherry-markdown.stream.esm.d.ts', 'index.stream', 'Cherry', ['SyntaxHookBase']],
+];
+
 async function replacePaths() {
   try {
     const results = await replaceInFile({
@@ -33,6 +43,14 @@ async function replacePaths() {
     const entryPath = 'dist/types/index.d.ts';
     const content = readFileSync(entryPath, 'utf-8');
     writeFileSync(entryPath, `/// <reference path="../../types/modules.d.ts" />\n${content}`);
+
+    for (const [file, entry, defaultName, namedExports] of declarationEntries) {
+      const names = namedExports.join(', ');
+      writeFileSync(
+        `dist/${file}`,
+        `import ${defaultName}, { ${names} } from "./types/${entry}";\nexport { ${names} };\nexport default ${defaultName};`,
+      );
+    }
   } catch (error) {
     throw error;
   }

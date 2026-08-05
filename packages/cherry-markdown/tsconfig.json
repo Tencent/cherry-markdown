@@ -16,16 +16,7 @@
     },
     "experimentalDecorators": true
   },
-  "include": [
-    "src/index.js",
-    "src/index.browser.js",
-    "src/index.core.js",
-    "src/index.core.browser.js",
-    "src/index.engine.js",
-    "src/index.engine.browser.js",
-    "src/index.stream.js",
-    "src/index.stream.browser.js"
-  ],
+  "include": ["src/index.js", "src/index.core.js", "src/index.engine.js", "src/index.stream.js"],
   "exclude": ["**/node_modules/**", "src/libs/**/*", "dist"],
   "files": ["types/codemirror.d.ts", "types/env.d.ts"]
 }

@@ -7,36 +7,32 @@ const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
 const readProjectFile = (filePath) => readFileSync(resolve(projectRoot, filePath), 'utf-8');
 
-describe('browser global entry split', () => {
+describe('UMD and ESM entry split', () => {
   it('keeps ESM entries free of window.Cherry side effects', () => {
-    const esmEntries = ['src/index.js', 'src/index.core.js', 'src/index.stream.js'];
+    const esmEntries = ['src/index.js', 'src/index.engine.core.js', 'src/index.stream.js'];
 
     esmEntries.forEach((entry) => {
       expect(readProjectFile(entry), entry).not.toMatch(/window\.Cherry\s*=/);
     });
   });
 
-  it('keeps explicit globals in browser-only entries', () => {
-    const browserEntries = {
-      'src/index.browser.js': {
+  it('keeps explicit globals in UMD-only entries', () => {
+    const umdEntries = {
+      'src/index.umd.js': {
         globalAssignment: /window\.Cherry\s*=\s*Cherry/,
         namedExports: /export \* from '\.\/index'/,
       },
-      'src/index.core.browser.js': {
+      'src/index.core.umd.js': {
         globalAssignment: /window\.Cherry\s*=\s*Cherry/,
-        namedExports: /export \{ MenuHookBase, SyntaxHookBase \}/,
+        namedExports: /export \{ SyntaxHookBase, MenuHookBase \}/,
       },
-      'src/index.engine.browser.js': {
-        globalAssignment: /window\.CherryEngine\s*=\s*CherryEngine/,
-        namedExports: /export \* from '\.\/index\.engine'/,
-      },
-      'src/index.stream.browser.js': {
+      'src/index.stream.umd.js': {
         globalAssignment: /window\.Cherry\s*=\s*CherryStream/,
         namedExports: /export \{ SyntaxHookBase \}/,
       },
     };
 
-    Object.entries(browserEntries).forEach(([entry, { globalAssignment, namedExports }]) => {
+    Object.entries(umdEntries).forEach(([entry, { globalAssignment, namedExports }]) => {
       const source = readProjectFile(entry);
       expect(source, entry).toMatch(/export default/);
       expect(source, entry).toMatch(globalAssignment);
