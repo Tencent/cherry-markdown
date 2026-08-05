@@ -2,6 +2,7 @@ import { build } from 'vite';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import './revision.js';
 import { legacyUmdPlugin } from './legacy-umd.plugin.js';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
@@ -86,6 +87,7 @@ for (const current of builds) {
     plugins: [legacyUmdPlugin()],
     define: {
       BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
+      'process.env.BUILD_VERSION': JSON.stringify(process.env.BUILD_VERSION || ''),
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
     },
     resolve: {

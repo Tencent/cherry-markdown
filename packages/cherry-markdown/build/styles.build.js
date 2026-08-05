@@ -8,7 +8,7 @@ const outputDir = resolve(root, 'dist');
 
 const styles = [
   ['src/sass/index.scss', 'cherry-markdown'],
-  ['src/sass/markdown_pure.scss', 'cherry-previewer'],
+  ['src/sass/markdown_pure.scss', 'cherry-markdown.markdown'],
 ];
 
 await mkdir(outputDir, { recursive: true });

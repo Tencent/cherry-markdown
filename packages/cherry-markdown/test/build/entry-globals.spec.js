@@ -77,6 +77,23 @@ describe('browser global Vite outputs', () => {
     expect(config).toMatch(/cherry-markdown\.stream\.esm\.js/);
   });
 
+  it('injects the package version into every production bundle', () => {
+    const config = readProjectFile('build/vite.build.js');
+
+    expect(config).toMatch(/import '\.\/revision\.js'/);
+    expect(config).toMatch(/'process\.env\.BUILD_VERSION': JSON\.stringify\(process\.env\.BUILD_VERSION \|\| ''\)/);
+  });
+
+  it('preserves the markdown-only stylesheet filenames', () => {
+    const stylesConfig = readProjectFile('build/styles.build.js');
+    const modules = readProjectFile('types/modules.d.ts');
+
+    expect(stylesConfig).toMatch(/\['src\/sass\/markdown_pure\.scss', 'cherry-markdown\.markdown'\]/);
+    expect(stylesConfig).not.toMatch(/\['src\/sass\/markdown_pure\.scss', 'cherry-previewer'\]/);
+    expect(modules).toContain("cherry-markdown/dist/cherry-markdown.markdown.css");
+    expect(modules).toContain("cherry-markdown/dist/cherry-markdown.markdown.min.css");
+  });
+
   it('keeps package and addon browser entries on legacy filenames', () => {
     const packageJson = JSON.parse(readProjectFile('package.json'));
     const addonConfig = readProjectFile('build/addons.build.js');
