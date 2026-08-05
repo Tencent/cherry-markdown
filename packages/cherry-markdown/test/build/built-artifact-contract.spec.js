@@ -37,7 +37,7 @@ function resolvesDeclaration(fromFile, specifier) {
   );
 }
 
-describe.skipIf(!existsSync(distRoot))('built Cherry Markdown artifact contract', () => {
+describe('built Cherry Markdown artifact contract', () => {
   it('publishes the complete UMD and ESM bundle matrix with declarations', () => {
     [...bundleNames, ...declarationNames].forEach((file) => {
       expect(existsSync(resolve(distRoot, file)), file).toBe(true);

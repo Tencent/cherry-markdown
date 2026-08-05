@@ -56,4 +56,4 @@ jobs:
         run: vp run build
 
       - name: Verify Cherry Markdown published artifacts
-        run: vp test run packages/cherry-markdown/test/build/built-artifact-contract.spec.js
+        run: vp run -F cherry-markdown test:artifacts
