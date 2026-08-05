@@ -9,7 +9,13 @@ const readProjectFile = (filePath) => readFileSync(resolve(projectRoot, filePath
 
 describe('UMD and ESM entry split', () => {
   it('keeps ESM entries free of window.Cherry side effects', () => {
-    const esmEntries = ['src/index.js', 'src/index.engine.core.js', 'src/index.stream.js'];
+    const esmEntries = [
+      'src/index.js',
+      'src/index.core.js',
+      'src/index.engine.js',
+      'src/index.engine.core.js',
+      'src/index.stream.js',
+    ];
 
     esmEntries.forEach((entry) => {
       expect(readProjectFile(entry), entry).not.toMatch(/window\.Cherry\s*=/);

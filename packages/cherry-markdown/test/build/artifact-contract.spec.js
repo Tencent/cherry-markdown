@@ -13,8 +13,8 @@ describe('Cherry Markdown published artifact contract', () => {
   const addonsBuild = readProjectFile('build/addons.build.js');
   const packageJson = JSON.parse(readProjectFile('package.json'));
 
-  it('pins the bundle filenames published in 0.11.9', () => {
-    const outputs = [
+  it('preserves 0.11.9 bundles and pins the additive format matrix', () => {
+    const publishedOutputs = [
       ['full-esm', 'index.js', 'cherry-markdown.esm.js', 'es'],
       ['full-umd', 'index.umd.js', 'cherry-markdown.js', 'umd', 'Cherry'],
       ['core-umd', 'index.core.umd.js', 'cherry-markdown.core.js', 'umd', 'Cherry'],
@@ -23,8 +23,13 @@ describe('Cherry Markdown published artifact contract', () => {
       ['stream-esm', 'index.stream.js', 'cherry-markdown.stream.esm.js', 'es'],
       ['stream-umd', 'index.stream.umd.js', 'cherry-markdown.stream.js', 'umd', 'Cherry'],
     ];
+    const additiveOutputs = [
+      ['core-esm', 'index.core.js', 'cherry-markdown.core.esm.js', 'es'],
+      ['engine-esm', 'index.engine.js', 'cherry-markdown.engine.esm.js', 'es'],
+      ['engine-umd', 'index.engine.js', 'cherry-markdown.engine.js', 'umd', 'CherryEngine'],
+    ];
 
-    outputs.forEach(([id, entry, file, format, name]) => {
+    [...publishedOutputs, ...additiveOutputs].forEach(([id, entry, file, format, name]) => {
       expect(viteBuild, id).toContain(`id: '${id}'`);
       expect(viteBuild, id).toContain(`entry: resolve(src, '${entry}')`);
       expect(viteBuild, id).toContain(`file: '${file}'`);
@@ -33,7 +38,7 @@ describe('Cherry Markdown published artifact contract', () => {
         expect(viteBuild, id).toContain(`name: '${name}'`);
       }
     });
-    expect(viteBuild.match(/id: '(?:full|core|engine-core|stream)-(?:esm|umd)'/g)).toHaveLength(7);
+    expect(viteBuild.match(/id: '(?:full|core|engine|engine-core|stream)-(?:esm|umd)'/g)).toHaveLength(10);
     expect(viteBuild).toMatch(/id: 'full-umd'[\s\S]*?sourcemap: true/);
   });
 
@@ -67,8 +72,8 @@ describe('Cherry Markdown published artifact contract', () => {
     expect(packageJson.files).toEqual(['dist', 'types', '!types/env.d.ts']);
   });
 
-  it('pins the top-level declarations published in 0.11.9', () => {
-    const declarations = [
+  it('preserves 0.11.9 declarations and pins declarations for additive bundles', () => {
+    const publishedDeclarations = [
       'cherry-markdown.d.ts',
       'cherry-markdown.esm.d.ts',
       'cherry-markdown.core.d.ts',
@@ -77,9 +82,16 @@ describe('Cherry Markdown published artifact contract', () => {
       'cherry-markdown.stream.d.ts',
       'cherry-markdown.stream.esm.d.ts',
     ];
+    const additiveDeclarations = [
+      'cherry-markdown.core.esm.d.ts',
+      'cherry-markdown.engine.d.ts',
+      'cherry-markdown.engine.esm.d.ts',
+    ];
     const typeBuild = readProjectFile('build/replacePaths.js');
 
-    declarations.forEach((file) => expect(typeBuild, file).toContain(`'${file}'`));
+    [...publishedDeclarations, ...additiveDeclarations].forEach((file) => {
+      expect(typeBuild, file).toContain(`'${file}'`);
+    });
   });
 
   it('pins the full and markdown-only stylesheet filenames and declarations', () => {
@@ -109,7 +121,13 @@ describe('Cherry Markdown published artifact contract', () => {
   });
 
   it('pins browser global and ESM side-effect boundaries', () => {
-    const esmEntries = ['src/index.js', 'src/index.engine.core.js', 'src/index.stream.js'];
+    const esmEntries = [
+      'src/index.js',
+      'src/index.core.js',
+      'src/index.engine.js',
+      'src/index.engine.core.js',
+      'src/index.stream.js',
+    ];
     const umdEntries = {
       'src/index.umd.js': /window\.Cherry\s*=\s*Cherry/,
       'src/index.core.umd.js': /window\.Cherry\s*=\s*Cherry/,
@@ -122,13 +140,11 @@ describe('Cherry Markdown published artifact contract', () => {
     });
   });
 
-  it('forbids bundle filenames that were not published in 0.11.9', () => {
+  it('forbids unsupported alternate bundle filenames', () => {
     const buildSources = `${viteBuild}\n${stylesBuild}\n${addonsBuild}\n${JSON.stringify(packageJson)}`;
 
     expect(buildSources).not.toMatch(/\.iife\.js/);
     expect(buildSources).not.toMatch(/cherry-markdown\.umd\.js/);
     expect(buildSources).not.toMatch(/cherry-markdown\.min\.js/);
-    expect(buildSources).not.toMatch(/cherry-markdown\.core\.esm\.js/);
-    expect(buildSources).not.toMatch(/cherry-markdown\.engine(?:\.esm)?\.js/);
   });
 });

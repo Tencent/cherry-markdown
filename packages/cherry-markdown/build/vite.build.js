@@ -38,6 +38,28 @@ const builds = [
     external: coreExternal,
   },
   {
+    id: 'core-esm',
+    entry: resolve(src, 'index.core.js'),
+    file: 'cherry-markdown.core.esm.js',
+    format: 'es',
+    external: coreExternal,
+  },
+  {
+    id: 'engine-esm',
+    entry: resolve(src, 'index.engine.js'),
+    file: 'cherry-markdown.engine.esm.js',
+    format: 'es',
+    external: engineExternal,
+  },
+  {
+    id: 'engine-umd',
+    entry: resolve(src, 'index.engine.js'),
+    file: 'cherry-markdown.engine.js',
+    format: 'umd',
+    name: 'CherryEngine',
+    external: engineExternal,
+  },
+  {
     id: 'engine-core-esm',
     entry: resolve(src, 'index.engine.core.js'),
     file: 'cherry-markdown.engine.core.esm.js',
