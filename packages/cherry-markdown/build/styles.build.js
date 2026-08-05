@@ -3,14 +3,17 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as sass from 'sass';
 
-import { styleBuildTargets } from './artifact-contract.js';
-
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const outputDir = resolve(root, 'dist');
 
+const styles = [
+  ['src/sass/index.scss', 'cherry-markdown'],
+  ['src/sass/markdown_pure.scss', 'cherry-markdown.markdown'],
+];
+
 await mkdir(outputDir, { recursive: true });
 
-for (const { input, name } of styleBuildTargets) {
+for (const [input, name] of styles) {
   const source = resolve(root, input);
   const expanded = sass.compile(source, { style: 'expanded', charset: false });
   const compressed = sass.compile(source, { style: 'compressed', charset: false });
