@@ -33,8 +33,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     continue-on-error: ${{ inputs.mode == 'package' }}
-    env:
-      MARKETPLACE_DIR: ${{ runner.temp }}/cherry-markdown-vscode
     steps:
       - uses: actions/checkout@v6
 
@@ -83,6 +81,7 @@ jobs:
       # ── 4. 发布时才在隔离目录使用 Marketplace 名称，避免 Yarn workspace 重名。──
       - name: Prepare Marketplace Package
         run: |
+          MARKETPLACE_DIR="$RUNNER_TEMP/cherry-markdown-vscode"
           mkdir -p "$MARKETPLACE_DIR"
           tar -C packages/vscodePlugin \
             --exclude='./node_modules' \
@@ -102,6 +101,7 @@ jobs:
       - name: Package VSCode Plugin
         if: inputs.mode == 'package'
         run: |
+          MARKETPLACE_DIR="$RUNNER_TEMP/cherry-markdown-vscode"
           cd "$MARKETPLACE_DIR"
           VERSION=$(jq -r '.version' package.json)
           "$GITHUB_WORKSPACE/node_modules/.bin/vsce" package \
@@ -124,6 +124,7 @@ jobs:
       - name: Package VSIX (release)
         if: inputs.mode == 'release'
         run: |
+          MARKETPLACE_DIR="$RUNNER_TEMP/cherry-markdown-vscode"
           cd "$MARKETPLACE_DIR"
           VERSION=$(jq -r '.version' package.json)
           "$GITHUB_WORKSPACE/node_modules/.bin/vsce" package \
