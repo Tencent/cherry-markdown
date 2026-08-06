@@ -1,6 +1,7 @@
 {
   "description": "Просмотрщик Markdown для VS Code, основанный на [cherry-markdown](https://github.com/Tencent/cherry-markdown)",
   "commands.preview.title": "Просмотр в Cherry Markdown",
+  "workspaceTrust.description": "Предпросмотр доступен в ограниченном режиме, но адреса загрузки из настроек рабочей области игнорируются.",
   "usage.enum.active": "Активный",
   "usage.enum.only-manual": "Только вручную",
   "usage.description": "Режим триггера Cherry Markdown — параметры: [ Активный | Только вручную ]",

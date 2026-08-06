@@ -24,8 +24,19 @@
     "Visualization"
   ],
   "activationEvents": [
-    "onLanguage:markdown"
+    "onLanguage:markdown",
+    "onCommand:cherrymarkdown.preview"
   ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "%workspaceTrust.description%",
+      "restrictedConfigurations": [
+        "cherryMarkdown.CustomUploader",
+        "cherryMarkdown.PicGoServer"
+      ]
+    }
+  },
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -43,13 +54,6 @@
         }
       ]
     },
-    "keybindings": [
-      {
-        "command": "cherrymarkdown.preview",
-        "key": "F10",
-        "when": "editorTextFocus && editorLangId == markdown"
-      }
-    ],
     "icons": {
       "distro-ubuntu": {
         "description": "cherry-markdown icon",
@@ -64,8 +68,12 @@
       "properties": {
         "cherryMarkdown.Usage": {
           "type": "string",
-          "default": "%usage.enum.active%",
+          "default": "active",
           "enum": [
+            "active",
+            "only-manual"
+          ],
+          "enumItemLabels": [
             "%usage.enum.active%",
             "%usage.enum.only-manual%"
           ],
@@ -73,8 +81,14 @@
         },
         "cherryMarkdown.Theme": {
           "type": "string",
-          "default": "%theme.enum.default%",
+          "default": "default",
           "enum": [
+            "default",
+            "dark",
+            "green",
+            "red"
+          ],
+          "enumItemLabels": [
             "%theme.enum.default%",
             "%theme.enum.dark%",
             "%theme.enum.green%",
@@ -84,8 +98,13 @@
         },
         "cherryMarkdown.UploadType": {
           "type": "string",
-          "default": "%uploadType.enum.None%",
+          "default": "none",
           "enum": [
+            "none",
+            "custom",
+            "picgo"
+          ],
+          "enumItemLabels": [
             "%uploadType.enum.None%",
             "%uploadType.enum.CustomUploader%",
             "%uploadType.enum.PicGoServer%"
@@ -100,11 +119,9 @@
         "cherryMarkdown.CustomUploader": {
           "type": "object",
           "default": {
-            "enable": true,
-            "url": "https://your-server.com/upload",
-            "headers": {
-              "Access-Control-Allow-Origin": "*"
-            }
+            "enable": false,
+            "url": "",
+            "headers": {}
           },
           "properties": {
             "enable": {
@@ -121,17 +138,8 @@
               "type": "object",
               "default": {},
               "description": "%customUploader.headers%",
-              "properties": {
-                "key": {
-                  "type": "string",
-                  "default": "",
-                  "description": "%customUploader.headers.key.description%"
-                },
-                "value": {
-                  "type": "string",
-                  "default": "",
-                  "description": "%customUploader.headers.value.description%"
-                }
+              "additionalProperties": {
+                "type": "string"
               }
             }
           },
@@ -147,6 +155,12 @@
           "items": {
             "type": "string",
             "enum": [
+              "isBorder",
+              "isNotBorder",
+              "isShadow",
+              "isRadius"
+            ],
+            "enumItemLabels": [
               "%backfillImageProps.enum.isBorder%",
               "%backfillImageProps.enum.isNotBorder%",
               "%backfillImageProps.enum.isShadow%",
@@ -167,19 +181,32 @@
     }
   },
   "scripts": {
-    "dev": "rspack build --watch",
-    "build": "rspack build --mode production",
-    "package": "yarn build && npx @vscode/vsce package --no-dependencies --no-yarn"
+    "build": "yarn build:extension && yarn build:webview",
+    "build:extension": "vite build --mode extension",
+    "build:webview": "vite build --mode webview",
+    "typecheck": "tsc --noEmit",
+    "test": "yarn test:unit && yarn test:integration",
+    "test:unit": "vitest run test/config.test.ts test/protocol.test.ts test/textEdit.test.ts",
+    "test:package": "vitest run test/package.test.ts",
+    "test:vsix": "vitest run test/vsix.test.ts",
+    "test:integration": "yarn build && tsc && node out/test/runIntegrationTests.js",
+    "package": "yarn build && yarn test:package && vsce package --no-dependencies --no-yarn && yarn test:vsix"
   },
   "devDependencies": {
-    "@rspack/cli": "^1.5.3",
-    "@rspack/core": "^1.5.3",
-    "@types/vscode": "^1.58.0",
+    "@types/node": "^20.10.6",
+    "@types/mocha": "^10.0.10",
+    "@types/vscode": "1.73.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "3.9.2",
     "axios": "^1.4.0",
     "cherry-markdown": "*",
-    "css-loader": "^7.1.4",
     "html-to-image": "^1.11.11",
-    "mathjax": "^3.2.2"
+    "mathjax": "^3.2.2",
+    "ovsx": "1.1.0",
+    "typescript": "^6.0.2",
+    "vite": "^6.4.1",
+    "vitest": "^3.1.3"
   },
   "dependencies": {}
 }

@@ -2,11 +2,13 @@
 out/**
 node_modules/**
 src/**
+test/**
+.vscode-test.mjs
+vite.config.mts
+vitest.config.mts
 .gitignore
 .yarnrc
-vsc-extension-quickstart.md
-**/.eslintrc.json
+publish_manual.md
+tsconfig.json
 **/*.map
 **/*.ts
-
-web-resources/scripts/global-vars.js

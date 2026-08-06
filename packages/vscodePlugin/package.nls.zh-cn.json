@@ -1,6 +1,7 @@
 {
   "description": "适用于 VS Code 的 Markdown 预览器，基于 [cherry-markdown](https://github.com/Tencent/cherry-markdown)",
   "commands.preview.title": "在 Cherry Markdown 中预览",
+  "workspaceTrust.description": "受限模式下仍可预览，但会忽略工作区定义的上传地址。",
   "usage.enum.active": "激活",
   "usage.enum.only-manual": "仅手动",
   "usage.description": "cherry-markdown 的触发模式 — 可选项：[ 激活 | 仅手动 ]",

@@ -1,6 +1,7 @@
 {
   "description": "A Markdown previewer for VS Code, powered by [cherry-markdown](https://github.com/Tencent/cherry-markdown)",
   "commands.preview.title": "Preview in Cherry Markdown",
+  "workspaceTrust.description": "Preview remains available in Restricted Mode, but workspace-defined upload endpoints are ignored.",
   "usage.enum.active": "Active",
   "usage.enum.only-manual": "Manual only",
   "usage.description": "Trigger mode for Cherry Markdown — options: [ Active | Manual only ]",

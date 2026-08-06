@@ -1,39 +1,69 @@
-# Cherry Markdown VSCode Extension
+# Cherry Markdown for VS Code
 
-## Introduction
-
-[Cherry Markdown Editor](https://github.com/Tencent/cherry-markdown) is an open-source, lightweight and easy to extend Javascript Markdown editor. Cherry Markdown supports [CommonMark specification](https://commonmark.org/), [GitHub Flavored Markdown Spec](https://github.github.com/gfm/) and many custom grammars. Check it in [demo page](https://tencent.github.io/cherry-markdown/examples/index.html).
+Cherry Markdown for VS Code provides a live Markdown preview and an optional visual editing surface powered by [Cherry Markdown](https://github.com/Tencent/cherry-markdown).
 
 ## Features
 
-### Syntax Features
+- Live preview with bidirectional scroll synchronization
+- Optional visual editing with VS Code undo, save, and external-change protection
+- CommonMark, GitHub Flavored Markdown, formulas, tables, checklists, media, and Cherry Markdown extensions
+- Relative workspace images and links
+- PNG export
+- Image insertion using base64, a custom uploader, or PicGo
+- English, Simplified Chinese, and Russian UI
 
-- Generate charts based on table content
-- Adjust font color and size
-- Font background color, superscript and subscript
-- Insert checklists
-- Insert audio or video
+## Usage
 
-### Functional Features
+Open a Markdown file and run **Cherry Markdown: Preview in Cherry Markdown** from the Command Palette or the editor context menu.
 
-- Live preview with Scroll Sync
-- Mobile preview mode
-- Copy from rich text and paste as markdown text
-- Image size editing
+By default, the preview opens automatically for active Markdown documents. Set `cherryMarkdown.Usage` to `only-manual` to open it only through the command.
 
-### Performance Features
+The preview follows the active Markdown document. When another file type has focus, visual editing is disabled so that changes cannot be written to the wrong document.
 
-- Partial rendering
-- Partial update
+## Settings
 
-### Security
+| Setting                             | Values                            | Default                         | Description                                                            |
+| ----------------------------------- | --------------------------------- | ------------------------------- | ---------------------------------------------------------------------- |
+| `cherryMarkdown.Usage`              | `active`, `only-manual`           | `active`                        | Controls automatic preview opening.                                    |
+| `cherryMarkdown.Theme`              | `default`, `dark`, `green`, `red` | `default`                       | Selects the Cherry Markdown theme.                                     |
+| `cherryMarkdown.UploadType`         | `none`, `custom`, `picgo`         | `none`                          | Selects image insertion behavior.                                      |
+| `cherryMarkdown.CustomUploader`     | object                            | disabled                        | Configures a custom HTTP uploader.                                     |
+| `cherryMarkdown.PicGoServer`        | URL                               | `http://127.0.0.1:36677/upload` | Configures the PicGo server endpoint.                                  |
+| `cherryMarkdown.BackfillImageProps` | array                             | `[]`                            | Adds border, shadow, radius, or no-border metadata to inserted images. |
 
-Cherry Markdown has a built-in security Hook, filtering through whitelist and DomPurify to perform scan filtering.
+Configuration values are stable across VS Code display languages. Values written by older English, Chinese, and Russian versions are still recognized.
 
-### Style Themes
+## Upload security
 
-Cherry Markdown has a variety of style themes to choose from.
+- Workspace-defined custom uploader and PicGo endpoints are ignored in Restricted Mode.
+- Upload endpoints must use HTTP or HTTPS.
+- Upload files are limited to 50 MB and requests time out after 30 seconds.
+- Without an uploader, only images are accepted and inserted as data URLs.
 
-### Features Demo
+Authentication headers stored in settings are visible as plain text. Prefer user settings over workspace settings and avoid committing credentials to the repository.
 
-Click [Cherry Markdown Wiki](https://github.com/Tencent/cherry-markdown/wiki/%E7%89%B9%E6%80%A7%E5%B1%95%E7%A4%BA-features) for more details.
+## Development
+
+From the repository root:
+
+```bash
+yarn install
+yarn build:vscodePlugin
+yarn workspace cherry-markdown-vscode-plugin typecheck
+yarn workspace cherry-markdown-vscode-plugin test:unit
+yarn workspace cherry-markdown-vscode-plugin test:package
+yarn workspace cherry-markdown-vscode-plugin test:integration
+```
+
+To inspect the distributable package:
+
+```bash
+cd packages/vscodePlugin
+yarn package
+```
+
+The integration test downloads a fixed VS Code version so local and CI runs use the same Extension Host contract.
+
+## Feedback
+
+Report extension issues using the [VS Code Plugin Feedback template](https://github.com/Tencent/cherry-markdown/issues/new?template=6.vscode_plugin_feedback.yml).

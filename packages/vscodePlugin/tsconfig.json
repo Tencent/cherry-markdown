@@ -7,8 +7,9 @@
     "lib": ["es2020", "DOM"],
     "rootDir": ".",
     "moduleResolution": "node16",
+    "types": ["node", "vscode", "mocha"],
     "noEmit": false
   },
-  "include": ["src/**/*.ts", "rspack.config.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*.ts", "test/**/*.ts", "web-resources/scripts/**/*.ts", "vite.config.mts", "vitest.config.mts"],
+  "exclude": ["node_modules", "dist", "web-resources/dist"]
 }

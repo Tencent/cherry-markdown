@@ -32,7 +32,7 @@ const ignores = [
   'examples/**',
   'packages/cherry-markdown/src/libs/*.js',
   'packages/cherry-markdown/src/addons/advance/maps/**',
-  'packages/vscodePlugin/web-resources/**',
+  'packages/vscodePlugin/web-resources/scripts/pinyin/**',
 
   // 样式与构建模板（非 JS/TS 语义）
   '**/*.css',
@@ -143,7 +143,7 @@ export default [
     './tsconfig.eslint.json',
   ),
   // vscode plugin
-  ...createTencentTsConfigs(packageRoots.vscodePlugin, ['packages/vscodePlugin/**/*.ts']),
+  ...createTencentTsConfigs(packageRoots.vscodePlugin, ['packages/vscodePlugin/**/*.{ts,mts}']),
   // cherry-markdown：types / 构建配置
   ...createTencentTsConfigs(
     packageRoots.cherryMarkdown,

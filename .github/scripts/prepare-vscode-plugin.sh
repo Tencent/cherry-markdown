@@ -52,10 +52,11 @@ cd "$ROOT_DIR/packages/vscodePlugin"
 #     所以读取核心库实际版本号作为依赖值。
 CORE_VERSION=$(jq -r '.version' "$ROOT_DIR/packages/cherry-markdown/package.json")
 tmp=$(mktemp) && jq --arg ver "$CORE_VERSION" '
-  .dependencies["cherry-markdown-core"] = $ver |
+  .devDependencies["cherry-markdown-core"] = $ver |
+  del(.devDependencies["cherry-markdown"]) |
   del(.dependencies["cherry-markdown"])
 ' package.json > "$tmp" && mv "$tmp" package.json
-echo "   ✅ dep: cherry-markdown → cherry-markdown-core@$CORE_VERSION"
+echo "   ✅ devDep: cherry-markdown → cherry-markdown-core@$CORE_VERSION"
 
 # 3b. 包名: cherry-markdown-vscode-plugin → cherry-markdown
 tmp=$(mktemp) && jq '.name = "cherry-markdown"' package.json > "$tmp" && mv "$tmp" package.json

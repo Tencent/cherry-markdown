@@ -1,5 +1,23 @@
 {
   "Preview": "预览",
   "By": "通过",
-  "UnSupported": "不支持"
+  "UnSupported": "不支持",
+  "Unsupported": "不支持",
+  "Edit": "编辑",
+  "Font style": "字体样式",
+  "Save": "保存",
+  "Save as PNG": "保存为 PNG",
+  "Save PNG": "保存 PNG",
+  "The Markdown document is not active, so preview editing is disabled.": "Markdown 文档当前未激活，因此已禁用预览编辑。",
+  "The preview document is no longer active.": "预览对应的文档已不再激活。",
+  "The document changed outside the preview.": "文档已在预览外部发生变更。",
+  "Unable to apply the preview edit.": "无法应用预览区的编辑。",
+  "Upload failed.": "上传失败。",
+  "The link is invalid.": "链接无效。",
+  "This link protocol is not allowed.": "不允许打开该链接协议。",
+  "Unable to export the preview as PNG.": "无法将预览导出为 PNG。",
+  "The exported PNG is too large.": "导出的 PNG 过大。",
+  "Saving Cherry Markdown PNG...": "正在保存 Cherry Markdown PNG...",
+  "Image saved successfully.": "图片已保存。",
+  "Unable to save the PNG.": "无法保存 PNG。"
 }
