@@ -32,11 +32,11 @@ const webviewConfig: UserConfig = {
   resolve: {
     alias: [
       {
-        find: /^cherry-markdown-core$/,
+        find: /^cherry-markdown$/,
         replacement: path.resolve(packageRoot, '../cherry-markdown/dist/cherry-markdown.esm.js'),
       },
       {
-        find: 'cherry-markdown-core/dist/cherry-markdown.min.css',
+        find: 'cherry-markdown/dist/cherry-markdown.min.css',
         replacement: path.resolve(packageRoot, '../cherry-markdown/dist/cherry-markdown.min.css'),
       },
     ],

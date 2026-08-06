@@ -6,10 +6,10 @@
 #   "release"     — 构建 + 打包 .vsix + 发布到 VS Marketplace 与 Open VSX
 #
 # 步骤:
-#   1. 改名（cherry-markdown-core + cherry-markdown）— 解决 workspace 冲突
-#   2. 改版本号（package 模式加时间戳）
-#   3. 安装依赖 + 构建核心库
-#   4. 生产模式编译插件
+#   1. 改版本号（package 模式加时间戳）
+#   2. 安装依赖并构建插件
+#   3. 类型检查、测试和产物验证
+#   4. 准备隔离的 Marketplace 打包目录
 #   5. 打包 / 上传 artifact / 双市场发布
 # =============================================================================
 
@@ -33,6 +33,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     continue-on-error: ${{ inputs.mode == 'package' }}
+    env:
+      MARKETPLACE_DIR: ${{ runner.temp }}/cherry-markdown-vscode
     steps:
       - uses: actions/checkout@v6
 
@@ -42,11 +44,7 @@ jobs:
           node-version-file: .node-version
           cache: 'yarn'
 
-      # ── 1. 改名：解决 workspace 同名冲突 ──
-      - name: Prepare package names
-        run: bash .github/scripts/prepare-vscode-plugin.sh
-
-      # ── 2. 改版本号（package 加时间戳）──
+      # ── 1. 改版本号（package 加时间戳）──
       - name: Stamp preview version
         if: inputs.mode != 'release'
         run: |
@@ -64,32 +62,54 @@ jobs:
             )
           ' package.json > "$tmp" && mv "$tmp" package.json
 
-      # ── 3. 安装依赖 + 构建核心库 ──
-      - name: Install and Build Dependencies
-        run: |
-          yarn --network-timeout 100000
-          yarn build
+      # ── 2. 安装依赖 + 构建插件 ──
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile --network-timeout 100000
 
-      # ── 4. 生产模式编译插件 ──
+      # 核心库必须先生成 ESM/CSS，根脚本负责按顺序构建核心库和插件。
       - name: Build VSCode Plugin (production bundle)
         run: yarn build:vscodePlugin
 
+      # ── 3. 类型检查、测试和产物验证 ──
       - name: Validate VSCode Plugin
         run: |
-          yarn workspace cherry-markdown typecheck
-          yarn workspace cherry-markdown test:unit
-          yarn workspace cherry-markdown test:package
+          yarn workspace cherry-markdown-vscode-plugin typecheck
+          yarn workspace cherry-markdown-vscode-plugin test:unit
+          yarn workspace cherry-markdown-vscode-plugin test:package
 
       - name: Test VSCode Plugin in Extension Host
-        run: xvfb-run -a yarn workspace cherry-markdown test:integration
+        run: xvfb-run -a yarn workspace cherry-markdown-vscode-plugin test:integration
+
+      # ── 4. 发布时才在隔离目录使用 Marketplace 名称，避免 Yarn workspace 重名。──
+      - name: Prepare Marketplace Package
+        run: |
+          mkdir -p "$MARKETPLACE_DIR"
+          tar -C packages/vscodePlugin \
+            --exclude='./node_modules' \
+            --exclude='./.vscode-test' \
+            --exclude='./out' \
+            --exclude='./*.vsix' \
+            -cf - . | tar -C "$MARKETPLACE_DIR" -xf -
+
+          tmp=$(mktemp)
+          jq '
+            .name = "cherry-markdown" |
+            del(.scripts["vscode:prepublish"])
+          ' "$MARKETPLACE_DIR/package.json" > "$tmp"
+          mv "$tmp" "$MARKETPLACE_DIR/package.json"
 
       # ── 5a. package 模式：打包 + 上传 artifact ──
       - name: Package VSCode Plugin
         if: inputs.mode == 'package'
         run: |
-          cd packages/vscodePlugin
-          yarn vsce package --no-dependencies --no-yarn
-          yarn test:vsix
+          cd "$MARKETPLACE_DIR"
+          VERSION=$(jq -r '.version' package.json)
+          "$GITHUB_WORKSPACE/node_modules/.bin/vsce" package \
+            --no-dependencies \
+            --no-yarn \
+            --out "$GITHUB_WORKSPACE/packages/vscodePlugin/cherry-markdown-$VERSION.vsix"
+          cd "$GITHUB_WORKSPACE/packages/vscodePlugin"
+          VSCODE_EXTENSION_NAME=cherry-markdown ../../node_modules/.bin/vitest run test/vsix.test.ts
 
       - name: Upload VSIX
         if: inputs.mode == 'package'
@@ -104,9 +124,14 @@ jobs:
       - name: Package VSIX (release)
         if: inputs.mode == 'release'
         run: |
-          cd packages/vscodePlugin
-          yarn vsce package --no-dependencies --no-yarn
-          yarn test:vsix
+          cd "$MARKETPLACE_DIR"
+          VERSION=$(jq -r '.version' package.json)
+          "$GITHUB_WORKSPACE/node_modules/.bin/vsce" package \
+            --no-dependencies \
+            --no-yarn \
+            --out "$GITHUB_WORKSPACE/packages/vscodePlugin/cherry-markdown-$VERSION.vsix"
+          cd "$GITHUB_WORKSPACE/packages/vscodePlugin"
+          VSCODE_EXTENSION_NAME=cherry-markdown ../../node_modules/.bin/vitest run test/vsix.test.ts
           ls -1 *.vsix
 
       - name: Publish to Visual Studio Marketplace
@@ -116,7 +141,7 @@ jobs:
         run: |
           cd packages/vscodePlugin
           VSIX=$(ls -1 *.vsix | head -1)
-          yarn vsce publish --packagePath "$VSIX" --no-dependencies --no-yarn
+          ../../node_modules/.bin/vsce publish --packagePath "$VSIX" --no-dependencies --no-yarn
 
       - name: Publish to Open VSX Registry
         if: inputs.mode == 'release'
@@ -125,4 +150,4 @@ jobs:
         run: |
           cd packages/vscodePlugin
           VSIX=$(ls -1 *.vsix | head -1)
-          yarn ovsx publish "$VSIX" --no-dependencies --no-yarn
+          ../../node_modules/.bin/ovsx publish "$VSIX" --no-dependencies --no-yarn

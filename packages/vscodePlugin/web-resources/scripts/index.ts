@@ -1,7 +1,5 @@
-// CI 环境下核心库被重命名为 cherry-markdown-core，本地开发时为 cherry-markdown
-// vite.config.mts 中的 alias 会确保两种情况下都能正确解析
-import Cherry from 'cherry-markdown-core';
-import 'cherry-markdown-core/dist/cherry-markdown.min.css';
+import Cherry from 'cherry-markdown';
+import 'cherry-markdown/dist/cherry-markdown.min.css';
 import type { CherryTheme } from '../../src/config';
 import type {
   EditorState,

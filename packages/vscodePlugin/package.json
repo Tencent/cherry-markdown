@@ -16,6 +16,9 @@
     "type": "git",
     "url": "https://github.com/Tencent/cherry-markdown.git"
   },
+  "bugs": {
+    "url": "https://github.com/Tencent/cherry-markdown/issues"
+  },
   "homepage": "https://github.com/Tencent/cherry-markdown",
   "engines": {
     "vscode": "^1.73.0"
@@ -181,16 +184,15 @@
     }
   },
   "scripts": {
-    "build": "yarn build:extension && yarn build:webview",
-    "build:extension": "vite build --mode extension",
-    "build:webview": "vite build --mode webview",
+    "build": "vite build --mode extension && vite build --mode webview",
+    "vscode:prepublish": "yarn build && yarn test:package",
     "typecheck": "tsc --noEmit",
     "test": "yarn test:unit && yarn test:integration",
     "test:unit": "vitest run test/config.test.ts test/protocol.test.ts test/textEdit.test.ts",
     "test:package": "vitest run test/package.test.ts",
     "test:vsix": "vitest run test/vsix.test.ts",
     "test:integration": "yarn build && tsc && node out/test/runIntegrationTests.js",
-    "package": "yarn build && yarn test:package && vsce package --no-dependencies --no-yarn && yarn test:vsix"
+    "package": "vsce package --no-dependencies --no-yarn && yarn test:vsix"
   },
   "devDependencies": {
     "@types/node": "^20.10.6",

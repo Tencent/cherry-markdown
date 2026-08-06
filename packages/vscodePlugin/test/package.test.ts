@@ -20,4 +20,12 @@ describe('VS Code extension build artifacts', () => {
   test('does not recreate the obsolete global variables file', () => {
     expect(fs.existsSync(path.join(packageRoot, 'web-resources/scripts/global-vars.js'))).toBe(false);
   });
+
+  test('bundles the Cherry Markdown workspace dependency into the webview', () => {
+    const webviewBundle = fs.readFileSync(path.join(packageRoot, 'web-resources/dist/index.js'), 'utf8');
+    const runtimeImport = /(?:from\s*|import\s*\(\s*|require\(\s*)['"]cherry-markdown(?:\/[^'"]*)?['"]/;
+
+    expect(webviewBundle).not.toMatch(runtimeImport);
+    expect(webviewBundle).toContain('Cherry Markdown');
+  });
 });

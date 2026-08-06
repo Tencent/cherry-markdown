@@ -4,6 +4,8 @@ import path from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 const packageRoot = process.cwd();
+const sourceManifest = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8')) as { name: string };
+const expectedExtensionName = process.env.VSCODE_EXTENSION_NAME ?? sourceManifest.name;
 const archives = fs
   .readdirSync(packageRoot)
   .filter((file) => file.endsWith('.vsix'))
@@ -47,5 +49,16 @@ describe('VSIX archive', () => {
       ].some((pattern) => pattern.test(file)),
     );
     expect(developmentFile).toBeUndefined();
+  });
+
+  test('contains the expected extension identity', () => {
+    expect(archive).toBeDefined();
+    if (!archive) return;
+
+    const manifest = spawnSync('unzip', ['-p', path.join(packageRoot, archive.file), 'extension/package.json'], {
+      encoding: 'utf8',
+    });
+    expect(manifest.status, manifest.stderr).toBe(0);
+    expect((JSON.parse(manifest.stdout) as { name: string }).name).toBe(expectedExtensionName);
   });
 });
