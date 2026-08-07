@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { getTheme, getUsageMode } from './config';
+import { getTheme, getUsageMode, migrateTheme, THEME_STATE_KEY } from './config';
 import { uploadFileHandler } from './handler/uploadFile';
 import type { EditorState, ExtensionToWebviewMessage } from './protocol';
 import { parseWebviewMessage } from './protocol';
@@ -183,9 +183,6 @@ class CherryMarkdownPreview {
 
   private async handleConfigurationChange(event: vscode.ConfigurationChangeEvent): Promise<void> {
     if (!this.targetEditor) return;
-    if (event.affectsConfiguration('cherryMarkdown.Theme', this.targetEditor.document.uri)) {
-      await this.postEditorState('editor-change');
-    }
     if (
       !this.panel &&
       event.affectsConfiguration('cherryMarkdown.Usage', this.targetEditor.document.uri) &&
@@ -260,9 +257,8 @@ class CherryMarkdownPreview {
 
   private async updateTheme(theme: string): Promise<void> {
     if (!this.targetEditor) return;
-    await vscode.workspace
-      .getConfiguration('cherryMarkdown', this.targetEditor.document.uri)
-      .update('Theme', theme, vscode.ConfigurationTarget.Global);
+    await this.context.globalState.update(THEME_STATE_KEY, theme);
+    await this.postEditorState('editor-change');
   }
 
   private async uploadFile(file: Parameters<typeof uploadFileHandler>[0]): Promise<void> {
@@ -354,7 +350,7 @@ class CherryMarkdownPreview {
     const { document } = editor;
     return {
       text: document.getText(),
-      theme: getTheme(document.uri),
+      theme: getTheme(this.context.globalState, document.uri),
       documentUri: document.uri.toString(),
       documentVersion: document.version,
       resourceUri: this.panel.webview.asWebviewUri(document.uri).toString(),
@@ -419,6 +415,7 @@ export function activate(context: vscode.ExtensionContext): void {
   preview = new CherryMarkdownPreview(context, output);
   preview.register();
   context.subscriptions.push(output, preview);
+  void migrateTheme(context.globalState);
 }
 
 export function deactivate(): void {

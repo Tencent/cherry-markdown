@@ -3,6 +3,13 @@ import path from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 const packageRoot = process.cwd();
+const packageManifest = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8')) as {
+  contributes: {
+    commands: Array<{ command: string; title: string }>;
+    keybindings: Array<{ command: string; key: string }>;
+    configuration: { properties: Record<string, unknown> };
+  };
+};
 const manifest = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8')) as { main: string };
 const requiredFiles = [
   manifest.main,
@@ -27,5 +34,24 @@ describe('VS Code extension build artifacts', () => {
 
     expect(webviewBundle).not.toMatch(runtimeImport);
     expect(webviewBundle).toContain('Cherry Markdown');
+  });
+
+  test('keeps theme ownership inside Cherry Markdown', () => {
+    expect(packageManifest.contributes.configuration.properties['cherryMarkdown.Theme']).toBeUndefined();
+    expect(packageManifest.contributes.configuration.properties['cherryMarkdown.PicGoServer']).toBeUndefined();
+  });
+
+  test('provides a localized command manifest and an explicit shortcut', () => {
+    expect(packageManifest.contributes.commands).toContainEqual({
+      command: 'cherrymarkdown.preview',
+      title: '%commands.preview.title%',
+    });
+    expect(packageManifest.contributes.keybindings).toEqual(
+      expect.arrayContaining([expect.objectContaining({ command: 'cherrymarkdown.preview', key: 'F10' })]),
+    );
+    const zhCnMessages = JSON.parse(
+      fs.readFileSync(path.join(packageRoot, 'package.nls.zh-cn.json'), 'utf8'),
+    ) as Record<string, string>;
+    expect(zhCnMessages['commands.preview.title']).toBe('在 Cherry Markdown 中预览');
   });
 });

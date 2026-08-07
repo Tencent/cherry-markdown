@@ -26,13 +26,14 @@ describe('configuration normalization', () => {
   });
 
   test.each([
-    ['none', 'none'],
-    ['None', 'none'],
-    ['自定义上传器', 'custom'],
-    ['Пользовательский загрузчик', 'custom'],
-    ['PicGoServer', 'picgo'],
-  ])('normalizes uploader %s', (value, expected) => {
-    expect(config.normalizeUploadType(value)).toBe(expected);
+    ['workspace', 'workspace'],
+    ['工作区', 'workspace'],
+    ['data', 'data'],
+    ['Base64', 'data'],
+    ['remote', 'remote'],
+    ['自定义上传器', 'remote'],
+  ])('normalizes image upload mode %s', (value, expected) => {
+    expect(config.normalizeImageUploadMode(value)).toBe(expected);
   });
 
   test('filters and deduplicates image properties', () => {
@@ -45,7 +46,12 @@ describe('configuration normalization', () => {
   test('falls back for invalid values', () => {
     expect(config.normalizeUsage(null)).toBe('active');
     expect(config.normalizeTheme('unknown')).toBe('default');
-    expect(config.normalizeUploadType({})).toBe('none');
+    expect(config.normalizeImageUploadMode({})).toBe('workspace');
     expect(config.normalizeBackfillImageProps('isBorder')).toEqual([]);
+  });
+
+  test('prefers the globally persisted Cherry theme', () => {
+    const globalState = { get: vi.fn().mockReturnValue('dark') };
+    expect(config.getTheme(globalState)).toBe('dark');
   });
 });

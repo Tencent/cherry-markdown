@@ -1,5 +1,5 @@
 // 上传方式（配置值不随 VS Code 显示语言改变）
-export type UploadType = 'none' | 'custom' | 'picgo';
+export type ImageUploadMode = 'workspace' | 'data' | 'remote';
 
 // 自定义上传配置
 export interface CustomUploader {

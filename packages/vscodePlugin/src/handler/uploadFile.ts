@@ -1,7 +1,7 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { getBackfillImageProps, getCustomUploader, getPicGoServer, getUploadType } from '../config';
+import { getAssetDirectory, getBackfillImageProps, getCustomUploader, getImageUploadMode } from '../config';
 import type { UploadFileRequest, UploadFileResult } from '../types/upload';
 
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
@@ -79,17 +79,73 @@ async function readUploadFile(fileInfo: UploadFileRequest): Promise<Uint8Array> 
   return vscode.workspace.fs.readFile(await validateUploadFile(fileInfo));
 }
 
+function safeFileName(fileInfo: UploadFileRequest): string {
+  const sourceName = (fileInfo.name || path.posix.basename(fileInfo.path.replace(/\\/g, '/'))).trim();
+  const fileName = path.posix.basename(sourceName).replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_');
+  return fileName || 'image';
+}
+
+function splitFileName(fileName: string): { stem: string; extension: string } {
+  const parsed = path.posix.parse(fileName);
+  return { stem: parsed.name || 'image', extension: parsed.ext };
+}
+
+async function fileExists(uri: vscode.Uri): Promise<boolean> {
+  try {
+    await vscode.workspace.fs.stat(uri);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function nextAssetUri(directory: vscode.Uri, fileName: string): Promise<vscode.Uri> {
+  const { stem, extension } = splitFileName(fileName);
+  let index = 0;
+  while (true) {
+    const candidateName = index === 0 ? `${stem}${extension}` : `${stem}-${index}${extension}`;
+    const candidate = vscode.Uri.joinPath(directory, candidateName);
+    if (!(await fileExists(candidate))) return candidate;
+    index += 1;
+  }
+}
+
+function relativeAssetPath(document: vscode.Uri, asset: vscode.Uri): string {
+  const relative = path.posix.relative(path.posix.dirname(document.path), asset.path).replace(/\\/g, '/');
+  const encoded = relative.split('/').map(encodeURIComponent).join('/');
+  return relative.startsWith('..') ? encoded : `./${encoded}`;
+}
+
+async function saveWorkspaceAsset(fileInfo: UploadFileRequest, resource: vscode.Uri | undefined): Promise<string> {
+  if (!resource) throw new Error('A Markdown document is required to save workspace assets.');
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(resource);
+  if (!workspaceFolder) {
+    throw new Error('Open a workspace to save uploaded files locally.');
+  }
+
+  const source = await validateUploadFile(fileInfo);
+  const assetDirectory = vscode.Uri.joinPath(workspaceFolder.uri, ...getAssetDirectory(resource).split('/'));
+  await vscode.workspace.fs.createDirectory(assetDirectory);
+  const assetUri = await nextAssetUri(assetDirectory, safeFileName(fileInfo));
+  await vscode.workspace.fs.writeFile(assetUri, await vscode.workspace.fs.readFile(source));
+  return relativeAssetPath(resource, assetUri);
+}
+
 export const uploadFileHandler = async (
   fileInfo: UploadFileRequest,
   resource?: vscode.Uri,
 ): Promise<UploadFileResult> => {
   const { requestId, name = '', type = '' } = fileInfo;
-  const uploadType = getUploadType(resource);
+  const uploadMode = getImageUploadMode(resource);
   const result: UploadFileResult = { requestId, name, url: '' };
   for (const property of getBackfillImageProps(resource)) result[property] = true;
 
-  switch (uploadType) {
-    case 'custom': {
+  switch (uploadMode) {
+    case 'workspace': {
+      result.url = await saveWorkspaceAsset(fileInfo, resource);
+      break;
+    }
+    case 'remote': {
       const customUploader = getCustomUploader(resource);
       if (customUploader?.enable !== true || !customUploader.url) {
         throw new Error('Custom uploader is not configured.');
@@ -112,23 +168,7 @@ export const uploadFileHandler = async (
       result.url = parseUploadResponse(response.data);
       break;
     }
-    case 'picgo': {
-      const picGoUrl = parseHttpUrl(getPicGoServer(resource), 'PicGo server URL');
-      await validateUploadFile(fileInfo);
-      const upload = await axios.post<unknown, AxiosResponse<{ success: boolean; result?: string[] }>>(
-        picGoUrl.toString(),
-        { list: [fileInfo.path] },
-        {
-          headers: { 'Content-Type': 'application/json' },
-          timeout: UPLOAD_TIMEOUT_MS,
-          maxContentLength: MAX_RESPONSE_BYTES,
-        },
-      );
-      if (upload.data?.success !== true) throw new Error('PicGo reported that the upload failed.');
-      result.url = parseUploadResponse(upload.data?.result?.[0]);
-      break;
-    }
-    case 'none': {
+    case 'data': {
       if (!type.startsWith('image/')) throw new Error('Only images are supported without an uploader.');
       const file = await readUploadFile(fileInfo);
       result.url = `data:${type};base64,${Buffer.from(file).toString('base64')}`;

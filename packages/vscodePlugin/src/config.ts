@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
-import type { BackfillImageProp, CustomUploader, UploadType } from './types/upload';
+import type { BackfillImageProp, CustomUploader, ImageUploadMode } from './types/upload';
 
 export type UsageMode = 'active' | 'only-manual';
 export type CherryTheme = 'default' | 'dark' | 'green' | 'red';
+export const THEME_STATE_KEY = 'cherryMarkdown.theme';
+export const DEFAULT_ASSET_DIRECTORY = '.cherry-assets';
 
 const usageAliases: Record<string, UsageMode> = {
   active: 'active',
@@ -34,18 +36,21 @@ const themeAliases: Record<string, CherryTheme> = {
   Красная: 'red',
 };
 
-const uploadTypeAliases: Record<string, UploadType> = {
-  none: 'none',
-  None: 'none',
-  无: 'none',
-  Нет: 'none',
-  custom: 'custom',
-  CustomUploader: 'custom',
-  自定义上传器: 'custom',
-  'Пользовательский загрузчик': 'custom',
-  picgo: 'picgo',
-  PicGoServer: 'picgo',
-  'PicGo 服务器': 'picgo',
+const imageUploadModeAliases: Record<string, ImageUploadMode> = {
+  workspace: 'workspace',
+  Workspace: 'workspace',
+  工作区: 'workspace',
+  data: 'data',
+  Data: 'data',
+  Base64: 'data',
+  base64: 'data',
+  remote: 'remote',
+  Remote: 'remote',
+  远程: 'remote',
+  custom: 'remote',
+  CustomUploader: 'remote',
+  自定义上传器: 'remote',
+  'Пользовательский загрузчик': 'remote',
 };
 
 const backfillPropAliases: Record<string, BackfillImageProp> = {
@@ -75,8 +80,8 @@ export function normalizeTheme(value: unknown): CherryTheme {
   return typeof value === 'string' ? (themeAliases[value] ?? 'default') : 'default';
 }
 
-export function normalizeUploadType(value: unknown): UploadType {
-  return typeof value === 'string' ? (uploadTypeAliases[value] ?? 'none') : 'none';
+export function normalizeImageUploadMode(value: unknown): ImageUploadMode {
+  return typeof value === 'string' ? (imageUploadModeAliases[value] ?? 'workspace') : 'workspace';
 }
 
 export function normalizeBackfillImageProps(value: unknown): BackfillImageProp[] {
@@ -92,22 +97,40 @@ export function getUsageMode(resource?: vscode.Uri): UsageMode {
   return normalizeUsage(vscode.workspace.getConfiguration('cherryMarkdown', resource).get('Usage'));
 }
 
-export function getTheme(resource?: vscode.Uri): CherryTheme {
+export function getTheme(globalState: Pick<vscode.Memento, 'get'>, resource?: vscode.Uri): CherryTheme {
+  const storedTheme = globalState.get<unknown>(THEME_STATE_KEY);
+  if (storedTheme !== undefined) return normalizeTheme(storedTheme);
+
+  // Read the removed setting once for existing users, then all new writes use globalState.
   return normalizeTheme(vscode.workspace.getConfiguration('cherryMarkdown', resource).get('Theme'));
 }
 
-export function getUploadType(resource?: vscode.Uri): UploadType {
-  return normalizeUploadType(vscode.workspace.getConfiguration('cherryMarkdown', resource).get('UploadType'));
+export async function migrateTheme(globalState: Pick<vscode.Memento, 'get' | 'update'>): Promise<void> {
+  if (globalState.get<unknown>(THEME_STATE_KEY) !== undefined) return;
+  const legacyTheme = vscode.workspace.getConfiguration('cherryMarkdown').get('Theme');
+  if (legacyTheme !== undefined) await globalState.update(THEME_STATE_KEY, normalizeTheme(legacyTheme));
+}
+
+export function getImageUploadMode(resource?: vscode.Uri): ImageUploadMode {
+  return normalizeImageUploadMode(
+    vscode.workspace.getConfiguration('cherryMarkdown', resource).get('ImageUploadMode', 'workspace'),
+  );
 }
 
 export function getCustomUploader(resource?: vscode.Uri): CustomUploader | undefined {
   return vscode.workspace.getConfiguration('cherryMarkdown', resource).get<CustomUploader>('CustomUploader');
 }
 
-export function getPicGoServer(resource?: vscode.Uri): string {
-  return vscode.workspace
+export function getAssetDirectory(resource?: vscode.Uri): string {
+  const configured = vscode.workspace
     .getConfiguration('cherryMarkdown', resource)
-    .get<string>('PicGoServer', 'http://127.0.0.1:36677/upload');
+    .get<string>('AssetDirectory', DEFAULT_ASSET_DIRECTORY);
+  const segments = configured
+    .replace(/\\/g, '/')
+    .split('/')
+    .map((segment) => segment.trim())
+    .filter((segment) => segment && segment !== '.' && segment !== '..');
+  return segments.join('/') || DEFAULT_ASSET_DIRECTORY;
 }
 
 export function getBackfillImageProps(resource?: vscode.Uri): BackfillImageProp[] {

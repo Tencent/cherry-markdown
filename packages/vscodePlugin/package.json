@@ -36,7 +36,7 @@
       "description": "%workspaceTrust.description%",
       "restrictedConfigurations": [
         "cherryMarkdown.CustomUploader",
-        "cherryMarkdown.PicGoServer"
+        "cherryMarkdown.AssetDirectory"
       ]
     }
   },
@@ -57,6 +57,13 @@
         }
       ]
     },
+    "keybindings": [
+      {
+        "command": "cherrymarkdown.preview",
+        "key": "F10",
+        "when": "editorTextFocus && editorLangId == markdown"
+      }
+    ],
     "icons": {
       "distro-ubuntu": {
         "description": "cherry-markdown icon",
@@ -82,42 +89,30 @@
           ],
           "description": "%usage.description%"
         },
-        "cherryMarkdown.Theme": {
+        "cherryMarkdown.ImageUploadMode": {
           "type": "string",
-          "default": "default",
+          "default": "workspace",
           "enum": [
-            "default",
-            "dark",
-            "green",
-            "red"
+            "workspace",
+            "data",
+            "remote"
           ],
           "enumItemLabels": [
-            "%theme.enum.default%",
-            "%theme.enum.dark%",
-            "%theme.enum.green%",
-            "%theme.enum.red%"
-          ],
-          "description": "%theme.description%"
-        },
-        "cherryMarkdown.UploadType": {
-          "type": "string",
-          "default": "none",
-          "enum": [
-            "none",
-            "custom",
-            "picgo"
-          ],
-          "enumItemLabels": [
-            "%uploadType.enum.None%",
-            "%uploadType.enum.CustomUploader%",
-            "%uploadType.enum.PicGoServer%"
+            "%imageUploadMode.enum.workspace%",
+            "%imageUploadMode.enum.data%",
+            "%imageUploadMode.enum.remote%"
           ],
           "enumDescriptions": [
-            "%uploadType.enumDescriptions.None%",
-            "%uploadType.enumDescriptions.CustomUploader%",
-            "%uploadType.enumDescriptions.PicGoServer%"
+            "%imageUploadMode.enumDescriptions.workspace%",
+            "%imageUploadMode.enumDescriptions.data%",
+            "%imageUploadMode.enumDescriptions.remote%"
           ],
-          "description": "%uploadType.description%"
+          "description": "%imageUploadMode.description%"
+        },
+        "cherryMarkdown.AssetDirectory": {
+          "type": "string",
+          "default": ".cherry-assets",
+          "description": "%assetDirectory.description%"
         },
         "cherryMarkdown.CustomUploader": {
           "type": "object",
@@ -147,11 +142,6 @@
             }
           },
           "description": "%customUploader.description%"
-        },
-        "cherryMarkdown.PicGoServer": {
-          "type": "string",
-          "description": "%picGoServer.description%",
-          "default": "http://127.0.0.1:36677/upload"
         },
         "cherryMarkdown.BackfillImageProps": {
           "type": "array",
@@ -188,7 +178,7 @@
     "vscode:prepublish": "yarn build && yarn test:package",
     "typecheck": "tsc --noEmit",
     "test": "yarn test:unit && yarn test:integration",
-    "test:unit": "vitest run test/config.test.ts test/protocol.test.ts test/textEdit.test.ts",
+    "test:unit": "vitest run test/config.test.ts test/protocol.test.ts test/textEdit.test.ts test/upload.test.ts",
     "test:package": "vitest run test/package.test.ts",
     "test:vsix": "vitest run test/vsix.test.ts",
     "test:integration": "yarn build && tsc && node out/test/runIntegrationTests.js",
