@@ -87,6 +87,21 @@ describe('image upload handler', () => {
     expect(result.url).toBe('../.cherry-assets/image-1.png');
   });
 
+  test('serializes same-name workspace uploads', async () => {
+    const results = await Promise.all([
+      uploadFileHandler(
+        { requestId: 13, name: 'image.png', type: 'image/png', path: '/tmp/image.png', size: 3 },
+        mockState.uri('/workspace/readme.md') as never,
+      ),
+      uploadFileHandler(
+        { requestId: 14, name: 'image.png', type: 'image/png', path: '/tmp/image.png', size: 3 },
+        mockState.uri('/workspace/readme.md') as never,
+      ),
+    ]);
+
+    expect(results.map(({ url }) => url)).toEqual(['./.cherry-assets/image.png', './.cherry-assets/image-1.png']);
+  });
+
   test('sanitizes file names and configured asset directories', async () => {
     mockState.assetDirectory = 'assets/images';
 
@@ -205,6 +220,17 @@ describe('image upload handler', () => {
         mockState.uri('/workspace/readme.md') as never,
       ),
     ).rejects.toThrow('50 MB');
+
+    mockState.reportedSizes.clear();
+    mockState.files.set('/tmp/image.png', new Uint8Array([1, 2, 3, 4]));
+    mockState.reportedSizes.set('/tmp/image.png', 3);
+    await expect(
+      uploadFileHandler(
+        { requestId: 12, name: 'image.png', type: 'image/png', path: '/tmp/image.png', size: 3 },
+        mockState.uri('/workspace/readme.md') as never,
+      ),
+    ).rejects.toThrow('changed while');
+    mockState.files.set('/tmp/image.png', new Uint8Array([1, 2, 3]));
   });
 
   test('accepts supported remote response shapes', () => {
@@ -213,10 +239,13 @@ describe('image upload handler', () => {
     );
   });
 
-  test.each(['not-a-url', { url: 'javascript:alert(1)' }, { data: { url: 'ftp://cdn.example/image.png' } }])(
-    'rejects unsupported remote response %j',
-    (response) => {
-      expect(() => parseUploadResponse(response)).toThrow('supported URL');
-    },
-  );
+  test.each([
+    'not-a-url',
+    'https://',
+    'https://cdn.example/image).png',
+    { url: 'javascript:alert(1)' },
+    { data: { url: 'ftp://cdn.example/image.png' } },
+  ])('rejects unsupported remote response %j', (response) => {
+    expect(() => parseUploadResponse(response)).toThrow('supported URL');
+  });
 });

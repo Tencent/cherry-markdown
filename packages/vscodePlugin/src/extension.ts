@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { getTheme, getUsageMode, migrateTheme, THEME_STATE_KEY } from './config';
+import { getTheme, getUsageMode, migrateImageUploadMode, migrateTheme, THEME_STATE_KEY } from './config';
 import { uploadFileHandler } from './handler/uploadFile';
 import type { EditorState, ExtensionToWebviewMessage } from './protocol';
 import { parseWebviewMessage } from './protocol';
@@ -26,6 +26,7 @@ class CherryMarkdownPreview {
   private scrollTimeout: ReturnType<typeof setTimeout> | undefined;
   private pendingWebviewText: string | undefined;
   private editQueue: Promise<void> = Promise.resolve();
+  private panelGeneration = 0;
 
   constructor(
     private readonly context: vscode.ExtensionContext,
@@ -71,6 +72,7 @@ class CherryMarkdownPreview {
       retainContextWhenHidden: false,
       localResourceRoots: this.getResourceRoots(),
     });
+    this.panelGeneration += 1;
     this.panel.iconPath = vscode.Uri.joinPath(this.context.extensionUri, 'favicon.ico');
     this.panel.webview.html = getWebviewContent(this.panel, this.context.extensionUri);
     this.webviewReady = false;
@@ -87,6 +89,7 @@ class CherryMarkdownPreview {
   }
 
   private resetPanel(): void {
+    this.panelGeneration += 1;
     if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
     this.messageDisposable?.dispose();
     this.messageDisposable = undefined;
@@ -262,12 +265,18 @@ class CherryMarkdownPreview {
   }
 
   private async uploadFile(file: Parameters<typeof uploadFileHandler>[0]): Promise<void> {
+    const { panel } = this;
+    const generation = this.panelGeneration;
     try {
       const result = await uploadFileHandler(file, this.targetEditor?.document.uri);
-      await this.postMessage({ cmd: 'upload-file-result', data: result });
+      if (generation === this.panelGeneration && panel === this.panel) {
+        await this.postMessage({ cmd: 'upload-file-result', data: result }, panel);
+      }
     } catch (error: unknown) {
       this.reportError('upload-file', error);
-      await this.postOperationError('upload-file', vscode.l10n.t('Upload failed.'));
+      if (generation === this.panelGeneration && panel === this.panel) {
+        await this.postOperationError('upload-file', vscode.l10n.t('Upload failed.'), file.requestId, panel);
+      }
     }
   }
 
@@ -285,8 +294,14 @@ class CherryMarkdownPreview {
       return;
     }
 
-    if (/^https?:\/\//i.test(decodedUrl)) {
-      await vscode.env.openExternal(vscode.Uri.parse(decodedUrl));
+    if (/^https?:\/\//i.test(rawUrl)) {
+      try {
+        const parsed = new URL(rawUrl);
+        if (!parsed.hostname || /[\u0000-\u001f]/.test(rawUrl)) throw new Error('Invalid URL');
+        await vscode.env.openExternal(vscode.Uri.parse(rawUrl));
+      } catch {
+        await vscode.window.showErrorMessage(vscode.l10n.t('The link is invalid.'));
+      }
       return;
     }
     if (decodedUrl.startsWith('#')) return;
@@ -297,10 +312,14 @@ class CherryMarkdownPreview {
     if (!this.targetEditor) return;
 
     let targetUri: vscode.Uri;
-    if (path.win32.isAbsolute(decodedUrl) || path.posix.isAbsolute(decodedUrl)) {
-      targetUri = vscode.Uri.file(decodedUrl);
+    const reference = vscode.Uri.parse(decodedUrl, true);
+    if (path.win32.isAbsolute(reference.fsPath) || path.posix.isAbsolute(reference.path)) {
+      targetUri = vscode.Uri.file(reference.fsPath).with({ query: reference.query, fragment: reference.fragment });
     } else {
-      targetUri = vscode.Uri.joinPath(uriDirectory(this.targetEditor.document.uri), decodedUrl);
+      targetUri = vscode.Uri.joinPath(uriDirectory(this.targetEditor.document.uri), reference.path).with({
+        query: reference.query,
+        fragment: reference.fragment,
+      });
     }
     await vscode.commands.executeCommand('vscode.open', targetUri, { preview: true });
   }
@@ -372,12 +391,17 @@ class CherryMarkdownPreview {
     await this.postMessage({ cmd, data: state });
   }
 
-  private async postOperationError(operation: string, message: string): Promise<void> {
-    await this.postMessage({ cmd: 'operation-error', data: { operation, message } });
+  private async postOperationError(
+    operation: string,
+    message: string,
+    requestId?: number,
+    panel = this.panel,
+  ): Promise<void> {
+    await this.postMessage({ cmd: 'operation-error', data: { operation, message, requestId } }, panel);
   }
 
-  private async postMessage(message: ExtensionToWebviewMessage): Promise<boolean> {
-    return (await this.panel?.webview.postMessage(message)) ?? false;
+  private async postMessage(message: ExtensionToWebviewMessage, panel = this.panel): Promise<boolean> {
+    return (await panel?.webview.postMessage(message)) ?? false;
   }
 
   private updateResourceRoots(): void {
@@ -416,6 +440,7 @@ export function activate(context: vscode.ExtensionContext): void {
   preview.register();
   context.subscriptions.push(output, preview);
   void migrateTheme(context.globalState);
+  void migrateImageUploadMode(context.globalState);
 }
 
 export function deactivate(): void {

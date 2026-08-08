@@ -33,7 +33,16 @@ function normalizeHeaders(value: unknown): Record<string, string> {
 }
 
 function isAllowedResultUrl(value: string): boolean {
-  return /^(https?:\/\/|data:image\/)/i.test(value);
+  if (/[\u0000-\u001f()[\]<>\\]/.test(value)) return false;
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const url = new URL(value);
+      return Boolean(url.hostname);
+    } catch {
+      return false;
+    }
+  }
+  return /^data:image\/[a-z\d.+-]+;base64,[A-Za-z\d+/]*={0,2}$/i.test(value);
 }
 
 export function parseUploadResponse(data: unknown): string {
@@ -76,7 +85,12 @@ function pathIsAbsolute(value: string): boolean {
 }
 
 async function readUploadFile(fileInfo: UploadFileRequest): Promise<Uint8Array> {
-  return vscode.workspace.fs.readFile(await validateUploadFile(fileInfo));
+  const file = await vscode.workspace.fs.readFile(await validateUploadFile(fileInfo));
+  if (file.length > MAX_UPLOAD_BYTES) throw new Error('The upload file exceeds the 50 MB limit.');
+  if (fileInfo.size > 0 && file.length !== fileInfo.size) {
+    throw new Error('The upload file changed while it was being read.');
+  }
+  return file;
 }
 
 function safeFileName(fileInfo: UploadFileRequest): string {
@@ -116,6 +130,8 @@ function relativeAssetPath(document: vscode.Uri, asset: vscode.Uri): string {
   return relative.startsWith('..') ? encoded : `./${encoded}`;
 }
 
+let workspaceUploadQueue: Promise<void> = Promise.resolve();
+
 async function saveWorkspaceAsset(fileInfo: UploadFileRequest, resource: vscode.Uri | undefined): Promise<string> {
   if (!resource) throw new Error('A Markdown document is required to save workspace assets.');
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(resource);
@@ -123,12 +139,21 @@ async function saveWorkspaceAsset(fileInfo: UploadFileRequest, resource: vscode.
     throw new Error('Open a workspace to save uploaded files locally.');
   }
 
-  const source = await validateUploadFile(fileInfo);
+  const source = await readUploadFile(fileInfo);
   const assetDirectory = vscode.Uri.joinPath(workspaceFolder.uri, ...getAssetDirectory(resource).split('/'));
   await vscode.workspace.fs.createDirectory(assetDirectory);
   const assetUri = await nextAssetUri(assetDirectory, safeFileName(fileInfo));
-  await vscode.workspace.fs.writeFile(assetUri, await vscode.workspace.fs.readFile(source));
+  await vscode.workspace.fs.writeFile(assetUri, source);
   return relativeAssetPath(resource, assetUri);
+}
+
+function queueWorkspaceAssetSave(fileInfo: UploadFileRequest, resource: vscode.Uri | undefined): Promise<string> {
+  const task = workspaceUploadQueue.then(() => saveWorkspaceAsset(fileInfo, resource));
+  workspaceUploadQueue = task.then(
+    () => undefined,
+    () => undefined,
+  );
+  return task;
 }
 
 export const uploadFileHandler = async (
@@ -142,7 +167,7 @@ export const uploadFileHandler = async (
 
   switch (uploadMode) {
     case 'workspace': {
-      result.url = await saveWorkspaceAsset(fileInfo, resource);
+      result.url = await queueWorkspaceAssetSave(fileInfo, resource);
       break;
     }
     case 'remote': {

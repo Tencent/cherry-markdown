@@ -65,8 +65,9 @@ let suppressEditMessage = false;
 let suppressThemeMessage = false;
 let editRequestId = 0;
 let uploadRequestId = 0;
-let editInFlight: { requestId: number; markdown: string } | undefined;
-let pendingMarkdown: string | undefined;
+  let editInFlight: { requestId: number; markdown: string } | undefined;
+  let pendingMarkdown: string | undefined;
+  let stateGeneration = 0;
 let editDebounceTimer: ReturnType<typeof setTimeout> | undefined;
 const uploadCallbacks = new Map<number, UploadCallback | undefined>();
 
@@ -309,9 +310,10 @@ async function ensureMathJax(markdown: string): Promise<void> {
   if (cherry && window.MathJax) cherry.options.externals.MathJax = window.MathJax;
 }
 
-async function initializeCherry(state: EditorState): Promise<void> {
-  editorState = state;
+async function initializeCherry(state: EditorState, generation: number): Promise<void> {
   await ensureMathJax(state.text);
+  if (generation !== stateGeneration) return;
+  editorState = state;
   const locale = languageIdentifiers[state.vscodeLanguage] || 'zh_CN';
   const instance = new CherryEditor({ ...createBasicConfig(state), value: state.text, locale });
   cherry = instance;
@@ -323,18 +325,29 @@ async function initializeCherry(state: EditorState): Promise<void> {
 }
 
 async function applyEditorState(state: EditorState): Promise<void> {
+  stateGeneration += 1;
+  const generation = stateGeneration;
   if (!cherry) {
-    await initializeCherry(state);
+    await initializeCherry(state, generation);
     return;
   }
-  editorState = state;
-  editInFlight = undefined;
-  pendingMarkdown = undefined;
-  clearTimeout(editDebounceTimer);
+  const preserveUnacknowledgedEdit =
+    editorState?.documentUri === state.documentUri &&
+    editorState.documentVersion === state.documentVersion &&
+    (editInFlight !== undefined || pendingMarkdown !== undefined);
   await ensureMathJax(state.text);
-  suppressEditMessage = true;
-  cherry.setValue(state.text);
-  suppressEditMessage = false;
+  if (generation !== stateGeneration) return;
+  if (!preserveUnacknowledgedEdit) {
+    editorState = state;
+    editInFlight = undefined;
+    pendingMarkdown = undefined;
+    clearTimeout(editDebounceTimer);
+    suppressEditMessage = true;
+    cherry.setValue(state.text);
+    suppressEditMessage = false;
+  } else {
+    editorState = { ...state, text: editorState?.text ?? state.text };
+  }
   suppressThemeMessage = true;
   cherry.setTheme(state.theme);
   suppressThemeMessage = false;
@@ -487,7 +500,10 @@ window.addEventListener('message', (event: MessageEvent<ExtensionToWebviewMessag
       if (cherry) applyUploadResult(data);
       break;
     case 'operation-error':
-      if (data?.operation === 'upload-file') uploadCallbacks.clear();
+      if (data?.operation === 'upload-file') {
+        if (data.requestId === undefined) uploadCallbacks.clear();
+        else uploadCallbacks.delete(data.requestId);
+      }
       vscode.postMessage({ type: 'show-message', data: data?.message || 'Cherry Markdown operation failed.' });
       break;
   }

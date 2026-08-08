@@ -29,7 +29,8 @@ export function getWebviewContent(currentPanel: { webview: WebviewResource }, ex
 </head>
 <body>
   <div id="dom_mask"></div>
-  <div id="markdown" class="markdown-preview-only" aria-live="polite"></div>
+  <div id="markdown" class="markdown-preview-only"></div>
+  <div id="webview-status" role="status" aria-live="polite" aria-atomic="true"></div>
   <script src="${pinyinScript}"></script>
   <script type="module" src="${bundleScript}"></script>
 </body>

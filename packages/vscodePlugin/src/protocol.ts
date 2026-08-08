@@ -27,7 +27,7 @@ export type ExtensionToWebviewMessage =
   | { cmd: 'disable-edit'; data: Record<string, never> }
   | { cmd: 'enable-edit'; data: Record<string, never> }
   | { cmd: 'upload-file-result'; data: UploadFileResult }
-  | { cmd: 'operation-error'; data: { operation: string; message: string } };
+  | { cmd: 'operation-error'; data: { operation: string; message: string; requestId?: number } };
 
 export type WebviewToExtensionMessage =
   | { type: 'ready'; data?: undefined }

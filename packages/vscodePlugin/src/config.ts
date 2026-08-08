@@ -4,6 +4,7 @@ import type { BackfillImageProp, CustomUploader, ImageUploadMode } from './types
 export type UsageMode = 'active' | 'only-manual';
 export type CherryTheme = 'default' | 'dark' | 'green' | 'red';
 export const THEME_STATE_KEY = 'cherryMarkdown.theme';
+export const IMAGE_UPLOAD_MODE_MIGRATED_KEY = 'cherryMarkdown.imageUploadModeMigrated';
 export const DEFAULT_ASSET_DIRECTORY = '.cherry-assets';
 
 const usageAliases: Record<string, UsageMode> = {
@@ -52,6 +53,7 @@ const imageUploadModeAliases: Record<string, ImageUploadMode> = {
   自定义上传器: 'remote',
   'Пользовательский загрузчик': 'remote',
 };
+const legacyPicGoAliases = new Set(['PicGoServer', 'PicGo Server', 'PicGo 服务器', 'PicGo服务器']);
 
 const backfillPropAliases: Record<string, BackfillImageProp> = {
   isBorder: 'isBorder',
@@ -111,10 +113,54 @@ export async function migrateTheme(globalState: Pick<vscode.Memento, 'get' | 'up
   if (legacyTheme !== undefined) await globalState.update(THEME_STATE_KEY, normalizeTheme(legacyTheme));
 }
 
+function readLegacyImageUploadMode(resource?: vscode.Uri): ImageUploadMode | undefined {
+  const configuration = vscode.workspace.getConfiguration('cherryMarkdown', resource);
+  const legacy = configuration.get<unknown>('UploadType');
+  if (legacy === undefined) return undefined;
+  if (typeof legacy === 'string' && legacyPicGoAliases.has(legacy)) {
+    const picGoUrl = configuration.get<unknown>('PicGoServer');
+    const custom = configuration.get<CustomUploader>('CustomUploader');
+    if (typeof picGoUrl === 'string' && picGoUrl.trim() && !custom?.url) return 'remote';
+    return custom?.enable ? 'remote' : 'workspace';
+  }
+  return normalizeImageUploadMode(legacy);
+}
+
 export function getImageUploadMode(resource?: vscode.Uri): ImageUploadMode {
-  return normalizeImageUploadMode(
-    vscode.workspace.getConfiguration('cherryMarkdown', resource).get('ImageUploadMode', 'workspace'),
-  );
+  const configuration = vscode.workspace.getConfiguration('cherryMarkdown', resource);
+  const configured = configuration.get<unknown>('ImageUploadMode');
+  return configured === undefined
+    ? (readLegacyImageUploadMode(resource) ?? 'workspace')
+    : normalizeImageUploadMode(configured);
+}
+
+export async function migrateImageUploadMode(globalState: Pick<vscode.Memento, 'get' | 'update'>): Promise<void> {
+  if (globalState.get<boolean>(IMAGE_UPLOAD_MODE_MIGRATED_KEY)) return;
+  const configuration = vscode.workspace.getConfiguration('cherryMarkdown');
+  const configured = configuration.get<unknown>('ImageUploadMode');
+  if (configured === undefined) {
+    const legacyMode = readLegacyImageUploadMode();
+    if (legacyMode !== undefined) {
+      await configuration.update('ImageUploadMode', legacyMode, vscode.ConfigurationTarget.Global);
+      const legacy = configuration.get<unknown>('UploadType');
+      const picGoUrl = configuration.get<unknown>('PicGoServer');
+      const custom = configuration.get<CustomUploader>('CustomUploader');
+      if (
+        typeof legacy === 'string' &&
+        legacyPicGoAliases.has(legacy) &&
+        typeof picGoUrl === 'string' &&
+        picGoUrl.trim() &&
+        !custom?.url
+      ) {
+        await configuration.update(
+          'CustomUploader',
+          { enable: true, url: picGoUrl.trim(), headers: custom?.headers ?? {} },
+          vscode.ConfigurationTarget.Global,
+        );
+      }
+    }
+  }
+  await globalState.update(IMAGE_UPLOAD_MODE_MIGRATED_KEY, true);
 }
 
 export function getCustomUploader(resource?: vscode.Uri): CustomUploader | undefined {

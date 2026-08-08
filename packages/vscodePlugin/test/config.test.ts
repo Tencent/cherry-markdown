@@ -5,6 +5,7 @@ import * as config from '../src/config';
 const mockGetConfiguration = vi.hoisted(() => vi.fn());
 
 vi.mock('vscode', () => ({
+  ConfigurationTarget: { Global: 1 },
   Uri: { file: (path: string) => ({ path }) },
   workspace: { getConfiguration: mockGetConfiguration },
 }));
@@ -97,6 +98,27 @@ describe('configuration normalization', () => {
     await config.migrateTheme(globalState);
 
     expect(globalState.update).not.toHaveBeenCalled();
+  });
+
+  test('migrates the legacy PicGo uploader explicitly', async () => {
+    const update = vi.fn();
+    const get = vi.fn((key: string) => {
+      if (key === 'UploadType') return 'PicGoServer';
+      if (key === 'PicGoServer') return 'https://picgo.example/upload';
+      return undefined;
+    });
+    getConfiguration.mockReturnValue({ get, update });
+    const globalState = { get: vi.fn().mockReturnValue(false), update: vi.fn() };
+
+    await config.migrateImageUploadMode(globalState);
+
+    expect(update).toHaveBeenCalledWith('ImageUploadMode', 'remote', 1);
+    expect(update).toHaveBeenCalledWith(
+      'CustomUploader',
+      { enable: true, url: 'https://picgo.example/upload', headers: {} },
+      1,
+    );
+    expect(globalState.update).toHaveBeenCalledWith(config.IMAGE_UPLOAD_MODE_MIGRATED_KEY, true);
   });
 
   test('reads configuration values with the document resource scope', () => {
