@@ -112,7 +112,13 @@ class CherryMarkdownPreview {
       switch (message.type) {
         case 'ready':
           this.webviewReady = true;
-          void this.postEditorState('editor-init');
+          void (async () => {
+            await this.postEditorState('editor-init');
+            await this.postMessage({
+              cmd: this.isEditEnabled() ? 'enable-edit' : 'disable-edit',
+              data: {},
+            });
+          })();
           break;
         case 'preview-scroll':
           this.revealEditorLine(message.data);
@@ -159,6 +165,15 @@ class CherryMarkdownPreview {
     }
 
     if (this.panel) await this.postMessage({ cmd: 'disable-edit', data: {} });
+  }
+
+  private isEditEnabled(): boolean {
+    const activeEditor = vscode.window.activeTextEditor;
+    return Boolean(
+      activeEditor?.document.languageId === 'markdown' &&
+      this.targetEditor &&
+      sameUri(activeEditor.document.uri, this.targetEditor.document.uri),
+    );
   }
 
   private async handleDocumentChange(event: vscode.TextDocumentChangeEvent): Promise<void> {
@@ -215,11 +230,12 @@ class CherryMarkdownPreview {
       return;
     }
 
-    const replacement = calculateTextReplacement(document.getText(), data.markdown);
+    const normalizedMarkdown = data.markdown.replace(/\r?\n/g, document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n');
+    const replacement = calculateTextReplacement(document.getText(), normalizedMarkdown);
     if (!replacement) {
       await this.postMessage({
         cmd: 'editor-ack',
-        data: { requestId: data.requestId, documentVersion: document.version, text: data.markdown },
+        data: { requestId: data.requestId, documentVersion: document.version, text: document.getText() },
       });
       return;
     }
@@ -230,7 +246,7 @@ class CherryMarkdownPreview {
       new vscode.Range(document.positionAt(replacement.startOffset), document.positionAt(replacement.endOffset)),
       replacement.text,
     );
-    this.pendingWebviewText = data.markdown;
+    this.pendingWebviewText = normalizedMarkdown;
     const applied = await vscode.workspace.applyEdit(edit);
     if (!applied) {
       this.pendingWebviewText = undefined;
@@ -312,7 +328,7 @@ class CherryMarkdownPreview {
     if (!this.targetEditor) return;
 
     let targetUri: vscode.Uri;
-    const reference = vscode.Uri.parse(decodedUrl, true);
+    const reference = vscode.Uri.parse(decodedUrl);
     if (path.win32.isAbsolute(reference.fsPath) || path.posix.isAbsolute(reference.path)) {
       targetUri = vscode.Uri.file(reference.fsPath).with({ query: reference.query, fragment: reference.fragment });
     } else {

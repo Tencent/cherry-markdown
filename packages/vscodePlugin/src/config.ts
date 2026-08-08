@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import type { BackfillImageProp, CustomUploader, ImageUploadMode } from './types/upload';
 
 export type UsageMode = 'active' | 'only-manual';
-export type CherryTheme = 'default' | 'dark' | 'green' | 'red';
+export type CherryTheme = 'default' | 'dark' | 'gray' | 'abyss' | 'green' | 'red' | 'violet' | 'blue';
 export const THEME_STATE_KEY = 'cherryMarkdown.theme';
 export const IMAGE_UPLOAD_MODE_MIGRATED_KEY = 'cherryMarkdown.imageUploadModeMigrated';
 export const DEFAULT_ASSET_DIRECTORY = '.cherry-assets';
@@ -27,6 +27,12 @@ const themeAliases: Record<string, CherryTheme> = {
   Dark: 'dark',
   深色: 'dark',
   Тёмная: 'dark',
+  gray: 'gray',
+  Gray: 'gray',
+  沉稳: 'gray',
+  abyss: 'abyss',
+  Abyss: 'abyss',
+  深海: 'abyss',
   green: 'green',
   Green: 'green',
   绿色: 'green',
@@ -35,6 +41,12 @@ const themeAliases: Record<string, CherryTheme> = {
   Red: 'red',
   红色: 'red',
   Красная: 'red',
+  violet: 'violet',
+  Violet: 'violet',
+  淡雅: 'violet',
+  blue: 'blue',
+  Blue: 'blue',
+  清幽: 'blue',
 };
 
 const imageUploadModeAliases: Record<string, ImageUploadMode> = {
@@ -126,9 +138,24 @@ function readLegacyImageUploadMode(resource?: vscode.Uri): ImageUploadMode | und
   return normalizeImageUploadMode(legacy);
 }
 
+function hasExplicitImageUploadMode(configuration: vscode.WorkspaceConfiguration): boolean {
+  if (!configuration.inspect) return configuration.get<unknown>('ImageUploadMode') !== undefined;
+  const inspected = configuration.inspect<unknown>('ImageUploadMode');
+  if (!inspected) return configuration.get<unknown>('ImageUploadMode') !== undefined;
+  return [
+    inspected.globalValue,
+    inspected.workspaceValue,
+    inspected.workspaceFolderValue,
+    inspected.globalLanguageValue,
+    inspected.workspaceLanguageValue,
+    inspected.workspaceFolderLanguageValue,
+  ].some((value) => value !== undefined);
+}
+
 export function getImageUploadMode(resource?: vscode.Uri): ImageUploadMode {
   const configuration = vscode.workspace.getConfiguration('cherryMarkdown', resource);
-  const configured = configuration.get<unknown>('ImageUploadMode');
+  const explicitlyConfigured = hasExplicitImageUploadMode(configuration);
+  const configured = explicitlyConfigured ? configuration.get<unknown>('ImageUploadMode') : undefined;
   return configured === undefined
     ? (readLegacyImageUploadMode(resource) ?? 'workspace')
     : normalizeImageUploadMode(configured);
@@ -137,8 +164,8 @@ export function getImageUploadMode(resource?: vscode.Uri): ImageUploadMode {
 export async function migrateImageUploadMode(globalState: Pick<vscode.Memento, 'get' | 'update'>): Promise<void> {
   if (globalState.get<boolean>(IMAGE_UPLOAD_MODE_MIGRATED_KEY)) return;
   const configuration = vscode.workspace.getConfiguration('cherryMarkdown');
-  const configured = configuration.get<unknown>('ImageUploadMode');
-  if (configured === undefined) {
+  const configured = hasExplicitImageUploadMode(configuration);
+  if (!configured) {
     const legacyMode = readLegacyImageUploadMode();
     if (legacyMode !== undefined) {
       await configuration.update('ImageUploadMode', legacyMode, vscode.ConfigurationTarget.Global);

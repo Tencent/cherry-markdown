@@ -1,7 +1,12 @@
-import { spawnSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, test } from 'vitest';
+
+const nodeRequire = createRequire(__filename);
+const { readZip } = nodeRequire('@vscode/vsce/out/zip.js') as {
+  readZip: (archivePath: string, filter: (name: string) => boolean) => Promise<Map<string, Buffer>>;
+};
 
 const packageRoot = process.cwd();
 const sourceManifest = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8')) as { name: string };
@@ -18,13 +23,11 @@ describe('VSIX archive', () => {
     expect(archive?.file).toBeTruthy();
   });
 
-  test('contains runtime files and excludes development files', () => {
+  test('contains runtime files and excludes development files', async () => {
     expect(archive).toBeDefined();
     if (!archive) return;
 
-    const listing = spawnSync('unzip', ['-Z1', path.join(packageRoot, archive.file)], { encoding: 'utf8' });
-    expect(listing.status, listing.stderr).toBe(0);
-    const files = listing.stdout.trim().split('\n');
+    const files = [...(await readZip(path.join(packageRoot, archive.file), () => true)).keys()];
 
     expect(files).toEqual(
       expect.arrayContaining([
@@ -51,14 +54,13 @@ describe('VSIX archive', () => {
     expect(developmentFile).toBeUndefined();
   });
 
-  test('contains the expected extension identity', () => {
+  test('contains the expected extension identity', async () => {
     expect(archive).toBeDefined();
     if (!archive) return;
 
-    const manifest = spawnSync('unzip', ['-p', path.join(packageRoot, archive.file), 'extension/package.json'], {
-      encoding: 'utf8',
-    });
-    expect(manifest.status, manifest.stderr).toBe(0);
-    expect((JSON.parse(manifest.stdout) as { name: string }).name).toBe(expectedExtensionName);
+    const files = await readZip(path.join(packageRoot, archive.file), (name) => name === 'extension/package.json');
+    const manifest = files.get('extension/package.json');
+    expect(manifest).toBeDefined();
+    expect((JSON.parse(manifest?.toString('utf8') ?? '{}') as { name: string }).name).toBe(expectedExtensionName);
   });
 });

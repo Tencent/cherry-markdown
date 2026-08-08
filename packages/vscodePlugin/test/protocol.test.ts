@@ -18,6 +18,10 @@ describe('Webview protocol', () => {
     expect(parseWebviewMessage(message)).toEqual(message);
   });
 
+  test.each(['gray', 'abyss', 'violet', 'blue'])('accepts Cherry built-in theme %s', (theme) => {
+    expect(parseWebviewMessage({ type: 'change-theme', data: theme })).toEqual({ type: 'change-theme', data: theme });
+  });
+
   test('normalizes accepted messages to their validated shape', () => {
     const raw = {
       type: 'editor-change',
@@ -42,7 +46,7 @@ describe('Webview protocol', () => {
     {},
     { type: 'unknown' },
     { type: 'preview-scroll', data: Number.NaN },
-    { type: 'change-theme', data: 'blue' },
+    { type: 'change-theme', data: 'unknown' },
     { type: 'editor-change', data: { markdown: '# Missing identity' } },
     { type: 'upload-file', data: { requestId: -1, name: 'x' } },
     { type: 'export-png', data: 'data:text/plain;base64,eA==' },

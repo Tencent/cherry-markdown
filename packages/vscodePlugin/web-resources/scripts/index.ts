@@ -122,13 +122,14 @@ function isEditMode() {
 }
 
 function setEditMode(enabled: boolean) {
+  const editEnabled = enabled && !window.isDisableEdit;
   const pen = document.getElementsByClassName('cherry-toolbar-pen')[0];
   const markdown = document.getElementById('markdown');
   if (!pen || !markdown) return;
-  markdown.className = enabled ? 'markdown-edit-preview' : 'markdown-preview-only';
-  pen.className = enabled ? `${pen.className.replace(' active', '')} active` : pen.className.replace(' active', '');
-  pen.innerHTML = `<i class="ch-icon ${enabled ? 'ch-icon-pen-fill' : 'ch-icon-pen'}"></i>`;
-  vscode.setState({ ...vscode.getState(), editMode: enabled, scrollTop: cherry?.previewer.getDom().scrollTop || 0 });
+  markdown.className = editEnabled ? 'markdown-edit-preview' : 'markdown-preview-only';
+  pen.className = editEnabled ? `${pen.className.replace(' active', '')} active` : pen.className.replace(' active', '');
+  pen.innerHTML = `<i class="ch-icon ${editEnabled ? 'ch-icon-pen-fill' : 'ch-icon-pen'}"></i>`;
+  vscode.setState({ ...vscode.getState(), editMode: editEnabled, scrollTop: cherry?.previewer.getDom().scrollTop || 0 });
 }
 
 /** 处理 a 链接跳转问题 */
@@ -225,23 +226,7 @@ function createBasicConfig(state: EditorState): Record<string, unknown> {
       },
       toc: true,
     },
-    editor: {
-      fileUpload: (file: UploadFileWithPath, callback?: UploadCallback) => {
-        uploadRequestId += 1;
-        const requestId = uploadRequestId;
-        uploadCallbacks.set(requestId, callback);
-        vscode.postMessage({
-          type: 'upload-file',
-          data: {
-            requestId,
-            name: file.name,
-            path: file.path || '',
-            size: file.size,
-            type: file.type,
-          },
-        });
-      },
-    },
+    editor: {},
     event: {
       // 当编辑区内容有实际变化时触发
       changeMainTheme: (theme: CherryTheme) => {
@@ -257,6 +242,21 @@ function createBasicConfig(state: EditorState): Record<string, unknown> {
     },
     keydown: [],
     callback: {
+      fileUpload: (file: UploadFileWithPath, callback?: UploadCallback) => {
+        uploadRequestId += 1;
+        const requestId = uploadRequestId;
+        uploadCallbacks.set(requestId, callback);
+        vscode.postMessage({
+          type: 'upload-file',
+          data: {
+            requestId,
+            name: file.name,
+            path: file.path || '',
+            size: file.size,
+            type: file.type,
+          },
+        });
+      },
       changeString2Pinyin: window.pinyin,
       beforeImageMounted(_srcProp: unknown, srcValue: string) {
         if (isHttpUrl(srcValue) || isDataUrl(srcValue)) {
@@ -318,7 +318,7 @@ async function initializeCherry(state: EditorState, generation: number): Promise
   const instance = new CherryEditor({ ...createBasicConfig(state), value: state.text, locale });
   cherry = instance;
   bindCherryEvents(instance);
-  setEditMode(Boolean(persistedState.editMode));
+  setEditMode(Boolean(persistedState.editMode) && !window.isDisableEdit);
   requestAnimationFrame(() => {
     instance.previewer.getDom().scrollTop = Number(persistedState.scrollTop) || 0;
   });
@@ -500,6 +500,11 @@ window.addEventListener('message', (event: MessageEvent<ExtensionToWebviewMessag
       if (cherry) applyUploadResult(data);
       break;
     case 'operation-error':
+      if (data?.operation === 'editor-change') {
+        editInFlight = undefined;
+        pendingMarkdown = undefined;
+        clearTimeout(editDebounceTimer);
+      }
       if (data?.operation === 'upload-file') {
         if (data.requestId === undefined) uploadCallbacks.clear();
         else uploadCallbacks.delete(data.requestId);

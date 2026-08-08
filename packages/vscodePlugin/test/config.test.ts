@@ -139,6 +139,25 @@ describe('configuration normalization', () => {
     expect(getConfiguration).toHaveBeenCalledWith('cherryMarkdown', resource);
   });
 
+  test('uses legacy upload mode when the new setting is only a contributed default', () => {
+    const get = vi.fn((key: string) => {
+      if (key === 'ImageUploadMode') return 'workspace';
+      if (key === 'UploadType') return 'data';
+      return undefined;
+    });
+    getConfiguration.mockReturnValue({
+      get,
+      inspect: vi.fn().mockReturnValue({
+        defaultValue: 'workspace',
+        globalValue: undefined,
+        workspaceValue: undefined,
+        workspaceFolderValue: undefined,
+      }),
+    });
+
+    expect(config.getImageUploadMode()).toBe('data');
+  });
+
   test.each([
     ['.cherry-assets', '.cherry-assets'],
     ['assets/images', 'assets/images'],

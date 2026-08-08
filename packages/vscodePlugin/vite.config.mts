@@ -7,6 +7,14 @@ const packageRoot = path.dirname(fileURLToPath(import.meta.url));
 const webviewDist = path.resolve(packageRoot, 'web-resources/dist');
 
 const extensionConfig: UserConfig = {
+  resolve: {
+    conditions: ['node'],
+    mainFields: ['module', 'main'],
+  },
+  ssr: {
+    target: 'node',
+    noExternal: ['axios'],
+  },
   build: {
     target: 'node16',
     outDir: path.resolve(packageRoot, 'dist'),

@@ -42,7 +42,7 @@ export type WebviewToExtensionMessage =
   | { type: 'open-url'; data: string }
   | { type: 'export-png'; data: string };
 
-const themes: CherryTheme[] = ['default', 'dark', 'green', 'red'];
+const themes: CherryTheme[] = ['default', 'dark', 'gray', 'abyss', 'green', 'red', 'violet', 'blue'];
 const MAX_PNG_MESSAGE_LENGTH = Math.ceil((50 * 1024 * 1024 * 4) / 3) + 'data:image/png;base64,'.length;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
