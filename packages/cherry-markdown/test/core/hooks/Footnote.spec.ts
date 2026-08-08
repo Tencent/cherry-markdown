@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import Footnote from '../../../src/core/hooks/Footnote';
 import { hashHex } from '../../../src/utils/hash';
 

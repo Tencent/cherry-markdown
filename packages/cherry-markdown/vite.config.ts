@@ -9,12 +9,13 @@
  * - 中间件拦截：处理字体文件和资源路由
  * - HTML 转换：自动处理 link 和 script 标签
  *
- * 注意：此配置仅用于开发，生产构建使用 Rollup（build/*.config.js）
+ * 注意：此配置仅用于开发，生产构建由 Vite/Rolldown（build/vite.build.js）完成
  */
 
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vite-plus';
 import path from 'path';
 import { cherryDevPlugin, printLinksPlugin } from './vite.plugins';
+import { getBuildVersion } from './build/revision.js';
 
 // Cherry Markdown 源码目录
 const cherryMarkdownDir = path.resolve(__dirname);
@@ -87,7 +88,7 @@ export default defineConfig({
 
   // 定义全局常量
   define: {
-    'process.env.BUILD_VERSION': JSON.stringify(process.env.BUILD_VERSION || ''),
+    'process.env.BUILD_VERSION': JSON.stringify(getBuildVersion('development')),
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
     BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
   },

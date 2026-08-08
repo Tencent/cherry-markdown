@@ -1,5 +1,5 @@
 import { handleUpload } from '../../../src/utils/file';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import Audio from '../../../src/toolbars/hooks/Audio';
 import FileLink from '../../../src/toolbars/hooks/File';
 import Image from '../../../src/toolbars/hooks/Image';

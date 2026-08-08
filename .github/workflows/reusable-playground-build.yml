@@ -23,15 +23,19 @@ jobs:
           retention-days: 5
 
       - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version-file: '.node-version'
+          cache: true
 
       - uses: actions/setup-node@v4
         with:
-          node-version-file: .node-version
+          node-version-file: '.node-version'
           cache: 'yarn'
 
-      - run: yarn install
+      - run: vp install
 
-      - run: yarn build
+      - run: vp run build
 
       - run: |
           mkdir -p playground/packages/cherry-markdown

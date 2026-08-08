@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { initMathEngines } from '../../src/utils/math-loader';
 
 const { loadCSSMock, loadScriptMock } = vi.hoisted(() => ({

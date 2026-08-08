@@ -70,7 +70,7 @@ const webviewConfig: UserConfig = {
 };
 
 export default defineConfig(({ mode }) => {
-  if (mode === 'extension') return extensionConfig;
+  if (mode === 'extension' || mode === 'development') return extensionConfig;
   if (mode === 'webview') return webviewConfig;
   throw new Error(`Unsupported VS Code plugin build mode: ${mode}`);
 });

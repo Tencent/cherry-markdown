@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { addonsKeywords, allSuggestList, suggesterKeywords } from '../../../src/core/hooks/SuggestList';
 
 interface Suggestion {

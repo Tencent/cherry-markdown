@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import MathBlock from '../../../src/core/hooks/MathBlock';
 import { hashHex } from '../../../src/utils/hash';
 

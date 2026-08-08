@@ -20,7 +20,7 @@ npm install @cherry-markdown/miniprogram
 
 The package is ESM-only and exposes `CherryStream`, which creates and owns its Cherry engine. Its `setMarkdown()` input model matches Web CherryStream; it returns MiniProgram view data instead of updating a DOM previewer. SSE requests, framing, and payload extraction are application responsibilities.
 
-The native MiniProgram runtime does not execute ESM packages directly. Bundle application source that imports this package into the MiniProgram runtime format; the Demo uses Rollup for that build step.
+The native MiniProgram runtime does not execute ESM packages directly. Bundle application source that imports this package into the MiniProgram runtime format; the Demo uses Vite/Rolldown for that build step.
 
 ### Stream rendering
 

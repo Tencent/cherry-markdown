@@ -174,7 +174,7 @@
     }
   },
   "scripts": {
-    "build": "vite build --mode extension && vite build --mode webview",
+    "build": "vp build --mode extension && vp build --mode webview",
     "vscode:prepublish": "yarn build && yarn test:package",
     "typecheck": "tsc --noEmit",
     "test": "yarn test:unit && yarn test:integration",

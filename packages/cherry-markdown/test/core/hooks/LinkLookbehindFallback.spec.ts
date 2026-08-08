@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import Link from '../../../src/core/hooks/Link';
 import UrlCache from '../../../src/UrlCache';
 

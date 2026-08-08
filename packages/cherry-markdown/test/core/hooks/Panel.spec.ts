@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import Panel from '../../../src/core/hooks/Panel';
 import { hashHex } from '../../../src/utils/hash';
 

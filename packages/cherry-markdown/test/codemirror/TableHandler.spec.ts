@@ -23,7 +23,7 @@
  * - $getTdOffset: 边界检查
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vite-plus/test';
 
 // Mock CodeMirror 6 实例
 const createMockCodeMirror = (content: string) => {

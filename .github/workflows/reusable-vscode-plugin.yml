@@ -36,6 +36,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version-file: '.node-version'
+          cache: true
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -60,23 +65,23 @@ jobs:
             )
           ' package.json > "$tmp" && mv "$tmp" package.json
 
-      # ── 2. 安装依赖 + 构建插件 ──
+      # ── 2. 安装依赖 ──
       - name: Install Dependencies
-        run: yarn --frozen-lockfile --network-timeout 100000
+        run: vp install
 
       # 核心库必须先生成 ESM/CSS，根脚本负责按顺序构建核心库和插件。
       - name: Build VSCode Plugin (production bundle)
-        run: yarn build:vscodePlugin
+        run: vp run build:vscodePlugin
 
       # ── 3. 类型检查、测试和产物验证 ──
       - name: Validate VSCode Plugin
         run: |
-          yarn workspace cherry-markdown-vscode-plugin typecheck
-          yarn workspace cherry-markdown-vscode-plugin test:unit
-          yarn workspace cherry-markdown-vscode-plugin test:package
+          vp run -F cherry-markdown-vscode-plugin typecheck
+          vp run -F cherry-markdown-vscode-plugin test:unit
+          vp run -F cherry-markdown-vscode-plugin test:package
 
       - name: Test VSCode Plugin in Extension Host
-        run: xvfb-run -a yarn workspace cherry-markdown-vscode-plugin test:integration
+        run: xvfb-run -a vp run -F cherry-markdown-vscode-plugin test:integration
 
       # ── 4. 发布时才在隔离目录使用 Marketplace 名称，避免 Yarn workspace 重名。──
       - name: Prepare Marketplace Package

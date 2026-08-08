@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import FrontMatter from '../../../src/core/hooks/FrontMatter';
 import { hashHex } from '../../../src/utils/hash';
 

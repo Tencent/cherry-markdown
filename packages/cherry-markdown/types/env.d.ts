@@ -25,7 +25,7 @@ declare namespace NodeJS {
 
 declare global {
   const BUILD_ENV: string;
-  /** 构建脚本注入，Rollup define 会替换 process.env */
+  /** 构建脚本注入，Vite define 会替换 process.env */
   const process: {
     env: NodeJS.ProcessEnv;
   };

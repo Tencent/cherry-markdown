@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import Graph from '../../../src/toolbars/hooks/Graph';
 import ProTable from '../../../src/toolbars/hooks/ProTable';
 import { createMenuContext } from '../../helpers/menu';

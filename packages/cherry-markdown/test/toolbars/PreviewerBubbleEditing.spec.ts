@@ -1,5 +1,5 @@
 import { EditorState, type TransactionSpec } from '@codemirror/state';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import { createPreviewerBubble } from '../helpers/previewerBubble';
 
 function attachEditor(bubble: ReturnType<typeof createPreviewerBubble>['bubble'], markdown: string) {

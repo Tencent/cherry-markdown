@@ -27,25 +27,33 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [lts/*, 24.x]
-        # lts/*: 当前最新 Active LTS（自动跟随）
+        node-version: [22.x, 24.x, lts/*]
+        # 22.x: package.json engines 声明的最低支持版本
         # 24.x: 固定开发基准版本
+        # lts/*: 当前最新 Active LTS（自动跟随）
 
     steps:
       - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: true
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn
+        run: vp install
 
       - name: Lint
-        run: yarn lint
+        run: vp run lint
 
       - name: Typecheck
-        run: yarn typecheck
+        run: vp run typecheck
 
       - name: Build
-        run: yarn build
+        run: vp run build
+
+      - name: Verify Cherry Markdown published artifacts
+        run: vp run -F cherry-markdown test:artifacts

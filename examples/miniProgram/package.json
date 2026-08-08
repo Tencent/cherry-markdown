@@ -8,8 +8,5 @@
   "dependencies": {
     "@cherry-markdown/miniprogram": "https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniprogram@1827.tgz"
   },
-  "devDependencies": {
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "rollup": "^4.52.3"
-  }
+  "devDependencies": {}
 }

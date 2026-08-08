@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import BackgroundColor from '../../../src/core/hooks/BackgroundColor';
 import Color from '../../../src/core/hooks/Color';
 import Size from '../../../src/core/hooks/Size';

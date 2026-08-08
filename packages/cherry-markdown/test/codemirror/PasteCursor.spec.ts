@@ -2,7 +2,7 @@
  * HTML paste cursor regression tests.
  */
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import type { EditorView } from '@codemirror/view';
 import Editor from '../../src/Editor';
 import pasteHelper from '../../src/utils/pasteHelper';

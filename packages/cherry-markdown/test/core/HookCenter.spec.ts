@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test';
 import HookCenter from '../../src/core/HookCenter';
 import SyntaxBase from '../../src/core/SyntaxBase';
 import ParagraphBase from '../../src/core/ParagraphBase';

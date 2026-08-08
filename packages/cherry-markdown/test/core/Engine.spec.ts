@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import CherryEngine from '../../src/index.engine.core';
 import Engine from '../../src/Engine';
 import ParagraphBase from '../../src/core/ParagraphBase';

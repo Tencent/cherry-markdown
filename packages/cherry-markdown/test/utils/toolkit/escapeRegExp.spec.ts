@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import escapeRegExp from '@/utils/toolkit/escapeRegExp';
 
 describe('utils/toolkit/escapeRegExp', () => {
