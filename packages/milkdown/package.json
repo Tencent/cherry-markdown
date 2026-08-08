@@ -52,7 +52,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "run-s clean build:types",
+    "build": "rimraf ./dist && tsc --project tsconfig.build.json",
     "build:types": "tsc --project tsconfig.build.json",
     "clean": "rimraf ./dist",
     "test": "yarn workspace cherry-markdown build:engine && vitest run --config vitest.config.ts",
@@ -73,8 +73,9 @@
     "@milkdown/kit": "^7.21.3",
     "cherry-markdown": "*",
     "mathlive": "^0.110.0",
+    "mermaid": "^11.14.0",
     "remark-math": "^6.0.0",
-    "mermaid": "^11.14.0"
+    "rimraf": "^3.0.2"
   },
   "dependencies": {
     "remark-math": "^6.0.0"
