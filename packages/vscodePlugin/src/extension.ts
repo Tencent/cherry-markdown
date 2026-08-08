@@ -1,251 +1,465 @@
-import * as vscode from 'vscode';
 import * as path from 'path';
-import { getWebviewContent } from './webview';
+import * as vscode from 'vscode';
+import { getTheme, getUsageMode, migrateImageUploadMode, migrateTheme, THEME_STATE_KEY } from './config';
 import { uploadFileHandler } from './handler/uploadFile';
+import type { EditorState, ExtensionToWebviewMessage } from './protocol';
+import { parseWebviewMessage } from './protocol';
+import { calculateTextReplacement } from './textEdit';
+import { getWebviewContent } from './webview';
 
-// 状态管理器
-// 更简化的状态对象
-const state = {
-  panel: undefined as vscode.WebviewPanel | undefined,
-  targetEditor: undefined as vscode.TextEditor | undefined,
-  webviewMsgDisposable: undefined as vscode.Disposable | undefined,
-  extPath: '',
-  scrollTimeout: undefined as ReturnType<typeof setTimeout> | undefined,
-  editTimeout: undefined as ReturnType<typeof setTimeout> | undefined,
-  disableScroll: false,
-  disableEdit: false,
-  isPanelInit: false,
-  theme: vscode.workspace.getConfiguration('cherryMarkdown').get('theme') as string | undefined,
-  reset() {
-    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
-    if (this.editTimeout) clearTimeout(this.editTimeout);
-    this.webviewMsgDisposable?.dispose();
-    this.panel = undefined;
-    this.targetEditor = undefined;
-    this.webviewMsgDisposable = undefined;
-    this.scrollTimeout = undefined;
-    this.editTimeout = undefined;
-    this.disableScroll = false;
-    this.disableEdit = false;
-    this.isPanelInit = false;
-    this.theme = vscode.workspace.getConfiguration('cherryMarkdown').get('theme') as string | undefined;
-  },
-};
+const MAX_PNG_BYTES = 50 * 1024 * 1024;
 
-export function activate(context: vscode.ExtensionContext) {
-  state.extPath = context.extensionPath;
-  context.subscriptions.push(
-    vscode.commands.registerCommand('cherrymarkdown.preview', () => triggerEditorContentChange(true)),
-  );
-  context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(() => triggerEditorContentChange()));
-  context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor((e) => handleActiveEditorChange(e)));
-  context.subscriptions.push(
-    vscode.workspace.onDidChangeTextDocument((e) => {
-      if (state.isPanelInit && e?.document && !state.disableEdit) {
-        triggerEditorContentChange();
-      }
-    }),
-  );
-  context.subscriptions.push(
-    vscode.window.onDidChangeTextEditorVisibleRanges((e) => {
-      if (!state.isPanelInit || !state.panel) return;
-      if (!state.disableScroll) {
-        state.panel.webview.postMessage({ cmd: 'editor-scroll', data: e.visibleRanges[0].start.line });
-      }
-    }),
-  );
+function sameUri(left: vscode.Uri | undefined, right: vscode.Uri | undefined): boolean {
+  return left?.toString() === right?.toString();
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() {}
+function uriDirectory(uri: vscode.Uri): vscode.Uri {
+  return uri.with({ path: path.posix.dirname(uri.path), query: '', fragment: '' });
+}
 
-/**
- * 获取当前文件的信息
- * @returns
- */
-const getMarkdownFileInfo = () => {
-  let editor = vscode.window.activeTextEditor;
-  let doc = editor?.document;
-  let text = '';
-  let title = '';
-  if (doc?.languageId !== 'markdown' && state.targetEditor?.document?.languageId === 'markdown') {
-    editor = state.targetEditor;
-    doc = state.targetEditor?.document;
-  }
-  if (doc?.languageId === 'markdown' && editor) {
-    state.targetEditor = editor;
-    text = doc.getText() || '';
-    title = path.basename(doc.fileName) || '';
-  }
-  title = title
-    ? `${vscode.l10n.t('Preview')} ${title} ${vscode.l10n.t('By')} Cherry Markdown`
-    : `${vscode.l10n.t('UnSupported')} ${vscode.l10n.t('By')} Cherry Markdown`;
-  const theme = state.theme ?? vscode.workspace.getConfiguration('cherryMarkdown').get('theme');
-  return { mdInfo: { text, theme }, currentTitle: title };
-};
+class CherryMarkdownPreview {
+  private panel: vscode.WebviewPanel | undefined;
+  private targetEditor: vscode.TextEditor | undefined;
+  private messageDisposable: vscode.Disposable | undefined;
+  private webviewReady = false;
+  private suppressEditorScroll = false;
+  private scrollTimeout: ReturnType<typeof setTimeout> | undefined;
+  private pendingWebviewText: string | undefined;
+  private editQueue: Promise<void> = Promise.resolve();
+  private panelGeneration = 0;
 
-/**
- * 初始化cherry预览窗口
- */
-const initCherryPanel = () => {
-  if (state.isPanelInit && state.panel) {
-    state.panel.reveal(vscode.ViewColumn.Two);
-    return;
-  }
-  const { mdInfo, currentTitle } = getMarkdownFileInfo();
-  const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath ?? '';
-  state.panel = vscode.window.createWebviewPanel('cherrymarkdown.preview', currentTitle, vscode.ViewColumn.Two, {
-    enableScripts: true,
-    retainContextWhenHidden: true,
-    localResourceRoots: [
-      vscode.Uri.file(path.join(state.extPath, 'web-resources')),
-      vscode.Uri.file(path.join(state.extPath, 'web-resources', 'dist')),
-      vscode.Uri.file(workspaceFolder),
-    ],
-  });
-  try {
-    state.panel.webview.html = getWebviewContent(
-      { ...mdInfo, vscodeLanguage: vscode.env.language },
-      state.panel,
-      state.extPath,
+  constructor(
+    private readonly context: vscode.ExtensionContext,
+    private readonly output: vscode.OutputChannel,
+  ) {}
+
+  register(): void {
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand('cherrymarkdown.preview', () => this.show(true)),
+      vscode.window.onDidChangeActiveTextEditor((editor) => this.handleActiveEditorChange(editor)),
+      vscode.workspace.onDidChangeTextDocument((event) => this.handleDocumentChange(event)),
+      vscode.window.onDidChangeTextEditorVisibleRanges((event) => this.handleVisibleRangesChange(event)),
+      vscode.workspace.onDidChangeConfiguration((event) => this.handleConfigurationChange(event)),
     );
-  } catch (err) {
-    vscode.window.showErrorMessage('Failed to initialize Cherry Markdown webview.');
-    console.error(err);
-  }
-  state.panel.iconPath = vscode.Uri.file(path.join(state.extPath, 'favicon.ico'));
-  state.isPanelInit = true;
-  state.panel.onDidDispose(() => state.reset());
-  initCherryPanelEvent();
-};
 
-const initCherryPanelEvent = () => {
-  if (!state.panel) return;
-  state.webviewMsgDisposable?.dispose();
-  state.webviewMsgDisposable = state.panel.webview.onDidReceiveMessage(async (e) => {
-    const { type, data } = e;
-    switch (type) {
-      case 'preview-scroll': {
-        state.disableScroll = true;
-        if (!state.targetEditor) return;
-        const pos = new vscode.Position(data, 0);
-        const range = new vscode.Range(pos, pos);
-        state.targetEditor.revealRange(range, vscode.TextEditorRevealType.AtTop);
-        if (state.scrollTimeout) clearTimeout(state.scrollTimeout);
-        state.scrollTimeout = setTimeout(() => {
-          state.disableScroll = false;
-        }, 500);
+    void this.handleActiveEditorChange(vscode.window.activeTextEditor);
+  }
+
+  dispose(): void {
+    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+    this.messageDisposable?.dispose();
+    this.panel?.dispose();
+  }
+
+  private async show(manual: boolean): Promise<void> {
+    const editor = vscode.window.activeTextEditor;
+    if (editor?.document.languageId === 'markdown') {
+      this.targetEditor = editor;
+    }
+    if (!this.targetEditor || (!manual && getUsageMode(this.targetEditor.document.uri) !== 'active')) return;
+
+    if (this.panel) {
+      this.panel.reveal(vscode.ViewColumn.Two);
+      this.updateResourceRoots();
+      await this.postEditorState('editor-change');
+      return;
+    }
+
+    const title = this.getTitle();
+    this.panel = vscode.window.createWebviewPanel('cherrymarkdown.preview', title, vscode.ViewColumn.Two, {
+      enableScripts: true,
+      enableForms: false,
+      retainContextWhenHidden: false,
+      localResourceRoots: this.getResourceRoots(),
+    });
+    this.panelGeneration += 1;
+    this.panel.iconPath = vscode.Uri.joinPath(this.context.extensionUri, 'favicon.ico');
+    this.panel.webview.html = getWebviewContent(this.panel, this.context.extensionUri);
+    this.webviewReady = false;
+
+    this.panel.onDidDispose(() => this.resetPanel(), undefined, this.context.subscriptions);
+    this.panel.onDidChangeViewState(
+      async ({ webviewPanel }) => {
+        if (webviewPanel.visible && this.webviewReady) await this.postEditorState('editor-change');
+      },
+      undefined,
+      this.context.subscriptions,
+    );
+    this.registerWebviewMessages();
+  }
+
+  private resetPanel(): void {
+    this.panelGeneration += 1;
+    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+    this.messageDisposable?.dispose();
+    this.messageDisposable = undefined;
+    this.panel = undefined;
+    this.webviewReady = false;
+    this.pendingWebviewText = undefined;
+    this.suppressEditorScroll = false;
+  }
+
+  private registerWebviewMessages(): void {
+    if (!this.panel) return;
+    this.messageDisposable?.dispose();
+    this.messageDisposable = this.panel.webview.onDidReceiveMessage((rawMessage: unknown) => {
+      const message = parseWebviewMessage(rawMessage);
+      if (!message) {
+        this.output.appendLine('[protocol] Ignored an invalid message from the Webview.');
         return;
       }
-      case 'change-theme': {
-        state.theme = data;
-        vscode.workspace.getConfiguration('cherryMarkdown').update('theme', data, true);
-        break;
+
+      switch (message.type) {
+        case 'ready':
+          this.webviewReady = true;
+          void (async () => {
+            await this.postEditorState('editor-init');
+            await this.postMessage({
+              cmd: this.isEditEnabled() ? 'enable-edit' : 'disable-edit',
+              data: {},
+            });
+          })();
+          break;
+        case 'preview-scroll':
+          this.revealEditorLine(message.data);
+          break;
+        case 'change-theme':
+          void this.updateTheme(message.data);
+          break;
+        case 'editor-change':
+          this.editQueue = this.editQueue
+            .then(() => this.applyWebviewEdit(message.data))
+            .catch(async (error: unknown) => {
+              this.reportError('editor-change', error);
+              await this.postOperationError('editor-change', vscode.l10n.t('Unable to apply the preview edit.'));
+              await this.postEditorState('editor-change');
+            });
+          break;
+        case 'show-message':
+          void vscode.window.showInformationMessage(message.data);
+          break;
+        case 'upload-file':
+          void this.uploadFile(message.data);
+          break;
+        case 'open-url':
+          void this.openUrl(message.data);
+          break;
+        case 'export-png':
+          void this.exportPng(message.data);
+          break;
       }
-      case 'cherry-change': {
-        if (!state.targetEditor) break;
-        state.disableEdit = true;
-        state.targetEditor.edit((editBuilder) => {
-          const endNum = state.targetEditor!.document.lineCount + 1;
-          const end = new vscode.Position(endNum, 0);
-          editBuilder.replace(new vscode.Range(new vscode.Position(0, 0), end), data.markdown);
-        });
-        if (state.editTimeout) clearTimeout(state.editTimeout);
-        state.editTimeout = setTimeout(() => {
-          state.disableEdit = false;
-        }, 500);
-        break;
+    });
+  }
+
+  private async handleActiveEditorChange(editor: vscode.TextEditor | undefined): Promise<void> {
+    if (editor?.document.languageId === 'markdown') {
+      this.targetEditor = editor;
+      if (this.panel) {
+        this.updateResourceRoots();
+        await this.postMessage({ cmd: 'enable-edit', data: {} });
+        await this.postEditorState('editor-change');
+      } else if (getUsageMode(editor.document.uri) === 'active') {
+        await this.show(false);
       }
-      case 'tips':
-        vscode.window.showInformationMessage(data, 'OK');
-        break;
-      case 'cherry-load-img':
-        // 可扩展图片加载逻辑
-        break;
-      case 'upload-file': {
-        try {
-          const res = await uploadFileHandler(data);
-          if (res.url) {
-            state.panel?.webview.postMessage({ cmd: 'upload-file-callback', data: res });
-          } else {
-            vscode.window.showInformationMessage('上传不成功');
-          }
-        } catch (err) {
-          vscode.window.showErrorMessage('上传失败');
-          console.error(err);
-        }
-        break;
-      }
-      case 'open-url': {
-        if (data === 'href-invalid') {
-          vscode.window.showErrorMessage('link is not valid, please check it.');
-          return;
-        }
-        if (/^(http|https):\/\//.test(data)) {
-          vscode.env.openExternal(vscode.Uri.parse(data));
-          return;
-        }
-        const decodedData = decodeURIComponent(data);
-        if (path.isAbsolute(decodedData)) {
-          const decodedDataPath = vscode.Uri.file(decodedData);
-          vscode.commands.executeCommand('vscode.open', decodedDataPath, { preview: true });
-          return;
-        }
-        if (data.startsWith('#')) return;
-        if (!state.targetEditor) return;
-        const uri = vscode.Uri.file(path.join(state.targetEditor.document.uri.fsPath, '..', data));
-        vscode.commands.executeCommand('vscode.open', uri, { preview: true });
-        break;
-      }
-      case 'export-png': {
-        if (data === 'export-fail') {
-          vscode.window.showErrorMessage('导出错误，请重新尝试');
-          return;
-        }
-        const uri = await vscode.window.showSaveDialog({
-          filters: { Images: ['png'] },
-          saveLabel: '保存截图',
-        });
-        if (uri) {
-          const base64Data = data.replace(/^data:image\/png;base64,/, '');
-          const buffer = Buffer.from(base64Data, 'base64');
-          await vscode.workspace.fs.writeFile(uri, buffer);
-          vscode.window.showInformationMessage('Image saved successfully!');
-        } else {
-          vscode.window.showWarningMessage('Save cancelled.');
-        }
-        break;
-      }
+      return;
     }
-  });
-};
 
-// handle active editor change
-const handleActiveEditorChange = (e: vscode.TextEditor | undefined) => {
-  const cherryUsage = vscode.workspace.getConfiguration('cherryMarkdown').get<'active' | 'only-manual'>('Usage');
-  if (!e?.document || cherryUsage !== 'active') return;
-  triggerEditorContentChange();
-  if (e.document.languageId !== 'markdown') {
-    state.panel?.webview.postMessage({ cmd: 'disable-edit', data: {} });
-  } else {
-    state.panel?.webview.postMessage({ cmd: 'enable-edit', data: {} });
+    if (this.panel) await this.postMessage({ cmd: 'disable-edit', data: {} });
   }
-};
 
-/**
- * 向预览区发送vscode编辑区内容变更的消息
- */
-const triggerEditorContentChange = (focus = false) => {
-  if (state.isPanelInit && state.panel) {
-    const { mdInfo, currentTitle } = getMarkdownFileInfo();
-    state.panel.title = currentTitle;
-    state.panel.webview.postMessage({ cmd: 'editor-change', data: mdInfo });
-    return;
+  private isEditEnabled(): boolean {
+    const activeEditor = vscode.window.activeTextEditor;
+    return Boolean(
+      activeEditor?.document.languageId === 'markdown' &&
+      this.targetEditor &&
+      sameUri(activeEditor.document.uri, this.targetEditor.document.uri),
+    );
   }
-  if (vscode.window.activeTextEditor?.document?.languageId === 'markdown') {
-    const cherryUsage = vscode.workspace.getConfiguration('cherryMarkdown').get<'active' | 'only-manual'>('Usage');
-    if (cherryUsage === 'active' || focus) {
-      initCherryPanel();
+
+  private async handleDocumentChange(event: vscode.TextDocumentChangeEvent): Promise<void> {
+    if (!this.targetEditor || !sameUri(event.document.uri, this.targetEditor.document.uri)) return;
+    if (this.pendingWebviewText === event.document.getText()) {
+      this.pendingWebviewText = undefined;
+      return;
+    }
+    this.pendingWebviewText = undefined;
+    await this.postEditorState('editor-change');
+  }
+
+  private handleVisibleRangesChange(event: vscode.TextEditorVisibleRangesChangeEvent): void {
+    if (
+      !this.panel ||
+      !this.targetEditor ||
+      !sameUri(event.textEditor.document.uri, this.targetEditor.document.uri) ||
+      this.suppressEditorScroll ||
+      event.visibleRanges.length === 0
+    ) {
+      return;
+    }
+    void this.postMessage({ cmd: 'editor-scroll', data: event.visibleRanges[0].start.line });
+  }
+
+  private async handleConfigurationChange(event: vscode.ConfigurationChangeEvent): Promise<void> {
+    if (!this.targetEditor) return;
+    if (
+      !this.panel &&
+      event.affectsConfiguration('cherryMarkdown.Usage', this.targetEditor.document.uri) &&
+      getUsageMode(this.targetEditor.document.uri) === 'active'
+    ) {
+      await this.show(false);
     }
   }
-};
+
+  private async applyWebviewEdit(data: {
+    documentUri: string;
+    baseVersion: number;
+    requestId: number;
+    markdown: string;
+  }): Promise<void> {
+    const editor = this.targetEditor;
+    if (editor?.document.uri.toString() !== data.documentUri) {
+      await this.postOperationError('editor-change', vscode.l10n.t('The preview document is no longer active.'));
+      await this.postEditorState('editor-change');
+      return;
+    }
+
+    const { document } = editor;
+    if (document.version !== data.baseVersion) {
+      await this.postOperationError('editor-change', vscode.l10n.t('The document changed outside the preview.'));
+      await this.postEditorState('editor-change');
+      return;
+    }
+
+    const normalizedMarkdown = data.markdown.replace(/\r?\n/g, document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n');
+    const replacement = calculateTextReplacement(document.getText(), normalizedMarkdown);
+    if (!replacement) {
+      await this.postMessage({
+        cmd: 'editor-ack',
+        data: { requestId: data.requestId, documentVersion: document.version, text: document.getText() },
+      });
+      return;
+    }
+
+    const edit = new vscode.WorkspaceEdit();
+    edit.replace(
+      document.uri,
+      new vscode.Range(document.positionAt(replacement.startOffset), document.positionAt(replacement.endOffset)),
+      replacement.text,
+    );
+    this.pendingWebviewText = normalizedMarkdown;
+    const applied = await vscode.workspace.applyEdit(edit);
+    if (!applied) {
+      this.pendingWebviewText = undefined;
+      await this.postOperationError('editor-change', vscode.l10n.t('Unable to apply the preview edit.'));
+      await this.postEditorState('editor-change');
+      return;
+    }
+
+    await this.postMessage({
+      cmd: 'editor-ack',
+      data: { requestId: data.requestId, documentVersion: document.version, text: document.getText() },
+    });
+  }
+
+  private revealEditorLine(line: number): void {
+    if (!this.targetEditor) return;
+    const lastLine = Math.max(0, this.targetEditor.document.lineCount - 1);
+    const targetLine = line < 0 ? lastLine : Math.min(Math.floor(line), lastLine);
+    const position = new vscode.Position(targetLine, 0);
+    this.suppressEditorScroll = true;
+    this.targetEditor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.AtTop);
+    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+    this.scrollTimeout = setTimeout(() => {
+      this.suppressEditorScroll = false;
+    }, 150);
+  }
+
+  private async updateTheme(theme: string): Promise<void> {
+    if (!this.targetEditor) return;
+    await this.context.globalState.update(THEME_STATE_KEY, theme);
+    await this.postEditorState('editor-change');
+  }
+
+  private async uploadFile(file: Parameters<typeof uploadFileHandler>[0]): Promise<void> {
+    const { panel } = this;
+    const generation = this.panelGeneration;
+    try {
+      const result = await uploadFileHandler(file, this.targetEditor?.document.uri);
+      if (generation === this.panelGeneration && panel === this.panel) {
+        await this.postMessage({ cmd: 'upload-file-result', data: result }, panel);
+      }
+    } catch (error: unknown) {
+      this.reportError('upload-file', error);
+      if (generation === this.panelGeneration && panel === this.panel) {
+        await this.postOperationError('upload-file', vscode.l10n.t('Upload failed.'), file.requestId, panel);
+      }
+    }
+  }
+
+  private async openUrl(rawUrl: string): Promise<void> {
+    if (!rawUrl) {
+      await vscode.window.showErrorMessage(vscode.l10n.t('The link is invalid.'));
+      return;
+    }
+
+    let decodedUrl: string;
+    try {
+      decodedUrl = decodeURIComponent(rawUrl);
+    } catch {
+      await vscode.window.showErrorMessage(vscode.l10n.t('The link is invalid.'));
+      return;
+    }
+
+    if (/^https?:\/\//i.test(rawUrl)) {
+      try {
+        const parsed = new URL(rawUrl);
+        if (!parsed.hostname || /[\u0000-\u001f]/.test(rawUrl)) throw new Error('Invalid URL');
+        await vscode.env.openExternal(vscode.Uri.parse(rawUrl));
+      } catch {
+        await vscode.window.showErrorMessage(vscode.l10n.t('The link is invalid.'));
+      }
+      return;
+    }
+    if (decodedUrl.startsWith('#')) return;
+    if (/^[a-z][a-z\d+.-]*:/i.test(decodedUrl) && !path.win32.isAbsolute(decodedUrl)) {
+      await vscode.window.showErrorMessage(vscode.l10n.t('This link protocol is not allowed.'));
+      return;
+    }
+    if (!this.targetEditor) return;
+
+    let targetUri: vscode.Uri;
+    const reference = vscode.Uri.parse(decodedUrl);
+    if (path.win32.isAbsolute(reference.fsPath) || path.posix.isAbsolute(reference.path)) {
+      targetUri = vscode.Uri.file(reference.fsPath).with({ query: reference.query, fragment: reference.fragment });
+    } else {
+      targetUri = vscode.Uri.joinPath(uriDirectory(this.targetEditor.document.uri), reference.path).with({
+        query: reference.query,
+        fragment: reference.fragment,
+      });
+    }
+    await vscode.commands.executeCommand('vscode.open', targetUri, { preview: true });
+  }
+
+  private async exportPng(data: string): Promise<void> {
+    if (data === 'export-fail') {
+      await vscode.window.showErrorMessage(vscode.l10n.t('Unable to export the preview as PNG.'));
+      return;
+    }
+
+    const base64Data = data.slice('data:image/png;base64,'.length);
+    const estimatedSize = Math.floor((base64Data.length * 3) / 4);
+    if (estimatedSize > MAX_PNG_BYTES) {
+      await vscode.window.showErrorMessage(vscode.l10n.t('The exported PNG is too large.'));
+      return;
+    }
+    if (base64Data.length % 4 !== 0 || !/^[A-Za-z\d+/]*={0,2}$/.test(base64Data)) {
+      await vscode.window.showErrorMessage(vscode.l10n.t('Unable to export the preview as PNG.'));
+      return;
+    }
+
+    const uri = await vscode.window.showSaveDialog({
+      filters: { Images: ['png'] },
+      saveLabel: vscode.l10n.t('Save PNG'),
+    });
+    if (!uri) return;
+
+    try {
+      const buffer = Buffer.from(base64Data, 'base64');
+      if (!buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) {
+        throw new Error('The exported data is not a PNG file.');
+      }
+      await vscode.window.withProgress(
+        { location: vscode.ProgressLocation.Notification, title: vscode.l10n.t('Saving Cherry Markdown PNG...') },
+        () => vscode.workspace.fs.writeFile(uri, buffer),
+      );
+      await vscode.window.showInformationMessage(vscode.l10n.t('Image saved successfully.'));
+    } catch (error: unknown) {
+      this.reportError('export-png', error);
+      await vscode.window.showErrorMessage(vscode.l10n.t('Unable to save the PNG.'));
+    }
+  }
+
+  private getEditorState(): EditorState | undefined {
+    const editor = this.targetEditor;
+    if (editor?.document.languageId !== 'markdown' || !this.panel) return undefined;
+    const { document } = editor;
+    return {
+      text: document.getText(),
+      theme: getTheme(this.context.globalState, document.uri),
+      documentUri: document.uri.toString(),
+      documentVersion: document.version,
+      resourceUri: this.panel.webview.asWebviewUri(document.uri).toString(),
+      vscodeLanguage: vscode.env.language,
+      labels: {
+        edit: vscode.l10n.t('Edit'),
+        fontStyle: vscode.l10n.t('Font style'),
+        save: vscode.l10n.t('Save'),
+        savePng: vscode.l10n.t('Save as PNG'),
+        editDisabled: vscode.l10n.t('The Markdown document is not active, so preview editing is disabled.'),
+      },
+    };
+  }
+
+  private async postEditorState(cmd: 'editor-init' | 'editor-change'): Promise<void> {
+    const state = this.getEditorState();
+    if (!state || !this.panel || !this.webviewReady) return;
+    this.panel.title = this.getTitle();
+    await this.postMessage({ cmd, data: state });
+  }
+
+  private async postOperationError(
+    operation: string,
+    message: string,
+    requestId?: number,
+    panel = this.panel,
+  ): Promise<void> {
+    await this.postMessage({ cmd: 'operation-error', data: { operation, message, requestId } }, panel);
+  }
+
+  private async postMessage(message: ExtensionToWebviewMessage, panel = this.panel): Promise<boolean> {
+    return (await panel?.webview.postMessage(message)) ?? false;
+  }
+
+  private updateResourceRoots(): void {
+    if (!this.panel) return;
+    this.panel.webview.options = {
+      enableScripts: true,
+      enableForms: false,
+      localResourceRoots: this.getResourceRoots(),
+    };
+  }
+
+  private getResourceRoots(): vscode.Uri[] {
+    const roots = [vscode.Uri.joinPath(this.context.extensionUri, 'web-resources')];
+    if (!this.targetEditor) return roots;
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(this.targetEditor.document.uri);
+    roots.push(workspaceFolder?.uri ?? uriDirectory(this.targetEditor.document.uri));
+    return roots;
+  }
+
+  private getTitle(): string {
+    if (!this.targetEditor) return `${vscode.l10n.t('Unsupported')} · Cherry Markdown`;
+    return `${vscode.l10n.t('Preview')} ${path.posix.basename(this.targetEditor.document.uri.path)} · Cherry Markdown`;
+  }
+
+  private reportError(operation: string, error: unknown): void {
+    const message = error instanceof Error ? error.message : String(error);
+    this.output.appendLine(`[${operation}] ${message}`);
+  }
+}
+
+let preview: CherryMarkdownPreview | undefined;
+
+export function activate(context: vscode.ExtensionContext): void {
+  const output = vscode.window.createOutputChannel('Cherry Markdown');
+  preview = new CherryMarkdownPreview(context, output);
+  preview.register();
+  context.subscriptions.push(output, preview);
+  void migrateTheme(context.globalState);
+  void migrateImageUploadMode(context.globalState);
+}
+
+export function deactivate(): void {
+  preview?.dispose();
+  preview = undefined;
+}

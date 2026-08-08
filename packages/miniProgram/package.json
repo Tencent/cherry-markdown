@@ -52,9 +52,7 @@
     "htmlparser2": "^10.0.0"
   },
   "devDependencies": {
-    "rimraf": "^3.0.2",
-    "typescript": "^6.0.2",
-    "vitest": "4.1.10"
+    "rimraf": "^3.0.2"
   },
   "engines": {
     "node": ">=22",
