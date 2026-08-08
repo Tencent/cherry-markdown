@@ -20,7 +20,7 @@ npm install @cherry-markdown/miniprogram
 
 该包仅提供 ESM，并只公开 `CherryStream`，它会自行创建并持有 Cherry engine。其 `setMarkdown()` 输入模型与 Web CherryStream 一致，但返回小程序视图数据而不是更新 DOM Previewer。SSE 请求、分帧和内容提取由应用负责。
 
-小程序原生运行时不能直接执行 ESM 包，需要将 import 该包的应用源码构建为小程序运行时格式；Demo 使用 Rollup 完成该构建步骤。
+小程序原生运行时不能直接执行 ESM 包，需要将 import 该包的应用源码构建为小程序运行时格式；Demo 使用 Vite/Rolldown 完成该构建步骤。
 
 ### 流式渲染
 

@@ -82,6 +82,26 @@ yarn add cherry-markdown
 npm install cherry-markdown --save
 ```
 
+### CDN 使用
+
+普通 `<script>` 场景使用 UMD 产物，并固定版本号：
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cherry-markdown@0.11.9/dist/cherry-markdown.min.css">
+<script src="https://cdn.jsdelivr.net/npm/cherry-markdown@0.11.9/dist/cherry-markdown.js"></script>
+```
+
+UMD 产物会暴露全局变量 `Cherry`。需要使用原生 ESM 时：
+
+```html
+<script type="module">
+  import Cherry from 'https://cdn.jsdelivr.net/npm/cherry-markdown@0.11.9/dist/cherry-markdown.esm.js';
+
+  const cherry = new Cherry({ id: 'markdown-container' });
+</script>
+```
+
+
 Cherry 提供多种构建产物（完整包 / 核心包 / 流式输出包 / 引擎包），以适配浏览器、Node.js、AI Chat 流式输出等不同场景。使用示例、构建包差异、mermaid 集成方式及异步动态加载等详细内容，请参考 **[构建产物介绍](https://github.com/Tencent/cherry-markdown/wiki/%E6%9E%84%E5%BB%BA%E4%BA%A7%E7%89%A9%E4%BB%8B%E7%BB%8D)**。
 
 ## 贡献指南

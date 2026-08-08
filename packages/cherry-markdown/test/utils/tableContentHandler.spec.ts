@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import TableHandler from '../../src/utils/tableContentHandler';
 
 type TableCode = { code: string; offset: number; type: string };

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import { createPreviewerBubble } from '../helpers/previewerBubble';
 
 vi.mock('../../src/utils/dialog', () => ({

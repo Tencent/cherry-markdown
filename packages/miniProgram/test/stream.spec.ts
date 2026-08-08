@@ -1,5 +1,5 @@
 /* global globalThis */
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import CherryStream from '../src';
 import { blocksToMiniProgramView, resolvePendingImages } from '../src/shared/view';
 import { htmlToMiniProgramBlocks } from '../src/shared/transform';

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import PlantUMLCodeEngine from '../../src/addons/cherry-code-block-plantuml-plugin';
 import CherryEngine from '../../src/index.engine.core';
 

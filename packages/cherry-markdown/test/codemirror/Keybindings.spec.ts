@@ -31,7 +31,7 @@
  * 验证 state 变更结果，避免 jsdom 环境中模拟 keydown 的复杂性。
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vite-plus/test';
 import { EditorSelection } from '@codemirror/state';
 import {
   moveLineUp,

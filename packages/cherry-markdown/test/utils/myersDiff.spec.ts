@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import MyersDiff from '@/utils/myersDiff';
 
 describe('utils/myersDiff edge cases', () => {

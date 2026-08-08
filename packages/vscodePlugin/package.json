@@ -1,5 +1,6 @@
 {
   "name": "cherry-markdown-vscode-plugin",
+  "type": "module",
   "displayName": "Cherry Markdown",
   "description": "A markdown previewer powered by [cherry-markdown](https://github.com/Tencent/cherry-markdown) for VSCode",
   "version": "0.3.1",
@@ -26,7 +27,7 @@
   "activationEvents": [
     "onLanguage:markdown"
   ],
-  "main": "./dist/extension.js",
+  "main": "./dist/extension.cjs",
   "contributes": {
     "commands": [
       {
@@ -167,13 +168,11 @@
     }
   },
   "scripts": {
-    "dev": "rspack build --watch",
-    "build": "rspack build --mode production",
-    "package": "yarn build && npx @vscode/vsce package --no-dependencies --no-yarn"
+    "dev": "vp build --watch",
+    "build": "NODE_ENV=production node vite.build.js",
+    "package": "vp run build && npx @vscode/vsce package --no-dependencies --no-yarn"
   },
   "devDependencies": {
-    "@rspack/cli": "^1.5.3",
-    "@rspack/core": "^1.5.3",
     "@types/vscode": "^1.58.0",
     "axios": "^1.4.0",
     "cherry-markdown": "*",

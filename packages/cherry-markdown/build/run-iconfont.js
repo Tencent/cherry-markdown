@@ -212,7 +212,7 @@ function buildScss(entries) {
   font-family: "${fontName}";
   font-style: normal;
   font-weight: normal;
-  //line-height: 1;
+  line-height: 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

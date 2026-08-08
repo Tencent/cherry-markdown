@@ -29,7 +29,7 @@
  * - 生命周期 (destroy)
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vite-plus/test';
 
 // ============ Mock CM6 组件 ============
 

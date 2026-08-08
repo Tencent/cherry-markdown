@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import Toc from '../../../src/core/hooks/Toc';
 import { hashHex } from '../../../src/utils/hash';
 

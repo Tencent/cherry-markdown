@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import UrlCache from '../../../src/UrlCache';
 import Image from '../../../src/core/hooks/Image';
 

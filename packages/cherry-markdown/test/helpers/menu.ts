@@ -1,5 +1,5 @@
 import { EditorSelection, EditorState } from '@codemirror/state';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 export interface TestSelection {
   anchor: number;

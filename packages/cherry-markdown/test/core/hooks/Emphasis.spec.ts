@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import Emphasis from '../../../src/core/hooks/Emphasis';
 
 const sentenceMake = vi.fn((markdown: string) => ({ html: `<span>${markdown}</span>`, sign: markdown }));

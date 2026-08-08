@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import AsyncRenderHandler from '../../src/utils/async-render-handler';
 
 describe('utils/async-render-handler', () => {

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import Toolbar from '../../src/toolbars/Toolbar';
 
 vi.mock('../../src/toolbars/HookCenter', () => ({

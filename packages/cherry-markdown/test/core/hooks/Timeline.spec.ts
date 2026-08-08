@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vite-plus/test';
 import CherryEngine from '../../../src/index.engine.core';
 
 function createEngine(overrides: Record<string, any> = {}): any {

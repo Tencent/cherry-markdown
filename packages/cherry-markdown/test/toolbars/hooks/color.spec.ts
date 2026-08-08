@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import Color from '../../../src/toolbars/hooks/Color';
 import { createMenuContext } from '../../helpers/menu';
 

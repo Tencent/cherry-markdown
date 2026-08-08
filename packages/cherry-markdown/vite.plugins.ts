@@ -49,10 +49,11 @@ export function printLinksPlugin(examplesDir: string, htmlPages: string[]): Plug
  * 功能：
  * 1. 拦截对 dist/cherry-markdown.js 的请求，重定向到虚拟模块（源码入口 index.js）
  * 2. 拦截对 dist/cherry-markdown.core.js 的请求，重定向到虚拟模块（源码入口 index.core.js）
- * 3. 拦截对 dist/cherry-markdown.css 的请求，重定向到虚拟模块（SCSS 源文件）
- * 4. 拦截对 dist/addons/*.js 的请求，重定向到虚拟模块（src/addons/ 源码）
- * 5. 拦截字体文件请求，代理到 dist/fonts/ 目录
- * 6. 转换 HTML，将 link 标签转换为 JS 模块导入，将引用 dist 的 script 转换为 module 类型
+ * 3. 拦截对 dist/cherry-markdown.stream.js 的请求，重定向到虚拟模块（源码入口 index.stream.js）
+ * 4. 拦截对 dist/cherry-markdown.css 的请求，重定向到虚拟模块（SCSS 源文件）
+ * 5. 拦截对 dist/addons/*.js 的请求，重定向到虚拟模块（src/addons/ 源码）
+ * 6. 拦截字体文件请求，代理到 dist/fonts/ 目录
+ * 7. 转换 HTML，将 link 标签转换为 JS 模块导入，将引用 dist 的 script 转换为 module 类型
  */
 export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plugin {
   // 虚拟模块 ID 前缀
@@ -61,9 +62,11 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
   // 固定虚拟模块
   const virtualCherryJsId = `${VIRTUAL_PREFIX}full-js`;
   const virtualCherryCoreJsId = `${VIRTUAL_PREFIX}core-js`;
+  const virtualCherryStreamJsId = `${VIRTUAL_PREFIX}stream-js`;
   const virtualCherryCssId = `${VIRTUAL_PREFIX}css`;
   const resolvedVirtualCherryJsId = `\0${virtualCherryJsId}`;
   const resolvedVirtualCherryCoreJsId = `\0${virtualCherryCoreJsId}`;
+  const resolvedVirtualCherryStreamJsId = `\0${virtualCherryStreamJsId}`;
   const resolvedVirtualCherryCssId = `\0${virtualCherryCssId}`;
 
   /**
@@ -127,14 +130,21 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
 
         // 2. 拦截 cherry-markdown.core.js 请求 → core 虚拟模块
         // 必须在通用的 cherry-markdown*.js 匹配之前
-        const coreJsPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown\.core[^/]*\.js/;
+        const coreJsPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown\.core\.js/;
         if (coreJsPattern.test(url)) {
           req.url = `/@id/${virtualCherryCoreJsId}`;
           return next();
         }
 
-        // 3. 拦截 cherry-markdown.js（非 core）请求 → full 虚拟模块
-        const jsPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown[^/]*\.js/;
+        // 3. 拦截 cherry-markdown.stream.js 请求 → stream 虚拟模块
+        const streamJsPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown\.stream\.js/;
+        if (streamJsPattern.test(url)) {
+          req.url = `/@id/${virtualCherryStreamJsId}`;
+          return next();
+        }
+
+        // 4. 拦截 cherry-markdown.js（非 core/stream）请求 → full 虚拟模块
+        const jsPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown\.js/;
         const cssPattern = /\/?\.{0,2}\/?packages\/cherry-markdown\/dist\/cherry-markdown[^/]*\.css/;
 
         if (jsPattern.test(url)) {
@@ -142,13 +152,13 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
           return next();
         }
 
-        // 4. 拦截 cherry-markdown.css 请求 → 虚拟模块
+        // 5. 拦截 cherry-markdown.css 请求 → 虚拟模块
         if (cssPattern.test(url)) {
           req.url = `/@id/${virtualCherryCssId}`;
           return next();
         }
 
-        // 5. 拦截字体文件请求，代理到 dist/fonts/
+        // 6. 拦截字体文件请求，代理到 dist/fonts/
         // 情况1: src/sass/fonts/ 路径（Vite 处理 SCSS 时生成的绝对路径）
         // 情况2: /fonts/ 根路径（CSS 通过 JS 模块注入时，浏览器用页面 URL 解析相对路径 ./fonts/）
         const fontPatterns = [/\/packages\/cherry-markdown\/src\/sass\/fonts\/(.+)/, /^\/fonts\/(ch-icon\.[^?]+)/];
@@ -182,6 +192,7 @@ export function cherryDevPlugin(srcDir: string, cherryMarkdownDir: string): Plug
     resolveId(id) {
       if (id === virtualCherryJsId) return resolvedVirtualCherryJsId;
       if (id === virtualCherryCoreJsId) return resolvedVirtualCherryCoreJsId;
+      if (id === virtualCherryStreamJsId) return resolvedVirtualCherryStreamJsId;
       if (id === virtualCherryCssId) return resolvedVirtualCherryCssId;
 
       // 动态 addon 虚拟模块
@@ -212,6 +223,18 @@ export { Cherry };
 import Cherry from '${srcDirNormalized}/index.core.js';
 
 // 暴露到全局，兼容 examples 中的用法
+window.Cherry = Cherry;
+
+export default Cherry;
+export { Cherry };
+`;
+      }
+
+      // 加载 stream 虚拟模块 - 从 index.stream.js 导入
+      if (id === resolvedVirtualCherryStreamJsId) {
+        return `
+import Cherry from '${srcDirNormalized}/index.stream.js';
+
 window.Cherry = Cherry;
 
 export default Cherry;
@@ -262,9 +285,9 @@ export default AddonModule;
         },
       );
 
-      // 2. cherry-markdown*.js（主包和 core）→ type="module"
+      // 2. cherry-markdown.js / core.js / stream.js（开发模式映射为源码模块）→ type="module"
       result = result.replace(
-        /<script([^>]*)\s+src=["']([^"']*\/packages\/cherry-markdown\/dist\/cherry-markdown[^"']*)["']([^>]*)><\/script>/gi,
+        /<script([^>]*)\s+src=["']([^"']*\/packages\/cherry-markdown\/dist\/cherry-markdown(?:\.core|\.stream)?\.js)["']([^>]*)><\/script>/gi,
         (match, before, src, after) => {
           if (/type\s*=\s*["']module["']/i.test(before + after)) {
             return match;

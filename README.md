@@ -82,6 +82,26 @@ Via npm
 npm install cherry-markdown --save
 ```
 
+### CDN usage
+
+Use the UMD artifact for a regular `<script>` tag, and pin the package version:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cherry-markdown@0.11.9/dist/cherry-markdown.min.css">
+<script src="https://cdn.jsdelivr.net/npm/cherry-markdown@0.11.9/dist/cherry-markdown.js"></script>
+```
+
+The UMD artifact exposes the global `Cherry` variable. For native ESM:
+
+```html
+<script type="module">
+  import Cherry from 'https://cdn.jsdelivr.net/npm/cherry-markdown@0.11.9/dist/cherry-markdown.esm.js';
+
+  const cherry = new Cherry({ id: 'markdown-container' });
+</script>
+```
+
+
 Cherry provides multiple build artifacts (Full / Core / Stream / Engine) to fit different scenarios such as browser, Node.js, and AI Chat streaming. For usage examples, bundle differences, mermaid integration and dynamic import, please refer to **[Build Artifacts Guide](https://github.com/Tencent/cherry-markdown/wiki/%E6%9E%84%E5%BB%BA%E4%BA%A7%E7%89%A9%E4%BB%8B%E7%BB%8D)**.
 
 ## Contribution Guidelines

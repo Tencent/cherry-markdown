@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import LRUCache from '../../src/utils/LRUCache';
 import hashHex from '../../src/utils/hash';
 

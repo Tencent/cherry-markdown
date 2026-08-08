@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import Size from '../../../src/core/hooks/Size';
 import Underline from '../../../src/core/hooks/Underline';
 

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import MenuBase from '../../src/toolbars/MenuBase';
 import { createMenuContext, type TestSelection } from '../helpers/menu';
 

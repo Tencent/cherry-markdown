@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import Engine from '../src/Engine';
 import CherryEngine from '../src/index.engine.core';
 import { createPreviewer } from './helpers/previewer';

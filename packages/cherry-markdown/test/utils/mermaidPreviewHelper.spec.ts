@@ -2,7 +2,7 @@
  * mermaid 预览辅助逻辑单元测试
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vite-plus/test';
 import {
   countMermaidFigures,
   getMermaidFigureByIndex,

@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 import PreviewerBubble from '../../src/toolbars/PreviewerBubble';
 import { createPreviewer } from './previewer';
 

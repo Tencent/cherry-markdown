@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import Strikethrough from '../../../src/core/hooks/Strikethrough';
 
 describe('core/hooks/Strikethrough', () => {

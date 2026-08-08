@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import { createPreviewer, createRect } from './helpers/previewer';
 
 function defineDimension(element: Element, property: string, value: number | boolean) {

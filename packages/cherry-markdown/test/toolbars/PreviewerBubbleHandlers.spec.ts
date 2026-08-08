@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import imgSizeHandler from '../../src/utils/imgSizeHandler';
 import imgToolHandler from '../../src/utils/imgToolHandler';
 import { createRect } from '../helpers/previewer';

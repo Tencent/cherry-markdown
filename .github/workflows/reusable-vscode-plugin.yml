@@ -36,10 +36,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version-file: '.node-version'
+          cache: true
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .node-version
+          node-version-file: '.node-version'
           cache: 'yarn'
 
       # ── 1. 改名：解决 workspace 同名冲突 ──
@@ -67,12 +72,12 @@ jobs:
       # ── 3. 安装依赖 + 构建核心库 ──
       - name: Install and Build Dependencies
         run: |
-          yarn --network-timeout 100000
-          yarn build
+          vp install
+          vp run build:vscodePlugin
 
       # ── 4. 生产模式编译插件 ──
       - name: Build VSCode Plugin (production bundle)
-        run: yarn build:vscodePlugin
+        run: vp run build:vscodePlugin
 
       # ── 5a. package 模式：打包 + 上传 artifact ──
       - name: Package VSCode Plugin

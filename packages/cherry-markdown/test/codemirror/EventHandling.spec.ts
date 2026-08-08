@@ -24,7 +24,7 @@
  * - 事件卸载 (cleanup)
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vite-plus/test';
 
 // ============ Mock 类型 ============
 

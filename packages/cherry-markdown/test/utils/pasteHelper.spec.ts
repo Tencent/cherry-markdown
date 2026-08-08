@@ -4,7 +4,7 @@
  * 验证粘贴 HTML 后切换 TEXT/Markdown 时按粘贴区域替换，避免内容重复
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import pasteHelper from '../../src/utils/pasteHelper';
 
 /**

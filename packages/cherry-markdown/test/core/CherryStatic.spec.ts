@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import { CherryStatic } from '../../src/CherryStatic';
 import { HOOKS_TYPE_LIST } from '../../src/core/SyntaxBase';
 import TapdTablePlugin from '../../src/addons/advance/cherry-tapd-table-plugin';
