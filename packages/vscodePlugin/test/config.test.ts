@@ -1,7 +1,20 @@
-import { describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import * as vscode from 'vscode';
 import * as config from '../src/config';
 
-vi.mock('vscode', () => ({ workspace: { getConfiguration: vi.fn() } }));
+const mockGetConfiguration = vi.hoisted(() => vi.fn());
+
+vi.mock('vscode', () => ({
+  Uri: { file: (path: string) => ({ path }) },
+  workspace: { getConfiguration: mockGetConfiguration },
+}));
+
+const getConfiguration = mockGetConfiguration;
+
+beforeEach(() => {
+  getConfiguration.mockReset();
+  getConfiguration.mockReturnValue({ get: vi.fn() });
+});
 
 describe('configuration normalization', () => {
   test.each([
@@ -53,5 +66,66 @@ describe('configuration normalization', () => {
   test('prefers the globally persisted Cherry theme', () => {
     const globalState = { get: vi.fn().mockReturnValue('dark') };
     expect(config.getTheme(globalState)).toBe('dark');
+  });
+
+  test('falls back to the legacy theme setting when global state is empty', () => {
+    const get = vi.fn().mockReturnValue('绿色');
+    getConfiguration.mockReturnValue({ get });
+
+    expect(config.getTheme({ get: vi.fn().mockReturnValue(undefined) })).toBe('green');
+    expect(get).toHaveBeenCalledWith('Theme');
+  });
+
+  test('migrates the legacy theme into global state only once', async () => {
+    const get = vi.fn().mockReturnValue('深色');
+    getConfiguration.mockReturnValue({ get });
+    const globalState = { get: vi.fn().mockReturnValue(undefined), update: vi.fn() };
+
+    await config.migrateTheme(globalState);
+
+    expect(globalState.update).toHaveBeenCalledWith(config.THEME_STATE_KEY, 'dark');
+
+    globalState.get.mockReturnValue('red');
+    await config.migrateTheme(globalState);
+    expect(globalState.update).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not write a migration value when the legacy setting is absent', async () => {
+    getConfiguration.mockReturnValue({ get: vi.fn().mockReturnValue(undefined) });
+    const globalState = { get: vi.fn().mockReturnValue(undefined), update: vi.fn() };
+
+    await config.migrateTheme(globalState);
+
+    expect(globalState.update).not.toHaveBeenCalled();
+  });
+
+  test('reads configuration values with the document resource scope', () => {
+    const resource = vscode.Uri.file('/workspace/readme.md');
+    const get = vi.fn((key: string, fallback?: unknown) => {
+      if (key === 'Usage') return 'only-manual';
+      if (key === 'ImageUploadMode') return '远程';
+      if (key === 'CustomUploader') return { enable: true, url: 'https://upload.example' };
+      if (key === 'BackfillImageProps') return ['阴影'];
+      return fallback;
+    });
+    getConfiguration.mockReturnValue({ get });
+
+    expect(config.getUsageMode(resource)).toBe('only-manual');
+    expect(config.getImageUploadMode(resource)).toBe('remote');
+    expect(config.getCustomUploader(resource)).toEqual({ enable: true, url: 'https://upload.example' });
+    expect(config.getBackfillImageProps(resource)).toEqual(['isShadow']);
+    expect(getConfiguration).toHaveBeenCalledWith('cherryMarkdown', resource);
+  });
+
+  test.each([
+    ['.cherry-assets', '.cherry-assets'],
+    ['assets/images', 'assets/images'],
+    ['../assets\\images/..', 'assets/images'],
+    ['', '.cherry-assets'],
+    [null, '.cherry-assets'],
+    [{ path: 'assets' }, '.cherry-assets'],
+  ])('normalizes asset directory %s', (value, expected) => {
+    getConfiguration.mockReturnValue({ get: vi.fn().mockReturnValue(value) });
+    expect(config.getAssetDirectory()).toBe(expected);
   });
 });

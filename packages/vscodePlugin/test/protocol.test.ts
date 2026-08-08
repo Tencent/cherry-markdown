@@ -18,6 +18,25 @@ describe('Webview protocol', () => {
     expect(parseWebviewMessage(message)).toEqual(message);
   });
 
+  test('normalizes accepted messages to their validated shape', () => {
+    const raw = {
+      type: 'editor-change',
+      data: {
+        documentUri: 'file:///readme.md',
+        baseVersion: 1,
+        requestId: 2,
+        markdown: '# Hello',
+        ignored: true,
+      },
+      ignored: true,
+    };
+
+    expect(parseWebviewMessage(raw)).toEqual({
+      type: 'editor-change',
+      data: { documentUri: 'file:///readme.md', baseVersion: 1, requestId: 2, markdown: '# Hello' },
+    });
+  });
+
   test.each([
     null,
     {},
@@ -27,6 +46,14 @@ describe('Webview protocol', () => {
     { type: 'editor-change', data: { markdown: '# Missing identity' } },
     { type: 'upload-file', data: { requestId: -1, name: 'x' } },
     { type: 'export-png', data: 'data:text/plain;base64,eA==' },
+    { type: 'ready', data: null },
+    { type: 'preview-scroll', data: Infinity },
+    { type: 'change-theme', data: 'Default' },
+    { type: 'show-message', data: 'x'.repeat(2001) },
+    { type: 'open-url', data: 'x'.repeat(32769) },
+    { type: 'editor-change', data: { documentUri: '', baseVersion: 0, requestId: 0, markdown: '' } },
+    { type: 'editor-change', data: { documentUri: 'file:///x', baseVersion: -1, requestId: 0, markdown: '' } },
+    { type: 'upload-file', data: { requestId: 1, name: 'x', type: 'image/png', path: '/tmp/x', size: NaN } },
   ])('rejects invalid message %#', (message) => {
     expect(parseWebviewMessage(message)).toBeUndefined();
   });

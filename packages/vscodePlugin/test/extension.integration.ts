@@ -24,4 +24,18 @@ suite('Cherry Markdown extension', () => {
     assert.ok(commands.includes('cherrymarkdown.preview'));
     await vscode.commands.executeCommand('cherrymarkdown.preview');
   });
+
+  test('exposes the self-contained upload settings and no legacy theme setting', () => {
+    const configuration = vscode.workspace.getConfiguration('cherryMarkdown');
+    assert.strictEqual(configuration.has('Theme'), false);
+    assert.strictEqual(configuration.has('PicGoServer'), false);
+    assert.strictEqual(configuration.get('ImageUploadMode'), 'workspace');
+    assert.strictEqual(configuration.get('AssetDirectory'), '.cherry-assets');
+  });
+
+  test('keeps the preview command callable when a non-Markdown editor is active', async () => {
+    const document = await vscode.workspace.openTextDocument({ language: 'plaintext', content: 'plain text' });
+    await vscode.window.showTextDocument(document);
+    await assert.doesNotReject(Promise.resolve(vscode.commands.executeCommand('cherrymarkdown.preview')));
+  });
 });

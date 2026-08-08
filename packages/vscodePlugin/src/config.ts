@@ -124,7 +124,8 @@ export function getCustomUploader(resource?: vscode.Uri): CustomUploader | undef
 export function getAssetDirectory(resource?: vscode.Uri): string {
   const configured = vscode.workspace
     .getConfiguration('cherryMarkdown', resource)
-    .get<string>('AssetDirectory', DEFAULT_ASSET_DIRECTORY);
+    .get<unknown>('AssetDirectory', DEFAULT_ASSET_DIRECTORY);
+  if (typeof configured !== 'string') return DEFAULT_ASSET_DIRECTORY;
   const segments = configured
     .replace(/\\/g, '/')
     .split('/')

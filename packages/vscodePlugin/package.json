@@ -178,7 +178,7 @@
     "vscode:prepublish": "yarn build && yarn test:package",
     "typecheck": "tsc --noEmit",
     "test": "yarn test:unit && yarn test:integration",
-    "test:unit": "vitest run test/config.test.ts test/protocol.test.ts test/textEdit.test.ts test/upload.test.ts",
+    "test:unit": "vitest run test/config.test.ts test/protocol.test.ts test/textEdit.test.ts test/upload.test.ts test/webview.test.ts",
     "test:package": "vitest run test/package.test.ts",
     "test:vsix": "vitest run test/vsix.test.ts",
     "test:integration": "yarn build && tsc && node out/test/runIntegrationTests.js",

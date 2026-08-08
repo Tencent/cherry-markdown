@@ -71,7 +71,7 @@ export function parseWebviewMessage(value: unknown): WebviewToExtensionMessage |
 
   switch (value.type) {
     case 'ready':
-      return { type: 'ready' };
+      return value.data === undefined ? { type: 'ready' } : undefined;
     case 'preview-scroll':
       return typeof value.data === 'number' && Number.isFinite(value.data)
         ? { type: value.type, data: value.data }
@@ -83,6 +83,7 @@ export function parseWebviewMessage(value: unknown): WebviewToExtensionMessage |
     case 'editor-change':
       return isRecord(value.data) &&
         typeof value.data.documentUri === 'string' &&
+        value.data.documentUri.length > 0 &&
         isFiniteNonNegativeNumber(value.data.baseVersion) &&
         isFiniteNonNegativeNumber(value.data.requestId) &&
         typeof value.data.markdown === 'string'

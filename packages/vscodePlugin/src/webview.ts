@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
 
-function resourceUri(webview: vscode.Webview, extensionUri: vscode.Uri, ...segments: string[]): vscode.Uri {
+type WebviewResource = Pick<vscode.Webview, 'cspSource' | 'asWebviewUri'>;
+
+function resourceUri(webview: WebviewResource, extensionUri: vscode.Uri, ...segments: string[]): vscode.Uri {
   return webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, ...segments));
 }
 
 /** Returns the static Webview shell. Document content is sent only after the Webview reports that it is ready. */
-export function getWebviewContent(currentPanel: vscode.WebviewPanel, extensionUri: vscode.Uri): string {
+export function getWebviewContent(currentPanel: { webview: WebviewResource }, extensionUri: vscode.Uri): string {
   const { webview } = currentPanel;
   const bundleCss = resourceUri(webview, extensionUri, 'web-resources', 'dist', 'index.css');
   const customCss = resourceUri(webview, extensionUri, 'web-resources', 'scripts', 'index.css');

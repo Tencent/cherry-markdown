@@ -41,6 +41,19 @@ describe('VS Code extension build artifacts', () => {
     expect(packageManifest.contributes.configuration.properties['cherryMarkdown.PicGoServer']).toBeUndefined();
   });
 
+  test('declares self-contained image upload defaults', () => {
+    const { properties } = packageManifest.contributes.configuration;
+    expect(properties['cherryMarkdown.ImageUploadMode']).toMatchObject({
+      type: 'string',
+      default: 'workspace',
+      enum: ['workspace', 'data', 'remote'],
+    });
+    expect(properties['cherryMarkdown.AssetDirectory']).toMatchObject({
+      type: 'string',
+      default: '.cherry-assets',
+    });
+  });
+
   test('provides a localized command manifest and an explicit shortcut', () => {
     expect(packageManifest.contributes.commands).toContainEqual({
       command: 'cherrymarkdown.preview',
@@ -53,5 +66,12 @@ describe('VS Code extension build artifacts', () => {
       fs.readFileSync(path.join(packageRoot, 'package.nls.zh-cn.json'), 'utf8'),
     ) as Record<string, string>;
     expect(zhCnMessages['commands.preview.title']).toBe('在 Cherry Markdown 中预览');
+
+    for (const locale of ['package.nls.json', 'package.nls.ru.json', 'package.nls.zh-cn.json']) {
+      const messages = JSON.parse(fs.readFileSync(path.join(packageRoot, locale), 'utf8')) as Record<string, string>;
+      expect(messages['commands.preview.title']).toBeTruthy();
+      expect(messages['imageUploadMode.description']).toBeTruthy();
+      expect(messages['assetDirectory.description']).toBeTruthy();
+    }
   });
 });
