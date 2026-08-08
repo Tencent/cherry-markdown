@@ -49,19 +49,19 @@ Authentication headers stored in settings are visible as plain text. Prefer user
 From the repository root:
 
 ```bash
-yarn install
-yarn build:vscodePlugin
-yarn workspace cherry-markdown-vscode-plugin typecheck
-yarn workspace cherry-markdown-vscode-plugin test:unit
-yarn workspace cherry-markdown-vscode-plugin test:package
-yarn workspace cherry-markdown-vscode-plugin test:integration
+vp install
+vp run build:vscodePlugin
+vp run -F cherry-markdown-vscode-plugin typecheck
+vp run -F cherry-markdown-vscode-plugin test:unit
+vp run -F cherry-markdown-vscode-plugin test:package
+vp run -F cherry-markdown-vscode-plugin test:integration
 ```
 
 To inspect the distributable package:
 
 ```bash
 cd packages/vscodePlugin
-yarn package
+vp run package
 ```
 
 The integration test downloads a fixed VS Code version so local and CI runs use the same Extension Host contract.

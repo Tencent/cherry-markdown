@@ -175,18 +175,16 @@
   },
   "scripts": {
     "build": "vp build --mode extension && vp build --mode webview",
-    "vscode:prepublish": "yarn build && yarn test:package",
+    "vscode:prepublish": "vp build --mode extension && vp build --mode webview && vp test run test/package.test.ts",
     "typecheck": "tsc --noEmit",
-    "test": "yarn test:unit && yarn test:integration",
-    "test:unit": "vitest run test/config.test.ts test/protocol.test.ts test/textEdit.test.ts test/upload.test.ts test/webview.test.ts",
-    "test:package": "vitest run test/package.test.ts",
-    "test:vsix": "vitest run test/vsix.test.ts",
-    "test:integration": "yarn build && tsc && node out/test/runIntegrationTests.js",
-    "package": "vsce package --no-dependencies --no-yarn && yarn test:vsix"
+    "test": "vp run test:unit && vp run test:integration",
+    "test:unit": "vp test run test/config.test.ts test/protocol.test.ts test/textEdit.test.ts test/upload.test.ts test/webview.test.ts",
+    "test:package": "vp test run test/package.test.ts",
+    "test:vsix": "vp test run test/vsix.test.ts",
+    "test:integration": "vp run build && tsc && node out/test/runIntegrationTests.js",
+    "package": "vsce package --no-dependencies --no-yarn && vp test run test/vsix.test.ts"
   },
   "devDependencies": {
-    "@types/node": "^20.10.6",
-    "@types/mocha": "^10.0.10",
     "@types/vscode": "1.73.0",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
@@ -195,10 +193,7 @@
     "cherry-markdown": "*",
     "html-to-image": "^1.11.11",
     "mathjax": "^3.2.2",
-    "ovsx": "1.1.0",
-    "typescript": "^6.0.2",
-    "vite": "^6.4.1",
-    "vitest": "^3.1.3"
+    "ovsx": "1.1.0"
   },
   "dependencies": {}
 }
