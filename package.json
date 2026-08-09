@@ -47,8 +47,8 @@
     "@commitlint/config-conventional": "21.0.0",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^9",
-    "@types/node": "^20.10.6",
     "@types/mocha": "^10.0.10",
+    "@types/node": "^20.10.6",
     "@typescript-eslint/eslint-plugin": "^8.62.0",
     "@typescript-eslint/parser": "^8.62.0",
     "@vitest/coverage-v8": "4.1.10",
@@ -81,8 +81,7 @@
     "ansi-regex": "5.0.1",
     "glob-watcher": "6.0.0",
     "vite": "npm:@voidzero-dev/vite-plus-core@0.2.6",
-    "vitest": "4.1.10",
-    "brace-expansion": "1.1.16"
+    "vitest": "4.1.10"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
