@@ -10,9 +10,16 @@
     "version:sync": "node ./scripts/sync-version.js"
   },
   "dependencies": {
+    "@codemirror/language": "^6.12.2",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.40.0",
     "@milkdown/components": "^7.21.3",
+    "@milkdown/core": "^7.22.0",
+    "@milkdown/ctx": "^7.22.0",
     "@milkdown/kit": "^7.21.3",
     "@milkdown/plugin-math": "^7.5.9",
+    "@milkdown/prose": "^7.22.0",
+    "@milkdown/transformer": "^7.22.0",
     "@milkdown/theme-nord": "^7.21.3",
     "@tauri-apps/api": "2.2.0",
     "@tauri-apps/plugin-dialog": "2.2.0",
@@ -29,6 +36,6 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.2.5",
-    "@vitejs/plugin-vue": "^5.2.1"
+    "@vitejs/plugin-vue": "^6.0.8"
   }
 }

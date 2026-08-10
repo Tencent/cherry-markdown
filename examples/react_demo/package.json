@@ -18,14 +18,14 @@
     "@eslint/js": "^9.17.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^6.0.5",
     "eslint": "^9.17.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.18.2",
-    "vite": "npm:@voidzero-dev/vite-plus-core@0.2.6",
+    "vite": "^8.2.1",
     "vite-plus": "0.2.6"
   }
 }
