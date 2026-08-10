@@ -23,7 +23,7 @@ await build({
   build: {
     emptyOutDir: false,
     target: 'es2015',
-    minify: 'esbuild',
+    minify: 'oxc',
     lib: {
       entry: resolve(root, 'src/index.js'),
       formats: ['es'],
