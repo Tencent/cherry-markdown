@@ -9,7 +9,7 @@
  * - Bubble.js 对 isUserInteraction 的判断
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vite-plus/test';
 import imgSizeHandler from '@/utils/imgSizeHandler';
 import imgToolHandler from '@/utils/imgToolHandler';
 

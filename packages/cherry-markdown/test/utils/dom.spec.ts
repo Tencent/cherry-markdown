@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import {
   createElement,
   elementsFromPoint,
@@ -201,6 +201,7 @@ describe('utils/dom', () => {
     expect(inserted.src).toContain('/app.js');
     inserted.onload?.(undefined);
     await expect(scriptPromise).resolves.toBeUndefined();
+    appendSpy.mockRestore();
 
     const link = document.createElement('link');
     link.id = 'existing-style';
@@ -213,7 +214,6 @@ describe('utils/dom', () => {
     const insertedLink = linkSpy.mock.calls[0]?.[0] as HTMLLinkElement;
     expect(insertedLink.href).toContain('/style.css');
 
-    appendSpy.mockRestore();
     linkSpy.mockRestore();
   });
 });

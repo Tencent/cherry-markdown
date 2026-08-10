@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import EChartsTableEngine from '../../src/addons/advance/cherry-table-echarts-plugin';
 
 const isBrowserMock = vi.hoisted(() => vi.fn(() => false));

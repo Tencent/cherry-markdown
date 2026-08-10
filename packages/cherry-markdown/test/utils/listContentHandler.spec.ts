@@ -1,5 +1,5 @@
 import { EditorState } from '@codemirror/state';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import ListHandler from '../../src/utils/listContentHandler';
 import { LIST_CONTENT } from '../../src/utils/regexp';
 

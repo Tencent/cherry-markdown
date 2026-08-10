@@ -1,12 +1,12 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "cherry-markdown",
-  "version": "0.3.1",
+  "version": "0.4.1",
   "identifier": "com.cherry-markdown.app",
   "build": {
-    "beforeDevCommand": "yarn dev",
+    "beforeDevCommand": "vp run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "yarn build",
+    "beforeBuildCommand": "vp run build",
     "frontendDist": "../dist"
   },
   "app": {
@@ -24,16 +24,29 @@
     ],
     "security": {
       "csp": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http: https: asset: http://asset.localhost https://asset.localhost; media-src 'self' data: blob: http: https: asset: http://asset.localhost https://asset.localhost; font-src 'self' data: http: https:; connect-src 'self' http: https: ws: wss: data: blob:;",
-      "dangerousDisableAssetCspModification": ["style-src"]
+      "dangerousDisableAssetCspModification": [
+        "style-src"
+      ]
     }
   },
   "bundle": {
     "active": true,
     "targets": "all",
-    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
     "fileAssociations": [
       {
-        "ext": ["md", "markdown", "txt", "text"],
+        "ext": [
+          "md",
+          "markdown",
+          "txt",
+          "text"
+        ],
         "name": "Markdown Document",
         "description": "Cherry Markdown Document",
         "role": "Editor"

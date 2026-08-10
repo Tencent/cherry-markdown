@@ -1,29 +1,31 @@
-import { mkdirSync } from 'node:fs';
+import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import resolvePlugin from '@rollup/plugin-node-resolve';
-import { rollup } from 'rollup';
+import { build } from 'vite';
 
 const demoRoot = import.meta.dirname;
-const root = resolve(demoRoot, '../..');
-const outputFile = resolve(root, 'examples/miniProgram/miniprogram/pages/index/index.js');
+const outputFile = resolve(demoRoot, 'miniprogram/pages/index/index.js');
 
-mkdirSync(resolve(outputFile, '..'), { recursive: true });
+await mkdir(resolve(outputFile, '..'), { recursive: true });
 
-const bundle = await rollup({
-  input: resolve(demoRoot, 'src/pages/index/index.js'),
-  plugins: [
-    resolvePlugin({
-      browser: true,
-      preferBuiltins: false,
-      exportConditions: ['browser', 'import', 'default'],
-    }),
-  ],
+await build({
+  configFile: false,
+  root: demoRoot,
+  build: {
+    outDir: resolve(demoRoot, 'miniprogram/pages/index'),
+    emptyOutDir: false,
+    lib: {
+      entry: resolve(demoRoot, 'src/pages/index/index.js'),
+      formats: ['cjs'],
+      fileName: () => 'index.js',
+    },
+    rollupOptions: {
+      output: {
+        format: 'cjs',
+        entryFileNames: 'index.js',
+        codeSplitting: false,
+        manualChunks: undefined,
+        exports: 'named',
+      },
+    },
+  },
 });
-
-await bundle.write({
-  file: outputFile,
-  format: 'cjs',
-  exports: 'named',
-});
-
-await bundle.close();

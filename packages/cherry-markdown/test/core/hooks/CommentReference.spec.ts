@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import UrlCache from '../../../src/UrlCache';
 import CommentReference from '../../../src/core/hooks/CommentReference';
 

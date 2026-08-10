@@ -24,7 +24,7 @@
  * - destroy() 互不影响
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vite-plus/test';
 
 // ============ Mock 类型 ============
 

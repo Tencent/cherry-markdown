@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import MenuBase from '../../../src/toolbars/MenuBase';
 import Bold from '../../../src/toolbars/hooks/Bold';
 import Br from '../../../src/toolbars/hooks/Br';

@@ -1,5 +1,23 @@
 {
   "Preview": "Предварительный просмотр",
   "By": "От",
-  "UnSupported": "Не поддерживается"
+  "UnSupported": "Не поддерживается",
+  "Unsupported": "Не поддерживается",
+  "Edit": "Изменить",
+  "Font style": "Стиль шрифта",
+  "Save": "Сохранить",
+  "Save as PNG": "Сохранить как PNG",
+  "Save PNG": "Сохранить PNG",
+  "The Markdown document is not active, so preview editing is disabled.": "Документ Markdown неактивен, поэтому редактирование предпросмотра отключено.",
+  "The preview document is no longer active.": "Документ предпросмотра больше не активен.",
+  "The document changed outside the preview.": "Документ изменился вне предпросмотра.",
+  "Unable to apply the preview edit.": "Не удалось применить изменение из предпросмотра.",
+  "Upload failed.": "Ошибка загрузки.",
+  "The link is invalid.": "Недопустимая ссылка.",
+  "This link protocol is not allowed.": "Этот протокол ссылки не разрешён.",
+  "Unable to export the preview as PNG.": "Не удалось экспортировать предпросмотр в PNG.",
+  "The exported PNG is too large.": "Экспортированный PNG слишком велик.",
+  "Saving Cherry Markdown PNG...": "Сохранение Cherry Markdown PNG...",
+  "Image saved successfully.": "Изображение сохранено.",
+  "Unable to save the PNG.": "Не удалось сохранить PNG."
 }

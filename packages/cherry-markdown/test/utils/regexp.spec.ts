@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { URL_INLINE_NO_SLASH } from '../../src/utils/regexp';
 
 describe('utils/regexp', () => {

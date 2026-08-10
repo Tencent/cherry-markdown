@@ -9,32 +9,34 @@
   "license": "Apache-2.0",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/react_demo",
+    "examples/miniProgram"
   ],
   "scripts": {
-    "postinstall": "yarn workspace cherry-markdown run iconfont",
+    "postinstall": "vp run -F cherry-markdown iconfont",
     "prepare": "husky",
     "changeset": "npx @changesets/cli",
     "changeset-version": "npx @changesets/cli version",
-    "dev": "yarn workspace cherry-markdown dev",
-    "build": "yarn build:core && yarn build:miniProgram",
-    "build:core": "yarn workspace cherry-markdown build",
-    "build:miniProgram": "yarn workspace @cherry-markdown/miniprogram build",
-    "dev:client": "yarn workspace @cherry-markdown/client tauri dev",
-    "build:client": "yarn workspace @cherry-markdown/client tauri build",
-    "build:vscodePlugin": "yarn workspace cherry-markdown build && yarn workspace cherry-markdown-vscode-plugin build",
-    "example:react": "yarn workspace @cherry-markdown/react_demo dev",
-    "test": "yarn test:core && yarn test:miniProgram",
-    "test:core": "yarn workspace cherry-markdown test",
-    "test:miniProgram": "yarn workspace @cherry-markdown/miniprogram test",
-    "test:coverage": "yarn workspace cherry-markdown test:coverage",
-    "test:update": "yarn workspace cherry-markdown test:update",
-    "lint": "prettier --check . && eslint .",
-    "lint:fix": "prettier --write . && eslint --fix .",
-    "typecheck": "yarn typecheck:core && yarn typecheck:miniProgram",
-    "typecheck:core": "yarn workspace cherry-markdown run typecheck",
-    "typecheck:miniProgram": "yarn workspace @cherry-markdown/miniprogram typecheck",
-    "validate": "yarn lint && yarn typecheck"
+    "dev": "vp run dev:core",
+    "dev:core": "vp dev --config packages/cherry-markdown/vite.config.ts",
+    "build": "vp run -F cherry-markdown build && vp run -F @cherry-markdown/miniprogram build && vp run -F @cherry-markdown/mini-program-demo build && vp run -F @cherry-markdown/react_demo build && vp run -F @cherry-markdown/client build && vp run -F cherry-markdown-vscode-plugin build",
+    "build:core": "vp run -F cherry-markdown build",
+    "build:miniProgram": "vp run -F @cherry-markdown/miniprogram build",
+    "dev:client": "vp run -F @cherry-markdown/client dev",
+    "build:client": "vp run -F @cherry-markdown/client build",
+    "build:vscodePlugin": "vp run -F cherry-markdown build && vp run -F cherry-markdown-vscode-plugin build",
+    "example:react": "vp run -F @cherry-markdown/react_demo dev",
+    "test": "vp run -F cherry-markdown test && vp run -F @cherry-markdown/miniprogram test",
+    "test:core": "vp run -F cherry-markdown test",
+    "test:miniProgram": "vp run -F @cherry-markdown/miniprogram test",
+    "test:update": "vp run -F cherry-markdown test:update",
+    "lint": "vp check",
+    "lint:fix": "vp check --fix",
+    "typecheck": "vp run -F cherry-markdown typecheck && vp run -F @cherry-markdown/miniprogram typecheck",
+    "typecheck:core": "vp run -F cherry-markdown typecheck",
+    "typecheck:miniProgram": "vp run -F @cherry-markdown/miniprogram typecheck",
+    "validate": "vp check"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
@@ -45,35 +47,27 @@
     "@commitlint/config-conventional": "21.0.0",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^9",
-    "@rollup/plugin-eslint": "^9.2.0",
     "@types/node": "^20.10.6",
+    "@types/mocha": "^10.0.10",
     "@typescript-eslint/eslint-plugin": "^8.62.0",
     "@typescript-eslint/parser": "^8.62.0",
-    "@vitest/coverage-v8": "3.2.4",
+    "@vitest/coverage-v8": "4.1.10",
     "@vue/typescript-plugin": "^3.2.2",
     "commitlint": "21.0.0",
+    "esbuild": "^0.25.0",
     "eslint": "^9",
     "eslint-config-prettier": "^10.1.8",
     "eslint-config-tencent": "^1.2.0",
     "eslint-plugin-prettier": "^5.5.6",
     "globals": "^17.7.0",
     "husky": "~9.1.7",
-    "lint-staged": "~12.5.0",
     "prettier": "^3.9.3",
     "typescript": "^6.0.2",
-    "vite": "^6.4.1",
-    "vitest": "3.2.4",
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.2.6",
+    "vite-plus": "0.2.6",
+    "vitest": "4.1.10",
     "vue-eslint-parser": "^10.4.1",
     "vue-tsc": "^3.2.2"
-  },
-  "lint-staged": {
-    "{packages/{cherry-markdown/{src,test},miniProgram/{src,test,build},client/src,vscodePlugin/src}/**/*.{js,ts,vue},eslint.config.mjs,prettier.config.mjs}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "**/*.{md,mdx}": [
-      "prettier --write"
-    ]
   },
   "engines": {
     "node": ">=22",
@@ -85,7 +79,9 @@
     "yargs-parser": "20.2.9",
     "xmldom": "0.5.0",
     "ansi-regex": "5.0.1",
-    "glob-watcher": "6.0.0"
+    "glob-watcher": "6.0.0",
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.2.6",
+    "vitest": "4.1.10"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

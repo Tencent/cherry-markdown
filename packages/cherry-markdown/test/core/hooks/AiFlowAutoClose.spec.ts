@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import AiFlowAutoClose from '../../../src/core/hooks/AiFlowAutoClose';
 
 type MediaType = 'img' | 'video' | 'audio';

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import MermaidCodeEngine from '../../src/addons/cherry-code-block-mermaid-plugin';
 import CherryEngine from '../../src/index.engine.core';
 

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import { exportHTMLFile, exportMarkdownFile, exportPDF, exportScreenShot, exportWordFile } from '../src/utils/export';
 import { createPreviewer } from './helpers/previewer';
 

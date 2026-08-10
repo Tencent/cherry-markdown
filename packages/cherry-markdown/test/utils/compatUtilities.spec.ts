@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import {
   CODE_PREVIEWER_LANG_SELECT_CLASS_NAME,
   codePreviewLangSelectList,

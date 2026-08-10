@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import EChartsTableEngine from '../../src/addons/advance/cherry-table-echarts-plugin';
 
 interface TableEChartsInstallOptions {

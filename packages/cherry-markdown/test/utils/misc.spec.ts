@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { hexToRgb, hsvToRgb, rgbToHex, rgbToHsv } from '../../src/utils/color';
 import { calculateLinesOfParagraph, prependLineFeedForParagraph } from '../../src/utils/lineFeed';
 import NestedError, { $expectInherit, $expectInstance, $expectTarget } from '../../src/utils/error';

@@ -18,22 +18,16 @@ import { readFileSync } from 'fs';
 import { execSync } from 'child_process';
 const PackageInfo = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
 
-// ref: https://gitlab.com/IvanSanchez/rollup-plugin-git-version/-/blob/master/src/version.mjs
-// const branchRegexp = /ref: .*\/(\w*)/;
-// const shortRegexp = /0000000000000000000000000000000000000000 ([0-9a-f]{8})/;
-const shortHEADRegexp = /([0-9a-f]{8})/;
-// let currentBranch = '';
-let currentRev = '';
-try {
-  // const branch = readFileSync('.git/HEAD');
-  const head = execSync('git rev-parse HEAD').toString();
-  // [, currentBranch] = branchRegexp.exec(branch);
-  [, currentRev] = shortHEADRegexp.exec(head);
-} catch {
-  console.warn('failed to get git revision.');
-}
+export function getBuildVersion(environment = 'production') {
+  if (environment !== 'development') {
+    return PackageInfo.version;
+  }
 
-process.env.BUILD_VERSION = PackageInfo.version;
-if (currentRev !== '' && process.env.NODE_ENV === 'development') {
-  process.env.BUILD_VERSION += `-${currentRev}`;
+  try {
+    const revision = execSync('git rev-parse --short=8 HEAD').toString().trim();
+    return revision ? `${PackageInfo.version}-${revision}` : PackageInfo.version;
+  } catch {
+    console.warn('failed to get git revision.');
+    return PackageInfo.version;
+  }
 }

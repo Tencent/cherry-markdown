@@ -1,6 +1,6 @@
 [package]
 name = "cherry-markdown-client"
-version = "0.3.1"
+version = "0.4.1"
 description = "A Cherry Markdown Client"
 authors = ["Cherry OTeam"]
 edition = "2021"
@@ -18,4 +18,3 @@ tauri-plugin-dialog = "2.2.0"
 tauri-plugin-fs = "2.2.0"
 tauri-plugin-global-shortcut = "2.3.1"
 tauri-plugin-window-state = "2"
-

@@ -41,30 +41,18 @@
     "access": "public"
   },
   "scripts": {
-    "build": "run-s clean build:esm build:types",
-    "build:esm": "cross-env NODE_ENV=production rollup --config build/rollup.config.js",
+    "build": "vp run clean && vp run build:esm && vp run build:types",
+    "build:esm": "NODE_ENV=production node build/vite.build.js",
     "build:types": "node build/types.js",
     "clean": "rimraf ./dist",
-    "test": "vitest run --config vitest.config.ts",
+    "test": "vp test run --config vitest.config.ts",
     "typecheck": "tsc --project test/tsconfig.json --noEmit"
   },
   "dependencies": {
     "htmlparser2": "^10.0.0"
   },
   "devDependencies": {
-    "@rollup/plugin-alias": "5.1.1",
-    "@rollup/plugin-babel": "6.0.4",
-    "@rollup/plugin-commonjs": "28.0.6",
-    "@rollup/plugin-json": "6.1.0",
-    "@rollup/plugin-node-resolve": "16.0.1",
-    "@rollup/plugin-replace": "6.0.2",
-    "@rollup/plugin-terser": "^0.4.3",
-    "cross-env": "^7.0.2",
-    "npm-run-all": "^4.1.5",
-    "rimraf": "^3.0.2",
-    "rollup": "4.52.3",
-    "typescript": "^6.0.2",
-    "vitest": "^3.1.3"
+    "rimraf": "^3.0.2"
   },
   "engines": {
     "node": ">=22",

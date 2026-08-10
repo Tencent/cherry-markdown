@@ -1,5 +1,5 @@
 import { changeCodeTheme, changeTheme, getCodeThemeFromLocal } from '../../../src/utils/config';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import ChangeLocale from '../../../src/toolbars/hooks/ChangeLocale';
 import CodeTheme from '../../../src/toolbars/hooks/CodeTheme';
 import Theme from '../../../src/toolbars/hooks/Theme';

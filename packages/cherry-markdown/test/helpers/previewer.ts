@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 import Previewer from '../../src/Previewer';
 
 export function createRect(x: number, y: number, width: number, height: number): DOMRect {

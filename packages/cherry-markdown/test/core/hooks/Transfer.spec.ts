@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import Transfer from '../../../src/core/hooks/Transfer';
 
 describe('core/hooks/Transfer', () => {

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import EChartsCodeBlockEngine from '../../src/addons/advance/cherry-codeblock-echarts-plugin';
 import CherryEngine from '../../src/index.engine.core';
 

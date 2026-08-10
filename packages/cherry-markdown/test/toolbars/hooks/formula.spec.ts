@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import Formula from '../../../src/toolbars/hooks/Formula';
 import { createMenuContext } from '../../helpers/menu';
 

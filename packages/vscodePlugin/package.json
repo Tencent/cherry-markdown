@@ -16,6 +16,9 @@
     "type": "git",
     "url": "https://github.com/Tencent/cherry-markdown.git"
   },
+  "bugs": {
+    "url": "https://github.com/Tencent/cherry-markdown/issues"
+  },
   "homepage": "https://github.com/Tencent/cherry-markdown",
   "engines": {
     "vscode": "^1.73.0"
@@ -24,8 +27,19 @@
     "Visualization"
   ],
   "activationEvents": [
-    "onLanguage:markdown"
+    "onLanguage:markdown",
+    "onCommand:cherrymarkdown.preview"
   ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "%workspaceTrust.description%",
+      "restrictedConfigurations": [
+        "cherryMarkdown.CustomUploader",
+        "cherryMarkdown.AssetDirectory"
+      ]
+    }
+  },
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -64,47 +78,48 @@
       "properties": {
         "cherryMarkdown.Usage": {
           "type": "string",
-          "default": "%usage.enum.active%",
+          "default": "active",
           "enum": [
+            "active",
+            "only-manual"
+          ],
+          "enumItemLabels": [
             "%usage.enum.active%",
             "%usage.enum.only-manual%"
           ],
           "description": "%usage.description%"
         },
-        "cherryMarkdown.Theme": {
+        "cherryMarkdown.ImageUploadMode": {
           "type": "string",
-          "default": "%theme.enum.default%",
+          "default": "workspace",
           "enum": [
-            "%theme.enum.default%",
-            "%theme.enum.dark%",
-            "%theme.enum.green%",
-            "%theme.enum.red%"
+            "workspace",
+            "data",
+            "remote"
           ],
-          "description": "%theme.description%"
-        },
-        "cherryMarkdown.UploadType": {
-          "type": "string",
-          "default": "%uploadType.enum.None%",
-          "enum": [
-            "%uploadType.enum.None%",
-            "%uploadType.enum.CustomUploader%",
-            "%uploadType.enum.PicGoServer%"
+          "enumItemLabels": [
+            "%imageUploadMode.enum.workspace%",
+            "%imageUploadMode.enum.data%",
+            "%imageUploadMode.enum.remote%"
           ],
           "enumDescriptions": [
-            "%uploadType.enumDescriptions.None%",
-            "%uploadType.enumDescriptions.CustomUploader%",
-            "%uploadType.enumDescriptions.PicGoServer%"
+            "%imageUploadMode.enumDescriptions.workspace%",
+            "%imageUploadMode.enumDescriptions.data%",
+            "%imageUploadMode.enumDescriptions.remote%"
           ],
-          "description": "%uploadType.description%"
+          "description": "%imageUploadMode.description%"
+        },
+        "cherryMarkdown.AssetDirectory": {
+          "type": "string",
+          "default": ".cherry-assets",
+          "description": "%assetDirectory.description%"
         },
         "cherryMarkdown.CustomUploader": {
           "type": "object",
           "default": {
-            "enable": true,
-            "url": "https://your-server.com/upload",
-            "headers": {
-              "Access-Control-Allow-Origin": "*"
-            }
+            "enable": false,
+            "url": "",
+            "headers": {}
           },
           "properties": {
             "enable": {
@@ -121,32 +136,24 @@
               "type": "object",
               "default": {},
               "description": "%customUploader.headers%",
-              "properties": {
-                "key": {
-                  "type": "string",
-                  "default": "",
-                  "description": "%customUploader.headers.key.description%"
-                },
-                "value": {
-                  "type": "string",
-                  "default": "",
-                  "description": "%customUploader.headers.value.description%"
-                }
+              "additionalProperties": {
+                "type": "string"
               }
             }
           },
           "description": "%customUploader.description%"
-        },
-        "cherryMarkdown.PicGoServer": {
-          "type": "string",
-          "description": "%picGoServer.description%",
-          "default": "http://127.0.0.1:36677/upload"
         },
         "cherryMarkdown.BackfillImageProps": {
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
+              "isBorder",
+              "isNotBorder",
+              "isShadow",
+              "isRadius"
+            ],
+            "enumItemLabels": [
               "%backfillImageProps.enum.isBorder%",
               "%backfillImageProps.enum.isNotBorder%",
               "%backfillImageProps.enum.isShadow%",
@@ -167,19 +174,26 @@
     }
   },
   "scripts": {
-    "dev": "rspack build --watch",
-    "build": "rspack build --mode production",
-    "package": "yarn build && npx @vscode/vsce package --no-dependencies --no-yarn"
+    "build": "vp build --mode extension && vp build --mode webview",
+    "vscode:prepublish": "vp build --mode extension && vp build --mode webview && vp test run test/package.test.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vp run test:unit && vp run test:integration",
+    "test:unit": "vp test run test/config.test.ts test/protocol.test.ts test/textEdit.test.ts test/upload.test.ts test/webview.test.ts",
+    "test:package": "vp test run test/package.test.ts",
+    "test:vsix": "vp test run test/vsix.test.ts",
+    "test:integration": "vp run build && tsc && node out/test/runIntegrationTests.js",
+    "package": "vsce package --no-dependencies --no-yarn && vp test run test/vsix.test.ts"
   },
   "devDependencies": {
-    "@rspack/cli": "^1.5.3",
-    "@rspack/core": "^1.5.3",
-    "@types/vscode": "^1.58.0",
+    "@types/vscode": "1.73.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "3.9.2",
     "axios": "^1.4.0",
     "cherry-markdown": "*",
-    "css-loader": "^7.1.4",
     "html-to-image": "^1.11.11",
-    "mathjax": "^3.2.2"
+    "mathjax": "^3.2.2",
+    "ovsx": "1.1.0"
   },
   "dependencies": {}
 }

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import Export from '../../../src/toolbars/hooks/Export';
 import { createMenuContext } from '../../helpers/menu';
 

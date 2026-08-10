@@ -1,5 +1,5 @@
 import { EditorSelection, EditorState } from '@codemirror/state';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import { handleNewlineIndentList } from '../../src/utils/autoindent';
 
 const createAdapter = (

@@ -1,6 +1,6 @@
 import List from '../../../src/core/hooks/List';
 import { hashHex } from '../../../src/utils/hash';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 interface ListConfig {
   indentSpace?: number;

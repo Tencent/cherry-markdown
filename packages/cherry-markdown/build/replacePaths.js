@@ -14,27 +14,57 @@
  * limitations under the License.
  */
 import replaceInFile from 'replace-in-file';
+import glob from 'glob';
 import { readFileSync, writeFileSync } from 'fs';
+import { dirname, relative, resolve } from 'path';
+
+const declarationEntries = [
+  ['cherry-markdown.d.ts', 'index', 'Cherry', ['MenuHookBase', 'SyntaxHookBase']],
+  ['cherry-markdown.esm.d.ts', 'index', 'Cherry', ['MenuHookBase', 'SyntaxHookBase']],
+  ['cherry-markdown.core.d.ts', 'index.core', 'Cherry', ['MenuHookBase', 'SyntaxHookBase']],
+  ['cherry-markdown.core.esm.d.ts', 'index.core', 'Cherry', ['MenuHookBase', 'SyntaxHookBase']],
+  ['cherry-markdown.engine.d.ts', 'index.engine', 'CherryEngine', ['MenuHookBase', 'SyntaxHookBase']],
+  ['cherry-markdown.engine.esm.d.ts', 'index.engine', 'CherryEngine', ['MenuHookBase', 'SyntaxHookBase']],
+  ['cherry-markdown.engine.core.d.ts', 'index.engine.core', 'CherryEngine', ['MenuHookBase', 'SyntaxHookBase']],
+  ['cherry-markdown.engine.core.esm.d.ts', 'index.engine.core', 'CherryEngine', ['MenuHookBase', 'SyntaxHookBase']],
+  ['cherry-markdown.stream.d.ts', 'index.stream', 'Cherry', ['SyntaxHookBase']],
+  ['cherry-markdown.stream.esm.d.ts', 'index.stream', 'Cherry', ['SyntaxHookBase']],
+];
 
 async function replacePaths() {
-  try {
+  const declarationRoot = resolve('dist/types');
+  const publicTypesRoot = resolve('types');
+
+  for (const file of glob.sync('dist/types/**/*.d.ts')) {
+    const fileDirectory = dirname(resolve(file));
+    const publicTypesPath = relative(fileDirectory, publicTypesRoot).replace(/\\/g, '/');
+    const declarationTypesPath = relative(fileDirectory, declarationRoot).replace(/\\/g, '/') || '.';
     const results = await replaceInFile({
-      files: 'dist/types/**/*.d.ts',
-      from: /~types\//g,
-      to: '../../types/',
+      files: file,
+      from: [/~types\//g, /@cherry\//g, /@\//g],
+      to: [`${publicTypesPath}/`, `${declarationTypesPath}/`, `${declarationTypesPath}/`],
     });
     for (const result of results) {
       if (result.hasChanged) {
         console.log(result);
       }
     }
+  }
 
-    // 在产物主入口顶部插入三斜线引用，使消费者自动加载环境模块声明（CSS、addon 等）
-    const entryPath = 'dist/types/index.d.ts';
-    const content = readFileSync(entryPath, 'utf-8');
+  // 在产物主入口顶部插入三斜线引用，使消费者自动加载环境模块声明（CSS、addon 等）
+  const entryPath = resolve(declarationRoot, 'index.d.ts');
+  const modulesReference = '/// <reference path="../../types/modules.d.ts" />';
+  const content = readFileSync(entryPath, 'utf-8');
+  if (!content.startsWith(modulesReference)) {
     writeFileSync(entryPath, `/// <reference path="../../types/modules.d.ts" />\n${content}`);
-  } catch (error) {
-    throw error;
+  }
+
+  for (const [file, entry, defaultName, namedExports] of declarationEntries) {
+    const names = namedExports.join(', ');
+    writeFileSync(
+      `dist/${file}`,
+      `import ${defaultName}, { ${names} } from "./types/${entry}";\nexport { ${names} };\nexport default ${defaultName};\n`,
+    );
   }
 }
 

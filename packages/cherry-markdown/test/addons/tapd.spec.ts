@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import TapdCheckListPlugin from '../../src/addons/advance/cherry-tapd-checklist-plugin';
 import TapdHtmlTagPlugin from '../../src/addons/advance/cherry-tapd-html-tag-plugin';
 import TapdTablePlugin from '../../src/addons/advance/cherry-tapd-table-plugin';

@@ -1,5 +1,5 @@
 import { redo, undo } from '@codemirror/commands';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import FullScreen from '../../../src/toolbars/hooks/FullScreen';
 import MobilePreview from '../../../src/toolbars/hooks/MobilePreview';
 import Redo from '../../../src/toolbars/hooks/Redo';

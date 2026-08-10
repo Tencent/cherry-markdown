@@ -2,7 +2,7 @@
  * mermaid 编辑器侧锚点逻辑测试
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vite-plus/test';
 import { Text } from '@codemirror/state';
 import {
   buildMermaidEditContext,

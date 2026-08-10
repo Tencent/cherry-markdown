@@ -37,13 +37,18 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version-file: '.node-version'
+          cache: true
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: .node-version
+          node-version-file: '.node-version'
 
       - name: Install dependencies
-        run: yarn
+        run: vp install
 
       - name: Check for changesets
         id: changesets
