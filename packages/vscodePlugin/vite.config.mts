@@ -20,7 +20,7 @@ const extensionConfig: UserConfig = {
     outDir: path.resolve(packageRoot, 'dist'),
     emptyOutDir: true,
     sourcemap: false,
-    minify: 'esbuild',
+    minify: 'oxc',
     lib: {
       entry: path.resolve(packageRoot, 'src/extension.ts'),
       formats: ['cjs'],
@@ -54,7 +54,7 @@ const webviewConfig: UserConfig = {
     outDir: webviewDist,
     emptyOutDir: true,
     sourcemap: false,
-    minify: 'esbuild',
+    minify: 'oxc',
     assetsInlineLimit: 0,
     rollupOptions: {
       input: path.resolve(packageRoot, 'web-resources/scripts/index.ts'),
