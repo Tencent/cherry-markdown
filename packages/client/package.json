@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "npx node ./scripts/sync-version.js && vp dev",
+    "tauri:dev": "npx node ./scripts/sync-version.js && tauri dev",
     "build": "npx node ./scripts/sync-version.js && vue-tsc --noEmit && vp build",
     "tauri:build": "tauri build",
     "preview": "vp preview",

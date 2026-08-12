@@ -44,7 +44,7 @@ yarn dev
 
 | 目的 | 命令 |
 | --- | --- |
-| 启动桌面客户端前端 | `yarn dev:client` |
+| 启动桌面客户端（Tauri） | `yarn dev:client` |
 | 启动 React 示例 | `yarn example:react` |
 | 构建全部 workspace | `yarn build` |
 | 只构建核心包 / 小程序包 | `yarn build:core` / `yarn build:miniProgram` |
