@@ -23,7 +23,7 @@
     "build": "vp run -F cherry-markdown build && vp run -F @cherry-markdown/miniprogram build && vp run -F @cherry-markdown/mini-program-demo build && vp run -F @cherry-markdown/react_demo build && vp run -F @cherry-markdown/client build && vp run -F cherry-markdown-vscode-plugin build",
     "build:core": "vp run -F cherry-markdown build",
     "build:miniProgram": "vp run -F @cherry-markdown/miniprogram build",
-    "dev:client": "vp run -F @cherry-markdown/client dev",
+    "dev:client": "vp run -F @cherry-markdown/client tauri:dev",
     "build:client": "vp run -F @cherry-markdown/client build",
     "build:vscodePlugin": "vp run -F cherry-markdown build && vp run -F cherry-markdown-vscode-plugin build",
     "example:react": "vp run -F @cherry-markdown/react_demo dev",

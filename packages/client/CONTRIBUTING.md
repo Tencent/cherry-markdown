@@ -19,11 +19,11 @@ Install dependencies from the repository root with Yarn; do not create a separat
 yarn install
 ```
 
-The client is a workspace managed by Vite+. Its package scripts are run through the root workspace, for example `yarn dev:client` and `yarn build:client`.
+The client is a workspace managed by Vite+. `yarn dev:client` invokes `tauri dev` and opens the native desktop client; use the package-level `dev` script only when you need the standalone web server.
 
 ### Development
 
-- Start the client frontend in development mode.
+- Start the native Tauri client in development mode.
 
 ```shell
 yarn dev:client
@@ -36,7 +36,9 @@ yarn dev:client
 yarn build:client
 ```
 
-For the native Tauri bundle, run the client workspace task through Vite+ after installing Rust and the platform dependencies:
+The root command runs the package `tauri:dev` script through Vite+, which invokes the Tauri CLI. After installing Rust and the platform dependencies, it starts the native window and the Vite dev server configured in `src-tauri/tauri.conf.json`.
+
+For the native Tauri bundle, run:
 
 ```shell
 ./node_modules/.bin/vp run -F @cherry-markdown/client tauri:build
