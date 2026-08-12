@@ -109,7 +109,7 @@ Cherry 提供多种构建产物（完整包 / 核心包 / 流式输出包 / 引�
 欢迎加入我们，一起打造强大的 Markdown 编辑器。在实现新功能或提交特性前，请先阅读：
 
 - [初识 cherry markdown 编辑器](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86-cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)
-- [贡献指南](https://github.com/Tencent/cherry-markdown/wiki/%E8%B4%A1%E7%8C%AE%E6%8C%87%E5%8D%97%20Contribution%20Guidelines)
+- [贡献指南](./CONTRIBUTING.md)
 
 ## License
 
