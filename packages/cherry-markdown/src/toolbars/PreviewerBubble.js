@@ -305,8 +305,8 @@ export default class PreviewerBubble {
       return;
     }
     const { target } = e;
-    // 先计算是previewer中第几个checkbox
-    const list = Array.from(this.previewerDom.querySelectorAll('.ch-icon-square, .ch-icon-check'));
+    // 只统计列表项内的 checkbox，避免 index 错乱，导致勾选错位
+    const list = Array.from(this.previewerDom.querySelectorAll('li .ch-icon-square, li .ch-icon-check'));
     this.checkboxIdx = list.indexOf(target);
 
     // 然后找到Editor中对应的`- []`或者`- [ ]`进行修改
