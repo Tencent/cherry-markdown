@@ -58,6 +58,26 @@
       ]
     },
     {
+      "identifier": "fs:allow-write-file",
+      "allow": [
+        { "path": "**" },
+        { "path": "**/*" },
+        { "path": "/**" },
+        { "path": "/**/*" },
+        { "path": "$HOME/**" },
+        { "path": "$DESKTOP/**" },
+        { "path": "$DOCUMENT/**" },
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$APPCONFIG/**" },
+        { "path": "$APPDATA/**" },
+        { "path": "$APPLOCALDATA/**" },
+        { "path": "$APPLOG/**" },
+        { "path": "$AUDIO/**" },
+        { "path": "$VIDEO/**" },
+        { "path": "$PICTURE/**" }
+      ]
+    },
+    {
       "identifier": "fs:allow-exists",
       "allow": [{ "path": "**" }, { "path": "**/*" }, { "path": "/**" }, { "path": "/**/*" }]
     },

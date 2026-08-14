@@ -38,7 +38,20 @@ export default defineConfig(async () => ({
   },
   // 添加optimizeDeps配置来解决katex依赖优化问题
   optimizeDeps: {
-    include: ['katex', 'echarts'],
+    // html-docx-js-typescript 是 CommonJS + Node 风格代码（内部有 `new Buffer(...)`），
+    // Vite dev 首次访问时需要 esbuild 预打包成 ESM，否则 dynamic import 会 404。
+    // 显式 include 强制预打包，避免运行时才失败。
+    include: ['katex', 'echarts', 'html-docx-js-typescript', 'jszip', 'browser-or-node'],
     exclude: ['cherry-markdown'],
+    esbuildOptions: {
+      // Buffer 在浏览器不存在，但 html-docx-js-typescript 里有 `new Buffer(...)` 静态引用
+      // （分支代码，runtime 走的是 Blob 分支不会真的调用）。为了让 esbuild 预打包通过，
+      // 把 Buffer/global 定义成浏览器友好的替身。
+      define: {
+        global: 'globalThis',
+        // 让静态分析阶段 Buffer 可解析；运行时被 isBrowser 分支保护，不会真的调到
+        Buffer: 'undefined',
+      },
+    },
   },
 }));

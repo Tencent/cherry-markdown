@@ -17,6 +17,7 @@ import * as echarts from 'echarts';
 import type { CherryEditorInstance } from './editorTypes';
 import { getCurrentLightbox } from './composables/useImageLightbox';
 import { createImageBedFileUpload, createImageBedOnPaste } from './composables/useImageBedUploader';
+import { runCherryExport, type ExportType } from './composables/useCherryExport';
 import { usePreferencesStore, type EditorMode } from '../store';
 
 /**
@@ -48,13 +49,14 @@ type CustomConfig = {
       customMenu_fileUpload?: CherryMenuHook;
       customMenuChangeModule: CherryMenuHook;
       customSave: CherryMenuHook;
+      customExport: CherryMenuHook;
     };
   };
 };
 
 // Cherry upstream types do not include custom menu ids in toolbarRight,
 // but runtime supports them through customMenu registration.
-const toolbarRight = ['customSave', '|', 'export', 'togglePreview'] as unknown as ToolbarRightConfig;
+const toolbarRight = ['customSave', '|', 'togglePreview'] as unknown as ToolbarRightConfig;
 
 const customMenuChangeModule = Cherry.createMenuHook('编辑', {
   iconName: 'pen' as const,
@@ -92,6 +94,70 @@ const customSave = Cherry.createMenuHook('保存', {
       const event = new CustomEvent(WINDOW_EVENTS.REQUEST_SAVE, { detail: { markdown } });
       window.dispatchEvent(event);
     }
+  },
+});
+
+/**
+ * 导出菜单：Tauri 环境下不能复用主包 utils/export.js（<a download> 在 WebView2/WKWebView 里
+ * 不会触发系统下载器），因此客户端自实现 runCherryExport，走 dialog.save + fs.writeTextFile / writeFile。
+ *
+ * 五种导出：
+ * - pdf：受限于 WebView 打印能力，降级为导出为 HTML 并提示用户"浏览器打开 → 另存为 PDF"
+ * - screenShot：html2canvas 出 PNG，二进制通过 fs.writeFile 落盘
+ * - markdown：cherry.getMarkdown() → fs.writeTextFile
+ * - html：previewer.getValue() 拼装 HTML5 文档 → fs.writeTextFile
+ * - word：写 text/html 到剪贴板，用户 Ctrl+V 粘贴到 Word（与主包一致）
+ *
+ * 菜单点击流：subMenuConfig → afterInit 里 bindSubClick(type) → onClick(_selection, type) → runCherryExport
+ */
+interface ExportMenuInstance {
+  $cherry: {
+    previewer: {
+      options: { previewerCache: { html: string } };
+      lazyLoadImg: { changeDataSrc2Src(html: string): string };
+      isPreviewerHidden(): boolean;
+      getDomContainer(): HTMLElement;
+      refresh(html: string): void;
+      getValue(): string;
+    };
+    getMarkdown(): string;
+    getFirstLineText?(fallback?: string): string;
+  };
+  subMenuConfig: Array<{ noIcon?: boolean; name: string; onclick?: unknown }>;
+  updateMarkdown: boolean;
+  bindSubClick(shortcut: string, selection?: string): unknown;
+}
+
+const customExport = Cherry.createMenuHook('导出', {
+  iconName: 'download' as const,
+  // 先占位（name 走主包 i18n），具体 onclick 在 afterInit 里用菜单实例重新绑定
+  subMenuConfig: [
+    { noIcon: true, name: 'exportToPdf' },
+    { noIcon: true, name: 'exportScreenshot' },
+    { noIcon: true, name: 'exportMarkdownFile' },
+    { noIcon: true, name: 'exportHTMLFile' },
+    { noIcon: true, name: 'exportWordFile' },
+  ],
+  afterInit(this: ExportMenuInstance) {
+    const typeMap: Record<string, ExportType> = {
+      exportToPdf: 'pdf',
+      exportScreenshot: 'screenShot',
+      exportMarkdownFile: 'markdown',
+      exportHTMLFile: 'html',
+      exportWordFile: 'word',
+    };
+    this.subMenuConfig.forEach((item) => {
+      const type = typeMap[item.name];
+      if (type) {
+        // eslint-disable-next-line no-param-reassign
+        item.onclick = this.bindSubClick.bind(this, type);
+      }
+    });
+  },
+  onClick(this: ExportMenuInstance, _selection: string, type: ExportType) {
+    this.updateMarkdown = false;
+    if (!type) return;
+    void runCherryExport(this.$cherry, type);
   },
 });
 
@@ -288,7 +354,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     ],
     toolbarRight,
     bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', '|', 'size', 'color'], // array or false
-    sidebar: ['customMenuChangeModule', 'mobilePreview', 'theme', 'codeTheme'],
+    sidebar: ['customMenuChangeModule', 'customExport', 'mobilePreview', 'theme', 'codeTheme'],
     float: false,
     // hiddenToolbar: [''],
     // sidebar: ['customMenuChangeModule', 'mobilePreview', 'copy', 'theme', 'codeTheme'],
@@ -299,6 +365,7 @@ const cherryConfig: CherryOptions<CustomConfig> = {
     customMenu: {
       customMenuChangeModule,
       customSave,
+      customExport,
     },
     config: {
       // 地图表格配置 - 支持自定义地图数据源URL
