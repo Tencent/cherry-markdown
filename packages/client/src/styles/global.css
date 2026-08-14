@@ -157,8 +157,10 @@ body {
   padding: 15px 2px 15px 5px;
 }
 
-#markdown-editor .cherry-dropdown[name="theme"], #markdown-editor .cherry-dropdown[name="codeTheme"] {
-  margin-top: -45px;
+#markdown-editor .cherry-dropdown {
+  &[name="theme"], &[name="codeTheme"], &[name="customExport"] {
+    margin-top: -45px;
+  }
 }
 
 #markdown-editor .cherry-previewer .cherry-echarts-wrapper {
