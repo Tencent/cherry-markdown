@@ -30,7 +30,7 @@ describe('UMD and ESM entry split', () => {
       },
       'src/index.core.umd.js': {
         globalAssignment: /window\.Cherry\s*=\s*Cherry/,
-        namedExports: /export \{ SyntaxHookBase, MenuHookBase \}/,
+        namedExports: /export \{ SyntaxHookBase, MenuHookBase, MermaidCodeEngine, MermaidPlugin \}/,
       },
       'src/index.stream.umd.js': {
         globalAssignment: /window\.Cherry\s*=\s*CherryStream/,
@@ -44,5 +44,13 @@ describe('UMD and ESM entry split', () => {
       expect(source, entry).toMatch(globalAssignment);
       expect(source, entry).toMatch(namedExports);
     });
+  });
+
+  it('exports the Mermaid plugin from both core entries', () => {
+    const esmSource = readProjectFile('src/index.core.js');
+    const umdSource = readProjectFile('src/index.core.umd.js');
+
+    expect(esmSource).toMatch(/MermaidCodeEngine, MermaidCodeEngine as MermaidPlugin/);
+    expect(umdSource).toMatch(/MermaidCodeEngine, MermaidPlugin/);
   });
 });

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Cherry, { SyntaxHookBase, MenuHookBase } from './index.core';
+import Cherry, { SyntaxHookBase, MenuHookBase, MermaidCodeEngine, MermaidPlugin } from './index.core';
 
 import { isBrowser } from './utils/env';
 
@@ -22,5 +22,5 @@ if (isBrowser()) {
   window.Cherry = Cherry;
 }
 
-export { SyntaxHookBase, MenuHookBase };
+export { SyntaxHookBase, MenuHookBase, MermaidCodeEngine, MermaidPlugin };
 export default Cherry;
