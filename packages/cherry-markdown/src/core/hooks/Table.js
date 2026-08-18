@@ -71,7 +71,7 @@ export default class Table extends ParagraphBase {
   $parseChartOptions(cell) {
     // Logger.log('Parsing chart options for cell:', cell);
     // 初始化失败
-    if (!this.chartRenderEngine) {
+    if (!this.chartRenderEngine || !this.chartRenderEngine.isValid()) {
       // Logger.log('Chart render engine not available');
       return null;
     }
