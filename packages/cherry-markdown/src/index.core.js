@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 import Cherry from './Cherry';
+import MermaidCodeEngine from '@/addons/cherry-code-block-mermaid-plugin';
 
 import SyntaxHookBase from './core/SyntaxBase';
 import MenuHookBase from './toolbars/MenuBase';
 
-export { SyntaxHookBase, MenuHookBase };
+export { SyntaxHookBase, MenuHookBase, MermaidCodeEngine, MermaidCodeEngine as MermaidPlugin };
 
 export default Cherry;
