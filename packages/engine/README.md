@@ -17,13 +17,49 @@ Cherry Markdown 的解析与渲染引擎，独立于编辑器 UI。
 ## 使用
 
 ```js
-import CherryEngine from '@cherry-markdown/engine';
+import CherryEngine, {
+  Engine,
+  SyntaxHookBase,
+  createSyntaxHook,
+  Header,
+  Paragraph,
+  Table,
+  CodeBlock,
+  Link,
+  Image,
+} from '@cherry-markdown/engine';
 
 const engine = new CherryEngine({
   engine: { syntax: { header: { anchorStyle: 'none' } } },
 });
 const html = engine.makeHtml('# Hello');
 ```
+
+### 直接使用 Engine
+
+```js
+import { Engine } from '@cherry-markdown/engine';
+
+const engine = new Engine(options, cherryInstance);
+const html = engine.makeHtml('# Markdown');
+```
+
+### 自定义语法 Hook
+
+```js
+import { createSyntaxHook } from '@cherry-markdown/engine';
+
+const MyHook = createSyntaxHook('myHook', 'sentence', {
+  rule: /(\$\$[\s\S]+?\$\$)/,
+  makeHtml(str) {
+    return `<mark>${str}</mark>`;
+  },
+});
+```
+
+引擎包同时导出全部 37 个内置语法 Hook（`Header`、`Table`、`List`、`CodeBlock` 等）、
+`HookCenter`/`hooksConfig`/`HOOKS_TYPE_LIST`（Hook 注册机制）、以及
+`Logger`/`Sanitizer`/`UrlCache`/`urlProcessorProxy`/`defaultConfig`（运行时工具）。
 
 ## 构建与测试
 
