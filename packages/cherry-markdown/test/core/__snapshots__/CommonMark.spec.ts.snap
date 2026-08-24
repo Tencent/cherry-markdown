@@ -111,7 +111,7 @@ exports[`engine > CommonMark-22 1`] = `
 `;
 
 exports[`engine > CommonMark-23 1`] = `
-"<p data-sign="60a7268e76f95c9b1" data-type="p" data-lines="1"><a href="/bar\\*" title="ti*tle">foo</a></p>
+"<p data-sign="0b85662edc7d00851" data-type="p" data-lines="1"><a href="/bar%5C*" title="ti*tle">foo</a></p>
 
 <p data-sign="br2" data-type="br" data-lines="2">&nbsp;</p>
 "
@@ -1373,7 +1373,7 @@ exports[`engine > CommonMark-201 1`] = `
 `;
 
 exports[`engine > CommonMark-202 1`] = `
-"<p data-sign="53396e0e3469bdff1" data-type="p" data-lines="1"><a href="/url\\bar\\*baz" title="foo\\bar\\baz">foo</a></p>
+"<p data-sign="f3fa6107d499084b1" data-type="p" data-lines="1"><a href="/url%5Cbar%5C*baz" title="foo\\bar\\baz">foo</a></p>
 "
 `;
 
@@ -1397,7 +1397,7 @@ exports[`engine > CommonMark-205 1`] = `
 `;
 
 exports[`engine > CommonMark-206 1`] = `
-"<p data-sign="067b5c69c8bc54b41" data-type="p" data-lines="1"><a href="/φου">αγω</a></p>
+"<p data-sign="53865f729bc22acd1" data-type="p" data-lines="1"><a href="/%CF%86%CE%BF%CF%85">αγω</a></p>
 "
 `;
 
