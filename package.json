@@ -36,7 +36,18 @@
     "typecheck": "vp run -F cherry-markdown typecheck && vp run -F @cherry-markdown/miniprogram typecheck",
     "typecheck:core": "vp run -F cherry-markdown typecheck",
     "typecheck:miniProgram": "vp run -F @cherry-markdown/miniprogram typecheck",
-    "validate": "vp check"
+    "validate": "vp check",
+    "build:engine": "vp run -F @cherry-markdown/engine build",
+    "build:preview": "vp run -F @cherry-markdown/preview build",
+    "build:stream": "vp run -F @cherry-markdown/stream build",
+    "build:milkdown": "vp run -F @cherry-markdown/milkdown build",
+    "build:packages": "vp run -F @cherry-markdown/engine build && vp run -F @cherry-markdown/preview build && vp run -F @cherry-markdown/stream build && vp run -F @cherry-markdown/milkdown build",
+    "test:engine": "vp run -F @cherry-markdown/engine test",
+    "test:preview": "vp run -F @cherry-markdown/preview test",
+    "test:stream": "vp run -F @cherry-markdown/stream test",
+    "test:milkdown": "vp run -F @cherry-markdown/milkdown test",
+    "test:packages": "vp run -F @cherry-markdown/engine test && vp run -F @cherry-markdown/preview test && vp run -F @cherry-markdown/stream test && vp run -F @cherry-markdown/milkdown test",
+    "typecheck:packages": "vp run -F @cherry-markdown/engine typecheck && vp run -F @cherry-markdown/preview typecheck && vp run -F @cherry-markdown/stream typecheck && vp run -F @cherry-markdown/milkdown typecheck"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
@@ -73,5 +84,13 @@
     "node": ">=22",
     "yarn": ">=1.22.18"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "dependencies": {
+    "@milkdown/core": "7.22.1",
+    "@milkdown/ctx": "7.22.1",
+    "@milkdown/plugin-listener": "7.22.1",
+    "@milkdown/preset-commonmark": "7.22.1",
+    "@milkdown/prose": "7.22.1",
+    "@milkdown/theme-nord": "7.22.1"
+  }
 }

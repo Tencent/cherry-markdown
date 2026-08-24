@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@cherry-markdown/preview — 纯预览 Demo</title>
+    <style>
+      html, body { margin: 0; padding: 0; font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f6f8; }
+      .header { padding: 16px 24px; background: #fff; border-bottom: 1px solid #e5e6eb; }
+      .header h1 { margin: 0; font-size: 20px; }
+      .header p { margin: 6px 0 0; color: #888; font-size: 13px; }
+      .container { max-width: 900px; margin: 24px auto; background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+      .cherry-markdown { line-height: 1.7; }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>@cherry-markdown/preview · 纯预览</h1>
+      <p>使用 @cherry-markdown/engine 渲染 Markdown，@cherry-markdown/preview 增量更新 DOM（不依赖编辑器）。</p>
+    </div>
+    <div class="container">
+      <div id="preview"></div>
+    </div>
+
+    <script type="module">
+      import CherryEngine from '../../engine/dist/cherry-markdown-engine.esm.js';
+      import Previewer from '../../preview/dist/cherry-markdown-preview.esm.js';
+
+      const md = `# 纯预览演示
+
+这是 **@cherry-markdown/preview** 独立包。
+
+- 支持列表
+- 支持**加粗**
+- 支持 \`行内代码\`
+
+> 一段引用。
+
+---
+
+| 列一 | 列二 |
+| ---- | ---- |
+| a    | b    |`;
+
+      const engine = new CherryEngine({});
+      const html = engine.makeHtml(md);
+
+      const previewer = new Previewer({
+        previewerDom: document.getElementById('preview'),
+        lazyLoadImg: { autoLoadImgNum: -1 },
+      });
+      previewer.update(html);
+    </script>
+  </body>
+</html>

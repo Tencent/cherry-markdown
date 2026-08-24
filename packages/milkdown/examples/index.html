@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@cherry-markdown/milkdown — WYSIWYG 实验 Demo</title>
+    <style>
+      html, body { margin: 0; padding: 0; font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f6f8; }
+      .header { padding: 16px 24px; background: #fff; border-bottom: 1px solid #e5e6eb; }
+      .header h1 { margin: 0; font-size: 20px; }
+      .header p { margin: 6px 0 0; color: #888; font-size: 13px; }
+      .container { max-width: 900px; margin: 24px auto; background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+      .output { margin-top: 20px; padding: 12px; background: #fafafa; border-radius: 6px; }
+      .output h3 { margin: 0 0 8px; font-size: 14px; color: #555; }
+      .output pre { margin: 0; font-size: 12px; color: #666; white-space: pre-wrap; word-break: break-all; }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>@cherry-markdown/milkdown · 所见即所得实验</h1>
+      <p>基于 Milkdown / ProseMirror 的第一阶段独立实验，不进入 cherry-markdown 默认依赖。</p>
+    </div>
+    <div class="container">
+      <div id="editor"></div>
+      <div class="output">
+        <h3>当前 Markdown</h3>
+        <pre id="md-output"></pre>
+      </div>
+    </div>
+
+    <script type="module">
+      import CherryMilkdown from '../../milkdown/dist/cherry-markdown-milkdown.esm.js';
+
+      const output = document.getElementById('md-output');
+
+      const editor = new CherryMilkdown({
+        el: document.getElementById('editor'),
+        value: '# 所见即所得实验\n\n试试 **加粗**、`代码`、列表等。',
+        onChange: (markdown) => {
+          output.textContent = markdown;
+        },
+      });
+      editor.create().then(() => {
+        editor.getMarkdown().then((md) => (output.textContent = md));
+      });
+    </script>
+  </body>
+</html>

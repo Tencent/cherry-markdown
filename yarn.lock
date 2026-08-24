@@ -2392,6 +2392,19 @@
     remark-stringify "^11.0.0"
     unified "^11.0.3"
 
+"@milkdown/core@7.22.1", "@milkdown/core@^7.22.1":
+  version "7.22.1"
+  resolved "https://registry.npmjs.org/@milkdown/core/-/core-7.22.1.tgz#db808f1107d7e72e3d1bceca6e2700ccf28faf8e"
+  integrity sha512-X4O3al2aYugpFP/Do7VoPgvVEftjJVi+6UhZmz9fSdqMtpU70AitJ8R/erUA18hay2hWvNO9m3pxIJoR6no6KQ==
+  dependencies:
+    "@milkdown/ctx" "7.22.1"
+    "@milkdown/exception" "7.22.1"
+    "@milkdown/prose" "7.22.1"
+    "@milkdown/transformer" "7.22.1"
+    remark-parse "^11.0.0"
+    remark-stringify "^11.0.0"
+    unified "^11.0.3"
+
 "@milkdown/ctx@7.22.0", "@milkdown/ctx@^7.22.0":
   version "7.22.0"
   resolved "https://registry.npmjs.org/@milkdown/ctx/-/ctx-7.22.0.tgz#9db0c657345909ce51ecbb3636201baaf9709ced"
@@ -2399,10 +2412,22 @@
   dependencies:
     "@milkdown/exception" "7.22.0"
 
+"@milkdown/ctx@7.22.1", "@milkdown/ctx@^7.22.1":
+  version "7.22.1"
+  resolved "https://registry.npmjs.org/@milkdown/ctx/-/ctx-7.22.1.tgz#a80215ceff3aeeb971bcf166a77e55fda8d5bb2c"
+  integrity sha512-6+LJdo3DcrkO1lzGcje0yWqaG6ZKgTR8kDxyDrrm7iocBjq3M+bkw04f99ZG/BLp1Rbc4yRyin2mUy6m4SEVaA==
+  dependencies:
+    "@milkdown/exception" "7.22.1"
+
 "@milkdown/exception@7.22.0":
   version "7.22.0"
   resolved "https://registry.npmjs.org/@milkdown/exception/-/exception-7.22.0.tgz#904c536dc67b4637c4d09e24978397d1b757ba8c"
   integrity sha512-66HIsd5l+Fd8Kll84me2wBlO07XSdzGWHPfhFdnkwsEfyPrksnTe51digYh6F7szZWUvmv0kG2xtRJAVgpPbzw==
+
+"@milkdown/exception@7.22.1":
+  version "7.22.1"
+  resolved "https://registry.npmjs.org/@milkdown/exception/-/exception-7.22.1.tgz#31593eea0fcb10963fcfed300af5cad5576fa909"
+  integrity sha512-wXUfn+fpWy0jeJ6AVEjKPieouLfJIDLQ4IRqyEL3d5yZDiZTtKu1Va0+RprrvqANpGJ1YBRQ1uCgDE6sJgTEjQ==
 
 "@milkdown/exception@7.5.9":
   version "7.5.9"
@@ -2512,6 +2537,17 @@
     "@types/lodash-es" "^4.17.12"
     lodash-es "^4.17.21"
 
+"@milkdown/plugin-listener@7.22.1", "@milkdown/plugin-listener@^7.22.1":
+  version "7.22.1"
+  resolved "https://registry.npmjs.org/@milkdown/plugin-listener/-/plugin-listener-7.22.1.tgz#3139cb4d28c04cea8ea26ac21e7d6f8d9e286fc3"
+  integrity sha512-6k8JMDrdAL0E0WygpDX1YOR0Q9Wc4pia8pIMN5nN5liEeAyNaM6LwAxXJY+awQJ0OstDKHTfjkh7WzJo4QiXOA==
+  dependencies:
+    "@milkdown/core" "7.22.1"
+    "@milkdown/ctx" "7.22.1"
+    "@milkdown/prose" "7.22.1"
+    "@types/lodash-es" "^4.17.12"
+    lodash-es "^4.17.21"
+
 "@milkdown/plugin-math@^7.5.9":
   version "7.5.9"
   resolved "https://registry.npmjs.org/@milkdown/plugin-math/-/plugin-math-7.5.9.tgz#d404a981dd139d14a6d39db3ea2ec16968eb7f8a"
@@ -2594,6 +2630,21 @@
     unist-util-visit "^5.0.0"
     unist-util-visit-parents "^6.0.1"
 
+"@milkdown/preset-commonmark@7.22.1", "@milkdown/preset-commonmark@^7.22.1":
+  version "7.22.1"
+  resolved "https://registry.npmjs.org/@milkdown/preset-commonmark/-/preset-commonmark-7.22.1.tgz#6f2cdcfcb0f204328720c4fd2112f07fa92be346"
+  integrity sha512-it+G0YUG5MDXt0qLB6W083ss5i6tnWAXWCW8SgnmsehGxntkN5//gNM/8vh3rqwl8RvnBvjLWpJ6TgHSlBPhlw==
+  dependencies:
+    "@milkdown/core" "7.22.1"
+    "@milkdown/ctx" "7.22.1"
+    "@milkdown/exception" "7.22.1"
+    "@milkdown/prose" "7.22.1"
+    "@milkdown/transformer" "7.22.1"
+    "@milkdown/utils" "7.22.1"
+    remark-inline-links "^7.0.0"
+    unist-util-visit "^5.0.0"
+    unist-util-visit-parents "^6.0.1"
+
 "@milkdown/preset-gfm@7.22.0":
   version "7.22.0"
   resolved "https://registry.npmjs.org/@milkdown/preset-gfm/-/preset-gfm-7.22.0.tgz#64f316886eacba9a2310dbee74149ca57c720333"
@@ -2629,6 +2680,36 @@
     prosemirror-transform "^1.10.5"
     prosemirror-view "^1.41.3"
 
+"@milkdown/prose@7.22.1", "@milkdown/prose@^7.22.1":
+  version "7.22.1"
+  resolved "https://registry.npmjs.org/@milkdown/prose/-/prose-7.22.1.tgz#b617262cb839c9932f49a93ee967befbd5d4d316"
+  integrity sha512-fqgTHl94G7oDPY94cPYBm6ARxEoLQ10ubkTNLD1nzAlTUfJLULZkIEMSMy4CECncw2go3ExW32CZPpXLJVSxnQ==
+  dependencies:
+    "@milkdown/exception" "7.22.1"
+    prosemirror-changeset "^2.3.1"
+    prosemirror-commands "^1.7.1"
+    prosemirror-dropcursor "^1.8.2"
+    prosemirror-gapcursor "^1.4.0"
+    prosemirror-history "^1.5.0"
+    prosemirror-inputrules "^1.5.1"
+    prosemirror-keymap "^1.2.3"
+    prosemirror-model "^1.25.4"
+    prosemirror-schema-list "^1.5.1"
+    prosemirror-state "^1.4.4"
+    prosemirror-tables "^1.8.1"
+    prosemirror-transform "^1.10.5"
+    prosemirror-view "^1.41.3"
+
+"@milkdown/theme-nord@7.22.1", "@milkdown/theme-nord@^7.22.1":
+  version "7.22.1"
+  resolved "https://registry.npmjs.org/@milkdown/theme-nord/-/theme-nord-7.22.1.tgz#9a9e4b16b8b414c05130eea1237c52360b71c43c"
+  integrity sha512-KBl+XXl0km/7ZETvL14uf7UKVoVyrjGOtuweXKkJkmSAj2pr7luY84YWB3IAjbe7ucjNzY4MUFfEMXwZQZYT6A==
+  dependencies:
+    "@milkdown/core" "7.22.1"
+    "@milkdown/ctx" "7.22.1"
+    "@milkdown/prose" "7.22.1"
+    clsx "^2.0.0"
+
 "@milkdown/theme-nord@^7.21.3":
   version "7.22.0"
   resolved "https://registry.npmjs.org/@milkdown/theme-nord/-/theme-nord-7.22.0.tgz#9e1cae952cd487c4a089094bfa2795b5614d3808"
@@ -2649,6 +2730,16 @@
     remark "^15.0.1"
     unified "^11.0.3"
 
+"@milkdown/transformer@7.22.1":
+  version "7.22.1"
+  resolved "https://registry.npmjs.org/@milkdown/transformer/-/transformer-7.22.1.tgz#d7e90f2daff5c72df103aeabad50c2cbbfc411ce"
+  integrity sha512-rU1IBtxezNg7TSWaq+RP59/t6tfD3jIPGrwAtMKPIGuYEax+8d1fyGisp98TeI3l0VQEIgMpF+KlNDV+Y1HJVA==
+  dependencies:
+    "@milkdown/exception" "7.22.1"
+    "@milkdown/prose" "7.22.1"
+    remark "^15.0.1"
+    unified "^11.0.3"
+
 "@milkdown/utils@7.22.0":
   version "7.22.0"
   resolved "https://registry.npmjs.org/@milkdown/utils/-/utils-7.22.0.tgz#9504c650a2d3f1bafe76aba5f503fe5a5d13a6a4"
@@ -2659,6 +2750,18 @@
     "@milkdown/exception" "7.22.0"
     "@milkdown/prose" "7.22.0"
     "@milkdown/transformer" "7.22.0"
+    nanoid "^6.0.0"
+
+"@milkdown/utils@7.22.1":
+  version "7.22.1"
+  resolved "https://registry.npmjs.org/@milkdown/utils/-/utils-7.22.1.tgz#b14a9dce6f14965105d5fa162685183645110437"
+  integrity sha512-ye0LGy/Ez8fjtcYyYj93wp4XfH00JYpCiy1IDHYB+9HVIpnbr3ed7PvY4s2000xmDWe0Vlx07TOyv96yvFrnjQ==
+  dependencies:
+    "@milkdown/core" "7.22.1"
+    "@milkdown/ctx" "7.22.1"
+    "@milkdown/exception" "7.22.1"
+    "@milkdown/prose" "7.22.1"
+    "@milkdown/transformer" "7.22.1"
     nanoid "^6.0.0"
 
 "@milkdown/utils@7.5.9":
@@ -5365,6 +5468,11 @@ braces@^3.0.3, braces@~3.0.2:
   dependencies:
     fill-range "^7.1.1"
 
+browser-or-node@^1.2.1:
+  version "1.3.0"
+  resolved "https://registry.npmjs.org/browser-or-node/-/browser-or-node-1.3.0.tgz#f2a4e8568f60263050a6714b2cc236bb976647a7"
+  integrity sha512-0F2z/VSnLbmEeBcUrSuDH5l0HxTXdQQzLjkmBR4cYfvg1zJrKSlmIZFqyFR8oX0NrwPhy3c3HQ6i3OxMbew4Tg==
+
 browser-process-hrtime@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/browser-process-hrtime/-/browser-process-hrtime-1.0.0.tgz#3c9b4b7d782c8121e56f10106d84c0d0ffc94626"
@@ -7757,6 +7865,15 @@ hosted-git-info@^7.0.0:
   dependencies:
     lru-cache "^10.0.1"
 
+html-docx-js-typescript@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.npmjs.org/html-docx-js-typescript/-/html-docx-js-typescript-0.1.5.tgz#2f0119dd9423990de71ab5390ba829be79a2a92a"
+  integrity sha512-GNojWFDYbpHSIgKml6/0oAom8mtHrHRTWKMyLRdeJQHO/CyeM6H39DYgzYvPp4OhBp2Ti8dxMKFq0/FkpYD4bg==
+  dependencies:
+    browser-or-node "^1.2.1"
+    jszip "^3.4.0"
+    tslib "^1.13.0"
+
 html-encoding-sniffer@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/html-encoding-sniffer/-/html-encoding-sniffer-3.0.0.tgz#2cb1a8cf0db52414776e5b2a7a04d5dd98158de9"
@@ -8509,7 +8626,7 @@ jsonwebtoken@^9.0.0:
     object.assign "^4.1.4"
     object.values "^1.1.6"
 
-jszip@^3.10.1:
+jszip@^3.10.1, jszip@^3.4.0:
   version "3.10.1"
   resolved "https://registry.npmjs.org/jszip/-/jszip-3.10.1.tgz#34aee70eb18ea1faec2f589208a157d1feb091c2"
   integrity sha512-xXDvecyTpGLrqFrvkrUSoxxfJI5AH7U8zxxtVclpsUtMCq4JQ290LY8AW5c7Ggnr/Y/oK+bQMbqK2qmtk3pN4g==
@@ -11744,6 +11861,11 @@ tslib@2.3.0:
   version "2.3.0"
   resolved "https://registry.npmjs.org/tslib/-/tslib-2.3.0.tgz#803b8cdab3e12ba581a4ca41c8839bbb0dacb09e"
   integrity sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==
+
+tslib@^1.13.0:
+  version "1.14.1"
+  resolved "https://registry.npmjs.org/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
+  integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
 tslib@^2.2.0, tslib@^2.4.0, tslib@^2.5.0, tslib@^2.6.2:
   version "2.8.1"
