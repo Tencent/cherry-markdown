@@ -15,7 +15,7 @@
  */
 import ParagraphBase from '@/core/ParagraphBase';
 import { compileRegExp } from '@/utils/regexp';
-import { isValidScheme } from '@/utils/sanitize';
+import { isValidScheme, encodeURIOnce } from '@/utils/sanitize';
 import UrlCache from '@/UrlCache';
 /**
  * 脚注和引用语法
@@ -64,7 +64,7 @@ export default class CommentReference extends ParagraphBase {
     if (!isValidScheme(unwrappedUrl)) {
       return;
     }
-    const innerUrl = UrlCache.set(unwrappedUrl);
+    const innerUrl = UrlCache.set(encodeURIOnce(unwrappedUrl));
     this.commentCache[`${key}`.toLowerCase()] = [innerUrl, ...args].join(' ');
   }
 
