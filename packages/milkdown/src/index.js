@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import CherryMilkdown from './CherryMilkdown';
+import CherryMilkdown, { MarkdownRoundTripError } from './CherryMilkdown';
+import EditorAdapter from './EditorAdapter';
 
-export { CherryMilkdown };
+export { CherryMilkdown, CherryMilkdown as MilkdownEditorAdapter, EditorAdapter, MarkdownRoundTripError };
 export default CherryMilkdown;

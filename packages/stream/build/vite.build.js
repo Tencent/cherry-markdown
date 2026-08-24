@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const src = resolve(root, 'src');
 
-const baseExternal = ['jsdom', /^@cherry-markdown\//];
+const baseExternal = ['jsdom'];
 
 const builds = [
   {
@@ -13,7 +13,7 @@ const builds = [
     entry: resolve(src, 'index.js'),
     file: 'cherry-markdown-stream.esm.js',
     format: 'es',
-    external: baseExternal,
+    external: [...baseExternal, '@cherry-markdown/engine', '@cherry-markdown/preview'],
   },
   {
     id: 'stream-umd',
@@ -22,6 +22,13 @@ const builds = [
     format: 'umd',
     name: 'CherryStream',
     external: baseExternal,
+  },
+  {
+    id: 'stream-cjs',
+    entry: resolve(src, 'index.js'),
+    file: 'cherry-markdown-stream.cjs',
+    format: 'cjs',
+    external: [...baseExternal, '@cherry-markdown/engine', '@cherry-markdown/preview'],
   },
 ];
 
@@ -39,6 +46,8 @@ for (const current of builds) {
       alias: {
         '@': src,
         '@cherry': src,
+        '@cherry-markdown/engine': resolve(root, '../engine/dist/cherry-markdown-engine.browser.esm.js'),
+        '@cherry-markdown/preview': resolve(root, '../preview/dist/cherry-markdown-preview.esm.js'),
       },
     },
     build: {

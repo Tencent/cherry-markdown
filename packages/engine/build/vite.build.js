@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const src = resolve(root, 'src');
+const nodeSanitizer = resolve(src, 'Sanitizer.node.js');
 
 const baseExternal = ['jsdom', 'mermaid', /^mermaid\//];
 
@@ -14,6 +15,14 @@ const builds = [
     file: 'cherry-markdown-engine.esm.js',
     format: 'es',
     external: baseExternal,
+    node: true,
+  },
+  {
+    id: 'engine-browser-esm',
+    entry: resolve(src, 'index.js'),
+    file: 'cherry-markdown-engine.browser.esm.js',
+    format: 'es',
+    external: ['mermaid', /^mermaid\//],
   },
   {
     id: 'engine-umd',
@@ -23,6 +32,14 @@ const builds = [
     name: 'CherryEngine',
     external: baseExternal,
   },
+  {
+    id: 'engine-cjs',
+    entry: resolve(src, 'index.js'),
+    file: 'cherry-markdown-engine.cjs',
+    format: 'cjs',
+    external: baseExternal,
+    node: true,
+  },
 ];
 
 for (const current of builds) {
@@ -30,16 +47,27 @@ for (const current of builds) {
   await build({
     configFile: false,
     root,
+    plugins: current.node
+      ? [
+          {
+            name: 'engine-node-sanitizer',
+            enforce: 'pre',
+            resolveId(source) {
+              return /(?:^|\/)Sanitizer(?:\.js)?$/.test(source) ? nodeSanitizer : null;
+            },
+          },
+        ]
+      : [],
     define: {
       BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
       'process.env.BUILD_VERSION': JSON.stringify(process.env.BUILD_VERSION || '0.0.1'),
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
     },
     resolve: {
-      alias: {
-        '@': src,
-        '@cherry': src,
-      },
+      alias: [
+        { find: '@', replacement: src },
+        { find: '@cherry', replacement: src },
+      ],
     },
     build: {
       emptyOutDir: false,

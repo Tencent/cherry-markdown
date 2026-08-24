@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import CherryStream from './CherryStream';
+export { SyntaxHookBase } from '@cherry-markdown/engine';
 
 export { CherryStream };
 export default CherryStream;

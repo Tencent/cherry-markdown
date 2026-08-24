@@ -9,6 +9,7 @@ const readProjectFile = (filePath) => readFileSync(resolve(projectRoot, filePath
 
 describe('Cherry Markdown published artifact contract', () => {
   const viteBuild = readProjectFile('build/vite.build.js');
+  const legacyBuild = readProjectFile('build/legacy-entries.js');
   const stylesBuild = readProjectFile('build/styles.build.js');
   const addonsBuild = readProjectFile('build/addons.build.js');
   const packageJson = JSON.parse(readProjectFile('package.json'));
@@ -29,26 +30,23 @@ describe('Cherry Markdown published artifact contract', () => {
       ['engine-umd', 'index.engine.js', 'cherry-markdown.engine.js', 'umd', 'CherryEngine'],
     ];
 
-    [...publishedOutputs, ...additiveOutputs].forEach(([id, entry, file, format, name]) => {
-      expect(viteBuild, id).toContain(`id: '${id}'`);
-      expect(viteBuild, id).toContain(`entry: resolve(src, '${entry}')`);
-      expect(viteBuild, id).toContain(`file: '${file}'`);
-      expect(viteBuild, id).toContain(`format: '${format}'`);
+    [...publishedOutputs, ...additiveOutputs].slice(2).forEach(([id, entry, file, format, name]) => {
+      expect(legacyBuild, id).toContain(`'${id}', '${entry}', '${file}', '${format}'`);
       if (name) {
-        expect(viteBuild, id).toContain(`name: '${name}'`);
+        expect(legacyBuild, id).toContain(`'${format}', '${name}'`);
       }
     });
-    expect(viteBuild.match(/id: '(?:full|core|engine|engine-core|stream)-(?:esm|umd)'/g)).toHaveLength(10);
+    expect(viteBuild).toContain("id: 'full-esm'");
+    expect(viteBuild).toContain("id: 'full-umd'");
+    expect(legacyBuild.match(/\['(?:core|engine|engine-core|stream)-(?:esm|umd)'/g)).toHaveLength(8);
     expect(viteBuild).toMatch(/id: 'full-umd'[\s\S]*?sourcemap: true/);
   });
 
   it('pins external dependencies and preserves sequential build outputs', () => {
     expect(viteBuild).toContain("const baseExternal = ['jsdom']");
-    expect(viteBuild).toContain(
-      "const coreExternal = [...baseExternal, 'mermaid', '@replit/codemirror-vim', 'codemirror', /^codemirror\\//]",
-    );
-    expect(viteBuild).toContain("const engineExternal = [...baseExternal, 'mermaid']");
-    expect(viteBuild).toContain("const streamExternal = [...engineExternal, 'codemirror', /^codemirror\\//]");
+    expect(viteBuild).not.toContain('coreExternal');
+    expect(viteBuild).not.toContain('streamExternal');
+    expect(legacyBuild).toContain('@deprecated Remove this complete manifest when Cherry Markdown reaches 1.0');
     expect(viteBuild).toMatch(/emptyOutDir: false/);
     expect(viteBuild).toContain("minify: current.id === 'full-umd' ? false : 'terser'");
     expect(viteBuild).toContain("pure_funcs: ['console.log', 'console.info']");

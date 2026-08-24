@@ -16,6 +16,7 @@
 import vDH from 'virtual-dom/h';
 import vDDiff from 'virtual-dom/diff';
 import vDPatch from 'virtual-dom/patch';
+import CherryEngine from '@cherry-markdown/engine';
 import LazyLoadImg from './utils/lazyLoadImg';
 import MyersDiff from './utils/myersDiff';
 import { isBrowser } from './utils/env';
@@ -54,6 +55,8 @@ export default class Previewer {
    * @param {Object} options
    * @param {HTMLElement} [options.previewerDom] 预览容器 DOM
    * @param {string} [options.value] 初始 markdown 值
+   * @param {Object} [options.engine] Cherry Engine options
+   * @param {Object} [options.engineInstance] existing Cherry Engine instance
    * @param {Object} [options.lazyLoadImg] 图片懒加载配置
    */
   constructor(options = {}) {
@@ -80,6 +83,8 @@ export default class Previewer {
       },
     };
     Object.assign(this.options, options);
+    this.markdown = this.options.value || '';
+    this.engine = options.engineInstance || new CherryEngine(options.engine || {});
 
     if (!this.options.previewerDom && isBrowser()) {
       this.options.previewerDom = document.createElement('div');
@@ -88,6 +93,32 @@ export default class Previewer {
     /** @property @type {LazyLoadImg|null} */
     this.lazyLoadImg = new LazyLoadImg(this.options.lazyLoadImg, this);
     this.lazyLoadImg.doLazyLoad();
+
+    if (this.markdown) {
+      this.setMarkdown(this.markdown);
+    }
+  }
+
+  /**
+   * Render Markdown through the Engine owned by this preview package.
+   * @param {string} markdown
+   * @returns {string} rendered HTML
+   */
+  setMarkdown(markdown) {
+    this.markdown = markdown || '';
+    const html = /** @type {string} */ (this.engine.makeHtml(this.markdown));
+    this.update(html);
+    return html;
+  }
+
+  /** @returns {string} */
+  getMarkdown() {
+    return this.markdown;
+  }
+
+  /** @param {boolean} [wrapTheme=false] */
+  getHtml(wrapTheme = false) {
+    return this.getValue(wrapTheme);
   }
 
   /**
@@ -264,7 +295,7 @@ export default class Previewer {
   }
 
   $applyChange(domContainer, oldContent, newContent, change) {
-    if (change.type === 'add') {
+    if (change.type === 'add' || change.type === 'insert') {
       const oldDom = oldContent[change.oldIndex];
       for (let j = change.newIndex; j >= change.oldIndex; j--) {
         if (oldDom) {
@@ -282,7 +313,7 @@ export default class Previewer {
           domContainer.removeChild(oldContent[j].dom);
         }
       }
-    } else if (change.type === 'modify') {
+    } else if (change.type === 'modify' || change.type === 'update') {
       const newDom = newContent[change.newIndex];
       if (newDom) {
         newDom.dom = this.$updateDom(newDom.dom, oldContent[change.oldIndex].dom);

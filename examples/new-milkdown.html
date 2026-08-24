@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>【new】Milkdown Adapter</title>
+    <style>
+      body { max-width: 900px; margin: 32px auto; padding: 0 20px; font: 14px/1.6 system-ui; }
+      #editor, pre { min-height: 220px; padding: 16px; border: 1px solid #ddd; }
+      pre { white-space: pre-wrap; background: #f7f8fa; } .error { color: #b42318; }
+    </style>
+  </head>
+  <body>
+    <h1>【new】@cherry-markdown/milkdown</h1>
+    <p>验证 Adapter 的 create/getMarkdown/setMarkdown/getEditor/destroy，以及专有语法的显式 unsupported 结果。</p>
+    <button id="set">setMarkdown</button><button id="roundtrip">检查 Cherry 语法</button><button id="destroy">destroy</button>
+    <p id="status"></p><div id="editor"></div><pre id="markdown"></pre>
+    <script type="module">
+      import MilkdownAdapter from '@cherry-markdown/milkdown';
+
+      const status = document.querySelector('#status');
+      const output = document.querySelector('#markdown');
+      const adapter = new MilkdownAdapter({ el: document.querySelector('#editor'), value: '# Milkdown\n\nMarkdown 是保存格式。', onChange: (md) => { output.textContent = md; } });
+      await adapter.create();
+      output.textContent = await adapter.getMarkdown();
+      status.textContent = `【new】editor created=${Boolean(adapter.getEditor())}`;
+      document.querySelector('#set').addEventListener('click', async () => { await adapter.setMarkdown('## External update\n\n- one\n- two'); output.textContent = await adapter.getMarkdown(); });
+      document.querySelector('#roundtrip').addEventListener('click', async () => {
+        try { await adapter.setMarkdown('::: panel\nCherry proprietary syntax\n:::'); status.textContent = '【new】round-trip 保留'; status.className = ''; }
+        catch (error) { status.textContent = `【new】unsupported: ${error.message}`; status.className = 'error'; }
+      });
+      document.querySelector('#destroy').addEventListener('click', async () => { await adapter.destroy(); status.textContent = '【new】destroy 已调用'; });
+    </script>
+  </body>
+</html>

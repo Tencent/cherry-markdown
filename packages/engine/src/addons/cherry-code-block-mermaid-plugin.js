@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import mergeWith from '@/utils/toolkit/mergeWith';
-import { isBrowser } from '@/utils/env';
-import { getExternal } from '@/utils/external';
-import { loadScript } from '@/utils/dom';
+import mergeWith from '../utils/toolkit/mergeWith';
+import { isBrowser } from '../utils/env';
+import { getExternal } from '../utils/external';
+import { loadScript } from '../utils/dom';
 
 const CHART_TYPES = [
   'flowchart',

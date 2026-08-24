@@ -16,6 +16,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@cherry-markdown/engine': resolve(__dirname, '../engine/src/index.js'),
+      '@cherry-markdown/preview': resolve(__dirname, '../preview/src/index.js'),
+      '@cherry-markdown/stream': resolve(__dirname, '../stream/src/index.js'),
       '@': resolve(__dirname, './src'),
       '@cherry': resolve(__dirname, './src'),
     },

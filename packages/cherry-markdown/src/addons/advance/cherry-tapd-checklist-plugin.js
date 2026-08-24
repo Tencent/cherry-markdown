@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import ParagraphBase from '@/core/ParagraphBase';
+import { ParagraphBase } from '@cherry-markdown/engine';
 /**
  * [TAPD](https://tapd.cn)的检查项语法
  * 通用的检查项语法为：

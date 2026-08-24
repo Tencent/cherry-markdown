@@ -13,56 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import mergeWith from '@/utils/toolkit/mergeWith';
-import cloneDeep from '@/utils/toolkit/cloneDeep';
-
-import Engine from './Engine';
-import { CherryStatic } from './CherryStatic';
-import SyntaxHookBase from './core/SyntaxBase';
+import CherryEngine, { SyntaxHookBase } from '@cherry-markdown/engine';
 import MenuHookBase from './toolbars/MenuBase';
-import defaultConfig from './Cherry.config';
-import { customizer } from './utils/config';
-import { urlProcessorProxy } from './UrlCache';
-
-class CherryEngine extends CherryStatic {
-  /**
-   * @private
-   */
-  static initialized = false;
-  // TODO: 共用config
-  /**
-   * @readonly
-   */
-  static config = {
-    defaults: defaultConfig,
-  };
-
-  /**
-   * @param {any} options
-   */
-  constructor(options) {
-    super();
-    CherryEngine.initialized = true;
-    const defaultConfigCopy = cloneDeep(CherryEngine.config.defaults);
-    const opts = mergeWith({}, defaultConfigCopy, options, customizer);
-
-    if (typeof opts.engine.global.urlProcessor === 'function') {
-      opts.engine.global.urlProcessor = urlProcessorProxy(opts.engine.global.urlProcessor);
-      opts.callback.urlProcessor = opts.engine.global.urlProcessor;
-    } else {
-      opts.callback.urlProcessor = urlProcessorProxy(opts.callback.urlProcessor);
-    }
-
-    // @ts-expect-error 构造器返回 Engine 实例以兼容历史 API
-    return new Engine(opts, { options: opts });
-  }
-}
 
 export { SyntaxHookBase, MenuHookBase };
-
-/**
- * @typedef {typeof CherryStatic & (new (options: Partial<import('~types/cherry').CherryOptions>) => Engine)}
- */
-const CherryEngineExport = CherryEngine;
-
-export default CherryEngineExport;
+export * from '@cherry-markdown/engine';
+export default CherryEngine;

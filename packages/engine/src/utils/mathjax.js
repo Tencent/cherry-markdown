@@ -22,7 +22,7 @@ import { escapeHTMLSpecialChar } from './sanitize';
  * 装饰器，挂载对应的模块到实例上
  */
 export function LoadMathModule() {
-  const self = /** @type {import('../core/SyntaxBase').default & { katex?: unknown; MathJax?: unknown }} */ (this);
+  const self = /** @type {import('../syntax/SyntaxBase').default & { katex?: unknown; MathJax?: unknown }} */ (this);
   self.katex = getExternal('katex', self.$externals?.katex);
   self.MathJax = getExternal('MathJax', self.$externals?.MathJax);
 }

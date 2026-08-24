@@ -1,6 +1,6 @@
 # Cherry Markdown 多包架构
 
-Cherry Markdown 按「用户场景和职责」拆分为多个独立包（[ISSUE #6](https://cnb.cool/tencent/cherry-markdown/cherry-markdown/-/issues/6)）。
+Cherry Markdown 按「用户场景和职责」拆分为多个独立包（[GitHub Issue #1862](https://github.com/Tencent/cherry-markdown/issues/1862)）。
 
 ## 包一览
 
@@ -48,11 +48,14 @@ yarn build:packages
 # 测试所有独立包
 yarn test:packages
 
-# 各包独立示例（构建后打开对应 examples/index.html）
+# 原有示例保持不变；新版包边界验收页统一使用 /new- 前缀和【new】标识
 yarn build:engine
 yarn build:preview
 yarn build:stream
 yarn build:milkdown
+yarn workspace cherry-markdown dev
+# /new-engine.html /new-preview.html /new-stream.html /new-milkdown.html
+vp run verify:demos # CI 同步检查路由、【new】标识、包解析和浏览器模块转换
 ```
 
 ## 发版与治理
@@ -60,3 +63,17 @@ yarn build:milkdown
 - 各包独立版本、独立发布（Changesets 管理）
 - Engine 规则变化必须有 fixture / snapshot
 - CI 检查各包不携带不应包含的依赖
+
+## 0.x 历史入口迁移
+
+0.x 仍生成以下历史文件，但它们只是新包的转发/组合入口，不再拥有独立实现。它们将在 1.0 删除。
+
+| 历史入口 | 新入口 |
+| --- | --- |
+| `cherry-markdown.core.*` | `cherry-markdown` 默认编辑器入口 |
+| `cherry-markdown.engine.core.*` | `@cherry-markdown/engine` |
+| `cherry-markdown.engine.*` | `@cherry-markdown/engine` + 根包 Mermaid 插件 |
+| `cherry-markdown.stream.*` | `@cherry-markdown/stream` |
+
+`previewOnly` 仍是编辑器运行模式，不再承担“移除 CodeMirror 的纯预览构建”职责；纯预览请使用
+`@cherry-markdown/preview`。新源码禁止依赖上述历史入口或依赖根包的内部源码路径。

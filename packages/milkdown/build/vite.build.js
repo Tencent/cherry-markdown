@@ -21,7 +21,14 @@ const builds = [
     file: 'cherry-markdown-milkdown.js',
     format: 'umd',
     name: 'CherryMilkdown',
-    external: baseExternal,
+    external: ['jsdom'],
+  },
+  {
+    id: 'milkdown-cjs',
+    entry: resolve(src, 'index.js'),
+    file: 'cherry-markdown-milkdown.cjs',
+    format: 'cjs',
+    external: ['jsdom'],
   },
 ];
 
@@ -39,6 +46,7 @@ for (const current of builds) {
       alias: {
         '@': src,
         '@cherry': src,
+        '@cherry-markdown/engine': resolve(root, '../engine/dist/cherry-markdown-engine.browser.esm.js'),
       },
     },
     build: {

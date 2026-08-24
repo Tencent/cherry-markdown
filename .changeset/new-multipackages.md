@@ -3,6 +3,7 @@
 '@cherry-markdown/preview': minor
 '@cherry-markdown/stream': minor
 '@cherry-markdown/milkdown': minor
+'cherry-markdown': minor
 ---
 
-feat: 建立多包拆分架构（engine / preview / stream / milkdown），各包独立构建、测试与示例
+按职责建立 engine / preview / stream / milkdown 独立包；根编辑器改为组合新包，并在 0.x 保留可于 1.0 统一删除的历史产物转发入口。

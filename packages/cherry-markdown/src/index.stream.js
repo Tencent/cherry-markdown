@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import CherryStream from './CherryStream';
-
-import SyntaxHookBase from './core/SyntaxBase';
+import CherryStream, { SyntaxHookBase } from '@cherry-markdown/stream';
 
 export { SyntaxHookBase };
 export default CherryStream;

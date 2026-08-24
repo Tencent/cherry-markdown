@@ -34,6 +34,10 @@ jobs:
       publishedClientVersion: ${{ steps.extract_version.outputs.clientVersion }}
       publishedCoreVersion: ${{ steps.extract_version.outputs.coreVersion }}
       publishedMiniProgramVersion: ${{ steps.extract_version.outputs.miniProgramVersion }}
+      publishedEngineVersion: ${{ steps.extract_version.outputs.engineVersion }}
+      publishedPreviewVersion: ${{ steps.extract_version.outputs.previewVersion }}
+      publishedStreamVersion: ${{ steps.extract_version.outputs.streamVersion }}
+      publishedMilkdownVersion: ${{ steps.extract_version.outputs.milkdownVersion }}
     steps:
       - uses: actions/checkout@v6
 
@@ -71,7 +75,15 @@ jobs:
           echo "coreVersion=$coreVersion" >> $GITHUB_OUTPUT
 
           miniProgramVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/miniprogram") | .version')
+          engineVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/engine") | .version')
+          previewVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/preview") | .version')
+          streamVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/stream") | .version')
+          milkdownVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/milkdown") | .version')
           echo "miniProgramVersion=$miniProgramVersion" >> $GITHUB_OUTPUT
+          echo "engineVersion=$engineVersion" >> $GITHUB_OUTPUT
+          echo "previewVersion=$previewVersion" >> $GITHUB_OUTPUT
+          echo "streamVersion=$streamVersion" >> $GITHUB_OUTPUT
+          echo "milkdownVersion=$milkdownVersion" >> $GITHUB_OUTPUT
 
           # Debugging output
           echo "publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}"
@@ -101,6 +113,54 @@ jobs:
       package_version: ${{ needs.release.outputs.publishedMiniProgramVersion }}
       dist_asset_name: 'cherry-markdown-mini-program'
       release_tag: '@cherry-markdown/miniprogram@${{ needs.release.outputs.publishedMiniProgramVersion }}'
+    secrets: inherit
+
+  build-engine-release:
+    needs: release
+    if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/engine"') }}
+    uses: ./.github/workflows/reusable-npm-release.yml
+    with:
+      package_name: '@cherry-markdown/engine'
+      package_dir: './packages/engine'
+      package_version: ${{ needs.release.outputs.publishedEngineVersion }}
+      dist_asset_name: 'cherry-markdown-engine'
+      release_tag: '@cherry-markdown/engine@${{ needs.release.outputs.publishedEngineVersion }}'
+    secrets: inherit
+
+  build-preview-release:
+    needs: [release, build-engine-release]
+    if: ${{ always() && contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/preview"') && (needs.build-engine-release.result == 'success' || needs.build-engine-release.result == 'skipped') }}
+    uses: ./.github/workflows/reusable-npm-release.yml
+    with:
+      package_name: '@cherry-markdown/preview'
+      package_dir: './packages/preview'
+      package_version: ${{ needs.release.outputs.publishedPreviewVersion }}
+      dist_asset_name: 'cherry-markdown-preview'
+      release_tag: '@cherry-markdown/preview@${{ needs.release.outputs.publishedPreviewVersion }}'
+    secrets: inherit
+
+  build-stream-release:
+    needs: [release, build-engine-release, build-preview-release]
+    if: ${{ always() && contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/stream"') && (needs.build-engine-release.result == 'success' || needs.build-engine-release.result == 'skipped') && (needs.build-preview-release.result == 'success' || needs.build-preview-release.result == 'skipped') }}
+    uses: ./.github/workflows/reusable-npm-release.yml
+    with:
+      package_name: '@cherry-markdown/stream'
+      package_dir: './packages/stream'
+      package_version: ${{ needs.release.outputs.publishedStreamVersion }}
+      dist_asset_name: 'cherry-markdown-stream'
+      release_tag: '@cherry-markdown/stream@${{ needs.release.outputs.publishedStreamVersion }}'
+    secrets: inherit
+
+  build-milkdown-release:
+    needs: [release, build-engine-release]
+    if: ${{ always() && contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/milkdown"') && (needs.build-engine-release.result == 'success' || needs.build-engine-release.result == 'skipped') }}
+    uses: ./.github/workflows/reusable-npm-release.yml
+    with:
+      package_name: '@cherry-markdown/milkdown'
+      package_dir: './packages/milkdown'
+      package_version: ${{ needs.release.outputs.publishedMilkdownVersion }}
+      dist_asset_name: 'cherry-markdown-milkdown'
+      release_tag: '@cherry-markdown/milkdown@${{ needs.release.outputs.publishedMilkdownVersion }}'
     secrets: inherit
 
   build-client-release:

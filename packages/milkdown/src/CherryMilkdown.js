@@ -17,6 +17,25 @@ import { Editor, rootCtx, defaultValueCtx } from '@milkdown/core';
 import { commonmark } from '@milkdown/preset-commonmark';
 import { listener, listenerCtx } from '@milkdown/plugin-listener';
 import { nord } from '@milkdown/theme-nord';
+import { getMarkdown, replaceAll } from '@milkdown/utils';
+import CherryEngine from '@cherry-markdown/engine';
+import EditorAdapter from './EditorAdapter';
+
+export class MarkdownRoundTripError extends Error {
+  constructor(source, output) {
+    super('[CherryMilkdown] Markdown round-trip changed unsupported syntax');
+    this.name = 'MarkdownRoundTripError';
+    this.code = 'CHERRY_MARKDOWN_UNSUPPORTED_SYNTAX';
+    this.source = source;
+    this.output = output;
+  }
+}
+
+const normalizeMarkdown = (markdown) =>
+  (markdown || '')
+    .replace(/\r\n?/g, '\n')
+    .replace(/^(\s*)[-+*]\s+/gm, '$1* ')
+    .replace(/\n+$/, '');
 
 /**
  * CherryMilkdown - 基于 Milkdown 的所见即所得（WYSIWYG）实验包
@@ -36,15 +55,21 @@ import { nord } from '@milkdown/theme-nord';
  *   });
  *   await editor.create();
  */
-export default class CherryMilkdown {
+export default class CherryMilkdown extends EditorAdapter {
   /**
    * @param {Object} options
    * @param {HTMLElement} [options.el] 编辑器挂载元素
    * @param {string} [options.value] 初始 markdown 内容
    * @param {Function} [options.onChange] markdown 变化回调
+   * @param {Object} [options.engine] Cherry Engine options
+   * @param {Object} [options.engineInstance] existing Cherry Engine instance
+   * @param {boolean} [options.strictRoundTrip=true] reject syntax Milkdown cannot preserve
    */
   constructor(options = {}) {
+    super();
     this.options = options;
+    this.engine = options.engineInstance || new CherryEngine(options.engine || {});
+    this.strictRoundTrip = options.strictRoundTrip !== false;
     /** @type {import('@milkdown/core').Editor|null} */
     this.editor = null;
   }
@@ -67,8 +92,10 @@ export default class CherryMilkdown {
       .use(nord)
       .use(commonmark)
       // @ts-ignore listener 插件类型
-      .use(listener())
+      .use(listener)
       .create();
+
+    this.assertRoundTrip(value, await this.getMarkdown());
 
     // 在创建完成后配置 markdown 变化监听
     if (onChange) {
@@ -90,11 +117,31 @@ export default class CherryMilkdown {
     if (!this.editor) {
       throw new Error('[CherryMilkdown] editor not created, call create() first');
     }
-    return this.editor.action((ctx) => {
-      /** @type {any} */
-      const manager = ctx.get(listenerCtx);
-      return manager.markdown;
-    });
+    return this.editor.action(getMarkdown());
+  }
+
+  /**
+   * Replace the complete Markdown document.
+   * @param {string} markdown
+   */
+  async setMarkdown(markdown) {
+    if (!this.editor) {
+      throw new Error('[CherryMilkdown] editor not created, call create() first');
+    }
+    this.editor.action(replaceAll(markdown || ''));
+    this.assertRoundTrip(markdown, await this.getMarkdown());
+  }
+
+  assertRoundTrip(source, output) {
+    if (this.strictRoundTrip && normalizeMarkdown(source) !== normalizeMarkdown(output)) {
+      throw new MarkdownRoundTripError(source, output);
+    }
+    return output;
+  }
+
+  /** Render the persisted Markdown with Cherry Engine for parity checks. */
+  async getEngineHtml() {
+    return this.engine.makeHtml(await this.getMarkdown());
   }
 
   /**

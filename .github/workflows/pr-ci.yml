@@ -49,11 +49,20 @@ jobs:
       - name: Lint
         run: vp run lint
 
+      - name: Package boundaries
+        run: vp run check:boundaries
+
       - name: Typecheck
         run: vp run typecheck
 
       - name: Build
         run: vp run build
+
+      - name: Verify new package demos
+        run: vp run verify:demos
+
+      - name: Verify package artifacts
+        run: vp run verify:packages
 
       - name: Verify Cherry Markdown published artifacts
         run: vp run -F cherry-markdown test:artifacts

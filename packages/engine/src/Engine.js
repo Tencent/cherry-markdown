@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import HookCenter from './core/HookCenter';
-import hooksConfig from './core/HooksConfig';
+import HookCenter from './syntax/HookCenter';
+import hooksConfig from './syntax/HooksConfig';
 import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './utils/error';
 import { hashHex } from './utils/hash';
-import SyntaxBase from './core/SyntaxBase';
-import ParagraphBase from './core/ParagraphBase';
+import SyntaxBase from './syntax/SyntaxBase';
+import ParagraphBase from './syntax/ParagraphBase';
 import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg, getCodeBlockRule } from './utils/regexp';
 import { escapeHTMLSpecialChar } from './utils/sanitize';
 import Logger from './Logger';

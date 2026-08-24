@@ -1,5 +1,5 @@
 import { EditorView } from '@codemirror/view';
-import SyntaxBase from '../src/core/SyntaxBase';
+import SyntaxBase from '../src/syntax/SyntaxBase';
 import { FormulaMenu } from '@/toolbars/BubbleFormula';
 
 export interface CherryExternalsOptions {

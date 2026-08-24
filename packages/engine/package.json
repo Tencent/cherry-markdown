@@ -9,12 +9,21 @@
     "url": "git+https://github.com/Tencent/cherry-markdown.git",
     "directory": "packages/engine"
   },
-  "main": "./dist/cherry-markdown-engine.js",
+  "main": "./dist/cherry-markdown-engine.cjs",
   "module": "./dist/cherry-markdown-engine.esm.js",
   "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "browser": "./dist/cherry-markdown-engine.browser.esm.js",
+      "import": "./dist/cherry-markdown-engine.esm.js",
+      "require": "./dist/cherry-markdown-engine.cjs",
+      "default": "./dist/cherry-markdown-engine.esm.js"
+    }
+  },
   "files": [
     "dist",
-    "types"
+    "README.md"
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
@@ -41,7 +50,5 @@
     "htmlparser2": "^10.0.0",
     "jsdom": "~19.0.0"
   },
-  "optionalDependencies": {
-    "mermaid": "^11.14.0"
-  }
+  "sideEffects": false
 }

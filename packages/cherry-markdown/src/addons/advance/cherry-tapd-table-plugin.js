@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-import ParagraphBase from '@/core/ParagraphBase';
+import { ParagraphBase } from '@cherry-markdown/engine';
 /**
  * [TAPD](https://tapd.cn)的简单表格语法
  * 该表格语法不是markdown通用的表格语法，请谨慎使用

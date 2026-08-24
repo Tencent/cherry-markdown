@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import SyntaxBase, { HOOKS_TYPE_LIST } from './core/SyntaxBase';
-import ParagraphBase from './core/ParagraphBase';
+import SyntaxBase, { HOOKS_TYPE_LIST } from './syntax/SyntaxBase';
+import ParagraphBase from './syntax/ParagraphBase';
 
 /**
  * 属性类型匹配

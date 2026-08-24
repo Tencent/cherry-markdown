@@ -4,15 +4,12 @@ import { fileURLToPath } from 'node:url';
 
 import { legacyUmdPlugin } from './legacy-umd.plugin.js';
 import { getBuildVersion } from './revision.js';
+import { legacyEntries } from './legacy-entries.js';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const src = resolve(root, 'src');
 const buildVersion = getBuildVersion(process.env.NODE_ENV);
 const baseExternal = ['jsdom'];
-const coreExternal = [...baseExternal, 'mermaid', '@replit/codemirror-vim', 'codemirror', /^codemirror\//];
-const engineExternal = [...baseExternal, 'mermaid'];
-const streamExternal = [...engineExternal, 'codemirror', /^codemirror\//];
-
 const builds = [
   {
     id: 'full-esm',
@@ -30,66 +27,11 @@ const builds = [
     external: baseExternal,
     sourcemap: true,
   },
-  {
-    id: 'core-umd',
-    entry: resolve(src, 'index.core.umd.js'),
-    file: 'cherry-markdown.core.js',
-    format: 'umd',
-    name: 'Cherry',
-    external: coreExternal,
-  },
-  {
-    id: 'core-esm',
-    entry: resolve(src, 'index.core.js'),
-    file: 'cherry-markdown.core.esm.js',
-    format: 'es',
-    external: coreExternal,
-  },
-  {
-    id: 'engine-esm',
-    entry: resolve(src, 'index.engine.js'),
-    file: 'cherry-markdown.engine.esm.js',
-    format: 'es',
-    external: engineExternal,
-  },
-  {
-    id: 'engine-umd',
-    entry: resolve(src, 'index.engine.js'),
-    file: 'cherry-markdown.engine.js',
-    format: 'umd',
-    name: 'CherryEngine',
-    external: engineExternal,
-  },
-  {
-    id: 'engine-core-esm',
-    entry: resolve(src, 'index.engine.core.js'),
-    file: 'cherry-markdown.engine.core.esm.js',
-    format: 'es',
-    external: engineExternal,
-  },
-  {
-    id: 'engine-core-umd',
-    entry: resolve(src, 'index.engine.core.js'),
-    file: 'cherry-markdown.engine.core.js',
-    format: 'umd',
-    name: 'CherryEngine',
-    external: engineExternal,
-  },
-  {
-    id: 'stream-esm',
-    entry: resolve(src, 'index.stream.js'),
-    file: 'cherry-markdown.stream.esm.js',
-    format: 'es',
-    external: streamExternal,
-  },
-  {
-    id: 'stream-umd',
-    entry: resolve(src, 'index.stream.umd.js'),
-    file: 'cherry-markdown.stream.js',
-    format: 'umd',
-    name: 'Cherry',
-    external: streamExternal,
-  },
+  ...legacyEntries.map((entry) => ({
+    ...entry,
+    entry: resolve(src, entry.entry),
+    external: baseExternal,
+  })),
 ];
 
 for (const current of builds) {
@@ -110,6 +52,9 @@ for (const current of builds) {
       alias: {
         '@': src,
         '@cherry': src,
+        '@cherry-markdown/engine': resolve(root, '../engine/dist/cherry-markdown-engine.browser.esm.js'),
+        '@cherry-markdown/preview': resolve(root, '../preview/dist/cherry-markdown-preview.esm.js'),
+        '@cherry-markdown/stream': resolve(root, '../stream/dist/cherry-markdown-stream.esm.js'),
       },
     },
     build: {

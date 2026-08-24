@@ -16,7 +16,7 @@
 /**
  * 本文件主要维护导出 CherryEngine 时需要附加在对象上的静态属性集合
  */
-import { HOOKS_TYPE_LIST } from './core/SyntaxBase';
+import { HOOKS_TYPE_LIST } from './syntax/SyntaxBase';
 import { createSyntaxHook } from './Factory';
 import { isBrowser } from './utils/env';
 

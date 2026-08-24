@@ -45,6 +45,10 @@ const htmlPages = [
   '/suggester.html',
   '/custom_codeblock_wrapper.html',
   '/toolbar-toggle-demo.html',
+  '/new-engine.html',
+  '/new-preview.html',
+  '/new-stream.html',
+  '/new-milkdown.html',
 ];
 
 export default defineConfig({
@@ -57,6 +61,10 @@ export default defineConfig({
       // 源码别名
       { find: '@', replacement: srcDir },
       { find: '@cherry', replacement: srcDir },
+      { find: '@cherry-markdown/engine', replacement: path.resolve(cherryMarkdownDir, '../engine/dist/cherry-markdown-engine.browser.esm.js') },
+      { find: '@cherry-markdown/preview', replacement: path.resolve(cherryMarkdownDir, '../preview/dist/cherry-markdown-preview.esm.js') },
+      { find: '@cherry-markdown/stream', replacement: path.resolve(cherryMarkdownDir, '../stream/dist/cherry-markdown-stream.esm.js') },
+      { find: '@cherry-markdown/milkdown', replacement: path.resolve(cherryMarkdownDir, '../milkdown/dist/cherry-markdown-milkdown.esm.js') },
       // examples 别名
       { find: '@examples', replacement: examplesDir },
     ],
@@ -75,6 +83,13 @@ export default defineConfig({
       allow: [
         examplesDir, // 开发示例
         path.resolve(cherryMarkdownDir, 'src'), // 源码
+        path.resolve(cherryMarkdownDir, '../engine/src'),
+        path.resolve(cherryMarkdownDir, '../preview/src'),
+        path.resolve(cherryMarkdownDir, '../stream/src'),
+        path.resolve(cherryMarkdownDir, '../engine/dist'),
+        path.resolve(cherryMarkdownDir, '../preview/dist'),
+        path.resolve(cherryMarkdownDir, '../stream/dist'),
+        path.resolve(cherryMarkdownDir, '../milkdown/dist'),
         path.resolve(cherryMarkdownDir, 'dist/fonts'), // 字体文件
       ],
       // 显式禁止访问敏感目录（Vite 4.3.9+ 支持）

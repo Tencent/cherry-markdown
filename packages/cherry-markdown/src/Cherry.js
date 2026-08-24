@@ -16,7 +16,7 @@
 import mergeWith from '@/utils/toolkit/mergeWith';
 import cloneDeep from '@/utils/toolkit/cloneDeep';
 import Editor from './Editor';
-import Engine from './Engine';
+import { Engine } from '@cherry-markdown/engine';
 import Previewer from './Previewer';
 import Bubble from './toolbars/Bubble';
 import FloatMenu from './toolbars/FloatMenu';
