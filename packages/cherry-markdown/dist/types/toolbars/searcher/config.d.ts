@@ -5,32 +5,32 @@
  */
 /**
  * 解析 `toolbars.config.searcher`
- * @param {import('../../types/cherry').CherrySearcherToolbarOption | undefined} config
+ * @param {import('../../../../types/cherry').CherrySearcherToolbarOption | undefined} config
  * @returns {SearcherConfig}
  */
-export function resolveSearcherConfig(config: import("../../types/cherry").CherrySearcherToolbarOption | undefined): SearcherConfig;
+export function resolveSearcherConfig(config: import("../../../../types/cherry").CherrySearcherToolbarOption | undefined): SearcherConfig;
 /**
- * @param {{ options?: { toolbars?: { config?: { searcher?: import('../../types/cherry').CherrySearcherToolbarOption } } } } | undefined} cherry
- * @returns {import('../../types/cherry').CherrySearcherToolbarOption | undefined}
+ * @param {{ options?: { toolbars?: { config?: { searcher?: import('../../../../types/cherry').CherrySearcherToolbarOption } } } } | undefined} cherry
+ * @returns {import('../../../../types/cherry').CherrySearcherToolbarOption | undefined}
  */
 export function getSearcherToolbarConfig(cherry: {
     options?: {
         toolbars?: {
             config?: {
-                searcher?: import("../../types/cherry").CherrySearcherToolbarOption;
+                searcher?: import("../../../../types/cherry").CherrySearcherToolbarOption;
             };
         };
     };
-} | undefined): import("../../types/cherry").CherrySearcherToolbarOption | undefined;
+} | undefined): import("../../../../types/cherry").CherrySearcherToolbarOption | undefined;
 /**
- * @param {{ options?: { toolbars?: { config?: { searcher?: import('../../types/cherry').CherrySearcherToolbarOption } } } } | undefined} cherry
+ * @param {{ options?: { toolbars?: { config?: { searcher?: import('../../../../types/cherry').CherrySearcherToolbarOption } } } } | undefined} cherry
  * @returns {boolean}
  */
 export function isSearcherReplaceEnabled(cherry: {
     options?: {
         toolbars?: {
             config?: {
-                searcher?: import("../../types/cherry").CherrySearcherToolbarOption;
+                searcher?: import("../../../../types/cherry").CherrySearcherToolbarOption;
             };
         };
     };

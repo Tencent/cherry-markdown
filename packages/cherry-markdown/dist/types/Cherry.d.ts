@@ -883,13 +883,13 @@ export default class Cherry extends CherryStatic {
     bubble: Bubble;
     /**
      * @private
-     * @returns {import('@/Editor').default}
+     * @returns {import('./Editor').default}
      */
     private createEditor;
     editor: Editor;
     /**
      * @private
-     * @returns {import('@/Previewer').default}
+     * @returns {import('./Previewer').default}
      */
     private createPreviewer;
     previewer: Previewer;

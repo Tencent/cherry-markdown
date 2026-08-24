@@ -1,6 +1,6 @@
 /**
  * @typedef {import('@codemirror/view').EditorView} EditorView
- * @typedef {import('../../types/editor').CM6Adapter} CM6Adapter
+ * @typedef {import('../../../../types/editor').CM6Adapter} CM6Adapter
  */
 /**
  * @typedef { Object } SuggestListItemObject 推荐列表项对象
@@ -41,7 +41,7 @@ export default class Suggester extends SyntaxBase {
     rule(): any;
 }
 export type EditorView = import("@codemirror/view").EditorView;
-export type CM6Adapter = import("../../types/editor").CM6Adapter;
+export type CM6Adapter = import("../../../../types/editor").CM6Adapter;
 /**
  * 推荐列表项对象
  */
@@ -95,7 +95,7 @@ export type SuggesterConfig = {
      */
     suggester: Array<SuggesterConfigItem>;
 };
-import SyntaxBase from '@/core/SyntaxBase';
+import SyntaxBase from '../../core/SyntaxBase';
 declare class SuggesterPanel {
     constructor(cherry: any);
     searchCache: boolean;
@@ -114,10 +114,10 @@ declare class SuggesterPanel {
     hasEditor(): boolean;
     /**
      * 设置编辑器
-     * @param {import('@/Editor').default} editor
+     * @param {import('../../Editor').default} editor
      */
-    setEditor(editor: import("@/Editor").default): void;
-    editor: import("@/Editor").default;
+    setEditor(editor: import("../../Editor").default): void;
+    editor: import("../../Editor").default;
     setSuggester(suggester: any): void;
     bindEvent(): void;
     boundOnChange: (codemirror: any, evt: any) => void;

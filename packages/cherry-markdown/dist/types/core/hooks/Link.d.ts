@@ -33,4 +33,4 @@ export default class Link extends SyntaxBase {
         end: string;
     };
 }
-import SyntaxBase from '@/core/SyntaxBase';
+import SyntaxBase from '../../core/SyntaxBase';

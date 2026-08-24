@@ -29,4 +29,4 @@ export default class Graph extends MenuBase {
      */
     $getSampleCode(type: string): any;
 }
-import MenuBase from '@/toolbars/MenuBase';
+import MenuBase from '../../toolbars/MenuBase';

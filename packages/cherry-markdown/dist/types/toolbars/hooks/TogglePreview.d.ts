@@ -17,4 +17,4 @@ export default class TogglePreview extends MenuBase {
      */
     onClick(): void;
 }
-import MenuBase from '@/toolbars/MenuBase';
+import MenuBase from '../../toolbars/MenuBase';

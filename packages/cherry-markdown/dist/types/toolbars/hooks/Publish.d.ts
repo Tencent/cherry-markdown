@@ -13,4 +13,4 @@ export default class Publish extends MenuBase {
     getAllStyleSheets(): string;
 }
 export type SupportPlatform = import("../../../types/cherry").SupportPlatform;
-import MenuBase from '@/toolbars/MenuBase';
+import MenuBase from '../../toolbars/MenuBase';

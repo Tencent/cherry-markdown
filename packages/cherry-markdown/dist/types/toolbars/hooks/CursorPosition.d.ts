@@ -7,4 +7,4 @@ export default class CursorPosition extends MenuBase {
     $updateCursorPosition(): void;
     btnDom: any;
 }
-import MenuBase from '@/toolbars/MenuBase';
+import MenuBase from '../../toolbars/MenuBase';

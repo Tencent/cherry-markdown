@@ -9,4 +9,4 @@ export default class Transfer extends ParagraphBase {
     beforeMakeHtml(str: any): any;
     makeHtml(str: any): any;
 }
-import ParagraphBase from '@/core/ParagraphBase';
+import ParagraphBase from '../../core/ParagraphBase';

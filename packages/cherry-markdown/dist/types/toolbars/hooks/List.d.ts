@@ -21,4 +21,4 @@ export default class List extends MenuBase {
      */
     onClick(selection: string, shortKey?: 1 | 2 | 3 | "ol" | "1" | "2" | "3" | "ul" | "checklist" | ""): string;
 }
-import MenuBase from '@/toolbars/MenuBase';
+import MenuBase from '../../toolbars/MenuBase';

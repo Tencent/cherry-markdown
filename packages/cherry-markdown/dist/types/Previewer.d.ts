@@ -208,5 +208,5 @@ export default class Previewer {
      */
     destroy(): void;
 }
-import LazyLoadImg from '@/utils/lazyLoadImg';
+import LazyLoadImg from './utils/lazyLoadImg';
 import PreviewerBubble from './toolbars/PreviewerBubble';

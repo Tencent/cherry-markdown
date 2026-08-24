@@ -68,7 +68,7 @@ export default class CherryStream extends CherryStatic {
     setCodeWrap(codeWrap: any): void;
     /**
      * @private
-     * @returns {import('@/Previewer').default}
+     * @returns {import('./Previewer').default}
      */
     private createPreviewer;
     previewer: Previewer;

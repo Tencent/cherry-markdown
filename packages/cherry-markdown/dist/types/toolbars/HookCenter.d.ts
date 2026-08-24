@@ -2,10 +2,10 @@ export default class HookCenter {
     constructor(toolbar: any);
     toolbar: any;
     /**
-     * @type {{[key: string]: import('@/toolbars/MenuBase').default}} 保存所有菜单实例
+     * @type {{[key: string]: import('../toolbars/MenuBase').default}} 保存所有菜单实例
      */
     hooks: {
-        [key: string]: import("@/toolbars/MenuBase").default;
+        [key: string]: import("../toolbars/MenuBase").default;
     };
     /**
      * @type {string[]} 所有注册的菜单名称
@@ -25,10 +25,10 @@ export default class HookCenter {
     /**
      * 实例化菜单
      * @param {string} name 菜单名称
-     * @param {null|import('../../types/menus').CustomMenuConfig} options 菜单配置项
+     * @param {null|import('../../../types/menus').CustomMenuConfig} options 菜单配置项
      * @returns
      */
-    $newMenu(name: string, options?: null | import("../../types/menus").CustomMenuConfig): void;
+    $newMenu(name: string, options?: null | import("../../../types/menus").CustomMenuConfig): void;
     /**
      * 根据配置动态渲染、绑定工具栏
      * @returns

@@ -260,5 +260,5 @@ export default class PreviewerBubble {
      */
     destroy(): void;
 }
-import MermaidBubbleSession from '@/toolbars/MermaidBubbleSession';
-import TableHandler from '@/utils/tableContentHandler';
+import MermaidBubbleSession from '../toolbars/MermaidBubbleSession';
+import TableHandler from '../utils/tableContentHandler';

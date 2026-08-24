@@ -36,4 +36,4 @@ export default class Header extends ParagraphBase {
      */
     rule(): any;
 }
-import ParagraphBase from '@/core/ParagraphBase';
+import ParagraphBase from '../../core/ParagraphBase';

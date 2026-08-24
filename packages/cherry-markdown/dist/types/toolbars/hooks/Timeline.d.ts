@@ -14,4 +14,4 @@ export default class Timeline extends MenuBase {
      */
     onClick(selection: any): string;
 }
-import MenuBase from '@/toolbars/MenuBase';
+import MenuBase from '../../toolbars/MenuBase';

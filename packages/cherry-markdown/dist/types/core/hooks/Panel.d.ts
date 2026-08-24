@@ -91,4 +91,4 @@ export default class Panel extends ParagraphBase {
     $normalizeTimelineStatus(raw: string): string;
     rule(): any;
 }
-import ParagraphBase from '@/core/ParagraphBase';
+import ParagraphBase from '../../core/ParagraphBase';

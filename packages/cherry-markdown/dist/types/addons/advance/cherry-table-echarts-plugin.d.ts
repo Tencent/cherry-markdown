@@ -1,12 +1,12 @@
 export default class EChartsTableEngine {
     static install(cherryOptions: any, ...args: any[]): void;
     constructor(echartsOptions?: {});
+    echartsRef: any;
     options: {
         renderer: string;
         width: number;
         height: number;
     };
-    echartsRef: any;
     dom: any;
     cherryOptions: any;
     cherry: any;
@@ -15,6 +15,7 @@ export default class EChartsTableEngine {
     themeRuntime: any;
     themeCache: Map<any, any>;
     exportObservers: Map<any, any>;
+    isValid(): boolean;
     /**
      * 获取调色盘颜色，用于图表的配色
      */

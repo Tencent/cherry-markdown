@@ -47,9 +47,9 @@ export default class HookCenter {
      */
     register(HookClass: ((...args: any[]) => any) | typeof SyntaxBase | typeof ParagraphBase, editorConfig: CherryOptions, customHookConfig?: Omit<CustomSyntaxRegConfig, "syntaxClass">): -1 | -2;
 }
-export type CherryOptions = import("../../types/cherry").CherryOptions;
-export type CherryEngineOptions = import("../../types/cherry").CherryEngineOptions;
-export type CustomSyntaxRegConfig = import("../../types/cherry").CustomSyntaxRegConfig;
+export type CherryOptions = import("../../../types/cherry").CherryOptions;
+export type CherryEngineOptions = import("../../../types/cherry").CherryEngineOptions;
+export type CustomSyntaxRegConfig = import("../../../types/cherry").CustomSyntaxRegConfig;
 export type CustomSyntax = (SyntaxBase | ParagraphBase) & {
     Cherry$$CUSTOM: true;
 };

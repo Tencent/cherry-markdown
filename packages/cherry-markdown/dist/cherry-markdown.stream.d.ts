@@ -1,3 +1,3 @@
-import Cherry, { SyntaxHookBase } from "./types/index.stream.umd";
+import Cherry, { SyntaxHookBase } from "./types/index.stream";
 export { SyntaxHookBase };
 export default Cherry;

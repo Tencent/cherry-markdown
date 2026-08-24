@@ -24,4 +24,4 @@ export default class Search extends MenuBase {
     /** @param {string} selection @param {string} [aliasName] */
     onClick(selection: string, aliasName?: string): void;
 }
-import MenuBase from '@/toolbars/MenuBase';
+import MenuBase from '../../toolbars/MenuBase';

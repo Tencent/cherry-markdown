@@ -1,4 +1,3 @@
-@charset "UTF-8";
 :root {
   /* ========== 尺寸系统 ========== */
   --spacing-xs: 4px;
@@ -430,6 +429,7 @@
   font-family: "ch-icon";
   font-style: normal;
   font-weight: normal;
+  line-height: 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -6773,6 +6773,18 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   width: 25px;
   text-align: center;
   height: 25px;
+  line-height: 25px;
+}
+.cherry-previewer-codeBlock-hover-handler .cherry-code-block-custom-btn .ch-icon,
+.cherry-previewer-codeBlock-hover-handler .cherry-copy-code-block .ch-icon,
+.cherry-previewer-codeBlock-hover-handler .cherry-unExpand-code-block .ch-icon,
+.cherry-previewer-codeBlock-hover-handler .cherry-edit-code-block .ch-icon {
+  font-size: var(--toolbar-icon-size);
+}
+.cherry-previewer-codeBlock-hover-handler .cherry-code-block-custom-btn,
+.cherry-previewer-codeBlock-hover-handler .cherry-copy-code-block,
+.cherry-previewer-codeBlock-hover-handler .cherry-unExpand-code-block,
+.cherry-previewer-codeBlock-hover-handler .cherry-edit-code-block {
   cursor: pointer;
   float: right;
   top: 35px;
@@ -6794,6 +6806,8 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   width: 25px;
   text-align: center;
   height: 25px;
+  line-height: 25px;
+  font-size: var(--toolbar-icon-size);
   cursor: pointer;
   float: right;
   border-radius: 5px;
