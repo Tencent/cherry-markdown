@@ -94,10 +94,24 @@
     "@lezer/highlight": "^1.2.1",
     "@replit/codemirror-vim": "^6.3.0",
     "dompurify": "^3.2.6",
+    "fast-diff": "^1.1.2",
     "htmlparser2": "^10.0.0",
+    "json5": "^2.2.3",
     "jsdom": "~19.0.0"
   },
   "optionalDependencies": {
     "mermaid": "^11.14.0"
+  },
+  "peerDependencies": {
+    "echarts": "^6.0.0",
+    "katex": "^0.16.27"
+  },
+  "peerDependenciesMeta": {
+    "echarts": {
+      "optional": true
+    },
+    "katex": {
+      "optional": true
+    }
   }
 }

@@ -4,7 +4,7 @@
     {
       "label": "build:cherry-markdown",
       "type": "shell",
-      "command": "test -f ../cherry-markdown/dist/cherry-markdown.min.css && test -f ../cherry-markdown/dist/cherry-markdown.esm.js || yarn workspace cherry-markdown build",
+      "command": "test -f ../cherry-markdown/dist/cherry-markdown.min.css && test -f ../cherry-markdown/dist/cherry-markdown.esm.js || pnpm --filter cherry-markdown build",
       "options": {
         "cwd": "${workspaceFolder}/../.."
       },

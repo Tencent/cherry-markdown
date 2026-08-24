@@ -9,20 +9,20 @@
 - `packages/vscodePlugin`：VS Code 插件；`examples/`：示例和发布验证项目。
 - `.changeset/`：发布包的版本变更说明。
 
-这是一个 Yarn workspace。项目使用 [Vite+](https://viteplus.dev/)（命令行简称 `vp`）统一处理依赖安装、workspace 任务编排、开发服务器、构建、测试和代码检查。请优先使用根目录脚本，不要在子包中引入另一套 workspace 工具或 lockfile。
+这是一个 pnpm workspace。项目使用 [Vite+](https://viteplus.dev/)（命令行简称 `vp`）统一处理依赖安装、workspace 任务编排、开发服务器、构建、测试和代码检查。请优先使用根目录脚本，不要在子包中引入另一套 workspace 工具或 lockfile。
 
 ## 开发环境
 
 - Node.js：`>=22`，推荐使用仓库 `.node-version` 中的版本。
-- Yarn：`1.22.18` 或更高版本；仓库通过 `packageManager` 固定 Yarn 版本。
+- pnpm：`11` 或更高版本；仓库通过 `packageManager` 固定 pnpm 版本。
 - 桌面客户端还需要 Rust 和 Tauri 系统依赖，详见 [`packages/client/CONTRIBUTING.md`](./packages/client/CONTRIBUTING.md)。
 - 修改小程序示例时，还需要微信开发者工具。
 
 ```bash
-yarn install
+pnpm install
 ```
 
-安装完成后，`postinstall` 会生成核心编辑器所需的 iconfont。若本机 shell 找不到 `vp`，使用根目录脚本（例如 `yarn test`），或直接调用 `./node_modules/.bin/vp`。
+安装完成后，`postinstall` 会生成核心编辑器所需的 iconfont。若本机 shell 找不到 `vp`，使用根目录脚本（例如 `pnpm test`），或直接调用 `./node_modules/.bin/vp`。
 
 ## 日常开发
 
@@ -37,21 +37,21 @@ git switch -c feat/short-description
 启动核心编辑器示例：
 
 ```bash
-yarn dev
+pnpm dev
 ```
 
 常用命令：
 
 | 目的 | 命令 |
 | --- | --- |
-| 启动桌面客户端（Tauri） | `yarn dev:client` |
-| 启动 React 示例 | `yarn example:react` |
-| 构建全部 workspace | `yarn build` |
-| 只构建核心包 / 小程序包 | `yarn build:core` / `yarn build:miniProgram` |
-| 运行全部 / 核心 / 小程序测试 | `yarn test` / `yarn test:core` / `yarn test:miniProgram` |
-| 类型检查 | `yarn typecheck` |
-| 代码检查 / 自动修复 | `yarn lint` / `yarn lint:fix` |
-| 更新测试快照 | `yarn test:update` |
+| 启动桌面客户端（Tauri） | `pnpm dev:client` |
+| 启动 React 示例 | `pnpm example:react` |
+| 构建全部 workspace | `pnpm build` |
+| 只构建核心包 / 小程序包 | `pnpm build:core` / `pnpm build:miniProgram` |
+| 运行全部 / 核心 / 小程序测试 | `pnpm test` / `pnpm test:core` / `pnpm test:miniProgram` |
+| 类型检查 | `pnpm typecheck` |
+| 代码检查 / 自动修复 | `pnpm lint` / `pnpm lint:fix` |
+| 更新测试快照 | `pnpm test:update` |
 
 针对单个 workspace 编排任务时，使用 Vite+ 的过滤参数：
 
@@ -71,10 +71,10 @@ yarn dev
 4. 核心包改动通常执行：
 
    ```bash
-   yarn lint
-   yarn typecheck
-   yarn test
-   yarn build
+   pnpm lint
+   pnpm typecheck
+   pnpm test
+   pnpm build
    ```
 
 5. 核心包构建后检查发布产物：

@@ -1,5 +1,7 @@
 .DS_Store
 node_modules
+.pnpm-store
+.pnpm-store/**
 dist
 coverage
 
@@ -24,7 +26,7 @@ yarn-error.log*
 
 # Lock files
 package-lock.json
-pnpm-lock.yaml
+yarn.lock
 
 packages/**/yarn.lock
 

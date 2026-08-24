@@ -70,6 +70,12 @@ Cherry Markdown 提供基于 Tauri 构建的跨平台桌面客户端，支持 Wi
 
 ### 安装组件
 
+通过 pnpm
+
+```bash
+pnpm add cherry-markdown
+```
+
 通过 yarn
 
 ```bash

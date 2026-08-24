@@ -67,7 +67,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.node-version'
-          cache: 'yarn'
+          cache: 'pnpm'
 
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1

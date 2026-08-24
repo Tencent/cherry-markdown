@@ -105,7 +105,7 @@ function onStreamComplete() {
 
 ## Demo
 
-完整的微信小程序 Demo 在 `examples/miniProgram` 目录下。安装其依赖并运行 `yarn --cwd examples/miniProgram build` 后，再在微信开发者工具中打开 `examples/miniProgram`。本地包和预览 tarball 的验证方式见 [Demo README](../../examples/miniProgram/README.md)。
+完整的微信小程序 Demo 在 `examples/miniProgram` 目录下。安装其依赖并运行 `pnpm --dir examples/miniProgram build` 后，再在微信开发者工具中打开 `examples/miniProgram`。本地包和预览 tarball 的验证方式见 [Demo README](../../examples/miniProgram/README.md)。
 
 ## 许可证
 

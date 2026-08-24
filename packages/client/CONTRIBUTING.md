@@ -13,27 +13,27 @@ The repository-wide contribution flow, branch conventions, Changesets, and Vite+
 
 ---
 
-Install dependencies from the repository root with Yarn; do not create a separate pnpm lockfile for this workspace.
+Install dependencies from the repository root with pnpm; do not create a separate lockfile for this workspace.
 
 ```shell
-yarn install
+pnpm install
 ```
 
-The client is a workspace managed by Vite+. `yarn dev:client` invokes `tauri dev` and opens the native desktop client; use the package-level `dev` script only when you need the standalone web server.
+The client is a workspace managed by Vite+. `pnpm dev:client` invokes `tauri dev` and opens the native desktop client; use the package-level `dev` script only when you need the standalone web server.
 
 ### Development
 
 - Start the native Tauri client in development mode.
 
 ```shell
-yarn dev:client
+pnpm dev:client
 
 ```
 
 - Build the client together with the current Cherry Markdown package.
 
 ```shell
-yarn build:client
+pnpm build:client
 ```
 
 The root command runs the package `tauri:dev` script through Vite+, which invokes the Tauri CLI. After installing Rust and the platform dependencies, it starts the native window and the Vite dev server configured in `src-tauri/tauri.conf.json`.

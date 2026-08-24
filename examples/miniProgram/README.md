@@ -17,8 +17,8 @@ Minimal WeChat MiniProgram demo for stream rendering Markdown with `@cherry-mark
 ### Run
 
 ```sh
-yarn --cwd examples/miniProgram install
-yarn --cwd examples/miniProgram build
+pnpm --dir examples/miniProgram install
+pnpm --dir examples/miniProgram build
 ```
 
 The Demo source imports `@cherry-markdown/miniprogram` directly. Its build script compiles that ESM source into the ignored `miniprogram/pages/index/index.js` runtime file because native MiniProgram runtime does not directly load ESM files. Open `examples/miniProgram` in WeChat DevTools and compile; **Build npm is not required**.
@@ -26,15 +26,15 @@ The Demo source imports `@cherry-markdown/miniprogram` directly. Its build scrip
 To use the local package source instead, replace the package dependency and rebuild:
 
 ```sh
-yarn --cwd examples/miniProgram add "@cherry-markdown/miniprogram@file:../../packages/miniProgram"
-yarn --cwd examples/miniProgram build
+pnpm --dir examples/miniProgram add "@cherry-markdown/miniprogram@file:../../packages/miniProgram"
+pnpm --dir examples/miniProgram build
 ```
 
 To verify a pkg-pr-new tarball instead, install it into this Demo project, then rebuild the MiniProgram runtime file:
 
 ```sh
-yarn --cwd examples/miniProgram add "@cherry-markdown/miniprogram@https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniprogram@1827.tgz"
-yarn --cwd examples/miniProgram build
+pnpm --dir examples/miniProgram add "@cherry-markdown/miniprogram@https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniprogram@1827.tgz"
+pnpm --dir examples/miniProgram build
 ```
 
 ### What's Covered
@@ -72,8 +72,8 @@ onStreamComplete(() => {
 ### 运行
 
 ```sh
-yarn --cwd examples/miniProgram install
-yarn --cwd examples/miniProgram build
+pnpm --dir examples/miniProgram install
+pnpm --dir examples/miniProgram build
 ```
 
 Demo 源码会直接 import 已安装的 `@cherry-markdown/miniprogram`。由于小程序原生运行时不能直接加载 ESM 文件，构建脚本会把 ESM 源码编译为被忽略的 `miniprogram/pages/index/index.js` 运行文件。在微信开发者工具中打开 `examples/miniProgram` 后直接编译，**无需构建 npm**。
@@ -81,15 +81,15 @@ Demo 源码会直接 import 已安装的 `@cherry-markdown/miniprogram`。由于
 若要使用本地包源码，替换依赖后重新构建：
 
 ```sh
-yarn --cwd examples/miniProgram add "@cherry-markdown/miniprogram@file:../../packages/miniProgram"
-yarn --cwd examples/miniProgram build
+pnpm --dir examples/miniProgram add "@cherry-markdown/miniprogram@file:../../packages/miniProgram"
+pnpm --dir examples/miniProgram build
 ```
 
 若要验证 pkg-pr-new tarball，在该 Demo 项目中安装预览包后重新生成小程序运行文件：
 
 ```sh
-yarn --cwd examples/miniProgram add "@cherry-markdown/miniprogram@https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniprogram@1827.tgz"
-yarn --cwd examples/miniProgram build
+pnpm --dir examples/miniProgram add "@cherry-markdown/miniprogram@https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniprogram@1827.tgz"
+pnpm --dir examples/miniProgram build
 ```
 
 ### 覆盖能力

@@ -105,7 +105,7 @@ The package returns WXML-friendly data only. The bundled Demo shows one template
 
 ## Demo
 
-A complete WeChat MiniProgram demo is available at `examples/miniProgram`. Install its dependencies and run `yarn --cwd examples/miniProgram build` before opening `examples/miniProgram` in WeChat DevTools. See the [Demo README](../../examples/miniProgram/README.md) for local-package and preview-tarball verification.
+A complete WeChat MiniProgram demo is available at `examples/miniProgram`. Install its dependencies and run `pnpm --dir examples/miniProgram build` before opening `examples/miniProgram` in WeChat DevTools. See the [Demo README](../../examples/miniProgram/README.md) for local-package and preview-tarball verification.
 
 ## License
 

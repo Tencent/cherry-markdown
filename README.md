@@ -70,6 +70,12 @@ Prefer editing Markdown right inside VSCode? Cherry Markdown also provides an of
 
 ### Install as a package
 
+Via pnpm
+
+```bash
+pnpm add cherry-markdown
+```
+
 Via yarn
 
 ```bash

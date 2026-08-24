@@ -32,7 +32,7 @@ jobs:
         with:
           node-version-file: '.node-version'
           registry-url: 'https://registry.npmjs.org'
-          cache: yarn
+          cache: pnpm
 
       - name: Compute dev version
         working-directory: ./packages/cherry-markdown

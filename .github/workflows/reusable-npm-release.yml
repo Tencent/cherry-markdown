@@ -51,7 +51,7 @@ jobs:
         with:
           node-version-file: '.node-version'
           registry-url: 'https://registry.npmjs.org'
-          cache: yarn
+          cache: pnpm
 
       - name: Install and build
         run: vp install && vp run -F "${{ inputs.package_name }}" build

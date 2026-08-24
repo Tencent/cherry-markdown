@@ -27,4 +27,4 @@ $:
       stages:
         - name: install dependencies
           script:
-            - yarn install
+            - pnpm install

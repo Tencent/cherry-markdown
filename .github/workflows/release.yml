@@ -54,10 +54,10 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          version: yarn changeset-version
+          version: pnpm changeset-version
           title: 'chore: release'
           commit: 'chore: release'
-          publish: yarn changeset tag
+          publish: pnpm changeset tag
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
 
