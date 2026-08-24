@@ -14,6 +14,10 @@ const forbiddenEngineInteractionTokens = [
   'suggester-panel',
   'onCodeMirrorChange',
   'coordsAtPos(',
+  'previewer',
+  'wrapperDom',
+  '.$event',
+  '.toolbar',
 ];
 
 const walk = (dir) => readdirSync(dir).flatMap((name) => {

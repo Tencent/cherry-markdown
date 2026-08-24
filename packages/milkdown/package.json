@@ -18,7 +18,8 @@
       "import": "./dist/cherry-markdown-milkdown.esm.js",
       "require": "./dist/cherry-markdown-milkdown.cjs",
       "default": "./dist/cherry-markdown-milkdown.esm.js"
-    }
+    },
+    "./style.css": "./dist/cherry-markdown-milkdown.css"
   },
   "files": [
     "dist",
@@ -55,5 +56,7 @@
     "@milkdown/theme-nord": "7.22.0",
     "@milkdown/utils": "7.22.0"
   },
-  "sideEffects": false
+  "sideEffects": [
+    "./dist/*.css"
+  ]
 }

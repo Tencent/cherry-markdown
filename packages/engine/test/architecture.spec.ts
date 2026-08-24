@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vite-plus/test';
 import CherryEngine, { createSyntaxHook, Sanitizer } from '../src/index';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 describe('@cherry-markdown/engine architecture contract', () => {
@@ -32,5 +32,18 @@ describe('@cherry-markdown/engine architecture contract', () => {
     expect(suggester).not.toContain('suggester-panel');
     expect(suggester).not.toContain('onCodeMirrorChange');
     expect(existsSync(resolve(import.meta.dirname, '../src/addons/cherry-code-block-mermaid-plugin.js'))).toBe(false);
+
+    const walk = (directory: string): string[] =>
+      readdirSync(directory).flatMap((name) => {
+        const file = resolve(directory, name);
+        return statSync(file).isDirectory() ? walk(file) : [file];
+      });
+    const engineSource = walk(resolve(import.meta.dirname, '../src'))
+      .filter((file) => file.endsWith('.js'))
+      .map((file) => readFileSync(file, 'utf8'))
+      .join('\n');
+    for (const token of ['@codemirror/', 'previewer', 'wrapperDom', '.$event', '.toolbar']) {
+      expect(engineSource).not.toContain(token);
+    }
   });
 });

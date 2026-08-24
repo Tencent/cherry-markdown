@@ -17,6 +17,7 @@ Cherry Markdown 基于 Milkdown / ProseMirror 的所见即所得（WYSIWYG）实
 
 ```js
 import CherryMilkdown from '@cherry-markdown/milkdown';
+import '@cherry-markdown/milkdown/style.css';
 
 const editor = new CherryMilkdown({
   el: document.getElementById('editor'),

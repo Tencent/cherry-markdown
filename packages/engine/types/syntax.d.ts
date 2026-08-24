@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { CherryOptions } from './cherry';
+import { EngineOptions } from './engine';
 
 export type HookType = 'sentence' | 'paragraph';
 
@@ -30,9 +30,9 @@ export interface EditorConfig {
   /** hook 专用的配置 */
   config: Record<string, any> | false;
   /** 引擎的全局配置 */
-  globalConfig: CherryOptions['engine']['global'];
+  globalConfig: EngineOptions['engine']['global'];
   /** 外部依赖 */
-  externals: CherryOptions['externals'];
+  externals: EngineOptions['externals'];
   [key: string]: any;
 }
 

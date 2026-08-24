@@ -88,30 +88,6 @@ const SystemSuggestList = [
     keyword: 'detail',
     value: `+++ 点击展开更多\n内容\n++- 默认展开\n内容\n++ 默认收起\n内容\n+++\n`,
   },
-  // {
-  //   icon: 'pen',
-  //   label: '续写',
-  //   keyword: 'xu xie chatgpt',
-  //   value: () => {
-  //     if (!this.$engine.$cherry.options.openai.apiKey) {
-  //       return '请先配置openai apiKey';
-  //     }
-  //     this.$engine.$cherry.toolbar.toolbarHandlers.chatgpt('complement');
-  //     return `\n`;
-  //   },
-  // },
-  // {
-  //   icon: 'pen',
-  //   label: '总结',
-  //   keyword: 'zong jie chatgpt',
-  //   value: () => {
-  //     if (!this.$engine.$cherry.options.openai.apiKey) {
-  //       return '请先配置openai apiKey';
-  //     }
-  //     this.$engine.$cherry.toolbar.toolbarHandlers.chatgpt('summary');
-  //     return `\n`;
-  //   },
-  // },
 ];
 /*
  * 全角联想候选表，用于将全角转为半角。

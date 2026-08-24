@@ -13,8 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import CherryEngine, { SyntaxHookBase } from '@cherry-markdown/engine';
+import EnginePackage, { SyntaxHookBase } from '@cherry-markdown/engine';
 import MenuHookBase from './toolbars/MenuBase';
+import defaultConfig from './Cherry.config';
+import cloneDeep from './utils/toolkit/cloneDeep';
+import mergeWith from './utils/toolkit/mergeWith';
+import { customizer } from './utils/config';
+
+/** @deprecated 0.x compatibility constructor retaining the historical full config surface. */
+class CherryEngine extends EnginePackage {
+  static config = { defaults: defaultConfig };
+
+  constructor(options = {}, runtime = {}) {
+    const normalized = mergeWith({}, cloneDeep(CherryEngine.config.defaults), options, customizer);
+    super(normalized, runtime);
+  }
+}
 
 export { SyntaxHookBase, MenuHookBase };
 export * from '@cherry-markdown/engine';

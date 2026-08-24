@@ -2,6 +2,8 @@
 node_modules
 dist
 coverage
+playwright-report
+test-results
 
 # local env files
 .env.local

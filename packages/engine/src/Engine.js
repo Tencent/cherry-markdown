@@ -32,11 +32,17 @@ import { initMathEngines } from './utils/math-loader';
 export default class Engine {
   /**
    *
-   * @param {Partial<import('./Cherry').CherryOptions>} markdownParams 初始化Cherry时传入的选项
-   * @param {import('./Cherry').default} cherry Cherry实例
+   * @param {import('../types/engine').EngineOptions} markdownParams normalized engine options
+   * @param {import('../types/runtime').EngineRuntimeAdapter} [runtime] optional host adapter
    */
-  constructor(markdownParams, cherry) {
-    this.$cherry = cherry;
+  constructor(markdownParams, runtime = {}) {
+    this.runtime = runtime;
+    // Hooks still receive the historical host shape in 0.x. New consumers only
+    // receive a minimal option/locale facade and never a UI host.
+    this.$cherry = runtime.legacyHost || {
+      options: markdownParams,
+      getLocales: runtime.getLocales || (() => ({})),
+    };
     // Deprecated
     Object.defineProperty(this, '_cherry', {
       get() {
@@ -46,11 +52,11 @@ export default class Engine {
     });
     this.initMath(markdownParams);
     this.$configInit(markdownParams);
-    const syntaxHookAdapters = cherry?.interactionAdapters?.syntaxHooks || {};
+    const syntaxHookAdapters = runtime.syntaxHooks || {};
     const activeHooksConfig = hooksConfig.map((HookClass) => syntaxHookAdapters[HookClass.HOOK_NAME] || HookClass);
-    this.hookCenter = new HookCenter(activeHooksConfig, markdownParams, cherry);
+    this.hookCenter = new HookCenter(activeHooksConfig, markdownParams, this.$cherry);
     this.hooks = this.hookCenter.getHookList();
-    this.asyncRenderHandler = new AsyncRenderHandler(cherry);
+    this.asyncRenderHandler = new AsyncRenderHandler(runtime, markdownParams);
     // 使用LRU缓存替代普通对象
     this.hashCache = new LRUCache(20000); // 缓存最多20000个渲染结果
     this.hashStrMap = new LRUCache(2000); // 缓存最多2000个哈希值
@@ -76,13 +82,9 @@ export default class Engine {
     }
     this.timer = setTimeout(() => {
       this.hashCache.clear();
-      const markdownText = this.$cherry.editor?.editor?.view?.state?.doc?.toString() || '';
+      const markdownText = this.runtime.getMarkdown?.() || '';
       const html = this.makeHtml(markdownText);
-      this.$cherry.previewer?.refresh(html);
-      this.$cherry.$event.emit('afterChange', {
-        markdownText,
-        html,
-      });
+      this.runtime.onHtmlChange?.({ markdownText, html });
     }, 1000);
   }
 
@@ -93,7 +95,7 @@ export default class Engine {
     }
     let originUrl = this.$decodeReservedKeywords(url);
     originUrl = originUrl.replace(/&amp;/g, '&');
-    const ret = this.$cherry.options.callback.urlProcessor(originUrl, srcType, (/** @type {string} */ newUrl) => {
+    const ret = this.markdownParams.callback.urlProcessor(originUrl, srcType, (/** @type {string} */ newUrl) => {
       if (newUrl) {
         if (!this.urlProcessorMap[key]) {
           this.urlProcessorMap[key] = newUrl;
@@ -360,7 +362,7 @@ export default class Engine {
     if (forceNoCursor) {
       return md;
     }
-    if (this.$cherry.options.engine.global.flowSessionContext && this.$cherry.options.engine.global.flowSessionCursor) {
+    if (this.globalConfig.flowSessionContext && this.globalConfig.flowSessionCursor) {
       // 为了不破坏加粗、斜体等语法，光标占位符放在加粗、斜体语法后面
       if (/[*_~^]+\n*$/.test(md)) {
         return md.replace(/([*_~^]+\n*)$/, 'CHERRYFLOWSESSIONCURSOR$1');
@@ -400,16 +402,16 @@ export default class Engine {
    * @returns {string}
    */
   $clearFlowSessionCursorCache(md) {
-    if (this.$cherry.options.engine.global.flowSessionCursor) {
+    if (this.globalConfig.flowSessionCursor) {
       if (this.clearCursorTimer) {
         clearTimeout(this.clearCursorTimer);
       }
-      if (typeof this.$cherry.clearFlowSessionCursor === 'function') {
+      if (typeof this.runtime.clearFlowSessionCursor === 'function') {
         this.clearCursorTimer = setTimeout(() => {
-          this.$cherry.clearFlowSessionCursor();
+          this.runtime.clearFlowSessionCursor();
         }, 2560);
       }
-      return md.replace(/CHERRYFLOWSESSIONCURSOR/g, this.$cherry.options.engine.global.flowSessionCursor);
+      return md.replace(/CHERRYFLOWSESSIONCURSOR/g, this.globalConfig.flowSessionCursor);
     }
     return md;
   }

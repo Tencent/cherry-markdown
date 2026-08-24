@@ -10,7 +10,7 @@ const packages = [
   ['engine', 'cherry-markdown-engine', 'CherryEngine'],
   ['preview', 'cherry-markdown-preview', 'CherryPreview', 'cherry-markdown-preview.css'],
   ['stream', 'cherry-markdown-stream', 'CherryStream'],
-  ['milkdown', 'cherry-markdown-milkdown', 'CherryMilkdown'],
+  ['milkdown', 'cherry-markdown-milkdown', 'CherryMilkdown', 'cherry-markdown-milkdown.css'],
 ];
 const require = createRequire(import.meta.url);
 const npmCache = mkdtempSync(resolve(tmpdir(), 'cherry-npm-pack-'));

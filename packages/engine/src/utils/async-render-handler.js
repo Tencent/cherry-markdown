@@ -10,10 +10,12 @@ export default class AsyncRenderHandler {
   md = '';
 
   /**
-   * @param {import('../Cherry').default} cherry Cherry实例
+   * @param {import('../../types/runtime').EngineRuntimeAdapter} runtime
+   * @param {object} options normalized engine options
    */
-  constructor(cherry) {
-    this.$cherry = cherry;
+  constructor(runtime = {}, options = {}) {
+    this.runtime = runtime;
+    this.options = options;
   }
 
   handleSyncRenderStart(md = '') {
@@ -52,14 +54,8 @@ export default class AsyncRenderHandler {
   }
 
   handleAllCompleted() {
-    if (!this.$cherry.$event) {
-      // 使用 CherryEngine 时，没有 event 模块，手动调用 callbac
-      this.$cherry.options.callback?.afterAsyncRender?.(this.originMd, this.md);
-    } else {
-      this.$cherry.$event.emit('afterAsyncRender', {
-        markdownText: this.originMd,
-        html: this.md,
-      });
-    }
+    const payload = { markdownText: this.originMd, html: this.md };
+    if (this.runtime.onAsyncRender) this.runtime.onAsyncRender(payload);
+    else this.options.callback?.afterAsyncRender?.(payload.markdownText, payload.html);
   }
 }

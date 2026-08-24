@@ -19,9 +19,9 @@ import { $expectTarget } from '../utils/error';
 import Logger from '../Logger';
 
 /**
- * @typedef {import('~types/cherry').CherryOptions} CherryOptions
- * @typedef {import('~types/cherry').CherryEngineOptions} CherryEngineOptions
- * @typedef {import('~types/cherry').CustomSyntaxRegConfig} CustomSyntaxRegConfig
+ * @typedef {import('~types/engine').EngineOptions} CherryOptions
+ * @typedef {import('~types/engine').CherryEngineOptions} CherryEngineOptions
+ * @typedef {import('~types/engine').CustomSyntaxRegConfig} CustomSyntaxRegConfig
  * @typedef { (SyntaxBase | ParagraphBase) & { Cherry$$CUSTOM: true } } CustomSyntax
  * @typedef { (typeof SyntaxBase | typeof ParagraphBase) & { Cherry$$CUSTOM: true } } CustomSyntaxClass
  */

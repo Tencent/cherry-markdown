@@ -18,5 +18,5 @@
   },
   "include": ["src/index.js"],
   "exclude": ["**/node_modules/**", "dist"],
-  "files": ["types/codemirror.d.ts", "types/env.d.ts"]
+  "files": ["types/env.d.ts", "types/engine.d.ts", "types/runtime.d.ts"]
 }

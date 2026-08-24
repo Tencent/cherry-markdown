@@ -53,7 +53,7 @@ export default class FrontMatter extends ParagraphBase {
       }
       // update font-size
       if ('font-size' in frontmatter || 'fontSize' in frontmatter) {
-        this.$engine.$cherry.previewer.getDom().style.fontSize = frontmatter['font-size'] || frontmatter.fontSize;
+        this.$engine.runtime?.onFrontMatter?.(frontmatter);
       }
       const html = `<p data-sign="${sign}" data-type="frontMatter" data-lines="${lineCount}" data-content="${escapeHTMLSpecialChar(
         JSON.stringify(frontmatter),

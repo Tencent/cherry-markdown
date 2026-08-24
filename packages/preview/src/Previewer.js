@@ -84,11 +84,34 @@ export default class Previewer {
     };
     Object.assign(this.options, options);
     this.markdown = this.options.value || '';
-    this.engine = options.engineInstance || new CherryEngine(options.engine || {});
 
     if (!this.options.previewerDom && isBrowser()) {
       this.options.previewerDom = document.createElement('div');
     }
+
+    this.engineRuntime = {
+      getMarkdown: () => this.markdown,
+      onHtmlChange: ({ html }) => this.update(html),
+      onAsyncRender: ({ html }) => {
+        if (this.isDestroyed || !this.options) return;
+        if (this.isPreviewerHidden()) this.options.previewerCache.html = html;
+        this.options.onAsyncRender?.(html);
+      },
+      onFrontMatter: (frontmatter) => {
+        if (this.isDestroyed || !this.options) return;
+        const fontSize = frontmatter['font-size'] || frontmatter.fontSize;
+        if (this.options.previewerDom && fontSize) this.options.previewerDom.style.fontSize = fontSize;
+      },
+      renderPendingMath: ({ className, render }) => {
+        if (this.isDestroyed || !this.options) return;
+        this.options.previewerDom?.querySelectorAll(`.${className}`).forEach((element) => {
+          const isDisplayMode = element.classList.contains('Cherry-Math');
+          element.innerHTML = render(decodeURIComponent(element.getAttribute('data-content')), isDisplayMode);
+          element.classList.remove(className);
+        });
+      },
+    };
+    this.engine = options.engineInstance || new CherryEngine(options.engine || {}, this.engineRuntime);
 
     /** @property @type {LazyLoadImg|null} */
     this.lazyLoadImg = new LazyLoadImg(this.options.lazyLoadImg, this);

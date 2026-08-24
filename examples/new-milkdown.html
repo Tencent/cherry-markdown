@@ -17,13 +17,16 @@
     <p id="status"></p><div id="editor"></div><pre id="markdown"></pre>
     <script type="module">
       import MilkdownAdapter from '@cherry-markdown/milkdown';
+      import '@cherry-markdown/milkdown/style.css';
 
       const status = document.querySelector('#status');
       const output = document.querySelector('#markdown');
       const adapter = new MilkdownAdapter({ el: document.querySelector('#editor'), value: '# Milkdown\n\nMarkdown 是保存格式。', onChange: (md) => { output.textContent = md; } });
       await adapter.create();
+      window.__cherryNewDemo = { adapter };
       output.textContent = await adapter.getMarkdown();
       status.textContent = `【new】editor created=${Boolean(adapter.getEditor())}`;
+      document.body.dataset.demoReady = 'true';
       document.querySelector('#set').addEventListener('click', async () => { await adapter.setMarkdown('## External update\n\n- one\n- two'); output.textContent = await adapter.getMarkdown(); });
       document.querySelector('#roundtrip').addEventListener('click', async () => {
         try { await adapter.setMarkdown('::: panel\nCherry proprietary syntax\n:::'); status.textContent = '【new】round-trip 保留'; status.className = ''; }

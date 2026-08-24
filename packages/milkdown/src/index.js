@@ -15,6 +15,7 @@
  */
 import CherryMilkdown, { MarkdownRoundTripError } from './CherryMilkdown';
 import EditorAdapter from './EditorAdapter';
+import './milkdown.css';
 
 export { CherryMilkdown, CherryMilkdown as MilkdownEditorAdapter, EditorAdapter, MarkdownRoundTripError };
 export default CherryMilkdown;

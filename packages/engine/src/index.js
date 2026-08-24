@@ -47,7 +47,7 @@ class CherryEngine extends CherryStatic {
   /**
    * @param {any} options
    */
-  constructor(options) {
+  constructor(options, runtime = {}) {
     super();
     CherryEngine.initialized = true;
     const defaultConfigCopy = cloneDeep(CherryEngine.config.defaults);
@@ -61,7 +61,7 @@ class CherryEngine extends CherryStatic {
     }
 
     // 构造器返回 Engine 实例以兼容历史 API
-    return new Engine(opts, { options: opts });
+    return new Engine(opts, runtime);
   }
 }
 
@@ -121,9 +121,8 @@ export { default as Underline } from './syntax/hooks/Underline';
 export * from './syntax/hooks/SuggestList';
 export * from './syntax/hooks/Emoji.config';
 
-/**
- * @typedef {typeof CherryStatic & (new (options: Partial<import('../types/cherry').CherryOptions>) => Engine)}
- */
-const CherryEngineExport = CherryEngine;
+const CherryEngineExport = /** @type {typeof CherryStatic & (new (options?: Partial<import('../types/engine').EngineOptions>, runtime?: import('../types/runtime').EngineRuntimeAdapter) => Engine)} */ (
+  /** @type {unknown} */ (CherryEngine)
+);
 
 export default CherryEngineExport;

@@ -29,11 +29,13 @@
         makeHtml: (text) => text.replace(/==(.+?)==/g, '<mark>$1</mark>'),
       });
       const engine = new CherryEngine({ engine: { customSyntax: { MarkHook } } });
+      window.__cherryNewDemo = { engine };
       const markdown = document.querySelector('#markdown');
       const output = document.querySelector('#html');
       const render = () => {
         output.textContent = engine.makeHtml(`${markdown.value}\n\n==custom hook==`);
         document.querySelector('#status').textContent = '【new】Engine 渲染成功；页面未创建 CodeMirror。';
+        document.body.dataset.demoReady = 'true';
       };
       markdown.addEventListener('input', render);
       render();

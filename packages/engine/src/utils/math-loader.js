@@ -19,23 +19,15 @@ import { configureMathJax } from './mathjax';
 import { loadCSS, loadScript, getHTML } from './dom';
 
 /**
- * 通用的「占位符回填」流程：扫描 DOM、替换 asyncRenderHandler.md、触发 done、更新预览缓存
+ * 通用的占位符回填流程。Engine only updates its HTML state; a Preview
+ * adapter may mirror the same replacement into a mounted DOM.
  * @param {import('../Engine').default} engine Engine 实例
  * @param {Object} options
  * @param {string} options.className 占位符的 class 名称（如 cherry-katex-need-render）
  * @param {(content: string, isDisplayMode: boolean) => string} options.render 渲染函数
  */
 function rerenderPendingMath(engine, { className, render }) {
-  // 1. 先更新预览区域 DOM
-  engine.$cherry.previewer
-    .getDom()
-    .querySelectorAll(`.${className}`)
-    .forEach((el) => {
-      const isDisplayMode = el.classList.contains('Cherry-Math');
-      el.innerHTML = render(decodeURIComponent(el.getAttribute('data-content')), isDisplayMode);
-      el.classList.remove(className);
-    });
-  // 2. 再更新 asyncRenderHandler 中缓存的 md（实际为 html）
+  engine.runtime.renderPendingMath?.({ className, render });
   const needDoneKeys = [];
   const placeholderReg = new RegExp(
     `<(div|span) data-sign="([^"]+?)" class="([^"]+?) ${className}" ([^>]+? data-lines="[^"]+?") data-content="([\\s\\S]+?)"><\\/\\1>`,
@@ -54,10 +46,6 @@ function rerenderPendingMath(engine, { className, render }) {
   needDoneKeys.forEach((key) => {
     engine.asyncRenderHandler.done(key);
   });
-  // 3. 当预览区隐藏时，同步更新预览区缓存
-  if (engine.$cherry.previewer.isPreviewerHidden()) {
-    engine.$cherry.previewer.options.previewerCache.html = engine.asyncRenderHandler.md;
-  }
 }
 
 /**
@@ -145,7 +133,7 @@ function setupKatex(engine, syntax) {
 /**
  * 公式引擎初始化入口（按需加载 MathJax / katex 并在加载完成后回填渲染）
  * @param {import('../Engine').default} engine Engine 实例
- * @param {Partial<import('../Cherry').CherryOptions>} opts 初始化选项
+ * @param {import('../../types/engine').EngineOptions} opts engine options
  */
 export function initMathEngines(engine, opts) {
   if (!isBrowser()) {

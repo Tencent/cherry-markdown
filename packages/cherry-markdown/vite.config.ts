@@ -64,6 +64,7 @@ export default defineConfig({
       { find: '@cherry-markdown/engine', replacement: path.resolve(cherryMarkdownDir, '../engine/dist/cherry-markdown-engine.browser.esm.js') },
       { find: '@cherry-markdown/preview', replacement: path.resolve(cherryMarkdownDir, '../preview/dist/cherry-markdown-preview.esm.js') },
       { find: '@cherry-markdown/stream', replacement: path.resolve(cherryMarkdownDir, '../stream/dist/cherry-markdown-stream.esm.js') },
+      { find: '@cherry-markdown/milkdown/style.css', replacement: path.resolve(cherryMarkdownDir, '../milkdown/dist/cherry-markdown-milkdown.css') },
       { find: '@cherry-markdown/milkdown', replacement: path.resolve(cherryMarkdownDir, '../milkdown/dist/cherry-markdown-milkdown.esm.js') },
       // examples 别名
       { find: '@examples', replacement: examplesDir },

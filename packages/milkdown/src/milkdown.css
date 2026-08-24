@@ -1,0 +1,5 @@
+.cherry-milkdown .ProseMirror,
+.ProseMirror {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}

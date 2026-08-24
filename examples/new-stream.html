@@ -20,12 +20,14 @@
 
       const markdown = `# Stream\n\n未闭合到闭合：**strong** 和 [link](https://example.com)\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n\n\`\`\`js\nconst ready = true;\n\`\`\``;
       const stream = new CherryStream({ el: document.querySelector('#preview'), forceAppend: true });
+      window.__cherryNewDemo = { stream, markdown };
       const status = document.querySelector('#status');
       let cursor = 0;
       let timer;
       const update = () => {
         stream.setMarkdown(markdown.slice(0, cursor));
         status.textContent = `【new】${cursor}/${markdown.length}，TOC=${stream.getToc().length}，HTML=${stream.getHtml().length}`;
+        document.body.dataset.demoReady = 'true';
       };
       document.querySelector('#start').addEventListener('click', () => {
         clearInterval(timer);
