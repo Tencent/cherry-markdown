@@ -97689,7 +97689,7 @@
   if (!isBrowser()) nodeIgnorePlugin.forEach(function (key) {
     delete plugins[key];
   });
-  var VERSION$2 = "".concat("0.11.9");
+  var VERSION$2 = "".concat("0.11.10");
   var CherryStatic = function () {
     function CherryStatic() {
       _classCallCheck$129(this, CherryStatic);
