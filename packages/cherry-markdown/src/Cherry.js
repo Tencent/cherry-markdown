@@ -17,6 +17,7 @@ import mergeWith from '@/utils/toolkit/mergeWith';
 import cloneDeep from '@/utils/toolkit/cloneDeep';
 import Editor from './Editor';
 import { Engine } from '@cherry-markdown/engine';
+import EditorSuggester from './editor/Suggester';
 import Previewer from './Previewer';
 import Bubble from './toolbars/Bubble';
 import FloatMenu from './toolbars/FloatMenu';
@@ -128,9 +129,13 @@ export default class Cherry extends CherryStatic {
       this.options.engine.global.flowSessionCursor = '<span class="cherry-flow-session-cursor"></span>';
     }
 
-    /**
-     * @type {import('./Engine').default}
-     */
+    /** @type {{syntaxHooks: Record<string, typeof EditorSuggester>}} */
+    this.interactionAdapters = {
+      syntaxHooks: {
+        suggester: EditorSuggester,
+      },
+    };
+    /** @type {import('./Engine').default} */
     this.engine = new Engine(this.options, this);
     this.init();
   }

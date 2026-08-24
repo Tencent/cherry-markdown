@@ -198,7 +198,15 @@ export default class Previewer {
       }
       const newHtmlList = this.$getSignData(tmpDiv.children);
       const oldHtmlList = this.$getSignData(domContainer.children);
-      this.$dealUpdate(domContainer, oldHtmlList, newHtmlList);
+      try {
+        this.$dealUpdate(domContainer, oldHtmlList, newHtmlList);
+      } catch (error) {
+        // A rapidly changing stream can invalidate an index calculated by the
+        // incremental diff. Converge with one full DOM replacement instead of
+        // leaking a NotFoundError or leaving a partially updated preview.
+        if (error?.name !== 'NotFoundError') throw error;
+        domContainer.innerHTML = newHtml;
+      }
     } finally {
       this.applyingDomChanges = false;
     }

@@ -36,4 +36,22 @@ describe('@cherry-markdown/stream convergence contract', () => {
     stream.destroy();
     expect(mount.children).toHaveLength(0);
   });
+
+  it.each([
+    ['# 标题\n\n', ['| a', ' | b |\n', '| --- | --- |\n', '| 1 | 2 |']],
+    ['', ['> quote\n\n', '- one\n', '  - nested\n', '\n![image](https://example.com/a.png)']],
+  ])('matches one-shot Engine output after continuous accumulated tokens', (prefix, tokens) => {
+    const stream = new CherryStream({ el: document.createElement('div'), value: '' });
+    let markdown = prefix;
+    for (const token of tokens) {
+      markdown += token;
+      stream.setMarkdown(markdown);
+    }
+    stream.refreshPreviewer();
+    expect(stream.getMarkdown()).toBe(markdown);
+    expect(stream.getHtml()).toBe(stream.previewer.getHtml());
+    expect(stream.getHtml().replace(/>\s+</g, '><').trim()).toBe(
+      stream.engine.makeHtml(markdown).replace(/>\s+</g, '><').trim(),
+    );
+  });
 });

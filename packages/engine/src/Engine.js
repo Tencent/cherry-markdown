@@ -46,7 +46,9 @@ export default class Engine {
     });
     this.initMath(markdownParams);
     this.$configInit(markdownParams);
-    this.hookCenter = new HookCenter(hooksConfig, markdownParams, cherry);
+    const syntaxHookAdapters = cherry?.interactionAdapters?.syntaxHooks || {};
+    const activeHooksConfig = hooksConfig.map((HookClass) => syntaxHookAdapters[HookClass.HOOK_NAME] || HookClass);
+    this.hookCenter = new HookCenter(activeHooksConfig, markdownParams, cherry);
     this.hooks = this.hookCenter.getHookList();
     this.asyncRenderHandler = new AsyncRenderHandler(cherry);
     // 使用LRU缓存替代普通对象

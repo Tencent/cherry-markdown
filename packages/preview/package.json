@@ -18,7 +18,8 @@
       "import": "./dist/cherry-markdown-preview.esm.js",
       "require": "./dist/cherry-markdown-preview.cjs",
       "default": "./dist/cherry-markdown-preview.esm.js"
-    }
+    },
+    "./style.css": "./dist/cherry-markdown-preview.css"
   },
   "files": [
     "dist",
@@ -49,5 +50,7 @@
     "dompurify": "^3.2.6",
     "virtual-dom": "^2.1.1"
   },
-  "sideEffects": false
+  "sideEffects": [
+    "./dist/*.css"
+  ]
 }

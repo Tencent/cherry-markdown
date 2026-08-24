@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import Previewer from './Previewer';
+import './preview.css';
 
 export { Previewer };
 export default Previewer;

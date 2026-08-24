@@ -17,6 +17,7 @@ Cherry Markdown 的流式渲染包，适用于 AI Token 流式渲染场景。
 
 ```js
 import CherryStream from '@cherry-markdown/stream';
+import '@cherry-markdown/preview/style.css';
 
 const stream = new CherryStream({
   el: document.getElementById('preview'),

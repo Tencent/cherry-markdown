@@ -1,2 +1,2 @@
 /** @deprecated Internal compatibility path. */
-export { Suggester as default } from '@cherry-markdown/engine';
+export { default } from '../../editor/Suggester';

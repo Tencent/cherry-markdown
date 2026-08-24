@@ -95,7 +95,12 @@ export default class CherryMilkdown extends EditorAdapter {
       .use(listener)
       .create();
 
-    this.assertRoundTrip(value, await this.getMarkdown());
+    try {
+      this.assertRoundTrip(value, await this.getMarkdown());
+    } catch (error) {
+      await this.destroy();
+      throw error;
+    }
 
     // 在创建完成后配置 markdown 变化监听
     if (onChange) {
@@ -128,8 +133,14 @@ export default class CherryMilkdown extends EditorAdapter {
     if (!this.editor) {
       throw new Error('[CherryMilkdown] editor not created, call create() first');
     }
+    const previousMarkdown = await this.getMarkdown();
     this.editor.action(replaceAll(markdown || ''));
-    this.assertRoundTrip(markdown, await this.getMarkdown());
+    try {
+      this.assertRoundTrip(markdown, await this.getMarkdown());
+    } catch (error) {
+      this.editor.action(replaceAll(previousMarkdown));
+      throw error;
+    }
   }
 
   assertRoundTrip(source, output) {

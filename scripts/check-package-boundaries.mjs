@@ -8,6 +8,13 @@ const rules = {
   stream: ['@codemirror/', 'codemirror', '@milkdown/', 'cherry-markdown/src'],
   milkdown: ['@codemirror/', 'codemirror', 'cherry-markdown/src'],
 };
+const forbiddenEngineInteractionTokens = [
+  '@codemirror/',
+  '.view.focus(',
+  'suggester-panel',
+  'onCodeMirrorChange',
+  'coordsAtPos(',
+];
 
 const walk = (dir) => readdirSync(dir).flatMap((name) => {
   const file = resolve(dir, name);
@@ -31,6 +38,13 @@ for (const [packageDir, forbidden] of Object.entries(rules)) {
         failures.push(`${relative(root, file)} imports forbidden boundary ${item}`);
       }
     }
+  }
+}
+
+for (const file of walk(resolve(root, 'packages/engine/src')).filter((name) => name.endsWith('.js'))) {
+  const source = readFileSync(file, 'utf8');
+  for (const token of forbiddenEngineInteractionTokens) {
+    if (source.includes(token)) failures.push(`${relative(root, file)} leaks editor interaction token ${token}`);
   }
 }
 

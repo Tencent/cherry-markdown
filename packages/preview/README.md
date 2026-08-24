@@ -18,6 +18,7 @@ Cherry Markdown 的纯预览渲染包，不依赖编辑器 UI。
 ```js
 import CherryEngine from '@cherry-markdown/engine';
 import Previewer from '@cherry-markdown/preview';
+import '@cherry-markdown/preview/style.css';
 
 const engine = new CherryEngine({});
 const html = engine.makeHtml('# Hello\n\n**World**');

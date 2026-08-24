@@ -1,0 +1,13 @@
+.cherry-markdown {
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+
+.cherry-markdown img,
+.cherry-markdown video {
+  max-width: 100%;
+}
+
+.cherry-markdown pre {
+  overflow: auto;
+}

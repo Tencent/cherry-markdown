@@ -33,4 +33,30 @@ describe('@cherry-markdown/milkdown lifecycle contract', () => {
     await editor.destroy();
     expect(editor.getEditor()).toBeNull();
   });
+
+  it('rolls back unsupported Markdown instead of silently replacing persisted content', async () => {
+    const el = document.createElement('div');
+    const editor = new CherryMilkdown({ el, value: '# Safe' });
+    await editor.create();
+    editor.assertRoundTrip = () => {
+      throw new MarkdownRoundTripError('unsupported', 'changed');
+    };
+
+    await expect(editor.setMarkdown('unsupported')).rejects.toBeInstanceOf(MarkdownRoundTripError);
+    expect(await editor.getMarkdown()).toContain('# Safe');
+    await editor.destroy();
+  });
+
+  it('cleans up a failed initial proprietary-syntax round trip', async () => {
+    const el = document.createElement('div');
+    class UnsupportedMilkdown extends CherryMilkdown {
+      assertRoundTrip() {
+        throw new MarkdownRoundTripError('unsupported', 'changed');
+      }
+    }
+    const editor = new UnsupportedMilkdown({ el, value: 'unsupported' });
+
+    await expect(editor.create()).rejects.toBeInstanceOf(MarkdownRoundTripError);
+    expect(editor.getEditor()).toBeNull();
+  });
 });

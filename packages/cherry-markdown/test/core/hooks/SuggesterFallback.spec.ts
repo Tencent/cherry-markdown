@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vite-plus/test';
-import Suggester from '../../../../engine/src/syntax/hooks/Suggester';
+import Suggester from '../../../src/editor/Suggester';
 
-vi.mock('../../../../engine/src/utils/env', () => ({
+vi.mock('../../../src/utils/env', () => ({
   isBrowser: () => false,
 }));
 
-vi.mock('../../../../engine/src/utils/regexp', () => ({
+vi.mock('../../../src/utils/regexp', () => ({
   isLookbehindSupported: () => false,
 }));
 

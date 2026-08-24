@@ -61,6 +61,7 @@ for (const current of builds) {
         entry: current.entry,
         formats: [current.format],
         fileName: () => current.file,
+        cssFileName: 'cherry-markdown-preview',
         name: current.name,
       },
       rollupOptions: {

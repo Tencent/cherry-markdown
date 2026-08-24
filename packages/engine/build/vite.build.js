@@ -6,7 +6,7 @@ const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const src = resolve(root, 'src');
 const nodeSanitizer = resolve(src, 'Sanitizer.node.js');
 
-const baseExternal = ['jsdom', 'mermaid', /^mermaid\//];
+const baseExternal = ['jsdom'];
 
 const builds = [
   {
@@ -22,7 +22,7 @@ const builds = [
     entry: resolve(src, 'index.js'),
     file: 'cherry-markdown-engine.browser.esm.js',
     format: 'es',
-    external: ['mermaid', /^mermaid\//],
+    external: [],
   },
   {
     id: 'engine-umd',
@@ -90,7 +90,7 @@ for (const current of builds) {
           codeSplitting: false,
           exports: 'named',
           generatedCode: { preset: 'es5' },
-          globals: current.format === 'umd' && current.external.includes('mermaid') ? { mermaid: 'mermaid' } : {},
+          globals: {},
         },
       },
     },

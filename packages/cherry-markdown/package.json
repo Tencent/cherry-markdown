@@ -44,10 +44,10 @@
     "build:styles": "NODE_ENV=production node build/styles.build.js",
     "clean": "rimraf ./dist",
     "check-bundle": "es-check es5 dist/cherry-markdown.js",
-    "test": "vp test --exclude test/build/built-artifact-contract.spec.js",
+    "test": "vp test --exclude test/build/built-artifact-contract.spec.js --exclude test/build/legacy-equivalence.spec.js",
     "test:artifacts": "vp test run test/build/built-artifact-contract.spec.js test/build/legacy-equivalence.spec.js",
-    "test:coverage": "COVERAGE_THRESHOLDS=true vp test run --coverage --exclude test/build/built-artifact-contract.spec.js",
-    "test:update": "vp test -u --exclude test/build/built-artifact-contract.spec.js",
+    "test:coverage": "COVERAGE_THRESHOLDS=true vp test run --coverage --exclude test/build/built-artifact-contract.spec.js --exclude test/build/legacy-equivalence.spec.js",
+    "test:update": "vp test -u --exclude test/build/built-artifact-contract.spec.js --exclude test/build/legacy-equivalence.spec.js",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project test/tsconfig.json --noEmit",
     "examples": "serve -p 3000 ."
   },
