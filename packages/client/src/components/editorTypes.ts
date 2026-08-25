@@ -8,6 +8,13 @@ export interface CherryEditorStats {
 
 export interface CherryEditorInstance {
   focusMode: boolean;
+  /**
+   * Cherry 实例挂载后暴露的最外层 DOM 容器
+   * （包含 toolbar、editor、previewer、sidebar 等所有子结构），
+   * 在 customMenu 的 onClick 里常用于查询 sidebar 内的 toolbar 按钮做样式联动。
+   * 类型标为可选，避免在初始化早期访问时报错。
+   */
+  wrapperDom?: HTMLElement;
   editor?: {
     wordCount?: (mode: number) => CherryEditorStats | undefined;
     refresh?: () => void;

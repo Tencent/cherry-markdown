@@ -21,6 +21,11 @@ const formatFullTime = (ts: number): string => {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
 };
 
+const formatClockTime = (ts: number): string => {
+  const d = new Date(ts);
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+};
+
 export default defineComponent({
   name: 'StatusBar',
   props: {
@@ -32,17 +37,52 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    /** 最近一次本地版本自动保存时间戳（毫秒），由 App.tsx 传入 */
+    lastAutoSavedAt: {
+      type: Number as unknown as import('vue').PropType<number | null>,
+      default: null,
+    },
+    /** 当前文件是否存在本地历史版本（决定“查看历史版本”按钮显隐） */
+    hasVersion: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: {
     toggleToolbar: () => true,
+    openVersionHistory: () => true,
   },
-  setup(props) {
+  setup(props, { emit }) {
     const fileStore = useFileStore();
     const preferences = usePreferencesStore();
     const wordCount = ref(0);
     const wordWords = ref(0);
     const wordLine = ref(0);
     const lastChangeTime = ref<number | null>(null);
+    // 自动快照提示的“可见时间戳”：仅在 3s 展示窗口内保持为 props.lastAutoSavedAt 的值
+    // 展示窗口结束后置 null 隐藏提示；下次 props.lastAutoSavedAt 变化时重新显示 3s
+    const visibleAutoSavedAt = ref<number | null>(null);
+    let autoSavedHideTimer: number | undefined;
+    watch(
+      () => props.lastAutoSavedAt,
+      (ts) => {
+        if (!ts) {
+          visibleAutoSavedAt.value = null;
+          if (autoSavedHideTimer) {
+            window.clearTimeout(autoSavedHideTimer);
+            autoSavedHideTimer = undefined;
+          }
+          return;
+        }
+        visibleAutoSavedAt.value = ts;
+        if (autoSavedHideTimer) window.clearTimeout(autoSavedHideTimer);
+        autoSavedHideTimer = window.setTimeout(() => {
+          visibleAutoSavedAt.value = null;
+          autoSavedHideTimer = undefined;
+        }, 3000);
+      },
+      { immediate: true },
+    );
     // 当前编辑器引擎（cherry / milkdown），点击按钮时写回持久化
     const engine = ref<'cherry' | 'milkdown'>(preferences.engine);
     const toggleEngine = (): void => {
@@ -61,6 +101,19 @@ export default defineComponent({
 
     const FOCUS_MODE_CLASS = 'cherry-focus-mode';
     const WIDTH_CLASSES = ['fixed-width', 'auto-width'] as const;
+
+    // 将“固定宽度”数值同步为 CSS 变量，供 global.css / app.css 中的 fixed-width 样式使用
+    const applyFixedWidthCssVar = (px: number): void => {
+      document.body.style.setProperty('--fixed-content-width', `${px}px`);
+    };
+    // 初始化：无论是否处于专注模式，都先把 CSS 变量写好，进入专注模式时即刻生效
+    applyFixedWidthCssVar(preferences.fixedWidthValue);
+
+    // 用户在设置弹窗里修改固定宽度后，实时反映到 DOM
+    watch(
+      () => preferences.fixedWidthValue,
+      (v) => applyFixedWidthCssVar(v),
+    );
 
     // 根据当前引擎返回激活的编辑器容器 id：cherry → #markdown-editor，milkdown → #milkdown-editor
     const getActiveContainerId = (): string => (engine.value === 'milkdown' ? 'milkdown-editor' : 'markdown-editor');
@@ -347,6 +400,10 @@ export default defineComponent({
 
     onUnmounted(() => {
       if (waitTimer) window.clearTimeout(waitTimer);
+      if (autoSavedHideTimer) {
+        window.clearTimeout(autoSavedHideTimer);
+        autoSavedHideTimer = undefined;
+      }
       getEditorInstance()?.off?.('afterChange', onAfterChange);
       // 组件卸载时若仍处于专注模式，清理 body class 避免副作用残留
       document.body.classList.remove(FOCUS_MODE_CLASS);
@@ -372,6 +429,18 @@ export default defineComponent({
                 'span',
                 { class: 'file-change-time', title: `上次变更：${formatFullTime(lastChangeTime.value)}` },
                 formatChangeTime(lastChangeTime.value),
+              )
+            : null,
+          props.hasVersion
+            ? h(
+                'button',
+                {
+                  type: 'button',
+                  class: 'status-action status-action-history',
+                  title: '查看当前文件的本地历史版本',
+                  onClick: () => emit('openVersionHistory'),
+                },
+                [h('span', { class: 'status-action-label' }, '查看历史版本')],
               )
             : null,
         ]),
@@ -425,6 +494,17 @@ export default defineComponent({
           ),
         ]),
         h('div', { class: 'status-right' }, [
+          visibleAutoSavedAt.value
+            ? h(
+                'span',
+                {
+                  class: 'auto-saved-hint',
+                  title: `已自动快照，可点击「查看历史版本」进行查看\n${formatFullTime(visibleAutoSavedAt.value)}`,
+                },
+                [h('span', { class: 'auto-saved-dot' }), `自动快照 ${formatClockTime(visibleAutoSavedAt.value)}`],
+              )
+            : null,
+          visibleAutoSavedAt.value ? h('span', { class: 'status-sep' }) : null,
           h('span', { class: 'status-item' }, `${wordCount.value} 字`),
           h('span', { class: 'status-sep' }),
           h('span', { class: 'status-item' }, `${wordWords.value} 词`),

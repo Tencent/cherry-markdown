@@ -2,16 +2,29 @@ import { ref, readonly, type Ref } from 'vue';
 
 export type ToastType = 'info' | 'success' | 'warning' | 'error';
 
+/**
+ * 可选的操作按钮配置：Toast 上显示一个按钮，用于承担类似“应用本地版本”这种
+ * 需要用户主动确认但又不应该阻塞主界面的场景。
+ */
+export interface ToastAction {
+  /** 按钮文案 */
+  label: string;
+  /** 点击回调；返回 true / undefined 表示需要在点击后关闭 toast，返回 false 则保留 */
+  onClick: () => boolean | void;
+}
+
 export interface ToastItem {
   id: number;
   type: ToastType;
   message: string;
   duration: number;
+  action?: ToastAction;
 }
 
 interface ToastOptions {
   type?: ToastType;
   duration?: number;
+  action?: ToastAction;
 }
 
 // 默认配置
@@ -50,7 +63,9 @@ const addToast = (message: string, options: ToastOptions = {}): number => {
     id,
     type: options.type ?? 'info',
     message,
-    duration: options.duration ?? DEFAULT_DURATION,
+    // 带操作按钮的 toast 需要用户注意，默认延长展示时间
+    duration: options.duration ?? (options.action ? 8000 : DEFAULT_DURATION),
+    action: options.action,
   };
 
   toasts.value.push(toast);
@@ -94,6 +109,13 @@ const error = (message: string, duration?: number): number => {
   return addToast(message, { type: 'error', duration });
 };
 
+/**
+ * 带操作按钮的 toast（非阻塞消息提醒 + 一键操作）。
+ * 适用于“发现更新的本地版本”“文件被外部修改”等需要用户可选择动作的场景。
+ */
+const action = (message: string, act: ToastAction, options: Omit<ToastOptions, 'action'> = {}): number =>
+  addToast(message, { ...options, type: options.type ?? 'info', action: act });
+
 export const useToast = () => {
   return {
     toasts: readonly(toasts),
@@ -104,6 +126,7 @@ export const useToast = () => {
     success,
     warning,
     error,
+    action,
   };
 };
 
@@ -113,6 +136,7 @@ export const toast = {
   success,
   warning,
   error,
+  action,
   remove: removeToast,
   clear: clearAllToasts,
 };

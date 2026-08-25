@@ -82,6 +82,30 @@
   flex: 1;
   margin-right: 8px;
   word-break: break-word;
+  /* 允许消息中的 \n 换行，但连续空白仍会被折叠，避免误缩进 */
+  white-space: pre-line;
+  line-height: 1.45;
+}
+
+.toast-action {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-right: 6px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.toast-action:hover {
+  background: rgba(255, 255, 255, 0.32);
+  border-color: rgba(255, 255, 255, 0.55);
 }
 
 .toast-close {
@@ -155,6 +179,7 @@
   gap: 8px;
   justify-content: flex-end;
   flex-wrap: wrap;
+  margin-top: 20px;
 }
 
 .btn {
