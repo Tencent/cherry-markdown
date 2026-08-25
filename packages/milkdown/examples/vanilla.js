@@ -1,64 +1,85 @@
 import Cherry from 'cherry-markdown';
 import 'cherry-markdown/dist/cherry-markdown.css';
-import { attachCherryMilkdownPreview } from '@cherry-markdown/milkdown';
+import { milkdown } from '@cherry-markdown/milkdown';
 import '@cherry-markdown/milkdown/styles.css';
 import '@milkdown/kit/prose/view/style/prosemirror.css';
+import basicMd from '../../../examples/assets/markdown/index.md?raw';
+
+let echartsReady;
+
+async function loadECharts() {
+  echartsReady ??= Promise.all([
+    import('echarts/core'),
+    import('echarts/charts'),
+    import('echarts/components'),
+    import('echarts/renderers'),
+    import('echarts/features'),
+  ]).then(([echarts, charts, components, renderers, features]) => {
+    echarts.use([
+      charts.LineChart,
+      charts.BarChart,
+      charts.PieChart,
+      charts.RadarChart,
+      charts.ScatterChart,
+      charts.MapChart,
+      charts.HeatmapChart,
+      charts.SankeyChart,
+      components.GridComponent,
+      components.RadarComponent,
+      components.GeoComponent,
+      components.GraphicComponent,
+      components.ToolboxComponent,
+      components.TooltipComponent,
+      components.AxisPointerComponent,
+      components.TitleComponent,
+      components.LegendComponent,
+      components.DataZoomComponent,
+      components.VisualMapComponent,
+      components.DatasetComponent,
+      components.TransformComponent,
+      renderers.CanvasRenderer,
+      features.LabelLayout,
+      features.UniversalTransition,
+    ]);
+    window.echarts = echarts;
+    Cherry.usePlugin(Cherry.plugins.EChartsCodeBlockEngine, {
+      size: { width: '100%', height: '600px' },
+      enableJs: true,
+    });
+    return echarts;
+  });
+  return echartsReady;
+}
+
+async function renderECharts({ container, source }) {
+  const echarts = await loadECharts();
+  const expression = source.trim().replace(/;\s*$/, '');
+  // This demo intentionally matches the original index.html configuration,
+  // whose EChartsCodeBlockEngine has enableJs enabled.
+  const option = Function(`"use strict"; return (${expression});`)();
+  container.style.width = '100%';
+  container.style.height = '600px';
+  const chart = echarts.init(container);
+  chart.setOption(option);
+  const resizeObserver = new ResizeObserver(() => chart.resize());
+  resizeObserver.observe(container);
+  return () => {
+    resizeObserver.disconnect();
+    chart.dispose();
+  };
+}
 
 async function main() {
-  const value = [
-    '---',
-    'title: Cherry Markdown',
-    'owner: Cherry Oteam',
-    '---',
-    '',
-    '# Cherry Markdown',
-    '',
-    '[[toc]]',
-    '',
-    '这个页面仍然是 Cherry Markdown 的预览页。现在可以直接点击标题、正文、列表和表格进行编辑。',
-    '',
-    '文字样式：!!#d54941 红色!!、!!!#fff1b8 背景色!!!、==高亮==、^^下标^^ 和 ^上标^。',
-    '',
-    '点击行内公式 $E=mc^2$，可以直接在公式中输入和修改。',
-    '',
-    '$$',
-    '\\int_0^1 x^2 \\, dx',
-    '$$',
-    '',
-    '| Feature | Status |',
-    '| --- | --- |',
-    '| Cherry 原预览样式 | 保持不变 |',
-    '| Milkdown 原位编辑 | 已接入 |',
-    '',
-    '::: warning 当前预览区可编辑',
-    'Milkdown 只接管文档内容，Cherry 继续管理页面、主题、工具栏和 Markdown 数据。',
-    ':::',
-    '',
-    '+++- 更多能力',
-    'Detail 正文同样在当前预览位置编辑。',
-    '+++',
-    '',
-    '```mermaid',
-    'flowchart LR',
-    '  CherryPreview --> Milkdown --> Markdown',
-    '```',
-  ].join('\n');
+  window.Cherry = Cherry;
+  await Promise.all([loadECharts(), import('../../../examples/assets/scripts/pinyin/pinyin_dist.js')]);
+  const { basicConfig } = await import('../../../examples/assets/scripts/index-demo.js');
 
-  const cherry = new Cherry({
-    id: 'editor',
-    value,
-    editor: {
-      defaultModel: 'previewOnly',
-      height: '100%',
-    },
-    previewer: {
-      enablePreviewerBubble: true,
-    },
+  window.cherry = new Cherry({
+    ...basicConfig,
+    id: 'markdown',
+    value: basicMd,
+    extensions: [milkdown({ renderers: { echarts: renderECharts } })],
   });
-  const editor = await attachCherryMilkdownPreview(cherry);
-  window.cherry = cherry;
-  window.cherryMilkdown = editor;
-  window.detachCherryMilkdown = () => editor.detach();
 }
 
 void main();

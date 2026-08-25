@@ -44,6 +44,7 @@ export default class Previewer {
    * } | null}
    */
   contentRenderer = null;
+  editingBridge = null;
 
   /**
    * @property
@@ -872,6 +873,35 @@ export default class Previewer {
     return true;
   }
 
+  /** Registers command/insert handling for an editor mounted in the preview surface. */
+  setEditingBridge(bridge) {
+    if (!bridge || typeof bridge.isActive !== 'function') {
+      throw new TypeError('Previewer.setEditingBridge: bridge.isActive must be a function.');
+    }
+    this.editingBridge = bridge;
+  }
+
+  clearEditingBridge(bridge) {
+    if (!this.editingBridge || (bridge && bridge !== this.editingBridge)) return false;
+    this.editingBridge = null;
+    return true;
+  }
+
+  getEditingAdapter() {
+    if (!this.editingBridge?.isActive?.()) return null;
+    return this.editingBridge.getSearchAdapter?.() ?? null;
+  }
+
+  runEditingCommand(command) {
+    if (!this.editingBridge?.isActive?.()) return false;
+    return this.editingBridge.runCommand?.(command) === true;
+  }
+
+  insertEditingContent(content, options = {}) {
+    if (!this.editingBridge?.isActive?.()) return false;
+    return this.editingBridge.insert?.(content, options) === true;
+  }
+
   $updateContentRenderer(html, domContainer = this.getDomContainer()) {
     const renderer = this.contentRenderer;
     if (!renderer) {
@@ -1458,6 +1488,7 @@ export default class Previewer {
     if (this.contentRenderer) {
       this.clearContentRenderer(this.contentRenderer);
     }
+    this.clearEditingBridge(this.editingBridge);
 
     // 清理滚动事件监听
     this.removeScroll();

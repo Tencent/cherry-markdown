@@ -28,6 +28,7 @@ const customMarkdownPlugin: RemarkPluginRaw<unknown> = function customMarkdownPl
       cherryHtmlBlock: (node: MarkdownNode) => String(node.source ?? node.value ?? ''),
       cherryHtmlInline: (node: MarkdownNode) => String(node.source ?? node.value ?? ''),
       cherryEmoji: (node: MarkdownNode) => String(node.source ?? node.value ?? ''),
+      cherryLinkTarget: (node: MarkdownNode) => String(node.source ?? ''),
       cherryCompoundItem: (node: MarkdownNode, _parent: MarkdownNode, state: MarkdownState, info: unknown) => {
         const body = state.containerFlow(node, info).trim();
         const role = String(node.role ?? '');

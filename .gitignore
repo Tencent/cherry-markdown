@@ -2,6 +2,7 @@
 node_modules
 dist
 coverage
+packages/milkdown/preview/
 
 # local env files
 .env.local

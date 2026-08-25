@@ -1,5 +1,6 @@
 ---
 '@cherry-markdown/milkdown': minor
+'cherry-markdown': minor
 ---
 
-新增 Milkdown 所见即所得编辑包：CommonMark/GFM、数学公式和 Cherry 行内排版均可直接编辑，TOC、frontmatter、panel、detail、HTML 与图表以可视化嵌入节点呈现并保持 Markdown 可逆。
+新增按实例启用的 `milkdown()` 即见即所得预览编辑扩展和 Cherry 异步扩展生命周期。原 CodeMirror、工具栏、主题、布局和 Markdown 数据源保持不变；CommonMark/GFM、数学公式和 Cherry 行内排版可直接编辑，TOC、frontmatter、panel、detail、HTML 与图表保持可视化和 Markdown 可逆。

@@ -24,7 +24,6 @@ interface BlockMatch {
 }
 
 const BLOCK_PATTERNS = [
-  { syntax: 'frontmatter' as const, pattern: /^---[^\n]*\n[\s\S]+?\n---[^\n]*(?=\n|$)/gm },
   { syntax: 'toc' as const, pattern: /^[ \t]*(?:\[\[(?:toc|TOC)\]\]|【【(?:toc|TOC)】】|\[(?:toc|TOC)\])[ \t]*$/gm },
   { syntax: 'comment-reference' as const, pattern: /^[ \t]*\[(?!\^)[^\]\n]+?\]:[^\S\n]*[^\n]+$/gm },
   { syntax: 'panel' as const, pattern: /^[ \t]*:::[^:\n][^\n]*\n[\s\S]*?^[ \t]*:::[ \t]*$/gm },
@@ -38,6 +37,11 @@ const BLOCK_PATTERNS = [
     ),
   })),
 ];
+
+// YAML frontmatter is only valid at the start of a Markdown document. Treating
+// every pair of horizontal rules as frontmatter can swallow most of a long
+// document, including fenced examples between those rules.
+const FRONTMATTER_PATTERN = /^(?:\uFEFF)?---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?=\r?\n|$)/;
 
 const INLINE_MATCHERS = [
   {
@@ -85,6 +89,15 @@ const INLINE_MATCHERS = [
 
 function collectBlocks(source: string): BlockMatch[] {
   const matches: BlockMatch[] = [];
+  const frontmatter = FRONTMATTER_PATTERN.exec(source);
+  if (frontmatter) {
+    matches.push({
+      from: 0,
+      to: frontmatter[0].length,
+      syntax: 'frontmatter',
+      source: frontmatter[0],
+    });
+  }
   for (const descriptor of BLOCK_PATTERNS) {
     descriptor.pattern.lastIndex = 0;
     let match: RegExpExecArray | null;
@@ -300,7 +313,7 @@ function splitText(node: MarkdownNode): MarkdownNode[] {
   return next;
 }
 
-function transformInline(node: MarkdownNode, root = false) {
+function transformInline(node: MarkdownNode, source: string, root = false) {
   if (!node.children) return;
   if (
     node.type === 'paragraph' &&
@@ -332,9 +345,25 @@ function transformInline(node: MarkdownNode, root = false) {
         source: child.value ?? '',
       });
     } else if (child.type === 'text') {
-      next.push(...splitText(child));
+      const value = child.value ?? '';
+      const previous = next.at(-1);
+      const target = previous?.type === 'link' ? /^\{target\s*=\s*([^}\s]+)\}/.exec(value) : null;
+      if (target) {
+        const range = nodeRange(child);
+        const rawValue = range ? source.slice(range.from, range.to) : value;
+        const rawTarget = /^\{target\s*=\s*([^}\s]+)\}/.exec(rawValue)?.[0] ?? target[0];
+        next.push({
+          type: 'cherryLinkTarget',
+          source: rawTarget,
+          target: String(target[1] ?? '').replace(/^['"]|['"]$/g, ''),
+        });
+        const remainder = value.slice(target[0].length);
+        if (remainder) next.push(...splitText({ ...child, value: remainder }));
+      } else {
+        next.push(...splitText(child));
+      }
     } else {
-      transformInline(child);
+      transformInline(child, source);
       next.push(child);
     }
   }
@@ -343,6 +372,6 @@ function transformInline(node: MarkdownNode, root = false) {
 
 export function transformCherryWysiwygTree(tree: MarkdownNode, source: string, parse: ParseMarkdown = () => []) {
   replaceRootBlocks(tree, source, parse);
-  transformInline(tree, true);
+  transformInline(tree, source, true);
   return tree;
 }

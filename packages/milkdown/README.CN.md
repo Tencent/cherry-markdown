@@ -35,30 +35,30 @@ import '@milkdown/kit/prose/view/style/prosemirror.css';
 
 ```js
 import Cherry from 'cherry-markdown';
-import { attachCherryMilkdownPreview } from '@cherry-markdown/milkdown';
+import { milkdown } from '@cherry-markdown/milkdown';
 
 const cherry = new Cherry({
   id: 'editor',
   value: '# 标题\n\n行内公式 $E=mc^2$ 和 !!red 红色文字!!。',
-  editor: { defaultModel: 'previewOnly' },
-});
-
-const editor = await attachCherryMilkdownPreview(cherry, {
-  onChange({ markdown }) {
-    console.log(markdown);
-  },
+  extensions: [
+    milkdown({
+      onChange({ markdown }) {
+        console.log(markdown);
+      },
+    }),
+  ],
 });
 
 // 预览区编辑会自动回写 cherry.getMarkdown() / CodeMirror。
 // 源码编辑也会自动更新当前 Milkdown 预览内容。
-await editor.detach(); // 恢复 Cherry 原生只读预览
+cherry.destroy(); // Milkdown 随当前 Cherry 实例一起清理
 ```
 
-`createCherryMilkdown` 仍可用于不需要 Cherry 页面壳的独立编辑器，但它不是本示例的默认集成方式。
+`attachCherryMilkdownPreview(cherry, options)` 继续兼容需要显式 detach 句柄的旧接入；`createCherryMilkdown` 仍可用于不需要 Cherry 页面壳的独立编辑器。两者都不是 Cherry 页面中的推荐接入方式。
 
 `plugins` 会在内置 WYSIWYG 插件之后加载，可用于注册业务 NodeView。
 
-编辑器不显示常驻格式工具栏。在空段落输入 `/` 调出插入命令，普通格式使用 Markdown 快捷输入；复合块标题和正文都直接编辑，结构按钮只在悬停或选中节点时出现。表格使用 Milkdown `table-block`，可增删、拖拽行列并修改列对齐；公式使用 MathLive，点击公式即可输入。
+扩展模式保留 Cherry 原工具栏；焦点在预览区时，格式命令优先作用于当前 Milkdown 选区。图片、文件、Draw.io、图表等选择器继续使用 Cherry 原交互，并把结果插入触发时保存的 Milkdown 选区。也可以在预览空段落输入 `/` 调出插入命令或使用 Markdown 快捷输入。复合块标题和正文都直接编辑，结构按钮只在悬停或选中节点时出现。表格使用 Milkdown `table-block`，可增删、拖拽行列并修改列对齐；公式使用 MathLive，点击公式即可输入。
 
 可通过 `mathlive` 传入宏和虚拟键盘模式：
 
@@ -89,9 +89,11 @@ createCherryMilkdown({
 ## 本地示例
 
 ```sh
-yarn build
-npx vite examples
+yarn build:demo
+npx serve preview
 ```
+
+该 demo 复用仓库根 `examples/index.html` 的布局、配置、工具栏、主题、ECharts 插件和整份 Markdown 手册；业务接入上的唯一差异是增加 `extensions: [milkdown()]`。
 
 ## 当前边界
 

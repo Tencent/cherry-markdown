@@ -121,6 +121,9 @@ export default class Cherry extends CherryStatic {
      */
     this.instanceId = `cherry-${new Date().getTime()}${Math.random()}`;
     this.options.instanceId = this.instanceId;
+    this.isDestroyed = false;
+    /** @type {Array<() => void | Promise<void>>} */
+    this.extensionCleanups = [];
     this.lastMarkdownText = '';
     this.$event = new Event(this.instanceId);
 
@@ -132,7 +135,31 @@ export default class Cherry extends CherryStatic {
      * @type {import('./Engine').default}
      */
     this.engine = new Engine(this.options, this);
-    this.init();
+    if (this.init() !== false) {
+      this.mountExtensions();
+    }
+  }
+
+  /** Mount instance-scoped integrations without making construction async. */
+  mountExtensions() {
+    const extensions = Array.isArray(this.options.extensions) ? this.options.extensions : [];
+    extensions.forEach((extension) => {
+      if (!extension || typeof extension.mount !== 'function') {
+        Logger.warn('Cherry extension ignored because mount() is missing.');
+        return;
+      }
+      Promise.resolve()
+        .then(() => extension.mount(this))
+        .then((cleanup) => {
+          if (typeof cleanup !== 'function') return;
+          if (this.isDestroyed) {
+            Promise.resolve(cleanup()).catch((error) => Logger.error('Cherry extension cleanup failed.', error));
+            return;
+          }
+          this.extensionCleanups.push(cleanup);
+        })
+        .catch((error) => Logger.error(`Cherry extension "${extension.name || 'anonymous'}" failed to mount.`, error));
+    });
   }
 
   /**
@@ -271,6 +298,12 @@ export default class Cherry extends CherryStatic {
   }
 
   destroy() {
+    if (this.isDestroyed) return;
+    this.isDestroyed = true;
+    this.extensionCleanups.splice(0).forEach((cleanup) => {
+      Promise.resolve(cleanup()).catch((error) => Logger.error('Cherry extension cleanup failed.', error));
+    });
+
     // 先销毁搜索面板桥接（解绑监听、清理面板 DOM）
     destroySearcherBridge(this);
 
@@ -513,6 +546,15 @@ export default class Cherry extends CherryStatic {
    * @param {boolean} [focus=true] 保持编辑器处于focus状态
    */
   insert(content, isSelect = false, anchor = false, focus = true) {
+    if (
+      !anchor &&
+      this.previewer?.insertEditingContent?.(content, {
+        select: isSelect,
+        focus,
+      })
+    ) {
+      return;
+    }
     const editorView = this.editor.editor;
     let insertPos;
 

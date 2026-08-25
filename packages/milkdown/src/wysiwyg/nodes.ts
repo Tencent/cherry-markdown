@@ -1,5 +1,5 @@
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
-import { Plugin } from '@milkdown/kit/prose/state';
+import { NodeSelection, Plugin } from '@milkdown/kit/prose/state';
 import { Decoration, DecorationSet } from '@milkdown/kit/prose/view';
 import type { EditorView, NodeView, ViewMutationRecord } from '@milkdown/kit/prose/view';
 import type { SerializerState } from '@milkdown/kit/transformer';
@@ -17,6 +17,32 @@ async function renderMermaid(source: string) {
   return (await mermaid.render(`cherry-milkdown-mermaid-${mermaidRenderId}`, source)).svg;
 }
 
+function sanitizedEngineFragment(html: string, inline = false): DocumentFragment {
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  template.content.querySelectorAll('script, iframe, object, embed, base, meta, form').forEach((node) => node.remove());
+  template.content.querySelectorAll<HTMLElement>('*').forEach((element) => {
+    for (const attribute of Array.from(element.attributes)) {
+      const name = attribute.name.toLowerCase();
+      const value = attribute.value.trim().toLowerCase();
+      if (
+        name.startsWith('on') ||
+        (['href', 'src', 'xlink:href', 'formaction', 'srcset'].includes(name) &&
+          /^(?:javascript|data:text\/html)/.test(value)) ||
+        (name === 'style' && /(?:expression\s*\(|javascript\s*:)/.test(value))
+      ) {
+        element.removeAttribute(attribute.name);
+      }
+    }
+  });
+  if (inline && template.content.childElementCount === 1 && template.content.firstElementChild?.tagName === 'P') {
+    const fragment = document.createDocumentFragment();
+    fragment.append(...Array.from(template.content.firstElementChild.childNodes));
+    return fragment;
+  }
+  return template.content;
+}
+
 function sourceAttr() {
   return { default: '', validate: 'string' as const };
 }
@@ -31,6 +57,7 @@ function addCustomMarkdownNode(state: SerializerState, type: string, node: Prose
 export const cherryCompoundItemSchema = $nodeSchema('cherry_compound_item', () => ({
   content: 'block+',
   defining: true,
+  selectable: true,
   attrs: {
     role: sourceAttr(),
     label: sourceAttr(),
@@ -79,6 +106,7 @@ function compoundSchema(name: 'cherry_panel' | 'cherry_detail', markdownType: 'c
     group: 'block',
     defining: true,
     isolating: true,
+    selectable: true,
     attrs: {
       kind: { default: name === 'cherry_detail' ? 'detail' : 'panel', validate: 'string' as const },
       rawType: sourceAttr(),
@@ -197,6 +225,37 @@ export const cherryDiagramSchema = leafSchema('cherry_diagram', 'cherryDiagram',
 export const cherryHtmlBlockSchema = leafSchema('cherry_html_block', 'cherryHtmlBlock');
 export const cherryHtmlInlineSchema = leafSchema('cherry_html_inline', 'cherryHtmlInline', true);
 export const cherryEmojiSchema = leafSchema('cherry_emoji', 'cherryEmoji', true);
+export const cherryLinkTargetSchema = leafSchema('cherry_link_target', 'cherryLinkTarget', true, {
+  target: sourceAttr(),
+});
+
+class LinkTargetView implements NodeView {
+  dom: HTMLElement;
+  private node: ProseNode;
+
+  constructor(node: ProseNode) {
+    this.node = node;
+    this.dom = document.createElement('span');
+    this.dom.className = 'cherry-link-target';
+    this.dom.contentEditable = 'false';
+    this.sync();
+  }
+
+  update(node: ProseNode) {
+    if (node.type !== this.node.type) return false;
+    this.node = node;
+    this.sync();
+    return true;
+  }
+
+  ignoreMutation() {
+    return true;
+  }
+
+  private sync() {
+    this.dom.dataset.target = String(this.node.attrs.target ?? '');
+  }
+}
 
 function iconButton(label: string, title: string, action: () => void, readonly = false) {
   const button = document.createElement('button');
@@ -276,6 +335,9 @@ class CompoundItemView implements NodeView {
       () => this.updateAttrs({ label: this.label.textContent ?? '' }),
     );
     this.label.hidden = node.attrs.role === 'column';
+    if (role === 'detail-item') {
+      this.label.addEventListener('click', (event) => event.preventDefault());
+    }
     const actions = document.createElement('span');
     actions.className = 'cherry-node-actions';
     actions.append(
@@ -283,8 +345,18 @@ class CompoundItemView implements NodeView {
       iconButton('→', '向后移动', () => this.move(1), readonly),
       iconButton('×', '删除项目', this.remove, readonly),
     );
-    if (role !== 'detail-item') header.append(this.disclosure);
-    header.append(this.label, actions);
+    header.append(this.disclosure, this.label, actions);
+    header.addEventListener('mousedown', (event) => {
+      if (event.target !== header) return;
+      const pos = this.getPos();
+      if (typeof pos !== 'number') return;
+      event.preventDefault();
+      this.view.dispatch(this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos)));
+      this.view.focus();
+    });
+    if (role === 'detail-item') {
+      this.disclosure.addEventListener('click', (event) => event.preventDefault());
+    }
     this.contentDOM = document.createElement('div');
     this.contentDOM.className = `cherry-compound-item__content${
       role === 'detail-item' ? ' cherry-detail-body' : role === 'column' ? ' cherry-panel--col' : ''
@@ -313,7 +385,8 @@ class CompoundItemView implements NodeView {
   }
 
   stopEvent(event: Event) {
-    return Boolean((event.target as HTMLElement).closest('.cherry-compound-item__header'));
+    const target = event.target as HTMLElement;
+    return this.label.contains(target) || Boolean(target.closest('button'));
   }
 
   ignoreMutation(mutation: ViewMutationRecord) {
@@ -405,7 +478,8 @@ class CompoundView implements NodeView {
   }
 
   stopEvent(event: Event) {
-    return Boolean((event.target as HTMLElement).closest('.cherry-compound__header'));
+    const target = event.target as HTMLElement;
+    return this.title.contains(target) || Boolean(target.closest('button'));
   }
 
   ignoreMutation(mutation: ViewMutationRecord) {
@@ -428,7 +502,9 @@ class CompoundView implements NodeView {
     this.dom.className = `cherry-compound cherry-compound--${kind} ${cherryClass}`.trim();
     const header = this.title.parentElement;
     if (header) {
-      header.className = `cherry-compound__header${isPanel ? ' cherry-panel--title' : ''}`;
+      header.className = `cherry-compound__header${isPanel ? ' cherry-panel--title' : ''}${
+        isPanel && node.attrs.title ? ' cherry-panel--title__not-empty' : ''
+      }`;
     }
     this.contentDOM.className = `cherry-compound__content${isPanel ? ' cherry-panel--body' : ''}`;
     this.kind.textContent = kind;
@@ -593,6 +669,9 @@ class EmbedView implements NodeView {
   private timer?: ReturnType<typeof setTimeout>;
   private renderVersion = 0;
   private cleanup?: () => void;
+  private visibilityObserver?: IntersectionObserver;
+  private renderActivated = false;
+  private destroyed = false;
 
   constructor(
     node: ProseNode,
@@ -632,7 +711,7 @@ class EmbedView implements NodeView {
     this.source.addEventListener('input', this.updateSource);
     this.sourcePanel.append(this.source);
     this.dom.append(this.preview, controls, this.sourcePanel);
-    this.render();
+    this.scheduleRender();
     this.syncSource();
   }
 
@@ -640,7 +719,7 @@ class EmbedView implements NodeView {
     if (node.type !== this.node.type) return false;
     this.node = node;
     this.syncSource();
-    this.render();
+    if (this.renderActivated || node.type.name !== 'cherry_diagram') this.render();
     return true;
   }
 
@@ -665,9 +744,37 @@ class EmbedView implements NodeView {
   }
 
   destroy() {
+    this.destroyed = true;
+    this.renderVersion += 1;
+    this.visibilityObserver?.disconnect();
+    this.dom.removeEventListener('pointerdown', this.activateRender);
     if (this.timer) clearTimeout(this.timer);
     this.cleanup?.();
   }
+
+  private scheduleRender() {
+    if (this.node.type.name !== 'cherry_diagram' || typeof IntersectionObserver === 'undefined') {
+      this.activateRender();
+      return;
+    }
+    this.visibilityObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) this.activateRender();
+      },
+      { rootMargin: '500px 0px' },
+    );
+    this.visibilityObserver.observe(this.dom);
+    this.dom.addEventListener('pointerdown', this.activateRender, { once: true });
+  }
+
+  private activateRender = () => {
+    if (this.destroyed || this.renderActivated) return;
+    this.renderActivated = true;
+    this.visibilityObserver?.disconnect();
+    this.visibilityObserver = undefined;
+    this.dom.removeEventListener('pointerdown', this.activateRender);
+    this.render();
+  };
 
   private syncSource() {
     if (document.activeElement === this.source) return;
@@ -706,14 +813,11 @@ class EmbedView implements NodeView {
       return;
     }
     if (this.node.type.name.startsWith('cherry_html')) {
-      if (this.node.isInline) {
+      try {
+        const html = this.config.engine.makeHtml(String(this.node.attrs.source));
+        this.preview.replaceChildren(sanitizedEngineFragment(html, this.node.isInline));
+      } catch {
         this.preview.textContent = String(this.node.attrs.source);
-      } else {
-        const frame = document.createElement('iframe');
-        frame.className = 'cherry-embed__html-frame';
-        frame.setAttribute('sandbox', '');
-        frame.srcdoc = String(this.node.attrs.source);
-        this.preview.replaceChildren(frame);
       }
       return;
     }
@@ -735,7 +839,7 @@ class EmbedView implements NodeView {
       }),
     )
       .then((result: CherryVisualRendererResult) => {
-        if (version !== this.renderVersion) {
+        if (this.destroyed || version !== this.renderVersion) {
           if (typeof result === 'function') result();
           return;
         }
@@ -744,7 +848,7 @@ class EmbedView implements NodeView {
         if (typeof result === 'function') this.cleanup = result;
       })
       .catch((error: unknown) => {
-        if (version !== this.renderVersion) return;
+        if (this.destroyed || version !== this.renderVersion) return;
         this.preview.classList.remove('is-loading');
         this.preview.dataset.renderError = 'true';
         this.config.onError?.(error, 'render');
@@ -789,6 +893,31 @@ export const cherryDiagramView = embedView(cherryDiagramSchema);
 export const cherryHtmlBlockView = embedView(cherryHtmlBlockSchema);
 export const cherryHtmlInlineView = embedView(cherryHtmlInlineSchema);
 export const cherryEmojiView = embedView(cherryEmojiSchema);
+export const cherryLinkTargetView = $view(cherryLinkTargetSchema.node, () => (node) => new LinkTargetView(node));
+
+// Applying target during NodeView construction mutates DOM owned by
+// ProseMirror. With many links that mutation is observed as an edit, redraws
+// the marker and schedules the same mutation again. Resolve the adjacent
+// marker only for the user's actual click, before the browser follows it.
+export const cherryLinkTargetClickPlugin = $prose(
+  () =>
+    new Plugin({
+      props: {
+        handleDOMEvents: {
+          click: (_view, event) => {
+            const origin = event.target;
+            const link = origin instanceof Element ? origin.closest('a') : null;
+            const marker = link?.nextElementSibling;
+            if (!(link instanceof HTMLAnchorElement) || !marker?.classList.contains('cherry-link-target')) return false;
+            const target = marker.getAttribute('data-target') ?? '';
+            if (target && link.target !== target) link.target = target;
+            if (target === '_blank' && !link.rel.includes('noopener')) link.rel = `${link.rel} noopener`.trim();
+            return false;
+          },
+        },
+      },
+    }),
+);
 
 export const cherryTocRefreshPlugin = $prose(
   () =>
@@ -841,6 +970,7 @@ export const cherryStructureSchemas = [
   cherryHtmlBlockSchema,
   cherryHtmlInlineSchema,
   cherryEmojiSchema,
+  cherryLinkTargetSchema,
 ];
 
 export const cherryStructureViews = [
@@ -854,5 +984,7 @@ export const cherryStructureViews = [
   cherryHtmlBlockView,
   cherryHtmlInlineView,
   cherryEmojiView,
+  cherryLinkTargetView,
+  cherryLinkTargetClickPlugin,
   cherryTocRefreshPlugin,
 ];

@@ -3,20 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cherry Markdown Milkdown Preview Editing</title>
+    <title>Cherry Editor - Milkdown Preview Editing</title>
     <style>
       html,
       body,
-      #editor {
-        width: 100%;
+      body {
         height: 100%;
         margin: 0;
+        padding: 0;
         overflow: hidden;
+      }
+
+      video {
+        max-width: 400px;
+      }
+
+      img {
+        max-width: 100%;
+      }
+
+      iframe.cherry-dialog-iframe {
+        width: 100%;
+        height: 100%;
       }
     </style>
   </head>
   <body>
-    <div id="editor"></div>
+    <div id="dom_mask" style="position: absolute; top: 40px; height: 20px; width: 100%"></div>
+    <div id="markdown"></div>
     <script type="module" src="./vanilla.js"></script>
   </body>
 </html>

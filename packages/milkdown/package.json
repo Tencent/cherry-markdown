@@ -53,9 +53,11 @@
   },
   "scripts": {
     "build": "rimraf ./dist && tsc --project tsconfig.build.json",
+    "build:demo": "yarn build && node ./scripts/build-demo.mjs",
     "build:types": "tsc --project tsconfig.build.json",
     "clean": "rimraf ./dist",
     "test": "yarn workspace cherry-markdown build:engine && vitest run --config vitest.config.ts",
+    "test:consumer": "yarn workspace cherry-markdown build && yarn build && node ./scripts/verify-consumer.mjs",
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "peerDependencies": {
@@ -72,6 +74,7 @@
   "devDependencies": {
     "@milkdown/kit": "^7.21.3",
     "cherry-markdown": "*",
+    "echarts": "^6.0.0",
     "mathlive": "^0.110.0",
     "mermaid": "^11.14.0",
     "remark-math": "^6.0.0",

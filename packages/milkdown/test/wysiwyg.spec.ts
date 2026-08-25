@@ -53,6 +53,70 @@ describe('Cherry WYSIWYG markdown transform', () => {
     expect((tree.children[2] as { diagramType?: string } | undefined)?.diagramType).toBe('mermaid');
   });
 
+  it('only recognizes strict YAML frontmatter at the document start', () => {
+    const source = ['---', 'title: Cherry', '---', '', '# Heading', '', '---', '', 'Body', '', '---'].join('\n');
+    const tree = {
+      type: 'root',
+      children: [
+        { type: 'thematicBreak', position: { start: { offset: 0 }, end: { offset: 3 } } },
+        { type: 'paragraph', position: { start: { offset: 4 }, end: { offset: 17 } }, children: [] },
+        { type: 'thematicBreak', position: { start: { offset: 18 }, end: { offset: 21 } } },
+        { type: 'heading', position: { start: { offset: 23 }, end: { offset: 32 } }, children: [] },
+        { type: 'thematicBreak', position: { start: { offset: 34 }, end: { offset: 37 } } },
+        { type: 'paragraph', position: { start: { offset: 39 }, end: { offset: 43 } }, children: [] },
+        { type: 'thematicBreak', position: { start: { offset: 45 }, end: { offset: 48 } } },
+      ],
+    };
+
+    transformCherryWysiwygTree(tree, source);
+
+    expect(tree.children.map(({ type }) => type)).toEqual([
+      'cherryFrontmatter',
+      'heading',
+      'thematicBreak',
+      'paragraph',
+      'thematicBreak',
+    ]);
+  });
+
+  it('does not interpret horizontal rules around a fenced example as frontmatter', () => {
+    const source = [
+      '# Before',
+      '',
+      '---',
+      '',
+      '```yaml',
+      '---',
+      'title: example',
+      '---',
+      '```',
+      '',
+      '---',
+      '',
+      '# After',
+    ].join('\n');
+    const tree = {
+      type: 'root',
+      children: [
+        { type: 'heading', position: { start: { offset: 0 }, end: { offset: 8 } }, children: [] },
+        { type: 'thematicBreak', position: { start: { offset: 10 }, end: { offset: 13 } } },
+        { type: 'code', position: { start: { offset: 15 }, end: { offset: 52 } }, value: '---\ntitle: example\n---' },
+        { type: 'thematicBreak', position: { start: { offset: 54 }, end: { offset: 57 } } },
+        { type: 'heading', position: { start: { offset: 59 }, end: { offset: source.length } }, children: [] },
+      ],
+    };
+
+    transformCherryWysiwygTree(tree, source);
+
+    expect(tree.children.map(({ type }) => type)).toEqual([
+      'heading',
+      'thematicBreak',
+      'code',
+      'thematicBreak',
+      'heading',
+    ]);
+  });
+
   it('does not consume math because Milkdown math owns its visual schema', () => {
     expect(findCherryInlineMatches('Formula $E=mc^2$')).toEqual([]);
   });

@@ -85,6 +85,33 @@ describe('Previewer rendering pipeline', () => {
     expect(second.update).toHaveBeenCalledOnce();
   });
 
+  it('routes commands and deferred inserts only through the active preview editor bridge', () => {
+    const { previewer } = createPreviewer();
+    const first = {
+      isActive: vi.fn(() => true),
+      runCommand: vi.fn(() => true),
+      insert: vi.fn(() => true),
+    };
+    const second = {
+      isActive: vi.fn(() => false),
+      runCommand: vi.fn(() => true),
+      insert: vi.fn(() => true),
+    };
+
+    previewer.setEditingBridge(first);
+    expect(previewer.runEditingCommand({ name: 'bold' })).toBe(true);
+    expect(previewer.insertEditingContent('![image](url)', { source: 'picker' })).toBe(true);
+    expect(first.runCommand).toHaveBeenCalledWith({ name: 'bold' });
+    expect(first.insert).toHaveBeenCalledWith('![image](url)', { source: 'picker' });
+
+    previewer.setEditingBridge(second);
+    expect(previewer.runEditingCommand({ name: 'italic' })).toBe(false);
+    expect(previewer.insertEditingContent('ignored')).toBe(false);
+    expect(second.runCommand).not.toHaveBeenCalled();
+    expect(previewer.clearEditingBridge(first)).toBe(false);
+    expect(previewer.clearEditingBridge(second)).toBe(true);
+  });
+
   it('incrementally inserts, updates, and deletes rendered blocks', () => {
     const engine = createEngine();
     const { previewer, previewerDom } = createPreviewer();

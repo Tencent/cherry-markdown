@@ -135,6 +135,28 @@ describe('toolbars/MenuBase', () => {
     expect(focus).toHaveBeenCalledOnce();
   });
 
+  it('gives the focused preview editor first refusal and otherwise falls back to CodeMirror', () => {
+    const handled = createMenu('text');
+    const runHandled = vi.fn(() => true);
+    Reflect.set(handled.cherry, 'previewer', { runEditingCommand: runHandled });
+    handled.menu.setName('bold');
+    handled.menu.onClick = vi.fn((selection) => `**${selection}**`);
+
+    handled.menu.fire(undefined, 'Control-KeyB');
+    expect(runHandled).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'bold', shortKey: 'Control-KeyB', menu: handled.menu }),
+    );
+    expect(handled.menu.onClick).not.toHaveBeenCalled();
+    expect(handled.getState().doc.toString()).toBe('text');
+
+    const fallback = createMenu('text');
+    Reflect.set(fallback.cherry, 'previewer', { runEditingCommand: vi.fn(() => false) });
+    fallback.menu.setName('italic');
+    fallback.menu.onClick = vi.fn((selection) => `*${selection}*`);
+    fallback.menu.fire();
+    expect(fallback.getState().doc.toString()).toBe('*text*');
+  });
+
   it('resolves asynchronous actions before replacing selections', async () => {
     const { menu, getState, focus } = createMenu('text');
     menu.onClick = vi.fn(async (selection) => selection.toUpperCase());

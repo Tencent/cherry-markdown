@@ -79,6 +79,9 @@ class MathNodeView implements NodeView {
   private readonly field: Mathfield;
   private readonly view: EditorView;
   private readonly getPos: () => number | undefined;
+  private readonly reportError?: (error: unknown) => void;
+  private visibilityObserver?: IntersectionObserver;
+  private activated = false;
   private composing = false;
 
   constructor(
@@ -90,10 +93,12 @@ class MathNodeView implements NodeView {
       macros?: Record<string, string>;
       virtualKeyboardMode?: 'auto' | 'manual' | 'onfocus' | 'off';
     },
+    reportError?: (error: unknown) => void,
   ) {
     this.node = node;
     this.view = view;
     this.getPos = getPos;
+    this.reportError = reportError;
     this.dom = document.createElement(node.type.name === 'cherry_math_inline' ? 'span' : 'div');
     this.dom.className = `cherry-math cherry-math--${node.isInline ? 'inline' : 'block'}`;
     this.dom.dataset.cherryMath = node.isInline ? 'inline' : 'block';
@@ -105,11 +110,23 @@ class MathNodeView implements NodeView {
     if (options?.virtualKeyboardMode) this.field.virtualKeyboardMode = options.virtualKeyboardMode;
     this.field.setAttribute('aria-label', node.isInline ? 'Inline formula' : 'Block formula');
     this.field.addEventListener('input', this.onInput);
-    this.field.addEventListener('compositionstart', () => (this.composing = true));
+    this.field.addEventListener('compositionstart', this.onCompositionStart);
     this.field.addEventListener('compositionend', this.onCompositionEnd);
     this.field.addEventListener('keydown', this.onKeyDown);
+    this.field.addEventListener('focusin', this.activate);
+    this.field.addEventListener('pointerdown', this.activate);
     this.dom.append(this.field);
-    void loadMathlive().then(() => this.setFieldValue(String(this.node.attrs.value ?? ''), true));
+    if (typeof IntersectionObserver === 'undefined') {
+      this.activate();
+    } else {
+      this.visibilityObserver = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) this.activate();
+        },
+        { rootMargin: '300px 0px' },
+      );
+      this.visibilityObserver.observe(this.dom);
+    }
   }
 
   update(node: ProseNode) {
@@ -136,9 +153,13 @@ class MathNodeView implements NodeView {
   }
 
   destroy() {
+    this.visibilityObserver?.disconnect();
     this.field.removeEventListener('input', this.onInput);
+    this.field.removeEventListener('compositionstart', this.onCompositionStart);
     this.field.removeEventListener('compositionend', this.onCompositionEnd);
     this.field.removeEventListener('keydown', this.onKeyDown);
+    this.field.removeEventListener('focusin', this.activate);
+    this.field.removeEventListener('pointerdown', this.activate);
   }
 
   private setFieldValue(value: string, force = false) {
@@ -160,6 +181,20 @@ class MathNodeView implements NodeView {
 
   private onInput = () => {
     if (!this.composing) this.commit();
+  };
+
+  private onCompositionStart = () => {
+    this.composing = true;
+  };
+
+  private activate = () => {
+    if (this.activated) return;
+    this.activated = true;
+    this.visibilityObserver?.disconnect();
+    this.visibilityObserver = undefined;
+    void loadMathlive()
+      .then(() => this.setFieldValue(String(this.node.attrs.value ?? ''), true))
+      .catch((error: unknown) => this.reportError?.(error));
   };
 
   private onCompositionEnd = () => {
@@ -188,12 +223,16 @@ class MathNodeView implements NodeView {
 
 export const cherryMathInlineView = $view(cherryMathInlineSchema.node, (ctx) => (node, view, getPos) => {
   const config = ctx.get(cherryWysiwygConfigCtx.key);
-  return new MathNodeView(node, view, getPos, config.readonly, config.mathlive);
+  return new MathNodeView(node, view, getPos, config.readonly, config.mathlive, (error) =>
+    config.onError?.(error, 'render'),
+  );
 });
 
 export const cherryMathBlockView = $view(cherryMathBlockSchema.node, (ctx) => (node, view, getPos) => {
   const config = ctx.get(cherryWysiwygConfigCtx.key);
-  return new MathNodeView(node, view, getPos, config.readonly, config.mathlive);
+  return new MathNodeView(node, view, getPos, config.readonly, config.mathlive, (error) =>
+    config.onError?.(error, 'render'),
+  );
 });
 
 export const cherryMathInlineInputRule = $inputRule(

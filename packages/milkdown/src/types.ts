@@ -28,6 +28,8 @@ export interface CherryMilkdownOptions {
   debounce?: number;
   mathlive?: CherryMilkdownMathliveOptions;
   plugins?: MilkdownPlugin[];
+  /** @internal Use Cherry's native preview surface without Milkdown's floating component chrome. */
+  nativePreview?: boolean;
   renderers?: Record<string, CherryVisualRenderer>;
   onChange?: (result: CherryMilkdownChange) => void;
   onError?: (error: unknown, phase: CherryMilkdownErrorPhase) => void;
@@ -49,6 +51,37 @@ export interface CherryPreviewerHost {
   update(html: string): void;
   setContentRenderer(renderer: CherryPreviewContentRenderer): void;
   clearContentRenderer(renderer?: CherryPreviewContentRenderer): boolean;
+  setEditingBridge?(bridge: CherryPreviewEditingBridge): void;
+  clearEditingBridge?(bridge?: CherryPreviewEditingBridge): boolean;
+}
+
+export interface CherryToolbarCommand {
+  name: string;
+  shortKey: string;
+  event?: Event;
+  menu?: unknown;
+}
+
+export interface CherryPreviewEditingBridge {
+  isActive(): boolean;
+  runCommand?(command: CherryToolbarCommand): boolean;
+  insert?(content: string, options: { select: boolean; focus: boolean }): boolean;
+  getSearchAdapter?(): CherrySearchAdapter;
+  destroy?(): void;
+}
+
+export interface CherrySearchAdapter {
+  getDocString(): string;
+  getSelection(): { from: number; to: number };
+  getSelectedText(): string;
+  getCursorHead(): number;
+  setSelection(from: number, to: number, options?: { scrollIntoView?: boolean }): void;
+  setSelections(ranges: Array<{ from: number; to: number }>, options?: { scrollIntoView?: boolean }): void;
+  replaceRange(text: string, from: number, to: number): void;
+  setSearchQuery(pattern: string, caseSensitive: boolean, asRegex: boolean): void;
+  clearSearchQuery(): void;
+  focus(): void;
+  isReadOnly(): boolean;
 }
 
 /** Minimal public surface used to connect Milkdown to an existing Cherry previewer. */
@@ -57,6 +90,7 @@ export interface CherryMilkdownHost {
   getMarkdown(): string;
   getPreviewer(): CherryPreviewerHost;
   setValue(markdown: string, keepCursor?: boolean): void;
+  getCodeMirror?(): { hasFocus: boolean };
 }
 
 export interface CherryMilkdownPreviewOptions extends Omit<
@@ -75,7 +109,7 @@ export interface CherryMilkdownInstance {
   editor: Editor;
   engine: CherryEngineLike;
   getMarkdown(): string;
-  setMarkdown(markdown: string): void;
+  setMarkdown(markdown: string, options?: { emit?: boolean }): void;
   focus(): void;
   destroy(): Promise<void>;
 }

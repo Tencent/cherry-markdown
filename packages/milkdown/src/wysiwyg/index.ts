@@ -11,6 +11,7 @@ export {
   cherryFrontmatterSchema,
   cherryHtmlBlockSchema,
   cherryHtmlInlineSchema,
+  cherryLinkTargetSchema,
   cherryPanelSchema,
   cherryStructureSchemas,
   cherryTocRefreshPlugin,

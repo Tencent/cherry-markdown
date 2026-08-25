@@ -316,6 +316,16 @@ export default class MenuBase {
    */
   fire(event, shortKey = '') {
     event?.stopPropagation();
+    if (
+      this.$cherry.previewer?.runEditingCommand?.({
+        name: this.name,
+        shortKey,
+        event,
+        menu: this,
+      })
+    ) {
+      return;
+    }
     if (typeof this.onClick === 'function') {
       const selections = this.editor.getSelections();
       // 判断是不是多选

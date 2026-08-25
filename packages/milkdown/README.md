@@ -35,30 +35,30 @@ import '@milkdown/kit/prose/view/style/prosemirror.css';
 
 ```js
 import Cherry from 'cherry-markdown';
-import { attachCherryMilkdownPreview } from '@cherry-markdown/milkdown';
+import { milkdown } from '@cherry-markdown/milkdown';
 
 const cherry = new Cherry({
   id: 'editor',
   value: '# Title\n\nInline math $E=mc^2$ and !!red colored text!!.',
-  editor: { defaultModel: 'previewOnly' },
-});
-
-const editor = await attachCherryMilkdownPreview(cherry, {
-  onChange({ markdown }) {
-    console.log(markdown);
-  },
+  extensions: [
+    milkdown({
+      onChange({ markdown }) {
+        console.log(markdown);
+      },
+    }),
+  ],
 });
 
 // Preview edits are written to Cherry's Markdown/CodeMirror automatically.
 // Source edits are synchronized back into the current Milkdown preview.
-await editor.detach(); // Restore Cherry's native read-only preview.
+cherry.destroy(); // Milkdown is cleaned up with this Cherry instance.
 ```
 
-`createCherryMilkdown` remains available for a standalone surface without Cherry's page shell, but it is not the default integration demonstrated here.
+`attachCherryMilkdownPreview(cherry, options)` remains available for existing integrations that need an explicit detach handle. `createCherryMilkdown` remains available for a standalone surface without Cherry's page shell. Neither is the recommended Cherry integration.
 
 Plugins passed through `plugins` are loaded after the built-in WYSIWYG plugins and can register business NodeViews.
 
-The editor intentionally has no permanent formatting toolbar. Type `/` on an empty block for insertion commands, use native Markdown shortcuts for formatting, and edit compound titles and bodies directly. Structural controls appear only while hovering or selecting their node. Tables use Milkdown's `table-block` controls for row and column insertion, deletion, dragging, and alignment. Selecting a formula activates MathLive in place.
+In extension mode the original Cherry toolbar remains in place and routes formatting to the currently focused preview selection. Pickers such as image, file, Draw.io, and chart keep Cherry's original UI and insert at the saved Milkdown selection. Type `/` on an empty preview block for insertion commands, or use native Markdown shortcuts. Structural controls appear only while hovering or selecting their node. Tables use Milkdown's `table-block` controls for row and column insertion, deletion, dragging, and alignment. Selecting a formula activates MathLive in place.
 
 Configure MathLive macros and its virtual keyboard through `mathlive`:
 
@@ -89,9 +89,11 @@ createCherryMilkdown({
 ## Local example
 
 ```sh
-yarn build
-npx vite examples
+yarn build:demo
+npx serve preview
 ```
+
+The demo reuses Cherry's root `examples/index.html` layout, configuration, toolbar, theme, ECharts plugin, and full Markdown manual. Its only integration difference is `extensions: [milkdown()]`.
 
 ## Current boundary
 

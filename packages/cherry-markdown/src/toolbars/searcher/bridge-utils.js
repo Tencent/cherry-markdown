@@ -13,6 +13,7 @@ export const SEARCH_HOOK_NAME = 'search';
  * @property {Record<string, string | undefined>} [locale]
  * @property {{ toolbars?: import('~types/cherry').CherryToolbarsOptions }} [options]
  * @property {object} [editor]
+ * @property {{getEditingAdapter?: () => SearcherEditorAdapter | null}} [previewer]
  * @property {HTMLElement} [wrapperDom]
  * @property {import('@/toolbars/Toolbar').default} [toolbar]
  * @property {import('@/toolbars/ToolbarRight').default} [toolbarRight]
@@ -96,12 +97,17 @@ export function getSearchHook(cherry) {
  */
 export function createEditorAdapter(cherry) {
   const editor = cherry.editor?.editor;
+  const activeEditor = () => cherry.previewer?.getEditingAdapter?.();
 
   return {
     getDocString() {
+      const active = activeEditor();
+      if (active) return active.getDocString();
       return editor?.view?.state?.doc?.toString() ?? '';
     },
     getSelection() {
+      const active = activeEditor();
+      if (active) return active.getSelection();
       const selection = editor?.view?.state?.selection?.main;
       if (!selection) {
         return { from: 0, to: 0 };
@@ -109,6 +115,8 @@ export function createEditorAdapter(cherry) {
       return { from: selection.from, to: selection.to };
     },
     getSelectedText() {
+      const active = activeEditor();
+      if (active) return active.getSelectedText();
       const { from, to } = this.getSelection();
       if (from === to || !editor) {
         return '';
@@ -116,12 +124,18 @@ export function createEditorAdapter(cherry) {
       return editor.view.state.doc.sliceString(from, to);
     },
     getCursorHead() {
+      const active = activeEditor();
+      if (active) return active.getCursorHead();
       return editor?.view?.state?.selection?.main?.head ?? 0;
     },
     setSelection(from, to, options) {
+      const active = activeEditor();
+      if (active) return active.setSelection(from, to, options);
       editor?.setSelection(from, to, options);
     },
     setSelections(ranges, options = {}) {
+      const active = activeEditor();
+      if (active) return active.setSelections(ranges, options);
       const view = editor?.view;
       if (!view || !Array.isArray(ranges) || ranges.length === 0) {
         return;
@@ -142,18 +156,28 @@ export function createEditorAdapter(cherry) {
       view.dispatch(dispatchOptions);
     },
     replaceRange(text, from, to) {
+      const active = activeEditor();
+      if (active) return active.replaceRange(text, from, to);
       editor?.replaceRange(text, from, to);
     },
     setSearchQuery(pattern, caseSensitive, asRegex) {
+      const active = activeEditor();
+      if (active) return active.setSearchQuery(pattern, caseSensitive, asRegex);
       editor?.setSearchQuery(pattern, caseSensitive, asRegex);
     },
     clearSearchQuery() {
+      const active = activeEditor();
+      if (active) return active.clearSearchQuery();
       editor?.clearSearchQuery();
     },
     focus() {
+      const active = activeEditor();
+      if (active) return active.focus();
       editor?.view?.focus();
     },
     isReadOnly() {
+      const active = activeEditor();
+      if (active) return active.isReadOnly();
       return Boolean(editor?.getOption?.('readOnly'));
     },
   };

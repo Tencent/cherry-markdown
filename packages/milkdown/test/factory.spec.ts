@@ -1,12 +1,17 @@
 import { editorViewCtx } from '@milkdown/kit/core';
-import { NodeSelection } from '@milkdown/kit/prose/state';
+import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
+import Cherry from 'cherry-markdown';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   attachCherryMilkdownPreview,
   createCherryMilkdown,
+  milkdown,
   type CherryMilkdownHost,
   type CherryMilkdownInstance,
   type CherryPreviewContentRenderer,
+  type CherryPreviewEditingBridge,
 } from '../src';
 
 vi.mock('mermaid', () => ({
@@ -19,6 +24,7 @@ vi.mock('mermaid', () => ({
 vi.mock('mathlive', () => ({}));
 
 const instances: CherryMilkdownInstance[] = [];
+const fullManual = readFileSync(resolve(import.meta.dirname, '../../../examples/assets/markdown/index.md'), 'utf8');
 
 beforeAll(() => {
   class ResizeObserverMock {
@@ -52,6 +58,125 @@ function selectNode(instance: CherryMilkdownInstance, typeName: string) {
 }
 
 describe('createCherryMilkdown WYSIWYG', () => {
+  it('integrates through a real new Cherry({ extensions: [milkdown()] }) instance', async () => {
+    const element = root();
+    const initialMarkdown = '# Real Cherry\n\n* [Original marker](https://example.com){target=\\_blank}';
+    const cherry = new Cherry({
+      el: element,
+      value: initialMarkdown,
+      extensions: [milkdown({ debounce: 0 })],
+    });
+
+    await vi.waitFor(() => expect(element.querySelector('.cherry-milkdown--previewer .ProseMirror')).not.toBeNull());
+    expect(element.querySelector('.cherry-editor')).not.toBeNull();
+    expect(element.querySelector('.cherry-toolbar')).not.toBeNull();
+    expect(element.querySelector('.milkdown-table-block')).toBeNull();
+    expect(element.querySelector('.cherry-previewer h1')?.textContent).toBe('Real Cherry');
+    expect(cherry.getMarkdown()).toBe(initialMarkdown);
+
+    cherry.setValue('# Synced from Cherry API\n\nUpdated body.');
+    await vi.waitFor(() =>
+      expect(element.querySelector('.cherry-previewer h1')?.textContent).toBe('Synced from Cherry API'),
+    );
+    const preview = element.querySelector<HTMLElement>('.cherry-previewer');
+    if (preview) {
+      preview.scrollTop = 73;
+      preview.scrollLeft = 11;
+    }
+    cherry.setValue('# Synced again\n\nUpdated body.');
+    await vi.waitFor(() => expect(element.querySelector('.cherry-previewer h1')?.textContent).toBe('Synced again'));
+    expect(preview?.scrollTop).toBe(73);
+    expect(preview?.scrollLeft).toBe(11);
+    const previewEditor = element.querySelector('.ProseMirror');
+    cherry.switchModel('editOnly');
+    expect(element.querySelector('.cherry-previewer')?.classList.contains('cherry-previewer--hidden')).toBe(true);
+    cherry.switchModel('previewOnly');
+    await vi.waitFor(() => expect(element.querySelector('.ProseMirror')).toBe(previewEditor));
+
+    cherry.destroy();
+    await vi.waitFor(() => expect(element.childElementCount).toBe(0));
+  });
+
+  it('exposes milkdown() as the instance extension and returns Cherry-owned cleanup', async () => {
+    const element = root();
+    let renderer: CherryPreviewContentRenderer | undefined;
+    const previewer = {
+      getDom: () => element,
+      setContentRenderer: (next: CherryPreviewContentRenderer) => {
+        renderer = next;
+      },
+      clearContentRenderer: (target?: CherryPreviewContentRenderer) => {
+        if (!renderer || (target && target !== renderer)) return false;
+        renderer = undefined;
+        return true;
+      },
+      update: (html: string) => {
+        if (renderer) return renderer.update({ container: element, markdown: '# Extension preview', html });
+        element.innerHTML = html;
+      },
+    };
+    const host: CherryMilkdownHost = {
+      engine: { makeHtml: (value: string) => `<p>${value}</p>` },
+      getMarkdown: () => '# Extension preview',
+      getPreviewer: () => previewer,
+      setValue: vi.fn(),
+    };
+    const extension = milkdown({ debounce: 0 });
+
+    expect(extension.name).toBe('@cherry-markdown/milkdown');
+    const cleanup = await extension.mount(host);
+    expect(element.querySelector('h1')?.textContent).toBe('Extension preview');
+    expect(cleanup).toBeTypeOf('function');
+    await cleanup?.();
+    expect(renderer).toBeUndefined();
+    expect(element.textContent).toContain('# Extension preview');
+  });
+
+  it('restores the native Cherry preview and reports one error when extension initialization fails', async () => {
+    const element = root();
+    let renderer: CherryPreviewContentRenderer | undefined;
+    const previewer = {
+      getDom: () => element,
+      setContentRenderer: (next: CherryPreviewContentRenderer) => {
+        renderer = next;
+      },
+      clearContentRenderer: (target?: CherryPreviewContentRenderer) => {
+        if (!renderer || (target && target !== renderer)) return false;
+        renderer = undefined;
+        return true;
+      },
+      update: (html: string) => {
+        if (renderer) return renderer.update({ container: element, markdown: '# Native fallback', html });
+        element.innerHTML = html;
+      },
+    };
+    const error = new Error('broken preview initialization');
+    let renderCount = 0;
+    const host: CherryMilkdownHost = {
+      engine: {
+        makeHtml: (value: string) => {
+          renderCount += 1;
+          if (renderCount === 1) throw error;
+          return `<article>${value}</article>`;
+        },
+      },
+      getMarkdown: () => '# Native fallback',
+      getPreviewer: () => previewer,
+      setValue: vi.fn(),
+    };
+    const onError = vi.fn();
+
+    await expect(
+      attachCherryMilkdownPreview(host, {
+        onError,
+      }),
+    ).rejects.toThrow(error);
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledWith(error, 'create');
+    expect(renderer).toBeUndefined();
+    expect(element.querySelector('article')?.textContent).toBe('# Native fallback');
+  });
+
   it('edits inside the existing Cherry preview surface and writes Markdown back', async () => {
     const element = root();
     element.className = 'cherry-previewer cherry-markdown theme__default';
@@ -89,6 +214,8 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(element.classList.contains('cherry-markdown')).toBe(true);
     expect(element.querySelector('h1')?.textContent).toBe('Before');
     expect(instance.engine).toBe(engine);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(host.setValue).not.toHaveBeenCalled();
 
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     let headingEnd = -1;
@@ -174,6 +301,24 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(markdown).toContain('==mark==');
   });
 
+  it('keeps Cherry link attributes out of the visible text and round-trips them', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: '[Cherry](https://example.com){target=\\_blank}',
+    });
+    instances.push(instance);
+
+    const link = element.querySelector<HTMLAnchorElement>('a');
+    expect(element.querySelector('.ProseMirror')?.textContent).toBe('Cherry');
+    expect(link?.target).toBe('');
+    link?.addEventListener('click', (event) => event.preventDefault());
+    link?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(link?.target).toBe('_blank');
+    expect(link?.rel).toContain('noopener');
+    expect(instance.getMarkdown()).toContain('{target=\\_blank}');
+  });
+
   it('edits Cherry typography directly while preserving its Markdown mark', async () => {
     const element = root();
     const instance = await createCherryMilkdown({ root: element, value: 'Text !!red color!!.' });
@@ -215,6 +360,51 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(element.querySelector('table')?.closest('[data-cherry-visual]')).toBeNull();
   });
 
+  it('keeps preview tables directly editable without mounting floating component chrome', async () => {
+    const element = root();
+    const cherry = new Cherry({
+      el: element,
+      value: '| Name | Value |\n| --- | --- |\n| Milkdown | WYSIWYG |',
+      extensions: [milkdown({ debounce: 0 })],
+    });
+
+    await vi.waitFor(() => expect(element.querySelector('.cherry-milkdown--previewer table')).not.toBeNull());
+    expect(element.querySelector('.milkdown-table-block')).toBeNull();
+    expect(element.querySelector('.cherry-milkdown--previewer td')?.closest('.ProseMirror')).not.toBeNull();
+    expect(element.querySelector('.cherry-milkdown--previewer .ProseMirror')?.getAttribute('contenteditable')).toBe(
+      'true',
+    );
+
+    cherry.destroy();
+    await vi.waitFor(() => expect(element.childElementCount).toBe(0));
+  });
+
+  it('mounts the complete Cherry manual once without an initial synchronization write', async () => {
+    const element = root();
+    const onChange = vi.fn();
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: fullManual,
+      nativePreview: true,
+      debounce: 0,
+      onChange,
+    });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let frontmatterCount = 0;
+    view.state.doc.descendants((node) => {
+      if (node.type.name === 'cherry_frontmatter') frontmatterCount += 1;
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(frontmatterCount).toBe(0);
+    expect(onChange.mock.calls.length).toBe(0);
+    expect(element.querySelectorAll('.milkdown-table-block')).toHaveLength(0);
+
+    await instance.destroy();
+    instances.splice(instances.indexOf(instance), 1);
+  });
+
   it('updates the visual TOC when a heading is edited', async () => {
     const element = root();
     const instance = await createCherryMilkdown({ root: element, value: '# Before\n\n[[toc]]' });
@@ -240,6 +430,9 @@ describe('createCherryMilkdown WYSIWYG', () => {
     const nodes = element.querySelectorAll<HTMLElement>('.cherry-compound, .cherry-embed--cherry_diagram');
     expect(nodes).toHaveLength(2);
     expect(nodes[0]?.textContent).toContain('Panel body');
+    expect(nodes[0]?.classList.contains('cherry-panel')).toBe(true);
+    expect(nodes[0]?.querySelector('.cherry-panel--title')).not.toBeNull();
+    expect(nodes[0]?.querySelector('.cherry-panel--body')).not.toBeNull();
     expect(nodes[0]?.querySelector('input, select, textarea')).toBeNull();
     expect(nodes[1]?.querySelector<HTMLElement>('.cherry-embed__source')?.hidden).toBe(true);
     await vi.waitFor(() => expect(nodes[1]?.querySelector('[data-rendered-mermaid]')).not.toBeNull());
@@ -291,6 +484,101 @@ describe('createCherryMilkdown WYSIWYG', () => {
     }
 
     expect(instance.getMarkdown()).toContain(':::warning After');
+  });
+
+  it('selects Detail from real header mouse input while its title remains directly editable', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({ root: element, value: '+++ 更多能力\n正文\n+++' });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    const detail = element.querySelector<HTMLDetailsElement>('[data-role="detail-item"]');
+    const header = detail?.querySelector<HTMLElement>('.cherry-compound-item__header');
+    const label = detail?.querySelector<HTMLElement>('.cherry-compound-item__label');
+    const disclosure = detail?.querySelector<HTMLButtonElement>('.cherry-compound-item__disclosure');
+
+    expect(detail?.open).toBe(false);
+    header?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    expect(view.state.selection).toBeInstanceOf(NodeSelection);
+    expect((view.state.selection as NodeSelection).node.type.name).toBe('cherry_compound_item');
+
+    label?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(detail?.open).toBe(false);
+    if (label) {
+      label.textContent = '直接编辑后的更多能力';
+      label.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    expect(instance.getMarkdown()).toContain('+++ 直接编辑后的更多能力');
+
+    disclosure?.click();
+    expect(detail?.open).toBe(true);
+  });
+
+  it('routes Cherry toolbar commands to the focused Milkdown selection', async () => {
+    const element = root();
+    let markdown = 'Before and after';
+    let bridge: CherryPreviewEditingBridge | undefined;
+    let renderer: CherryPreviewContentRenderer | undefined;
+    const previewer = {
+      getDom: () => element,
+      setContentRenderer: (next: CherryPreviewContentRenderer) => {
+        renderer = next;
+      },
+      clearContentRenderer: () => {
+        renderer = undefined;
+        return true;
+      },
+      update: (html: string) => renderer?.update({ container: element, markdown, html }),
+      setEditingBridge: (next: typeof bridge) => {
+        bridge = next;
+      },
+      clearEditingBridge: () => {
+        bridge = undefined;
+        return true;
+      },
+    };
+    const host: CherryMilkdownHost = {
+      engine: { makeHtml: (value: string) => value },
+      getMarkdown: () => markdown,
+      getPreviewer: () => previewer,
+      getCodeMirror: () => ({ hasFocus: false }),
+      setValue: vi.fn((value: string) => {
+        markdown = value;
+      }),
+    };
+    const instance = await attachCherryMilkdownPreview(host, { debounce: 0 });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let start = -1;
+    view.state.doc.descendants((node, position) => {
+      if (node.isText && node.text?.startsWith('Before')) start = position;
+    });
+    view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, start, start + 6)));
+    element.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+    expect(bridge?.runCommand?.({ name: 'bold', shortKey: '', menu: {} })).toBe(true);
+    await vi.waitFor(() => expect(markdown).toContain('**Before**'));
+    expect(instance.getMarkdown()).toContain('**Before**');
+
+    const search = bridge?.getSearchAdapter?.();
+    const after = search?.getDocString().indexOf('after') ?? -1;
+    search?.setSelection(after, after + 5);
+    expect(search?.getSelectedText()).toBe('after');
+    search?.replaceRange('Milkdown', after, after + 5);
+    await vi.waitFor(() => expect(markdown).toContain('Milkdown'));
+
+    let hasUploadedImage = false;
+    const imageMenu = {
+      onClick: (selection: string) => {
+        if (!hasUploadedImage) {
+          hasUploadedImage = true;
+          return selection;
+        }
+        return '![uploaded](https://example.com/image.png)';
+      },
+    };
+    expect(bridge?.runCommand?.({ name: 'image', shortKey: '', menu: imageMenu })).toBe(true);
+    expect(bridge?.runCommand?.({ name: 'image', shortKey: '', menu: imageMenu })).toBe(true);
+    await vi.waitFor(() => expect(markdown).toContain('![uploaded](https://example.com/image.png)'));
   });
 
   it('edits inline math in place through MathLive input events', async () => {
@@ -370,17 +658,24 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(instance.getMarkdown()).toContain('B-->C');
   });
 
-  it('sandboxes HTML previews and keeps source editing next to the selected node', async () => {
+  it('uses the sanitized Cherry engine shell for HTML and keeps source editing next to the selected node', async () => {
     const element = root();
+    const makeHtml = vi.fn(
+      (source: string) => `<div class="cherry-native-html" onclick="window.__bad=true">${source}</div>`,
+    );
     const instance = await createCherryMilkdown({
       root: element,
       value: '<div>\nsafe\n<script>window.__bad = true</script>\n</div>',
+      engine: { makeHtml },
     });
     instances.push(instance);
     selectNode(instance, 'cherry_html_block');
-    const frame = element.querySelector<HTMLIFrameElement>('.cherry-embed__html-frame');
-    expect(frame).not.toBeNull();
-    expect(frame?.getAttribute('sandbox')).toBe('');
+    const shell = element.querySelector<HTMLElement>('.cherry-native-html');
+    expect(makeHtml).toHaveBeenCalledWith(expect.stringContaining('<div>'));
+    expect(shell).not.toBeNull();
+    expect(shell?.hasAttribute('onclick')).toBe(false);
+    expect(shell?.querySelector('script')).toBeNull();
+    expect(element.querySelector('iframe')).toBeNull();
     element.querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
     expect(element.querySelector('.cherry-embed__source code')).not.toBeNull();
     expect(element.querySelector('.cherry-embed textarea')).toBeNull();
@@ -396,6 +691,21 @@ describe('createCherryMilkdown WYSIWYG', () => {
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(element.querySelector('h1')?.textContent).toBe('Updated');
     expect(onChange).toHaveBeenCalledWith({ markdown: expect.stringContaining('# Updated') });
+  });
+
+  it('preserves the active text selection across API/source Markdown synchronization', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({ root: element, value: 'Before selected text after.' });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    const paragraph = view.state.doc.firstChild;
+    const start = (paragraph?.textContent.indexOf('selected text') ?? 0) + 1;
+    view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, start, start + 13)));
+
+    instance.setMarkdown('Prefix.\n\nBefore selected text after.', { emit: false });
+
+    const selection = view.state.selection;
+    expect(view.state.doc.textBetween(selection.from, selection.to)).toBe('selected text');
   });
 
   it('keeps embedded source editing disabled in readonly mode', async () => {
