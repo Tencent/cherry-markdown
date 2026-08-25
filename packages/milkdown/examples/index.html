@@ -3,34 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cherry Milkdown Vanilla Example</title>
-    <link rel="stylesheet" href="../styles.css" />
+    <title>Cherry Markdown Milkdown Preview Editing</title>
     <style>
-      main {
-        max-width: 960px;
-        margin: 32px auto;
-      }
-
+      html,
+      body,
       #editor {
-        min-height: 680px;
-        border: 1px solid #d8dce5;
-        border-radius: 8px;
-      }
-
-      .example-renderer {
-        overflow: auto;
-        padding: 16px;
-        border-radius: 8px;
-        background: #f5f7fa;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
       }
     </style>
   </head>
   <body>
-    <main>
-      <h1>Cherry Milkdown 完整 WYSIWYG 示例</h1>
-      <p>像普通文档一样直接编辑正文、标题、公式和复合块；只有图表或 HTML 源码需要时才在节点内部展开。</p>
-      <div id="editor"></div>
-    </main>
+    <div id="editor"></div>
     <script type="module" src="./vanilla.js"></script>
   </body>
 </html>

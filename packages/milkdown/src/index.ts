@@ -29,10 +29,10 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
   const debounce = Math.max(0, options.debounce ?? DEFAULT_DEBOUNCE);
   let timer: ReturnType<typeof setTimeout> | undefined;
   let destroyed = false;
-  let engine: InstanceType<typeof CherryEngine>;
+  let engine: CherryMilkdownInstance['engine'];
 
   try {
-    engine = new CherryEngine(options.cherryOptions);
+    engine = options.engine ?? new CherryEngine(options.cherryOptions);
   } catch (error) {
     options.onError?.(error, 'create');
     throw error;
@@ -139,6 +139,7 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
 }
 
 export type {
+  CherryMilkdownHost,
   CherryEngineLike,
   CherryDiagramRenderContext,
   CherryMilkdownChange,
@@ -146,8 +147,14 @@ export type {
   CherryMilkdownInstance,
   CherryMilkdownMathliveOptions,
   CherryMilkdownOptions,
+  CherryMilkdownPreviewInstance,
+  CherryMilkdownPreviewOptions,
+  CherryPreviewContentRenderer,
+  CherryPreviewContentRendererContext,
+  CherryPreviewerHost,
   CherryVisualRenderer,
   CherryVisualRenderContext,
   CherryVisualRendererResult,
 } from './types.js';
+export { attachCherryMilkdownPreview } from './previewer.js';
 export { cherryWysiwyg } from './wysiwyg/index.js';

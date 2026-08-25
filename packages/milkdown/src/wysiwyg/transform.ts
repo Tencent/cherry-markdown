@@ -77,7 +77,7 @@ const INLINE_MATCHERS = [
   },
   {
     type: 'cherry_highlight',
-    pattern: /(?<!\S)==([^=\n]+?)==(?!\S)/,
+    pattern: /==([^=\n]+?)==/,
     text: (match: RegExpExecArray) => match[1] ?? '',
   },
   { type: 'cherry_emoji', pattern: /:[+\w-]+:/, attrs: () => ({}) },

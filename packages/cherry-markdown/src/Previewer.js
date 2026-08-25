@@ -33,6 +33,19 @@ import LazyLoadImg from '@/utils/lazyLoadImg';
  */
 export default class Previewer {
   /**
+   * Optional owner for the previewer's content DOM.  Cherry keeps owning the
+   * preview shell (layout, theme, scrolling and toolbars), while integrations
+   * such as Milkdown can own only the document surface.
+   *
+   * @private
+   * @type {{
+   *   update: (context: {container: HTMLElement, markdown: string, html: string}) => void | Promise<void>;
+   *   destroy?: () => void | Promise<void>;
+   * } | null}
+   */
+  contentRenderer = null;
+
+  /**
    * @property
    * @private
    * @type {boolean} 等待预览区域更新。预览区域更新时，预览区的滚动不会引起编辑器滚动，避免因插入的元素高度变化导致编辑区域跳动
@@ -812,12 +825,77 @@ export default class Previewer {
    */
   refresh(html) {
     const domContainer = this.getDomContainer();
+    if (this.contentRenderer) {
+      this.$updateContentRenderer(html, domContainer);
+      return;
+    }
     domContainer.innerHTML = html;
+  }
+
+  /**
+   * Lets an integration render inside the existing Cherry preview surface.
+   * The preview container itself is deliberately retained so Cherry's layout,
+   * themes, scrolling and surrounding interactions remain unchanged.
+   *
+   * @param {{
+   *   update: (context: {container: HTMLElement, markdown: string, html: string}) => void | Promise<void>;
+   *   destroy?: () => void | Promise<void>;
+   * }} renderer
+   */
+  setContentRenderer(renderer) {
+    if (!renderer || typeof renderer.update !== 'function') {
+      throw new TypeError('Previewer.setContentRenderer: renderer.update must be a function.');
+    }
+    if (this.contentRenderer === renderer) {
+      return;
+    }
+    this.contentRenderer?.destroy?.();
+    this.contentRenderer = renderer;
+  }
+
+  /**
+   * Releases a custom document renderer without replacing the preview shell.
+   * Passing the renderer guards against an older integration clearing a newer
+   * owner during asynchronous teardown.
+   *
+   * @param {object} [renderer]
+   * @returns {boolean}
+   */
+  clearContentRenderer(renderer) {
+    if (!this.contentRenderer || (renderer && renderer !== this.contentRenderer)) {
+      return false;
+    }
+    const currentRenderer = this.contentRenderer;
+    this.contentRenderer = null;
+    currentRenderer.destroy?.();
+    this.getDomContainer().replaceChildren();
+    return true;
+  }
+
+  $updateContentRenderer(html, domContainer = this.getDomContainer()) {
+    const renderer = this.contentRenderer;
+    if (!renderer) {
+      return false;
+    }
+    const result = renderer.update({
+      container: domContainer,
+      markdown: this.$cherry?.getMarkdown?.() ?? '',
+      html,
+    });
+    if (result && typeof result.catch === 'function') {
+      result.catch((error) => Logger.error('Custom preview content renderer failed.', error));
+    }
+    this.afterUpdate();
+    return true;
   }
 
   update(html) {
     // 销毁后不执行更新
     if (this.isDestroyed) {
+      return;
+    }
+    if (this.contentRenderer && !this.isPreviewerHidden()) {
+      this.$updateContentRenderer(html);
       return;
     }
     // 更新时保留图片懒加载逻辑
@@ -1376,6 +1454,10 @@ export default class Previewer {
     }
 
     this.isDestroyed = true;
+
+    if (this.contentRenderer) {
+      this.clearContentRenderer(this.contentRenderer);
+    }
 
     // 清理滚动事件监听
     this.removeScroll();

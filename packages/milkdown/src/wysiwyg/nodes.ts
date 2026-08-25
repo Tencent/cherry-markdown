@@ -1,5 +1,6 @@
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
 import { Plugin } from '@milkdown/kit/prose/state';
+import { Decoration, DecorationSet } from '@milkdown/kit/prose/view';
 import type { EditorView, NodeView, ViewMutationRecord } from '@milkdown/kit/prose/view';
 import type { SerializerState } from '@milkdown/kit/transformer';
 import { $nodeSchema, $prose, $view } from '@milkdown/kit/utils';
@@ -243,10 +244,19 @@ class CompoundItemView implements NodeView {
     this.node = node;
     this.view = view;
     this.getPos = getPos;
-    this.dom = document.createElement('section');
+    const role = String(node.attrs.role);
+    this.dom = document.createElement(role === 'detail-item' ? 'details' : 'section');
     this.dom.className = 'cherry-compound-item';
-    this.dom.dataset.role = String(node.attrs.role);
-    const header = document.createElement('header');
+    this.dom.dataset.role = role;
+    if (this.dom instanceof HTMLDetailsElement) {
+      this.dom.open = Boolean(node.attrs.open);
+      this.dom.addEventListener('toggle', () => {
+        if (this.dom instanceof HTMLDetailsElement && this.dom.open !== Boolean(this.node.attrs.open)) {
+          this.updateAttrs({ open: this.dom.open });
+        }
+      });
+    }
+    const header = document.createElement(role === 'detail-item' ? 'summary' : 'header');
     header.className = 'cherry-compound-item__header';
     this.disclosure = iconButton(
       node.attrs.open ? '⌄' : '›',
@@ -273,9 +283,12 @@ class CompoundItemView implements NodeView {
       iconButton('→', '向后移动', () => this.move(1), readonly),
       iconButton('×', '删除项目', this.remove, readonly),
     );
-    header.append(this.disclosure, this.label, actions);
+    if (role !== 'detail-item') header.append(this.disclosure);
+    header.append(this.label, actions);
     this.contentDOM = document.createElement('div');
-    this.contentDOM.className = 'cherry-compound-item__content';
+    this.contentDOM.className = `cherry-compound-item__content${
+      role === 'detail-item' ? ' cherry-detail-body' : role === 'column' ? ' cherry-panel--col' : ''
+    }`;
     this.dom.append(header, this.contentDOM);
   }
 
@@ -285,6 +298,9 @@ class CompoundItemView implements NodeView {
     if (document.activeElement !== this.label) this.label.textContent = String(node.attrs.label ?? '');
     this.dom.dataset.role = String(node.attrs.role);
     this.disclosure.textContent = node.attrs.open ? '⌄' : '›';
+    if (this.dom instanceof HTMLDetailsElement && this.dom.open !== Boolean(node.attrs.open)) {
+      this.dom.open = Boolean(node.attrs.open);
+    }
     return true;
   }
 
@@ -365,8 +381,8 @@ class CompoundView implements NodeView {
     this.title.hidden = node.type.name === 'cherry_detail';
     const actions = document.createElement('span');
     actions.className = 'cherry-node-actions';
-    actions.append(iconButton('＋', '增加项目', this.addItem, readonly));
-    header.append(this.kind, this.title, actions);
+    actions.append(this.kind, iconButton('＋', '增加项目', this.addItem, readonly));
+    header.append(this.title, actions);
     this.contentDOM = document.createElement('div');
     this.contentDOM.className = 'cherry-compound__content';
     this.dom.append(header, this.contentDOM);
@@ -398,7 +414,23 @@ class CompoundView implements NodeView {
 
   private sync(node: ProseNode) {
     const kind = node.type.name === 'cherry_detail' ? 'detail' : String(node.attrs.kind);
-    this.dom.className = `cherry-compound cherry-compound--${kind}`;
+    const isPanel = node.type.name !== 'cherry_detail' && /^(panel|primary|info|warning|danger|success)$/.test(kind);
+    const cherryClass =
+      node.type.name === 'cherry_detail'
+        ? 'cherry-detail'
+        : isPanel
+          ? `cherry-panel cherry-panel__${kind === 'panel' ? 'primary' : kind}`
+          : kind === 'cols'
+            ? 'cherry-panel-cols cherry-panel-cols__cols'
+            : kind === 'tabs'
+              ? 'cherry-tabs'
+              : '';
+    this.dom.className = `cherry-compound cherry-compound--${kind} ${cherryClass}`.trim();
+    const header = this.title.parentElement;
+    if (header) {
+      header.className = `cherry-compound__header${isPanel ? ' cherry-panel--title' : ''}`;
+    }
+    this.contentDOM.className = `cherry-compound__content${isPanel ? ' cherry-panel--body' : ''}`;
     this.kind.textContent = kind;
     if (document.activeElement !== this.title) this.title.textContent = String(node.attrs.title ?? '');
   }
@@ -440,24 +472,26 @@ class CompoundView implements NodeView {
 }
 
 function renderToc(view: EditorView) {
-  const nav = document.createElement('nav');
-  nav.className = 'cherry-wysiwyg-toc';
-  const title = document.createElement('strong');
+  const nav = document.createElement('div');
+  nav.className = 'toc';
+  const title = document.createElement('div');
+  title.className = 'toc-title';
   title.textContent = '目录';
-  const list = document.createElement('ol');
+  const list = document.createElement('ul');
   view.state.doc.descendants((node) => {
     if (node.type.name !== 'heading') return;
     const item = document.createElement('li');
-    item.textContent = node.textContent;
-    item.dataset.level = String(node.attrs.level ?? 1);
+    item.className = 'toc-li';
+    const link = document.createElement('a');
+    const level = Number(node.attrs.level ?? 1);
+    link.className = `level-${level}`;
+    link.href = `#${String(node.attrs.id ?? '')}`;
+    link.target = '_self';
+    link.textContent = node.textContent;
+    item.append(link);
     list.append(item);
   });
-  nav.append(
-    title,
-    list.childElementCount
-      ? list
-      : Object.assign(document.createElement('span'), { textContent: '添加标题后生成目录' }),
-  );
+  nav.append(title, list.childElementCount ? list : Object.assign(document.createElement('span'), { textContent: '' }));
   return nav;
 }
 
@@ -759,6 +793,32 @@ export const cherryEmojiView = embedView(cherryEmojiSchema);
 export const cherryTocRefreshPlugin = $prose(
   () =>
     new Plugin({
+      props: {
+        decorations(state) {
+          const anchors: Decoration[] = [];
+          state.doc.descendants((node, position) => {
+            if (node.type.name !== 'heading') return;
+            const id = String(node.attrs.id ?? '');
+            if (!id) return;
+            anchors.push(
+              Decoration.widget(
+                position + 1,
+                () => {
+                  const anchor = document.createElement('a');
+                  anchor.className = 'anchor';
+                  anchor.href = `#${id}`;
+                  anchor.target = '_self';
+                  anchor.contentEditable = 'false';
+                  anchor.setAttribute('aria-label', `定位到 ${node.textContent}`);
+                  return anchor;
+                },
+                { side: -1 },
+              ),
+            );
+          });
+          return DecorationSet.create(state.doc, anchors);
+        },
+      },
       view: () => ({
         update: (view, previousState) => {
           if (previousState.doc.eq(view.state.doc)) return;

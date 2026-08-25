@@ -1,71 +1,64 @@
-import { createCherryMilkdown } from '@cherry-markdown/milkdown';
+import Cherry from 'cherry-markdown';
+import 'cherry-markdown/dist/cherry-markdown.css';
+import { attachCherryMilkdownPreview } from '@cherry-markdown/milkdown';
 import '@cherry-markdown/milkdown/styles.css';
 import '@milkdown/kit/prose/view/style/prosemirror.css';
 
 async function main() {
-  const editor = await createCherryMilkdown({
-    root: document.querySelector('#editor'),
-    value: [
-      '---',
-      'title: Cherry Milkdown',
-      'owner: Cherry Oteam',
-      '---',
-      '',
-      '# Cherry Milkdown WYSIWYG',
-      '',
-      '[[toc]]',
-      '',
-      '直接编辑 **粗体**、表格、公式和 Cherry 扩展样式，不需要右侧预览。',
-      '',
-      '文字样式：!!#d54941 红色!!、!!!#fff1b8 背景色!!!、==高亮==、^^下标^^ 和 ^上标^。',
-      '',
-      '点击行内公式 $E=mc^2$，可以直接在公式中输入和修改。',
-      '',
-      '$$',
-      '\\int_0^1 x^2 \\, dx',
-      '$$',
-      '',
-      '| Feature | Status |',
-      '| --- | --- |',
-      '| CommonMark / GFM | WYSIWYG |',
-      '| Cherry extensions | Structured editing |',
-      '',
-      '::: warning',
-      'Panel 标题和正文都在当前文档位置直接修改，不需要打开表单。',
-      ':::',
-      '',
-      ':::tabs',
-      ':: 表格',
-      '将鼠标移到表格边缘，可增加、删除或拖拽行列。',
-      ':: 公式',
-      'MathLive 提供可视化公式输入和虚拟键盘。',
-      ':::',
-      '',
-      '+++- 更多能力',
-      'Detail 正文直接编辑，也可以增加、删除和排序项目。',
-      '+++',
-      '',
-      '```mermaid',
-      'flowchart LR',
-      '  Markdown --> Milkdown --> WYSIWYG',
-      '```',
-      '',
-      '```echarts',
-      '{"series":[{"type":"bar","data":[3,5,2]}]}',
-      '```',
-      '',
-      '```plantuml',
-      '@startuml',
-      'Alice -> Bob: Cherry Milkdown',
-      '@enduml',
-      '```',
-    ].join('\n'),
-    renderers: {
-      echarts: ({ source }) => `<pre class="example-renderer">ECharts 配置实时更新\n${source}</pre>`,
-      plantuml: ({ source }) => `<pre class="example-renderer">PlantUML 配置实时更新\n${source}</pre>`,
+  const value = [
+    '---',
+    'title: Cherry Markdown',
+    'owner: Cherry Oteam',
+    '---',
+    '',
+    '# Cherry Markdown',
+    '',
+    '[[toc]]',
+    '',
+    '这个页面仍然是 Cherry Markdown 的预览页。现在可以直接点击标题、正文、列表和表格进行编辑。',
+    '',
+    '文字样式：!!#d54941 红色!!、!!!#fff1b8 背景色!!!、==高亮==、^^下标^^ 和 ^上标^。',
+    '',
+    '点击行内公式 $E=mc^2$，可以直接在公式中输入和修改。',
+    '',
+    '$$',
+    '\\int_0^1 x^2 \\, dx',
+    '$$',
+    '',
+    '| Feature | Status |',
+    '| --- | --- |',
+    '| Cherry 原预览样式 | 保持不变 |',
+    '| Milkdown 原位编辑 | 已接入 |',
+    '',
+    '::: warning 当前预览区可编辑',
+    'Milkdown 只接管文档内容，Cherry 继续管理页面、主题、工具栏和 Markdown 数据。',
+    ':::',
+    '',
+    '+++- 更多能力',
+    'Detail 正文同样在当前预览位置编辑。',
+    '+++',
+    '',
+    '```mermaid',
+    'flowchart LR',
+    '  CherryPreview --> Milkdown --> Markdown',
+    '```',
+  ].join('\n');
+
+  const cherry = new Cherry({
+    id: 'editor',
+    value,
+    editor: {
+      defaultModel: 'previewOnly',
+      height: '100%',
+    },
+    previewer: {
+      enablePreviewerBubble: true,
     },
   });
+  const editor = await attachCherryMilkdownPreview(cherry);
+  window.cherry = cherry;
   window.cherryMilkdown = editor;
+  window.detachCherryMilkdown = () => editor.detach();
 }
 
 void main();

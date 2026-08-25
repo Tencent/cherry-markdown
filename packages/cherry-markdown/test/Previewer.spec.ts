@@ -43,6 +43,48 @@ describe('Previewer rendering pipeline', () => {
     expect(Reflect.get(previewer, 'applyingDomChanges')).toBe(false);
   });
 
+  it('lets an integration own only the preview content surface', () => {
+    const { previewer, previewerDom, cherry, highlightLine } = createPreviewer();
+    const update = vi.fn(({ container, markdown, html }) => {
+      container.innerHTML = `<article contenteditable="true">${markdown}</article>`;
+      expect(html).toContain('native preview');
+    });
+    const destroy = vi.fn();
+    const renderer = { update, destroy };
+
+    previewer.setContentRenderer(renderer);
+    previewer.update('<p>native preview</p>');
+
+    expect(update).toHaveBeenCalledWith({
+      container: previewerDom,
+      markdown: '# Document',
+      html: '<p>native preview</p>',
+    });
+    expect(previewerDom.classList.contains('cherry-previewer')).toBe(true);
+    expect(previewerDom.querySelector('[contenteditable="true"]')?.textContent).toBe('# Document');
+    expect(highlightLine).toHaveBeenCalledWith(0);
+    expect(cherry.wrapperDom.contains(previewerDom)).toBe(true);
+
+    expect(previewer.clearContentRenderer(renderer)).toBe(true);
+    expect(destroy).toHaveBeenCalledOnce();
+    previewer.update('<p data-sign="native">restored</p>');
+    expect(previewerDom.textContent).toBe('restored');
+  });
+
+  it('does not let an older integration clear the current preview renderer', () => {
+    const { previewer } = createPreviewer();
+    const first = { update: vi.fn(), destroy: vi.fn() };
+    const second = { update: vi.fn(), destroy: vi.fn() };
+
+    previewer.setContentRenderer(first);
+    previewer.setContentRenderer(second);
+
+    expect(first.destroy).toHaveBeenCalledOnce();
+    expect(previewer.clearContentRenderer(first)).toBe(false);
+    previewer.update('<p>current</p>');
+    expect(second.update).toHaveBeenCalledOnce();
+  });
+
   it('incrementally inserts, updates, and deletes rendered blocks', () => {
     const engine = createEngine();
     const { previewer, previewerDom } = createPreviewer();

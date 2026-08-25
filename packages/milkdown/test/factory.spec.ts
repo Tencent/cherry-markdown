@@ -1,7 +1,13 @@
 import { editorViewCtx } from '@milkdown/kit/core';
 import { NodeSelection } from '@milkdown/kit/prose/state';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { createCherryMilkdown, type CherryMilkdownInstance } from '../src';
+import {
+  attachCherryMilkdownPreview,
+  createCherryMilkdown,
+  type CherryMilkdownHost,
+  type CherryMilkdownInstance,
+  type CherryPreviewContentRenderer,
+} from '../src';
 
 vi.mock('mermaid', () => ({
   default: {
@@ -46,17 +52,78 @@ function selectNode(instance: CherryMilkdownInstance, typeName: string) {
 }
 
 describe('createCherryMilkdown WYSIWYG', () => {
+  it('edits inside the existing Cherry preview surface and writes Markdown back', async () => {
+    const element = root();
+    element.className = 'cherry-previewer cherry-markdown theme__default';
+    let renderer: CherryPreviewContentRenderer | undefined;
+    let markdown = '# Before\n\nCherry preview body.';
+    const engine = { makeHtml: vi.fn((value: string) => `<h1>${value}</h1>`) };
+    const previewer = {
+      getDom: () => element,
+      setContentRenderer: vi.fn((next: CherryPreviewContentRenderer) => {
+        renderer = next;
+      }),
+      clearContentRenderer: vi.fn((target?: CherryPreviewContentRenderer) => {
+        if (!renderer || (target && target !== renderer)) return false;
+        renderer = undefined;
+        return true;
+      }),
+      update: vi.fn((html: string) => {
+        if (renderer) return renderer.update({ container: element, markdown, html });
+        element.innerHTML = html;
+      }),
+    };
+    const host: CherryMilkdownHost = {
+      engine,
+      getMarkdown: () => markdown,
+      getPreviewer: () => previewer,
+      setValue: vi.fn((value: string) => {
+        markdown = value;
+      }),
+    };
+
+    const instance = await attachCherryMilkdownPreview(host, { debounce: 0 });
+    instances.push(instance);
+
+    expect(element.classList.contains('cherry-previewer')).toBe(true);
+    expect(element.classList.contains('cherry-markdown')).toBe(true);
+    expect(element.querySelector('h1')?.textContent).toBe('Before');
+    expect(instance.engine).toBe(engine);
+
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let headingEnd = -1;
+    view.state.doc.descendants((node, position) => {
+      if (node.isText && node.text === 'Before') headingEnd = position + node.nodeSize;
+    });
+    vi.mocked(host.setValue).mockClear();
+    view.dispatch(view.state.tr.insertText(' editable', headingEnd));
+    await vi.waitFor(() =>
+      expect(host.setValue).toHaveBeenCalledWith(expect.stringContaining('Before editable'), true),
+    );
+    expect(markdown).toContain('Before editable');
+
+    markdown = '# From source editor';
+    await previewer.update(engine.makeHtml(markdown));
+    expect(element.querySelector('h1')?.textContent).toBe('From source editor');
+
+    await instance.detach();
+    expect(previewer.clearContentRenderer).toHaveBeenCalled();
+    expect(element.classList.contains('cherry-milkdown--previewer')).toBe(false);
+    expect(element.textContent).toContain('# From source editor');
+  });
+
   it('renders a single editable content surface with no raw cards or preview pane', async () => {
     const element = root();
     const instance = await createCherryMilkdown({
       root: element,
-      value: '# Hello\n\n[[toc]]\n\nText !!red color!! and $E=mc^2$.',
+      value: '# Hello\n\n[[toc]]\n\nText !!red color!!, ==highlight== and $E=mc^2$.',
     });
     instances.push(instance);
 
     expect(element.querySelector('h1')?.textContent).toBe('Hello');
-    expect(element.querySelector('.cherry-wysiwyg-toc')).not.toBeNull();
+    expect(element.querySelector('.toc')).not.toBeNull();
     expect(element.querySelector('.cherry-wysiwyg-color')?.textContent).toBe('color');
+    expect(element.querySelector('.cherry-wysiwyg-highlight')?.textContent).toBe('highlight');
     expect(element.querySelector('math-field')).not.toBeNull();
     expect(element.querySelector('[data-cherry-raw]')).toBeNull();
     expect(element.querySelector('textarea')).toBeNull();
@@ -160,7 +227,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
 
     view.dispatch(view.state.tr.insertText('After', headingTextPosition, headingTextPosition + 'Before'.length));
 
-    expect(element.querySelector('.cherry-wysiwyg-toc')?.textContent).toContain('After');
+    expect(element.querySelector('.toc')?.textContent).toContain('After');
   });
 
   it('shows Cherry panels and Mermaid as rendered visual nodes by default', async () => {
@@ -273,7 +340,9 @@ describe('createCherryMilkdown WYSIWYG', () => {
     instances.push(instance);
     const before = element.querySelectorAll('.cherry-compound-item').length;
     element
-      .querySelector<HTMLButtonElement>('.cherry-compound > .cherry-compound__header .cherry-node-actions button')
+      .querySelector<HTMLButtonElement>(
+        '.cherry-compound > .cherry-compound__header .cherry-node-actions button[aria-label="增加项目"]',
+      )
       ?.click();
     expect(element.querySelectorAll('.cherry-compound-item')).toHaveLength(before + 1);
   });

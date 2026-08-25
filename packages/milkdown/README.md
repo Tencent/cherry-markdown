@@ -2,7 +2,7 @@
 
 [简体中文](./README.CN.md)
 
-A framework-neutral Milkdown WYSIWYG editor for Cherry Markdown. The editor surface is the content view; a separate preview pane is not required.
+A Milkdown WYSIWYG extension for Cherry Markdown. The recommended mode mounts Milkdown in the existing Cherry previewer: Cherry keeps ownership of the page, theme, toolbar, layout, and preview interactions while Milkdown makes that content directly editable.
 
 ## Features
 
@@ -23,9 +23,10 @@ Cherry extensions are not presented as raw source cards. Business-specific synta
 npm install @cherry-markdown/milkdown @milkdown/kit cherry-markdown mathlive mermaid
 ```
 
-Import the styles once:
+Import Cherry's original styles and the Milkdown editing behavior styles:
 
 ```js
+import 'cherry-markdown/dist/cherry-markdown.css';
 import '@cherry-markdown/milkdown/styles.css';
 import '@milkdown/kit/prose/view/style/prosemirror.css';
 ```
@@ -33,20 +34,27 @@ import '@milkdown/kit/prose/view/style/prosemirror.css';
 ## Usage
 
 ```js
-import { createCherryMilkdown } from '@cherry-markdown/milkdown';
+import Cherry from 'cherry-markdown';
+import { attachCherryMilkdownPreview } from '@cherry-markdown/milkdown';
 
-const editor = await createCherryMilkdown({
-  root: document.querySelector('#editor'),
+const cherry = new Cherry({
+  id: 'editor',
   value: '# Title\n\nInline math $E=mc^2$ and !!red colored text!!.',
+  editor: { defaultModel: 'previewOnly' },
+});
+
+const editor = await attachCherryMilkdownPreview(cherry, {
   onChange({ markdown }) {
     console.log(markdown);
   },
 });
 
-editor.setMarkdown('# Updated');
-console.log(editor.getMarkdown());
-await editor.destroy();
+// Preview edits are written to Cherry's Markdown/CodeMirror automatically.
+// Source edits are synchronized back into the current Milkdown preview.
+await editor.detach(); // Restore Cherry's native read-only preview.
 ```
+
+`createCherryMilkdown` remains available for a standalone surface without Cherry's page shell, but it is not the default integration demonstrated here.
 
 Plugins passed through `plugins` are loaded after the built-in WYSIWYG plugins and can register business NodeViews.
 

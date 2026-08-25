@@ -1,14 +1,17 @@
 @import "mathlive/fonts.css";
 
 .cherry-milkdown {
+  --cherry-milkdown-primary: var(--md-link-color, #366ef4);
+  --cherry-milkdown-border: var(--base-border-color, #d8dce5);
+  --cherry-milkdown-muted: var(--base-sub-font-color, #646a73);
+  --cherry-milkdown-soft: var(--md-inline-code-bg, #f5f7fa);
+  --cherry-milkdown-panel: var(--panel-primary-bg, #eef3ff);
+}
+
+.cherry-milkdown:not(.cherry-previewer) {
   min-height: 320px;
   color: #1f2329;
   background: #fff;
-  --cherry-milkdown-primary: #366ef4;
-  --cherry-milkdown-border: #d8dce5;
-  --cherry-milkdown-muted: #646a73;
-  --cherry-milkdown-soft: #f5f7fa;
-  --cherry-milkdown-panel: #eef3ff;
 }
 
 .cherry-milkdown .milkdown,
@@ -20,18 +23,43 @@
   position: relative;
 }
 
-.cherry-milkdown .ProseMirror {
+.cherry-milkdown:not(.cherry-previewer) .ProseMirror {
   box-sizing: border-box;
   padding: 24px 40px 48px;
   outline: none;
   font: 16px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+.cherry-milkdown--previewer .milkdown,
+.cherry-milkdown--previewer .ProseMirror {
+  min-height: 100%;
+}
+
+.cherry-milkdown--previewer .cherry-source-node--cherry_frontmatter {
+  display: none;
+}
+
+.cherry-milkdown--previewer .cherry-source-node--cherry_toc {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.cherry-milkdown--previewer .ProseMirror {
+  box-sizing: border-box;
+  padding: 0;
+  outline: none;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+}
+
 .cherry-milkdown .ProseMirror > :first-child {
   margin-top: 0;
 }
 
-.cherry-milkdown .ProseMirror blockquote {
+.cherry-milkdown:not(.cherry-previewer) .ProseMirror blockquote {
   margin-left: 0;
   padding-left: 16px;
   border-left: 4px solid var(--cherry-milkdown-border);
@@ -305,23 +333,20 @@
   display: none;
 }
 
-.cherry-wysiwyg-toc > strong {
+.cherry-milkdown:not(.cherry-previewer) .toc > .toc-title {
   display: block;
   margin-bottom: 8px;
   font-size: 18px;
+  font-weight: 700;
 }
 
-.cherry-wysiwyg-toc ol {
+.cherry-milkdown:not(.cherry-previewer) .toc ul {
   margin: 0;
   padding-left: 24px;
 }
 
-.cherry-wysiwyg-toc li[data-level="2"] {
-  margin-left: 16px;
-}
-
-.cherry-wysiwyg-toc li[data-level="3"] {
-  margin-left: 32px;
+.cherry-milkdown:not(.cherry-previewer) .toc-li {
+  list-style: none;
 }
 
 .cherry-embed.is-selected {
@@ -379,15 +404,15 @@
   border-collapse: collapse;
 }
 
-.cherry-milkdown .ProseMirror th,
-.cherry-milkdown .ProseMirror td {
+.cherry-milkdown:not(.cherry-previewer) .ProseMirror th,
+.cherry-milkdown:not(.cherry-previewer) .ProseMirror td {
   min-width: 80px;
   padding: 8px 12px;
   border: 1px solid var(--cherry-milkdown-border);
   vertical-align: top;
 }
 
-.cherry-milkdown .ProseMirror th {
+.cherry-milkdown:not(.cherry-previewer) .ProseMirror th {
   background: var(--cherry-milkdown-soft);
 }
 
@@ -539,7 +564,7 @@
 }
 
 @media (max-width: 720px) {
-  .cherry-milkdown .ProseMirror {
+  .cherry-milkdown:not(.cherry-previewer) .ProseMirror {
     padding: 20px 16px 40px;
   }
 
@@ -547,4 +572,98 @@
   .cherry-compound-item__header {
     align-items: flex-start;
   }
+}
+
+/* Embedded mode deliberately follows Cherry's existing preview DOM contract. */
+.cherry-milkdown--previewer .cherry-compound.cherry-panel {
+  margin: var(--panel-margin, 10px 0);
+  overflow: hidden;
+  border: var(--panel-border, 0.5px solid var(--panel-border-color, transparent));
+  border-radius: var(--panel-border-radius, var(--radius-xl));
+  background: var(--panel-bg, transparent);
+  box-shadow: var(--panel-box-shadow, none);
+}
+
+.cherry-milkdown--previewer .cherry-compound.cherry-detail {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.cherry-milkdown--previewer .cherry-detail > .cherry-compound__header {
+  display: none;
+}
+
+.cherry-milkdown--previewer .cherry-detail > .cherry-compound__content {
+  padding: 0;
+}
+
+.cherry-milkdown--previewer .cherry-panel > .cherry-compound__header {
+  min-height: 0;
+  padding: var(--panel-title-padding, 5px 20px);
+  color: var(--panel-title-color, #fff);
+  background: var(--panel-title-bg, transparent);
+  border-radius: var(--panel-title-border-radius, 0);
+  border-bottom: var(--panel-title-border-bottom, none);
+}
+
+.cherry-milkdown--previewer .cherry-panel > .cherry-compound__header::before {
+  margin: 0 var(--spacing-md) 0 -6px;
+  font-family: "ch-icon";
+  vertical-align: bottom;
+  content: var(--panel-icon, "");
+}
+
+.cherry-milkdown--previewer .cherry-panel > .cherry-compound__content {
+  padding: var(--panel-body-padding, 5px 20px);
+  color: var(--panel-body-color, inherit);
+  background: var(--panel-body-bg, transparent);
+  border-radius: var(--panel-body-border-radius, 0);
+}
+
+.cherry-milkdown--previewer .cherry-compound-item[data-role="detail-item"] {
+  padding: 0;
+  border: 0;
+  background: var(--accordion-bg);
+}
+
+.cherry-milkdown--previewer .cherry-compound-item[data-role="detail-item"] > summary {
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) calc(var(--spacing-lg) + var(--spacing-xl));
+  color: var(--accordion-summary-color);
+  background: var(--accordion-summary-bg);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.cherry-milkdown--previewer .cherry-compound-item[data-role="detail-item"] > .cherry-detail-body {
+  padding: var(--spacing-lg);
+  color: var(--accordion-body-color);
+  background: var(--accordion-body-bg);
+  border-top: 1px solid var(--accordion-body-border);
+}
+
+.cherry-milkdown--previewer .milkdown-table-block {
+  margin: var(--spacing-lg) 0;
+  padding: 0;
+}
+
+.cherry-milkdown--previewer .cherry-embed {
+  margin: var(--spacing-lg) 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.cherry-milkdown--previewer math-field::part(menu-toggle),
+.cherry-milkdown--previewer math-field::part(virtual-keyboard-toggle) {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.cherry-milkdown--previewer math-field:hover::part(menu-toggle),
+.cherry-milkdown--previewer math-field:hover::part(virtual-keyboard-toggle),
+.cherry-milkdown--previewer math-field:focus-within::part(menu-toggle),
+.cherry-milkdown--previewer math-field:focus-within::part(virtual-keyboard-toggle) {
+  opacity: 1;
 }

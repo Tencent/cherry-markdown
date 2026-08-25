@@ -2,7 +2,7 @@
 
 [English](./README.md)
 
-Cherry Markdown 的框架无关 Milkdown 所见即所得编辑器。编辑区本身就是最终内容视图，不需要独立预览栏。
+Cherry Markdown 的 Milkdown 即见即所得扩展。推荐模式是把 Milkdown 挂载到现有 Cherry 预览区：页面、主题、工具栏和预览交互仍由 Cherry 管理，Milkdown 只让当前预览内容可以直接编辑。
 
 ## 能力
 
@@ -23,9 +23,10 @@ Cherry Markdown 的框架无关 Milkdown 所见即所得编辑器。编辑区本
 npm install @cherry-markdown/milkdown @milkdown/kit cherry-markdown mathlive mermaid
 ```
 
-全局引入一次样式：
+全局引入 Cherry 原样式和 Milkdown 的编辑行为样式：
 
 ```js
+import 'cherry-markdown/dist/cherry-markdown.css';
 import '@cherry-markdown/milkdown/styles.css';
 import '@milkdown/kit/prose/view/style/prosemirror.css';
 ```
@@ -33,20 +34,27 @@ import '@milkdown/kit/prose/view/style/prosemirror.css';
 ## 使用
 
 ```js
-import { createCherryMilkdown } from '@cherry-markdown/milkdown';
+import Cherry from 'cherry-markdown';
+import { attachCherryMilkdownPreview } from '@cherry-markdown/milkdown';
 
-const editor = await createCherryMilkdown({
-  root: document.querySelector('#editor'),
+const cherry = new Cherry({
+  id: 'editor',
   value: '# 标题\n\n行内公式 $E=mc^2$ 和 !!red 红色文字!!。',
+  editor: { defaultModel: 'previewOnly' },
+});
+
+const editor = await attachCherryMilkdownPreview(cherry, {
   onChange({ markdown }) {
     console.log(markdown);
   },
 });
 
-editor.setMarkdown('# 更新后的内容');
-console.log(editor.getMarkdown());
-await editor.destroy();
+// 预览区编辑会自动回写 cherry.getMarkdown() / CodeMirror。
+// 源码编辑也会自动更新当前 Milkdown 预览内容。
+await editor.detach(); // 恢复 Cherry 原生只读预览
 ```
+
+`createCherryMilkdown` 仍可用于不需要 Cherry 页面壳的独立编辑器，但它不是本示例的默认集成方式。
 
 `plugins` 会在内置 WYSIWYG 插件之后加载，可用于注册业务 NodeView。
 
