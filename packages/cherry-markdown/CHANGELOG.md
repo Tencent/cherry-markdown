@@ -1,5 +1,14 @@
 # Change Log
 
+## 0.11.10
+
+### Patch Changes
+
+- 修复未提供 ECharts 时图表表格无法安全降级的问题，并恢复 core 入口的 MermaidPlugin 命名导出。 [@sunsonliu](https://github.com/sunsonliu)([#1861](https://github.com/Tencent/cherry-markdown/pull/1861))([`ba1f07c`](https://github.com/Tencent/cherry-markdown/commit/ba1f07ca2644142d415b16cfe432db335c44ca27))
+- 迁移至 Vite+ 构建链，并继续发布 ESM 与 UMD 产物。现有 UMD 文件名和 CDN 集成路径保持不变，同时补充 `cherry-markdown.core.esm.js`、`cherry-markdown.engine.js` 和 `cherry-markdown.engine.esm.js`。 [@RSS1102](https://github.com/RSS1102)([#1833](https://github.com/Tencent/cherry-markdown/pull/1833))([`327877a`](https://github.com/Tencent/cherry-markdown/commit/327877ab1aab1e612660ca845b02dab0c646834e))
+- fix: 修复引入链接有注入的问题 [@RSS1102](https://github.com/RSS1102)([`72c7036`](https://github.com/Tencent/cherry-markdown/commit/72c7036d915ca88bccfb6cd1989ff3a17b1e348c))
+- 切换发布构建产物的 JavaScript 压缩器为 Oxc，更新相关包的构建产物。 [@RSS1102](https://github.com/RSS1102)([#1850](https://github.com/Tencent/cherry-markdown/pull/1850))([`d302daa`](https://github.com/Tencent/cherry-markdown/commit/d302daa70a653a053dda363d7e04b95bdeed11ad))
+
 ## 0.11.9
 
 ### Patch Changes

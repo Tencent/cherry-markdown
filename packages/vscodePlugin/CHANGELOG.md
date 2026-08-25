@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.3.2
+
+### Patch Changes
+
+- refactor: 统一 VS Code 插件构建与发布流程，使用全局主题状态和工作区资源上传，并修复命令本地化与快捷键配置 [@RSS1102](https://github.com/RSS1102)([#1846](https://github.com/Tencent/cherry-markdown/pull/1846))([`91984b4`](https://github.com/Tencent/cherry-markdown/commit/91984b4bd45d35c2cb634260f90592ed8f3b42d7))
+- 切换发布构建产物的 JavaScript 压缩器为 Oxc，更新相关包的构建产物。 [@RSS1102](https://github.com/RSS1102)([#1850](https://github.com/Tencent/cherry-markdown/pull/1850))([`d302daa`](https://github.com/Tencent/cherry-markdown/commit/d302daa70a653a053dda363d7e04b95bdeed11ad))
+
 ## 0.3.1
 
 ### Patch Changes
