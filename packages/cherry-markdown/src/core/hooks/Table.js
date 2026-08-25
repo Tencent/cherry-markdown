@@ -70,9 +70,11 @@ export default class Table extends ParagraphBase {
 
   $parseChartOptions(cell) {
     // Logger.log('Parsing chart options for cell:', cell);
-    // 初始化失败
     if (!this.chartRenderEngine) {
       // Logger.log('Chart render engine not available');
+      return null;
+    }
+    if (typeof this.chartRenderEngine.isValid === 'function' && !this.chartRenderEngine.isValid()) {
       return null;
     }
     const CHART_REGEX = /^:(\w+):(?:[ ]*{(.*?)}[ ]*)?$/;

@@ -978,6 +978,10 @@
     width: 25px;
     text-align: center;
     height: 25px;
+    line-height: 25px;
+    .ch-icon {
+      font-size: var(--toolbar-icon-size);
+    }
     cursor: pointer;
     float: right;
     top: 35px;
@@ -999,6 +1003,8 @@
     width: 25px;
     text-align: center;
     height: 25px;
+    line-height: 25px;
+    font-size: var(--toolbar-icon-size);
     cursor: pointer;
     float: right;
     border-radius: 5px;

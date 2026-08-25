@@ -109,7 +109,7 @@ Cherry provides multiple build artifacts (Full / Core / Stream / Engine) to fit 
 Welcome to join us in building a powerful Markdown editor. Before implementing new features or submitting a pull request, please read:
 
 - [Introduction to cherry-markdown editor](https://github.com/Tencent/cherry-markdown/wiki/%E5%88%9D%E8%AF%86-cherry-markdown-%E7%BC%96%E8%BE%91%E5%99%A8)
-- [Contribution Guidelines](https://github.com/Tencent/cherry-markdown/wiki/%E8%B4%A1%E7%8C%AE%E6%8C%87%E5%8D%97%20Contribution%20Guidelines)
+- [Contribution Guidelines](./CONTRIBUTING.md)
 
 ## License
 

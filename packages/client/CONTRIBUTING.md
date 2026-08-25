@@ -1,17 +1,8 @@
-# Contributing
+# Client-specific contribution notes
 
 Excited to hear that you are interested in contributing to this project! Thanks!
 
-## Documentation
-
-The easiest way to contribute documentation to this project is to follow these steps:
-
-1. [Fork the repository](https://docs.github.com/zh/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo).
-2. Clone the newly forked repo from your GitHub account.
-3. Create a new branch to add your work to, i.e. git checkout -b client/feat/xxx.
-4. Make your changes and commit them
-5. Push the branch to your fork
-6. Go to <https://github.com/Tencent/cherry-markdown/pulls>, there should be a "Compare & Pull Request" button, where you can create a PR.
+The repository-wide contribution flow, branch conventions, Changesets, and Vite+ commands are documented in [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md). This file only records requirements specific to the Tauri client.
 
 ### Setup (locally)
 
@@ -22,37 +13,35 @@ The easiest way to contribute documentation to this project is to follow these s
 
 ---
 
-This project uses [pnpm](https://pnpm.io/) to manage the dependencies, install it if you haven't via.
+Install dependencies from the repository root with Yarn; do not create a separate pnpm lockfile for this workspace.
 
 ```shell
-npm i -g pnpm
+yarn install
 ```
 
-Clone this repo to your local machine and install the dependencies.
-
-```shell
-pnpm install
-```
-
-> [!TIP]
-> If you are using another package manager, you need to pay attention to [`client/tauri.conf.json`](./tauri.conf.json) configuration.
-> `build.beforeDevCommand:your package manager dev`
-> `build.beforeBuildCommand:your package manager dev`
-> Then you can use `yarn/npm/pnpm` to build the project.
+The client is a workspace managed by Vite+. `yarn dev:client` invokes `tauri dev` and opens the native desktop client; use the package-level `dev` script only when you need the standalone web server.
 
 ### Development
 
-- Build with watch mode.
+- Start the native Tauri client in development mode.
 
 ```shell
-pnpm tauri:dev
+yarn dev:client
 
 ```
 
-- To build all the packages at once, run the following command on the project root.
+- Build the client together with the current Cherry Markdown package.
 
 ```shell
-pnpm tauri:build
+yarn build:client
+```
+
+The root command runs the package `tauri:dev` script through Vite+, which invokes the Tauri CLI. After installing Rust and the platform dependencies, it starts the native window and the Vite dev server configured in `src-tauri/tauri.conf.json`.
+
+For the native Tauri bundle, run:
+
+```shell
+./node_modules/.bin/vp run -F @cherry-markdown/client tauri:build
 ```
 
 #### More

@@ -76,7 +76,9 @@ export default class EChartsTableEngine {
     const globalEcharts = getExternal('echarts');
     const resolvedEcharts = echarts || globalEcharts;
     if (!resolvedEcharts) {
-      throw new Error('table-echarts-plugin[init]: Package echarts not found.');
+      console.warn('table-echarts-plugin[init]: Package echarts not found.');
+      this.echartsRef = false;
+      return;
     }
     this.options = { ...DEFAULT_OPTIONS, ...(options || {}) };
     this.echartsRef = /** @type {*} */ (resolvedEcharts); // echarts引用
@@ -100,6 +102,10 @@ export default class EChartsTableEngine {
 
     // 监听语言变更事件
     this.$enableLocaleObserver();
+  }
+
+  isValid() {
+    return !!this.echartsRef;
   }
 
   /**

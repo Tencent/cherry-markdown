@@ -134,6 +134,30 @@ describe('core/hooks/Table', () => {
     });
   });
 
+  it('falls back to a regular table when the chart engine is invalid', () => {
+    class InvalidChartEngine {
+      isValid() {
+        return false;
+      }
+
+      render() {
+        throw new Error('invalid chart engine must not render');
+      }
+    }
+    const { hook } = createTable({ enableChart: true, chartRenderEngine: InvalidChartEngine });
+
+    expect(hook.$parseChartOptions(':bar: {"title":"Sales"}')).toBeNull();
+
+    const result = hook.$parseTable(
+      ['| :bar: {"title":"Sales"} | Q1 |', '| --- | ---: |', '| Alpha | 10 |'],
+      sentenceMake,
+      3,
+    );
+
+    expect(result.html).toContain('<table class="cherry-table">');
+    expect(result.html).not.toContain('cherry-table-figure');
+  });
+
   it('injects required externals and fixed rendering defaults into the chart engine', () => {
     const echarts = { version: 'test' };
     const { cherry } = createTable(

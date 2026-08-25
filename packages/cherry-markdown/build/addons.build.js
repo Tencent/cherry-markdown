@@ -41,7 +41,7 @@ for (const entry of addonEntries) {
         outDir: outputDir,
         emptyOutDir: false,
         target: 'es2015',
-        minify: 'esbuild',
+        minify: 'oxc',
         lib: {
           entry: input,
           formats: [format],

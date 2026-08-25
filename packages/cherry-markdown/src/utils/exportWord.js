@@ -218,7 +218,7 @@ function showExportWordTip() {
       <p style="margin: 0 0 var(--spacing-lg) 0; color: var(--base-sub-font-color); font-size: var(--font-size-sm);">
         部分样式可能会丢失或变更
       </p>
-      <button onclick="this.parentElement.parentElement.remove()" style="
+      <button onclick="this.closest('.cherry-export-word-tip').remove()" style="
         background: var(--secondary-color);
         color: var(--primary-color);
         border: none;
@@ -237,11 +237,11 @@ function showExportWordTip() {
       height: 100%;
       background: rgba(0,0,0,0.3);
       z-index: 99998;
-    " onclick="this.parentElement.remove();"></div>
+    " onclick="this.closest('.cherry-export-word-tip').remove();"></div>
   `;
 
   const tipElement = document.createElement('div');
-  tipElement.className = 'cherry';
+  tipElement.className = 'cherry-export-word-tip cherry';
   tipElement.innerHTML = tipHTML;
   document.body.appendChild(tipElement);
 }

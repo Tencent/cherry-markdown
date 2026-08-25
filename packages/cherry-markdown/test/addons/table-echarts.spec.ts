@@ -77,11 +77,20 @@ describe('addons/EChartsTableEngine', () => {
     });
   });
 
-  it('requires ECharts and initializes rendering defaults', () => {
-    expect(() => new EChartsTableEngine()).toThrow('Package echarts not found');
+  it('disables chart rendering without ECharts instead of throwing', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    const renderer = new EChartsTableEngine();
+
+    expect(renderer.isValid()).toBe(false);
+    expect(warn).toHaveBeenCalledWith('table-echarts-plugin[init]: Package echarts not found.');
+  });
+
+  it('initializes rendering defaults when ECharts is available', () => {
     const environment = createEnvironment();
     const renderer = new EChartsTableEngine({ echarts: environment.echarts, cherry: environment.cherry });
 
+    expect(renderer.isValid()).toBe(true);
     expect(renderer.options).toMatchObject({ renderer: 'svg', width: 500, height: 300 });
     expect(renderer.instances.size).toBe(0);
   });

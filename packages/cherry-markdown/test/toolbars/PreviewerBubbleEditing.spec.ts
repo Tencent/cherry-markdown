@@ -31,7 +31,12 @@ describe('toolbars/PreviewerBubble checkbox editing', () => {
   it('toggles the matching unchecked checkbox through real CodeMirror state', () => {
     const { bubble, previewerDom } = createPreviewerBubble();
     const editor = attachEditor(bubble, '- [ ] first\n- [x] second');
-    previewerDom.innerHTML = '<i class="ch-icon ch-icon-square"></i><i class="ch-icon ch-icon-check"></i>';
+    previewerDom.innerHTML = [
+      '<ul>',
+      '<li><i class="ch-icon ch-icon-square"></i></li>',
+      '<li><i class="ch-icon ch-icon-check"></i></li>',
+      '</ul>',
+    ].join('');
     const checkbox = previewerDom.querySelector('.ch-icon-square');
 
     bubble.$dealCheckboxClick({ target: checkbox });
@@ -44,17 +49,42 @@ describe('toolbars/PreviewerBubble checkbox editing', () => {
     const { bubble, previewerDom } = createPreviewerBubble();
     const editor = attachEditor(bubble, '- [ ] first\n- [x] second');
     previewerDom.innerHTML = [
-      '<i class="ch-icon ch-icon-square"></i>',
-      '<i class="ch-icon ch-icon-check"></i>',
-      '<i class="ch-icon ch-icon-square"></i>',
+      '<ul>',
+      '<li><i class="ch-icon ch-icon-square"></i></li>',
+      '<li><i class="ch-icon ch-icon-check"></i></li>',
+      '</ul>',
+      '<p><i class="ch-icon ch-icon-square"></i></p>',
     ].join('');
+    const listIcons = previewerDom.querySelectorAll('li .ch-icon-square, li .ch-icon-check');
 
-    bubble.$dealCheckboxClick({ target: previewerDom.children[1] });
+    bubble.$dealCheckboxClick({ target: listIcons[1] });
     expect(editor.getMarkdown()).toBe('- [ ] first\n- [ ] second');
 
     editor.dispatch.mockClear();
-    bubble.$dealCheckboxClick({ target: previewerDom.children[2] });
+    bubble.$dealCheckboxClick({ target: previewerDom.querySelector('p .ch-icon-square') });
     expect(editor.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('ignores inline prose checkbox icons when mapping click index to markdown', () => {
+    const { bubble, previewerDom } = createPreviewerBubble();
+    const editor = attachEditor(
+      bubble,
+      '说明：本单使用可勾选复选框（- [ ]）记录\n- [ ] first\n- [ ] second',
+    );
+    previewerDom.innerHTML = [
+      '<p>说明：本单使用可勾选复选框（- <i class="ch-icon ch-icon-square"></i> ）记录</p>',
+      '<ul>',
+      '<li class="check-list-item"><i class="ch-icon ch-icon-square"></i> first</li>',
+      '<li class="check-list-item"><i class="ch-icon ch-icon-square"></i> second</li>',
+      '</ul>',
+    ].join('');
+    const firstListCheckbox = previewerDom.querySelector('li .ch-icon-square');
+
+    bubble.$dealCheckboxClick({ target: firstListCheckbox });
+
+    expect(editor.getMarkdown()).toBe(
+      '说明：本单使用可勾选复选框（- [ ]）记录\n- [x] first\n- [ ] second',
+    );
   });
 });
 
