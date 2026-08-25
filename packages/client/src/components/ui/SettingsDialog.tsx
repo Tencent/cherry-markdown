@@ -1,5 +1,6 @@
 import { defineComponent, h, Teleport, Transition, ref, computed, watch } from 'vue';
-import { useImageBedStore, type ImageBedProvider, type ImageBedState } from '../../store';
+import { useImageBedStore, usePreferencesStore, type ImageBedProvider, type ImageBedState } from '../../store';
+import { FIXED_WIDTH_DEFAULT, FIXED_WIDTH_MAX, FIXED_WIDTH_MIN } from '../../store/modal/preferences';
 import { testImageBedConnection } from '../composables/useImageBedUploader';
 import './settings-dialog.css';
 
@@ -24,9 +25,12 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const store = useImageBedStore();
+    const preferences = usePreferencesStore();
 
     // Local draft: only committed to store on "保存"; discarded on "取消"
     const draft = ref<ImageBedState>(cloneState(store.$state));
+    // 专注模式 - 固定宽度草稿（px）；同样只在“保存”时提交
+    const fixedWidthDraft = ref<number>(preferences.fixedWidthValue);
 
     // 每次弹窗打开时，用最新的 store 状态刷新草稿
     watch(
@@ -34,6 +38,7 @@ export default defineComponent({
       (v) => {
         if (v) {
           draft.value = cloneState(store.$state);
+          fixedWidthDraft.value = preferences.fixedWidthValue;
           testResult.value = null;
         }
       },
@@ -57,6 +62,10 @@ export default defineComponent({
 
     const handleSave = (): void => {
       store.replaceAll(cloneState(draft.value));
+      // 固定宽度：写回前需限制到合法范围内，store 内部也会再做一次 clamp
+      const raw = Number(fixedWidthDraft.value);
+      const px = Number.isFinite(raw) ? raw : FIXED_WIDTH_DEFAULT;
+      preferences.setFixedWidthValue(Math.min(FIXED_WIDTH_MAX, Math.max(FIXED_WIDTH_MIN, Math.round(px))));
       emit('close');
     };
 
@@ -91,6 +100,39 @@ export default defineComponent({
                     [
                       h('div', { class: 'dialog-content settings-dialog' }, [
                         h('h3', { class: 'dialog-title' }, '设置'),
+
+                        // ==== 专注模式分节 ====
+                        h('section', { class: 'settings-section' }, [
+                          h('h4', { class: 'settings-section-title' }, '专注模式'),
+                          h(
+                            'p',
+                            { class: 'settings-section-desc' },
+                            '专注模式下，正文采用居中固定宽度布局，便于阅读。可在下方自定义宽度，修改后立即生效。',
+                          ),
+                          h('div', { class: 'settings-form' }, [
+                            h('label', { class: 'settings-field' }, [
+                              h('span', { class: 'settings-field-label' }, `固定宽度（px）`),
+                              h('input', {
+                                class: 'settings-input',
+                                type: 'number',
+                                min: FIXED_WIDTH_MIN,
+                                max: FIXED_WIDTH_MAX,
+                                step: 20,
+                                value: fixedWidthDraft.value,
+                                placeholder: String(FIXED_WIDTH_DEFAULT),
+                                onInput: (e: Event) => {
+                                  const v = Number((e.target as HTMLInputElement).value);
+                                  fixedWidthDraft.value = Number.isFinite(v) ? v : FIXED_WIDTH_DEFAULT;
+                                },
+                              }),
+                              h(
+                                'span',
+                                { class: 'settings-field-hint' },
+                                `建议范围 ${FIXED_WIDTH_MIN} – ${FIXED_WIDTH_MAX}，默认 ${FIXED_WIDTH_DEFAULT}。仅在“固定宽度”模式下生效，100% 宽度不受影响。`,
+                              ),
+                            ]),
+                          ]),
+                        ]),
 
                         // ==== 图床设置分节 ====
                         h('section', { class: 'settings-section' }, [
