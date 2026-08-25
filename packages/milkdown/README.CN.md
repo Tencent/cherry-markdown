@@ -10,10 +10,10 @@ Cherry Markdown 的框架无关 Milkdown 所见即所得编辑器。编辑区本
 - 表格、任务列表、链接、图片、引用和代码块直接编辑。
 - 行内和块级公式通过 MathLive 原地可视输入，仍序列化为 Cherry LaTeX。
 - Cherry 颜色、背景色、字号、上下标、ruby、下划线和高亮使用可编辑 mark。
-- Panel、Detail、Cols、Tabs、Timeline 使用可编辑复合节点，标题、正文和子项都在内容中直接修改。
-- TOC 自动跟随标题；frontmatter 和 comment reference 使用就地字段表单。
-- Mermaid 默认渲染为图形；PlantUML、ECharts 可通过 `renderers` 接入。选中图表后在图形旁修改配置并实时刷新。
-- HTML 使用无脚本权限的沙箱预览，并在选中时显示紧邻源码编辑区。
+- Panel、Detail、Cols、Tabs、Timeline 保持连续正文编辑流，标题和正文都在原位置直接修改。
+- TOC 自动跟随标题；frontmatter 和 comment reference 使用紧凑的原位源码节点，不显示字段表单或弹窗。
+- Mermaid 默认渲染为图形；PlantUML、ECharts 可通过 `renderers` 接入。源码只在用户主动选择后于节点内部展开。
+- HTML 使用无脚本权限的沙箱预览，并提供按需开启的节点内源码模式。
 
 该包不会把 Cherry 扩展默认显示成 raw 源码卡片。业务自定义语法需要通过 Milkdown 插件提供 schema、parser、serializer 和 NodeView，未注册语法不宣称支持。
 
@@ -50,7 +50,7 @@ await editor.destroy();
 
 `plugins` 会在内置 WYSIWYG 插件之后加载，可用于注册业务 NodeView。
 
-编辑器默认提供选区/块工具栏和 `/` 菜单。表格使用 Milkdown `table-block`，可增删、拖拽行列并修改列对齐；公式使用 MathLive，点击公式即可输入。
+编辑器不显示常驻格式工具栏。在空段落输入 `/` 调出插入命令，普通格式使用 Markdown 快捷输入；复合块标题和正文都直接编辑，结构按钮只在悬停或选中节点时出现。表格使用 Milkdown `table-block`，可增删、拖拽行列并修改列对齐；公式使用 MathLive，点击公式即可输入。
 
 可通过 `mathlive` 传入宏和虚拟键盘模式：
 

@@ -31,7 +31,7 @@ async function main() {
       '| Cherry extensions | Structured editing |',
       '',
       '::: warning',
-      'Panel 的标题、类型和正文都可以直接修改。',
+      'Panel 标题和正文都在当前文档位置直接修改，不需要打开表单。',
       ':::',
       '',
       ':::tabs',

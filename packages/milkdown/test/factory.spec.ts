@@ -62,6 +62,32 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(element.querySelector('textarea')).toBeNull();
   });
 
+  it('does not turn Cherry document content into native form controls', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: [
+        '---',
+        'title: Cherry',
+        '---',
+        '',
+        ':::warning Notice',
+        'Body',
+        ':::',
+        '',
+        '[ref]: https://example.com',
+        '',
+        '```mermaid',
+        'graph TD; A-->B;',
+        '```',
+      ].join('\n'),
+    });
+    instances.push(instance);
+
+    expect(element.querySelector('input, select, textarea')).toBeNull();
+    expect(element.querySelectorAll('[contenteditable="true"]')).not.toHaveLength(0);
+  });
+
   it('keeps Cherry visual syntax reversible through Markdown serialization', async () => {
     const element = root();
     const value = [
@@ -147,8 +173,8 @@ describe('createCherryMilkdown WYSIWYG', () => {
     const nodes = element.querySelectorAll<HTMLElement>('.cherry-compound, .cherry-embed--cherry_diagram');
     expect(nodes).toHaveLength(2);
     expect(nodes[0]?.textContent).toContain('Panel body');
-    expect(nodes[0]?.querySelector('textarea')).toBeNull();
-    expect(nodes[1]?.querySelector<HTMLElement>('.cherry-embed__inspector')?.hidden).toBe(true);
+    expect(nodes[0]?.querySelector('input, select, textarea')).toBeNull();
+    expect(nodes[1]?.querySelector<HTMLElement>('.cherry-embed__source')?.hidden).toBe(true);
     await vi.waitFor(() => expect(nodes[1]?.querySelector('[data-rendered-mermaid]')).not.toBeNull());
   });
 
@@ -182,6 +208,24 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(element.querySelector('.cherry-compound textarea')).toBeNull();
   });
 
+  it('edits compound titles in place without form controls', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({ root: element, value: ':::warning Before\nBody\n:::' });
+    instances.push(instance);
+    const title = element.querySelector<HTMLElement>('.cherry-compound__title');
+
+    expect(title?.contentEditable).toBe('true');
+    expect(
+      element.querySelector('.cherry-compound input, .cherry-compound select, .cherry-compound textarea'),
+    ).toBeNull();
+    if (title) {
+      title.textContent = 'After';
+      title.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    expect(instance.getMarkdown()).toContain(':::warning After');
+  });
+
   it('edits inline math in place through MathLive input events', async () => {
     const element = root();
     const instance = await createCherryMilkdown({ root: element, value: 'Formula $x+1$.' });
@@ -205,33 +249,36 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(element.querySelector('.milkdown-table-block')).not.toBeNull();
   });
 
-  it('edits frontmatter as metadata fields', async () => {
+  it('keeps frontmatter compact and edits its source in place', async () => {
     const element = root();
     const instance = await createCherryMilkdown({
       root: element,
       value: '---\ntitle: Before\nowner: Cherry\n---\n\nBody',
     });
     instances.push(instance);
-    const inputs = element.querySelectorAll<HTMLInputElement>('.cherry-leaf-form--cherry_frontmatter input');
-    expect(inputs).toHaveLength(4);
-    const titleValue = inputs[1];
-    if (titleValue) {
-      titleValue.value = 'After';
-      titleValue.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(element.querySelector('.cherry-source-node--cherry_frontmatter input')).toBeNull();
+    element.querySelector<HTMLElement>('.cherry-source-node--cherry_frontmatter .cherry-source-node__header')?.click();
+    const source = element.querySelector<HTMLElement>('.cherry-source-node--cherry_frontmatter code');
+    expect(source?.hidden).toBe(false);
+    if (source) {
+      source.textContent = source.textContent?.replace('Before', 'After') ?? '';
+      source.dispatchEvent(new Event('input', { bubbles: true }));
     }
     expect(instance.getMarkdown()).toContain('title: After');
   });
 
-  it('adds structured tab items through the compound toolbar', async () => {
+  it('adds structured tab items through controls that stay hidden until interaction', async () => {
     const element = root();
     const instance = await createCherryMilkdown({ root: element, value: ':::tabs\n:: First\nOne\n:::\n' });
     instances.push(instance);
     const before = element.querySelectorAll('.cherry-compound-item').length;
-    element.querySelector<HTMLButtonElement>('.cherry-compound__toolbar button')?.click();
+    element
+      .querySelector<HTMLButtonElement>('.cherry-compound > .cherry-compound__header .cherry-node-actions button')
+      ?.click();
     expect(element.querySelectorAll('.cherry-compound-item')).toHaveLength(before + 1);
   });
 
-  it('opens a diagram inspector on selection and refreshes its source', async () => {
+  it('opens diagram source inside the selected node only when requested', async () => {
     const element = root();
     const instance = await createCherryMilkdown({
       root: element,
@@ -240,11 +287,15 @@ describe('createCherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
     selectNode(instance, 'cherry_diagram');
-    const textarea = element.querySelector<HTMLTextAreaElement>('.cherry-embed__inspector textarea');
-    expect(textarea?.value).toContain('A-->B');
-    if (textarea) {
-      textarea.value = 'graph TD; B-->C;';
-      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    const sourcePanel = element.querySelector<HTMLElement>('.cherry-embed__source');
+    expect(sourcePanel?.hidden).toBe(true);
+    element.querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
+    expect(sourcePanel?.hidden).toBe(false);
+    const source = sourcePanel?.querySelector<HTMLElement>('code');
+    expect(source?.textContent).toContain('A-->B');
+    if (source) {
+      source.textContent = 'graph TD; B-->C;';
+      source.dispatchEvent(new Event('input', { bubbles: true }));
     }
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(instance.getMarkdown()).toContain('B-->C');
@@ -261,7 +312,9 @@ describe('createCherryMilkdown WYSIWYG', () => {
     const frame = element.querySelector<HTMLIFrameElement>('.cherry-embed__html-frame');
     expect(frame).not.toBeNull();
     expect(frame?.getAttribute('sandbox')).toBe('');
-    expect(element.querySelector('.cherry-embed__inspector textarea')).not.toBeNull();
+    element.querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
+    expect(element.querySelector('.cherry-embed__source code')).not.toBeNull();
+    expect(element.querySelector('.cherry-embed textarea')).toBeNull();
     expect((window as typeof window & { __bad?: boolean }).__bad).toBeUndefined();
   });
 
@@ -288,7 +341,8 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(view.editable).toBe(false);
     selectNode(instance, 'cherry_diagram');
     expect(element.querySelector('.cherry-milkdown-toolbar')).toBeNull();
-    expect(element.querySelector<HTMLElement>('.cherry-embed__inspector')?.hidden).toBe(true);
+    expect(element.querySelector<HTMLElement>('.cherry-embed__source')?.hidden).toBe(true);
+    expect(element.querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.hidden).toBe(true);
   });
 
   it('focuses and destroys the editor cleanly', async () => {

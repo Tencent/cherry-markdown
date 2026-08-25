@@ -10,10 +10,10 @@ A framework-neutral Milkdown WYSIWYG editor for Cherry Markdown. The editor surf
 - Direct editing for tables, task lists, links, images, quotes, and code blocks.
 - Inline and block formulas edited in place with MathLive and serialized as Cherry LaTeX.
 - Editable marks for Cherry colors, backgrounds, font size, subscript, superscript, ruby, underline, and highlight.
-- Editable compound nodes for panels, details, columns, tabs, and timelines.
-- A live TOC plus in-place forms for frontmatter and reference definitions.
-- Mermaid renders by default. PlantUML and ECharts can use application renderers, with configuration edited beside the live diagram.
-- HTML uses a script-disabled sandbox preview with an adjacent source inspector when selected.
+- Panels, details, columns, tabs, and timelines keep their body in the continuous editor flow; titles are edited directly in place.
+- A live TOC plus compact document metadata and reference nodes with no field forms or modal dialogs.
+- Mermaid renders by default. PlantUML and ECharts can use application renderers; source opens inside the selected node only when requested.
+- HTML uses a script-disabled sandbox preview and an opt-in inline source mode.
 
 Cherry extensions are not presented as raw source cards. Business-specific syntax must provide a Milkdown schema, parser, serializer, and NodeView through a plugin; unregistered syntax is not claimed as supported.
 
@@ -50,7 +50,7 @@ await editor.destroy();
 
 Plugins passed through `plugins` are loaded after the built-in WYSIWYG plugins and can register business NodeViews.
 
-The editor includes selection/block controls and a `/` menu. Tables use Milkdown's `table-block` controls for row and column insertion, deletion, dragging, and alignment. Selecting a formula activates MathLive in place.
+The editor intentionally has no permanent formatting toolbar. Type `/` on an empty block for insertion commands, use native Markdown shortcuts for formatting, and edit compound titles and bodies directly. Structural controls appear only while hovering or selecting their node. Tables use Milkdown's `table-block` controls for row and column insertion, deletion, dragging, and alignment. Selecting a formula activates MathLive in place.
 
 Configure MathLive macros and its virtual keyboard through `mathlive`:
 

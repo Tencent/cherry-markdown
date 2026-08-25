@@ -1,6 +1,6 @@
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
 import { Plugin } from '@milkdown/kit/prose/state';
-import type { EditorView, NodeView } from '@milkdown/kit/prose/view';
+import type { EditorView, NodeView, ViewMutationRecord } from '@milkdown/kit/prose/view';
 import type { SerializerState } from '@milkdown/kit/transformer';
 import { $nodeSchema, $prose, $view } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
@@ -197,13 +197,47 @@ export const cherryHtmlBlockSchema = leafSchema('cherry_html_block', 'cherryHtml
 export const cherryHtmlInlineSchema = leafSchema('cherry_html_inline', 'cherryHtmlInline', true);
 export const cherryEmojiSchema = leafSchema('cherry_emoji', 'cherryEmoji', true);
 
+function iconButton(label: string, title: string, action: () => void, readonly = false) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = label;
+  button.title = title;
+  button.setAttribute('aria-label', title);
+  button.hidden = readonly;
+  button.addEventListener('mousedown', (event) => event.preventDefault());
+  button.addEventListener('click', action);
+  return button;
+}
+
+function editableLabel(className: string, value: string, placeholder: string, readonly: boolean, commit: () => void) {
+  const label = document.createElement('span');
+  label.className = className;
+  label.textContent = value;
+  label.dataset.placeholder = placeholder;
+  label.contentEditable = String(!readonly);
+  label.spellcheck = false;
+  label.addEventListener('input', commit);
+  label.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      label.blur();
+    }
+  });
+  return label;
+}
+
+function editableSourceText(source: HTMLElement) {
+  return source.innerText || source.textContent || '';
+}
+
 class CompoundItemView implements NodeView {
   dom: HTMLElement;
   contentDOM: HTMLElement;
   private node: ProseNode;
   private readonly view: EditorView;
   private readonly getPos: () => number | undefined;
-  private readonly label: HTMLInputElement;
+  private readonly label: HTMLElement;
+  private readonly disclosure: HTMLButtonElement;
 
   constructor(node: ProseNode, view: EditorView, getPos: () => number | undefined, readonly: boolean) {
     this.node = node;
@@ -213,39 +247,33 @@ class CompoundItemView implements NodeView {
     this.dom.className = 'cherry-compound-item';
     this.dom.dataset.role = String(node.attrs.role);
     const header = document.createElement('header');
-    this.label = document.createElement('input');
-    this.label.className = 'cherry-compound-item__label';
-    this.label.value = String(node.attrs.label ?? '');
-    this.label.placeholder = node.attrs.role === 'column' ? '列' : '标题';
+    header.className = 'cherry-compound-item__header';
+    this.disclosure = iconButton(
+      node.attrs.open ? '⌄' : '›',
+      '切换默认展开状态',
+      () => {
+        this.updateAttrs({ open: !this.node.attrs.open });
+      },
+      readonly,
+    );
+    this.disclosure.className = 'cherry-compound-item__disclosure';
+    this.disclosure.hidden = node.attrs.role !== 'detail-item';
+    this.label = editableLabel(
+      'cherry-compound-item__label',
+      String(node.attrs.label ?? ''),
+      node.attrs.role === 'column' ? '' : '直接输入标题',
+      readonly,
+      () => this.updateAttrs({ label: this.label.textContent ?? '' }),
+    );
     this.label.hidden = node.attrs.role === 'column';
-    this.label.readOnly = readonly;
-    this.label.addEventListener('input', this.updateLabel);
-    const open = document.createElement('input');
-    open.type = 'checkbox';
-    open.checked = Boolean(node.attrs.open);
-    open.title = '默认展开';
-    open.hidden = node.attrs.role !== 'detail-item';
-    open.disabled = readonly;
-    open.addEventListener('change', () => this.updateAttrs({ open: open.checked }));
-    const up = document.createElement('button');
-    up.type = 'button';
-    up.textContent = '↑';
-    up.title = '向前移动';
-    up.hidden = readonly;
-    up.addEventListener('click', () => this.move(-1));
-    const down = document.createElement('button');
-    down.type = 'button';
-    down.textContent = '↓';
-    down.title = '向后移动';
-    down.hidden = readonly;
-    down.addEventListener('click', () => this.move(1));
-    const remove = document.createElement('button');
-    remove.type = 'button';
-    remove.textContent = '×';
-    remove.title = '删除项目';
-    remove.hidden = readonly;
-    remove.addEventListener('click', this.remove);
-    header.append(open, this.label, up, down, remove);
+    const actions = document.createElement('span');
+    actions.className = 'cherry-node-actions';
+    actions.append(
+      iconButton('←', '向前移动', () => this.move(-1), readonly),
+      iconButton('→', '向后移动', () => this.move(1), readonly),
+      iconButton('×', '删除项目', this.remove, readonly),
+    );
+    header.append(this.disclosure, this.label, actions);
     this.contentDOM = document.createElement('div');
     this.contentDOM.className = 'cherry-compound-item__content';
     this.dom.append(header, this.contentDOM);
@@ -254,27 +282,34 @@ class CompoundItemView implements NodeView {
   update(node: ProseNode) {
     if (node.type !== this.node.type) return false;
     this.node = node;
-    this.label.value = String(node.attrs.label ?? '');
+    if (document.activeElement !== this.label) this.label.textContent = String(node.attrs.label ?? '');
     this.dom.dataset.role = String(node.attrs.role);
+    this.disclosure.textContent = node.attrs.open ? '⌄' : '›';
     return true;
   }
 
+  selectNode() {
+    this.dom.classList.add('is-selected');
+  }
+
+  deselectNode() {
+    this.dom.classList.remove('is-selected');
+  }
+
   stopEvent(event: Event) {
-    return event.target instanceof HTMLInputElement || event.target instanceof HTMLButtonElement;
+    return Boolean((event.target as HTMLElement).closest('.cherry-compound-item__header'));
   }
 
-  destroy() {
-    this.label.removeEventListener('input', this.updateLabel);
+  ignoreMutation(mutation: ViewMutationRecord) {
+    return this.label.contains(mutation.target);
   }
-
-  private updateLabel = () => {
-    this.updateAttrs({ label: this.label.value });
-  };
 
   private updateAttrs(attrs: Record<string, unknown>) {
     const pos = this.getPos();
     if (typeof pos === 'number') {
-      this.view.dispatch(this.view.state.tr.setNodeMarkup(pos, undefined, { ...this.node.attrs, ...attrs }));
+      this.view.dispatch(
+        this.view.state.tr.setNodeMarkup(pos, undefined, { ...this.node.attrs, ...attrs, source: '' }),
+      );
     }
   }
 
@@ -299,95 +334,97 @@ class CompoundItemView implements NodeView {
   }
 }
 
+const PANEL_KINDS = ['panel', 'primary', 'info', 'warning', 'danger', 'success'];
+
 class CompoundView implements NodeView {
   dom: HTMLElement;
   contentDOM: HTMLElement;
   private node: ProseNode;
   private readonly view: EditorView;
   private readonly getPos: () => number | undefined;
-  private readonly title: HTMLInputElement;
-  private readonly type: HTMLSelectElement;
+  private readonly title: HTMLElement;
+  private readonly kind: HTMLButtonElement;
 
   constructor(node: ProseNode, view: EditorView, getPos: () => number | undefined, readonly: boolean) {
     this.node = node;
     this.view = view;
     this.getPos = getPos;
     this.dom = document.createElement('section');
-    this.dom.className = `cherry-compound cherry-compound--${node.type.name === 'cherry_detail' ? 'detail' : String(node.attrs.kind)}`;
     this.dom.dataset.cherryCompound = node.type.name;
     const header = document.createElement('header');
-    header.className = 'cherry-compound__toolbar';
-    this.type = document.createElement('select');
-    for (const value of node.type.name === 'cherry_detail'
-      ? ['detail']
-      : [
-          'panel',
-          'primary',
-          'info',
-          'warning',
-          'danger',
-          'success',
-          'left',
-          'center',
-          'right',
-          'justify',
-          'cols',
-          'tabs',
-          'timeline',
-        ]) {
-      this.type.add(new Option(value, value));
-    }
-    this.type.value = String(node.attrs.kind ?? 'panel');
-    this.type.disabled = readonly;
-    this.type.setAttribute('aria-label', 'Cherry block type');
-    this.title = document.createElement('input');
-    this.title.value = String(node.attrs.title ?? '');
-    this.title.placeholder = node.type.name === 'cherry_detail' ? '详情' : '标题';
+    header.className = 'cherry-compound__header';
+    this.kind = iconButton(String(node.attrs.kind), '切换块类型', this.cycleKind, readonly);
+    this.kind.className = 'cherry-compound__kind';
+    this.title = editableLabel(
+      'cherry-compound__title',
+      String(node.attrs.title ?? ''),
+      '直接输入标题',
+      readonly,
+      this.updateTitle,
+    );
     this.title.hidden = node.type.name === 'cherry_detail';
-    this.title.readOnly = readonly;
-    const add = document.createElement('button');
-    add.type = 'button';
-    add.textContent = '＋';
-    add.title = '增加项目';
-    add.hidden = readonly || !['cols', 'tabs', 'timeline', 'detail'].includes(String(node.attrs.kind));
-    add.addEventListener('click', this.addItem);
-    this.type.addEventListener('change', this.updateAttrs);
-    this.title.addEventListener('input', this.updateAttrs);
-    header.append(this.type, this.title, add);
+    const actions = document.createElement('span');
+    actions.className = 'cherry-node-actions';
+    actions.append(iconButton('＋', '增加项目', this.addItem, readonly));
+    header.append(this.kind, this.title, actions);
     this.contentDOM = document.createElement('div');
     this.contentDOM.className = 'cherry-compound__content';
     this.dom.append(header, this.contentDOM);
+    this.sync(node);
   }
 
   update(node: ProseNode) {
     if (node.type !== this.node.type) return false;
     this.node = node;
-    this.type.value = String(node.attrs.kind ?? 'panel');
-    this.title.value = String(node.attrs.title ?? '');
-    this.dom.className = `cherry-compound cherry-compound--${node.type.name === 'cherry_detail' ? 'detail' : String(node.attrs.kind)}`;
+    this.sync(node);
     return true;
   }
 
-  stopEvent(event: Event) {
-    return event.target === this.type || event.target === this.title || event.target instanceof HTMLButtonElement;
+  selectNode() {
+    this.dom.classList.add('is-selected');
   }
 
-  private updateAttrs = () => {
+  deselectNode() {
+    this.dom.classList.remove('is-selected');
+  }
+
+  stopEvent(event: Event) {
+    return Boolean((event.target as HTMLElement).closest('.cherry-compound__header'));
+  }
+
+  ignoreMutation(mutation: ViewMutationRecord) {
+    return this.title.contains(mutation.target);
+  }
+
+  private sync(node: ProseNode) {
+    const kind = node.type.name === 'cherry_detail' ? 'detail' : String(node.attrs.kind);
+    this.dom.className = `cherry-compound cherry-compound--${kind}`;
+    this.kind.textContent = kind;
+    if (document.activeElement !== this.title) this.title.textContent = String(node.attrs.title ?? '');
+  }
+
+  private setAttrs(attrs: Record<string, unknown>) {
     const pos = this.getPos();
     if (typeof pos === 'number') {
       this.view.dispatch(
-        this.view.state.tr.setNodeMarkup(pos, undefined, {
-          ...this.node.attrs,
-          kind: this.type.value,
-          rawType: this.type.value,
-          title: this.title.value,
-          source: '',
-        }),
+        this.view.state.tr.setNodeMarkup(pos, undefined, { ...this.node.attrs, ...attrs, source: '' }),
       );
     }
+  }
+
+  private updateTitle = () => this.setAttrs({ title: this.title.textContent ?? '' });
+
+  private cycleKind = () => {
+    if (this.node.type.name === 'cherry_detail') return;
+    const current = PANEL_KINDS.indexOf(String(this.node.attrs.kind));
+    if (current < 0) return;
+    const kind = PANEL_KINDS[(current + 1) % PANEL_KINDS.length] ?? 'panel';
+    this.setAttrs({ kind, rawType: kind });
   };
 
   private addItem = () => {
+    const kind = String(this.node.attrs.kind);
+    if (this.node.type.name !== 'cherry_detail' && !['cols', 'tabs', 'timeline'].includes(kind)) return;
     const pos = this.getPos();
     if (typeof pos !== 'number') return;
     const itemType = this.view.state.schema.nodes.cherry_compound_item;
@@ -395,10 +432,10 @@ class CompoundView implements NodeView {
     if (!itemType || !paragraph) return;
     let role = 'timeline-item';
     if (this.node.type.name === 'cherry_detail') role = 'detail-item';
-    else if (this.type.value === 'cols') role = 'column';
-    else if (this.type.value === 'tabs') role = 'tab';
+    else if (kind === 'cols') role = 'column';
+    else if (kind === 'tabs') role = 'tab';
     const item = itemType.create({ role, label: '', open: false }, paragraph.create());
-    this.view.dispatch(this.view.state.tr.insert(pos + this.node.nodeSize - 1, item));
+    this.view.dispatch(this.view.state.tr.insert(pos + this.node.nodeSize - 1, item).scrollIntoView());
   };
 }
 
@@ -424,121 +461,91 @@ function renderToc(view: EditorView) {
   return nav;
 }
 
-class FormLeafView implements NodeView {
+class SourceLeafView implements NodeView {
   dom: HTMLElement;
   private node: ProseNode;
   private readonly view: EditorView;
   private readonly getPos: () => number | undefined;
+  private readonly source?: HTMLElement;
 
   constructor(node: ProseNode, view: EditorView, getPos: () => number | undefined, readonly: boolean) {
     this.node = node;
     this.view = view;
     this.getPos = getPos;
     this.dom = document.createElement('section');
-    this.dom.className = `cherry-leaf-form cherry-leaf-form--${node.type.name}`;
-    this.render(readonly);
+    this.dom.className = `cherry-source-node cherry-source-node--${node.type.name}`;
+    if (node.type.name === 'cherry_toc') {
+      this.dom.append(renderToc(view));
+      return;
+    }
+    const header = document.createElement('header');
+    header.className = 'cherry-source-node__header';
+    const label = document.createElement('span');
+    label.textContent = node.type.name === 'cherry_frontmatter' ? '文档属性' : '引用定义';
+    const hint = document.createElement('span');
+    hint.className = 'cherry-source-node__hint';
+    hint.textContent = node.type.name === 'cherry_frontmatter' ? '点击原位编辑' : '';
+    header.append(label, hint);
+    this.source = document.createElement('code');
+    this.source.className = 'cherry-source-node__source';
+    this.source.contentEditable = String(!readonly);
+    this.source.spellcheck = false;
+    this.source.textContent = String(node.attrs.source ?? '');
+    this.source.hidden = node.type.name === 'cherry_frontmatter';
+    this.source.addEventListener('input', this.commitSource);
+    if (node.type.name === 'cherry_frontmatter' && !readonly) {
+      header.tabIndex = 0;
+      header.setAttribute('role', 'button');
+      header.addEventListener('click', () => {
+        if (!this.source) return;
+        this.source.hidden = !this.source.hidden;
+        this.dom.classList.toggle('is-expanded', !this.source.hidden);
+        if (!this.source.hidden) this.source.focus();
+      });
+    }
+    this.dom.append(header, this.source);
   }
 
   update(node: ProseNode) {
     if (node.type !== this.node.type) return false;
     this.node = node;
+    if (this.source && document.activeElement !== this.source) {
+      this.source.textContent = String(node.attrs.source ?? '');
+    }
     return true;
+  }
+
+  selectNode() {
+    this.dom.classList.add('is-selected');
+  }
+
+  deselectNode() {
+    this.dom.classList.remove('is-selected');
+    if (this.source && this.node.type.name === 'cherry_frontmatter') this.source.hidden = true;
   }
 
   stopEvent(event: Event) {
-    return this.dom.contains(event.target as Node);
+    return Boolean(this.source?.contains(event.target as Node));
   }
 
-  ignoreMutation() {
-    return true;
+  ignoreMutation(mutation: ViewMutationRecord) {
+    return Boolean(this.source?.contains(mutation.target));
   }
 
-  private commit(attrs: Record<string, unknown>) {
+  private commitSource = () => {
+    if (!this.source) return;
     const pos = this.getPos();
-    if (typeof pos === 'number') this.view.dispatch(this.view.state.tr.setNodeMarkup(pos, undefined, attrs));
-  }
-
-  private render(readonly: boolean) {
-    if (this.node.type.name === 'cherry_toc') {
-      this.dom.append(renderToc(this.view));
-      return;
-    }
-    const title = document.createElement('strong');
-    title.textContent = this.node.type.name === 'cherry_frontmatter' ? 'Document metadata' : 'Reference definition';
-    this.dom.append(title);
+    if (typeof pos !== 'number') return;
+    const source = editableSourceText(this.source);
+    const attrs: Record<string, unknown> = { ...this.node.attrs, source };
     if (this.node.type.name === 'cherry_comment_definition') {
-      for (const key of ['label', 'url', 'title'] as const) {
-        const input = document.createElement('input');
-        input.value = String(this.node.attrs[key] ?? '');
-        input.placeholder = key;
-        input.readOnly = readonly;
-        input.addEventListener('input', () => {
-          const attrs = { ...this.node.attrs, [key]: input.value };
-          attrs.source = `[${attrs.label}]: ${attrs.url}${attrs.title ? ` "${attrs.title}"` : ''}`;
-          this.commit(attrs);
-        });
-        this.dom.append(input);
-      }
-      return;
+      const parsed = /^\s*\[([^\]]+)\]:\s*(\S+)(?:\s+["'(](.*?)["')])?\s*$/.exec(source);
+      attrs.label = parsed?.[1] ?? '';
+      attrs.url = parsed?.[2] ?? '';
+      attrs.title = parsed?.[3] ?? '';
     }
-    const rows = String(this.node.attrs.source ?? '')
-      .replace(/^---[^\n]*\n|\n---[^\n]*$/g, '')
-      .split(/\r?\n/)
-      .map((line) => line.match(/^([^:#][^:]*):\s*(.*)$/))
-      .filter((match): match is RegExpMatchArray => Boolean(match));
-    const table = document.createElement('div');
-    const values = rows.map((row) => ({ key: row[1] ?? '', value: row[2] ?? '' }));
-    const sync = () =>
-      this.commit({ source: `---\n${values.map((entry) => `${entry.key}: ${entry.value}`).join('\n')}\n---` });
-    const addRow = (key = '', value = '') => {
-      const entry = { key, value };
-      values.push(entry);
-      const row = document.createElement('div');
-      row.className = 'cherry-frontmatter-row';
-      const keyInput = document.createElement('input');
-      const valueInput = document.createElement('input');
-      keyInput.value = key;
-      valueInput.value = value;
-      keyInput.placeholder = 'key';
-      valueInput.placeholder = 'value';
-      keyInput.readOnly = readonly;
-      valueInput.readOnly = readonly;
-      keyInput.addEventListener('input', () => {
-        entry.key = keyInput.value;
-        sync();
-      });
-      valueInput.addEventListener('input', () => {
-        entry.value = valueInput.value;
-        sync();
-      });
-      row.append(keyInput, valueInput);
-      if (!readonly) {
-        const remove = document.createElement('button');
-        remove.type = 'button';
-        remove.textContent = '×';
-        remove.title = '删除字段';
-        remove.addEventListener('click', () => {
-          values.splice(values.indexOf(entry), 1);
-          row.remove();
-          sync();
-        });
-        row.append(remove);
-      }
-      table.append(row);
-    };
-    const initial = [...values];
-    values.length = 0;
-    initial.forEach(({ key, value }) => addRow(key, value));
-    if (!initial.length) addRow();
-    this.dom.append(table);
-    if (!readonly) {
-      const add = document.createElement('button');
-      add.type = 'button';
-      add.textContent = '增加字段';
-      add.addEventListener('click', () => addRow());
-      this.dom.append(add);
-    }
-  }
+    this.view.dispatch(this.view.state.tr.setNodeMarkup(pos, undefined, attrs));
+  };
 }
 
 class EmbedView implements NodeView {
@@ -547,7 +554,8 @@ class EmbedView implements NodeView {
   private readonly view: EditorView;
   private readonly getPos: () => number | undefined;
   private readonly preview: HTMLElement;
-  private readonly inspector: HTMLElement;
+  private readonly sourcePanel: HTMLElement;
+  private readonly source: HTMLElement;
   private timer?: ReturnType<typeof setTimeout>;
   private renderVersion = 0;
   private cleanup?: () => void;
@@ -565,34 +573,57 @@ class EmbedView implements NodeView {
     this.dom.className = `cherry-embed cherry-embed--${node.type.name}`;
     this.preview = document.createElement(node.isInline ? 'span' : 'div');
     this.preview.className = 'cherry-embed__preview';
-    this.inspector = document.createElement(node.isInline ? 'span' : 'div');
-    this.inspector.className = 'cherry-embed__inspector';
-    this.inspector.hidden = true;
-    this.dom.append(this.preview, this.inspector);
+    const controls = document.createElement(node.isInline ? 'span' : 'figcaption');
+    controls.className = 'cherry-embed__controls';
+    controls.hidden = node.type.name === 'cherry_emoji';
+    const type = document.createElement('span');
+    type.className = 'cherry-embed__type';
+    type.textContent = node.type.name === 'cherry_diagram' ? String(node.attrs.diagramType) : 'HTML';
+    const edit = iconButton(
+      '源码',
+      '在节点内编辑源码',
+      () => {
+        this.sourcePanel.hidden = !this.sourcePanel.hidden;
+        if (!this.sourcePanel.hidden) this.source.focus();
+      },
+      config.readonly,
+    );
+    controls.append(type, edit);
+    this.sourcePanel = document.createElement(node.isInline ? 'span' : 'pre');
+    this.sourcePanel.className = 'cherry-embed__source';
+    this.sourcePanel.hidden = true;
+    this.source = document.createElement('code');
+    this.source.contentEditable = String(!config.readonly);
+    this.source.spellcheck = false;
+    this.source.addEventListener('input', this.updateSource);
+    this.sourcePanel.append(this.source);
+    this.dom.append(this.preview, controls, this.sourcePanel);
     this.render();
-    this.buildInspector();
+    this.syncSource();
   }
 
   update(node: ProseNode) {
     if (node.type !== this.node.type) return false;
     this.node = node;
-    this.buildInspector();
+    this.syncSource();
     this.render();
     return true;
   }
 
   selectNode() {
     this.dom.classList.add('is-selected');
-    this.inspector.hidden = this.config.readonly || this.node.type.name === 'cherry_emoji';
   }
 
   deselectNode() {
     this.dom.classList.remove('is-selected');
-    this.inspector.hidden = true;
+    this.sourcePanel.hidden = true;
   }
 
   stopEvent(event: Event) {
-    return this.inspector.contains(event.target as Node);
+    return (
+      this.sourcePanel.contains(event.target as Node) ||
+      Boolean((event.target as HTMLElement).closest('.cherry-embed__controls'))
+    );
   }
 
   ignoreMutation() {
@@ -604,31 +635,28 @@ class EmbedView implements NodeView {
     this.cleanup?.();
   }
 
-  private buildInspector() {
-    this.inspector.replaceChildren();
-    if (this.node.type.name === 'cherry_emoji') return;
-    const textarea = document.createElement('textarea');
-    textarea.value =
+  private syncSource() {
+    if (document.activeElement === this.source) return;
+    this.source.textContent =
       this.node.type.name === 'cherry_diagram'
         ? String(this.node.attrs.value ?? '')
         : String(this.node.attrs.source ?? '');
-    textarea.readOnly = this.config.readonly;
-    textarea.setAttribute('aria-label', `${this.node.type.name} configuration`);
-    textarea.addEventListener('input', () => {
-      if (this.timer) clearTimeout(this.timer);
-      this.timer = setTimeout(() => {
-        const pos = this.getPos();
-        if (typeof pos !== 'number') return;
-        const attrs = { ...this.node.attrs };
-        if (this.node.type.name === 'cherry_diagram') {
-          attrs.value = textarea.value;
-          attrs.source = `\`\`\`${attrs.diagramType}\n${textarea.value}\n\`\`\``;
-        } else attrs.source = textarea.value;
-        this.view.dispatch(this.view.state.tr.setNodeMarkup(pos, undefined, attrs));
-      }, this.config.debounce);
-    });
-    this.inspector.append(textarea);
   }
+
+  private updateSource = () => {
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      const pos = this.getPos();
+      if (typeof pos !== 'number') return;
+      const value = editableSourceText(this.source);
+      const attrs = { ...this.node.attrs };
+      if (this.node.type.name === 'cherry_diagram') {
+        attrs.value = value;
+        attrs.source = `\`\`\`${attrs.diagramType}\n${value}\n\`\`\``;
+      } else attrs.source = value;
+      this.view.dispatch(this.view.state.tr.setNodeMarkup(pos, undefined, attrs));
+    }, this.config.debounce);
+  };
 
   private render() {
     this.renderVersion += 1;
@@ -705,15 +733,15 @@ export const cherryDetailView = $view(
 );
 export const cherryTocView = $view(
   cherryTocSchema.node,
-  (ctx) => (node, view, getPos) => new FormLeafView(node, view, getPos, ctx.get(cherryWysiwygConfigCtx.key).readonly),
+  (ctx) => (node, view, getPos) => new SourceLeafView(node, view, getPos, ctx.get(cherryWysiwygConfigCtx.key).readonly),
 );
 export const cherryFrontmatterView = $view(
   cherryFrontmatterSchema.node,
-  (ctx) => (node, view, getPos) => new FormLeafView(node, view, getPos, ctx.get(cherryWysiwygConfigCtx.key).readonly),
+  (ctx) => (node, view, getPos) => new SourceLeafView(node, view, getPos, ctx.get(cherryWysiwygConfigCtx.key).readonly),
 );
 export const cherryCommentDefinitionView = $view(
   cherryCommentDefinitionSchema.node,
-  (ctx) => (node, view, getPos) => new FormLeafView(node, view, getPos, ctx.get(cherryWysiwygConfigCtx.key).readonly),
+  (ctx) => (node, view, getPos) => new SourceLeafView(node, view, getPos, ctx.get(cherryWysiwygConfigCtx.key).readonly),
 );
 
 function embedView(schema: ReturnType<typeof leafSchema>) {
@@ -735,7 +763,7 @@ export const cherryTocRefreshPlugin = $prose(
         update: (view, previousState) => {
           if (previousState.doc.eq(view.state.doc)) return;
           view.dom
-            .querySelectorAll<HTMLElement>('.cherry-leaf-form--cherry_toc')
+            .querySelectorAll<HTMLElement>('.cherry-source-node--cherry_toc')
             .forEach((dom) => dom.replaceChildren(renderToc(view)));
         },
       }),

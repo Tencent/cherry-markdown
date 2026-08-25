@@ -1,5 +1,5 @@
 import { commandsCtx } from '@milkdown/kit/core';
-import { setBlockType, toggleMark, wrapIn } from '@milkdown/kit/prose/commands';
+import { setBlockType } from '@milkdown/kit/prose/commands';
 import type { EditorState, Transaction } from '@milkdown/kit/prose/state';
 import { Plugin } from '@milkdown/kit/prose/state';
 import type { EditorView } from '@milkdown/kit/prose/view';
@@ -24,19 +24,9 @@ function run(view: EditorView, command: ViewCommand) {
   view.focus();
 }
 
-function applyMark(view: EditorView, name: string, attrs?: Record<string, string>) {
-  const type = view.state.schema.marks[name];
-  if (type) run(view, toggleMark(type, attrs));
-}
-
 function setHeading(view: EditorView, level?: number) {
   const type = view.state.schema.nodes[level ? 'heading' : 'paragraph'];
   if (type) run(view, setBlockType(type, level ? { level } : undefined));
-}
-
-function wrap(view: EditorView, name: string) {
-  const type = view.state.schema.nodes[name];
-  if (type) run(view, wrapIn(type));
 }
 
 function insertNode(view: EditorView, name: string) {
@@ -60,49 +50,6 @@ function insertNode(view: EditorView, name: string) {
   if (!node) return;
   view.dispatch(view.state.tr.replaceSelectionWith(node).scrollIntoView());
   view.focus();
-}
-
-function createToolbar(view: EditorView, callTable: () => void) {
-  const toolbar = document.createElement('div');
-  toolbar.className = 'cherry-milkdown-toolbar';
-  toolbar.setAttribute('role', 'toolbar');
-  toolbar.append(
-    button('¶', '正文', () => setHeading(view)),
-    button('H1', '一级标题', () => setHeading(view, 1)),
-    button('H2', '二级标题', () => setHeading(view, 2)),
-    button('B', '粗体', () => applyMark(view, 'strong')),
-    button('I', '斜体', () => applyMark(view, 'emphasis')),
-    button('U', '下划线', () => applyMark(view, 'cherry_underline')),
-    button('==', '高亮', () => applyMark(view, 'cherry_highlight')),
-    button('x₂', '下标', () => applyMark(view, 'cherry_subscript')),
-    button('x²', '上标', () => applyMark(view, 'cherry_superscript')),
-    button('❝', '引用', () => wrap(view, 'blockquote')),
-    button('•', '无序列表', () => wrap(view, 'bullet_list')),
-    button('1.', '有序列表', () => wrap(view, 'ordered_list')),
-    button('表格', '插入表格', callTable),
-    button('公式', '插入公式', () => insertNode(view, 'cherry_math_block')),
-    button('Panel', '插入 Panel', () => insertNode(view, 'cherry_panel')),
-    button('Detail', '插入 Detail', () => insertNode(view, 'cherry_detail')),
-    button('TOC', '插入目录', () => insertNode(view, 'cherry_toc')),
-  );
-  const color = document.createElement('input');
-  color.type = 'color';
-  color.title = '文字颜色';
-  color.setAttribute('aria-label', '文字颜色');
-  color.addEventListener('change', () => applyMark(view, 'cherry_color', { color: color.value }));
-  const size = document.createElement('select');
-  size.title = '字号';
-  size.setAttribute('aria-label', '字号');
-  for (const value of ['12', '14', '16', '18', '20', '24', '32']) size.add(new Option(`${value}px`, value));
-  size.value = '16';
-  size.addEventListener('change', () => applyMark(view, 'cherry_font_size', { size: size.value }));
-  const ruby = document.createElement('input');
-  ruby.className = 'cherry-milkdown-toolbar__ruby';
-  ruby.placeholder = '注音';
-  ruby.setAttribute('aria-label', 'Ruby 注音');
-  ruby.addEventListener('change', () => ruby.value && applyMark(view, 'cherry_ruby', { annotation: ruby.value }));
-  toolbar.append(color, size, ruby);
-  return toolbar;
 }
 
 function createSlashMenu(view: EditorView, callTable: () => void) {
@@ -141,9 +88,8 @@ export const cherryToolbar = $prose((ctx) => {
         ctx.get(commandsCtx).call(insertTableCommand.key, { row: 3, col: 3 });
         view.focus();
       };
-      const toolbar = createToolbar(view, callTable);
       const slash = createSlashMenu(view, callTable);
-      view.dom.parentElement?.prepend(toolbar, slash);
+      view.dom.parentElement?.prepend(slash);
       const updateSlash = () => {
         const { $from, empty } = view.state.selection;
         slash.hidden = !empty || !$from.parent.isTextblock || $from.parent.textBetween(0, $from.parentOffset) !== '/';
@@ -153,7 +99,6 @@ export const cherryToolbar = $prose((ctx) => {
         update: updateSlash,
         destroy: () => {
           view.dom.removeEventListener('keyup', updateSlash);
-          toolbar.remove();
           slash.remove();
         },
       };
