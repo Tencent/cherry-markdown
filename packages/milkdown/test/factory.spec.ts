@@ -1,6 +1,5 @@
 import { editorViewCtx } from '@milkdown/kit/core';
 import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
-import Cherry from 'cherry-markdown';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -22,6 +21,17 @@ vi.mock('mermaid', () => ({
 }));
 
 vi.mock('mathlive', () => ({}));
+
+// Keep typechecking independent from generated Cherry declarations while loading the
+// actual workspace package at runtime. The test command builds Cherry before Vitest.
+const { default: Cherry } = await vi.importActual<{
+  default: new (options: { el: HTMLElement; value: string; extensions: ReturnType<typeof milkdown>[] }) => {
+    getMarkdown(): string;
+    setValue(markdown: string): void;
+    switchModel(model: 'editOnly' | 'previewOnly'): void;
+    destroy(): void;
+  };
+}>('cherry-markdown');
 
 const instances: CherryMilkdownInstance[] = [];
 const fullManual = readFileSync(resolve(import.meta.dirname, '../../../examples/assets/markdown/index.md'), 'utf8');
