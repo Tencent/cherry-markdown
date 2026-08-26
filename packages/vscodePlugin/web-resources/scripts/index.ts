@@ -30,6 +30,10 @@ interface CherryInstance {
   onChange(callback: (value: string | { markdown?: string }) => void): void;
   setTheme(theme: CherryTheme): void;
   setValue(value: string): void;
+  editor?: {
+    getCursor(): { line: number; ch: number };
+    setCursor(line: number, ch: number): void;
+  };
 }
 
 interface CherryConstructor {
@@ -70,6 +74,8 @@ let uploadRequestId = 0;
   let pendingMarkdown: string | undefined;
   let stateGeneration = 0;
 let editDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+let suppressScrollMessages = false;
+let suppressScrollMessagesTimer: ReturnType<typeof setTimeout> | undefined;
 const uploadCallbacks = new Map<number, UploadCallback | undefined>();
 
 /**
@@ -344,13 +350,27 @@ async function applyEditorState(state: EditorState): Promise<void> {
   await ensureMathJax(state.text);
   if (generation !== stateGeneration) return;
   if (!preserveUnacknowledgedEdit) {
+    const textChanged = editorState?.text !== state.text;
     editorState = state;
     editInFlight = undefined;
     pendingMarkdown = undefined;
     clearTimeout(editDebounceTimer);
-    suppressEditMessage = true;
-    cherry.setValue(state.text);
-    suppressEditMessage = false;
+    if (textChanged) {
+      const cursor = cherry.editor?.getCursor?.();
+      suppressEditMessage = true;
+      suppressScrollMessages = true;
+      if (suppressScrollMessagesTimer) clearTimeout(suppressScrollMessagesTimer);
+      try {
+        cherry.setValue(state.text);
+        if (cursor) cherry.editor?.setCursor?.(cursor.line, cursor.ch);
+      } finally {
+        suppressEditMessage = false;
+        suppressScrollMessagesTimer = setTimeout(() => {
+          suppressScrollMessages = false;
+          suppressScrollMessagesTimer = undefined;
+        }, 150);
+      }
+    }
   } else {
     editorState = { ...state, text: editorState?.text ?? state.text };
   }
@@ -455,6 +475,7 @@ function postScrollPosition(domContainer: HTMLElement): void {
 }
 
 function postScrollMessage(line: number): void {
+  if (suppressScrollMessages) return;
   vscode.postMessage({ type: 'preview-scroll', data: line });
 }
 
