@@ -2,6 +2,7 @@ import type { MilkdownPlugin } from '@milkdown/kit/ctx';
 import type { RemarkPluginRaw } from '@milkdown/kit/transformer';
 import { $remark } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
+import { cherryCodeBlock } from './code-block.js';
 import { cherryMath } from './math.js';
 import { cherryWysiwygMarkInputRules, cherryWysiwygMarkSchemas } from './marks.js';
 import { cherryStructureSchemas, cherryStructureViews } from './nodes.js';
@@ -88,6 +89,7 @@ export const cherryWysiwyg: MilkdownPlugin[] = [
   ...cherryWysiwygMarkSchemas,
   ...cherryWysiwygMarkInputRules,
   ...cherryMath,
+  ...cherryCodeBlock,
   ...cherryStructureSchemas,
   ...cherryStructureViews,
   cherryToolbar,

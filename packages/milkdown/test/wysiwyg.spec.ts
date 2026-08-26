@@ -18,7 +18,7 @@ describe('Cherry WYSIWYG markdown transform', () => {
     ]);
   });
 
-  it('creates native visual nodes for diagrams and ordinary fenced code', () => {
+  it('keeps ordinary fenced code structured while diagrams remain native visual nodes', () => {
     const source = [
       '[[toc]]',
       '',
@@ -49,7 +49,7 @@ describe('Cherry WYSIWYG markdown transform', () => {
       ],
     };
     transformCherryWysiwygTree(tree, source);
-    expect(tree.children.map(({ type }) => type)).toEqual(['cherryToc', 'cherryNativeBlock', 'cherryDiagram']);
+    expect(tree.children.map(({ type }) => type)).toEqual(['cherryToc', 'code', 'cherryDiagram']);
     expect((tree.children[2] as { diagramType?: string } | undefined)?.diagramType).toBe('mermaid');
   });
 
@@ -135,7 +135,7 @@ describe('Cherry WYSIWYG markdown transform', () => {
     expect(tree.children.map(({ type }) => type)).toEqual([
       'heading',
       'thematicBreak',
-      'cherryNativeBlock',
+      'code',
       'thematicBreak',
       'heading',
     ]);

@@ -90,11 +90,12 @@ createCherryMilkdown({
 ## Local example
 
 ```sh
+yarn dev:demo
 yarn build:demo
-npx serve preview
+yarn preview:demo
 ```
 
-The demo reuses Cherry's root `examples/index.html` layout, configuration, toolbar, theme, ECharts plugin, and full Markdown manual. Its only integration difference is `extensions: [milkdown()]`.
+The user-facing demo is a minimal React + Vite application whose entry is `examples/react/App.tsx`; `index.html` only contains the root element required by Vite. It reuses the root demo's layout, configuration, toolbar, theme, ECharts plugin, and full Markdown manual. Its only integration difference is `extensions: [milkdown()]`, with the Cherry instance destroyed during React unmount.
 
 ## Reliability checks
 

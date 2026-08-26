@@ -182,7 +182,7 @@ export default class PreviewerBubble {
       return false;
     }
     const container = element.closest('div[data-type="codeBlock"]');
-    if (!container) {
+    if (!container || container.hasAttribute('data-cherry-preview-editing')) {
       return false;
     }
     return container;

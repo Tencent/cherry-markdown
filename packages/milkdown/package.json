@@ -56,10 +56,12 @@
     "build:demo": "yarn workspace cherry-markdown build && yarn build && node ./scripts/build-demo.mjs",
     "build:types": "tsc --project tsconfig.build.json",
     "clean": "rimraf ./dist",
+    "dev:demo": "vite --config vite.demo.config.mjs",
+    "preview:demo": "vite preview --config vite.demo.config.mjs",
     "test": "yarn workspace cherry-markdown build:engine && vitest run --config vitest.config.ts",
     "test:e2e": "playwright test --config playwright.config.ts",
     "test:consumer": "yarn workspace cherry-markdown build && yarn build && node ./scripts/verify-consumer.mjs",
-    "typecheck": "tsc --project tsconfig.json --noEmit"
+    "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.demo.json --noEmit"
   },
   "peerDependencies": {
     "@milkdown/kit": "^7.21.3",
@@ -74,14 +76,21 @@
   },
   "devDependencies": {
     "@milkdown/kit": "^7.21.3",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^6.0.5",
     "cherry-markdown": "*",
     "echarts": "^6.0.0",
     "mathlive": "^0.110.0",
     "mermaid": "^11.14.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "remark-math": "^6.0.0",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "vite": "^8.2.1"
   },
   "dependencies": {
+    "prismjs": "^1.24.1",
     "remark-math": "^6.0.0"
   },
   "engines": {

@@ -104,6 +104,7 @@ describe('Previewer rendering pipeline', () => {
     const { previewer } = createPreviewer();
     const first = {
       isActive: vi.fn(() => true),
+      queryCommandState: vi.fn(() => ({ active: true, enabled: true, value: 2 })),
       runCommand: vi.fn(() => true),
       insert: vi.fn(() => true),
     };
@@ -114,12 +115,14 @@ describe('Previewer rendering pipeline', () => {
     };
 
     previewer.setEditingBridge(first);
+    expect(previewer.queryEditingCommandState({ name: 'header' })).toEqual({ active: true, enabled: true, value: 2 });
     expect(previewer.runEditingCommand({ name: 'bold' })).toBe(true);
     expect(previewer.insertEditingContent('![image](url)', { source: 'picker' })).toBe(true);
     expect(first.runCommand).toHaveBeenCalledWith({ name: 'bold' });
     expect(first.insert).toHaveBeenCalledWith('![image](url)', { source: 'picker' });
 
     previewer.setEditingBridge(second);
+    expect(previewer.queryEditingCommandState({ name: 'header' })).toBeNull();
     expect(previewer.runEditingCommand({ name: 'italic' })).toBe(false);
     expect(previewer.insertEditingContent('ignored')).toBe(false);
     expect(second.runCommand).not.toHaveBeenCalled();

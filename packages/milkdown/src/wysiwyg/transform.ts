@@ -172,17 +172,10 @@ function collectBlocks(source: string): BlockMatch[] {
       });
     }
   }
-  // In the native preview surface, ordinary fenced code should keep Cherry's
-  // exact highlighted DOM. It remains editable through the node-local source
-  // editor, just like other native visual nodes.
-  for (const fencedRange of fencedRanges) {
-    if (
-      matches.some((match) => match.syntax === 'diagram' && match.from < fencedRange.to && fencedRange.from < match.to)
-    ) {
-      continue;
-    }
-    matches.push({ ...fencedRange, syntax: 'native' });
-  }
+  // Ordinary fenced code stays in Milkdown's structured `code_block` schema.
+  // Only diagram languages are promoted to native visual nodes. Turning every
+  // fence into an opaque source node makes direct code editing impossible and
+  // causes newly inserted code blocks to change node type after synchronization.
   return matches
     .sort((left, right) => left.from - right.from || right.to - right.from - (left.to - left.from))
     .filter((match, index, all) => !all.slice(0, index).some((item) => item.from < match.to && match.from < item.to));

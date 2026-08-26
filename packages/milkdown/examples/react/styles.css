@@ -1,0 +1,28 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#dom_mask {
+  position: absolute;
+  top: 40px;
+  width: 100%;
+  height: 20px;
+}
+
+video {
+  max-width: 400px;
+}
+
+img {
+  max-width: 100%;
+}
+
+iframe.cherry-dialog-iframe {
+  width: 100%;
+  height: 100%;
+}

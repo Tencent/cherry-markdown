@@ -689,6 +689,16 @@ describe('createCherryMilkdown WYSIWYG', () => {
     await vi.waitFor(() => expect(markdown).toContain('**Before**'));
     expect(instance.getMarkdown()).toContain('**Before**');
 
+    expect(bridge?.runCommand?.({ name: 'h1', shortKey: '1', menu: {} })).toBe(true);
+    await vi.waitFor(() => expect(view.state.doc.firstChild?.type.name).toBe('heading'));
+    expect(view.state.doc.firstChild?.attrs.level).toBe(1);
+    expect(bridge?.runCommand?.({ name: 'h1', shortKey: '1', menu: {} })).toBe(true);
+    await vi.waitFor(() => expect(view.state.doc.firstChild?.type.name).toBe('paragraph'));
+
+    expect(bridge?.runCommand?.({ name: 'codeBlock', shortKey: '', menu: {} })).toBe(true);
+    await vi.waitFor(() => expect(view.state.doc.firstChild?.type.name).toBe('code_block'));
+    expect(instance.getMarkdown()).toContain('```');
+
     const search = bridge?.getSearchAdapter?.();
     const after = search?.getDocString().indexOf('after') ?? -1;
     search?.setSelection(after, after + 5);
@@ -709,6 +719,31 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(bridge?.runCommand?.({ name: 'image', shortKey: '', menu: imageMenu })).toBe(true);
     expect(bridge?.runCommand?.({ name: 'image', shortKey: '', menu: imageMenu })).toBe(true);
     await vi.waitFor(() => expect(markdown).toContain('![uploaded](https://example.com/image.png)'));
+  });
+
+  it('keeps ordinary fenced code directly editable with Cherry code-block chrome', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: '```js\nconst value = 1;\n```',
+      nativePreview: true,
+      debounce: 0,
+    });
+    instances.push(instance);
+
+    const codeBlock = element.querySelector<HTMLElement>('[data-type="codeBlock"]');
+    expect(codeBlock).not.toBeNull();
+    expect(codeBlock?.classList.contains('cherry-milkdown-code-block')).toBe(true);
+    expect(codeBlock?.closest('.cherry-embed')).toBeNull();
+    expect(codeBlock?.querySelector('code')?.textContent).toBe('const value = 1;');
+
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let codePosition = -1;
+    view.state.doc.descendants((node, position) => {
+      if (node.type.name === 'code_block') codePosition = position;
+    });
+    view.dispatch(view.state.tr.insertText('\nconst next = 2;', codePosition + 'const value = 1;'.length + 1));
+    await vi.waitFor(() => expect(instance.getMarkdown()).toContain('const next = 2;'));
   });
 
   it('edits inline math in place through MathLive input events', async () => {

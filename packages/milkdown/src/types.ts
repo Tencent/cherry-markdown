@@ -71,8 +71,15 @@ export interface CherryToolbarCommand {
   menu?: unknown;
 }
 
+export interface CherryToolbarCommandState {
+  active: boolean;
+  enabled: boolean;
+  value?: string | number;
+}
+
 export interface CherryPreviewEditingBridge {
   isActive(): boolean;
+  queryCommandState?(command: CherryToolbarCommand): CherryToolbarCommandState;
   runCommand?(command: CherryToolbarCommand): boolean;
   insert?(content: string, options: { select: boolean; focus: boolean }): boolean;
   getSearchAdapter?(): CherrySearchAdapter;

@@ -25,7 +25,7 @@ export const cherryCompatibilityCases: readonly CherryCompatibilityCase[] = [
     id: 'code-block',
     label: 'fenced code block',
     markdown: '```js\nconst value = 1;\n```',
-    mode: 'native-source',
+    mode: 'structured',
     selector: '[data-type="codeBlock"]',
   },
   { id: 'list', label: 'list', markdown: '- one\n- two', mode: 'structured', selector: 'ul' },

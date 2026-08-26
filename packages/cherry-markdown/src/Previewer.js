@@ -897,6 +897,11 @@ export default class Previewer {
     return this.editingBridge.runCommand?.(command) === true;
   }
 
+  queryEditingCommandState(command) {
+    if (!this.editingBridge?.isActive?.()) return null;
+    return this.editingBridge.queryCommandState?.(command) ?? null;
+  }
+
   insertEditingContent(content, options = {}) {
     if (!this.editingBridge?.isActive?.()) return false;
     return this.editingBridge.insert?.(content, options) === true;

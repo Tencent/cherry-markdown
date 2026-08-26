@@ -49,25 +49,48 @@ try {
     cherryTarball,
     milkdownTarball,
     ...peers,
+    'react@18.3.1',
+    'react-dom@18.3.1',
+    '@vitejs/plugin-react@6.0.5',
     'vite@8.2.1',
   ]);
   writeFileSync(
     join(fixtureRoot, 'index.html'),
-    '<div id="editor"></div><script type="module" src="/main.js"></script>\n',
+    '<div id="root"></div><script type="module" src="/main.jsx"></script>\n',
   );
   writeFileSync(
-    join(fixtureRoot, 'main.js'),
-    `import Cherry from 'cherry-markdown';
+    join(fixtureRoot, 'main.jsx'),
+    `import { useEffect, useRef } from 'react';
+import { createRoot } from 'react-dom/client';
+import Cherry from 'cherry-markdown';
 import { milkdown } from '@cherry-markdown/milkdown';
 import 'cherry-markdown/dist/cherry-markdown.css';
 import '@cherry-markdown/milkdown/styles.css';
 import '@milkdown/kit/prose/view/style/prosemirror.css';
 
-window.cherry = new Cherry({
-  el: document.getElementById('editor'),
-  value: '# Published package consumer',
-  extensions: [milkdown()],
-});
+function App() {
+  const editorRoot = useRef(null);
+  useEffect(() => {
+    const cherry = new Cherry({
+      el: editorRoot.current,
+      value: '# Published package consumer',
+      extensions: [milkdown()],
+    });
+    window.cherry = cherry;
+    return () => cherry.destroy();
+  }, []);
+  return <div ref={editorRoot} />;
+}
+
+createRoot(document.getElementById('root')).render(<App />);
+`,
+  );
+  writeFileSync(
+    join(fixtureRoot, 'vite.config.js'),
+    `import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({ plugins: [react()] });
 `,
   );
   run(resolve(fixtureRoot, 'node_modules/.bin/vite'), ['build']);

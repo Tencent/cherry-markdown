@@ -147,19 +147,20 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
 
   // Cherry's preview already supplies the native visual shell. The floating
   // Milkdown components are useful for standalone consumers, but mounting them
-  // for every table, image, link and code block in the full manual adds a large
+  // for every table, image and link in the full manual adds a large
   // amount of DOM and event work before the user edits anything.
   const interactiveComponents = options.nativePreview
     ? undefined
     : await Promise.all([
         import('@milkdown/kit/component/table-block'),
-        import('@milkdown/kit/component/code-block'),
         import('@milkdown/kit/component/image-inline'),
         import('@milkdown/kit/component/link-tooltip'),
       ]);
 
   try {
-    engine = options.engine ?? new CherryEngine(options.cherryOptions);
+    // Cherry's generated declaration keeps the optional object return mode in
+    // `makeHtml`, while this integration always calls its default string mode.
+    engine = options.engine ?? (new CherryEngine(options.cherryOptions) as unknown as CherryMilkdownInstance['engine']);
   } catch (error) {
     options.onError?.(error, 'create');
     throw error;
@@ -265,9 +266,8 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
   if (interactiveComponents) {
     editor
       .use(interactiveComponents[0].tableBlock)
-      .use(interactiveComponents[1].codeBlockComponent)
-      .use(interactiveComponents[2].imageInlineComponent)
-      .use(interactiveComponents[3].linkTooltipPlugin);
+      .use(interactiveComponents[1].imageInlineComponent)
+      .use(interactiveComponents[2].linkTooltipPlugin);
   }
 
   for (const plugin of options.plugins ?? []) editor.use(plugin);

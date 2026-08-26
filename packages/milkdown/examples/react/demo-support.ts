@@ -1,11 +1,7 @@
 import Cherry from 'cherry-markdown';
-import 'cherry-markdown/dist/cherry-markdown.css';
-import { milkdown } from '@cherry-markdown/milkdown';
-import '@cherry-markdown/milkdown/styles.css';
-import '@milkdown/kit/prose/view/style/prosemirror.css';
-import basicMd from '../../../examples/assets/markdown/index.md?raw';
+import type { CherryVisualRenderer } from '@cherry-markdown/milkdown';
 
-let echartsReady;
+let echartsReady: Promise<typeof import('echarts/core')> | undefined;
 
 async function loadECharts() {
   echartsReady ??= Promise.all([
@@ -52,11 +48,10 @@ async function loadECharts() {
   return echartsReady;
 }
 
-async function renderECharts({ container, source }) {
+export const renderECharts: CherryVisualRenderer = async ({ container, source }) => {
   const echarts = await loadECharts();
   const expression = source.trim().replace(/;\s*$/, '');
-  // This demo intentionally matches the original index.html configuration,
-  // whose EChartsCodeBlockEngine has enableJs enabled.
+  // This matches the root demo, whose ECharts code block engine enables JS.
   const option = Function(`"use strict"; return (${expression});`)();
   container.style.width = '100%';
   container.style.height = '600px';
@@ -68,29 +63,9 @@ async function renderECharts({ container, source }) {
     resizeObserver.disconnect();
     chart.dispose();
   };
+};
+
+export async function loadDemoDependencies() {
+  // @ts-expect-error The legacy pinyin demo asset does not publish declarations.
+  await Promise.all([loadECharts(), import('../../../../examples/assets/scripts/pinyin/pinyin_dist.js')]);
 }
-
-async function main() {
-  window.Cherry = Cherry;
-  window.milkdown = milkdown;
-  await Promise.all([loadECharts(), import('../../../examples/assets/scripts/pinyin/pinyin_dist.js')]);
-  const { basicConfig } = await import('../../../examples/assets/scripts/index-demo.js');
-
-  window.cherry = new Cherry({
-    ...basicConfig,
-    id: 'markdown',
-    value: basicMd,
-    extensions: [
-      milkdown({
-        debounce: 0,
-        renderers: { echarts: renderECharts },
-        onChange: ({ markdown }) => {
-          window.milkdownMarkdown = markdown;
-        },
-      }),
-    ],
-  });
-  window.milkdownMarkdown = window.cherry.getMarkdown();
-}
-
-void main();

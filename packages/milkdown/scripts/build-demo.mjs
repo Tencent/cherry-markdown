@@ -2,25 +2,13 @@ import { cp, mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'vite';
+import demoConfig from '../vite.demo.config.mjs';
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const workspaceRoot = resolve(packageRoot, '../..');
 const output = resolve(packageRoot, 'preview');
 
-await build({
-  root: resolve(packageRoot, 'examples'),
-  base: './',
-  build: {
-    outDir: output,
-    emptyOutDir: true,
-    rollupOptions: {
-      input: {
-        index: resolve(packageRoot, 'examples/index.html'),
-        visual: resolve(packageRoot, 'examples/visual.html'),
-      },
-    },
-  },
-});
+await build(demoConfig);
 
 await mkdir(resolve(output, 'assets'), { recursive: true });
 await cp(resolve(workspaceRoot, 'examples/assets'), resolve(output, 'assets'), { recursive: true });

@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "paths": {
+      "@cherry-markdown/milkdown": ["./src/index.ts"]
+    },
+    "types": ["node", "vite/client"]
+  },
+  "include": ["examples/react/**/*.ts", "examples/react/**/*.tsx", "src/prismjs.d.ts"]
+}

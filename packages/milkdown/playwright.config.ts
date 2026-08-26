@@ -28,7 +28,7 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   webServer: {
-    command: `yarn workspace @cherry-markdown/milkdown build:demo && ./node_modules/.bin/vite preview --host 127.0.0.1 --port ${port} --outDir packages/milkdown/preview`,
+    command: `yarn workspace @cherry-markdown/milkdown build:demo && ./node_modules/.bin/vite preview --config packages/milkdown/vite.demo.config.mjs --host 127.0.0.1 --port ${port}`,
     cwd: workspaceRoot,
     url: `http://127.0.0.1:${port}/index.html`,
     reuseExistingServer: !process.env.CI,

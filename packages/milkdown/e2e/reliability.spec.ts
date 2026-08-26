@@ -224,6 +224,111 @@ test('Cherry toolbar and search operate on the focused Milkdown surface', async 
   await attachEvidence(page, testInfo, actions, errors);
 });
 
+test('heading toggles back to paragraph and code blocks stay in the preview editor', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.evaluate(() => {
+    const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+    scope.cherry.setValue('Editable block');
+  });
+
+  const paragraph = page.locator('.ProseMirror p', { hasText: 'Editable block' });
+  await paragraph.click();
+  const headingMenu = page.locator('.cherry-toolbar-header');
+  await headingMenu.dispatchEvent('pointerdown', { pointerType: 'mouse' });
+  await headingMenu.dispatchEvent('pointerup', { pointerType: 'mouse' });
+  await page.locator('.cherry-dropdown[name="header"] [title="一级标题"]').click();
+  await expect(page.locator('.ProseMirror h1')).toHaveText('Editable block');
+  await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('# Editable block');
+  actions.push('changed paragraph to H1 in the preview surface');
+
+  await headingMenu.dispatchEvent('pointerdown', { pointerType: 'mouse' });
+  await headingMenu.dispatchEvent('pointerup', { pointerType: 'mouse' });
+  await expect(page.locator('.cherry-dropdown[name="header"] [title="一级标题"]')).toHaveClass(
+    /cherry-dropdown-item__selected/,
+  );
+  await page.locator('.cherry-dropdown[name="header"] [title="一级标题"]').click();
+  await expect(page.locator('.ProseMirror p')).toHaveText('Editable block');
+  await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('Editable block');
+  await headingMenu.dispatchEvent('pointerdown', { pointerType: 'mouse' });
+  await headingMenu.dispatchEvent('pointerup', { pointerType: 'mouse' });
+  await expect(page.locator('.cherry-dropdown[name="header"] .cherry-dropdown-item__selected')).toHaveCount(0);
+  await headingMenu.dispatchEvent('pointerdown', { pointerType: 'mouse' });
+  await headingMenu.dispatchEvent('pointerup', { pointerType: 'mouse' });
+  actions.push('selected H1 again and returned it to paragraph');
+
+  const insertMenu = page.locator('.cherry-toolbar-insert');
+  await insertMenu.dispatchEvent('pointerdown', { pointerType: 'mouse' });
+  await insertMenu.dispatchEvent('pointerup', { pointerType: 'mouse' });
+  await page.locator('.cherry-dropdown[name="insert"] [title="代码块"]').click();
+  const codeBlock = page.locator('.ProseMirror .cherry-milkdown-code-block');
+  await expect(codeBlock).toBeVisible();
+  await expect(page.locator('.cherry-editor .cm-content')).not.toBeFocused();
+  await codeBlock.locator('code').click();
+  await page.keyboard.press('End');
+  await page.keyboard.press('Enter');
+  await page.keyboard.insertText('const next = 2;');
+  await codeBlock.locator('select[aria-label="代码语言"]').selectOption('javascript');
+  await expect
+    .poll(async () => {
+      const state = await readState(page);
+      return {
+        synchronized: state.cherry === state.codeMirror && state.cherry === state.milkdown,
+        markdown: state.cherry.trim(),
+      };
+    })
+    .toEqual({
+      synchronized: true,
+      markdown: '```javascript\nEditable block\nconst next = 2;\n```',
+    });
+  actions.push('converted the current block to code, edited it in place, and changed its language');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('slash menu exposes H6 and keyboard code-block conversion without leaving preview', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+
+  const setMarkdown = (value: string) =>
+    page.evaluate((next) => {
+      const scope = window as typeof window & { cherry: { setValue(markdown: string): void } };
+      scope.cherry.setValue(next);
+    }, value);
+
+  await setMarkdown('');
+  await page.locator('.ProseMirror p').click();
+  await page.keyboard.insertText('/');
+  const slashMenu = page.locator('.cherry-milkdown-slash');
+  await expect(slashMenu).toBeVisible();
+  await slashMenu.getByRole('option', { name: '标题 6' }).click();
+  await page.keyboard.insertText('Sixth level');
+  await expect(page.locator('.ProseMirror h6')).toHaveText('Sixth level');
+  await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('###### Sixth level');
+  actions.push('created and edited H6 through the caret-anchored slash menu');
+
+  await setMarkdown('');
+  await page.locator('.ProseMirror p').click();
+  await page.keyboard.insertText('/');
+  await expect(slashMenu).toBeVisible();
+  for (let index = 0; index < 7; index += 1) await page.keyboard.press('ArrowDown');
+  await expect(slashMenu.getByRole('option', { name: '代码块' })).toHaveAttribute('aria-selected', 'true');
+  await page.keyboard.press('Enter');
+  await page.keyboard.insertText('slashCode();');
+  await expect(page.locator('.ProseMirror .cherry-milkdown-code-block code')).toHaveText('slashCode();');
+  await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('```\nslashCode();\n```');
+  await expect(page.locator('.cherry-editor .cm-content')).not.toBeFocused();
+  actions.push('used arrow keys and Enter to create a directly editable code block without focusing CodeMirror');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
 test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', async ({ page }, testInfo) => {
   const errors = captureBrowserErrors(page);
   await page.setViewportSize({ width: 1440, height: 1000 });

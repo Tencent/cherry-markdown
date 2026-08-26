@@ -4,17 +4,16 @@ import { toggleMark } from '@milkdown/kit/prose/commands';
 import { TextSelection } from '@milkdown/kit/prose/state';
 import type { EditorView } from '@milkdown/kit/prose/view';
 import {
-  createCodeBlockCommand,
   insertHrCommand,
   toggleEmphasisCommand,
   toggleInlineCodeCommand,
   toggleStrongCommand,
   wrapInBlockquoteCommand,
   wrapInBulletListCommand,
-  wrapInHeadingCommand,
   wrapInOrderedListCommand,
 } from '@milkdown/kit/preset/commonmark';
 import { insertTableCommand, toggleStrikethroughCommand } from '@milkdown/kit/preset/gfm';
+import { redoCommand, undoCommand } from '@milkdown/kit/plugin/history';
 import type { CherryMilkdownHost, CherryPreviewEditingBridge, CherryToolbarCommand } from './types.js';
 import type { CherryMilkdownInstance } from './types.js';
 
@@ -68,10 +67,38 @@ export function createCherryEditingBridge(
   const isActive = () => previewWasActive && !cherry.getCodeMirror?.()?.hasFocus;
 
   const call = (command: { key: unknown }, payload?: unknown) => {
+    let handled = false;
     instance.editor.action((ctx) => {
-      ctx.get(commandsCtx).call(command.key as never, payload as never);
+      handled = ctx.get(commandsCtx).call(command.key as never, payload as never) !== false;
     });
+    if (handled) view.focus();
+    return handled;
+  };
+
+  const setTextBlock = (
+    type: NonNullable<(typeof view.state.schema.nodes)[string]>,
+    attrs?: Record<string, unknown>,
+  ) => {
+    let transaction = view.state.tr;
+    try {
+      for (const range of view.state.selection.ranges) {
+        transaction = transaction.setBlockType(range.$from.pos, range.$to.pos, type, attrs);
+      }
+    } catch {
+      return false;
+    }
+    if (!transaction.docChanged) return false;
+    view.dispatch(transaction);
     view.focus();
+    return true;
+  };
+
+  const setHeading = (level: number) => {
+    const { heading, paragraph } = view.state.schema.nodes;
+    if (!heading || !paragraph) return false;
+    const { $from } = view.state.selection;
+    const sameLevel = $from.parent.type === heading && Number($from.parent.attrs.level) === level;
+    return setTextBlock(sameLevel ? paragraph : heading, sameLevel ? undefined : { level });
   };
 
   const toggleCustomMark = (name: string, attrs?: Record<string, string>) => {
@@ -131,8 +158,10 @@ export function createCherryEditingBridge(
         call(toggleInlineCodeCommand);
         return true;
       case 'code':
-        call(createCodeBlockCommand);
-        return true;
+      case 'codeBlock': {
+        const type = view.state.schema.nodes.code_block;
+        return type ? setTextBlock(type, { language: '' }) : false;
+      }
       case 'quote':
         call(wrapInBlockquoteCommand);
         return true;
@@ -150,8 +179,7 @@ export function createCherryEditingBridge(
         return true;
       case 'header': {
         const level = Number(String(command.shortKey).replace(/\D/g, '')) || 1;
-        call(wrapInHeadingCommand, Math.min(6, level));
-        return true;
+        return setHeading(Math.min(6, level));
       }
       case 'h1':
       case 'h2':
@@ -159,8 +187,11 @@ export function createCherryEditingBridge(
       case 'h4':
       case 'h5':
       case 'h6':
-        call(wrapInHeadingCommand, Number(command.name.slice(1)));
-        return true;
+        return setHeading(Number(command.name.slice(1)));
+      case 'undo':
+        return call(undoCommand);
+      case 'redo':
+        return call(redoCommand);
       case 'underline':
         return toggleCustomMark('cherry_underline');
       case 'sub':
@@ -197,6 +228,27 @@ export function createCherryEditingBridge(
       default:
         return TRANSFORMED_MARKDOWN_COMMANDS.has(command.name) ? runCherryTransform(command) : false;
     }
+  };
+
+  const queryCommandState = (command: CherryToolbarCommand) => {
+    const { $from } = view.state.selection;
+    const parent = $from.parent;
+    if (command.name === 'header') {
+      const level = parent.type.name === 'heading' ? Number(parent.attrs.level) : 0;
+      return { active: level > 0, enabled: true, value: level };
+    }
+    if (/^h[1-6]$/.test(command.name)) {
+      const level = Number(command.name.slice(1));
+      return {
+        active: parent.type.name === 'heading' && Number(parent.attrs.level) === level,
+        enabled: true,
+        value: level,
+      };
+    }
+    if (command.name === 'code' || command.name === 'codeBlock') {
+      return { active: parent.type.name === 'code_block', enabled: true };
+    }
+    return { active: false, enabled: view.editable };
   };
 
   const searchableDocument = () => {
@@ -243,6 +295,7 @@ export function createCherryEditingBridge(
 
   return {
     isActive,
+    queryCommandState,
     runCommand,
     insert: (content, options) => insertMarkdown(content, options.select),
     getSearchAdapter: () => searchAdapter,
