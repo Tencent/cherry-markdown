@@ -52,7 +52,7 @@ export const configureMathJax = (usePlugins) => {
           ['\\[', '\\]'],
         ],
         tags: 'ams',
-        packages: { '[+]': ['noerrors', 'cancel', 'color'] },
+        packages: { '[+]': ['noerrors', 'cancel', 'color', 'boldsymbol'] },
         macros: {
           bm: ['{\\boldsymbol{#1}}', 1],
         },

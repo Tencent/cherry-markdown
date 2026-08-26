@@ -1,6 +1,7 @@
 import Cherry from 'cherry-markdown';
 import 'cherry-markdown/dist/cherry-markdown.min.css';
 import type { CherryTheme } from '../../src/config';
+import { getVSCodeMathJaxConfig, waitForMathJax } from '../../src/mathjaxConfig';
 import type {
   EditorState,
   ExtensionToWebviewMessage,
@@ -169,6 +170,7 @@ function createBasicConfig(state: EditorState): Record<string, unknown> {
         },
         mathBlock: {
           engine: 'MathJax', // katex或MathJax
+          plugins: false,
         },
         inlineMath: {
           engine: 'MathJax', // katex或MathJax
@@ -303,10 +305,14 @@ function needsMathJax(markdown: string): boolean {
 }
 
 async function ensureMathJax(markdown: string): Promise<void> {
-  if (!needsMathJax(markdown) || window.MathJax) return;
-  await import(/* webpackChunkName: "mathjax" */ 'mathjax/es5/tex-svg.js').catch((error) => {
-    console.error('MathJax load failed:', error);
-  });
+  if (!needsMathJax(markdown)) return;
+  if (!window.MathJax) window.MathJax = getVSCodeMathJaxConfig();
+  if (!('tex2svg' in (window.MathJax as object))) {
+    await import(/* webpackChunkName: "mathjax" */ 'mathjax/es5/tex-svg-full.js').catch((error) => {
+      console.error('MathJax load failed:', error);
+    });
+  }
+  if (window.MathJax) await waitForMathJax(window.MathJax);
   if (cherry && window.MathJax) cherry.options.externals.MathJax = window.MathJax;
 }
 
