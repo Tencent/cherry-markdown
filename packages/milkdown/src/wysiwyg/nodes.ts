@@ -222,6 +222,10 @@ export const cherryDiagramSchema = leafSchema('cherry_diagram', 'cherryDiagram',
   diagramType: sourceAttr(),
   value: sourceAttr(),
 });
+export const cherryTableChartSchema = leafSchema('cherry_table_chart', 'cherryTableChart', false, {
+  chartType: sourceAttr(),
+});
+export const cherryNativeBlockSchema = leafSchema('cherry_native_block', 'cherryNativeBlock');
 export const cherryHtmlBlockSchema = leafSchema('cherry_html_block', 'cherryHtmlBlock');
 export const cherryHtmlInlineSchema = leafSchema('cherry_html_inline', 'cherryHtmlInline', true);
 export const cherryEmojiSchema = leafSchema('cherry_emoji', 'cherryEmoji', true);
@@ -709,6 +713,7 @@ class EmbedView implements NodeView {
     this.source.contentEditable = String(!config.readonly);
     this.source.spellcheck = false;
     this.source.addEventListener('input', this.updateSource);
+    this.source.addEventListener('blur', this.flushSourceRender);
     this.sourcePanel.append(this.source);
     this.dom.append(this.preview, controls, this.sourcePanel);
     this.scheduleRender();
@@ -719,7 +724,9 @@ class EmbedView implements NodeView {
     if (node.type !== this.node.type) return false;
     this.node = node;
     this.syncSource();
-    if (this.renderActivated || node.type.name !== 'cherry_diagram') this.render();
+    if ((this.renderActivated || node.type.name !== 'cherry_diagram') && document.activeElement !== this.source) {
+      this.render();
+    }
     return true;
   }
 
@@ -785,18 +792,26 @@ class EmbedView implements NodeView {
   }
 
   private updateSource = () => {
+    const pos = this.getPos();
+    if (typeof pos !== 'number') return;
+    const value = editableSourceText(this.source);
+    const attrs = { ...this.node.attrs };
+    if (this.node.type.name === 'cherry_diagram') {
+      attrs.value = value;
+      attrs.source = `\`\`\`${attrs.diagramType}\n${value}\n\`\`\``;
+    } else attrs.source = value;
+    this.view.dispatch(this.view.state.tr.setNodeMarkup(pos, undefined, attrs));
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => {
-      const pos = this.getPos();
-      if (typeof pos !== 'number') return;
-      const value = editableSourceText(this.source);
-      const attrs = { ...this.node.attrs };
-      if (this.node.type.name === 'cherry_diagram') {
-        attrs.value = value;
-        attrs.source = `\`\`\`${attrs.diagramType}\n${value}\n\`\`\``;
-      } else attrs.source = value;
-      this.view.dispatch(this.view.state.tr.setNodeMarkup(pos, undefined, attrs));
+      this.timer = undefined;
+      if (this.renderActivated || this.node.type.name !== 'cherry_diagram') this.render();
     }, this.config.debounce);
+  };
+
+  private flushSourceRender = () => {
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = undefined;
+    if (this.renderActivated || this.node.type.name !== 'cherry_diagram') this.render();
   };
 
   private render() {
@@ -812,7 +827,7 @@ class EmbedView implements NodeView {
       }
       return;
     }
-    if (this.node.type.name.startsWith('cherry_html')) {
+    if (this.node.type.name.startsWith('cherry_html') || this.node.type.name === 'cherry_native_block') {
       try {
         const html = this.config.engine.makeHtml(String(this.node.attrs.source));
         this.preview.replaceChildren(sanitizedEngineFragment(html, this.node.isInline));
@@ -856,6 +871,206 @@ class EmbedView implements NodeView {
   }
 }
 
+class TableChartView implements NodeView {
+  dom: HTMLElement;
+  private node: ProseNode;
+  private readonly preview: HTMLElement;
+  private readonly source: HTMLElement;
+  private readonly sourcePanel: HTMLElement;
+  private observer?: IntersectionObserver;
+  private destroyed = false;
+  private editingSource = false;
+
+  constructor(
+    node: ProseNode,
+    private readonly view: EditorView,
+    private readonly getPos: () => number | undefined,
+    private readonly config: CherryWysiwygConfig,
+  ) {
+    this.node = node;
+    this.dom = document.createElement('figure');
+    this.dom.className = 'cherry-embed cherry-table-chart';
+    this.preview = document.createElement('div');
+    this.preview.className = 'cherry-embed__preview cherry-table-chart__preview';
+    // An empty, lazy NodeView has a zero-area intersection rectangle and can
+    // therefore never enter the viewport. Reserve the same minimum height as
+    // Cherry's native ECharts wrapper until the first native render completes.
+    this.preview.style.minHeight = '300px';
+    const controls = document.createElement('figcaption');
+    controls.className = 'cherry-embed__controls';
+    const type = document.createElement('span');
+    type.textContent = String(node.attrs.chartType);
+    const edit = iconButton('源码', '在节点内编辑表格图表源码', this.openSource, config.readonly);
+    controls.append(type, edit);
+    this.sourcePanel = document.createElement('pre');
+    this.sourcePanel.className = 'cherry-embed__source cherry-table-chart__source';
+    this.sourcePanel.hidden = true;
+    this.source = document.createElement('code');
+    this.source.contentEditable = String(!config.readonly);
+    this.source.spellcheck = false;
+    this.source.textContent = String(node.attrs.source ?? '');
+    this.source.addEventListener('input', this.commitSource);
+    this.source.addEventListener('blur', this.finishSourceEdit);
+    this.sourcePanel.append(this.source);
+    this.dom.append(this.preview, controls, this.sourcePanel);
+    this.dom.addEventListener('mousedown', this.selectFromEmptyArea, true);
+    this.dom.addEventListener('click', this.selectFromEmptyArea, true);
+    this.scheduleRender();
+  }
+
+  update(node: ProseNode) {
+    if (node.type !== this.node.type) return false;
+    const sourceChanged = node.attrs.source !== this.node.attrs.source;
+    this.node = node;
+    if (document.activeElement !== this.source) this.source.textContent = String(node.attrs.source ?? '');
+    if (sourceChanged) this.render();
+    return true;
+  }
+
+  selectNode() {
+    this.dom.classList.add('is-selected');
+    if (!this.config.readonly) this.sourcePanel.hidden = false;
+  }
+
+  deselectNode() {
+    this.dom.classList.remove('is-selected');
+    if (!this.editingSource) this.sourcePanel.hidden = true;
+  }
+
+  stopEvent(event: Event) {
+    return (
+      this.sourcePanel.contains(event.target as Node) ||
+      Boolean((event.target as HTMLElement).closest('.cherry-embed__controls'))
+    );
+  }
+
+  ignoreMutation(mutation: ViewMutationRecord) {
+    return this.sourcePanel.contains(mutation.target);
+  }
+
+  destroy() {
+    this.destroyed = true;
+    this.observer?.disconnect();
+    this.dom.removeEventListener('mousedown', this.selectFromEmptyArea, true);
+    this.dom.removeEventListener('click', this.selectFromEmptyArea, true);
+    this.config.engine.destroyRenderedContent?.(this.preview);
+  }
+
+  private scheduleRender() {
+    if (typeof IntersectionObserver === 'undefined') {
+      this.render();
+      return;
+    }
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        this.observer?.disconnect();
+        this.observer = undefined;
+        this.render();
+      },
+      { rootMargin: '500px 0px' },
+    );
+    this.observer.observe(this.dom);
+  }
+
+  private selectFromEmptyArea = (event: MouseEvent) => {
+    if (
+      this.sourcePanel.contains(event.target as Node) ||
+      (event.target as HTMLElement).closest('.cherry-embed__controls')
+    ) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    // Native chart children (canvas/SVG) may own their pointer interaction.
+    // Reflect selection immediately, then let the real NodeSelection keep it
+    // in sync with subsequent keyboard and blur behavior.
+    this.selectNode();
+    const pos = this.resolvePos();
+    if (typeof pos !== 'number') return;
+    this.view.dispatch(this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos)));
+    this.view.focus();
+  };
+
+  private openSource = () => {
+    this.editingSource = true;
+    this.dom.classList.add('is-editing');
+    this.selectNode();
+    const pos = this.resolvePos();
+    if (typeof pos === 'number') {
+      this.view.dispatch(this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos)));
+    }
+  };
+
+  private finishSourceEdit = () => {
+    this.commitSource();
+    this.editingSource = false;
+    this.dom.classList.remove('is-editing');
+    if (!this.dom.classList.contains('is-selected')) this.sourcePanel.hidden = true;
+  };
+
+  private commitSource = () => {
+    if (this.config.readonly) return;
+    const pos = this.resolvePos();
+    if (typeof pos !== 'number') return;
+    const source = editableSourceText(this.source);
+    if (source === this.node.attrs.source) return;
+    const firstLine = source.split(/\r?\n/, 1)[0]?.trim().replace(/^\|/, '') ?? '';
+    const chartType = /^:(\w+):/.exec(firstLine)?.[1] ?? String(this.node.attrs.chartType ?? '');
+    this.view.dispatch(
+      this.view.state.tr.setNodeMarkup(pos, undefined, {
+        ...this.node.attrs,
+        source,
+        chartType,
+      }),
+    );
+  };
+
+  private resolvePos() {
+    try {
+      const direct = this.getPos();
+      if (typeof direct === 'number') return direct;
+    } catch {
+      // Fall through while this NodeView is between ProseMirror mappings.
+    }
+    try {
+      const domPosition = this.view.posAtDOM(this.dom, 0);
+      for (const candidate of [domPosition, domPosition - 1]) {
+        if (candidate >= 0 && this.view.state.doc.nodeAt(candidate)?.type === this.node.type) return candidate;
+      }
+    } catch {
+      // The DOM may temporarily be detached during an external update.
+    }
+    let matched: number | undefined;
+    this.view.state.doc.descendants((node, position) => {
+      if (
+        matched === undefined &&
+        node.type === this.node.type &&
+        node.attrs.source === this.node.attrs.source &&
+        node.attrs.chartType === this.node.attrs.chartType
+      ) {
+        matched = position;
+      }
+    });
+    return matched;
+  }
+
+  private render() {
+    if (this.destroyed) return;
+    this.config.engine.destroyRenderedContent?.(this.preview);
+    try {
+      const html = this.config.engine.makeHtml(String(this.node.attrs.source ?? ''));
+      this.preview.replaceChildren(sanitizedEngineFragment(html));
+      this.preview.style.removeProperty('min-height');
+      delete this.preview.dataset.renderError;
+    } catch (error) {
+      this.preview.textContent = String(this.node.attrs.source ?? '');
+      this.preview.dataset.renderError = 'true';
+      this.config.onError?.(error, 'render');
+    }
+  }
+}
+
 export const cherryCompoundItemView = $view(
   cherryCompoundItemSchema.node,
   (ctx) => (node, view, getPos) =>
@@ -890,7 +1105,12 @@ function embedView(schema: ReturnType<typeof leafSchema>) {
 }
 
 export const cherryDiagramView = embedView(cherryDiagramSchema);
+export const cherryTableChartView = $view(
+  cherryTableChartSchema.node,
+  (ctx) => (node, view, getPos) => new TableChartView(node, view, getPos, ctx.get(cherryWysiwygConfigCtx.key)),
+);
 export const cherryHtmlBlockView = embedView(cherryHtmlBlockSchema);
+export const cherryNativeBlockView = embedView(cherryNativeBlockSchema);
 export const cherryHtmlInlineView = embedView(cherryHtmlInlineSchema);
 export const cherryEmojiView = embedView(cherryEmojiSchema);
 export const cherryLinkTargetView = $view(cherryLinkTargetSchema.node, () => (node) => new LinkTargetView(node));
@@ -967,6 +1187,8 @@ export const cherryStructureSchemas = [
   cherryFrontmatterSchema,
   cherryCommentDefinitionSchema,
   cherryDiagramSchema,
+  cherryTableChartSchema,
+  cherryNativeBlockSchema,
   cherryHtmlBlockSchema,
   cherryHtmlInlineSchema,
   cherryEmojiSchema,
@@ -981,6 +1203,8 @@ export const cherryStructureViews = [
   cherryFrontmatterView,
   cherryCommentDefinitionView,
   cherryDiagramView,
+  cherryTableChartView,
+  cherryNativeBlockView,
   cherryHtmlBlockView,
   cherryHtmlInlineView,
   cherryEmojiView,

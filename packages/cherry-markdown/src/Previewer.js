@@ -902,16 +902,18 @@ export default class Previewer {
     return this.editingBridge.insert?.(content, options) === true;
   }
 
-  $updateContentRenderer(html, domContainer = this.getDomContainer()) {
+  $updateContentRenderer(html, domContainer = this.getDomContainer(), updateContext) {
     const renderer = this.contentRenderer;
     if (!renderer) {
       return false;
     }
-    const result = renderer.update({
+    const context = {
       container: domContainer,
       markdown: this.$cherry?.getMarkdown?.() ?? '',
       html,
-    });
+      ...(updateContext ? { updateContext } : {}),
+    };
+    const result = renderer.update(context);
     if (result && typeof result.catch === 'function') {
       result.catch((error) => Logger.error('Custom preview content renderer failed.', error));
     }
@@ -919,13 +921,13 @@ export default class Previewer {
     return true;
   }
 
-  update(html) {
+  update(html, updateContext) {
     // 销毁后不执行更新
     if (this.isDestroyed) {
       return;
     }
     if (this.contentRenderer && !this.isPreviewerHidden()) {
-      this.$updateContentRenderer(html);
+      this.$updateContentRenderer(html, this.getDomContainer(), updateContext);
       return;
     }
     // 更新时保留图片懒加载逻辑
@@ -936,6 +938,7 @@ export default class Previewer {
       this.applyingDomChanges = true;
       // 预览区未隐藏时，直接更新
       const domContainer = this.getDomContainer();
+      this.$cherry?.engine?.destroyRenderedContent?.(domContainer);
       if (this.editor?.selectAll) {
         domContainer.innerHTML = '';
       }
@@ -1488,6 +1491,8 @@ export default class Previewer {
     if (this.contentRenderer) {
       this.clearContentRenderer(this.contentRenderer);
     }
+    const renderedContainer = this.getDomContainer();
+    this.$cherry?.engine?.destroyRenderedContent?.(renderedContainer);
     this.clearEditingBridge(this.editingBridge);
 
     // 清理滚动事件监听

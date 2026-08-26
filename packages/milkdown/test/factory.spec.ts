@@ -235,7 +235,11 @@ describe('createCherryMilkdown WYSIWYG', () => {
     vi.mocked(host.setValue).mockClear();
     view.dispatch(view.state.tr.insertText(' editable', headingEnd));
     await vi.waitFor(() =>
-      expect(host.setValue).toHaveBeenCalledWith(expect.stringContaining('Before editable'), true),
+      expect(host.setValue).toHaveBeenCalledWith(
+        expect.stringContaining('Before editable'),
+        true,
+        expect.objectContaining({ source: expect.stringContaining('@cherry-markdown/milkdown:'), revision: 1 }),
+      ),
     );
     expect(markdown).toContain('Before editable');
 
@@ -247,6 +251,88 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(previewer.clearContentRenderer).toHaveBeenCalled();
     expect(element.classList.contains('cherry-milkdown--previewer')).toBe(false);
     expect(element.textContent).toContain('# From source editor');
+  });
+
+  it('synchronizes a local transaction in the current microtask instead of waiting for listener debounce', async () => {
+    const element = root();
+    let renderer: CherryPreviewContentRenderer | undefined;
+    let markdown = 'Use `a` here.';
+    const host: CherryMilkdownHost = {
+      engine: { makeHtml: (value: string) => `<p>${value}</p>` },
+      getMarkdown: () => markdown,
+      getPreviewer: () => ({
+        getDom: () => element,
+        setContentRenderer: (next) => {
+          renderer = next;
+        },
+        clearContentRenderer: () => {
+          renderer = undefined;
+          return true;
+        },
+        update: (html) => renderer?.update({ container: element, markdown, html }),
+      }),
+      setValue: vi.fn((value: string) => {
+        markdown = value;
+      }),
+    };
+    const instance = await attachCherryMilkdownPreview(host, { debounce: 1000 });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let position = -1;
+    view.state.doc.descendants((node, pos) => {
+      if (node.isText && node.text === 'a') position = pos + 1;
+    });
+
+    view.dispatch(view.state.tr.insertText('bc', position));
+    await Promise.resolve();
+
+    expect(host.setValue).toHaveBeenCalledTimes(1);
+    expect(markdown).toContain('`abc`');
+
+    const updateContext = vi.mocked(host.setValue).mock.calls[0]?.[2];
+    await renderer?.update({
+      container: element,
+      markdown: 'Use `stale` here.',
+      html: '<p>stale</p>',
+      updateContext: { ...updateContext, revision: 0 },
+    });
+    expect(instance.getMarkdown()).toContain('`abc`');
+
+    await renderer?.update({
+      container: element,
+      markdown: 'Use `external` here.',
+      html: '<p>external</p>',
+      updateContext: { source: 'external-api', revision: 1 },
+    });
+    expect(instance.getMarkdown()).toContain('`external`');
+  });
+
+  it('keeps 50 rapid inline-code edits monotonic while public notifications stay debounced', async () => {
+    const element = root();
+    const immediate: string[] = [];
+    const onChange = vi.fn();
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: 'Use `x` here.',
+      debounce: 1000,
+      onImmediateChange: ({ markdown }) => immediate.push(markdown),
+      onChange,
+    });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let position = -1;
+    view.state.doc.descendants((node, pos) => {
+      if (node.isText && node.text === 'x') position = pos + 1;
+    });
+
+    for (let index = 0; index < 50; index += 1) {
+      view.dispatch(view.state.tr.insertText(String(index % 10), position + index));
+      await Promise.resolve();
+      expect(immediate.at(-1)).toContain(`\`x${Array.from({ length: index + 1 }, (_, i) => i % 10).join('')}\``);
+    }
+
+    expect(immediate).toHaveLength(50);
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('renders a single editable content surface with no raw cards or preview pane', async () => {
@@ -368,6 +454,40 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(element.querySelector('table')).not.toBeNull();
     expect(element.querySelectorAll('td')).toHaveLength(2);
     expect(element.querySelector('table')?.closest('[data-cherry-visual]')).toBeNull();
+  });
+
+  it('renders a table chart with Cherry HTML, preserves its exact source, and cleans rendered resources', async () => {
+    const element = root();
+    const value = ['| :line:{"title":"Trend"} | Jan | Feb |', '| --- | ---: | ---: |', '| Sales | 1 | 2 |'].join('\n');
+    const engine = {
+      makeHtml: vi.fn(
+        () =>
+          '<div class="cherry-table-wrapper"><table class="cherry-table"><tbody><tr><td>Sales</td></tr></tbody></table></div><figure class="cherry-table-figure"><div class="cherry-echarts-wrapper"></div></figure>',
+      ),
+      destroyRenderedContent: vi.fn(),
+    };
+    const instance = await createCherryMilkdown({ root: element, value, engine, debounce: 0 });
+    instances.push(instance);
+
+    expect(instance.getMarkdown().trim()).toBe(value);
+    expect(element.querySelector('.cherry-echarts-wrapper')).not.toBeNull();
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    element.querySelector<HTMLButtonElement>('[aria-label="在节点内编辑表格图表源码"]')?.click();
+    expect(element.querySelector('.cherry-table-chart')?.classList.contains('is-editing')).toBe(true);
+    expect(view.state.selection).toBeInstanceOf(NodeSelection);
+    const source = element.querySelector<HTMLElement>('.cherry-table-chart__source code');
+    expect(source?.textContent).toBe(value);
+    if (source) {
+      source.innerText = value.replace('Trend', 'Updated').replace('| Sales | 1 | 2 |', '| Sales | 3 | 5 |');
+      source.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    expect(instance.getMarkdown()).toContain('"title":"Updated"');
+    expect(instance.getMarkdown()).toContain('| Sales | 3 | 5 |');
+    expect(view.state.selection).toBeInstanceOf(NodeSelection);
+    await instance.destroy();
+    instances.splice(instances.indexOf(instance), 1);
+    expect(engine.destroyRenderedContent).toHaveBeenCalled();
   });
 
   it('keeps preview tables directly editable without mounting floating component chrome', async () => {
@@ -632,17 +752,19 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(instance.getMarkdown()).toContain('title: After');
   });
 
-  it('adds structured tab items through controls that stay hidden until interaction', async () => {
+  it('keeps Tabs in one source-preserving native visual node', async () => {
     const element = root();
-    const instance = await createCherryMilkdown({ root: element, value: ':::tabs\n:: First\nOne\n:::\n' });
+    const value = ':::tabs\n:: First\nOne\n:::\n';
+    const instance = await createCherryMilkdown({ root: element, value });
     instances.push(instance);
-    const before = element.querySelectorAll('.cherry-compound-item').length;
+    expect(instance.getMarkdown().trim()).toBe(value.trim());
+    selectNode(instance, 'cherry_native_block');
     element
-      .querySelector<HTMLButtonElement>(
-        '.cherry-compound > .cherry-compound__header .cherry-node-actions button[aria-label="增加项目"]',
-      )
+      .querySelector<HTMLButtonElement>('.cherry-embed--cherry_native_block .cherry-embed__controls button')
       ?.click();
-    expect(element.querySelectorAll('.cherry-compound-item')).toHaveLength(before + 1);
+    expect(element.querySelector<HTMLElement>('.cherry-embed--cherry_native_block .cherry-embed__source')?.hidden).toBe(
+      false,
+    );
   });
 
   it('opens diagram source inside the selected node only when requested', async () => {
@@ -716,6 +838,19 @@ describe('createCherryMilkdown WYSIWYG', () => {
 
     const selection = view.state.selection;
     expect(view.state.doc.textBetween(selection.from, selection.to)).toBe('selected text');
+  });
+
+  it('applies external Markdown as a minimal ProseMirror transaction', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({ root: element, value: 'Stable paragraph.\n\nBefore.' });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    const unchangedParagraph = view.state.doc.firstChild;
+
+    instance.setMarkdown('Stable paragraph.\n\nAfter.', { emit: false });
+
+    expect(view.state.doc.firstChild).toBe(unchangedParagraph);
+    expect(view.state.doc.lastChild?.textContent).toBe('After.');
   });
 
   it('keeps embedded source editing disabled in readonly mode', async () => {

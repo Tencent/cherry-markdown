@@ -71,6 +71,21 @@ describe('Previewer rendering pipeline', () => {
     expect(previewerDom.textContent).toBe('restored');
   });
 
+  it('forwards source and revision context only for contextual updates', () => {
+    const { previewer } = createPreviewer();
+    const renderer = { update: vi.fn() };
+    previewer.setContentRenderer(renderer);
+
+    previewer.update('<p>local</p>', { source: 'milkdown:1', revision: 7 });
+
+    expect(renderer.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        html: '<p>local</p>',
+        updateContext: { source: 'milkdown:1', revision: 7 },
+      }),
+    );
+  });
+
   it('does not let an older integration clear the current preview renderer', () => {
     const { previewer } = createPreviewer();
     const first = { update: vi.fn(), destroy: vi.fn() };

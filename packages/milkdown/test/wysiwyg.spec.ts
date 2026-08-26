@@ -18,7 +18,7 @@ describe('Cherry WYSIWYG markdown transform', () => {
     ]);
   });
 
-  it('creates visual block nodes and leaves ordinary fenced code alone', () => {
+  it('creates native visual nodes for diagrams and ordinary fenced code', () => {
     const source = [
       '[[toc]]',
       '',
@@ -49,8 +49,32 @@ describe('Cherry WYSIWYG markdown transform', () => {
       ],
     };
     transformCherryWysiwygTree(tree, source);
-    expect(tree.children.map(({ type }) => type)).toEqual(['cherryToc', 'code', 'cherryDiagram']);
+    expect(tree.children.map(({ type }) => type)).toEqual(['cherryToc', 'cherryNativeBlock', 'cherryDiagram']);
     expect((tree.children[2] as { diagramType?: string } | undefined)?.diagramType).toBe('mermaid');
+  });
+
+  it('turns a Cherry table chart into one source-preserving native visual node', () => {
+    const source = ['| :line:{"title":"Trend"} | Jan | Feb |', '| --- | ---: | ---: |', '| Sales | 1 | 2 |'].join('\n');
+    const tree = {
+      type: 'root',
+      children: [
+        {
+          type: 'table',
+          position: { start: { offset: 0 }, end: { offset: source.length } },
+          children: [],
+        },
+      ],
+    };
+
+    transformCherryWysiwygTree(tree, source);
+
+    expect(tree.children).toEqual([
+      expect.objectContaining({
+        type: 'cherryTableChart',
+        chartType: 'line',
+        source,
+      }),
+    ]);
   });
 
   it('only recognizes strict YAML frontmatter at the document start', () => {
@@ -111,7 +135,7 @@ describe('Cherry WYSIWYG markdown transform', () => {
     expect(tree.children.map(({ type }) => type)).toEqual([
       'heading',
       'thematicBreak',
-      'code',
+      'cherryNativeBlock',
       'thematicBreak',
       'heading',
     ]);

@@ -9,6 +9,8 @@ import type {
 } from './types.js';
 import { createCherryMilkdown } from './index.js';
 
+let previewInstanceId = 0;
+
 /**
  * Mount Milkdown into the document surface of an existing Cherry previewer.
  * Cherry continues to own the page shell, theme, toolbar, layout and Markdown
@@ -31,6 +33,8 @@ export async function attachCherryMilkdownPreview(
   let destruction: Promise<void> | undefined;
   let editingBridge: ReturnType<typeof createCherryEditingBridge> | undefined;
   let latestMarkdown = cherry.getMarkdown();
+  const updateSource = `@cherry-markdown/milkdown:${++previewInstanceId}`;
+  let localRevision = 0;
   let detached = false;
   let creationErrorReported = false;
 
@@ -52,8 +56,13 @@ export async function attachCherryMilkdownPreview(
       },
       onChange: (result) => {
         options.onChange?.(result);
-        if (detached || result.markdown === cherry.getMarkdown()) return;
-        cherry.setValue(result.markdown, true);
+      },
+      onImmediateChange: (result) => {
+        if (detached) return;
+        latestMarkdown = result.markdown;
+        localRevision += 1;
+        if (result.markdown === cherry.getMarkdown()) return;
+        cherry.setValue(result.markdown, true, { source: updateSource, revision: localRevision });
       },
     });
     if (detached || instanceRoot !== container) {
@@ -67,10 +76,10 @@ export async function attachCherryMilkdownPreview(
   };
 
   const renderer: CherryPreviewContentRenderer = {
-    async update({ container, markdown }) {
+    async update({ container, markdown, updateContext }) {
       if (detached) return;
-      latestMarkdown = markdown;
       if (!instance || instanceRoot !== container || !container.contains(instanceRoot.querySelector('.milkdown'))) {
+        latestMarkdown = markdown;
         if (!creation) {
           creation = createIn(container).finally(() => {
             creation = undefined;
@@ -79,6 +88,14 @@ export async function attachCherryMilkdownPreview(
         await creation;
         return;
       }
+      if (
+        updateContext?.source === updateSource &&
+        typeof updateContext.revision === 'number' &&
+        updateContext.revision <= localRevision
+      ) {
+        return;
+      }
+      latestMarkdown = markdown;
       if (instance.getMarkdown() !== markdown) {
         const { scrollLeft, scrollTop } = container;
         instance.setMarkdown(markdown, { emit: false });

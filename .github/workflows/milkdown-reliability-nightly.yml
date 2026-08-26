@@ -1,27 +1,29 @@
 # =============================================================================
-# PR: Unit Test — 单元测试运行
-#
-# 触发时机: 提交 PR 到 main 或 dev 分支时自动运行
-# 功能: 执行 Vite+ test，验证代码逻辑正确性
+# Milkdown Reliability — nightly cross-browser interaction and lifecycle stress
 # =============================================================================
 
-name: 'PR: Unit Test'
+name: 'Nightly: Milkdown Reliability'
 
 on:
-  pull_request:
-    branches: [main, dev]
+  schedule:
+    - cron: '23 18 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}
   cancel-in-progress: true
 
 jobs:
-  test:
+  browser-matrix:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
+    env:
+      MILKDOWN_BROWSER_MATRIX: '1'
+      MILKDOWN_STRESS_ROUNDS: '20'
+      MILKDOWN_HEAP_GATE: '1'
 
     steps:
       - uses: actions/checkout@v6
@@ -29,33 +31,26 @@ jobs:
         with:
           node-version-file: '.node-version'
           cache: true
-      - name: Use Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6
         with:
           node-version-file: '.node-version'
           cache: 'yarn'
       - name: Install dependencies
         run: vp install
 
-      - name: Test
-        run: vp run test
+      - name: Install Chromium, Firefox and WebKit
+        run: yarn playwright install --with-deps chromium firefox webkit
 
-      - name: Verify Milkdown published-package consumer
-        run: vp run -F @cherry-markdown/milkdown test:consumer
-
-      - name: Install Chromium
-        run: yarn playwright install --with-deps chromium
-
-      - name: Test Milkdown reliability in Chromium
+      - name: Run full Milkdown browser matrix
         run: vp run -F @cherry-markdown/milkdown test:e2e
 
-      - name: Upload Milkdown browser failure evidence
+      - name: Upload browser failure evidence
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: milkdown-chromium-failure-${{ github.run_attempt }}
+          name: milkdown-browser-matrix-failure-${{ github.run_attempt }}
           path: |
             packages/milkdown/test-results
             packages/milkdown/playwright-report
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 14

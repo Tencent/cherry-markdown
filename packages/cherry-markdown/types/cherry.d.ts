@@ -6,6 +6,12 @@ export interface CherryExternalsOptions {
   [key: string]: any;
 }
 
+/** Identifies a non-destructive editor update and its monotonic revision. */
+export interface CherryUpdateContext {
+  source?: string;
+  revision?: number;
+}
+
 /**
  * 自定义toolbar键名[key]
  */

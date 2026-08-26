@@ -14,6 +14,7 @@ Cherry Markdown 的 Milkdown 即见即所得扩展。推荐模式是把 Milkdown
 - TOC 自动跟随标题；frontmatter 和 comment reference 使用紧凑的原位源码节点，不显示字段表单或弹窗。
 - Mermaid 默认渲染为图形；PlantUML、ECharts 可通过 `renderers` 接入。源码只在用户主动选择后于节点内部展开。
 - HTML 使用无脚本权限的沙箱预览，并提供按需开启的节点内源码模式。
+- `:line:` 等表格图表直接复用 Cherry 原生 DOM 和 ECharts 生命周期；选中后只在当前节点内编辑完整 Markdown 源码。
 
 该包不会把 Cherry 扩展默认显示成 raw 源码卡片。业务自定义语法需要通过 Milkdown 插件提供 schema、parser、serializer 和 NodeView，未注册语法不宣称支持。
 
@@ -94,6 +95,17 @@ npx serve preview
 ```
 
 该 demo 复用仓库根 `examples/index.html` 的布局、配置、工具栏、主题、ECharts 插件和整份 Markdown 手册；业务接入上的唯一差异是增加 `extensions: [milkdown()]`。
+
+## 可靠性验证
+
+```sh
+yarn test
+yarn typecheck
+yarn test:consumer
+yarn test:e2e
+```
+
+单元测试与真实浏览器共享一份 Cherry 语法能力清单。Chromium PR 门禁覆盖表格图表、快速连续编辑、模式/API 交替更新、未聚焦像素对比和重复创建销毁；定时任务在 Chromium、Firefox 和 WebKit 运行 20 轮生命周期压力测试。失败会保留 trace、视频、截图、console、最终 Markdown 和动作序列。
 
 ## 当前边界
 

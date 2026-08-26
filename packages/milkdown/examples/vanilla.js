@@ -38,6 +38,7 @@ async function loadECharts() {
       components.DatasetComponent,
       components.TransformComponent,
       renderers.CanvasRenderer,
+      renderers.SVGRenderer,
       features.LabelLayout,
       features.UniversalTransition,
     ]);
@@ -71,6 +72,7 @@ async function renderECharts({ container, source }) {
 
 async function main() {
   window.Cherry = Cherry;
+  window.milkdown = milkdown;
   await Promise.all([loadECharts(), import('../../../examples/assets/scripts/pinyin/pinyin_dist.js')]);
   const { basicConfig } = await import('../../../examples/assets/scripts/index-demo.js');
 
@@ -78,8 +80,17 @@ async function main() {
     ...basicConfig,
     id: 'markdown',
     value: basicMd,
-    extensions: [milkdown({ renderers: { echarts: renderECharts } })],
+    extensions: [
+      milkdown({
+        debounce: 0,
+        renderers: { echarts: renderECharts },
+        onChange: ({ markdown }) => {
+          window.milkdownMarkdown = markdown;
+        },
+      }),
+    ],
   });
+  window.milkdownMarkdown = window.cherry.getMarkdown();
 }
 
 void main();

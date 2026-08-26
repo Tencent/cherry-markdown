@@ -14,6 +14,7 @@ A Milkdown WYSIWYG extension for Cherry Markdown. The recommended mode mounts Mi
 - A live TOC plus compact document metadata and reference nodes with no field forms or modal dialogs.
 - Mermaid renders by default. PlantUML and ECharts can use application renderers; source opens inside the selected node only when requested.
 - HTML uses a script-disabled sandbox preview and an opt-in inline source mode.
+- `:line:` and other table charts reuse Cherry's native DOM and ECharts lifecycle; selection opens the full Markdown source inside that node only.
 
 Cherry extensions are not presented as raw source cards. Business-specific syntax must provide a Milkdown schema, parser, serializer, and NodeView through a plugin; unregistered syntax is not claimed as supported.
 
@@ -94,6 +95,17 @@ npx serve preview
 ```
 
 The demo reuses Cherry's root `examples/index.html` layout, configuration, toolbar, theme, ECharts plugin, and full Markdown manual. Its only integration difference is `extensions: [milkdown()]`.
+
+## Reliability checks
+
+```sh
+yarn test
+yarn typecheck
+yarn test:consumer
+yarn test:e2e
+```
+
+Unit and real-browser tests share one typed Cherry syntax capability matrix. The Chromium PR gate covers table charts, rapid continuous editing, alternating mode/API updates, unfocused pixel comparison, and repeated mount/destroy. A scheduled Chromium, Firefox, and WebKit matrix runs 20 lifecycle stress rounds. Failures retain the trace, video, screenshots, console errors, final Markdown, and action sequence.
 
 ## Current boundary
 

@@ -7,10 +7,16 @@ export type CherryMilkdownErrorPhase = 'create' | 'parse' | 'render';
 
 export interface CherryEngineLike {
   makeHtml(markdown: string): string;
+  destroyRenderedContent?(container: Element): void;
 }
 
 export interface CherryMilkdownChange {
   markdown: string;
+}
+
+export interface CherryUpdateContext {
+  source?: string;
+  revision?: number;
 }
 
 export interface CherryMilkdownMathliveOptions {
@@ -33,12 +39,15 @@ export interface CherryMilkdownOptions {
   renderers?: Record<string, CherryVisualRenderer>;
   onChange?: (result: CherryMilkdownChange) => void;
   onError?: (error: unknown, phase: CherryMilkdownErrorPhase) => void;
+  /** @internal Immediate document synchronization used by the Cherry preview extension. */
+  onImmediateChange?: (result: CherryMilkdownChange) => void;
 }
 
 export interface CherryPreviewContentRendererContext {
   container: HTMLElement;
   markdown: string;
   html: string;
+  updateContext?: CherryUpdateContext;
 }
 
 export interface CherryPreviewContentRenderer {
@@ -48,7 +57,7 @@ export interface CherryPreviewContentRenderer {
 
 export interface CherryPreviewerHost {
   getDom(): HTMLElement;
-  update(html: string): void;
+  update(html: string, updateContext?: CherryUpdateContext): void;
   setContentRenderer(renderer: CherryPreviewContentRenderer): void;
   clearContentRenderer(renderer?: CherryPreviewContentRenderer): boolean;
   setEditingBridge?(bridge: CherryPreviewEditingBridge): void;
@@ -89,7 +98,7 @@ export interface CherryMilkdownHost {
   engine: CherryEngineLike;
   getMarkdown(): string;
   getPreviewer(): CherryPreviewerHost;
-  setValue(markdown: string, keepCursor?: boolean): void;
+  setValue(markdown: string, keepCursor?: boolean, updateContext?: CherryUpdateContext): void;
   getCodeMirror?(): { hasFocus: boolean };
 }
 

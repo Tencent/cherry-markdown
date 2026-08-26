@@ -128,7 +128,6 @@
 .cherry-wysiwyg-sub,
 .cherry-wysiwyg-sup,
 .cherry-wysiwyg-underline,
-.cherry-wysiwyg-highlight,
 .cherry-wysiwyg-ruby {
   border-radius: 2px;
 }
@@ -136,11 +135,6 @@
 .cherry-wysiwyg-underline {
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-.cherry-wysiwyg-highlight {
-  padding: 0 2px;
-  background: #fff1b8;
 }
 
 .cherry-wysiwyg-ruby {
@@ -376,6 +370,13 @@
   max-width: 100%;
   height: auto;
   margin: 0 auto;
+}
+
+/* ProseMirror uses pre-wrap on the editable document. Native Cherry HTML
+ * contains formatting whitespace between elements, which must collapse just
+ * as it does in the original previewer or it creates phantom blank lines. */
+.cherry-embed__preview {
+  white-space: normal;
 }
 
 .cherry-embed__controls {
@@ -630,11 +631,33 @@
   padding: 0;
 }
 
+.cherry-milkdown--previewer th > p,
+.cherry-milkdown--previewer td > p {
+  margin: 0;
+}
+
+/* Milkdown's GFM schema normalizes an omitted alignment to inline `left`.
+ * Cherry centers an unaligned header while keeping body cells left aligned. */
+.cherry-milkdown--previewer th[style*="text-align: left"] {
+  text-align: center !important;
+}
+
+/* Cherry wraps tables in `.cherry-table-container`, so its table bottom
+ * margin and the following panel top margin do not collapse. Milkdown keeps
+ * the editable table as a direct ProseMirror child; restore the same gap. */
+.cherry-milkdown--previewer .ProseMirror > table + .cherry-panel {
+  margin-top: calc(var(--spacing-lg) + 10px);
+}
+
 .cherry-milkdown--previewer .cherry-embed {
   margin: var(--spacing-lg) 0;
   padding: 0;
   border: 0;
   background: transparent;
+}
+
+.cherry-milkdown--previewer .cherry-embed--cherry_native_block {
+  margin: 0;
 }
 
 .cherry-milkdown--previewer math-field::part(menu-toggle),

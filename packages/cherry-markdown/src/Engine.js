@@ -472,4 +472,29 @@ export default class Engine {
       hook.clearCache && hook.clearCache();
     });
   }
+
+  /**
+   * Releases resources owned by rendered hooks inside a preview container.
+   * Renderers must be idempotent because partial preview updates may call this
+   * before nodes are actually removed.
+   * @param {Element} container
+   */
+  destroyRenderedContent(container) {
+    if (!container) return;
+    ['sentence', 'paragraph'].forEach((type) => {
+      this.hooks[type]?.forEach((hook) => hook.destroyRenderedContent?.(container));
+    });
+  }
+
+  /** Releases hook-level observers, timers and third-party instances. */
+  destroy() {
+    ['sentence', 'paragraph'].forEach((type) => {
+      this.hooks[type]?.forEach((hook) => hook.onDestroy?.());
+    });
+    if (this.timer) clearTimeout(this.timer);
+    if (this.clearCursorTimer) clearTimeout(this.clearCursorTimer);
+    this.timer = null;
+    this.clearCursorTimer = null;
+    this.clearCache();
+  }
 }

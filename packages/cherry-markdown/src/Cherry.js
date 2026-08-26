@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/** @typedef {import('~types/cherry').CherryUpdateContext} CherryUpdateContext */
 import mergeWith from '@/utils/toolkit/mergeWith';
 import cloneDeep from '@/utils/toolkit/cloneDeep';
 import Editor from './Editor';
@@ -311,6 +312,8 @@ export default class Cherry extends CherryStatic {
     if (this.editor) {
       this.editor.destroy();
     }
+    this.previewer?.destroy?.();
+    this.engine?.destroy?.();
 
     // 清理 DOM
     if (this.noMountEl) {
@@ -467,7 +470,11 @@ export default class Cherry extends CherryStatic {
    * @returns markdown源码内容
    */
   getValue() {
-    return this.lastMarkdownText || this.editor?.editor?.view?.state?.doc?.toString() || '';
+    // CodeMirror is the synchronous source of truth. lastMarkdownText is the
+    // last rendered snapshot and intentionally trails edits by the preview
+    // debounce interval, so preferring it makes rapid API reads appear to
+    // roll back even though the editor document already contains the change.
+    return this.editor?.editor?.view?.state?.doc?.toString() ?? this.lastMarkdownText ?? '';
   }
 
   /**
@@ -529,13 +536,14 @@ export default class Cherry extends CherryStatic {
    * 覆盖编辑区的内容
    * @param {string} content markdown内容
    * @param {boolean} [keepCursor=false] 是否保持光标位置
+   * @param {CherryUpdateContext} [updateContext] 更新来源和版本
    *
    * 协作场景说明：
    *  - keepCursor 为 true 时，底层会基于 fast-diff 计算最小变更集，并由 CodeMirror 6
    *    的 ChangeSet 机制自动映射当前光标/选区位置。
    */
-  setValue(content, keepCursor = false) {
-    this.editor.setValue(content, keepCursor);
+  setValue(content, keepCursor = false, updateContext) {
+    this.editor.setValue(content, keepCursor, updateContext);
   }
 
   /**
@@ -1065,7 +1073,7 @@ export default class Cherry extends CherryStatic {
   /**
    * 编辑器内容变更时触发,更新预览区内容
    * @private
-   * @param {Event} evt - 编辑事件对象(未使用)
+   * @param {Event & {updateContext?: {source?: string, revision?: number}}} evt - 编辑事件对象
    * @param {import('@codemirror/view').EditorView | Object} editorView - 编辑器实例
    */
   editText(evt, editorView) {
@@ -1092,10 +1100,11 @@ export default class Cherry extends CherryStatic {
         const markdownText = view.state.doc.toString();
         this.lastMarkdownText = markdownText;
         const html = this.engine.makeHtml(markdownText);
-        this.previewer.update(html);
+        this.previewer.update(html, evt?.updateContext);
         this.$event.emit('afterChange', {
           markdownText,
           html,
+          updateContext: evt?.updateContext,
         });
       }, interval);
     } catch (e) {

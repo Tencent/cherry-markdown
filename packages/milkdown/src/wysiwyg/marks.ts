@@ -124,7 +124,7 @@ export const cherryWysiwygMarkSchemas = definitions.map((definition) =>
     toMarkdown: {
       match: (mark) => mark.type.name === definition.name,
       runner: (state, mark, node) => {
-        state.addNode('text', undefined, definition.serialize(node.textContent, mark.attrs as MarkAttrs));
+        state.addNode(definition.mdastType, undefined, node.textContent, { ...mark.attrs });
         return true;
       },
     },

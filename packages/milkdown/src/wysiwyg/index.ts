@@ -7,6 +7,8 @@ export {
   cherryCompoundItemSchema,
   cherryDetailSchema,
   cherryDiagramSchema,
+  cherryTableChartSchema,
+  cherryNativeBlockSchema,
   cherryEmojiSchema,
   cherryFrontmatterSchema,
   cherryHtmlBlockSchema,

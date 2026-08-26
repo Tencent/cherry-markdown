@@ -10,6 +10,12 @@ import { cherryToolbar } from './toolbar.js';
 
 interface MarkdownState {
   containerFlow(node: MarkdownNode, info: unknown): string;
+  containerPhrasing(node: MarkdownNode, info: unknown): string;
+}
+
+function markHandler(open: (node: MarkdownNode) => string, close: string) {
+  return (node: MarkdownNode, _parent: MarkdownNode, state: MarkdownState, info: unknown) =>
+    `${open(node)}${node.value ?? state.containerPhrasing(node, info)}${close}`;
 }
 
 function normalize(value: string) {
@@ -21,14 +27,26 @@ const customMarkdownPlugin: RemarkPluginRaw<unknown> = function customMarkdownPl
   const extensions = (data.toMarkdownExtensions ??= []) as Array<Record<string, unknown>>;
   extensions.push({
     handlers: {
+      break: () => '  \n',
       cherryToc: (node: MarkdownNode) => String(node.source ?? '[[toc]]'),
       cherryFrontmatter: (node: MarkdownNode) => String(node.source ?? '---\n---'),
       cherryCommentDefinition: (node: MarkdownNode) => String(node.source ?? ''),
       cherryDiagram: (node: MarkdownNode) => String(node.source ?? ''),
+      cherryTableChart: (node: MarkdownNode) => String(node.source ?? ''),
+      cherryNativeBlock: (node: MarkdownNode) => String(node.source ?? ''),
       cherryHtmlBlock: (node: MarkdownNode) => String(node.source ?? node.value ?? ''),
       cherryHtmlInline: (node: MarkdownNode) => String(node.source ?? node.value ?? ''),
       cherryEmoji: (node: MarkdownNode) => String(node.source ?? node.value ?? ''),
       cherryLinkTarget: (node: MarkdownNode) => String(node.source ?? ''),
+      cherry_background_color: markHandler((node) => `!!!${String(node.color ?? '')} `, '!!!'),
+      cherry_color: markHandler((node) => `!!${String(node.color ?? '')} `, '!!'),
+      cherry_font_size: markHandler((node) => `!${String(node.size ?? '')} `, '!'),
+      cherry_subscript: markHandler(() => '^^', '^^'),
+      cherry_superscript: markHandler(() => '^', '^'),
+      cherry_ruby: (node: MarkdownNode, _parent: MarkdownNode, state: MarkdownState, info: unknown) =>
+        `{${node.value ?? state.containerPhrasing(node, info)}|${String(node.annotation ?? '')}}`,
+      cherry_underline: markHandler(() => '/', '/'),
+      cherry_highlight: markHandler(() => '==', '=='),
       cherryCompoundItem: (node: MarkdownNode, _parent: MarkdownNode, state: MarkdownState, info: unknown) => {
         const body = state.containerFlow(node, info).trim();
         const role = String(node.role ?? '');
@@ -54,9 +72,9 @@ const customMarkdownPlugin: RemarkPluginRaw<unknown> = function customMarkdownPl
     },
   });
   return (tree, file) => {
-    const parse = (source: string) => {
+    const parse = (source: string, options?: { supplementalDefinitions?: boolean }) => {
       const parsed = this.parse(source) as MarkdownNode;
-      transformCherryWysiwygTree(parsed, source, parse);
+      transformCherryWysiwygTree(parsed, source, parse, options);
       return parsed.children ?? [];
     };
     transformCherryWysiwygTree(tree as MarkdownNode, String(file.value), parse);
