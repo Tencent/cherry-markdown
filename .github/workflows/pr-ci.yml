@@ -49,11 +49,45 @@ jobs:
       - name: Lint
         run: vp run lint
 
+      - name: Package boundaries
+        run: vp run check:boundaries
+
       - name: Typecheck
         run: vp run typecheck
 
       - name: Build
         run: vp run build
 
+      - name: Verify new package demos
+        run: vp run verify:demos
+
+      - name: Verify package artifacts
+        run: vp run verify:packages
+
       - name: Verify Cherry Markdown published artifacts
         run: vp run -F cherry-markdown test:artifacts
+
+      - name: Cache Playwright Chromium
+        if: matrix.node-version == '22.x'
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-1.62.1
+
+      - name: Install Chromium
+        if: matrix.node-version == '22.x'
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser package acceptance
+        if: matrix.node-version == '22.x'
+        run: vp run test:browser
+
+      - name: Upload browser failure evidence
+        if: failure() && matrix.node-version == '22.x'
+        uses: actions/upload-artifact@v6
+        with:
+          name: browser-acceptance-${{ matrix.node-version }}
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore

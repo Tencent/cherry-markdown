@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@cherry-markdown/stream — 流式渲染 Demo</title>
+    <style>
+      html, body { margin: 0; padding: 0; font-family: -apple-system, "PingFang SC", sans-serif; background: #f5f6f8; }
+      .header { padding: 16px 24px; background: #fff; border-bottom: 1px solid #e5e6eb; }
+      .header h1 { margin: 0; font-size: 20px; }
+      .header p { margin: 6px 0 0; color: #888; font-size: 13px; }
+      .container { display: flex; gap: 16px; padding: 24px; }
+      .panel { flex: 1; background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+      .panel h2 { margin-top: 0; font-size: 15px; color: #555; }
+      #markdown { width: 100%; min-height: 480px; border: 1px solid #e5e6eb; border-radius: 6px; padding: 12px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 14px; box-sizing: border-box; resize: vertical; }
+      .cherry-previewer { border-left: 1px solid #f0f0f0; padding-left: 16px; }
+      .actions { margin-bottom: 12px; }
+      .actions button { margin-right: 8px; padding: 6px 14px; border: none; border-radius: 6px; background: #1677ff; color: #fff; cursor: pointer; }
+      .actions button.secondary { background: #f0f0f0; color: #333; }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>@cherry-markdown/stream · 流式渲染</h1>
+      <p>基于 @cherry-markdown/engine 解析 + @cherry-markdown/preview 纯预览，适用于 AI Token 流式渲染场景。</p>
+    </div>
+    <div class="container">
+      <div class="panel">
+        <h2>Markdown 输入</h2>
+        <div class="actions">
+          <button id="btn-render">渲染</button>
+          <button id="btn-stream" class="secondary">模拟流式输出</button>
+        </div>
+        <textarea id="markdown"># 你好，Cherry
+
+**流式渲染** 演示页面。
+
+- 列表项一
+- 列表项二
+
+\`\`\`js
+const hello = 'world';
+console.log(hello);
+\`\`\`
+
+> 这是一段引用。</textarea>
+      </div>
+      <div class="panel">
+        <h2>预览区</h2>
+        <div id="preview"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import CherryStream from '../../stream/dist/cherry-markdown-stream.esm.js';
+
+      const textarea = document.getElementById('markdown');
+      const preview = document.getElementById('preview');
+
+      const stream = new CherryStream({
+        el: preview,
+        forceAppend: true,
+        value: textarea.value,
+      });
+
+      document.getElementById('btn-render').addEventListener('click', () => {
+        stream.setValue(textarea.value);
+      });
+
+      document.getElementById('btn-stream').addEventListener('click', () => {
+        const text = textarea.value;
+        let i = 0;
+        stream.setValue('');
+        const timer = setInterval(() => {
+          i += 3;
+          stream.setValue(text.slice(0, i));
+          if (i >= text.length) clearInterval(timer);
+        }, 30);
+      });
+    </script>
+  </body>
+</html>

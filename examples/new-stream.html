@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>【new】Stream 独立包</title>
+    <style>
+      body { max-width: 900px; margin: 32px auto; padding: 0 20px; font: 14px/1.6 system-ui; }
+      #preview { min-height: 360px; padding: 16px; border: 1px solid #ddd; }
+      button { margin-right: 8px; } .status { color: #087443; }
+    </style>
+  </head>
+  <body>
+    <h1>【new】@cherry-markdown/stream</h1>
+    <p>逐字符覆盖未闭合强调、链接、表格和代码块，并检查最终 HTML 收敛。</p>
+    <button id="start">开始</button><button id="stop">暂停</button><button id="finish">立即完成</button>
+    <p id="status" class="status"></p><div id="preview"></div>
+    <script type="module">
+      import CherryStream from '@cherry-markdown/stream';
+
+      const markdown = `# Stream\n\n未闭合到闭合：**strong** 和 [link](https://example.com)\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n\n\`\`\`js\nconst ready = true;\n\`\`\``;
+      const stream = new CherryStream({ el: document.querySelector('#preview'), forceAppend: true });
+      window.__cherryNewDemo = { stream, markdown };
+      const status = document.querySelector('#status');
+      let cursor = 0;
+      let timer;
+      const update = () => {
+        stream.setMarkdown(markdown.slice(0, cursor));
+        status.textContent = `【new】${cursor}/${markdown.length}，TOC=${stream.getToc().length}，HTML=${stream.getHtml().length}`;
+        document.body.dataset.demoReady = 'true';
+      };
+      document.querySelector('#start').addEventListener('click', () => {
+        clearInterval(timer);
+        timer = setInterval(() => { cursor = Math.min(cursor + 1, markdown.length); update(); if (cursor === markdown.length) clearInterval(timer); }, 24);
+      });
+      document.querySelector('#stop').addEventListener('click', () => clearInterval(timer));
+      document.querySelector('#finish').addEventListener('click', () => { clearInterval(timer); cursor = markdown.length; update(); });
+      update();
+    </script>
+  </body>
+</html>

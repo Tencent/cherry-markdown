@@ -16,7 +16,7 @@
 import Cherry from './Cherry';
 import MermaidCodeEngine from '@/addons/cherry-code-block-mermaid-plugin';
 
-import SyntaxHookBase from './core/SyntaxBase';
+import { SyntaxHookBase } from '@cherry-markdown/engine';
 import MenuHookBase from './toolbars/MenuBase';
 
 export { SyntaxHookBase, MenuHookBase, MermaidCodeEngine, MermaidCodeEngine as MermaidPlugin };

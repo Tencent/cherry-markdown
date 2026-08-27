@@ -33,7 +33,7 @@
     "iconfont": "node build/run-iconfont.js",
     "dev": "vp dev",
     "dev:vite": "vp dev",
-    "build": "vp run clean && vp run build:all",
+    "build": "vp run -F @cherry-markdown/engine build && vp run -F @cherry-markdown/preview build && vp run -F @cherry-markdown/stream build && vp run clean && vp run build:all",
     "build:all": "vp run iconfont && vp run build:styles && vp run build:types && vp run build:addons && vp run build:full",
     "build:full": "NODE_ENV=production node build/vite.build.js",
     "build:core": "NODE_ENV=production node build/vite.build.js",
@@ -44,10 +44,10 @@
     "build:styles": "NODE_ENV=production node build/styles.build.js",
     "clean": "rimraf ./dist",
     "check-bundle": "es-check es5 dist/cherry-markdown.js",
-    "test": "vp test --exclude test/build/built-artifact-contract.spec.js",
-    "test:artifacts": "vp test run test/build/built-artifact-contract.spec.js",
-    "test:coverage": "COVERAGE_THRESHOLDS=true vp test run --coverage --exclude test/build/built-artifact-contract.spec.js",
-    "test:update": "vp test -u --exclude test/build/built-artifact-contract.spec.js",
+    "test": "vp test --exclude test/build/built-artifact-contract.spec.js --exclude test/build/legacy-equivalence.spec.js",
+    "test:artifacts": "vp test run test/build/built-artifact-contract.spec.js test/build/legacy-equivalence.spec.js",
+    "test:coverage": "COVERAGE_THRESHOLDS=true vp test run --coverage --exclude test/build/built-artifact-contract.spec.js --exclude test/build/legacy-equivalence.spec.js",
+    "test:update": "vp test -u --exclude test/build/built-artifact-contract.spec.js --exclude test/build/legacy-equivalence.spec.js",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project test/tsconfig.json --noEmit",
     "examples": "serve -p 3000 ."
   },
@@ -84,6 +84,8 @@
     "virtual-dom": "^2.1.1"
   },
   "dependencies": {
+    "@cherry-markdown/engine": "^0.0.1",
+    "@cherry-markdown/preview": "^0.0.1",
     "@codemirror/autocomplete": "^6.18.6",
     "@codemirror/commands": "^6.8.1",
     "@codemirror/lang-markdown": "^6.3.2",

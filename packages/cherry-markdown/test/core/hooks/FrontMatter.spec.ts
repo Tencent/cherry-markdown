@@ -8,9 +8,9 @@ function createFrontMatter() {
   Object.defineProperty(hook, '$engine', {
     value: {
       hash: (value: string) => hashHex(value),
-      $cherry: {
-        previewer: {
-          getDom: () => previewer,
+      runtime: {
+        onFrontMatter: (frontmatter: Record<string, string>) => {
+          previewer.style.fontSize = frontmatter['font-size'] || frontmatter.fontSize;
         },
       },
     },

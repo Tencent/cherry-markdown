@@ -1,0 +1,479 @@
+/**
+ * Copyright (C) 2021 Tencent.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import HookCenter from './syntax/HookCenter';
+import hooksConfig from './syntax/HooksConfig';
+import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './utils/error';
+import { hashHex } from './utils/hash';
+import SyntaxBase from './syntax/SyntaxBase';
+import ParagraphBase from './syntax/ParagraphBase';
+import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg, getCodeBlockRule } from './utils/regexp';
+import { escapeHTMLSpecialChar } from './utils/sanitize';
+import Logger from './Logger';
+import AsyncRenderHandler from './utils/async-render-handler';
+import UrlCache from './UrlCache';
+import htmlParser from './utils/htmlparser';
+import * as htmlparser2 from 'htmlparser2';
+import LRUCache from './utils/LRUCache';
+import { initMathEngines } from './utils/math-loader';
+
+export default class Engine {
+  /**
+   *
+   * @param {import('../types/engine').EngineOptions} markdownParams normalized engine options
+   * @param {import('../types/runtime').EngineRuntimeAdapter} [runtime] optional host adapter
+   */
+  constructor(markdownParams, runtime = {}) {
+    this.runtime = runtime;
+    // Hooks still receive the historical host shape in 0.x. New consumers only
+    // receive a minimal option/locale facade and never a UI host.
+    this.$cherry = runtime.legacyHost || {
+      options: markdownParams,
+      getLocales: runtime.getLocales || (() => ({})),
+    };
+    // Deprecated
+    Object.defineProperty(this, '_cherry', {
+      get() {
+        Logger.warn('`_engine._cherry` is deprecated. Use `$engine.$cherry` instead.');
+        return this.$cherry;
+      },
+    });
+    this.initMath(markdownParams);
+    this.$configInit(markdownParams);
+    const syntaxHookAdapters = runtime.syntaxHooks || {};
+    const activeHooksConfig = hooksConfig.map((HookClass) => syntaxHookAdapters[HookClass.HOOK_NAME] || HookClass);
+    this.hookCenter = new HookCenter(activeHooksConfig, markdownParams, this.$cherry);
+    this.hooks = this.hookCenter.getHookList();
+    this.asyncRenderHandler = new AsyncRenderHandler(runtime, markdownParams);
+    // 使用LRU缓存替代普通对象
+    this.hashCache = new LRUCache(20000); // 缓存最多20000个渲染结果
+    this.hashStrMap = new LRUCache(2000); // 缓存最多2000个哈希值
+    this.cachedBigData = {};
+    this.urlProcessorMap = {};
+
+    this.markdownParams = markdownParams;
+    this.currentStrMd5 = [];
+    this.globalConfig = markdownParams.engine.global;
+    this.htmlWhiteListAppend = this.globalConfig.htmlWhiteList;
+    this.htmlBlackList = this.globalConfig.htmlBlackList;
+  }
+
+  /**
+   * 重新生成html
+   * 这是为urlProcessor支持异步回调函数而实现的重新生成html的方法
+   * 该方法会清空所有缓存，所以降低了该方法的执行频率，1s内最多执行一次
+   */
+  reMakeHtml() {
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+    this.timer = setTimeout(() => {
+      this.hashCache.clear();
+      const markdownText = this.runtime.getMarkdown?.() || '';
+      const html = this.makeHtml(markdownText);
+      this.runtime.onHtmlChange?.({ markdownText, html });
+    }, 1000);
+  }
+
+  urlProcessor(url, srcType) {
+    const key = `${srcType}_${url}`;
+    if (this.urlProcessorMap[key]) {
+      return this.urlProcessorMap[key];
+    }
+    let originUrl = this.$decodeReservedKeywords(url);
+    originUrl = originUrl.replace(/&amp;/g, '&');
+    const ret = this.markdownParams.callback.urlProcessor(originUrl, srcType, (/** @type {string} */ newUrl) => {
+      if (newUrl) {
+        if (!this.urlProcessorMap[key]) {
+          this.urlProcessorMap[key] = newUrl;
+          this.reMakeHtml();
+        }
+      } else {
+        delete this.urlProcessorMap[key];
+      }
+      return;
+    });
+    if (ret && ret !== originUrl) {
+      return ret;
+    }
+    return url;
+  }
+
+  initMath(opts) {
+    initMathEngines(this, opts);
+  }
+
+  $configInit(params) {
+    if (params.hooksConfig && $expectTarget(params.hooksConfig.hooksList, Array)) {
+      for (let key = 0; key < params.hooksConfig.hooksList.length; key++) {
+        const hook = params.hooksConfig.hooksList[key];
+        try {
+          if (hook.getType() === 'sentence') {
+            $expectInherit(hook, SyntaxBase);
+          }
+
+          if (hook.getType() === 'paragraph') {
+            $expectInherit(hook, ParagraphBase);
+          }
+          $expectInstance(hook);
+          hooksConfig.push(hook);
+        } catch {
+          throw new Error('the hook does not correctly inherit');
+        }
+      }
+    }
+  }
+
+  $prepareMakeHtml(md) {
+    this.asyncRenderHandler.clear();
+    this.asyncRenderHandler.handleSyncRenderStart(md);
+  }
+
+  $completeMakeHtml(md) {
+    this.asyncRenderHandler.handleSyncRenderCompleted(md);
+  }
+
+  $beforeMakeHtml(str) {
+    let $str = this.$encodeReservedKeywords(str);
+    $str = $str.replace(/\r\n/g, '\n'); // DOS to Unix
+    $str = $str.replace(/\r/g, '\n'); // Mac to Unix
+    // 避免正则性能问题，如/.+\n/.test(' '.repeat(99999)), 回溯次数过多
+    // 参考文章：http://www.alloyteam.com/2019/07/13574/
+    if ($str[$str.length - 1] !== '\n') {
+      $str += '\n';
+    }
+    $str = this.$fireHookAction($str, 'sentence', 'beforeMakeHtml');
+    $str = this.$fireHookAction($str, 'paragraph', 'beforeMakeHtml', this.$dealSentenceByCache.bind(this));
+    return $str;
+  }
+
+  dealAfterMakeHtml(str) {
+    let $str = str.replace(/\\<\//g, '\\ </');
+    $str = $str
+      .replace(new RegExp(`\\\\(${PUNCTUATION})`, 'g'), (match, escapeChar) => {
+        if (escapeChar === '&') {
+          // & 字符需要特殊处理
+          return match;
+        }
+        return escapeHTMLSpecialChar(escapeChar);
+      })
+      .replace(/\\&(?!(amp|lt|gt|quot|apos);)/g, () => '&amp;');
+    $str = $str.replace(/\\ <\//g, '\\</');
+    $str = $str.replace(/id="safe_(?=.*?")/g, 'id="'); // transform header id to avoid being sanitized
+    return $str;
+  }
+
+  // 替换预留关键字
+  $encodeReservedKeywords(str) {
+    return str.replace(/[~$]/g, (ch) => (ch === '~' ? '~T' : '~D'));
+  }
+
+  // 还原预留关键字
+  $decodeReservedKeywords(str) {
+    return str.replace(/~D/g, '$').replace(/~T/g, '~');
+  }
+
+  $afterMakeHtml(str) {
+    let $str = this.$fireHookAction(str, 'paragraph', 'afterMakeHtml', this.$dealSentenceByCache.bind(this));
+    // str = this.fireHookAction(str, 'sentence', 'afterMakeHtml');
+    $str = this.dealAfterMakeHtml($str);
+    $str = UrlCache.restoreAll($str);
+    $str = this.$decodeReservedKeywords($str);
+    return $str;
+  }
+
+  $dealSentenceByCache(md) {
+    return this.$checkCache(md, (str) => this.$dealSentence(str));
+  }
+
+  $dealSentence(md) {
+    return this.$fireHookAction(md, 'sentence', 'makeHtml', this.$dealSentenceByCache.bind(this));
+  }
+
+  $fireHookAction(md, type, action, actionArgs) {
+    let $md = md;
+    const before = actionArgs?.before || '';
+    const method = action === 'afterMakeHtml' ? 'reduceRight' : 'reduce';
+    if (!this.hooks || !this.hooks[type] || !this.hooks[type][method]) {
+      return $md;
+    }
+    try {
+      let canContinue = true;
+      $md = this.hooks[type][method]((newMd, oneHook) => {
+        if (!canContinue) {
+          return newMd;
+        }
+        if (!oneHook.$engine) {
+          oneHook.$engine = this;
+          // Deprecated
+          Object.defineProperty(oneHook, '_engine', {
+            get() {
+              Logger.warn('`this._engine` is deprecated. Use `this.$engine` instead.');
+              return this.$engine;
+            },
+          });
+        }
+
+        if (!oneHook[action]) {
+          return newMd;
+        }
+        // 特殊处理：引用语法在实现嵌套引用时，需要将引用语法之前的语法进行执行，但不需要执行引用语法之后的语法
+        if (before && type === 'paragraph' && action === 'afterMakeHtml') {
+          if (oneHook.getName() === before) {
+            canContinue = false;
+          }
+        }
+        // const time = Date.now();
+        const ret = oneHook[action](newMd, actionArgs, this.markdownParams);
+        // const cost = Date.now() - time;
+        // if (cost > 50) {
+        //   console.log(`hook ${oneHook.getName()} ${action} cost ${Date.now() - time}ms`);
+        // }
+        return ret;
+      }, $md);
+    } catch (e) {
+      throw new NestedError(e);
+    }
+    return $md;
+  }
+
+  /**
+   * @deprecated 已废弃，推荐使用 .hash()
+   */
+  md5(str) {
+    return this.hash(str);
+  }
+
+  /**
+   * @deprecated 历史 API：原本基于 CryptoJS.SHA256 输出 64 位 hex。现已替换为
+   * 轻量非加密 hash（xxHash32 双通道，输出 16 位 hex），仅用于缓存键、
+   * 内部链接占位等场景。如有真实加密签名需求，请勿使用此方法。
+   */
+  sha256(str) {
+    return hashHex(str);
+  }
+
+  hashHex(str) {
+    return hashHex(str);
+  }
+
+  /**
+   * 计算哈希值（非加密，用于缓存键）
+   * @param {String} str 被计算的字符串
+   * @returns {String} 哈希值（16 位小写 hex）
+   */
+  hash(str) {
+    const cached = this.hashStrMap.get(str);
+    if (cached !== undefined) {
+      return cached;
+    }
+    const sign = hashHex(str);
+    this.hashStrMap.set(str, sign);
+    return sign;
+  }
+
+  $checkCache(str, func) {
+    const sign = this.hash(str);
+    if (typeof this.hashCache.get(sign) === 'undefined') {
+      this.hashCache.set(sign, func(str));
+      if (BUILD_ENV !== 'production') {
+        // 生产环境屏蔽
+        Logger.log('markdown引擎渲染了：', str);
+      }
+    }
+    return { sign, html: this.hashCache.get(sign) };
+  }
+
+  $dealParagraph(md) {
+    return this.$fireHookAction(md, 'paragraph', 'makeHtml', this.$dealSentenceByCache.bind(this));
+  }
+
+  // 缓存大文本数据，用以提升渲染性能
+  $cacheBigData(md) {
+    // 暂存所有代码块
+    const codeBlocks = [];
+    let $md = md.replace(getCodeBlockRule().reg, (whole, m1, m2) => {
+      const cacheKey = `codeBlockBegin${codeBlocks.length}codeBlockEnd`;
+      codeBlocks.push(whole);
+      return cacheKey;
+    });
+
+    $md = $md.replace(base64Reg, (dataUri) => {
+      const cacheKey = `bigDataBegin${this.hash(dataUri)}bigDataEnd`;
+      this.cachedBigData[cacheKey] = dataUri;
+      return cacheKey;
+    });
+    $md = $md.replace(imgBase64Reg, (whole, m1, m2) => {
+      const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
+      this.cachedBigData[cacheKey] = m2;
+      return `${m1}${cacheKey})`;
+    });
+    $md = $md.replace(imgDrawioXmlReg, (whole, m1, m2) => {
+      const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
+      this.cachedBigData[cacheKey] = m2;
+      return `${m1}${cacheKey}}`;
+    });
+
+    const tmpArr = $md.split(/\n/);
+    for (let i = 0; i < tmpArr.length; i++) {
+      if (tmpArr[i].length > 6000) {
+        tmpArr[i] = tmpArr[i].replace(longTextReg, (whole) => {
+          const cacheKey = `bigDataBegin${this.hash(whole)}bigDataEnd`;
+          this.cachedBigData[cacheKey] = whole;
+          return cacheKey;
+        });
+      }
+    }
+    $md = tmpArr.join('\n');
+    // 恢复所有代码块
+    $md = $md.replace(/codeBlockBegin(\d+)codeBlockEnd/g, (whole, index) => codeBlocks[index] ?? '');
+    return $md;
+  }
+
+  /**
+   * @param {string} md
+   */
+  $deCacheBigData(md) {
+    return md.replace(/bigDataBegin[^\n]+?bigDataEnd/g, (whole) => {
+      // 未命中缓存时（如用户原文中恰好包含该形态的文本）保留原文，避免被替换成 "undefined"
+      return this.cachedBigData[whole] ?? whole;
+    });
+  }
+
+  /**
+   * 流式输出场景时，在最后增加一个光标占位
+   * @param {string} md 内容
+   * @returns {string}
+   */
+  $setFlowSessionCursorCache(md, forceNoCursor = false) {
+    if (forceNoCursor) {
+      return md;
+    }
+    if (this.globalConfig.flowSessionContext && this.globalConfig.flowSessionCursor) {
+      // 为了不破坏加粗、斜体等语法，光标占位符放在加粗、斜体语法后面
+      if (/[*_~^]+\n*$/.test(md)) {
+        return md.replace(/([*_~^]+\n*)$/, 'CHERRYFLOWSESSIONCURSOR$1');
+      }
+      // 针对信息面板和手风琴做特殊处理
+      if (/:::\s*\n*$/.test(md) || /\+\+[+-]*\s*\n*$/.test(md)) {
+        return md;
+      }
+      // 针对代码块做特殊处理
+      if (/\n\s*`{1,}\s*\n*$/.test(md)) {
+        return md.replace(/(\n\s*`{1,}\s*\n*)$/, 'CHERRYFLOWSESSIONCURSOR$1');
+      }
+      // 针对无序列表做特殊处理
+      if (/\n\s*[-*]$/.test(md)) {
+        return md.replace(/(\n\s*[-*])$/, 'CHERRYFLOWSESSIONCURSOR$1');
+      }
+      // 针对表格做特殊处理
+      // 针对表格的第二行做特殊处理
+      if (/\|[\s-:]+\|*\n*$/.test(md)) {
+        return md;
+      }
+      if (/\|\n*$/.test(md)) {
+        return md.replace(/(\|\n*)$/, 'CHERRYFLOWSESSIONCURSOR$1');
+      }
+      // 针对换行符做特殊处理
+      if (/\n+$/.test(md)) {
+        return md.replace(/(\n+)$/, 'CHERRYFLOWSESSIONCURSOR$1');
+      }
+      return `${md}CHERRYFLOWSESSIONCURSOR`;
+    }
+    return md;
+  }
+
+  /**
+   * 流式输出场景时，把最后的光标占位替换为配置的dom元素，并在一段时间后删除该元素
+   * @param {string} md 内容
+   * @returns {string}
+   */
+  $clearFlowSessionCursorCache(md) {
+    if (this.globalConfig.flowSessionCursor) {
+      if (this.clearCursorTimer) {
+        clearTimeout(this.clearCursorTimer);
+      }
+      if (typeof this.runtime.clearFlowSessionCursor === 'function') {
+        this.clearCursorTimer = setTimeout(() => {
+          this.runtime.clearFlowSessionCursor();
+        }, 2560);
+      }
+      return md.replace(/CHERRYFLOWSESSIONCURSOR/g, this.globalConfig.flowSessionCursor);
+    }
+    return md;
+  }
+
+  /**
+   * @param {string} md md字符串
+   * @param {'string'|'object'} returnType 返回格式，string：返回html字符串，object：返回结构化数据
+   * @param {boolean} forceNoCursor 是否强制不添加光标占位
+   * @returns {string|object} 获取html
+   */
+  makeHtml(md, returnType = 'string', forceNoCursor = false) {
+    this.$prepareMakeHtml(md);
+    let $md = this.$setFlowSessionCursorCache(md, forceNoCursor);
+    $md = this.$cacheBigData($md);
+    $md = this.$beforeMakeHtml($md);
+    $md = this.$dealParagraph($md);
+    $md = this.$afterMakeHtml($md);
+    this.$fireHookAction($md, 'paragraph', '$cleanCache');
+    $md = this.$deCacheBigData($md);
+    $md = this.$clearFlowSessionCursorCache($md);
+    this.$completeMakeHtml($md);
+    if (returnType === 'object') {
+      return htmlparser2.parseDocument($md.replace(/\n/g, ''));
+    }
+    return $md;
+  }
+
+  makeHtmlForBlockquote(md) {
+    let $md = md;
+    $md = this.$dealParagraph($md);
+    $md = this.$fireHookAction($md, 'paragraph', 'afterMakeHtml', { before: 'blockquote' });
+    return $md;
+  }
+
+  makeHtmlForFootnote(md) {
+    let $md = md;
+    $md = this.$dealParagraph($md);
+    $md = this.$fireHookAction($md, 'paragraph', 'afterMakeHtml', { before: 'footnote' });
+    return $md;
+  }
+
+  mounted() {
+    this.$fireHookAction('', 'sentence', 'mounted');
+    this.$fireHookAction('', 'paragraph', 'mounted');
+    // UrlCache.clear();
+  }
+
+  /**
+   * @param {string} html html字符串
+   * @returns {string} 获取markdown
+   */
+  makeMarkdown(html) {
+    return htmlParser.run(html);
+  }
+
+  /**
+   * 清理engine的缓存
+   */
+  clearCache() {
+    this.hooks.paragraph?.forEach((hook) => {
+      // @ts-ignore
+      hook.clearCache && hook.clearCache();
+    });
+  }
+}

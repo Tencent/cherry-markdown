@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-import ParagraphBase from '@/core/ParagraphBase';
+import { ParagraphBase } from '@cherry-markdown/engine';
 /**
  * [TAPD](https://tapd.cn)的html块语法
  * 被[html]**[/html]包裹的内容不会进行任何markdown引擎渲染而直接加载到预览区

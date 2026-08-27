@@ -17,14 +17,15 @@
  * 本文件主要维护导出Cherry时需要附加在Cherry对象上的静态属性集合
  * 所有的具名导出都会挂载在Cherry或CherryEngine上
  */
-import { HOOKS_TYPE_LIST } from './core/SyntaxBase';
-import { createSyntaxHook, createMenuHook } from './Factory';
+import { HOOKS_TYPE_LIST, createSyntaxHook } from '@cherry-markdown/engine';
+import { createMenuHook } from './Factory';
 import TapdTablePlugin from './addons/advance/cherry-tapd-table-plugin';
 import TapdHtmlTagPlugin from './addons/advance/cherry-tapd-html-tag-plugin';
 import TapdCheckListPlugin from './addons/advance/cherry-tapd-checklist-plugin';
 import EChartsCodeBlockEngine from './addons/advance/cherry-codeblock-echarts-plugin';
 import { isBrowser } from './utils/env';
 
+/** @type {Record<string, any>} */
 const constants = { HOOKS_TYPE_LIST };
 
 const plugins = {

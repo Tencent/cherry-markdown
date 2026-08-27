@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vite-plus/test';
-import HookCenter from '../../src/core/HookCenter';
-import SyntaxBase from '../../src/core/SyntaxBase';
-import ParagraphBase from '../../src/core/ParagraphBase';
-import Logger from '@/Logger';
+import HookCenter from '../../../engine/src/syntax/HookCenter';
+import SyntaxBase from '../../../engine/src/syntax/SyntaxBase';
+import ParagraphBase from '../../../engine/src/syntax/ParagraphBase';
+import Logger from '../../../engine/src/Logger';
 import { assignHookClassProps } from '../helpers/hookClass';
 
 // 返回值常量
@@ -10,7 +10,7 @@ const WARN_DUPLICATED = -1;
 const WARN_NOT_A_VALID_HOOK = -2;
 
 // Mock Logger
-vi.mock('@/Logger', () => ({
+vi.mock('../../../engine/src/Logger', () => ({
   default: {
     warn: vi.fn(),
   },

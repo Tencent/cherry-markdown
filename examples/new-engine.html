@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>【new】Engine 独立包</title>
+    <style>
+      body { max-width: 1080px; margin: 32px auto; padding: 0 20px; font: 14px/1.6 system-ui; }
+      main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      textarea, pre { box-sizing: border-box; width: 100%; min-height: 360px; padding: 16px; border: 1px solid #ddd; }
+      pre { margin: 0; overflow: auto; white-space: pre-wrap; background: #f7f8fa; }
+      .status { color: #087443; }
+    </style>
+  </head>
+  <body>
+    <h1>【new】@cherry-markdown/engine</h1>
+    <p>只验证 Markdown → HTML、Hook 和 Sanitizer，不创建编辑器或预览 DOM。</p>
+    <p id="status" class="status"></p>
+    <main><textarea id="markdown"># Engine
+
+**单一解析源码**
+
+<script>alert('removed')</script></textarea><pre id="html"></pre></main>
+    <script type="module">
+      import CherryEngine, { createSyntaxHook } from '@cherry-markdown/engine';
+
+      const MarkHook = createSyntaxHook('newDemoMark', 'sentence', {
+        rule: () => ({ reg: /==(.+?)==/g }),
+        makeHtml: (text) => text.replace(/==(.+?)==/g, '<mark>$1</mark>'),
+      });
+      const engine = new CherryEngine({ engine: { customSyntax: { MarkHook } } });
+      window.__cherryNewDemo = { engine };
+      const markdown = document.querySelector('#markdown');
+      const output = document.querySelector('#html');
+      const render = () => {
+        output.textContent = engine.makeHtml(`${markdown.value}\n\n==custom hook==`);
+        document.querySelector('#status').textContent = '【new】Engine 渲染成功；页面未创建 CodeMirror。';
+        document.body.dataset.demoReady = 'true';
+      };
+      markdown.addEventListener('input', render);
+      render();
+    </script>
+  </body>
+</html>

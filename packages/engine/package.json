@@ -1,0 +1,54 @@
+{
+  "name": "@cherry-markdown/engine",
+  "license": "Apache-2.0",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Markdown parse & render engine for Cherry Markdown",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tencent/cherry-markdown.git",
+    "directory": "packages/engine"
+  },
+  "main": "./dist/cherry-markdown-engine.cjs",
+  "module": "./dist/cherry-markdown-engine.esm.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "browser": "./dist/cherry-markdown-engine.browser.esm.js",
+      "import": "./dist/cherry-markdown-engine.esm.js",
+      "require": "./dist/cherry-markdown-engine.cjs",
+      "default": "./dist/cherry-markdown-engine.esm.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "node build/vite.build.js && tsc --project tsconfig.json",
+    "build:types": "tsc --project tsconfig.json",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "test": "vp test",
+    "clean": "rimraf ./dist"
+  },
+  "keywords": [
+    "markdown",
+    "engine"
+  ],
+  "author": "Cherry Oteam",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "dompurify": "^3.2.6",
+    "htmlparser2": "^10.0.0",
+    "jsdom": "~19.0.0"
+  },
+  "sideEffects": false
+}

@@ -1,0 +1,62 @@
+{
+  "name": "@cherry-markdown/milkdown",
+  "license": "Apache-2.0",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "WYSIWYG experiment for Cherry Markdown based on Milkdown",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tencent/cherry-markdown.git",
+    "directory": "packages/milkdown"
+  },
+  "main": "./dist/cherry-markdown-milkdown.cjs",
+  "module": "./dist/cherry-markdown-milkdown.esm.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/cherry-markdown-milkdown.esm.js",
+      "require": "./dist/cherry-markdown-milkdown.cjs",
+      "default": "./dist/cherry-markdown-milkdown.esm.js"
+    },
+    "./style.css": "./dist/cherry-markdown-milkdown.css"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "node build/vite.build.js && tsc --project tsconfig.json",
+    "build:types": "tsc --project tsconfig.json",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "test": "vp test",
+    "clean": "rimraf ./dist"
+  },
+  "keywords": [
+    "markdown",
+    "wysiwyg",
+    "milkdown"
+  ],
+  "author": "Cherry Oteam",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@cherry-markdown/engine": "^0.0.1",
+    "@milkdown/core": "7.22.0",
+    "@milkdown/ctx": "7.22.0",
+    "@milkdown/plugin-listener": "7.22.0",
+    "@milkdown/preset-commonmark": "7.22.0",
+    "@milkdown/prose": "7.22.0",
+    "@milkdown/theme-nord": "7.22.0",
+    "@milkdown/utils": "7.22.0"
+  },
+  "sideEffects": [
+    "./dist/*.css"
+  ]
+}

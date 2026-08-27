@@ -75,6 +75,10 @@ jobs:
           token: ${{ secrets.BOT_TOKEN }}
           body: |
             ### 🌐 Playground 预览
+            * [【new】Engine 独立包](${{steps.deploy.outputs.url}}/new-engine.html)
+            * [【new】Preview 独立包](${{steps.deploy.outputs.url}}/new-preview.html)
+            * [【new】Stream 独立包](${{steps.deploy.outputs.url}}/new-stream.html)
+            * [【new】Milkdown 独立包](${{steps.deploy.outputs.url}}/new-milkdown.html)
             * [AI Chat 流式输入（标准版）](${{steps.deploy.outputs.url}}/ai_chat.html)
             * [AI Chat 流式输入（Stream 版 + 插件懒加载）](${{steps.deploy.outputs.url}}/ai_chat_stream.html)
             * [API 演示](${{steps.deploy.outputs.url}}/api.html)

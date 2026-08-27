@@ -18,7 +18,7 @@ import { svg2img, getSvgString } from '@/utils/svgUtils';
 import { canvas2img } from '@/utils/export';
 import { copyToClip } from '@/utils/copy';
 import { unescapeHTMLSpecialChar } from '@/utils/sanitize';
-import MathBlock from '@/core/hooks/MathBlock';
+import { MathBlock } from '@cherry-markdown/engine';
 import { getExternal } from '@/utils/external';
 
 export default class FormulaHandler {

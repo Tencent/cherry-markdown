@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import SyntaxBase, { HOOKS_TYPE_LIST } from './core/SyntaxBase';
-import ParagraphBase from './core/ParagraphBase';
+export { createSyntaxHook } from '@cherry-markdown/engine';
 import MenuBase from './toolbars/MenuBase';
 
 /**
@@ -70,61 +69,6 @@ function filterOptions(options, whiteList, propTypes) {
     }
   });
   return filteredOptions;
-}
-
-export function createSyntaxHook(name, type, options) {
-  const BaseClass = type === HOOKS_TYPE_LIST.PAR ? ParagraphBase : SyntaxBase;
-  const optionsWhiteList = ['beforeMakeHtml', 'makeHtml', 'afterMakeHtml', 'rule', 'test'];
-  const filteredOptions = filterOptions(options, optionsWhiteList, 'function');
-  const paragraphConfig = { needCache: options.needCache, defaultCache: options.defaultCache };
-  return class CustomSyntax extends BaseClass {
-    static HOOK_NAME = name;
-
-    constructor(editorConfig = {}) {
-      if (type === HOOKS_TYPE_LIST.PAR) {
-        super({ needCache: !!paragraphConfig.needCache, defaultCache: paragraphConfig.defaultCache });
-      } else {
-        super();
-      }
-
-      this.config = editorConfig.config;
-    }
-
-    beforeMakeHtml(...args) {
-      if (filteredOptions.beforeMakeHtml) {
-        return filteredOptions.beforeMakeHtml.apply(this, args);
-      }
-      return super.beforeMakeHtml(...args);
-    }
-
-    makeHtml(...args) {
-      if (filteredOptions.makeHtml) {
-        return filteredOptions.makeHtml.apply(this, args);
-      }
-      return super.makeHtml(...args);
-    }
-
-    afterMakeHtml(...args) {
-      if (filteredOptions.afterMakeHtml) {
-        return filteredOptions.afterMakeHtml.apply(this, args);
-      }
-      return super.afterMakeHtml(...args);
-    }
-
-    test(...args) {
-      if (filteredOptions.test) {
-        return filteredOptions.test.apply(this, args);
-      }
-      return super.test(...args);
-    }
-
-    rule(...args) {
-      if (filteredOptions.rule) {
-        return filteredOptions.rule.apply(this, args);
-      }
-      return super.rule(...args);
-    }
-  };
 }
 
 export function createMenuHook(name, options) {

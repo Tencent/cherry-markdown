@@ -1,0 +1,53 @@
+{
+  "name": "@cherry-markdown/stream",
+  "license": "Apache-2.0",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "AI token streaming markdown renderer for Cherry Markdown",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tencent/cherry-markdown.git",
+    "directory": "packages/stream"
+  },
+  "main": "./dist/cherry-markdown-stream.cjs",
+  "module": "./dist/cherry-markdown-stream.esm.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/cherry-markdown-stream.esm.js",
+      "require": "./dist/cherry-markdown-stream.cjs",
+      "default": "./dist/cherry-markdown-stream.esm.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "node build/vite.build.js && tsc --project tsconfig.json",
+    "build:types": "tsc --project tsconfig.json",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "test": "vp test",
+    "clean": "rimraf ./dist"
+  },
+  "keywords": [
+    "markdown",
+    "stream",
+    "ai"
+  ],
+  "author": "Cherry Oteam",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@cherry-markdown/engine": "^0.0.1",
+    "@cherry-markdown/preview": "^0.0.1"
+  },
+  "sideEffects": false
+}

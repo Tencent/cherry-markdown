@@ -4,12 +4,15 @@ import Engine from '../../src/Engine';
 import ParagraphBase from '../../src/core/ParagraphBase';
 import SyntaxBase from '../../src/core/SyntaxBase';
 import hooksConfig from '../../src/core/HooksConfig';
+import type { EngineRuntimeAdapter } from '../../../engine/types/runtime';
 
 type EngineOptions = ConstructorParameters<typeof CherryEngine>[0];
 
-function createEngine(options: EngineOptions = {}): Engine {
-  // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
-  return new CherryEngine(options);
+function createEngine(
+  options: EngineOptions = {},
+  runtime: EngineRuntimeAdapter = {},
+): Engine {
+  return new CherryEngine(options, runtime);
 }
 
 describe('core/Engine', () => {
@@ -75,18 +78,19 @@ describe('core/Engine', () => {
 
   it('re-renders the current document once after a burst of URL updates', () => {
     vi.useFakeTimers();
-    const engine = createEngine();
     const refresh = vi.fn();
     const emit = vi.fn();
-    Object.assign(engine.$cherry, {
-      editor: { editor: { view: { state: { doc: { toString: () => '# Updated' } } } } },
-      previewer: { refresh },
-      $event: { emit },
+    const engineWithRuntime = createEngine({}, {
+      getMarkdown: () => '# Updated',
+      onHtmlChange: ({ markdownText, html }: { markdownText: string; html: string }) => {
+        refresh(html);
+        emit('afterChange', { markdownText, html });
+      },
     });
-    const makeHtml = vi.spyOn(engine, 'makeHtml').mockReturnValue('<h1>Updated</h1>');
+    const makeHtml = vi.spyOn(engineWithRuntime, 'makeHtml').mockReturnValue('<h1>Updated</h1>');
 
-    engine.reMakeHtml();
-    engine.reMakeHtml();
+    engineWithRuntime.reMakeHtml();
+    engineWithRuntime.reMakeHtml();
     vi.advanceTimersByTime(1000);
 
     expect(makeHtml).toHaveBeenCalledOnce();
@@ -172,10 +176,9 @@ describe('core/Engine', () => {
 
   it('restores and eventually clears configured flow cursor DOM', () => {
     vi.useFakeTimers();
-    const engine = createEngine();
     const clearFlowSessionCursor = vi.fn();
+    const engine = createEngine({}, { clearFlowSessionCursor });
     engine.$cherry.options.engine.global.flowSessionCursor = '<i class="cursor"></i>';
-    Object.defineProperty(engine.$cherry, 'clearFlowSessionCursor', { value: clearFlowSessionCursor });
 
     expect(engine.$clearFlowSessionCursorCache('beforeCHERRYFLOWSESSIONCURSORafter')).toBe(
       'before<i class="cursor"></i>after',

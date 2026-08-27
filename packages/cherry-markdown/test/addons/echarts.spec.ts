@@ -151,12 +151,10 @@ describe('addons/EChartsCodeBlockEngine', () => {
     const engine = new CherryEngine({
       engine: { syntax: { codeBlock: { customRenderer: { echarts: renderer } } } },
     });
-    // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
     Object.defineProperty(engine.$cherry, 'previewer', {
       value: { getDom: () => environment.previewerDom },
     });
-    // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
-    const html = engine.makeHtml('```echarts\n{ series: [{ type: "bar", data: [3, 5] }] }\n```');
+    const html = String(engine.makeHtml('```echarts\n{ series: [{ type: "bar", data: [3, 5] }] }\n```'));
     environment.previewerDom.innerHTML = html;
     const wrapper = environment.previewerDom.querySelector('[data-type="echarts"]');
 

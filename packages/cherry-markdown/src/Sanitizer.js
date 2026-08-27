@@ -1,4 +1,2 @@
-import createDOMPurify from 'dompurify';
-
-// for browser
-export const sanitizer = createDOMPurify(window);
+/** Shared sanitizer; implementation is owned by @cherry-markdown/engine. */
+export { Sanitizer as sanitizer, Sanitizer as default } from '@cherry-markdown/engine';

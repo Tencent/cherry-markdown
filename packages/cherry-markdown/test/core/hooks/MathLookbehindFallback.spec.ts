@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
-import { hashHex } from '../../../src/utils/hash';
-import InlineMath from '../../../src/core/hooks/InlineMath';
-import MathBlock from '../../../src/core/hooks/MathBlock';
+import { hashHex } from '../../../../engine/src/utils/hash';
+import InlineMath from '../../../../engine/src/syntax/hooks/InlineMath';
+import MathBlock from '../../../../engine/src/syntax/hooks/MathBlock';
 
-vi.mock('../../../src/utils/regexp', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../src/utils/regexp')>();
+vi.mock('../../../../engine/src/utils/regexp', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../engine/src/utils/regexp')>();
   return {
     ...actual,
     isLookbehindSupported: () => false,

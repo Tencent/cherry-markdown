@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
-import Br from '../../../src/core/hooks/Br';
+import Br from '../../../../engine/src/syntax/hooks/Br';
 
 const isBrowserMock = vi.hoisted(() => vi.fn(() => true));
 
-vi.mock('../../../src/utils/env', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../src/utils/env')>();
+vi.mock('../../../../engine/src/utils/env', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../../engine/src/utils/env')>();
   return { ...actual, isBrowser: isBrowserMock };
 });
 
