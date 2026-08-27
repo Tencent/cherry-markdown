@@ -101,6 +101,15 @@ export function useMilkdownEditor({ onContentChanged }: UseMilkdownEditorOptions
     }
   };
 
+  /**
+   * 与 Cherry 引擎的 clearUndoRedo 保持签名一致；Milkdown 由 ProseMirror 管理
+   * 历史，当前未接入清空逻辑，先作为 no-op 占位。后续如需支持，可在此调用
+   * ProseMirror 的 history 插件重置 API。
+   */
+  const clearUndoRedo = (): void => {
+    // no-op
+  };
+
   const scrollPreviewToTop = (): void => {
     // Milkdown 无独立预览区；直接滚动编辑容器到顶部
     const el = document.getElementById('milkdown-editor');
@@ -124,6 +133,7 @@ export function useMilkdownEditor({ onContentChanged }: UseMilkdownEditorOptions
     getMarkdown,
     initEditor,
     setMarkdown,
+    clearUndoRedo,
     scrollPreviewToTop,
     toggleToolbar,
     switchEditorMode,

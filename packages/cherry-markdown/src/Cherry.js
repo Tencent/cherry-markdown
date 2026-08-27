@@ -589,6 +589,13 @@ export default class Cherry extends CherryStatic {
   }
 
   /**
+   * 清空undo/redo栈
+   */
+  clearUndoRedo() {
+    this.editor?.clearUndoRedo();
+  }
+
+  /**
    * 覆盖编辑区的内容
    * @param {string} content markdown内容
    * @param {boolean} [keepCursor=false] 是否保持光标位置

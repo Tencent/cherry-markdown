@@ -69,8 +69,19 @@
 }
 
 .toast-warning {
-  --toast-bg: #faad14;
-  --toast-color: #000;
+  --toast-bg: #fdf6e3;
+  --toast-color: #8a6d3b;
+  border: 1px solid rgba(138, 109, 59, 0.18);
+}
+
+.toast-warning .toast-action {
+  background: rgba(138, 109, 59, 0.08);
+  border-color: rgba(138, 109, 59, 0.28);
+}
+
+.toast-warning .toast-action:hover {
+  background: rgba(138, 109, 59, 0.16);
+  border-color: rgba(138, 109, 59, 0.45);
 }
 
 .toast-error {

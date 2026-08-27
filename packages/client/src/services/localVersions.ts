@@ -2,8 +2,8 @@
  * 本地版本服务（IndexedDB）
  *
  * 数据模型：
- *   store `latest`   —— key = filePath / DRAFT_KEY, value = LatestRecord
- *   store `versions` —— keyPath = id, 索引 by_file (filePath, createdAt)
+ *   store `versions` —— keyPath = id (`${filePath}::${kind}::${bucket}`), 索引 by_file (filePath, createdAt)
+ *                       同一 (filePath, kind, bucket) 的唯一性由 id 天然保证（put 同 id 即覆盖）
  *
  * 版本分级：
  *   - minute : 当天每 5 分钟一个 bucket
@@ -11,19 +11,26 @@
  *   - day    : 3 天之前每天一个 bucket
  *
  * 写入策略：
- *   1. 每次 saveLatest 时，同步写 latest 记录
- *   2. 计算当前应属于哪个粒度的 bucket，若该 bucket 已存在则覆盖（滚动更新为最后一次内容），否则插入
- *   3. 触发一次 compact：把已过期粒度的多条记录折叠为目标粒度（同 bucket 只保留 createdAt 最大的一条）
+ *   1. 计算当前应属于哪个粒度的 bucket，若该 bucket 已存在则覆盖（滚动更新为最后一次内容），否则插入
+ *   2. 触发一次 compact：把已过期粒度的多条记录折叠为目标粒度（同 bucket 只保留 createdAt 最大的一条）
+ *
+ * “最新内容”不再单独维护 store，直接取 versions 中 createdAt 最大的一条即可：
+ *   compact 保留组内 createdAt 最大者的原始时间戳（只改 id/kind/bucket），因此该值等同于用户
+ *   “最后一次编辑的精确时刻”，与磁盘 mtime 比较的语义保持不变。
  */
 
 export const LOCAL_VERSIONS_DB = 'cherry-markdown-versions';
 export const LOCAL_VERSIONS_DB_VERSION = 1;
-export const LATEST_STORE = 'latest';
 export const VERSIONS_STORE = 'versions';
 export const DRAFT_KEY = '__draft__untitled';
 
 export type VersionKind = 'minute' | 'hour' | 'day';
 
+/**
+ * “最新内容”的对外视图。
+ * 内部实际存储在 versions store 中最新的一条 VersionRecord 里，
+ * 这里只是为了调用方使用方便再包装一层：updatedAt 即那条记录的 createdAt。
+ */
 export interface LatestRecord {
   filePath: string;
   content: string;
@@ -55,13 +62,9 @@ const openDB = (): Promise<IDBDatabase> => {
     const req = indexedDB.open(LOCAL_VERSIONS_DB, LOCAL_VERSIONS_DB_VERSION);
     req.onupgradeneeded = () => {
       const db = req.result;
-      if (!db.objectStoreNames.contains(LATEST_STORE)) {
-        db.createObjectStore(LATEST_STORE, { keyPath: 'filePath' });
-      }
       if (!db.objectStoreNames.contains(VERSIONS_STORE)) {
         const store = db.createObjectStore(VERSIONS_STORE, { keyPath: 'id' });
         store.createIndex('by_file', ['filePath', 'createdAt']);
-        store.createIndex('by_file_bucket', ['filePath', 'kind', 'bucket'], { unique: true });
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -69,12 +72,6 @@ const openDB = (): Promise<IDBDatabase> => {
   });
   return dbPromise;
 };
-
-const promisifyRequest = <T>(req: IDBRequest<T>): Promise<T> =>
-  new Promise((resolve, reject) => {
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
 
 const promisifyTransaction = (tx: IDBTransaction): Promise<void> =>
   new Promise((resolve, reject) => {
@@ -112,23 +109,21 @@ export const classifyKind = (ts: number, now: number = Date.now()): VersionKind 
 const genId = (filePath: string, kind: VersionKind, bucket: number): string => `${filePath}::${kind}::${bucket}`;
 
 /**
- * 保存最新内容 + 触发版本快照 + 触发一次懒 compact。
+ * 保存一次自动保存快照，同时触发一次懒 compact。
  * 返回本次写入完成时间戳，供上层显示“已自动保存 xx”。
+ *
+ * 名称保留为 saveLatest 是历史沿用（对应“最新自动保存”这一语义），
+ * 实际存储上不再有独立的 latest 记录。
  */
 export async function saveLatest(filePath: string, content: string): Promise<number> {
   const db = await openDB();
   const now = Date.now();
   const size = content.length;
 
-  const tx = db.transaction([LATEST_STORE, VERSIONS_STORE], 'readwrite');
-  const latestStore = tx.objectStore(LATEST_STORE);
+  const tx = db.transaction(VERSIONS_STORE, 'readwrite');
   const versionsStore = tx.objectStore(VERSIONS_STORE);
 
-  // 1. 写 latest
-  const latest: LatestRecord = { filePath, content, size, updatedAt: now };
-  latestStore.put(latest);
-
-  // 2. 写当前 minute bucket（若已存在同 bucket 记录则覆盖）
+  // 写当前 minute bucket（若已存在同 bucket 记录则覆盖）
   const kind: VersionKind = 'minute';
   const bucket = bucketStart(now, kind);
   const version: VersionRecord = {
@@ -144,7 +139,7 @@ export async function saveLatest(filePath: string, content: string): Promise<num
 
   await promisifyTransaction(tx);
 
-  // 3. 异步执行 compact（不阻塞主写入，也避免同事务里做长跨度操作）
+  // 异步执行 compact（不阻塞主写入，也避免同事务里做长跨度操作）
   void compactVersions(filePath, now).catch((err) => {
     console.warn('[localVersions] compact failed:', err);
   });
@@ -152,13 +147,34 @@ export async function saveLatest(filePath: string, content: string): Promise<num
   return now;
 }
 
-/** 读取指定文件的最新记录 */
+/**
+ * 读取指定文件的最新记录：直接取 versions 中 createdAt 最大的一条并包装为 LatestRecord。
+ * compact 时保留组内 createdAt 最大者的原始时间戳，因此这里的 updatedAt 仍是用户
+ * “最后一次编辑的精确时刻”。
+ */
 export async function getLatest(filePath: string): Promise<LatestRecord | null> {
   const db = await openDB();
-  const tx = db.transaction(LATEST_STORE, 'readonly');
-  const store = tx.objectStore(LATEST_STORE);
-  const rec = await promisifyRequest(store.get(filePath));
-  return (rec as LatestRecord | undefined) ?? null;
+  const tx = db.transaction(VERSIONS_STORE, 'readonly');
+  const idx = tx.objectStore(VERSIONS_STORE).index('by_file');
+  const range = IDBKeyRange.bound([filePath, -Infinity], [filePath, Infinity]);
+  return new Promise((resolve, reject) => {
+    const req = idx.openCursor(range, 'prev');
+    req.onsuccess = () => {
+      const cursor = req.result;
+      if (!cursor) {
+        resolve(null);
+        return;
+      }
+      const v = cursor.value as VersionRecord;
+      resolve({
+        filePath: v.filePath,
+        content: v.content,
+        size: v.size,
+        updatedAt: v.createdAt,
+      });
+    };
+    req.onerror = () => reject(req.error);
+  });
 }
 
 /** 列出指定文件的所有版本（按 createdAt desc） */
@@ -205,30 +221,12 @@ export async function deleteVersion(id: string): Promise<void> {
 }
 
 /**
- * 清空指定文件的所有历史版本（保留 latest 记录，避免破坏“已自动保存”提示）。
+ * 删除某文件的所有本地版本（彻底清理）。
  * 历史版本对话框左下角的“清空所有版本”按钮使用。
  */
-export async function clearAllVersions(filePath: string): Promise<void> {
-  const db = await openDB();
-  const tx = db.transaction(VERSIONS_STORE, 'readwrite');
-  const idx = tx.objectStore(VERSIONS_STORE).index('by_file');
-  const range = IDBKeyRange.bound([filePath, -Infinity], [filePath, Infinity]);
-  const req = idx.openCursor(range);
-  req.onsuccess = () => {
-    const cursor = req.result;
-    if (cursor) {
-      cursor.delete();
-      cursor.continue();
-    }
-  };
-  await promisifyTransaction(tx);
-}
-
-/** 删除某文件的所有本地版本与 latest 记录（不常用，仅在“清空本地版本”入口使用） */
 export async function clearFile(filePath: string): Promise<void> {
   const db = await openDB();
-  const tx = db.transaction([LATEST_STORE, VERSIONS_STORE], 'readwrite');
-  tx.objectStore(LATEST_STORE).delete(filePath);
+  const tx = db.transaction(VERSIONS_STORE, 'readwrite');
   const idx = tx.objectStore(VERSIONS_STORE).index('by_file');
   const range = IDBKeyRange.bound([filePath, -Infinity], [filePath, Infinity]);
   const req = idx.openCursor(range);
@@ -316,8 +314,8 @@ export function formatVersionLabel(v: VersionRecord): string {
   const dd = pad(d.getDate());
   if (v.kind === 'day') return `${mm}/${dd}`;
   const hh = pad(d.getHours());
-  if (v.kind === 'hour') return `${mm}/${dd} ${hh}:00`;
   const mi = pad(d.getMinutes());
+  if (v.kind === 'hour') return `${mm}/${dd} ${hh}:${mi}`;
   const ss = pad(new Date(v.createdAt).getSeconds());
   return `${mm}/${dd} ${hh}:${mi}:${ss}`;
 }

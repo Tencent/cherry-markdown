@@ -36,6 +36,11 @@ export interface CherryEditorInstance {
   getMarkdown(): string;
   setMarkdown(markdown: string): void;
   switchModel(mode: CherryEditorMode, needSyncToolbar?: boolean): void;
+  /**
+   * 清空底层 CodeMirror 的 undo/redo 历史栈。
+   * 在客户端切换文件后调用，避免撤销回到上一个文件的内容。
+   */
+  clearUndoRedo?(): void;
   on(event: 'afterChange', handler: () => void): void;
   off(event: 'afterChange', handler: () => void): void;
 }

@@ -200,6 +200,18 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
     getEditor().setMarkdown(markdown);
   };
 
+  /**
+   * 清空 Cherry 底层 CodeMirror 的 undo/redo 历史栈。
+   * 客户端在"切换文件"场景下调用（setMarkdown 之后），
+   * 避免用户误按 Ctrl+Z 撤销回上一个文件的内容。
+   */
+  const clearUndoRedo = (): void => {
+    const instance = getEditor();
+    if (typeof instance.clearUndoRedo === 'function') {
+      instance.clearUndoRedo();
+    }
+  };
+
   const getMarkdown = (): string => getEditor().getMarkdown();
 
   const scrollPreviewToTop = (): void => {
@@ -271,6 +283,7 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
     getMarkdown,
     initEditor,
     setMarkdown,
+    clearUndoRedo,
     scrollPreviewToTop,
     toggleToolbar,
     switchEditorMode,

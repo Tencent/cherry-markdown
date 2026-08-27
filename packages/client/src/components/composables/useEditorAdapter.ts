@@ -85,6 +85,17 @@ export function useEditorAdapter({ onContentChanged }: UseEditorAdapterOptions) 
     current().setMarkdown(markdown);
   };
 
+  /**
+   * 清空当前引擎的 undo/redo 历史栈。客户端在"切换文件"场景下调用，
+   * 避免用户误按 Ctrl+Z 撤销回上一个文件的内容。
+   *
+   * Cherry 引擎会调用 clearUndoRedo()；
+   * Milkdown 引擎当前为 no-op。
+   */
+  const clearUndoRedo = (): void => {
+    current().clearUndoRedo();
+  };
+
   const scrollPreviewToTop = (): void => current().scrollPreviewToTop();
 
   const toggleToolbar = (): void => current().toggleToolbar();
@@ -139,6 +150,7 @@ export function useEditorAdapter({ onContentChanged }: UseEditorAdapterOptions) 
     getMarkdown,
     initEditor,
     setMarkdown,
+    clearUndoRedo,
     scrollPreviewToTop,
     toggleToolbar,
     switchEditorMode,

@@ -345,8 +345,9 @@ class CM6Adapter {
    * @param {EditorView} view - EditorView 实例
    * @param {Compartment} [vimCompartment] - vim 模式的 Compartment（可选，用于多实例隔离）
    * @param {Compartment} [readOnlyCompartment] - 只读状态的 Compartment（可选，用于动态切换只读）
+   * @param {Compartment} [historyCompartment] - 历史记录的 Compartment（可选，用于清空 undo/redo 栈）
    */
-  constructor(view, vimCompartment, readOnlyCompartment) {
+  constructor(view, vimCompartment, readOnlyCompartment, historyCompartment) {
     /** @type {EditorView} */
     this.view = view;
     /** @type {Map<string, Array<(...args: unknown[]) => void>>} */
@@ -357,8 +358,30 @@ class CM6Adapter {
     this.vimCompartment = vimCompartment || null;
     /** @type {Compartment | null} */
     this.readOnlyCompartment = readOnlyCompartment || null;
+    /** @type {Compartment | null} */
+    this.historyCompartment = historyCompartment || null;
     /** @type {number} 实例级 markId 计数器 */
     this.markIdCounter = 0;
+  }
+
+  /**
+   * 清空 undo/redo 历史栈
+   * 通过 Compartment 先将 history 扩展重置为空，再重新装载 history() 实现
+   * @returns {void}
+   */
+  clearHistory() {
+    if (!this.historyCompartment) {
+      console.warn('historyCompartment not available, cannot clear undo/redo history');
+      return;
+    }
+    // 先卸载 history 扩展，清空其内部维护的 undo/redo 栈
+    this.view.dispatch({
+      effects: this.historyCompartment.reconfigure([]),
+    });
+    // 再重新装载 history()，从当前状态开始重新记录
+    this.view.dispatch({
+      effects: this.historyCompartment.reconfigure(history()),
+    });
   }
 
   /**
@@ -1100,6 +1123,8 @@ export default class Editor {
     this.vimCompartment = new Compartment();
     /** @type {Compartment} */
     this.readOnlyCompartment = new Compartment();
+    /** @type {Compartment} */
+    this.historyCompartment = new Compartment();
 
     /** @type {ReturnType<typeof setTimeout> | number} */
     this.dealSpecialWordsTimer = 0;
@@ -1920,7 +1945,7 @@ export default class Editor {
     const extensions = [
       cachedCherryHighlighting,
       markdown(),
-      history(),
+      this.historyCompartment.of(history()),
       search(),
       closeBrackets(),
       cachedDefaultHighlighting,
@@ -2139,7 +2164,7 @@ export default class Editor {
 
     textArea.style.display = 'none';
 
-    const editor = new CM6Adapter(view, this.vimCompartment, this.readOnlyCompartment);
+    const editor = new CM6Adapter(view, this.vimCompartment, this.readOnlyCompartment, this.historyCompartment);
     this.previewer = previewer;
     this.editor = editor;
 
@@ -2677,5 +2702,17 @@ export default class Editor {
   addTrackedEvent(elm, evType, fn, useCapture = false) {
     addEvent(elm, evType, fn, useCapture);
     this.domEventListeners.push({ elm, evType, fn, useCapture });
+  }
+
+  /**
+   * 清空undo/redo栈
+   * 通过重置 CodeMirror 6 的 history 扩展来清除全部撤销/重做历史，
+   * 清空后当前文档状态将作为新的初始状态，无法再撤销到此前的修改。
+   */
+  clearUndoRedo() {
+    const cm6Adapter = this.editor;
+    if (cm6Adapter && typeof cm6Adapter.clearHistory === 'function') {
+      cm6Adapter.clearHistory();
+    }
   }
 }

@@ -431,18 +431,6 @@ export default defineComponent({
                 formatChangeTime(lastChangeTime.value),
               )
             : null,
-          props.hasVersion
-            ? h(
-                'button',
-                {
-                  type: 'button',
-                  class: 'status-action status-action-history',
-                  title: '查看当前文件的本地历史版本',
-                  onClick: () => emit('openVersionHistory'),
-                },
-                [h('span', { class: 'status-action-label' }, '查看历史版本')],
-              )
-            : null,
         ]),
         h('div', { class: 'status-center' }, [
           h(
@@ -505,6 +493,18 @@ export default defineComponent({
               )
             : null,
           visibleAutoSavedAt.value ? h('span', { class: 'status-sep' }) : null,
+          props.hasVersion
+            ? h(
+                'button',
+                {
+                  type: 'button',
+                  class: 'status-action status-action-history',
+                  title: '查看当前文件的本地历史版本',
+                  onClick: () => emit('openVersionHistory'),
+                },
+                [h('span', { class: 'status-action-label' }, '查看历史版本')],
+              )
+            : null,
           h('span', { class: 'status-item' }, `${wordCount.value} 字`),
           h('span', { class: 'status-sep' }),
           h('span', { class: 'status-item' }, `${wordWords.value} 词`),
