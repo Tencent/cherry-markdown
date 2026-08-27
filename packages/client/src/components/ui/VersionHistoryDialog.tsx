@@ -11,8 +11,9 @@
  */
 import { computed, defineComponent, h, PropType, Teleport, Transition, ref, watch } from 'vue';
 import { readTextFile } from '@tauri-apps/plugin-fs';
+import { ask } from '@tauri-apps/plugin-dialog';
 import {
-  clearAllVersions,
+  clearFile,
   deleteVersion,
   formatVersionLabel,
   listVersions,
@@ -21,11 +22,11 @@ import {
 import { diffLines, summarizeDiff, type DiffLine } from '../../utils/diffLines';
 import '../ui/ui.css';
 
-const kindLabel: Record<VersionRecord['kind'], string> = {
-  minute: '分钟',
-  hour: '小时',
-  day: '日',
-};
+// const kindLabel: Record<VersionRecord['kind'], string> = {
+//   minute: '分钟',
+//   hour: '小时',
+//   day: '日',
+// };
 
 const humanSize = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
@@ -128,9 +129,13 @@ export default defineComponent({
 
     const handleClose = (): void => emit('close');
 
-    // 删除单条：更新内存列表并同步 IDB；若删除的是当前选中项，则回落到列表第一条
+    // 删除单条：更新内存列表并同步 IDB；若删除的是当前选中项，则回落到列表第一条。
+    //
+    // “最新版本”目前已直接取 versions 中 createdAt 最大的一条（不再有独立的 latest store），
+    // 因此删除后无需额外同步：checkNewerLocalVersion 下一次读取自然就是剩余版本中最新的一条。
     const handleDeleteOne = async (id: string, event: MouseEvent): Promise<void> => {
       event.stopPropagation();
+      if (!props.filePath) return;
       try {
         await deleteVersion(id);
         versions.value = versions.value.filter((v) => v.id !== id);
@@ -141,22 +146,38 @@ export default defineComponent({
         console.warn('[VersionHistoryDialog] deleteVersion failed:', err);
       }
     };
-
-    // 清空所有：仅清 versions（保留 latest，避免破坏“自动快照”提示的连续性）
+    // 清空所有：调用 clearFile 同时清 versions 和 latest
+    // （避免切换文件后 checkNewerLocalVersion 仍基于残留 latest 弹“发现更新的本地版本”提示）
+    //
+    // 使用 @tauri-apps/plugin-dialog 的 ask 而非 window.confirm：
+    //   1. Tauri（WebView2 / WKWebView）里的原生 window.confirm 行为不稳定，
+    //      在部分环境下会被静默放行（同步返回 true 且不弹窗），无法真正阻塞后续 clearFile。
+    //   2. ask 是 Promise<boolean>，走 Rust 端的原生对话框，跨平台行为一致。
     const handleClearAll = async (): Promise<void> => {
       if (!props.filePath) return;
       if (versions.value.length === 0) return;
-      // 简单确认，避免误点
-      const confirmed = window.confirm(
-        `确定要清空当前文件的全部 ${versions.value.length} 个本地历史版本吗？此操作不可撤销。`,
-      );
+      let confirmed = false;
+      try {
+        confirmed = await ask(
+          `确定要清空当前文件的全部 ${versions.value.length} 个本地历史版本吗？\n` + `此操作不可撤销。`,
+          {
+            title: '清空本地历史版本',
+            kind: 'warning',
+            okLabel: '清空',
+            cancelLabel: '取消',
+          },
+        );
+      } catch (err) {
+        console.warn('[VersionHistoryDialog] ask dialog failed:', err);
+        return;
+      }
       if (!confirmed) return;
       try {
-        await clearAllVersions(props.filePath);
+        await clearFile(props.filePath);
         versions.value = [];
         activeId.value = null;
       } catch (err) {
-        console.warn('[VersionHistoryDialog] clearAllVersions failed:', err);
+        console.warn('[VersionHistoryDialog] clearFile failed:', err);
       }
     };
 
@@ -267,7 +288,7 @@ export default defineComponent({
                                                   marginTop: '2px',
                                                 },
                                               },
-                                              `${kindLabel[v.kind]} · ${humanSize(v.size)}`,
+                                              `${humanSize(v.size)}`,
                                             ),
                                             // hover 时显示的行内删除按钮
                                             hoveredId.value === v.id

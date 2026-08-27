@@ -18,6 +18,11 @@ const MILKDOWN_MAX_BYTES = 200 * 1024;
 interface UseAppFileOperationsOptions {
   getMarkdown: () => string;
   setMarkdown: (markdown: string) => void;
+  /**
+   * 清空编辑器 undo/redo 历史栈。切换文件（新建 / 打开 / 侧边栏切换 / 启动恢复）
+   * 时在 setMarkdown 之后调用，避免用户误按 Ctrl+Z 撤销回上一个文件的内容。
+   */
+  clearUndoRedo: () => void;
   scrollPreviewToTop: () => void;
   setUnsavedChanges: (value: boolean) => void;
   confirmProceedWhenUnsaved: (saveMarkdown: () => Promise<FileOperationResult>) => Promise<boolean>;
@@ -27,6 +32,7 @@ interface UseAppFileOperationsOptions {
 export function useAppFileOperations({
   getMarkdown,
   setMarkdown,
+  clearUndoRedo,
   scrollPreviewToTop,
   setUnsavedChanges,
   confirmProceedWhenUnsaved,
@@ -112,6 +118,8 @@ export function useAppFileOperations({
   const newFile = async (): Promise<void> => {
     if (!(await canLeaveCurrentFile())) return;
     setMarkdown('');
+    // 切换到新文件后清空 undo/redo，避免撤销回上一个文件的内容
+    clearUndoRedo();
     fileStore.startUntitledDraft();
     setUnsavedChanges(true);
     await updateTitle(null, true);
@@ -144,6 +152,8 @@ export function useAppFileOperations({
       const markdown = await readTextFile(normalizedPath);
       guardLargeFileForMilkdown(markdown);
       setMarkdown(markdown);
+      // 切换文件后清空 undo/redo，避免撤销回上一个文件的内容
+      clearUndoRedo();
       fileStore.clearUntitledDraft();
       fileStore.setCurrentFilePath(normalizedPath);
       fileStore.addRecentFile(normalizedPath);
@@ -171,6 +181,8 @@ export function useAppFileOperations({
       const markdown = await readTextFile(normalizedPath);
       guardLargeFileForMilkdown(markdown);
       setMarkdown(markdown);
+      // 切换文件后清空 undo/redo，避免撤销回上一个文件的内容
+      clearUndoRedo();
       fileStore.clearUntitledDraft();
       fileStore.setCurrentFilePath(normalizedPath);
       fileStore.addRecentFile(normalizedPath);
@@ -207,6 +219,8 @@ export function useAppFileOperations({
       const markdown = await readTextFile(normalizedPath);
       guardLargeFileForMilkdown(markdown);
       setMarkdown(markdown);
+      // 启动恢复上次打开的文件后清空 undo/redo，避免出现无意义的历史栈
+      clearUndoRedo();
       if (normalizedPath !== fileStore.currentFilePath) {
         fileStore.setCurrentFilePath(normalizedPath);
       }
@@ -226,6 +240,8 @@ export function useAppFileOperations({
     const normalizedPath = normalizePath(filePath);
     guardLargeFileForMilkdown(content);
     setMarkdown(content);
+    // 侧边栏切换文件后清空 undo/redo，避免撤销回上一个文件的内容
+    clearUndoRedo();
     scrollPreviewToTop();
     fileStore.clearUntitledDraft();
     fileStore.setCurrentFilePath(normalizedPath);

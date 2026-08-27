@@ -38,6 +38,7 @@ export default defineComponent({
     const fileOperations = useAppFileOperations({
       getMarkdown: editor.getMarkdown,
       setMarkdown: editor.setMarkdown,
+      clearUndoRedo: editor.clearUndoRedo,
       scrollPreviewToTop: editor.scrollPreviewToTop,
       setUnsavedChanges: unsavedGuard.setUnsavedChanges,
       confirmProceedWhenUnsaved: unsavedGuard.confirmProceedWhenUnsaved,
