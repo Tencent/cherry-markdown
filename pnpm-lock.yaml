@@ -12,12 +12,8 @@ overrides:
   '@codemirror/search': 6.7.0
   '@codemirror/state': 6.6.0
   '@codemirror/view': 6.42.1
-  '@lezer/highlight': 1.2.3
   '@replit/codemirror-vim': 6.3.0
   dompurify: 3.4.13
-  htmlparser2: 10.1.0
-  json5: 2.2.3
-  jsdom: 19.0.0
   mermaid: 11.14.0
   echarts: 6.0.0
   katex: 0.16.45
@@ -204,7 +200,7 @@ importers:
         specifier: 6.42.1
         version: 6.42.1
       '@lezer/highlight':
-        specifier: 1.2.3
+        specifier: ^1.2.1
         version: 1.2.3
       '@replit/codemirror-vim':
         specifier: 6.3.0
@@ -219,13 +215,13 @@ importers:
         specifier: ^1.1.2
         version: 1.3.0
       htmlparser2:
-        specifier: 10.1.0
+        specifier: ^10.0.0
         version: 10.1.0
       jsdom:
-        specifier: 19.0.0
+        specifier: ~19.0.0
         version: 19.0.0(supports-color@9.4.0)
       json5:
-        specifier: 2.2.3
+        specifier: ^2.2.3
         version: 2.2.3
       katex:
         specifier: 0.16.45
@@ -390,7 +386,7 @@ importers:
   packages/miniProgram:
     dependencies:
       htmlparser2:
-        specifier: 10.1.0
+        specifier: ^10.0.0
         version: 10.1.0
     devDependencies:
       rimraf:
@@ -5262,6 +5258,10 @@ packages:
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
 
+  json5@1.0.2:
+    resolution: {integrity: sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA==}
+    hasBin: true
+
   json5@2.2.3:
     resolution: {integrity: sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==}
     engines: {node: '>=6'}
@@ -7139,7 +7139,7 @@ packages:
       '@vitest/coverage-v8': 4.1.10
       '@vitest/ui': 4.1.10
       happy-dom: '*'
-      jsdom: 19.0.0
+      jsdom: '*'
       vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       '@edge-runtime/vm':
@@ -12985,6 +12985,10 @@ snapshots:
 
   json-stable-stringify-without-jsonify@1.0.1: {}
 
+  json5@1.0.2:
+    dependencies:
+      minimist: 1.2.8
+
   json5@2.2.3: {}
 
   jsonc-parser@3.3.1: {}
@@ -14989,7 +14993,7 @@ snapshots:
   tsconfig-paths@3.15.0:
     dependencies:
       '@types/json5': 0.0.29
-      json5: 2.2.3
+      json5: 1.0.2
       minimist: 1.2.8
       strip-bom: 3.0.0
 

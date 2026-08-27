@@ -22,12 +22,8 @@ overrides:
   '@codemirror/search': 6.7.0
   '@codemirror/state': 6.6.0
   '@codemirror/view': 6.42.1
-  '@lezer/highlight': 1.2.3
   '@replit/codemirror-vim': 6.3.0
   dompurify: 3.4.13
-  htmlparser2: 10.1.0
-  json5: 2.2.3
-  jsdom: 19.0.0
   mermaid: 11.14.0
   echarts: 6.0.0
   katex: 0.16.45
