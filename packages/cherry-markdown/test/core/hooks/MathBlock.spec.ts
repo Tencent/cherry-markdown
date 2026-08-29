@@ -142,6 +142,19 @@ describe('core/hooks/MathBlock', () => {
     expect(html).toContain('<text>valid</text>');
   });
 
+  it('falls back to raw source when a non-self-closing MathJax block throws', () => {
+    const tex2svg = vi.fn(() => {
+      throw new Error('invalid formula');
+    });
+    const { hook } = createMathBlock('MathJax');
+    setExternals(hook, { MathJax: { tex2svg } });
+
+    const html = hook.restoreCache(hook.toHtml('~D~Dx+y~D~D', '', '', 'x+y'));
+
+    expect(html).toContain('$$x+y$$');
+    expect(html).not.toContain('<mjx-container');
+  });
+
   it('reuses the last valid MathJax block for an merror node', () => {
     const tex2svg = vi
       .fn()

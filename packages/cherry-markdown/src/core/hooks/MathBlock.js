@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import ParagraphBase from '@/core/ParagraphBase';
-import { escapeFormulaPunctuations, LoadMathModule } from '@/utils/mathjax';
+import { escapeFormulaPunctuations, LoadMathModule, renderMathFallback } from '@/utils/mathjax';
 import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
 import { isLookbehindSupported } from '@/utils/regexp';
@@ -70,10 +70,15 @@ export default class MathBlock extends ParagraphBase {
         result = `<div data-sign="${sign}" class="Cherry-Math cherry-katex-need-render" data-type="mathBlock" data-formula-source="${encodedFormulaSource}" data-lines="${lines}" data-content="${encodeURIComponent($content)}"></div>`;
         this.$engine.asyncRenderHandler.add(`math-block-${sign}`);
       } else {
-        let html = this.katex.renderToString($content, {
-          throwOnError: false,
-          displayMode: true,
-        });
+        let html;
+        try {
+          html = this.katex.renderToString($content, {
+            throwOnError: false,
+            displayMode: true,
+          });
+        } catch (e) {
+          html = renderMathFallback($content, true);
+        }
         if (this.isSelfClosing()) {
           if (/class="katex-error"/.test(html) && this.lastCode) {
             html = this.lastCode;
@@ -94,8 +99,10 @@ export default class MathBlock extends ParagraphBase {
         try {
           svg = getHTML(this.MathJax.tex2svg($content), true);
         } catch (e) {
-          if (this.isSelfClosing()) {
+          if (this.isSelfClosing() && this.lastCode) {
             svg = this.lastCode;
+          } else {
+            svg = renderMathFallback($content, true);
           }
         }
 

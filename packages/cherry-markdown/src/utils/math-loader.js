@@ -15,7 +15,7 @@
  */
 import { isBrowser } from './env';
 import { getExternal } from './external';
-import { configureMathJax } from './mathjax';
+import { configureMathJax, renderMathFallback } from './mathjax';
 import { loadCSS, loadScript, getHTML } from './dom';
 
 /**
@@ -106,7 +106,7 @@ function setupMathJax(engine, syntax) {
             true,
           );
         } catch (e) {
-          return '';
+          return renderMathFallback(content, isDisplayMode);
         }
       };
       rerenderPendingMath(engine, { className: 'cherry-mathjax-need-render', render });
@@ -133,11 +133,16 @@ function setupKatex(engine, syntax) {
     if (!resolvedKatex) {
       return;
     }
-    const render = (content, isDisplayMode) =>
-      resolvedKatex.renderToString(content, {
-        throwOnError: false,
-        displayMode: isDisplayMode,
-      });
+    const render = (content, isDisplayMode) => {
+      try {
+        return resolvedKatex.renderToString(content, {
+          throwOnError: false,
+          displayMode: isDisplayMode,
+        });
+      } catch (e) {
+        return renderMathFallback(content, isDisplayMode);
+      }
+    };
     rerenderPendingMath(engine, { className: 'cherry-katex-need-render', render });
   });
 }

@@ -184,6 +184,8 @@ describe('utils/math-loader', () => {
     expect(loadScriptMock).toHaveBeenCalledWith('/mathjax-inline.js', 'mathjax-js');
     expect(engine.$cherry.previewer.getDom().querySelector('.cherry-mathjax-need-render')).toBeNull();
     expect(engine.asyncRenderHandler.md).not.toContain('cherry-mathjax-need-render');
+    expect(engine.asyncRenderHandler.md).toContain('$$x+1$$');
+    expect(engine.asyncRenderHandler.md).toContain('$y+1$');
   });
 
   it('renders MathJax immediately when a loaded version has no startup promise', async () => {
