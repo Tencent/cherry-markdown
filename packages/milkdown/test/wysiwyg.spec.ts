@@ -77,6 +77,67 @@ describe('Cherry WYSIWYG markdown transform', () => {
     ]);
   });
 
+  it('keeps absolute table positions after native blocks split a full document', () => {
+    const chart = ['| :line:{"title":"Trend"} | Jan | Feb |', '| --- | ---: | ---: |', '| Sales | 1 | 2 |'].join('\n');
+    const source = `[[toc]]\n\n${chart}`;
+    const tree = {
+      type: 'root',
+      children: [
+        { type: 'paragraph', position: { start: { offset: 0 }, end: { offset: 7 } }, children: [] },
+        {
+          type: 'table',
+          position: { start: { offset: 9 }, end: { offset: source.length } },
+          children: [],
+        },
+      ],
+    };
+    const parse = (segment: string) => {
+      const start = segment.indexOf('| :line:');
+      return start < 0
+        ? []
+        : [
+            {
+              type: 'table',
+              position: { start: { offset: start }, end: { offset: segment.length } },
+              children: [],
+            },
+          ];
+    };
+
+    transformCherryWysiwygTree(tree, source, parse);
+
+    expect(tree.children.map(({ type }) => type)).toEqual(['cherryToc', 'cherryTableChart']);
+    expect(tree.children[1]).toEqual(expect.objectContaining({ chartType: 'line', source: chart }));
+  });
+
+  it('turns nested foreground and background syntax into nested editable marks', () => {
+    const tree = {
+      type: 'root',
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', value: '!!#ffffff !!!#000000 black on white!!!!!' }],
+        },
+      ],
+    };
+
+    transformCherryWysiwygTree(tree, '');
+
+    expect(tree.children[0]?.children?.[0]).toEqual(
+      expect.objectContaining({
+        type: 'cherry_color',
+        color: '#ffffff',
+        children: [
+          expect.objectContaining({
+            type: 'cherry_background_color',
+            color: '#000000',
+            children: [{ type: 'text', value: 'black on white' }],
+          }),
+        ],
+      }),
+    );
+  });
+
   it('only recognizes strict YAML frontmatter at the document start', () => {
     const source = ['---', 'title: Cherry', '---', '', '# Heading', '', '---', '', 'Body', '', '---'].join('\n');
     const tree = {

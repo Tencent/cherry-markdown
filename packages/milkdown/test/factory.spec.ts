@@ -444,6 +444,21 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(ruby?.getAttribute('data-cherry-annotation')).toBe('zi');
   });
 
+  it('renders and round-trips nested foreground and background colors', async () => {
+    const element = root();
+    const value = '[!!#ffffff !!!#000000 black on white!!!!!](https://example.com)';
+    const instance = await createCherryMilkdown({ root: element, value });
+    instances.push(instance);
+
+    const foreground = element.querySelector<HTMLElement>('.cherry-wysiwyg-color');
+    const background = element.querySelector<HTMLElement>('.cherry-wysiwyg-bg');
+    expect(foreground?.textContent).toBe('black on white');
+    expect(background?.textContent).toBe('black on white');
+    expect(foreground?.style.color).toBe('rgb(255, 255, 255)');
+    expect(background?.style.backgroundColor).toBe('rgb(0, 0, 0)');
+    expect(instance.getMarkdown()).toContain('!!#ffffff !!!#000000 black on white!!!!!');
+  });
+
   it('uses native editable GFM table nodes', async () => {
     const element = root();
     const instance = await createCherryMilkdown({

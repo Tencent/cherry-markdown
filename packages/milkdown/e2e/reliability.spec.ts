@@ -123,6 +123,55 @@ test('table ECharts renders, updates and keeps all Markdown owners in sync', asy
   await attachEvidence(page, testInfo, actions, errors);
 });
 
+test('the full demo loads every shared image and keeps images selectable in preview', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+
+  const images = page.locator('.ProseMirror img:not(.ProseMirror-separator)');
+  expect(await images.count()).toBeGreaterThanOrEqual(15);
+  await expect(page.locator('.ProseMirror img[alt="表格图表"]')).toBeVisible();
+  await expect(page.locator('.ProseMirror img[alt="字体样式"]')).toBeVisible();
+  const broken = await images.evaluateAll((elements) =>
+    elements
+      .filter((element) => {
+        const image = element as HTMLImageElement;
+        return !image.complete || image.naturalWidth === 0 || image.naturalHeight === 0;
+      })
+      .map((element) => (element as HTMLImageElement).currentSrc || element.getAttribute('src')),
+  );
+  expect(broken).toEqual([]);
+  actions.push(`loaded ${await images.count()} shared demo images with intrinsic dimensions`);
+
+  const feature = page.locator('.ProseMirror img[alt="表格图表"]');
+  const before = await readState(page);
+  await feature.click();
+  await expect(feature).toHaveClass(/ProseMirror-selectednode/);
+  await expect.poll(async () => await readState(page)).toEqual(before);
+  actions.push('selected a rendered feature image without changing Markdown state');
+
+  const nestedFontLink = page
+    .locator('.ProseMirror a[href="http://www.qq.com"]')
+    .filter({ hasText: '黑底白字超链接' })
+    .first();
+  await expect(nestedFontLink).toHaveText('黑底白字超链接');
+  await expect(nestedFontLink.locator('.cherry-wysiwyg-color')).toHaveCSS('color', 'rgb(255, 255, 255)');
+  await expect(nestedFontLink.locator('.cherry-wysiwyg-bg')).toHaveCSS('background-color', 'rgb(0, 0, 0)');
+  actions.push('rendered nested foreground and background font styles without leaking Markdown markers');
+
+  const nativeLineChart = page
+    .locator('.cherry-embed--cherry_native_block')
+    .filter({ hasText: '示例（折线图）' })
+    .first();
+  await nativeLineChart.scrollIntoViewIfNeeded();
+  await expect(nativeLineChart.locator('.cherry-echarts-wrapper svg')).toHaveCount(1);
+  actions.push('rendered the table ECharts nested inside the native two-column example');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
 test('rapid inline-code editing never rolls back and mode/API updates stay consistent', async ({ page }, testInfo) => {
   const errors = captureBrowserErrors(page);
   const actions: string[] = [];
@@ -203,7 +252,7 @@ test('Cherry toolbar and search operate on the focused Milkdown surface', async 
   const paragraph = page.locator('.ProseMirror p', { hasText: 'Toolbar bridge text.' });
   await expect(paragraph).toBeVisible();
   await paragraph.click({ position: { x: 8, y: 10 } });
-  await page.keyboard.press('Home');
+  for (let index = 0; index <= 'Toolbar bridge text.'.length; index += 1) await page.keyboard.press('ArrowLeft');
   for (let index = 0; index < 'Toolbar'.length; index += 1) await page.keyboard.press('Shift+ArrowRight');
   await expect.poll(() => page.evaluate(() => getSelection()?.toString())).toBe('Toolbar');
   await page.locator('.toolbar-left [title="加粗"]').click();

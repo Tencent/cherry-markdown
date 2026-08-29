@@ -81,6 +81,18 @@ function collectDelimitedBlocks(
 
 const INLINE_MATCHERS = [
   {
+    type: 'cherry_color',
+    pattern: /!!(#[0-9a-zA-Z]{3,6}|[a-z]{3,20})\s(!!!(#[0-9a-zA-Z]{3,6}|[a-z]{3,10})\s[\s\S]+?!!!)!!/,
+    attrs: (match: RegExpExecArray) => ({ color: match[1] ?? '' }),
+    text: (match: RegExpExecArray) => match[2] ?? '',
+  },
+  {
+    type: 'cherry_background_color',
+    pattern: /!!!(#[0-9a-zA-Z]{3,6}|[a-z]{3,10})\s(!!(#[0-9a-zA-Z]{3,6}|[a-z]{3,20})\s[\s\S]+?!!)!!!/,
+    attrs: (match: RegExpExecArray) => ({ color: match[1] ?? '' }),
+    text: (match: RegExpExecArray) => match[2] ?? '',
+  },
+  {
     type: 'cherry_background_color',
     pattern: /!!!(#[0-9a-zA-Z]{3,6}|[a-z]{3,10})\s([\s\S]+?)!!!/,
     attrs: (match: RegExpExecArray) => ({ color: match[1] ?? '' }),
@@ -213,6 +225,18 @@ export function findCherryInlineMatches(source: string): CherryInlineMatch[] {
 
 function parseChildren(body: string, parse: ParseMarkdown): MarkdownNode[] {
   return parse(body).length ? parse(body) : [{ type: 'paragraph', children: [{ type: 'text', value: '' }] }];
+}
+
+function offsetPositions(nodes: MarkdownNode[], offset: number) {
+  const visit = (node: MarkdownNode) => {
+    const start = node.position?.start?.offset;
+    const end = node.position?.end?.offset;
+    if (typeof start === 'number') node.position!.start!.offset = start + offset;
+    if (typeof end === 'number') node.position!.end!.offset = end + offset;
+    node.children?.forEach(visit);
+  };
+  nodes.forEach(visit);
+  return nodes;
 }
 
 function parsePanel(source: string, parse: ParseMarkdown): MarkdownNode {
@@ -394,7 +418,7 @@ function replaceRootBlocks(
       });
     if (!supplementalDefinitions) {
       const nodes = resolveReferences(parse(segment, { supplementalDefinitions: false }), segment);
-      return nodes.length || !segment.trim() ? nodes : fallback();
+      return nodes.length || !segment.trim() ? offsetPositions(nodes, baseOffset) : fallback();
     }
     const separator = '\n\n';
     const nodes = parse(`${segment}${separator}${supplementalDefinitions}`, { supplementalDefinitions: false });
@@ -405,7 +429,7 @@ function replaceRootBlocks(
       }),
       segment,
     );
-    return resolved.length || !segment.trim() ? resolved : fallback();
+    return resolved.length || !segment.trim() ? offsetPositions(resolved, baseOffset) : fallback();
   };
   let sourceCursor = 0;
   for (const block of blocks) {
@@ -459,7 +483,11 @@ function splitText(node: MarkdownNode): MarkdownNode[] {
     if (match.type === 'cherry_emoji') {
       next.push({ type: 'cherryEmoji', value: match.source, source: match.source });
     } else {
-      next.push({ type: match.type, children: [{ type: 'text', value: match.text ?? '' }], ...match.attrs });
+      next.push({
+        type: match.type,
+        children: splitText({ type: 'text', value: match.text ?? '' }),
+        ...match.attrs,
+      });
     }
     cursor = match.to;
   }
