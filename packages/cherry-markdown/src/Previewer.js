@@ -519,6 +519,9 @@ export default class Previewer {
       if (this.applyingDomChanges) {
         return;
       }
+      if (this.editingBridge?.handleScroll?.(domContainer) === true) {
+        return;
+      }
       if (this.disableScrollListener) {
         // 如果正在动画滚动,不要重置标志,让动画继续控制
         return;
@@ -1408,6 +1411,14 @@ export default class Previewer {
   }
 
   scrollToLineNum(lineNum, linePercent) {
+    if (this.editingBridge?.handleEditorScroll?.(lineNum, linePercent) === true) {
+      if (this.animation.timer) {
+        cancelAnimationFrame(this.animation.timer);
+        this.animation.timer = 0;
+      }
+      this.disableScrollListener = false;
+      return;
+    }
     const top = this.$getTopByLineNum(lineNum, linePercent);
     this.$scrollAnimation(top);
   }

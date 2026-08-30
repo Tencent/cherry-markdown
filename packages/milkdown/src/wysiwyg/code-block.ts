@@ -1,6 +1,6 @@
 import { codeBlockSchema } from '@milkdown/kit/preset/commonmark';
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
-import { Plugin } from '@milkdown/kit/prose/state';
+import { Plugin, TextSelection } from '@milkdown/kit/prose/state';
 import { Decoration, DecorationSet } from '@milkdown/kit/prose/view';
 import type { EditorView, NodeView, ViewMutationRecord } from '@milkdown/kit/prose/view';
 import { $prose, $view } from '@milkdown/kit/utils';
@@ -118,7 +118,7 @@ class CherryCodeBlockView implements NodeView {
     this.dom = document.createElement('div');
     this.dom.className = 'cherry-milkdown-code-block';
     this.dom.dataset.type = 'codeBlock';
-    this.dom.dataset.cherryPreviewEditing = 'true';
+    this.dom.addEventListener('click', this.stopLegacyClick);
 
     const tools = document.createElement('div');
     tools.className = 'cherry-milkdown-code-block__tools';
@@ -151,6 +151,7 @@ class CherryCodeBlockView implements NodeView {
     this.contentDOM = document.createElement('code');
     this.contentDOM.className = 'cherry-milkdown-code-block__content';
     this.contentDOM.spellcheck = false;
+    this.contentDOM.addEventListener('click', this.activateContent);
     this.pre.append(this.gutter, this.contentDOM);
     this.dom.append(tools, this.pre);
     this.sync();
@@ -184,6 +185,8 @@ class CherryCodeBlockView implements NodeView {
   destroy() {
     this.language.removeEventListener('change', this.updateLanguage);
     this.copy.removeEventListener('click', this.copyCode);
+    this.contentDOM.removeEventListener('click', this.activateContent);
+    this.dom.removeEventListener('click', this.stopLegacyClick);
   }
 
   private sync() {
@@ -214,6 +217,47 @@ class CherryCodeBlockView implements NodeView {
     this.view.dispatch(this.view.state.tr.setNodeAttribute(position, 'language', this.language.value));
     this.view.focus();
   };
+
+  private activateContent = (event: MouseEvent) => {
+    if (event.button !== 0) return;
+    // This NodeView has already translated the browser's DOM selection below.
+    // Do not let ProseMirror's root click handler replace it with a selection
+    // around the whole custom node after the event bubbles.
+    event.stopPropagation();
+    const position = this.getPos();
+    if (typeof position !== 'number') return;
+    const start = position + 1;
+    const end = start + this.node.content.size;
+    const selection = this.contentDOM.ownerDocument.getSelection();
+    let anchor: number | undefined;
+    let head: number | undefined;
+    if (
+      selection?.anchorNode &&
+      selection.focusNode &&
+      this.contentDOM.contains(selection.anchorNode) &&
+      this.contentDOM.contains(selection.focusNode)
+    ) {
+      try {
+        anchor = this.view.posAtDOM(selection.anchorNode, selection.anchorOffset);
+        head = this.view.posAtDOM(selection.focusNode, selection.focusOffset);
+      } catch {
+        // Fall through to coordinate mapping when a syntax decoration was
+        // replaced between pointerdown and click.
+      }
+    }
+    if (anchor === undefined || head === undefined) {
+      const mapped = this.view.posAtCoords({ left: event.clientX, top: event.clientY });
+      anchor = mapped?.pos ?? end;
+      head = anchor;
+    }
+    const clamp = (value: number) => Math.max(start, Math.min(end, value));
+    this.view.dispatch(
+      this.view.state.tr.setSelection(TextSelection.create(this.view.state.doc, clamp(anchor), clamp(head))),
+    );
+    this.view.focus();
+  };
+
+  private stopLegacyClick = (event: MouseEvent) => event.stopPropagation();
 
   private copyCode = () => {
     const value = this.node.textContent;

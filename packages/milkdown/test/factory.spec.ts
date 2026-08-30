@@ -746,7 +746,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
 
-    const codeBlock = element.querySelector<HTMLElement>('[data-type="codeBlock"]');
+    const codeBlock = element.querySelector<HTMLElement>('.cherry-milkdown-code-block');
     expect(codeBlock).not.toBeNull();
     expect(codeBlock?.classList.contains('cherry-milkdown-code-block')).toBe(true);
     expect(codeBlock?.closest('.cherry-embed')).toBeNull();

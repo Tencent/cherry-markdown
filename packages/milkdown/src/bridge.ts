@@ -61,8 +61,20 @@ export function createCherryEditingBridge(
   const rememberPreview = () => {
     previewWasActive = true;
   };
+  const activatePreview = (event: PointerEvent) => {
+    rememberPreview();
+    if (event.button !== 0 || !view.editable || view.hasFocus()) return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest('button, input, select, textarea, [contenteditable="false"]')) return;
+    if ((event.metaKey || event.ctrlKey) && target?.closest('a')) return;
+
+    // CodeMirror remains focused after Cherry switches the active editing
+    // surface. Claim focus before the browser resolves the pointer selection;
+    // the following mousedown still places or extends the native selection.
+    view.focus();
+  };
   view.dom.addEventListener('focusin', rememberPreview);
-  view.dom.addEventListener('pointerdown', rememberPreview);
+  view.dom.addEventListener('pointerdown', activatePreview, true);
 
   const isActive = () => previewWasActive && !cherry.getCodeMirror?.()?.hasFocus;
 
@@ -295,13 +307,20 @@ export function createCherryEditingBridge(
 
   return {
     isActive,
+    // The Milkdown renderer owns the whole preview DOM as one ProseMirror
+    // root, so Cherry's top-level data-lines mapper is never valid, even when
+    // focus temporarily leaves the preview (for example while opening a link).
+    handleScroll: () => true,
+    // A delayed CodeMirror scroll event must not move the preview away from
+    // its current selection or an in-preview anchor navigation.
+    handleEditorScroll: () => isActive(),
     queryCommandState,
     runCommand,
     insert: (content, options) => insertMarkdown(content, options.select),
     getSearchAdapter: () => searchAdapter,
     destroy() {
       view.dom.removeEventListener('focusin', rememberPreview);
-      view.dom.removeEventListener('pointerdown', rememberPreview);
+      view.dom.removeEventListener('pointerdown', activatePreview, true);
     },
   };
 }

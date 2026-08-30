@@ -79,6 +79,10 @@ export interface CherryToolbarCommandState {
 
 export interface CherryPreviewEditingBridge {
   isActive(): boolean;
+  /** Return true when the preview editor owns scroll synchronization. */
+  handleScroll?(container: HTMLElement): boolean;
+  /** Return true to suppress Cherry's source-to-preview line animation. */
+  handleEditorScroll?(lineNum: number | null, linePercent?: number): boolean;
   queryCommandState?(command: CherryToolbarCommand): CherryToolbarCommandState;
   runCommand?(command: CherryToolbarCommand): boolean;
   insert?(content: string, options: { select: boolean; focus: boolean }): boolean;

@@ -338,6 +338,61 @@ test('heading toggles back to paragraph and code blocks stay in the preview edit
   await attachEvidence(page, testInfo, actions, errors);
 });
 
+test('physical clicks edit code and navigate links and TOC inside the preview', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  const filler = Array.from({ length: 80 }, (_, index) => `Paragraph ${index}.`).join('\n\n');
+  await page.evaluate((markdown) => {
+    const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+    scope.cherry.setValue(markdown);
+  }, `# Target\n\n${filler}\n\n[Jump to target](#target)\n\n\`\`\`js\nconst value = 1;\n\`\`\`\n\n[[toc]]`);
+
+  const editor = page.locator('.ProseMirror');
+  const code = editor.locator('.cherry-milkdown-code-block code');
+  await page.locator('.cherry-editor .cm-content').click();
+  await expect(page.locator('.cherry-editor .cm-content')).toBeFocused();
+  await code.click({ position: { x: 90, y: 10 } });
+  await expect(editor).toBeFocused();
+  await page.keyboard.press('End');
+  await page.keyboard.press('Enter');
+  await page.keyboard.insertText('const clicked = true;');
+  await expect.poll(async () => (await readState(page)).cherry).toContain('const clicked = true;');
+  await page.waitForTimeout(500);
+  actions.push('focused and edited a fenced code block through a physical click');
+
+  const preview = page.locator('.cherry-previewer').first();
+  const targetHeading = editor.locator('h1#target');
+  const link = editor.getByRole('link', { name: 'Jump to target' });
+  await link.scrollIntoViewIfNeeded();
+  await link.click();
+  await expect(editor).toBeFocused();
+  await expect(link).toHaveAttribute('title', '按 Ctrl/⌘ 点击打开链接');
+  const popupPromise = page.waitForEvent('popup');
+  await link.click({ modifiers: ['ControlOrMeta'] });
+  const popup = await popupPromise;
+  await expect(popup).toHaveURL(/#target$/);
+  await popup.close();
+  actions.push('kept a normal link editable and followed it with Ctrl/Cmd click');
+
+  const tocLink = editor.locator('.cherry-source-node--cherry_toc a', { hasText: 'Target' });
+  await tocLink.scrollIntoViewIfNeeded();
+  await tocLink.click();
+  await expect.poll(async () => {
+    const [headingBox, previewBox] = await Promise.all([targetHeading.boundingBox(), preview.boundingBox()]);
+    return headingBox && previewBox ? Math.abs(headingBox.y - previewBox.y) : Number.POSITIVE_INFINITY;
+  }).toBeLessThan(32);
+  await expect(page).toHaveURL(/#target$/);
+  actions.push('navigated to a generated heading through the native-looking TOC');
+
+  const state = await readState(page);
+  expect(state.cherry).toBe(state.codeMirror);
+  expect(state.cherry).toBe(state.milkdown);
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
 test('slash menu exposes H6 and keyboard code-block conversion without leaving preview', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
@@ -394,7 +449,7 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
     {
       id: 'code-block',
       native: '#native [data-type="codeBlock"]',
-      milkdown: '#milkdown [data-type="codeBlock"]',
+      milkdown: '#milkdown .cherry-milkdown-code-block',
     },
   ];
   const layout: Array<{

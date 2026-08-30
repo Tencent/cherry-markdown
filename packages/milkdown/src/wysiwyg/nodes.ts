@@ -9,6 +9,10 @@ import type { CherryWysiwygConfig } from './config.js';
 import type { CherryVisualRendererResult } from './types.js';
 
 let mermaidRenderId = 0;
+const headingNavigationTasks = new WeakMap<
+  EditorView,
+  { frames: number[]; timers: Array<ReturnType<typeof setTimeout>> }
+>();
 
 async function renderMermaid(source: string) {
   const { default: mermaid } = await import('mermaid');
@@ -551,6 +555,57 @@ class CompoundView implements NodeView {
   };
 }
 
+function headingId(node: ProseNode, usedIds: Map<string, number>) {
+  const explicitId = String(node.attrs.id ?? '');
+  if (explicitId) return explicitId;
+  const baseId = node.textContent.toLowerCase().trim().replace(/\s+/g, '-');
+  if (!baseId) return '';
+  const occurrence = (usedIds.get(baseId) ?? 0) + 1;
+  usedIds.set(baseId, occurrence);
+  return occurrence === 1 ? baseId : `${baseId}-#${occurrence}`;
+}
+
+function navigateToHeading(view: EditorView, id: string) {
+  const target = Array.from(view.dom.querySelectorAll<HTMLElement>('[id]')).find((element) => element.id === id);
+  if (!target) return false;
+  view.dom.blur();
+  const scroll = () => {
+    if (!target.isConnected) return;
+    let container = target.parentElement;
+    while (container && container !== document.body) {
+      const style = getComputedStyle(container);
+      if (/^(?:auto|scroll)$/.test(style.overflowY) && container.scrollHeight > container.clientHeight) {
+        const offset = target.getBoundingClientRect().top - container.getBoundingClientRect().top;
+        container.scrollTop += offset - (Number.parseFloat(style.paddingTop) || 0);
+        return;
+      }
+      container = container.parentElement;
+    }
+    target.scrollIntoView({ block: 'start' });
+  };
+  const previous = headingNavigationTasks.get(view);
+  previous?.frames.forEach(cancelAnimationFrame);
+  previous?.timers.forEach(clearTimeout);
+  const task: { frames: number[]; timers: Array<ReturnType<typeof setTimeout>> } = { frames: [], timers: [] };
+  headingNavigationTasks.set(view, task);
+  scroll();
+  task.frames.push(
+    requestAnimationFrame(() => {
+      scroll();
+      task.frames.push(requestAnimationFrame(scroll));
+    }),
+  );
+  task.timers.push(setTimeout(scroll, 100), setTimeout(scroll, 350));
+  return true;
+}
+
+function cancelHeadingNavigation(view: EditorView) {
+  const task = headingNavigationTasks.get(view);
+  task?.frames.forEach(cancelAnimationFrame);
+  task?.timers.forEach(clearTimeout);
+  headingNavigationTasks.delete(view);
+}
+
 function renderToc(view: EditorView) {
   const nav = document.createElement('div');
   nav.className = 'toc';
@@ -558,6 +613,7 @@ function renderToc(view: EditorView) {
   title.className = 'toc-title';
   title.textContent = '目录';
   const list = document.createElement('ul');
+  const usedIds = new Map<string, number>();
   view.state.doc.descendants((node) => {
     if (node.type.name !== 'heading') return;
     const item = document.createElement('li');
@@ -565,7 +621,8 @@ function renderToc(view: EditorView) {
     const link = document.createElement('a');
     const level = Number(node.attrs.level ?? 1);
     link.className = `level-${level}`;
-    link.href = `#${String(node.attrs.id ?? '')}`;
+    const id = headingId(node, usedIds);
+    link.setAttribute('href', id ? `#${encodeURIComponent(id)}` : '#');
     link.target = '_self';
     link.textContent = node.textContent;
     item.append(link);
@@ -581,6 +638,8 @@ class SourceLeafView implements NodeView {
   private readonly view: EditorView;
   private readonly getPos: () => number | undefined;
   private readonly source?: HTMLElement;
+  private tocRefreshFrame?: number;
+  private destroyed = false;
 
   constructor(node: ProseNode, view: EditorView, getPos: () => number | undefined, readonly: boolean) {
     this.node = node;
@@ -589,7 +648,10 @@ class SourceLeafView implements NodeView {
     this.dom = document.createElement('section');
     this.dom.className = `cherry-source-node cherry-source-node--${node.type.name}`;
     if (node.type.name === 'cherry_toc') {
-      this.dom.append(renderToc(view));
+      this.dom.addEventListener('mousedown', this.prepareTocNavigation);
+      this.dom.addEventListener('click', this.navigateToc);
+      this.refreshToc();
+      this.scheduleTocRefresh();
       return;
     }
     const header = document.createElement('header');
@@ -623,6 +685,7 @@ class SourceLeafView implements NodeView {
   update(node: ProseNode) {
     if (node.type !== this.node.type) return false;
     this.node = node;
+    if (node.type.name === 'cherry_toc') this.scheduleTocRefresh();
     if (this.source && document.activeElement !== this.source) {
       this.source.textContent = String(node.attrs.source ?? '');
     }
@@ -639,12 +702,60 @@ class SourceLeafView implements NodeView {
   }
 
   stopEvent(event: Event) {
+    if (this.node.type.name === 'cherry_toc') {
+      return Boolean((event.target as Element | null)?.closest('a'));
+    }
     return Boolean(this.source?.contains(event.target as Node));
   }
 
   ignoreMutation(mutation: ViewMutationRecord) {
+    if (this.node.type.name === 'cherry_toc') return true;
     return Boolean(this.source?.contains(mutation.target));
   }
+
+  destroy() {
+    this.destroyed = true;
+    this.dom.removeEventListener('mousedown', this.prepareTocNavigation);
+    this.dom.removeEventListener('click', this.navigateToc);
+    if (this.tocRefreshFrame !== undefined) cancelAnimationFrame(this.tocRefreshFrame);
+  }
+
+  private refreshToc = () => {
+    if (this.destroyed || this.node.type.name !== 'cherry_toc') return;
+    this.dom.replaceChildren(renderToc(this.view));
+  };
+
+  private scheduleTocRefresh = () => {
+    if (this.tocRefreshFrame !== undefined) cancelAnimationFrame(this.tocRefreshFrame);
+    this.tocRefreshFrame = requestAnimationFrame(() => {
+      this.tocRefreshFrame = undefined;
+      this.refreshToc();
+    });
+  };
+
+  private navigateToc = (event: Event) => {
+    const link = event.target instanceof Element ? event.target.closest('a[href^="#"]') : null;
+    if (!(link instanceof HTMLAnchorElement)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const id = decodeURIComponent(link.hash.slice(1));
+    if (!id) return;
+    if (!navigateToHeading(this.view, id)) return;
+    try {
+      window.location.hash = encodeURIComponent(id);
+    } catch {
+      // Navigation is still complete when history is unavailable (for example,
+      // an embedded file preview with an opaque origin).
+    }
+  };
+
+  private prepareTocNavigation = (event: MouseEvent) => {
+    if (event.button !== 0) return;
+    const link = event.target instanceof Element ? event.target.closest('a[href^="#"]') : null;
+    if (!link) return;
+    event.preventDefault();
+    event.stopPropagation();
+  };
 
   private commitSource = () => {
     if (!this.source) return;
@@ -1124,17 +1235,41 @@ export const cherryLinkTargetClickPlugin = $prose(
     new Plugin({
       props: {
         handleDOMEvents: {
-          click: (_view, event) => {
+          click: (view, event) => {
             const origin = event.target;
             const link = origin instanceof Element ? origin.closest('a') : null;
+            if (!(link instanceof HTMLAnchorElement) || link.closest('.cherry-source-node--cherry_toc')) return false;
             const marker = link?.nextElementSibling;
-            if (!(link instanceof HTMLAnchorElement) || !marker?.classList.contains('cherry-link-target')) return false;
-            const target = marker.getAttribute('data-target') ?? '';
-            if (target && link.target !== target) link.target = target;
-            if (target === '_blank' && !link.rel.includes('noopener')) link.rel = `${link.rel} noopener`.trim();
-            return false;
+            if (marker?.classList.contains('cherry-link-target')) {
+              const target = marker.getAttribute('data-target') ?? '';
+              if (target && link.target !== target) link.target = target;
+              if (target === '_blank' && !link.rel.includes('noopener')) link.rel = `${link.rel} noopener`.trim();
+            }
+
+            if (!view.editable) return false;
+            event.preventDefault();
+            link.title = '按 Ctrl/⌘ 点击打开链接';
+            if (!event.metaKey && !event.ctrlKey) return false;
+
+            event.stopPropagation();
+            if (!/^(?:https?:|mailto:|tel:)/i.test(link.href)) return true;
+            window.open(link.href, '_blank', 'noopener');
+            return true;
           },
         },
+      },
+      view: (view) => {
+        const restoreHash = () => {
+          const id = decodeURIComponent(window.location.hash.slice(1));
+          if (id) navigateToHeading(view, id);
+        };
+        const restoreTimer = setTimeout(restoreHash, 350);
+        return {
+          destroy: () => {
+            clearTimeout(restoreTimer);
+            cancelHeadingNavigation(view);
+          },
+        };
       },
     }),
 );
@@ -1168,14 +1303,27 @@ export const cherryTocRefreshPlugin = $prose(
           return DecorationSet.create(state.doc, anchors);
         },
       },
-      view: () => ({
-        update: (view, previousState) => {
-          if (previousState.doc.eq(view.state.doc)) return;
-          view.dom
-            .querySelectorAll<HTMLElement>('.cherry-source-node--cherry_toc')
-            .forEach((dom) => dom.replaceChildren(renderToc(view)));
-        },
-      }),
+      view: () => {
+        let refreshFrame: number | undefined;
+        return {
+          update: (view, previousState) => {
+            if (previousState.doc.eq(view.state.doc)) return;
+            const refresh = () =>
+              view.dom
+                .querySelectorAll<HTMLElement>('.cherry-source-node--cherry_toc')
+                .forEach((dom) => dom.replaceChildren(renderToc(view)));
+            refresh();
+            if (refreshFrame !== undefined) cancelAnimationFrame(refreshFrame);
+            refreshFrame = requestAnimationFrame(() => {
+              refreshFrame = undefined;
+              refresh();
+            });
+          },
+          destroy: () => {
+            if (refreshFrame !== undefined) cancelAnimationFrame(refreshFrame);
+          },
+        };
+      },
     }),
 );
 
