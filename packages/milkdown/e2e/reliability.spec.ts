@@ -318,7 +318,7 @@ test('rapid inline-code editing never rolls back and mode/API updates stay consi
   await attachEvidence(page, testInfo, actions, errors);
 });
 
-test('Cherry toolbar and search operate on the focused Milkdown surface', async ({ page }, testInfo) => {
+test('Cherry toolbar operates on the focused Milkdown surface', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
   await page.goto(demoPath);
@@ -342,11 +342,6 @@ test('Cherry toolbar and search operate on the focused Milkdown surface', async 
     })
     .toEqual({ synchronized: true, markdown: '**Toolbar** bridge text.' });
   actions.push('selected preview text and applied Cherry bold toolbar command');
-
-  await page.locator('.toolbar-left [title="搜索/替换"]').click();
-  await page.locator('.cherry-searcher__input').fill('bridge');
-  await expect(page.locator('.cherry-searcher__counter')).toHaveText('1/1');
-  actions.push('searched the focused Milkdown document with Cherry search UI');
 
   expect(errors).toEqual([]);
   await attachEvidence(page, testInfo, actions, errors);

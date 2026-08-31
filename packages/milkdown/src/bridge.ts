@@ -1,7 +1,7 @@
 import { commandsCtx, editorViewCtx, parserCtx, serializerCtx } from '@milkdown/kit/core';
 import { Slice } from '@milkdown/kit/prose/model';
 import { toggleMark } from '@milkdown/kit/prose/commands';
-import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
+import { NodeSelection } from '@milkdown/kit/prose/state';
 import type { EditorView } from '@milkdown/kit/prose/view';
 import {
   insertHrCommand,
@@ -503,48 +503,6 @@ export function createCherryEditingBridge(
     return { active: false, enabled: view.editable };
   };
 
-  const searchableDocument = () => {
-    const characters = Array.from({ length: view.state.doc.content.size }, () => '\n');
-    view.state.doc.descendants((node, position) => {
-      if (!node.isText || !node.text) return;
-      Array.from(node.text).forEach((character, offset) => {
-        characters[position + offset] = character;
-      });
-    });
-    return characters.join('');
-  };
-
-  const setSearchSelection = (from: number, to: number, scrollIntoView = false) => {
-    const max = view.state.doc.content.size;
-    const safeFrom = Math.max(0, Math.min(from, max));
-    const safeTo = Math.max(safeFrom, Math.min(to, max));
-    let transaction = view.state.tr.setSelection(
-      TextSelection.between(view.state.doc.resolve(safeFrom), view.state.doc.resolve(safeTo)),
-    );
-    if (scrollIntoView) transaction = transaction.scrollIntoView();
-    view.dispatch(transaction);
-  };
-
-  const searchAdapter = {
-    getDocString: searchableDocument,
-    getSelection: () => ({ from: view.state.selection.from, to: view.state.selection.to }),
-    getSelectedText: () => selectedText(view),
-    getCursorHead: () => view.state.selection.head,
-    setSelection: (from: number, to: number, options?: { scrollIntoView?: boolean }) =>
-      setSearchSelection(from, to, options?.scrollIntoView),
-    setSelections: (ranges: Array<{ from: number; to: number }>, options?: { scrollIntoView?: boolean }) => {
-      const range = ranges[0];
-      if (range) setSearchSelection(range.from, range.to, options?.scrollIntoView);
-    },
-    replaceRange: (text: string, from: number, to: number) => {
-      view.dispatch(view.state.tr.insertText(text, from, to));
-    },
-    setSearchQuery: (_pattern: string, _caseSensitive: boolean, _asRegex: boolean) => {},
-    clearSearchQuery: () => {},
-    focus: () => view.focus(),
-    isReadOnly: () => !view.editable,
-  };
-
   return {
     isActive,
     // Milkdown owns the preview DOM, so map its top-level nodes back to the
@@ -592,7 +550,6 @@ export function createCherryEditingBridge(
       }
       return target instanceof HTMLElement ? updateMermaid(target, presentation) : false;
     },
-    getSearchAdapter: () => searchAdapter,
     destroy() {
       view.dom.removeEventListener('focusin', rememberPreview);
       view.dom.removeEventListener('pointerdown', activatePreview, true);

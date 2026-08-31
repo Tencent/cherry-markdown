@@ -890,11 +890,6 @@ export default class Previewer {
     return true;
   }
 
-  getEditingAdapter() {
-    if (!this.editingBridge?.isActive?.()) return null;
-    return this.editingBridge.getSearchAdapter?.() ?? null;
-  }
-
   runEditingCommand(command) {
     if (!this.editingBridge?.isActive?.()) return false;
     return this.editingBridge.runCommand?.(command) === true;

@@ -722,13 +722,6 @@ describe('createCherryMilkdown WYSIWYG', () => {
     await vi.waitFor(() => expect(view.state.doc.firstChild?.type.name).toBe('code_block'));
     expect(instance.getMarkdown()).toContain('```');
 
-    const search = bridge?.getSearchAdapter?.();
-    const after = search?.getDocString().indexOf('after') ?? -1;
-    search?.setSelection(after, after + 5);
-    expect(search?.getSelectedText()).toBe('after');
-    search?.replaceRange('Milkdown', after, after + 5);
-    await vi.waitFor(() => expect(markdown).toContain('Milkdown'));
-
     let hasUploadedImage = false;
     const imageMenu = {
       onClick: (selection: string) => {

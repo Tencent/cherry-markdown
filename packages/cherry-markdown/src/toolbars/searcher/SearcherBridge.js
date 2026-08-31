@@ -53,9 +53,6 @@ export default class SearcherBridge {
 
   /** 编辑区可见时允许搜索（只读模式仍可使用查找） */
   isSearchAvailable() {
-    if (this.cherry.previewer?.getEditingAdapter?.()) {
-      return true;
-    }
     const editorDom = this.cherry.editor?.options?.editorDom;
     const editor = this.cherry.editor?.editor;
     if (!editorDom || !editor) {

@@ -232,38 +232,6 @@ describe('SearcherBridge', () => {
     expect(setSearchQuery).toHaveBeenCalledWith('hello', true, true);
   });
 
-  it('搜索和替换动态作用于当前激活的预览编辑器', () => {
-    const editorDom = document.createElement('div');
-    editorDom.className = 'cherry-editor cherry-editor--hidden';
-    const previewAdapter = {
-      getDocString: vi.fn(() => '\nPreview text\n'),
-      getSelection: vi.fn(() => ({ from: 1, to: 8 })),
-      getSelectedText: vi.fn(() => 'Preview'),
-      getCursorHead: vi.fn(() => 8),
-      setSelection: vi.fn(),
-      setSelections: vi.fn(),
-      replaceRange: vi.fn(),
-      setSearchQuery: vi.fn(),
-      clearSearchQuery: vi.fn(),
-      focus: vi.fn(),
-      isReadOnly: vi.fn(() => false),
-    };
-    const cherry = createMockCherry({
-      editor: {
-        editor: createMockCherry().editor?.editor,
-        options: { editorDom, wrapperDom: document.body },
-      },
-      previewer: { getEditingAdapter: () => previewAdapter },
-    });
-
-    initSearcherBridge(cherry);
-    const bridge = getSearcherBridge(cherry);
-    expect(bridge?.isSearchAvailable()).toBe(true);
-    expect(bridge?.panel.editorAdapter.getDocString()).toBe('\nPreview text\n');
-    bridge?.panel.editorAdapter.replaceRange('Milkdown', 1, 8);
-    expect(previewAdapter.replaceRange).toHaveBeenCalledWith('Milkdown', 1, 8);
-  });
-
   it('destroySearcherBridge 销毁 Bridge 并解绑 Cherry 事件', () => {
     const editorDom = document.createElement('div');
     const $event = new Event('test');

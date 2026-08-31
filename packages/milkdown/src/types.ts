@@ -112,22 +112,7 @@ export interface CherryPreviewEditingBridge {
   ownsPreviewElement?(target: Element, kind: CherryPreviewElementKind): boolean;
   /** Apply an existing Cherry preview control to an element owned by this editing surface. */
   updatePreviewElement?(target: Element, change: CherryPreviewElementChange): boolean;
-  getSearchAdapter?(): CherrySearchAdapter;
   destroy?(): void;
-}
-
-export interface CherrySearchAdapter {
-  getDocString(): string;
-  getSelection(): { from: number; to: number };
-  getSelectedText(): string;
-  getCursorHead(): number;
-  setSelection(from: number, to: number, options?: { scrollIntoView?: boolean }): void;
-  setSelections(ranges: Array<{ from: number; to: number }>, options?: { scrollIntoView?: boolean }): void;
-  replaceRange(text: string, from: number, to: number): void;
-  setSearchQuery(pattern: string, caseSensitive: boolean, asRegex: boolean): void;
-  clearSearchQuery(): void;
-  focus(): void;
-  isReadOnly(): boolean;
 }
 
 /** Minimal public surface used to connect Milkdown to an existing Cherry previewer. */
