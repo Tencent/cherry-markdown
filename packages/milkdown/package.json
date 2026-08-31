@@ -61,7 +61,7 @@
     "test": "yarn workspace cherry-markdown build:engine && vitest run --config vitest.config.ts",
     "test:e2e": "playwright test --config playwright.config.ts",
     "test:consumer": "yarn workspace cherry-markdown build && yarn build && node ./scripts/verify-consumer.mjs",
-    "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.demo.json --noEmit"
+    "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project examples/react/tsconfig.json --noEmit"
   },
   "peerDependencies": {
     "@milkdown/kit": "^7.21.3",
