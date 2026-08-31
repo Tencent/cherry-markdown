@@ -395,14 +395,15 @@ export default class Engine {
   /**
    * 流式输出场景时，把最后的光标占位替换为配置的dom元素，并在一段时间后删除该元素
    * @param {string} md 内容
+   * @param {boolean} forceNoCursor 是否强制不添加光标占位
    * @returns {string}
    */
-  $clearFlowSessionCursorCache(md) {
+  $clearFlowSessionCursorCache(md, forceNoCursor = false) {
     if (this.$cherry.options.engine.global.flowSessionCursor) {
       if (this.clearCursorTimer) {
         clearTimeout(this.clearCursorTimer);
       }
-      if (typeof this.$cherry.clearFlowSessionCursor === 'function') {
+      if (!forceNoCursor && typeof this.$cherry.clearFlowSessionCursor === 'function') {
         this.clearCursorTimer = setTimeout(() => {
           this.$cherry.clearFlowSessionCursor();
         }, 2560);
@@ -427,7 +428,7 @@ export default class Engine {
     $md = this.$afterMakeHtml($md);
     this.$fireHookAction($md, 'paragraph', '$cleanCache');
     $md = this.$deCacheBigData($md);
-    $md = this.$clearFlowSessionCursorCache($md);
+    $md = this.$clearFlowSessionCursorCache($md, forceNoCursor);
     this.$completeMakeHtml($md);
     if (returnType === 'object') {
       return htmlparser2.parseDocument($md.replace(/\n/g, ''));
