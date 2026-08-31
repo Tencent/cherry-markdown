@@ -52,7 +52,9 @@ export default class InlineMath extends ParagraphBase {
     const linesArr = m1.match(/\n/g);
     const lines = linesArr ? linesArr.length + 2 : 2;
     const sign = this.$engine.hash(wholeMatch);
-    const $m1 = m1.replace(/\\~D/g, '$').replace(/\\~T/g, '~').replace(/~T/g, '~');
+    let $m1 = m1.replace(/\\~D/g, '$').replace(/\\~T/g, '~').replace(/~T/g, '~');
+    const hasCursor = /CHERRYFLOWSESSIONCURSOR/.test($m1);
+    $m1 = $m1.replace('CHERRYFLOWSESSIONCURSOR', '');
     // 保留一份源码到渲染节点上，供 formulaUtilsHandler 直接读取，避免再次对全文做正则解析。
     const encodedFormulaSource = encodeURIComponent($m1);
     // 既无MathJax又无katex时，原样输出
@@ -105,7 +107,8 @@ export default class InlineMath extends ParagraphBase {
         data-lines="${lines}" data-formula-source="${encodedFormulaSource}">$${escapeFormulaPunctuations(m1)}$</span>`;
     }
 
-    return this.pushCache(result, ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX + sign);
+    const appendCursor = hasCursor ? 'CHERRYFLOWSESSIONCURSOR' : '';
+    return this.pushCache(result, ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX + sign) + appendCursor;
   }
 
   isSelfClosing() {

@@ -2358,11 +2358,16 @@ export default class Editor {
     Array.from(editorDom.classList)
       .filter((className) => className.startsWith('cherry-editor-writing-style--'))
       .forEach((className) => editorDom.classList.remove(className));
+    // 先卸载 typewriter 模式的监听器，避免残留
+    this.uninstallTypewriterListener();
     if (writingStyle === 'normal') {
       return;
     }
     editorDom.classList.add(className);
     this.refreshWritingStatus();
+    if (writingStyle === 'typewriter') {
+      this.installTypewriterListener();
+    }
   }
 
   /**
@@ -2374,12 +2379,13 @@ export default class Editor {
       return;
     }
     const className = `cherry-editor-writing-style--${writingStyle}`;
+    const dom = this.getEditorDom();
     /**
      * @type {HTMLStyleElement}
      */
-    const style = document.querySelector('#cherry-editor-writing-style') || document.createElement('style');
+    const style = dom.querySelector('#cherry-editor-writing-style') || document.createElement('style');
     style.id = 'cherry-editor-writing-style';
-    Array.from(document.head.childNodes).find((node) => node === style) || document.head.appendChild(style);
+    dom.querySelector('#cherry-editor-writing-style') || dom.appendChild(style);
     const { sheet } = style;
     Array.from(Array(sheet.cssRules.length)).forEach(() => sheet.deleteRule(0));
 
@@ -2402,10 +2408,106 @@ export default class Editor {
     }
 
     if (writingStyle === 'typewriter') {
+      // 由于 CodeMirror 6 的 .cm-scroller 默认是 flex-direction: row，
+      // 直接给 ::before/::after 加 height 无法撑开垂直空间。这里改用 padding 实现
+      // 上下半屏留白，让首行/末行也能滚动到编辑区的垂直中间（padding 会计入 scrollHeight）
       const height = this.editor.scrollDOM.clientHeight / 2;
-      sheet.insertRule(`.${className} .cm-editor .cm-scroller::before { height: ${height}px; }`, 0);
-      sheet.insertRule(`.${className} .cm-editor .cm-scroller::after { height: ${height}px; }`, 0);
-      this.editor.scrollDOM.scrollTop = height;
+      sheet.insertRule(
+        `.${className} .cm-editor .cm-scroller { padding-top: ${height}px; padding-bottom: ${height}px; box-sizing: border-box; }`,
+        0,
+      );
+      // 伪元素高度需要下一帧才会影响 CodeMirror 的坐标度量，这里延迟到下一帧再执行滚动
+      requestAnimationFrame(() => this.scrollCursorToCenter());
+    }
+  }
+
+  /**
+   * 将当前光标所在行滚动到编辑区可视区域的垂直中间（typewriter 模式）
+   */
+  scrollCursorToCenter() {
+    if (!this.editor || !this.editor.view) {
+      return;
+    }
+    const { view } = this.editor;
+    const { scrollDOM } = view;
+    if (!scrollDOM) {
+      return;
+    }
+    const cursorPos = view.state.selection.main.head;
+    const cursorCoords = view.coordsAtPos(cursorPos);
+    if (!cursorCoords) {
+      return;
+    }
+    const scrollRect = scrollDOM.getBoundingClientRect();
+    // 光标当前视口位置相对于 scrollDOM 顶部的距离
+    const cursorTopInScroll = cursorCoords.top - scrollRect.top + scrollDOM.scrollTop;
+    const lineHeight = cursorCoords.bottom - cursorCoords.top;
+    // 目标：让光标行位于可视区域的垂直中间
+    const desiredCenter = scrollDOM.clientHeight / 2;
+    const targetScrollTop = cursorTopInScroll - desiredCenter + lineHeight / 2;
+    // 限制在 [0, maxScrollTop] 之间，避免负值
+    const maxScrollTop = Math.max(0, scrollDOM.scrollHeight - scrollDOM.clientHeight);
+    const finalTop = Math.max(0, Math.min(maxScrollTop, Math.round(targetScrollTop)));
+    if (Math.abs(scrollDOM.scrollTop - finalTop) > 1) {
+      scrollDOM.scrollTop = finalTop;
+    }
+  }
+
+  /**
+   * 安装 typewriter 模式的事件监听器：光标变化 / 窗口尺寸变化时重新居中
+   */
+  installTypewriterListener() {
+    if (!this.editor || this._typewriterInstalled) {
+      return;
+    }
+    this._typewriterInstalled = true;
+
+    // 光标或选区变化时重新居中
+    this._typewriterCursorHandler = () => {
+      // 使用 rAF 让 DOM 更新后再取坐标，避免拿到旧的位置
+      if (this._typewriterRaf) {
+        cancelAnimationFrame(this._typewriterRaf);
+      }
+      this._typewriterRaf = requestAnimationFrame(() => {
+        this._typewriterRaf = null;
+        this.scrollCursorToCenter();
+      });
+    };
+    this.editor.on('cursorActivity', this._typewriterCursorHandler);
+    // 文档变化（如输入、粘贴）也需要重新居中
+    this.editor.on('change', this._typewriterCursorHandler);
+
+    // 窗口尺寸变化时需要重算 padding 高度并重新居中
+    this._typewriterResizeHandler = () => {
+      this.refreshWritingStatus();
+    };
+    window.addEventListener('resize', this._typewriterResizeHandler);
+  }
+
+  /**
+   * 卸载 typewriter 模式的事件监听器
+   */
+  uninstallTypewriterListener() {
+    if (!this._typewriterInstalled) {
+      return;
+    }
+    this._typewriterInstalled = false;
+    if (this._typewriterRaf) {
+      cancelAnimationFrame(this._typewriterRaf);
+      this._typewriterRaf = null;
+    }
+    if (this.editor && this._typewriterCursorHandler) {
+      try {
+        this.editor.off('cursorActivity', this._typewriterCursorHandler);
+        this.editor.off('change', this._typewriterCursorHandler);
+      } catch (e) {
+        // ignore
+      }
+    }
+    this._typewriterCursorHandler = null;
+    if (this._typewriterResizeHandler) {
+      window.removeEventListener('resize', this._typewriterResizeHandler);
+      this._typewriterResizeHandler = null;
     }
   }
 
