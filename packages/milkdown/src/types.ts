@@ -6,9 +6,6 @@ import type { CherryVisualRenderer } from './wysiwyg/index.js';
 export type CherryMilkdownErrorPhase = 'create' | 'parse' | 'render';
 
 export interface CherryEngineLike {
-  makeHtml(markdown: string): string;
-  /** Optional future/public cleanup contract. Older Cherry versions use the hook fallback below. */
-  destroyRenderedContent?(container: Element): void;
   /** @internal Compatibility surface used only to dispose native table-chart instances. */
   hooks?: Partial<
     Record<
@@ -20,6 +17,9 @@ export interface CherryEngineLike {
       }>
     >
   >;
+  /** Optional future/public cleanup contract. Older Cherry versions use the hook fallback below. */
+  destroyRenderedContent?(container: Element): void;
+  makeHtml(markdown: string): string;
 }
 
 export interface CherryMilkdownChange {
@@ -125,7 +125,7 @@ export interface CherryMilkdownHost {
   getMarkdown(): string;
   getPreviewer(): CherryPreviewerHost;
   setValue(markdown: string, keepCursor?: boolean, updateContext?: CherryUpdateContext): void;
-  getCodeMirror?(): { hasFocus: boolean };
+  getCodeMirror?(): { dom?: HTMLElement; hasFocus: boolean | (() => boolean) };
 }
 
 export interface CherryMilkdownPreviewOptions extends Omit<

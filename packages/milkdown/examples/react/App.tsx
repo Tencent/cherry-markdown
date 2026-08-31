@@ -45,6 +45,11 @@ export default function App() {
             onChange: ({ markdown }) => {
               window.milkdownMarkdown = markdown;
             },
+            onImmediateChange: ({ markdown }) => {
+              // The E2E diagnostic mirrors the editor's committed document;
+              // public onChange remains debounced for consumers.
+              window.milkdownMarkdown = markdown;
+            },
           }),
         ],
       });

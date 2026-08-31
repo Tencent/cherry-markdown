@@ -12,8 +12,12 @@ import {
 } from '@milkdown/kit/preset/commonmark';
 import { insertTableCommand, toggleStrikethroughCommand } from '@milkdown/kit/preset/gfm';
 import { redoCommand, undoCommand } from '@milkdown/kit/plugin/history';
-import type { CherryMilkdownHost, CherryPreviewEditingBridge, CherryToolbarCommand } from './types.js';
-import type { CherryMilkdownInstance } from './types.js';
+import type {
+  CherryMilkdownHost,
+  CherryMilkdownInstance,
+  CherryPreviewEditingBridge,
+  CherryToolbarCommand,
+} from './types.js';
 
 interface CherryMenuLike {
   isSelections?: boolean;
@@ -166,11 +170,31 @@ export function createCherryEditingBridge(
     // the following mousedown still places or extends the native selection.
     view.focus();
   };
+  const deactivatePreviewFromSource = () => {
+    // Opening a toolbar can transiently move DOM focus to CodeMirror. That
+    // does not change the editing owner; only an explicit pointer interaction
+    // in the source editor should hand ownership back.
+    previewWasActive = false;
+  };
   view.dom.addEventListener('focusin', rememberPreview);
   view.dom.addEventListener('pointerdown', activatePreview, true);
   view.dom.addEventListener('click', syncAnchorNavigation, true);
+  const sourceEditor = cherry.getCodeMirror?.();
+  const sourceDom = sourceEditor?.dom;
+  sourceDom?.addEventListener('pointerdown', deactivatePreviewFromSource, true);
 
-  const isActive = () => previewWasActive && !cherry.getCodeMirror?.()?.hasFocus;
+  // Ownership is switched by explicit pointer/focus interaction, not by the
+  // transient DOM focus move caused by opening a Cherry toolbar submenu.
+  const isActive = () => {
+    // Lightweight hosts used by integrations may not expose CodeMirror DOM
+    // events. Preserve the legacy focus-based fallback for those hosts.
+    if (!sourceDom) {
+      const hasFocus = cherry.getCodeMirror?.()?.hasFocus;
+      const focused = typeof hasFocus === 'function' ? hasFocus() : hasFocus;
+      return previewWasActive && !focused;
+    }
+    return previewWasActive;
+  };
 
   const call = (command: { key: unknown }, payload?: unknown) => {
     let handled = false;
@@ -261,7 +285,8 @@ export function createCherryEditingBridge(
       return false;
     }
     const node = view.state.doc.nodeAt(position);
-    if (!node || node.type.name !== 'image') return false;
+    if (!node) return false;
+    if (node.type.name !== 'image') return false;
 
     const alt = String(node.attrs.alt ?? '');
     const extensions = alt.match(imageExtensionPattern) ?? [];
@@ -316,7 +341,8 @@ export function createCherryEditingBridge(
       return false;
     }
     const node = view.state.doc.nodeAt(position);
-    if (!node || node.type.name !== 'cherry_diagram' || node.attrs.diagramType !== 'mermaid') return false;
+    if (!node) return false;
+    if (node.type.name !== 'cherry_diagram' || node.attrs.diagramType !== 'mermaid') return false;
 
     const source = String(node.attrs.source ?? '');
     const lines = source.split(/\r?\n/);
@@ -361,7 +387,8 @@ export function createCherryEditingBridge(
     // intentionally empty in that case, so provide the current text block to
     // the hook instead of letting it fall back to the demo placeholder.
     const selection =
-      rawSelection || (isLineCommand && view.state.selection.$from.parent.isTextblock
+      rawSelection ||
+      (isLineCommand && view.state.selection.$from.parent.isTextblock
         ? view.state.selection.$from.parent.textContent
         : '');
     const previousIsSelections = menu.isSelections;
@@ -479,7 +506,7 @@ export function createCherryEditingBridge(
 
   const queryCommandState = (command: CherryToolbarCommand) => {
     const { $from } = view.state.selection;
-    const parent = $from.parent;
+    const { parent } = $from;
     if (command.name === 'header') {
       const level = parent.type.name === 'heading' ? Number(parent.attrs.level) : 0;
       return {
@@ -554,6 +581,7 @@ export function createCherryEditingBridge(
       view.dom.removeEventListener('focusin', rememberPreview);
       view.dom.removeEventListener('pointerdown', activatePreview, true);
       view.dom.removeEventListener('click', syncAnchorNavigation, true);
+      sourceDom?.removeEventListener('pointerdown', deactivatePreviewFromSource, true);
     },
   };
 }
