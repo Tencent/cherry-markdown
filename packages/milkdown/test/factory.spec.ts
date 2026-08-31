@@ -579,6 +579,8 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(nodes[0]?.querySelector('.cherry-panel--title')).not.toBeNull();
     expect(nodes[0]?.querySelector('.cherry-panel--body')).not.toBeNull();
     expect(nodes[0]?.querySelector('input, select, textarea')).toBeNull();
+    expect(nodes[0]?.querySelector<HTMLButtonElement>('[title="增加项目"]')?.hidden).toBe(true);
+    expect(nodes[1]?.dataset.type).toBe('mermaid');
     expect(nodes[1]?.querySelector<HTMLElement>('.cherry-embed__source')?.hidden).toBe(true);
     await vi.waitFor(() => expect(nodes[1]?.querySelector('[data-rendered-mermaid]')).not.toBeNull());
   });
@@ -734,6 +736,95 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(bridge?.runCommand?.({ name: 'image', shortKey: '', menu: imageMenu })).toBe(true);
     expect(bridge?.runCommand?.({ name: 'image', shortKey: '', menu: imageMenu })).toBe(true);
     await vi.waitFor(() => expect(markdown).toContain('![uploaded](https://example.com/image.png)'));
+
+    const image = element.querySelector<HTMLImageElement>('.ProseMirror img[src]');
+    expect(image).not.toBeNull();
+    expect(bridge?.updateImage?.(image!, { width: '160px', height: '90px' })).toBe(true);
+    await vi.waitFor(() => expect(markdown).toContain('![uploaded#160px#90px](https://example.com/image.png)'));
+    expect(bridge?.updateImage?.(image!, { type: 'border' })).toBe(true);
+    await vi.waitFor(() => expect(markdown).toContain('![uploaded#160px#90px#B](https://example.com/image.png)'));
+    expect(bridge?.updateImage?.(image!, { type: 'center' })).toBe(true);
+    await vi.waitFor(() =>
+      expect(markdown).toContain('![uploaded#160px#90px#B#center](https://example.com/image.png)'),
+    );
+  });
+
+  it('keeps Cherry source and Milkdown preview synchronized during TOC navigation and scrolling', async () => {
+    const element = root();
+    let markdown = '# First\n\n[[toc]]\n\n## Second\n\nBody';
+    let bridge: CherryPreviewEditingBridge | undefined;
+    let renderer: CherryPreviewContentRenderer | undefined;
+    let codeMirrorHasFocus = false;
+    const scrollToLineNum = vi.fn();
+    const previewer = {
+      getDom: () => element,
+      setContentRenderer: (next: CherryPreviewContentRenderer) => {
+        renderer = next;
+      },
+      clearContentRenderer: () => {
+        renderer = undefined;
+        return true;
+      },
+      update: (html: string) => renderer?.update({ container: element, markdown, html }),
+      setEditingBridge: (next: typeof bridge) => {
+        bridge = next;
+      },
+      clearEditingBridge: () => {
+        bridge = undefined;
+        return true;
+      },
+    };
+    const host: CherryMilkdownHost = {
+      engine: { makeHtml: (value: string) => value },
+      editor: { scrollToLineNum },
+      getMarkdown: () => markdown,
+      getPreviewer: () => previewer,
+      getCodeMirror: () => ({ hasFocus: codeMirrorHasFocus }),
+      setValue: vi.fn((value: string) => {
+        markdown = value;
+      }),
+    };
+    const instance = await attachCherryMilkdownPreview(host, { debounce: 0 });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    const blocks = Array.from(view.dom.children) as HTMLElement[];
+    element.getBoundingClientRect = () =>
+      ({ top: 0, bottom: 400, left: 0, right: 600, width: 600, height: 400, x: 0, y: 0, toJSON() {} }) as DOMRect;
+    blocks.forEach((block, index) => {
+      block.getBoundingClientRect = () => {
+        const top = index * 100 - element.scrollTop;
+        return {
+          top,
+          bottom: top + 100,
+          left: 0,
+          right: 600,
+          width: 600,
+          height: 100,
+          x: 0,
+          y: top,
+          toJSON() {},
+        } as DOMRect;
+      };
+    });
+
+    const secondTocLink = element.querySelector<HTMLAnchorElement>('.cherry-source-node--cherry_toc a[href="#second"]');
+    const secondHeading = element.querySelector<HTMLElement>('#second');
+    expect(secondTocLink).not.toBeNull();
+    expect(secondHeading).not.toBeNull();
+    if (secondHeading) secondHeading.scrollIntoView = vi.fn();
+    secondTocLink?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(scrollToLineNum).toHaveBeenLastCalledWith(4, 5, 0);
+
+    element.scrollTop = 0;
+    codeMirrorHasFocus = true;
+    bridge?.handleEditorScroll?.(4, 0);
+    expect(element.scrollTop).toBe(200);
+
+    scrollToLineNum.mockClear();
+    codeMirrorHasFocus = false;
+    view.dom.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    bridge?.handleScroll?.(element);
+    expect(scrollToLineNum).toHaveBeenLastCalledWith(4, 5, 0);
   });
 
   it('keeps ordinary fenced code directly editable with Cherry code-block chrome', async () => {
@@ -838,6 +929,52 @@ describe('createCherryMilkdown WYSIWYG', () => {
     }
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(instance.getMarkdown()).toContain('B-->C');
+  });
+
+  it('updates Mermaid size and alignment through the preview editing bridge', async () => {
+    const element = root();
+    let markdown = '```mermaid\ngraph TD; A-->B;\n```';
+    let bridge: CherryPreviewEditingBridge | undefined;
+    let renderer: CherryPreviewContentRenderer | undefined;
+    const previewer = {
+      getDom: () => element,
+      setContentRenderer: (next: CherryPreviewContentRenderer) => {
+        renderer = next;
+      },
+      clearContentRenderer: () => {
+        renderer = undefined;
+        return true;
+      },
+      update: (html: string) => renderer?.update({ container: element, markdown, html }),
+      setEditingBridge: (next: typeof bridge) => {
+        bridge = next;
+      },
+      clearEditingBridge: () => {
+        bridge = undefined;
+        return true;
+      },
+    };
+    const host: CherryMilkdownHost = {
+      engine: { makeHtml: (value: string) => value },
+      getMarkdown: () => markdown,
+      getPreviewer: () => previewer,
+      getCodeMirror: () => ({ hasFocus: false }),
+      setValue: vi.fn((value: string) => {
+        markdown = value;
+      }),
+    };
+    const instance = await attachCherryMilkdownPreview(host, { debounce: 0 });
+    instances.push(instance);
+    const figure = element.querySelector<HTMLElement>('.cherry-embed--cherry_diagram[data-type="mermaid"]');
+
+    expect(figure).not.toBeNull();
+    expect(bridge?.updateMermaid?.(figure!, { width: '360px', height: '240px' })).toBe(true);
+    await vi.waitFor(() => expect(markdown).toContain('```mermaid #360px #240px'));
+    expect(figure?.style.width).toBe('360px');
+    expect(figure?.style.height).toBe('240px');
+    expect(bridge?.updateMermaid?.(figure!, { type: 'center' })).toBe(true);
+    await vi.waitFor(() => expect(markdown).toContain('```mermaid #360px #240px #center'));
+    expect(figure?.classList.contains('cherry-mermaid-align-center')).toBe(true);
   });
 
   it('uses the sanitized Cherry engine shell for HTML and keeps source editing next to the selected node', async () => {

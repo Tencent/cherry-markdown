@@ -1,7 +1,7 @@
-import { commandsCtx, editorViewCtx, parserCtx } from '@milkdown/kit/core';
+import { commandsCtx, editorViewCtx, parserCtx, serializerCtx } from '@milkdown/kit/core';
 import { Slice } from '@milkdown/kit/prose/model';
 import { toggleMark } from '@milkdown/kit/prose/commands';
-import { TextSelection } from '@milkdown/kit/prose/state';
+import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
 import type { EditorView } from '@milkdown/kit/prose/view';
 import {
   insertHrCommand,
@@ -58,6 +58,95 @@ export function createCherryEditingBridge(
 ): CherryPreviewEditingBridge {
   let previewWasActive = false;
   const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+  const serialize = instance.editor.action((ctx) => ctx.get(serializerCtx));
+  const previewContainer = cherry.getPreviewer().getDom();
+  let cachedDocument = view.state.doc;
+  let cachedMarkdown = '';
+  let cachedBlocks: Array<{ element: HTMLElement; fromLine: number; toLine: number }> = [];
+
+  const lineAt = (markdown: string, offset: number) => {
+    let line = 0;
+    for (let index = 0; index < Math.min(offset, markdown.length); index += 1) {
+      if (markdown.charCodeAt(index) === 10) line += 1;
+    }
+    return line;
+  };
+
+  const scrollBlocks = () => {
+    const document = view.state.doc;
+    const markdown = serialize(document);
+    if (cachedDocument === document && cachedMarkdown === markdown && cachedBlocks.length) return cachedBlocks;
+
+    let cursor = 0;
+    const blocks: typeof cachedBlocks = [];
+    document.forEach((node, offset) => {
+      const dom = view.nodeDOM(offset);
+      if (!(dom instanceof HTMLElement)) return;
+      const isolatedDocument = document.type.create(document.attrs, [node]);
+      const source = serialize(isolatedDocument).trim();
+      let sourceOffset = source ? markdown.indexOf(source, cursor) : cursor;
+      if (sourceOffset < 0) sourceOffset = cursor;
+      const sourceEnd = Math.max(sourceOffset, sourceOffset + source.length);
+      const fromLine = lineAt(markdown, sourceOffset);
+      const toLine = Math.max(fromLine + 1, lineAt(markdown, sourceEnd) + 1);
+      blocks.push({ element: dom, fromLine, toLine });
+      cursor = sourceEnd;
+    });
+
+    cachedDocument = document;
+    cachedMarkdown = markdown;
+    cachedBlocks = blocks;
+    return blocks;
+  };
+
+  const scrollEditorToBlock = (block: (typeof cachedBlocks)[number], percent = 0) => {
+    cherry.editor?.scrollToLineNum(block.fromLine, block.toLine, Math.max(0, Math.min(percent, 1)));
+  };
+
+  const scrollEditorToElement = (target: HTMLElement) => {
+    const block = scrollBlocks().find(({ element }) => element === target || element.contains(target));
+    if (!block) return false;
+    scrollEditorToBlock(block);
+    return true;
+  };
+
+  const scrollPreviewToLine = (lineNum: number | null, linePercent = 0) => {
+    if (lineNum === null) {
+      previewContainer.scrollTop = previewContainer.scrollHeight;
+      return;
+    }
+    if (lineNum <= 0) {
+      previewContainer.scrollTop = 0;
+      return;
+    }
+    const blocks = scrollBlocks();
+    const block =
+      blocks.find(({ fromLine, toLine }) => lineNum >= fromLine && lineNum < toLine) ??
+      blocks.find(({ fromLine }) => fromLine >= lineNum) ??
+      blocks.at(-1);
+    if (!block) return;
+    const blockLines = Math.max(1, block.toLine - block.fromLine);
+    const percent = Math.max(0, Math.min(1, (lineNum - block.fromLine + linePercent) / blockLines));
+    const containerRect = previewContainer.getBoundingClientRect();
+    const blockRect = block.element.getBoundingClientRect();
+    previewContainer.scrollTop += blockRect.top - containerRect.top + blockRect.height * percent;
+  };
+
+  const syncAnchorNavigation = (event: MouseEvent) => {
+    const link = event.target instanceof Element ? event.target.closest('a[href^="#"]') : null;
+    if (!(link instanceof HTMLAnchorElement)) return;
+    let id = '';
+    try {
+      id = decodeURIComponent(link.hash.slice(1));
+    } catch {
+      return;
+    }
+    if (!id) return;
+    const target = Array.from(view.dom.querySelectorAll<HTMLElement>('[id]')).find((element) => element.id === id);
+    if (!target) return;
+    previewWasActive = true;
+    scrollEditorToElement(target);
+  };
   const rememberPreview = () => {
     previewWasActive = true;
   };
@@ -75,6 +164,7 @@ export function createCherryEditingBridge(
   };
   view.dom.addEventListener('focusin', rememberPreview);
   view.dom.addEventListener('pointerdown', activatePreview, true);
+  view.dom.addEventListener('click', syncAnchorNavigation, true);
 
   const isActive = () => previewWasActive && !cherry.getCodeMirror?.()?.hasFocus;
 
@@ -130,6 +220,113 @@ export function createCherryEditingBridge(
       view.dispatch(transaction);
     });
     view.focus();
+    return true;
+  };
+
+  const imageExtensionPattern =
+    /#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|border|shadow|radius|B|S|R|center|right|left|float-right|float-left)/g;
+  const imageSizePattern = /^#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)$/;
+  const imageDecorationPattern = /^#(?:border|shadow|radius|B|S|R)$/;
+  const imageAlignmentPattern = /^#(?:center|right|left|float-right|float-left)$/;
+
+  const updateImage = (
+    target: HTMLImageElement,
+    change: { width?: number | string; height?: number | string; type?: string },
+  ) => {
+    let position: number;
+    try {
+      position = view.posAtDOM(target, 0);
+    } catch {
+      return false;
+    }
+    const node = view.state.doc.nodeAt(position);
+    if (!node || node.type.name !== 'image') return false;
+
+    const alt = String(node.attrs.alt ?? '');
+    const extensions = alt.match(imageExtensionPattern) ?? [];
+    const base = alt.replace(imageExtensionPattern, '').trimEnd();
+    let sizes = extensions.filter((token) => imageSizePattern.test(token));
+    let decorations = extensions.filter((token) => imageDecorationPattern.test(token));
+    let alignment = extensions.find((token) => imageAlignmentPattern.test(token));
+
+    if (change.width !== undefined || change.height !== undefined) {
+      const width = Math.round(Number.parseFloat(String(change.width)));
+      const height = Math.round(Number.parseFloat(String(change.height)));
+      sizes = [Number.isFinite(width) ? `#${width}px` : '', Number.isFinite(height) ? `#${height}px` : ''].filter(
+        Boolean,
+      );
+    }
+
+    if (change.type) {
+      const decorationAliases: Record<string, string> = { border: '#B', shadow: '#S', radius: '#R' };
+      const decoration = decorationAliases[change.type];
+      if (decoration) {
+        const aliases: Record<string, RegExp> = {
+          border: /^#(?:border|B)$/,
+          shadow: /^#(?:shadow|S)$/,
+          radius: /^#(?:radius|R)$/,
+        };
+        const alias = aliases[change.type];
+        const active = decorations.some((token) => alias.test(token));
+        decorations = decorations.filter((token) => !alias.test(token));
+        if (!active) decorations.push(decoration);
+      } else if (change.type === 'clear-align') {
+        alignment = undefined;
+      } else if (/^(?:left|right|center|float-left|float-right)$/.test(change.type)) {
+        alignment = `#${change.type}`;
+      }
+    }
+
+    const nextAlt = `${base}${[...sizes, ...decorations, ...(alignment ? [alignment] : [])].join('')}`;
+    const transaction = view.state.tr.setNodeMarkup(position, undefined, { ...node.attrs, alt: nextAlt });
+    transaction.setSelection(NodeSelection.create(transaction.doc, position));
+    view.dispatch(transaction);
+    return true;
+  };
+
+  const updateMermaid = (
+    target: HTMLElement,
+    change: { width?: number | string; height?: number | string; type?: string },
+  ) => {
+    let position: number;
+    try {
+      position = view.posAtDOM(target, 0);
+    } catch {
+      return false;
+    }
+    const node = view.state.doc.nodeAt(position);
+    if (!node || node.type.name !== 'cherry_diagram' || node.attrs.diagramType !== 'mermaid') return false;
+
+    const source = String(node.attrs.source ?? '');
+    const lines = source.split(/\r?\n/);
+    const opener = lines[0] ?? '```mermaid';
+    const layoutPattern = /#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|center|right|left|float-right|float-left)/gi;
+    const sizePattern = /^#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)$/i;
+    const alignmentPattern = /^#(?:center|right|left|float-right|float-left)$/i;
+    const extensions = opener.match(layoutPattern) ?? [];
+    const base = opener.replace(layoutPattern, '').trimEnd();
+    let sizes = extensions.filter((token) => sizePattern.test(token));
+    let alignment = extensions.find((token) => alignmentPattern.test(token));
+
+    if (change.width !== undefined || change.height !== undefined) {
+      const width = Math.round(Number.parseFloat(String(change.width)));
+      const height = Math.round(Number.parseFloat(String(change.height)));
+      sizes = [Number.isFinite(width) ? `#${width}px` : '', Number.isFinite(height) ? `#${height}px` : ''].filter(
+        Boolean,
+      );
+    }
+    if (change.type === 'clear-align') alignment = undefined;
+    else if (change.type && /^(?:left|right|center|float-left|float-right)$/.test(change.type)) {
+      alignment = `#${change.type}`;
+    }
+
+    lines[0] = `${base}${sizes.length || alignment ? ' ' : ''}${[...sizes, ...(alignment ? [alignment] : [])].join(
+      ' ',
+    )}`;
+    const nextSource = lines.join('\n');
+    const transaction = view.state.tr.setNodeMarkup(position, undefined, { ...node.attrs, source: nextSource });
+    transaction.setSelection(NodeSelection.create(transaction.doc, position));
+    view.dispatch(transaction);
     return true;
   };
 
@@ -307,20 +504,39 @@ export function createCherryEditingBridge(
 
   return {
     isActive,
-    // The Milkdown renderer owns the whole preview DOM as one ProseMirror
-    // root, so Cherry's top-level data-lines mapper is never valid, even when
-    // focus temporarily leaves the preview (for example while opening a link).
-    handleScroll: () => true,
-    // A delayed CodeMirror scroll event must not move the preview away from
-    // its current selection or an in-preview anchor navigation.
-    handleEditorScroll: () => isActive(),
+    // Milkdown owns the preview DOM, so map its top-level nodes back to the
+    // serialized Markdown instead of using Cherry's native data-lines mapper.
+    handleScroll: (container) => {
+      if (!isActive()) return true;
+      const containerTop = container.getBoundingClientRect().top;
+      const blocks = scrollBlocks();
+      let current = blocks[0];
+      for (const block of blocks) {
+        if (block.element.getBoundingClientRect().top > containerTop + 1) break;
+        current = block;
+      }
+      if (!current) return true;
+      const rect = current.element.getBoundingClientRect();
+      const percent = rect.height > 0 ? Math.max(0, Math.min(1, (containerTop - rect.top) / rect.height)) : 0;
+      scrollEditorToBlock(current, percent);
+      return true;
+    },
+    handleEditorScroll: (lineNum, linePercent) => {
+      // While the preview owns focus, CodeMirror scroll events are echoes of
+      // the preview-to-source synchronization and must not pull it back.
+      if (!isActive()) scrollPreviewToLine(lineNum, linePercent);
+      return true;
+    },
     queryCommandState,
     runCommand,
     insert: (content, options) => insertMarkdown(content, options.select),
+    updateImage,
+    updateMermaid,
     getSearchAdapter: () => searchAdapter,
     destroy() {
       view.dom.removeEventListener('focusin', rememberPreview);
       view.dom.removeEventListener('pointerdown', activatePreview, true);
+      view.dom.removeEventListener('click', syncAnchorNavigation, true);
     },
   };
 }

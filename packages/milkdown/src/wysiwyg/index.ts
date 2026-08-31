@@ -2,6 +2,7 @@ export { cherryWysiwygConfigCtx } from './config.js';
 export type { CherryWysiwygConfig } from './config.js';
 export { cherryCodeBlock, cherryCodeBlockHighlightPlugin, cherryCodeBlockView } from './code-block.js';
 export { cherryMath, cherryMathBlockSchema, cherryMathInlineSchema } from './math.js';
+export { cherryImagePresentation, cherryImageView } from './image.js';
 export { cherryWysiwygMarkInputRules, cherryWysiwygMarkSchemas } from './marks.js';
 export {
   cherryCommentDefinitionSchema,

@@ -151,6 +151,31 @@ test('the full demo loads every shared image and keeps images selectable in prev
   await expect.poll(async () => await readState(page)).toEqual(before);
   actions.push('selected a rendered feature image without changing Markdown state');
 
+  const resizable = page.locator('.ProseMirror img[src$="demo-dog.png"]').first();
+  await resizable.scrollIntoViewIfNeeded();
+  await expect(resizable).toHaveCSS('width', '100px');
+  await resizable.click();
+  const resizePoints = page.locator('.cherry-previewer-img-size-handler__points');
+  await expect(resizePoints).toHaveCount(8);
+  await expect(page.locator('.cherry-previewer-img-tool-handler .img-tool-button')).toHaveCount(8);
+
+  const corner = page.locator('.cherry-previewer-img-size-handler__points-rightBottom');
+  const box = await corner.boundingBox();
+  expect(box).not.toBeNull();
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box!.x + box!.width / 2 + 30, box!.y + box!.height / 2 + 30, { steps: 4 });
+  await page.mouse.up();
+  await expect(resizable).toHaveAttribute('alt', /一条dog#\d+px#\d+px/);
+  await page.locator('.cherry-previewer-img-tool-handler [title="边框"]').click();
+  await expect(resizable).toHaveClass(/cherry-img-deco-border/);
+  await expect(resizable).toHaveCSS('border-top-style', 'solid');
+  await expect.poll(async () => {
+    const state = await readState(page);
+    return state.cherry === state.codeMirror && state.cherry === state.milkdown && /一条dog#\d+px#\d+px#B/.test(state.cherry);
+  }).toBe(true);
+  actions.push('resized and decorated a preview image with Cherry native controls while keeping Markdown synchronized');
+
   const nestedFontLink = page
     .locator('.ProseMirror a[href="http://www.qq.com"]')
     .filter({ hasText: '黑底白字超链接' })
@@ -167,6 +192,60 @@ test('the full demo loads every shared image and keeps images selectable in prev
   await nativeLineChart.scrollIntoViewIfNeeded();
   await expect(nativeLineChart.locator('.cherry-echarts-wrapper svg')).toHaveCount(1);
   actions.push('rendered the table ECharts nested inside the native two-column example');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('Mermaid keeps Cherry native resize and alignment controls in the preview editor', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.evaluate(() => {
+    const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+    scope.cherry.setValue('```mermaid\ngraph TD\n  Start --> Finish\n```');
+  });
+
+  const mermaid = page.locator('.ProseMirror .cherry-embed--cherry_diagram[data-type="mermaid"]');
+  await expect(mermaid).toBeVisible();
+  await expect(mermaid.locator('svg')).toHaveCount(1);
+  await mermaid.click();
+  await expect(mermaid).toHaveClass(/is-selected/);
+  await expect(page.locator('.cherry-previewer-img-size-handler__points')).toHaveCount(8);
+  await expect(page.locator('.cherry-previewer-img-tool-handler .img-tool-button')).toHaveCount(5);
+  actions.push('selected Mermaid and exposed Cherry native resize and alignment controls');
+
+  const corner = page.locator('.cherry-previewer-img-size-handler__points-rightBottom');
+  const box = await corner.boundingBox();
+  expect(box).not.toBeNull();
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box!.x + box!.width / 2 + 30, box!.y + box!.height / 2 + 30, { steps: 4 });
+  await page.mouse.up();
+  await expect.poll(async () => /```mermaid #\d+px #\d+px/.test((await readState(page)).cherry)).toBe(true);
+  actions.push('resized Mermaid and wrote its dimensions back to Markdown');
+
+  await mermaid.click();
+  await page.locator('.cherry-previewer-img-tool-handler [title="居中"]').click();
+  await expect(mermaid).toHaveClass(/cherry-mermaid-align-center/);
+  await expect
+    .poll(async () => {
+      const state = await readState(page);
+      return {
+        synchronized: state.cherry === state.codeMirror && state.cherry === state.milkdown,
+        syntax: /```mermaid #\d+px #\d+px #center/.test(state.cherry),
+      };
+    })
+    .toEqual({ synchronized: true, syntax: true });
+  actions.push('centered Mermaid and synchronized Cherry, CodeMirror, and Milkdown');
+
+  await mermaid.click();
+  await mermaid.getByRole('button', { name: '在节点内编辑源码' }).click();
+  await expect(mermaid.locator('.cherry-embed__source')).toBeVisible();
+  await expect(page.locator('.cherry-previewer-img-size-handler')).toHaveCount(0);
+  await expect(page.locator('.cherry-previewer-img-tool-handler')).toHaveCount(0);
+  actions.push('opened in-node Mermaid source without overlapping native floating controls');
 
   expect(errors).toEqual([]);
   await attachEvidence(page, testInfo, actions, errors);

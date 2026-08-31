@@ -3,6 +3,7 @@ import type { RemarkPluginRaw } from '@milkdown/kit/transformer';
 import { $remark } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
 import { cherryCodeBlock } from './code-block.js';
+import { cherryImageView } from './image.js';
 import { cherryMath } from './math.js';
 import { cherryWysiwygMarkInputRules, cherryWysiwygMarkSchemas } from './marks.js';
 import { cherryStructureSchemas, cherryStructureViews } from './nodes.js';
@@ -90,6 +91,7 @@ export const cherryWysiwyg: MilkdownPlugin[] = [
   ...cherryWysiwygMarkInputRules,
   ...cherryMath,
   ...cherryCodeBlock,
+  cherryImageView,
   ...cherryStructureSchemas,
   ...cherryStructureViews,
   cherryToolbar,

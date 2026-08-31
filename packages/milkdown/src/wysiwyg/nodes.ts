@@ -21,6 +21,25 @@ async function renderMermaid(source: string) {
   return (await mermaid.render(`cherry-milkdown-mermaid-${mermaidRenderId}`, source)).svg;
 }
 
+const MERMAID_ALIGNMENT_CLASSES = [
+  'cherry-mermaid-align-center',
+  'cherry-mermaid-align-right',
+  'cherry-mermaid-align-left',
+  'cherry-mermaid-align-float-right',
+  'cherry-mermaid-align-float-left',
+];
+
+function mermaidLayout(source: string) {
+  const opener = source.split(/\r?\n/, 1)[0] ?? '';
+  const sizes = opener.match(/#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi) ?? [];
+  const alignment = opener.match(/#(center|right|left|float-right|float-left)/i)?.[1] ?? '';
+  return {
+    width: sizes[0]?.slice(1) ?? '',
+    height: sizes[1]?.slice(1) ?? '',
+    alignment,
+  };
+}
+
 function sanitizedEngineFragment(html: string, inline = false): DocumentFragment {
   const template = document.createElement('template');
   template.innerHTML = html;
@@ -441,8 +460,14 @@ class CompoundView implements NodeView {
   private readonly getPos: () => number | undefined;
   private readonly title: HTMLElement;
   private readonly kind: HTMLButtonElement;
+  private readonly add: HTMLButtonElement;
 
-  constructor(node: ProseNode, view: EditorView, getPos: () => number | undefined, readonly: boolean) {
+  constructor(
+    node: ProseNode,
+    view: EditorView,
+    getPos: () => number | undefined,
+    private readonly readonly: boolean,
+  ) {
     this.node = node;
     this.view = view;
     this.getPos = getPos;
@@ -462,7 +487,8 @@ class CompoundView implements NodeView {
     this.title.hidden = node.type.name === 'cherry_detail';
     const actions = document.createElement('span');
     actions.className = 'cherry-node-actions';
-    actions.append(this.kind, iconButton('＋', '增加项目', this.addItem, readonly));
+    this.add = iconButton('＋', '增加项目', this.addItem, readonly);
+    actions.append(this.kind, this.add);
     header.append(this.title, actions);
     this.contentDOM = document.createElement('div');
     this.contentDOM.className = 'cherry-compound__content';
@@ -516,6 +542,9 @@ class CompoundView implements NodeView {
     }
     this.contentDOM.className = `cherry-compound__content${isPanel ? ' cherry-panel--body' : ''}`;
     this.kind.textContent = kind;
+    this.add.hidden =
+      this.readonly ||
+      (node.type.name !== 'cherry_detail' && !['cols', 'tabs', 'timeline'].includes(String(node.attrs.kind)));
     if (document.activeElement !== this.title) this.title.textContent = String(node.attrs.title ?? '');
   }
 
@@ -799,6 +828,7 @@ class EmbedView implements NodeView {
     this.getPos = getPos;
     this.dom = document.createElement(node.isInline ? 'span' : 'figure');
     this.dom.className = `cherry-embed cherry-embed--${node.type.name}`;
+    this.syncDiagramPresentation();
     this.preview = document.createElement(node.isInline ? 'span' : 'div');
     this.preview.className = 'cherry-embed__preview';
     const controls = document.createElement(node.isInline ? 'span' : 'figcaption');
@@ -834,6 +864,7 @@ class EmbedView implements NodeView {
   update(node: ProseNode) {
     if (node.type !== this.node.type) return false;
     this.node = node;
+    this.syncDiagramPresentation();
     this.syncSource();
     if ((this.renderActivated || node.type.name !== 'cherry_diagram') && document.activeElement !== this.source) {
       this.render();
@@ -900,6 +931,21 @@ class EmbedView implements NodeView {
       this.node.type.name === 'cherry_diagram'
         ? String(this.node.attrs.value ?? '')
         : String(this.node.attrs.source ?? '');
+  }
+
+  private syncDiagramPresentation() {
+    this.dom.classList.remove(...MERMAID_ALIGNMENT_CLASSES);
+    this.dom.style.removeProperty('width');
+    this.dom.style.removeProperty('height');
+    if (this.node.type.name !== 'cherry_diagram' || this.node.attrs.diagramType !== 'mermaid') {
+      this.dom.removeAttribute('data-type');
+      return;
+    }
+    this.dom.dataset.type = 'mermaid';
+    const layout = mermaidLayout(String(this.node.attrs.source ?? ''));
+    if (layout.width) this.dom.style.width = layout.width;
+    if (layout.height) this.dom.style.height = layout.height;
+    if (layout.alignment) this.dom.classList.add(`cherry-mermaid-align-${layout.alignment}`);
   }
 
   private updateSource = () => {

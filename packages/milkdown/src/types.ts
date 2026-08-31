@@ -86,6 +86,16 @@ export interface CherryPreviewEditingBridge {
   queryCommandState?(command: CherryToolbarCommand): CherryToolbarCommandState;
   runCommand?(command: CherryToolbarCommand): boolean;
   insert?(content: string, options: { select: boolean; focus: boolean }): boolean;
+  /** Apply Cherry's native preview image controls to an image owned by the preview editor. */
+  updateImage?(
+    target: HTMLImageElement,
+    change: { width?: number | string; height?: number | string; type?: string },
+  ): boolean;
+  /** Apply Cherry's native Mermaid layout controls to a diagram owned by the preview editor. */
+  updateMermaid?(
+    target: HTMLElement,
+    change: { width?: number | string; height?: number | string; type?: string },
+  ): boolean;
   getSearchAdapter?(): CherrySearchAdapter;
   destroy?(): void;
 }
@@ -107,6 +117,10 @@ export interface CherrySearchAdapter {
 /** Minimal public surface used to connect Milkdown to an existing Cherry previewer. */
 export interface CherryMilkdownHost {
   engine: CherryEngineLike;
+  /** Cherry's existing source editor. Used by the preview bridge for scroll synchronization. */
+  editor?: {
+    scrollToLineNum(lineNum: number | null, endLine?: number, percent?: number): void;
+  };
   getMarkdown(): string;
   getPreviewer(): CherryPreviewerHost;
   setValue(markdown: string, keepCursor?: boolean, updateContext?: CherryUpdateContext): void;

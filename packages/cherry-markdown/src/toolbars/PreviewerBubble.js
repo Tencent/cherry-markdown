@@ -823,10 +823,12 @@ export default class PreviewerBubble {
       return;
     }
     this.$createPreviewerBubbles('click', 'img-handler');
-    const list = Array.from(this.previewerDom.querySelectorAll('img'));
+    const editingBridge = this.previewer.editingBridge;
+    const bridgeOwnsImage = editingBridge?.isActive?.() && typeof editingBridge.updateImage === 'function';
+    const list = Array.from(this.previewerDom.querySelectorAll('img:not(.ProseMirror-separator)'));
     this.totalImgs = list.length;
     this.imgIndex = list.indexOf(htmlElement);
-    if (!this.beginChangeImgValue(htmlElement)) {
+    if (!bridgeOwnsImage && !this.beginChangeImgValue(htmlElement)) {
       return { emit: () => {} };
     }
 
@@ -837,7 +839,11 @@ export default class PreviewerBubble {
     imgSizeDiv.className = 'cherry-previewer-img-size-handler';
     this.bubble.click.appendChild(imgSizeDiv);
     imgSizeHandler.showBubble(htmlElement, imgSizeDiv, this.previewerDom, { onInvalidTarget, validateTarget });
-    imgSizeHandler.bindChange(this.changeImgSize.bind(this));
+    imgSizeHandler.bindChange(
+      bridgeOwnsImage
+        ? (target, style) => editingBridge.updateImage(target, { width: style.width, height: style.height })
+        : this.changeImgSize.bind(this),
+    );
 
     const imgToolDiv = document.createElement('div');
     imgToolDiv.className = 'cherry-previewer-img-tool-handler';
@@ -846,7 +852,11 @@ export default class PreviewerBubble {
       onInvalidTarget,
       validateTarget,
     });
-    imgToolHandler.bindChange(this.changeImgStyle.bind(this));
+    imgToolHandler.bindChange(
+      bridgeOwnsImage
+        ? (target, type) => editingBridge.updateImage(target, { type })
+        : this.changeImgStyle.bind(this),
+    );
 
     // 订阅编辑器大小变化事件
     const updateHandler = imgSizeHandler.updatePosition.bind(imgSizeHandler);
@@ -1183,17 +1193,25 @@ export default class PreviewerBubble {
       return;
     }
     const sourceMode = figureElement.querySelector('.cherry-mermaid-source-toolbar-panel.active[data-mode="source"]');
-    if (sourceMode) {
+    const editingBridge = this.previewer.editingBridge;
+    const bridgeOwnsMermaid = editingBridge?.isActive?.() && typeof editingBridge.updateMermaid === 'function';
+    const bridgeSource = bridgeOwnsMermaid ? figureElement.querySelector('.cherry-embed__source:not([hidden])') : null;
+    if (sourceMode || bridgeSource) {
       return;
     }
     this.$createPreviewerBubbles('click', 'img-handler');
 
-    if (!this.mermaidSession.beginEdit(figureElement)) {
+    if (!bridgeOwnsMermaid && !this.mermaidSession.beginEdit(figureElement)) {
       return;
     }
 
     const onInvalidTarget = () => this.$removeImgPreviewerBubbles();
-    const handlerOptions = this.mermaidSession.createHandlerOptions(onInvalidTarget);
+    const handlerOptions = bridgeOwnsMermaid
+      ? {
+          onInvalidTarget,
+          validateTarget: () => document.contains(figureElement) && this.previewerDom.contains(figureElement),
+        }
+      : this.mermaidSession.createHandlerOptions(onInvalidTarget);
 
     const imgSizeDiv = document.createElement('div');
     imgSizeDiv.className = 'cherry-previewer-img-size-handler';
@@ -1203,8 +1221,12 @@ export default class PreviewerBubble {
       targetIndex: this.mermaidSession.previewIndex,
       ...handlerOptions,
     });
-    imgSizeHandler.bindChange((htmlElement, style) => this.mermaidSession.changeSize(style));
-    this.mermaidSession.bindPositionFollow();
+    imgSizeHandler.bindChange(
+      bridgeOwnsMermaid
+        ? (target, style) => editingBridge.updateMermaid(target, { width: style.width, height: style.height })
+        : (_htmlElement, style) => this.mermaidSession.changeSize(style),
+    );
+    if (!bridgeOwnsMermaid) this.mermaidSession.bindPositionFollow();
 
     // 添加对齐工具面板（仅对齐按钮，不含装饰按钮）
     const imgToolDiv = document.createElement('div');
@@ -1218,14 +1240,18 @@ export default class PreviewerBubble {
       this.previewer.$cherry.getLocales(),
       { isMermaid: true, targetIndex: this.mermaidSession.previewIndex, ...handlerOptions },
     );
-    imgToolHandler.bindChange((htmlElement, type) => this.mermaidSession.changeAlign(type));
+    imgToolHandler.bindChange(
+      bridgeOwnsMermaid
+        ? (target, type) => editingBridge.updateMermaid(target, { type })
+        : (_htmlElement, type) => this.mermaidSession.changeAlign(type),
+    );
 
     const updateHandler = imgSizeHandler.updatePosition.bind(imgSizeHandler);
     this.$cherry.$event.on('editor.size.change', updateHandler);
     const originalRemove = imgSizeHandler.remove;
     imgSizeHandler.remove = () => {
       this.$cherry.$event.off('editor.size.change', updateHandler);
-      this.mermaidSession.disposeHandlers();
+      if (!bridgeOwnsMermaid) this.mermaidSession.disposeHandlers();
       return originalRemove.call(imgSizeHandler);
     };
     this.bubbleHandler.click = imgSizeHandler;
