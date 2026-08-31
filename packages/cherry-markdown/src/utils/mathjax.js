@@ -52,7 +52,7 @@ export const configureMathJax = (usePlugins) => {
           ['\\[', '\\]'],
         ],
         tags: 'ams',
-        packages: { '[+]': ['noerrors', 'cancel', 'color'] },
+        packages: { '[+]': ['noerrors', 'cancel', 'color', 'boldsymbol'] },
         macros: {
           bm: ['{\\boldsymbol{#1}}', 1],
         },
@@ -70,6 +70,25 @@ export const configureMathJax = (usePlugins) => {
     });
   }
 };
+
+// 控制字符（U+0000–U+001F 以及 U+007F）在 LaTeX 中是非法的，
+// MathJax / KaTeX 遇到这类字符（如退格 \x08）时可能直接抛异常，导致整篇预览渲染中断。
+const INVALID_MATH_CHAR_REG = /[\u0000-\u001f\u007f]/g;
+
+/**
+ * 公式渲染失败时的兜底：回显原始源码，并把其中的非法控制字符用红色标出。
+ * @param {string} content 原始公式源码（不含 $ / $$ 定界符）
+ * @param {boolean} isDisplayMode 是否为块级公式（决定用 $$ 还是 $ 包裹）
+ * @returns {string} HTML 字符串
+ */
+export function renderMathFallback(content, isDisplayMode) {
+  const delimiters = isDisplayMode ? '$$' : '$';
+  const body = escapeHTMLSpecialChar(content).replace(INVALID_MATH_CHAR_REG, (char) => {
+    const hex = char.charCodeAt(0).toString(16).padStart(2, '0');
+    return `<span class="cherry-math-error" style="color:red">\\x${hex}</span>`;
+  });
+  return `${delimiters}${body}${delimiters}`;
+}
 
 const noEscape = ['&', '<', '>', '"', "'"]; // 需要转换为HTML实体字符的符号
 

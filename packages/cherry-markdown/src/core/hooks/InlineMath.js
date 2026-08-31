@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import ParagraphBase from '@/core/ParagraphBase';
-import { escapeFormulaPunctuations, LoadMathModule } from '@/utils/mathjax';
+import { escapeFormulaPunctuations, LoadMathModule, renderMathFallback } from '@/utils/mathjax';
 import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
 import { getTableRule, isLookbehindSupported, mathBlockReg } from '@/utils/regexp';
@@ -63,9 +63,14 @@ export default class InlineMath extends ParagraphBase {
         result = `${leadingChar}<span data-sign="${sign}" class="Cherry-InlineMath cherry-katex-need-render" data-type="mathBlock" data-formula-source="${encodedFormulaSource}" data-lines="${lines}" data-content="${encodeURIComponent($m1)}"></span>`;
         this.$engine.asyncRenderHandler.add(`math-inline-${sign}`);
       } else {
-        let html = this.katex.renderToString($m1, {
-          throwOnError: false,
-        });
+        let html;
+        try {
+          html = this.katex.renderToString($m1, {
+            throwOnError: false,
+          });
+        } catch (e) {
+          html = renderMathFallback($m1, false);
+        }
         if (this.isSelfClosing()) {
           if (/class="katex-error"/.test(html) && this.lastCode) {
             html = this.lastCode;
@@ -81,7 +86,12 @@ export default class InlineMath extends ParagraphBase {
         result = `${leadingChar}<span data-sign="${sign}" class="Cherry-InlineMath cherry-mathjax-need-render" data-type="mathBlock" data-formula-source="${encodedFormulaSource}" data-lines="${lines}" data-content="${encodeURIComponent($m1)}"></span>`;
         this.$engine.asyncRenderHandler.add(`math-inline-${sign}`);
       } else {
-        let svg = getHTML(this.MathJax.tex2svg($m1, { em: 12, ex: 6, display: false }), true);
+        let svg;
+        try {
+          svg = getHTML(this.MathJax.tex2svg($m1, { em: 12, ex: 6, display: false }), true);
+        } catch (e) {
+          svg = renderMathFallback($m1, false);
+        }
         if (this.isSelfClosing()) {
           if (/data-mml-node="merror"/.test(svg) && this.lastCode) {
             svg = this.lastCode;

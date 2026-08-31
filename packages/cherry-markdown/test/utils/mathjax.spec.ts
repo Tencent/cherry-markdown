@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vite-plus/test';
-import { configureMathJax, escapeFormulaPunctuations, LoadMathModule } from '../../src/utils/mathjax';
+import { configureMathJax, escapeFormulaPunctuations, LoadMathModule, renderMathFallback } from '../../src/utils/mathjax';
 
 interface MathHost {
   $externals: {
@@ -44,7 +44,7 @@ describe('utils/mathjax', () => {
       startup: { elements: ['.Cherry-Math', '.Cherry-InlineMath'], typeset: true },
       tex: {
         tags: 'ams',
-        packages: { '[+]': ['noerrors', 'cancel', 'color'] },
+        packages: { '[+]': ['noerrors', 'cancel', 'color', 'boldsymbol'] },
         macros: { bm: ['{\\boldsymbol{#1}}', 1] },
       },
       options: { enableMenu: false, processHtmlClass: 'tex2jax_process' },
@@ -74,5 +74,19 @@ describe('utils/mathjax', () => {
     const formula = escapeFormulaPunctuations('x_1 + <tag> & "quoted"');
 
     expect(formula).toBe('x\\_1 \\+ &lt;tag&gt; &amp; &quot;quoted&quot;');
+  });
+
+  it('renders raw source and highlights illegal control characters in red', () => {
+    expect(renderMathFallback('\x08oldsymbol a', false)).toBe(
+      '$<span class="cherry-math-error" style="color:red">\\x08</span>oldsymbol a$',
+    );
+  });
+
+  it('escapes HTML-sensitive characters in the fallback source', () => {
+    expect(renderMathFallback('a < b', false)).toBe('$a &lt; b$');
+  });
+
+  it('wraps block formulas with display delimiters', () => {
+    expect(renderMathFallback('x + y', true)).toBe('$$x + y$$');
   });
 });
