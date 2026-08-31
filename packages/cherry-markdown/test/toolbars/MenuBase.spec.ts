@@ -157,6 +157,22 @@ describe('toolbars/MenuBase', () => {
     expect(fallback.getState().doc.toString()).toBe('*text*');
   });
 
+  it('reads submenu state from the active preview editing surface', () => {
+    const { menu, cherry } = createMenu();
+    menu.setName('header');
+    menu.subMenuConfig = [{ name: 'h1' }, { name: 'h2' }, { name: 'h3' }] as never;
+    const queryEditingCommandState = vi.fn(() => ({ active: true, enabled: true, subMenuIndex: 1 }));
+    Reflect.set(cherry, 'previewer', { queryEditingCommandState });
+
+    expect(menu.getActiveSubMenuIndex(document.createElement('div'))).toBe(1);
+    expect(queryEditingCommandState).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'header', shortKey: '', menu }),
+    );
+
+    queryEditingCommandState.mockReturnValue({ active: true, enabled: true, subMenuIndex: 9 });
+    expect(menu.getActiveSubMenuIndex(document.createElement('div'))).toBe(-1);
+  });
+
   it('resolves asynchronous actions before replacing selections', async () => {
     const { menu, getState, focus } = createMenu('text');
     menu.onClick = vi.fn(async (selection) => selection.toUpperCase());

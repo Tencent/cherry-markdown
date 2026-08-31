@@ -482,7 +482,12 @@ export function createCherryEditingBridge(
     const parent = $from.parent;
     if (command.name === 'header') {
       const level = parent.type.name === 'heading' ? Number(parent.attrs.level) : 0;
-      return { active: level > 0, enabled: true, value: level };
+      return {
+        active: level > 0,
+        enabled: true,
+        value: level,
+        subMenuIndex: level >= 1 && level <= 6 ? level - 1 : -1,
+      };
     }
     if (/^h[1-6]$/.test(command.name)) {
       const level = Number(command.name.slice(1));
@@ -568,8 +573,25 @@ export function createCherryEditingBridge(
     queryCommandState,
     runCommand,
     insert: (content, options) => insertMarkdown(content, options.select),
-    updateImage,
-    updateMermaid,
+    ownsPreviewElement: (target, kind) => {
+      let position: number;
+      try {
+        position = view.posAtDOM(target, 0);
+      } catch {
+        return false;
+      }
+      const node = view.state.doc.nodeAt(position);
+      if (!node) return false;
+      if (kind === 'image') return target instanceof HTMLImageElement && node.type.name === 'image';
+      return node.type.name === 'cherry_diagram' && node.attrs.diagramType === 'mermaid';
+    },
+    updatePreviewElement: (target, change) => {
+      const { kind, ...presentation } = change;
+      if (kind === 'image') {
+        return target instanceof HTMLImageElement ? updateImage(target, presentation) : false;
+      }
+      return target instanceof HTMLElement ? updateMermaid(target, presentation) : false;
+    },
     getSearchAdapter: () => searchAdapter,
     destroy() {
       view.dom.removeEventListener('focusin', rememberPreview);

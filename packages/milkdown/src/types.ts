@@ -87,6 +87,16 @@ export interface CherryToolbarCommandState {
   active: boolean;
   enabled: boolean;
   value?: string | number;
+  subMenuIndex?: number;
+}
+
+export type CherryPreviewElementKind = 'image' | 'mermaid';
+
+export interface CherryPreviewElementChange {
+  kind: CherryPreviewElementKind;
+  width?: number | string;
+  height?: number | string;
+  type?: string;
 }
 
 export interface CherryPreviewEditingBridge {
@@ -98,16 +108,10 @@ export interface CherryPreviewEditingBridge {
   queryCommandState?(command: CherryToolbarCommand): CherryToolbarCommandState;
   runCommand?(command: CherryToolbarCommand): boolean;
   insert?(content: string, options: { select: boolean; focus: boolean }): boolean;
-  /** Apply Cherry's native preview image controls to an image owned by the preview editor. */
-  updateImage?(
-    target: HTMLImageElement,
-    change: { width?: number | string; height?: number | string; type?: string },
-  ): boolean;
-  /** Apply Cherry's native Mermaid layout controls to a diagram owned by the preview editor. */
-  updateMermaid?(
-    target: HTMLElement,
-    change: { width?: number | string; height?: number | string; type?: string },
-  ): boolean;
+  /** Whether a native preview control may operate on an element owned by this editing surface. */
+  ownsPreviewElement?(target: Element, kind: CherryPreviewElementKind): boolean;
+  /** Apply an existing Cherry preview control to an element owned by this editing surface. */
+  updatePreviewElement?(target: Element, change: CherryPreviewElementChange): boolean;
   getSearchAdapter?(): CherrySearchAdapter;
   destroy?(): void;
 }

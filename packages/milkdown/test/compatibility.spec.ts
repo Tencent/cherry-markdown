@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cherryCompatibilityCases } from '../src';
+import { cherryCompatibilityCases } from './fixtures/compatibility';
 
 describe('Cherry compatibility manifest', () => {
   it('has unique ids and an explicit handling mode for every case', () => {

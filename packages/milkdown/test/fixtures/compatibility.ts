@@ -9,10 +9,7 @@ export interface CherryCompatibilityCase {
   expectedText?: string;
 }
 
-/**
- * Shared acceptance matrix for Cherry's built-in syntax. Unit and browser tests
- * consume this list so new syntax cannot silently disappear from WYSIWYG mode.
- */
+/** Shared acceptance matrix for Cherry's built-in syntax. */
 export const cherryCompatibilityCases: readonly CherryCompatibilityCase[] = [
   { id: 'heading', label: 'heading', markdown: '# Heading', mode: 'structured', selector: 'h1' },
   {
@@ -33,7 +30,7 @@ export const cherryCompatibilityCases: readonly CherryCompatibilityCase[] = [
   {
     id: 'table',
     label: 'GFM table',
-    markdown: '| A | B |\n| --- | --- |\n| 1 | 2 |',
+    markdown: '| A | B |\n| --- | ---: |\n| 1 | 2 |',
     mode: 'structured',
     selector: 'table',
   },

@@ -469,11 +469,7 @@ export default class Cherry extends CherryStatic {
    * @returns markdown源码内容
    */
   getValue() {
-    // CodeMirror is the synchronous source of truth. lastMarkdownText is the
-    // last rendered snapshot and intentionally trails edits by the preview
-    // debounce interval, so preferring it makes rapid API reads appear to
-    // roll back even though the editor document already contains the change.
-    return this.editor?.editor?.view?.state?.doc?.toString() ?? this.lastMarkdownText ?? '';
+    return this.lastMarkdownText || this.editor?.editor?.view?.state?.doc?.toString() || '';
   }
 
   /**
@@ -543,6 +539,12 @@ export default class Cherry extends CherryStatic {
    */
   setValue(content, keepCursor = false, updateContext) {
     this.editor.setValue(content, keepCursor, updateContext);
+    // Contextual updates come from another editing surface. Keep the public
+    // Markdown snapshot current synchronously without changing the legacy
+    // getValue() behavior for normal CodeMirror input.
+    if (updateContext) {
+      this.lastMarkdownText = content;
+    }
   }
 
   /**

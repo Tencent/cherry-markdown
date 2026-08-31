@@ -824,8 +824,17 @@ export default class PreviewerBubble {
     }
     this.$createPreviewerBubbles('click', 'img-handler');
     const editingBridge = this.previewer.editingBridge;
-    const bridgeOwnsImage = editingBridge?.isActive?.() && typeof editingBridge.updateImage === 'function';
-    const list = Array.from(this.previewerDom.querySelectorAll('img:not(.ProseMirror-separator)'));
+    const bridgeCanOwnImage =
+      editingBridge?.isActive?.() &&
+      typeof editingBridge.ownsPreviewElement === 'function' &&
+      typeof editingBridge.updatePreviewElement === 'function';
+    const bridgeOwnsImage = bridgeCanOwnImage && editingBridge.ownsPreviewElement(htmlElement, 'image');
+    if (bridgeCanOwnImage && !bridgeOwnsImage) {
+      return { emit: () => {} };
+    }
+    const list = Array.from(this.previewerDom.querySelectorAll('img')).filter(
+      (image) => !bridgeCanOwnImage || editingBridge.ownsPreviewElement(image, 'image'),
+    );
     this.totalImgs = list.length;
     this.imgIndex = list.indexOf(htmlElement);
     if (!bridgeOwnsImage && !this.beginChangeImgValue(htmlElement)) {
@@ -841,7 +850,12 @@ export default class PreviewerBubble {
     imgSizeHandler.showBubble(htmlElement, imgSizeDiv, this.previewerDom, { onInvalidTarget, validateTarget });
     imgSizeHandler.bindChange(
       bridgeOwnsImage
-        ? (target, style) => editingBridge.updateImage(target, { width: style.width, height: style.height })
+        ? (target, style) =>
+            editingBridge.updatePreviewElement(target, {
+              kind: 'image',
+              width: style.width,
+              height: style.height,
+            })
         : this.changeImgSize.bind(this),
     );
 
@@ -854,7 +868,7 @@ export default class PreviewerBubble {
     });
     imgToolHandler.bindChange(
       bridgeOwnsImage
-        ? (target, type) => editingBridge.updateImage(target, { type })
+        ? (target, type) => editingBridge.updatePreviewElement(target, { kind: 'image', type })
         : this.changeImgStyle.bind(this),
     );
 
@@ -1194,7 +1208,11 @@ export default class PreviewerBubble {
     }
     const sourceMode = figureElement.querySelector('.cherry-mermaid-source-toolbar-panel.active[data-mode="source"]');
     const editingBridge = this.previewer.editingBridge;
-    const bridgeOwnsMermaid = editingBridge?.isActive?.() && typeof editingBridge.updateMermaid === 'function';
+    const bridgeOwnsMermaid =
+      editingBridge?.isActive?.() &&
+      typeof editingBridge.ownsPreviewElement === 'function' &&
+      editingBridge.ownsPreviewElement(figureElement, 'mermaid') &&
+      typeof editingBridge.updatePreviewElement === 'function';
     const bridgeSource = bridgeOwnsMermaid ? figureElement.querySelector('.cherry-embed__source:not([hidden])') : null;
     if (sourceMode || bridgeSource) {
       return;
@@ -1223,7 +1241,12 @@ export default class PreviewerBubble {
     });
     imgSizeHandler.bindChange(
       bridgeOwnsMermaid
-        ? (target, style) => editingBridge.updateMermaid(target, { width: style.width, height: style.height })
+        ? (target, style) =>
+            editingBridge.updatePreviewElement(target, {
+              kind: 'mermaid',
+              width: style.width,
+              height: style.height,
+            })
         : (_htmlElement, style) => this.mermaidSession.changeSize(style),
     );
     if (!bridgeOwnsMermaid) this.mermaidSession.bindPositionFollow();
@@ -1242,7 +1265,7 @@ export default class PreviewerBubble {
     );
     imgToolHandler.bindChange(
       bridgeOwnsMermaid
-        ? (target, type) => editingBridge.updateMermaid(target, { type })
+        ? (target, type) => editingBridge.updatePreviewElement(target, { kind: 'mermaid', type })
         : (_htmlElement, type) => this.mermaidSession.changeAlign(type),
     );
 

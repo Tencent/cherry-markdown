@@ -60,17 +60,6 @@ export default class Header extends MenuBase {
     return this.subMenuConfig;
   }
 
-  getActiveSubMenuIndex(subMenuDomPanel) {
-    const state = this.$cherry.previewer?.queryEditingCommandState?.({
-      name: this.name,
-      shortKey: '',
-      menu: this,
-    });
-    const level = Number(state?.value ?? 0);
-    if (state) return level >= 1 && level <= this.subMenuConfig.length ? level - 1 : -1;
-    return super.getActiveSubMenuIndex(subMenuDomPanel);
-  }
-
   /**
    * 解析快捷键，判断插入的标题级别
    * @param {string} shortKey 快捷键

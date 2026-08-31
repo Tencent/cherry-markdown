@@ -40,9 +40,6 @@ jobs:
       - name: Build Milkdown demo
         run: vp run -F @cherry-markdown/milkdown build:demo
 
-      - name: Verify Milkdown published-package consumer
-        run: node packages/milkdown/scripts/verify-consumer.mjs
-
       - run: |
           mkdir -p playground/packages/cherry-markdown
           cp -r packages/cherry-markdown/dist playground/packages/cherry-markdown

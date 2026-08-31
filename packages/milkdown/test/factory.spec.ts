@@ -9,9 +9,8 @@ import {
   milkdown,
   type CherryMilkdownHost,
   type CherryMilkdownInstance,
-  type CherryPreviewContentRenderer,
-  type CherryPreviewEditingBridge,
 } from '../src';
+import type { CherryPreviewContentRenderer, CherryPreviewEditingBridge } from '../src/types';
 
 vi.mock('mermaid', () => ({
   default: {
@@ -746,11 +745,14 @@ describe('createCherryMilkdown WYSIWYG', () => {
 
     const image = element.querySelector<HTMLImageElement>('.ProseMirror img[src]');
     expect(image).not.toBeNull();
-    expect(bridge?.updateImage?.(image!, { width: '160px', height: '90px' })).toBe(true);
+    expect(bridge?.ownsPreviewElement?.(image!, 'image')).toBe(true);
+    expect(
+      bridge?.updatePreviewElement?.(image!, { kind: 'image', width: '160px', height: '90px' }),
+    ).toBe(true);
     await vi.waitFor(() => expect(markdown).toContain('![uploaded#160px#90px](https://example.com/image.png)'));
-    expect(bridge?.updateImage?.(image!, { type: 'border' })).toBe(true);
+    expect(bridge?.updatePreviewElement?.(image!, { kind: 'image', type: 'border' })).toBe(true);
     await vi.waitFor(() => expect(markdown).toContain('![uploaded#160px#90px#B](https://example.com/image.png)'));
-    expect(bridge?.updateImage?.(image!, { type: 'center' })).toBe(true);
+    expect(bridge?.updatePreviewElement?.(image!, { kind: 'image', type: 'center' })).toBe(true);
     await vi.waitFor(() =>
       expect(markdown).toContain('![uploaded#160px#90px#B#center](https://example.com/image.png)'),
     );
@@ -975,11 +977,14 @@ describe('createCherryMilkdown WYSIWYG', () => {
     const figure = element.querySelector<HTMLElement>('.cherry-embed--cherry_diagram[data-type="mermaid"]');
 
     expect(figure).not.toBeNull();
-    expect(bridge?.updateMermaid?.(figure!, { width: '360px', height: '240px' })).toBe(true);
+    expect(bridge?.ownsPreviewElement?.(figure!, 'mermaid')).toBe(true);
+    expect(
+      bridge?.updatePreviewElement?.(figure!, { kind: 'mermaid', width: '360px', height: '240px' }),
+    ).toBe(true);
     await vi.waitFor(() => expect(markdown).toContain('```mermaid #360px #240px'));
     expect(figure?.style.width).toBe('360px');
     expect(figure?.style.height).toBe('240px');
-    expect(bridge?.updateMermaid?.(figure!, { type: 'center' })).toBe(true);
+    expect(bridge?.updatePreviewElement?.(figure!, { kind: 'mermaid', type: 'center' })).toBe(true);
     await vi.waitFor(() => expect(markdown).toContain('```mermaid #360px #240px #center'));
     expect(figure?.classList.contains('cherry-mermaid-align-center')).toBe(true);
   });

@@ -350,17 +350,8 @@ export type {
   CherryMilkdownOptions,
   CherryMilkdownPreviewInstance,
   CherryMilkdownPreviewOptions,
-  CherryPreviewContentRenderer,
-  CherryPreviewContentRendererContext,
-  CherryPreviewEditingBridge,
-  CherryPreviewerHost,
-  CherrySearchAdapter,
-  CherryUpdateContext,
   CherryVisualRenderer,
   CherryVisualRenderContext,
   CherryVisualRendererResult,
 } from './types.js';
 export { attachCherryMilkdownPreview, milkdown } from './previewer.js';
-export { cherryCompatibilityCases } from './compatibility.js';
-export type { CherryCompatibilityCase, CherryCompatibilityMode } from './compatibility.js';
-export { cherryWysiwyg } from './wysiwyg/index.js';
