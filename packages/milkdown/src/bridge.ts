@@ -9,8 +9,6 @@ import {
   toggleInlineCodeCommand,
   toggleStrongCommand,
   wrapInBlockquoteCommand,
-  wrapInBulletListCommand,
-  wrapInOrderedListCommand,
 } from '@milkdown/kit/preset/commonmark';
 import { insertTableCommand, toggleStrikethroughCommand } from '@milkdown/kit/preset/gfm';
 import { redoCommand, undoCommand } from '@milkdown/kit/plugin/history';
@@ -46,6 +44,12 @@ const TRANSFORMED_MARKDOWN_COMMANDS = new Set([
   'toc',
   'video',
 ]);
+
+// Cherry's compound block menus (and its list menus) transform the complete
+// source line under the caret. Keep these commands on the same replacement
+// path so an empty paragraph is replaced by one valid block instead of
+// leaving a trailing paragraph behind.
+const CHERRY_LINE_TRANSFORM_COMMANDS = new Set(['ol', 'ul', 'checklist', 'panel', 'detail', 'timeline']);
 
 function selectedText(view: EditorView) {
   const { from, to } = view.state.selection;
@@ -211,11 +215,28 @@ export function createCherryEditingBridge(
     return true;
   };
 
-  const insertMarkdown = (markdown: string, select = false) => {
+  const insertMarkdown = (markdown: string, select = false, replaceCurrentBlock = false) => {
     if (!markdown) return false;
     instance.editor.action((ctx) => {
       const parsed = ctx.get(parserCtx)(markdown);
-      const transaction = view.state.tr.replaceSelection(new Slice(parsed.content, 0, 0));
+      let transaction = view.state.tr;
+      // Cherry's block toolbar commands replace the current source line(s),
+      // not the text cursor inside an existing paragraph. Replacing only the
+      // cursor would leave an empty paragraph behind and Milkdown would
+      // normalize a multi-item list to a single empty item. For a top-level
+      // paragraph we can safely replace the complete ProseMirror node.
+      const { $from, $to } = view.state.selection;
+      if (replaceCurrentBlock && $from.depth === 1 && $from.parent.isBlock) {
+        // A selection spanning sibling top-level paragraphs represents the
+        // same set of source lines that Cherry's CodeMirror menu transforms.
+        // Include the final paragraph as well, otherwise its old text would
+        // remain after inserting the generated block structure.
+        const from = $from.before(1);
+        const to = $to.depth === 1 ? $to.after(1) : $from.after(1);
+        transaction = transaction.replaceWith(from, to, parsed.content);
+      } else {
+        transaction = transaction.replaceSelection(new Slice(parsed.content, 0, 0));
+      }
       if (!select) transaction.setSelection(view.state.selection.map(transaction.doc, transaction.mapping));
       view.dispatch(transaction);
     });
@@ -333,7 +354,16 @@ export function createCherryEditingBridge(
   const runCherryTransform = (command: CherryToolbarCommand) => {
     const menu = command.menu as CherryMenuLike | undefined;
     if (!menu?.onClick) return false;
-    const selection = selectedText(view);
+    const rawSelection = selectedText(view);
+    const isLineCommand = CHERRY_LINE_TRANSFORM_COMMANDS.has(command.name);
+    // Cherry's line-based list hooks operate on the complete current line
+    // when the caret has no text selection. Milkdown's selectedText() is
+    // intentionally empty in that case, so provide the current text block to
+    // the hook instead of letting it fall back to the demo placeholder.
+    const selection =
+      rawSelection || (isLineCommand && view.state.selection.$from.parent.isTextblock
+        ? view.state.selection.$from.parent.textContent
+        : '');
     const previousIsSelections = menu.isSelections;
     menu.isSelections = true;
     let result: unknown;
@@ -344,11 +374,17 @@ export function createCherryEditingBridge(
     }
     if (result instanceof Promise) {
       void result.then((value) => {
-        if (typeof value === 'string' && value !== selection) insertMarkdown(value);
+        if (typeof value === 'string' && value !== selection) {
+          const blockCommand = CHERRY_LINE_TRANSFORM_COMMANDS.has(command.name);
+          insertMarkdown(value, false, blockCommand);
+        }
       });
       return true;
     }
-    if (typeof result === 'string' && result !== selection) insertMarkdown(result);
+    if (typeof result === 'string' && result !== selection) {
+      const blockCommand = CHERRY_LINE_TRANSFORM_COMMANDS.has(command.name);
+      insertMarkdown(result, false, blockCommand);
+    }
     return true;
   };
 
@@ -375,11 +411,13 @@ export function createCherryEditingBridge(
         call(wrapInBlockquoteCommand);
         return true;
       case 'ul':
-        call(wrapInBulletListCommand);
-        return true;
       case 'ol':
-        call(wrapInOrderedListCommand);
-        return true;
+      case 'checklist':
+        // Cherry's list hooks provide the standard empty-selection template
+        // and preserve nested list indentation. Running the native Milkdown
+        // wrap command here would create only an empty `1.`/`-` item and make
+        // the preview diverge from Cherry's toolbar behavior.
+        return runCherryTransform(command);
       case 'hr':
         call(insertHrCommand);
         return true;

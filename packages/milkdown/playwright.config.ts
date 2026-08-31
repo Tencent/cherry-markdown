@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const port = 4177;
+const port = Number(process.env.MILKDOWN_E2E_PORT ?? 4177);
 const packageRoot = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = resolve(packageRoot, '../..');
 const browserProjects = process.env.MILKDOWN_BROWSER_MATRIX

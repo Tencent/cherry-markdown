@@ -1286,20 +1286,30 @@ export const cherryLinkTargetClickPlugin = $prose(
             const link = origin instanceof Element ? origin.closest('a') : null;
             if (!(link instanceof HTMLAnchorElement) || link.closest('.cherry-source-node--cherry_toc')) return false;
             const marker = link?.nextElementSibling;
-            if (marker?.classList.contains('cherry-link-target')) {
-              const target = marker.getAttribute('data-target') ?? '';
-              if (target && link.target !== target) link.target = target;
-              if (target === '_blank' && !link.rel.includes('noopener')) link.rel = `${link.rel} noopener`.trim();
+            const target = marker?.classList.contains('cherry-link-target')
+              ? marker.getAttribute('data-target') ?? ''
+              : '';
+
+            // Never mutate attributes on ProseMirror-owned link DOM here.
+            // Its DOMObserver would parse the whole paragraph again and turn
+            // preserved Markdown newlines between inline nodes into spaces,
+            // visibly moving the focused link onto the preceding line.
+            if (!view.editable) {
+              if (!target || target === '_self') return false;
+              event.preventDefault();
+              event.stopPropagation();
+              if (/^(?:https?:|mailto:|tel:)/i.test(link.href)) {
+                window.open(link.href, target, target === '_blank' ? 'noopener' : undefined);
+              }
+              return true;
             }
 
-            if (!view.editable) return false;
             event.preventDefault();
-            link.title = '按 Ctrl/⌘ 点击打开链接';
             if (!event.metaKey && !event.ctrlKey) return false;
 
             event.stopPropagation();
             if (!/^(?:https?:|mailto:|tel:)/i.test(link.href)) return true;
-            window.open(link.href, '_blank', 'noopener');
+            window.open(link.href, target || '_blank', target === '_blank' || !target ? 'noopener' : undefined);
             return true;
           },
         },

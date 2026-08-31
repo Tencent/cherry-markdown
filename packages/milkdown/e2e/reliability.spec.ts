@@ -447,7 +447,7 @@ test('physical clicks edit code and navigate links and TOC inside the preview', 
   await link.scrollIntoViewIfNeeded();
   await link.click();
   await expect(editor).toBeFocused();
-  await expect(link).toHaveAttribute('title', '按 Ctrl/⌘ 点击打开链接');
+  await expect(link).not.toHaveAttribute('title');
   const popupPromise = page.waitForEvent('popup');
   await link.click({ modifiers: ['ControlOrMeta'] });
   const popup = await popupPromise;
@@ -507,6 +507,99 @@ test('slash menu exposes H6 and keyboard code-block conversion without leaving p
   await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('```\nslashCode();\n```');
   await expect(page.locator('.cherry-editor .cm-content')).not.toBeFocused();
   actions.push('used arrow keys and Enter to create a directly editable code block without focusing CodeMirror');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('ordered-list toolbar keeps Cherry default nested-list behavior', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.evaluate(() => {
+    const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+    scope.cherry.setValue('');
+  });
+
+  const paragraph = page.locator('.ProseMirror p').first();
+  await paragraph.click();
+  await page.locator('.toolbar-left [title="有序列表"]').click();
+  await expect(page.locator('.ProseMirror > ol > li')).toHaveCount(2);
+  await expect(page.locator('.ProseMirror > ol > li:first-child > ol > li')).toHaveCount(1);
+  await expect
+    .poll(async () => {
+      const state = await readState(page);
+      const normalized = state.cherry.trim().replace(/\n +(?=\d+\.)/g, '\n    ');
+      return { normalized, synchronized: state.cherry === state.codeMirror && state.cherry === state.milkdown };
+    })
+    .toEqual({
+      normalized: '1. Item 1\n    1. Item 1.1\n2. Item 2',
+      synchronized: true,
+    });
+  actions.push('used the ordered-list toolbar on an empty paragraph and preserved Cherry nested-list defaults');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('focusing any Cherry link does not move it or rewrite ProseMirror DOM', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  const markdown = [
+    '# Target',
+    '',
+    '**效果**',
+    '[普通链接](https://example.com/plain)',
+    '[!!#ff0000 红色超链接!!](https://example.com/red)',
+    '[!!#ffffff !!!#000000 黑底白字超链接!!!!!](https://example.com/background)',
+    '[新窗口打开](https://example.com){target=_blank}',
+    '<https://example.com/auto>',
+    '[锚点链接](#target)',
+  ].join('\n');
+  await page.evaluate((value) => {
+    const scope = window as typeof window & { cherry: { setValue(markdown: string): void } };
+    scope.cherry.setValue(value);
+  }, markdown);
+
+  await expect(page.locator('.ProseMirror')).toContainText('锚点链接');
+  await expect.poll(async () => (await readState(page)).cherry).toContain('新窗口打开');
+  const closeToc = page.locator('.cherry-flex-toc__full .ch-icon-chevronsRight');
+  if (await closeToc.isVisible()) await closeToc.click();
+  const linkNames = [
+    '普通链接',
+    '红色超链接',
+    '黑底白字超链接',
+    '新窗口打开',
+    'https://example.com/auto',
+    '锚点链接',
+  ];
+  for (const name of linkNames) {
+    const link = page.getByRole('link', { name, exact: true });
+    await link.scrollIntoViewIfNeeded();
+    const beforeBox = await link.boundingBox();
+    const beforeHtml = await link.evaluate((element) => element.parentElement?.innerHTML);
+    await link.click();
+    const afterBox = await link.boundingBox();
+    const afterHtml = await link.evaluate((element) => element.parentElement?.innerHTML);
+
+    expect(beforeBox, name).not.toBeNull();
+    expect(afterBox, name).not.toBeNull();
+    expect(Math.abs((afterBox?.x ?? 0) - (beforeBox?.x ?? 0)), name).toBeLessThan(0.5);
+    expect(Math.abs((afterBox?.y ?? 0) - (beforeBox?.y ?? 0)), name).toBeLessThan(0.5);
+    expect(afterHtml, name).toBe(beforeHtml);
+    await expect(link, name).not.toHaveAttribute('target');
+    await expect(link, name).not.toHaveAttribute('title');
+  }
+  await expect
+    .poll(async () => {
+      const state = await readState(page);
+      return { containsLink: state.cherry.includes('新窗口打开'), synchronized: state.cherry === state.codeMirror };
+    })
+    .toEqual({ containsLink: true, synchronized: true });
+  actions.push('focused plain, styled, target, automatic and anchor links without moving or mutating DOM');
 
   expect(errors).toEqual([]);
   await attachEvidence(page, testInfo, actions, errors);

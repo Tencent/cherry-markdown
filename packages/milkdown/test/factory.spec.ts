@@ -408,10 +408,16 @@ describe('createCherryMilkdown WYSIWYG', () => {
     const link = element.querySelector<HTMLAnchorElement>('a');
     expect(element.querySelector('.ProseMirror')?.textContent).toBe('Cherry');
     expect(link?.target).toBe('');
+    const paragraphHtml = link?.parentElement?.innerHTML;
     link?.addEventListener('click', (event) => event.preventDefault());
     link?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-    expect(link?.target).toBe('_blank');
-    expect(link?.rel).toContain('noopener');
+    expect(link?.target).toBe('');
+    expect(link?.rel).toBe('');
+    expect(link?.parentElement?.innerHTML).toBe(paragraphHtml);
+
+    const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+    link?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true }));
+    expect(open).toHaveBeenCalledWith('https://example.com/', '_blank', 'noopener');
     expect(instance.getMarkdown()).toContain('{target=\\_blank}');
   });
 
