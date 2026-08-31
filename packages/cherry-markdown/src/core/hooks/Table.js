@@ -380,18 +380,6 @@ export default class Table extends ParagraphBase {
     return this.RULE[flavor].reg && this.RULE[flavor].reg.test(str);
   }
 
-  destroyRenderedContent(container) {
-    if (!this.chartRenderEngine?.destroyChart || !container?.querySelectorAll) return;
-    const charts = [];
-    if (container.matches?.('.cherry-echarts-wrapper')) charts.push(container);
-    charts.push(...container.querySelectorAll('.cherry-echarts-wrapper'));
-    charts.forEach((chart) => this.chartRenderEngine.destroyChart(chart));
-  }
-
-  onDestroy() {
-    this.chartRenderEngine?.onDestroy?.();
-  }
-
   /**
    * TODO: fix type errors
    * @returns

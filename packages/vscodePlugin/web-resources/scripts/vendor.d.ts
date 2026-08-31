@@ -4,4 +4,4 @@ declare module 'cherry-markdown' {
 }
 
 declare module 'cherry-markdown/dist/cherry-markdown.min.css';
-declare module 'mathjax/es5/tex-svg.js';
+declare module 'mathjax/es5/tex-svg-full.js';

@@ -723,8 +723,10 @@ test('the shared Cherry syntax matrix renders in the real demo without renderer 
     await expect.poll(async () => (await readState(page)).codeMirror).toBe(capability.markdown);
     if (capability.selector) {
       await expect(page.locator(`.ProseMirror ${capability.selector}`).first(), capability.id).toBeVisible();
+    } else if (capability.expectedText) {
+      await expect(page.locator('.ProseMirror'), capability.id).toContainText(capability.expectedText);
     } else {
-      await expect(page.locator('.ProseMirror')).toContainText('red');
+      throw new Error(`Compatibility case ${capability.id} has no selector or expectedText assertion.`);
     }
     const markdown = (await readState(page)).cherry;
     expect(markdown.length, capability.id).toBeGreaterThan(0);

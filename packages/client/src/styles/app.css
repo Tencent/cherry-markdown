@@ -62,7 +62,7 @@ body.engine-milkdown #markdown-editor {
 
 /* 专注模式下 Milkdown 的宽度模式：与 Cherry 的 fixed-width / auto-width 保持视觉一致 */
 #milkdown-editor.fixed-width .milkdown-editor-root {
-  max-width: 800px;
+  max-width: var(--fixed-content-width, 800px);
   padding-left: max(20px, 32px);
   padding-right: max(45px, 48px);
 }

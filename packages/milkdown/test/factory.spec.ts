@@ -480,12 +480,13 @@ describe('createCherryMilkdown WYSIWYG', () => {
   it('renders a table chart with Cherry HTML, preserves its exact source, and cleans rendered resources', async () => {
     const element = root();
     const value = ['| :line:{"title":"Trend"} | Jan | Feb |', '| --- | ---: | ---: |', '| Sales | 1 | 2 |'].join('\n');
+    const destroyChart = vi.fn();
     const engine = {
       makeHtml: vi.fn(
         () =>
           '<div class="cherry-table-wrapper"><table class="cherry-table"><tbody><tr><td>Sales</td></tr></tbody></table></div><figure class="cherry-table-figure"><div class="cherry-echarts-wrapper"></div></figure>',
       ),
-      destroyRenderedContent: vi.fn(),
+      hooks: { paragraph: [{ chartRenderEngine: { destroyChart } }] },
     };
     const instance = await createCherryMilkdown({ root: element, value, engine, debounce: 0 });
     instances.push(instance);
@@ -508,7 +509,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(view.state.selection).toBeInstanceOf(NodeSelection);
     await instance.destroy();
     instances.splice(instances.indexOf(instance), 1);
-    expect(engine.destroyRenderedContent).toHaveBeenCalled();
+    expect(destroyChart).toHaveBeenCalled();
   });
 
   it('keeps preview tables directly editable without mounting floating component chrome', async () => {

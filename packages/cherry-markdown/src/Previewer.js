@@ -946,7 +946,6 @@ export default class Previewer {
       this.applyingDomChanges = true;
       // 预览区未隐藏时，直接更新
       const domContainer = this.getDomContainer();
-      this.$cherry?.engine?.destroyRenderedContent?.(domContainer);
       if (this.editor?.selectAll) {
         domContainer.innerHTML = '';
       }
@@ -1507,8 +1506,6 @@ export default class Previewer {
     if (this.contentRenderer) {
       this.clearContentRenderer(this.contentRenderer);
     }
-    const renderedContainer = this.getDomContainer();
-    this.$cherry?.engine?.destroyRenderedContent?.(renderedContainer);
     this.clearEditingBridge(this.editingBridge);
 
     // 清理滚动事件监听

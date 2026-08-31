@@ -214,3 +214,61 @@ body[data-cherry-theme='dark'] .status-action-width:hover {
   color: var(--color-accent-strong);
   border-color: var(--color-accent);
 }
+
+/* “自动快照 HH:mm:ss” 提示：位于状态栏右侧，采用低饱和的成功色 */
+.auto-saved-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  height: 18px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: var(--color-success, #52c41a);
+  background: rgba(82, 196, 26, 0.08);
+  white-space: nowrap;
+}
+
+.auto-saved-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-success, #52c41a);
+  flex-shrink: 0;
+  animation: auto-saved-pulse 1.2s ease-out;
+}
+
+@keyframes auto-saved-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  60% {
+    transform: scale(1.4);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* “查看历史版本”按钮：紧凑样式，紧贴文件名右侧 */
+.status-action-history {
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid var(--color-border-strong, rgba(127, 127, 127, 0.3));
+  border-radius: 4px;
+  color: var(--color-text-secondary);
+  background: transparent;
+}
+
+.status-action-history:hover {
+  color: var(--color-accent-strong);
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+body[data-cherry-theme='dark'] .auto-saved-hint {
+  background: rgba(82, 196, 26, 0.15);
+}

@@ -7,12 +7,32 @@ import { $nodeSchema, $prose, $view } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
 import type { CherryWysiwygConfig } from './config.js';
 import type { CherryVisualRendererResult } from './types.js';
+import type { CherryEngineLike } from '../types.js';
 
 let mermaidRenderId = 0;
 const headingNavigationTasks = new WeakMap<
   EditorView,
   { frames: number[]; timers: Array<ReturnType<typeof setTimeout>> }
 >();
+
+function destroyCherryRenderedContent(engine: CherryEngineLike, container: Element) {
+  if (engine.destroyRenderedContent) {
+    engine.destroyRenderedContent(container);
+    return;
+  }
+
+  const charts = [
+    ...(container.matches('.cherry-echarts-wrapper') ? [container] : []),
+    ...container.querySelectorAll('.cherry-echarts-wrapper'),
+  ];
+  if (charts.length === 0) return;
+
+  for (const hook of engine.hooks?.paragraph ?? []) {
+    const destroyChart = hook.chartRenderEngine?.destroyChart;
+    if (!destroyChart) continue;
+    charts.forEach((chart) => destroyChart.call(hook.chartRenderEngine, chart));
+  }
+}
 
 async function renderMermaid(source: string) {
   const { default: mermaid } = await import('mermaid');
@@ -1110,7 +1130,7 @@ class TableChartView implements NodeView {
     this.observer?.disconnect();
     this.dom.removeEventListener('mousedown', this.selectFromEmptyArea, true);
     this.dom.removeEventListener('click', this.selectFromEmptyArea, true);
-    this.config.engine.destroyRenderedContent?.(this.preview);
+    destroyCherryRenderedContent(this.config.engine, this.preview);
   }
 
   private scheduleRender() {
@@ -1214,7 +1234,7 @@ class TableChartView implements NodeView {
 
   private render() {
     if (this.destroyed) return;
-    this.config.engine.destroyRenderedContent?.(this.preview);
+    destroyCherryRenderedContent(this.config.engine, this.preview);
     try {
       const html = this.config.engine.makeHtml(String(this.node.attrs.source ?? ''));
       this.preview.replaceChildren(sanitizedEngineFragment(html));

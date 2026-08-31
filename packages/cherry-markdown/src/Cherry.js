@@ -313,7 +313,6 @@ export default class Cherry extends CherryStatic {
       this.editor.destroy();
     }
     this.previewer?.destroy?.();
-    this.engine?.destroy?.();
 
     // 清理 DOM
     if (this.noMountEl) {
@@ -636,6 +635,13 @@ export default class Cherry extends CherryStatic {
    */
   clearEngineCache() {
     this.engine.clearCache();
+  }
+
+  /**
+   * 清空undo/redo栈
+   */
+  clearUndoRedo() {
+    this.editor?.clearUndoRedo();
   }
 
   /**

@@ -6,6 +6,7 @@ export interface CherryCompatibilityCase {
   markdown: string;
   mode: CherryCompatibilityMode;
   selector?: string;
+  expectedText?: string;
 }
 
 /**
@@ -87,11 +88,13 @@ export const cherryCompatibilityCases: readonly CherryCompatibilityCase[] = [
     label: 'Cherry inline syntax',
     markdown: '!!#f00 red!! !!!#fff background!!! !18 size! ^^sub^^ ^sup^ {字|zi} /under/ ==mark==',
     mode: 'structured',
+    expectedText: 'red',
   },
   {
     id: 'custom-hook',
     label: 'business custom hook',
     markdown: ':::custom\nOpaque source\n:::',
     mode: 'passthrough',
+    expectedText: 'Opaque source',
   },
 ] as const;

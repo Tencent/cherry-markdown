@@ -7,7 +7,19 @@ export type CherryMilkdownErrorPhase = 'create' | 'parse' | 'render';
 
 export interface CherryEngineLike {
   makeHtml(markdown: string): string;
+  /** Optional future/public cleanup contract. Older Cherry versions use the hook fallback below. */
   destroyRenderedContent?(container: Element): void;
+  /** @internal Compatibility surface used only to dispose native table-chart instances. */
+  hooks?: Partial<
+    Record<
+      'sentence' | 'paragraph',
+      Array<{
+        chartRenderEngine?: {
+          destroyChart?(target: Element): void;
+        };
+      }>
+    >
+  >;
 }
 
 export interface CherryMilkdownChange {

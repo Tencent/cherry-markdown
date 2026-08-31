@@ -1,5 +1,15 @@
 # @cherry-markdown/client
 
+## 0.5.1
+
+### Patch Changes
+
+- feat: 客户端增加导出长图、pdf、docs等能力 [@sunsonliu](https://github.com/sunsonliu)([#1859](https://github.com/Tencent/cherry-markdown/pull/1859))([`fe5dc16`](https://github.com/Tencent/cherry-markdown/commit/fe5dc168087c2aea8c958719a4f09b69b72865f9))
+- 修复 `brace-expansion` 受影响版本引起的高危拒绝服务漏洞（CVE-2026-13149），并将相关依赖链更新到已修复版本。 [@RSS1102](https://github.com/RSS1102)([#1849](https://github.com/Tencent/cherry-markdown/pull/1849))([`3903da1`](https://github.com/Tencent/cherry-markdown/commit/3903da1e818ba67886cfeddf64506cd123e61b5b))
+- fix: #1853 客户端导出word后出现弹窗无法关闭 [@sunsonliu](https://github.com/sunsonliu)([#1858](https://github.com/Tencent/cherry-markdown/pull/1858))([`4d81982`](https://github.com/Tencent/cherry-markdown/commit/4d819826468f44c918a1dd9879865aaf369a1205))
+- Updated dependencies [[`ba1f07c`](https://github.com/Tencent/cherry-markdown/commit/ba1f07ca2644142d415b16cfe432db335c44ca27), [`327877a`](https://github.com/Tencent/cherry-markdown/commit/327877ab1aab1e612660ca845b02dab0c646834e), [`72c7036`](https://github.com/Tencent/cherry-markdown/commit/72c7036d915ca88bccfb6cd1989ff3a17b1e348c), [`d302daa`](https://github.com/Tencent/cherry-markdown/commit/d302daa70a653a053dda363d7e04b95bdeed11ad)]:
+  - cherry-markdown@0.11.10
+
 ## 0.5.0
 
 ### Minor Changes

@@ -142,8 +142,8 @@ body {
 }
 
 #markdown-editor.fixed-width .cherry-previewer--full, #markdown-editor.fixed-width .cherry-editor--full .cm-editor .cm-scroller {
-  padding-left: max(20px, calc((100% - 800px) / 2));
-  padding-right: max(45px, calc((100% - 800px) / 2));
+  padding-left: max(20px, calc((100% - var(--fixed-content-width, 800px)) / 2));
+  padding-right: max(45px, calc((100% - var(--fixed-content-width, 800px)) / 2));
   border-left: none;
 }
 

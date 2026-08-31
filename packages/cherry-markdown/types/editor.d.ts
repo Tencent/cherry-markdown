@@ -130,6 +130,8 @@ export interface CM6Adapter {
   vimCompartment: import('@codemirror/state').Compartment | null;
   /** 只读状态的 Compartment（用于动态切换只读） */
   readOnlyCompartment: import('@codemirror/state').Compartment | null;
+  /** 历史记录的 Compartment（用于清空 undo/redo 栈） */
+  historyCompartment: import('@codemirror/state').Compartment | null;
   /** 标记 ID 计数器（实例级别，用于多实例隔离） */
   markIdCounter: number;
 
@@ -198,6 +200,12 @@ export interface CM6Adapter {
    * @param readOnly 是否只读
    */
   setReadOnly(readOnly: boolean): void;
+
+  /**
+   * 清空 undo/redo 历史栈
+   * 通过重置 history 扩展的方式清除全部撤销/重做记录。
+   */
+  clearHistory(): void;
 
   // 搜索操作
   setSearchQuery(query: string, caseSensitive?: boolean, isRegex?: boolean): void;

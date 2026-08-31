@@ -141,6 +141,34 @@ describe('core/hooks/InlineMath', () => {
     expect(html).not.toContain('merror');
   });
 
+  it('falls back to raw source with red-highlighted control chars when MathJax throws', () => {
+    const tex2svg = vi.fn(() => {
+      throw new Error('invalid formula');
+    });
+    const { hook } = createInlineMath('MathJax');
+    setExternals(hook, { MathJax: { tex2svg } });
+
+    const html = hook.restoreCache(hook.toHtml('~D\x08oldsymbol a~D', '', '\x08oldsymbol a'));
+
+    expect(html).toContain('cherry-math-error');
+    expect(html).toContain('\\x08');
+    expect(html).toContain('oldsymbol a');
+    expect(html).not.toContain('<mjx-container');
+  });
+
+  it('falls back to raw source when KaTeX rendering throws', () => {
+    const renderToString = vi.fn(() => {
+      throw new Error('invalid formula');
+    });
+    const { hook } = createInlineMath('katex');
+    setExternals(hook, { katex: { renderToString } });
+
+    const html = hook.restoreCache(hook.toHtml('~Dx~D', '', 'x'));
+
+    expect(html).toContain('$x$');
+    expect(html).not.toContain('class="katex"');
+  });
+
   it('renders escaped source when running with the node engine', () => {
     const { hook } = createInlineMath('MathJax');
     hook.engine = 'node';

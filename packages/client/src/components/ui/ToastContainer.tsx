@@ -23,10 +23,27 @@ export default defineComponent({
                     {
                       key: toast.id,
                       class: ['toast-item', getTypeClass(toast.type)],
-                      onClick: () => removeToast(toast.id),
+                      // 存在 action 时不再让整个 toast 变成“点击即关闭”的大按钮，
+                      // 避免误触；用户需要点右侧关闭按钮或等待自动消失
+                      onClick: toast.action ? undefined : () => removeToast(toast.id),
                     },
                     [
                       h('span', { class: 'toast-message' }, toast.message),
+                      toast.action
+                        ? h(
+                            'button',
+                            {
+                              class: 'toast-action',
+                              onClick: (event: MouseEvent) => {
+                                event.stopPropagation();
+                                const keepOpen = toast.action?.onClick();
+                                // onClick 返回 false 表示保留 toast，否则关闭
+                                if (keepOpen !== false) removeToast(toast.id);
+                              },
+                            },
+                            toast.action.label,
+                          )
+                        : null,
                       h(
                         'button',
                         {

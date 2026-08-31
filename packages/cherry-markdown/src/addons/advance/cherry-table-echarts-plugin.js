@@ -73,16 +73,6 @@ export default class EChartsTableEngine {
 
   constructor(echartsOptions = {}) {
     const { echarts, cherryOptions, cherry, ...options } = echartsOptions;
-    this.options = { ...DEFAULT_OPTIONS, ...(options || {}) };
-    this.dom = null;
-    this.cherryOptions = cherryOptions;
-    this.cherry = cherry;
-    this.instances = new Set();
-    this.themeObservers = new Map();
-    this.themeRuntime = null;
-    this.themeCache = new Map();
-    this.exportObservers = new Map();
-    this.pendingTimers = new Set();
     const globalEcharts = getExternal('echarts');
     const resolvedEcharts = echarts || globalEcharts;
     if (!resolvedEcharts) {
@@ -90,7 +80,25 @@ export default class EChartsTableEngine {
       this.echartsRef = false;
       return;
     }
+    this.options = { ...DEFAULT_OPTIONS, ...(options || {}) };
     this.echartsRef = /** @type {*} */ (resolvedEcharts); // echarts引用
+    this.dom = null;
+
+    // 保存Cherry配置，用于获取地图数据源URL
+    this.cherryOptions = cherryOptions;
+    // 保存Cherry实例，用于事件监听及i18n
+    this.cherry = cherry;
+    // 统一管理实例
+    this.instances = new Set();
+    // 主题监听器
+    this.themeObservers = new Map();
+    // 运行时主题（根据CSS变量动态生成）
+    this.themeRuntime = null;
+    // 主题缓存：key 为主题名（default/dark/abyss等），值为 { echarts, runtime }
+    this.themeCache = new Map();
+
+    // 导出完成事件监听器
+    this.exportObservers = new Map();
 
     // 监听语言变更事件
     this.$enableLocaleObserver();
@@ -98,15 +106,6 @@ export default class EChartsTableEngine {
 
   isValid() {
     return !!this.echartsRef;
-  }
-
-  $schedule(callback, delay) {
-    const timer = setTimeout(() => {
-      this.pendingTimers.delete(timer);
-      callback();
-    }, delay);
-    this.pendingTimers.add(timer);
-    return timer;
   }
 
   /**
@@ -267,7 +266,6 @@ export default class EChartsTableEngine {
    * 清理无效的图表实例（图表不在DOM中，但仍被this.instances保存，需要清理）
    */
   cleanupInvalidInstances() {
-    if (!this.instances) return;
     const instancesToRemove = [];
     this.instances.forEach((instance) => {
       // 检查实例是否已被销毁
@@ -296,7 +294,6 @@ export default class EChartsTableEngine {
    * 销毁图表实例
    */
   destroyChart(target) {
-    if (!this.echartsRef) return;
     let container = null;
     let inst = null;
 
@@ -710,7 +707,7 @@ export default class EChartsTableEngine {
     // 如果有Cherry实例，通过其事件系统监听语言变更事件
     if (this.cherry && this.cherry.$event) {
       const handler = (locale) => {
-        this.$schedule(() => {
+        setTimeout(() => {
           const root = this.$getCherryRoot();
           this.$rebuildAllCharts(root);
         }, 0);
@@ -784,7 +781,7 @@ export default class EChartsTableEngine {
     const previewDom = $cherry.previewer.getDom();
 
     // 延迟到下一轮事件循环再执行；只重试一次
-    this.$schedule(() => {
+    setTimeout(() => {
       const containers = previewDom.querySelectorAll(`#${chartId}`);
       if (containers.length <= 0 || !this.echartsRef) return;
       // if (this.echartsRef.getInstanceByDom(container)) return;
@@ -850,8 +847,6 @@ export default class EChartsTableEngine {
   }
 
   onDestroy() {
-    this.pendingTimers?.forEach((timer) => clearTimeout(timer));
-    this.pendingTimers?.clear();
     this.cleanupInvalidInstances();
 
     if (this.instances && this.instances.size > 0) {
@@ -872,7 +867,7 @@ export default class EChartsTableEngine {
       });
       this.exportObservers.clear();
     }
-    if (this.dom && this.echartsRef) {
+    if (this.dom) {
       const inst = this.echartsRef.getInstanceByDom(this.dom);
       if (inst && !inst.isDisposed()) inst.dispose();
       this.dom = null;

@@ -9,6 +9,7 @@ describe('Cherry compatibility manifest', () => {
     for (const item of cherryCompatibilityCases) {
       expect(['structured', 'native-source', 'passthrough']).toContain(item.mode);
       expect(item.markdown.trim()).not.toBe('');
+      expect(Boolean(item.selector || item.expectedText), `${item.id} browser assertion`).toBe(true);
     }
   });
 
