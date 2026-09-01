@@ -190,6 +190,10 @@ const cherryBlockDragDrop = $prose(
           return true;
         };
         const onPointerDown = (event: PointerEvent) => {
+          // A previous candidate must never leak into a subsequent click on a
+          // Cherry-owned control (for example after a synthetic/forced click
+          // in automation where the native pointerup is not delivered).
+          pointerCandidate = undefined;
           if (event.button !== 0 && event.pointerType === 'mouse') return;
           const target = event.target instanceof HTMLElement ? event.target : undefined;
           // NodeView controls (image resize, Mermaid/ECharts actions, table
