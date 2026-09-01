@@ -1208,6 +1208,15 @@ test('manual interaction matrix covers focus, edit, create and delete for remain
   // Formula: click the MathLive field, type, and verify immediate Markdown sync.
   await setValue('$x$');
   const math = page.locator('.ProseMirror math-field').first();
+  // MathLive upgrades the custom element asynchronously.  Wait for the
+  // upgraded, editable field before sending physical pointer/keyboard input;
+  // otherwise Chromium can legitimately deliver the click before MathLive
+  // has installed its shadow editor and the keystrokes are dropped.
+  await expect.poll(async () => math.evaluate((field) => ({
+    upgraded: Boolean(customElements.get('math-field')),
+    value: (field as HTMLElement & { value?: string }).value,
+    readOnly: (field as HTMLElement & { readOnly?: boolean }).readOnly,
+  }))).toEqual({ upgraded: true, value: 'x', readOnly: false });
   const mathBox = await math.boundingBox();
   expect(mathBox).not.toBeNull();
   await page.mouse.click(mathBox!.x + mathBox!.width - 2, mathBox!.y + mathBox!.height / 2);
