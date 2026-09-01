@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import ParagraphBase from '@/core/ParagraphBase';
-import { escapeFormulaPunctuations, LoadMathModule } from '@/utils/mathjax';
+import { escapeFormulaPunctuations, LoadMathModule, renderMathFallback } from '@/utils/mathjax';
 import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
 import { isLookbehindSupported } from '@/utils/regexp';
@@ -60,7 +60,9 @@ export default class MathBlock extends ParagraphBase {
 
     // 既无MathJax又无katex时，原样输出
     let result = '';
-    const $content = content.replace(/\\~D/g, '$').replace(/\\~T/g, '~').replace(/~T/g, '~');
+    let $content = content.replace(/\\~D/g, '$').replace(/\\~T/g, '~').replace(/~T/g, '~');
+    const hasCursor = /CHERRYFLOWSESSIONCURSOR/.test($content);
+    $content = $content.replace('CHERRYFLOWSESSIONCURSOR', '');
     // 保留一份源码到渲染节点上，供 formulaUtilsHandler 直接读取，避免再次对全文做正则解析。
     const encodedFormulaSource = encodeURIComponent($content);
 
@@ -70,10 +72,15 @@ export default class MathBlock extends ParagraphBase {
         result = `<div data-sign="${sign}" class="Cherry-Math cherry-katex-need-render" data-type="mathBlock" data-formula-source="${encodedFormulaSource}" data-lines="${lines}" data-content="${encodeURIComponent($content)}"></div>`;
         this.$engine.asyncRenderHandler.add(`math-block-${sign}`);
       } else {
-        let html = this.katex.renderToString($content, {
-          throwOnError: false,
-          displayMode: true,
-        });
+        let html;
+        try {
+          html = this.katex.renderToString($content, {
+            throwOnError: false,
+            displayMode: true,
+          });
+        } catch (e) {
+          html = renderMathFallback($content, true);
+        }
         if (this.isSelfClosing()) {
           if (/class="katex-error"/.test(html) && this.lastCode) {
             html = this.lastCode;
@@ -94,8 +101,10 @@ export default class MathBlock extends ParagraphBase {
         try {
           svg = getHTML(this.MathJax.tex2svg($content), true);
         } catch (e) {
-          if (this.isSelfClosing()) {
+          if (this.isSelfClosing() && this.lastCode) {
             svg = this.lastCode;
+          } else {
+            svg = renderMathFallback($content, true);
           }
         }
 
@@ -113,7 +122,8 @@ export default class MathBlock extends ParagraphBase {
       data-lines="${lines}" data-formula-source="${encodedFormulaSource}">$$${escapeFormulaPunctuations(content)}$$</div>`;
     }
 
-    return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
+    const appendCursor = hasCursor ? 'CHERRYFLOWSESSIONCURSOR' : '';
+    return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch) + appendCursor;
   }
 
   isSelfClosing() {

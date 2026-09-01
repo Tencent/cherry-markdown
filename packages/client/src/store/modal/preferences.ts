@@ -7,6 +7,8 @@ export type EditorEngine = 'cherry' | 'milkdown';
 interface PreferencesState {
   focusMode: boolean;
   widthMode: WidthMode;
+  /** 专注模式 - 固定宽度模式下的正文最大宽度（px），仅在 widthMode === 'fixed' 时生效 */
+  fixedWidthValue: number;
   editorMode: EditorMode;
   toolbarVisible: boolean;
   engine: EditorEngine;
@@ -14,9 +16,15 @@ interface PreferencesState {
 
 const STORAGE_KEY = 'cherry_markdown_ui_preferences';
 
+/** 固定宽度允许的范围（px），避免用户填入极端值导致布局崩坏 */
+export const FIXED_WIDTH_MIN = 400;
+export const FIXED_WIDTH_MAX = 1600;
+export const FIXED_WIDTH_DEFAULT = 800;
+
 const DEFAULT_STATE: PreferencesState = {
   focusMode: false,
   widthMode: 'fixed',
+  fixedWidthValue: FIXED_WIDTH_DEFAULT,
   editorMode: 'edit&preview',
   toolbarVisible: true,
   engine: 'cherry',
@@ -28,6 +36,11 @@ const isWidthMode = (v: unknown): v is WidthMode => v === 'fixed' || v === 'auto
 
 const isEditorEngine = (v: unknown): v is EditorEngine => v === 'cherry' || v === 'milkdown';
 
+const clampFixedWidth = (v: unknown): number => {
+  const n = typeof v === 'number' && Number.isFinite(v) ? v : FIXED_WIDTH_DEFAULT;
+  return Math.min(FIXED_WIDTH_MAX, Math.max(FIXED_WIDTH_MIN, Math.round(n)));
+};
+
 const loadFromStorage = (): PreferencesState => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -36,6 +49,7 @@ const loadFromStorage = (): PreferencesState => {
     return {
       focusMode: typeof parsed.focusMode === 'boolean' ? parsed.focusMode : DEFAULT_STATE.focusMode,
       widthMode: isWidthMode(parsed.widthMode) ? parsed.widthMode : DEFAULT_STATE.widthMode,
+      fixedWidthValue: clampFixedWidth(parsed.fixedWidthValue),
       editorMode: isEditorMode(parsed.editorMode) ? parsed.editorMode : DEFAULT_STATE.editorMode,
       toolbarVisible: typeof parsed.toolbarVisible === 'boolean' ? parsed.toolbarVisible : DEFAULT_STATE.toolbarVisible,
       engine: isEditorEngine(parsed.engine) ? parsed.engine : DEFAULT_STATE.engine,
@@ -63,6 +77,10 @@ export const usePreferencesStore = defineStore('preferences', {
     },
     setWidthMode(mode: WidthMode) {
       this.widthMode = mode;
+      saveToStorage(this.$state);
+    },
+    setFixedWidthValue(value: number) {
+      this.fixedWidthValue = clampFixedWidth(value);
       saveToStorage(this.$state);
     },
     setEditorMode(mode: EditorMode) {

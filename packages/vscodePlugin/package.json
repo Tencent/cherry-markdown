@@ -2,7 +2,7 @@
   "name": "cherry-markdown-vscode-plugin",
   "displayName": "Cherry Markdown",
   "description": "A markdown previewer powered by [cherry-markdown](https://github.com/Tencent/cherry-markdown) for VSCode",
-  "version": "0.3.2",
+  "version": "0.3.10",
   "publisher": "cherryMarkdownPublisher",
   "license": "Apache-2.0",
   "keywords": [
@@ -178,7 +178,7 @@
     "vscode:prepublish": "vp build --mode extension && vp build --mode webview && vp test run test/package.test.ts",
     "typecheck": "tsc --noEmit",
     "test": "vp run test:unit && vp run test:integration",
-    "test:unit": "vp test run test/config.test.ts test/protocol.test.ts test/textEdit.test.ts test/upload.test.ts test/webview.test.ts",
+    "test:unit": "vp test run test/config.test.ts test/protocol.test.ts test/textEdit.test.ts test/upload.test.ts test/webview.test.ts test/mathjaxConfig.test.ts test/editState.test.ts",
     "test:package": "vp test run test/package.test.ts",
     "test:vsix": "vp test run test/vsix.test.ts",
     "test:integration": "vp run build && tsc && node out/test/runIntegrationTests.js",

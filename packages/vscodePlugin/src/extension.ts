@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { getTheme, getUsageMode, migrateImageUploadMode, migrateTheme, THEME_STATE_KEY } from './config';
+import { isPreviewEditEnabled } from './editState';
 import { uploadFileHandler } from './handler/uploadFile';
 import type { EditorState, ExtensionToWebviewMessage } from './protocol';
 import { parseWebviewMessage } from './protocol';
@@ -152,7 +153,10 @@ class CherryMarkdownPreview {
   }
 
   private async handleActiveEditorChange(editor: vscode.TextEditor | undefined): Promise<void> {
-    if (editor?.document.languageId === 'markdown') {
+    // The active text editor is temporarily undefined while focus moves to the preview Webview.
+    if (!editor) return;
+
+    if (editor.document.languageId === 'markdown') {
       this.targetEditor = editor;
       if (this.panel) {
         this.updateResourceRoots();
@@ -169,10 +173,11 @@ class CherryMarkdownPreview {
 
   private isEditEnabled(): boolean {
     const activeEditor = vscode.window.activeTextEditor;
-    return Boolean(
-      activeEditor?.document.languageId === 'markdown' &&
-      this.targetEditor &&
-      sameUri(activeEditor.document.uri, this.targetEditor.document.uri),
+    return isPreviewEditEnabled(
+      this.targetEditor?.document.uri.toString(),
+      this.targetEditor?.document.languageId,
+      activeEditor?.document.uri.toString(),
+      activeEditor?.document.languageId,
     );
   }
 

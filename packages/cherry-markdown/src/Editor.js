@@ -345,8 +345,9 @@ class CM6Adapter {
    * @param {EditorView} view - EditorView 实例
    * @param {Compartment} [vimCompartment] - vim 模式的 Compartment（可选，用于多实例隔离）
    * @param {Compartment} [readOnlyCompartment] - 只读状态的 Compartment（可选，用于动态切换只读）
+   * @param {Compartment} [historyCompartment] - 历史记录的 Compartment（可选，用于清空 undo/redo 栈）
    */
-  constructor(view, vimCompartment, readOnlyCompartment) {
+  constructor(view, vimCompartment, readOnlyCompartment, historyCompartment) {
     /** @type {EditorView} */
     this.view = view;
     /** @type {Map<string, Array<(...args: unknown[]) => void>>} */
@@ -357,8 +358,30 @@ class CM6Adapter {
     this.vimCompartment = vimCompartment || null;
     /** @type {Compartment | null} */
     this.readOnlyCompartment = readOnlyCompartment || null;
+    /** @type {Compartment | null} */
+    this.historyCompartment = historyCompartment || null;
     /** @type {number} 实例级 markId 计数器 */
     this.markIdCounter = 0;
+  }
+
+  /**
+   * 清空 undo/redo 历史栈
+   * 通过 Compartment 先将 history 扩展重置为空，再重新装载 history() 实现
+   * @returns {void}
+   */
+  clearHistory() {
+    if (!this.historyCompartment) {
+      console.warn('historyCompartment not available, cannot clear undo/redo history');
+      return;
+    }
+    // 先卸载 history 扩展，清空其内部维护的 undo/redo 栈
+    this.view.dispatch({
+      effects: this.historyCompartment.reconfigure([]),
+    });
+    // 再重新装载 history()，从当前状态开始重新记录
+    this.view.dispatch({
+      effects: this.historyCompartment.reconfigure(history()),
+    });
   }
 
   /**
@@ -1046,6 +1069,13 @@ const markField = StateField.define({
 /** @type {import('~types/editor')} */
 export default class Editor {
   /**
+   * typewriter 模式下光标行在视口中的垂直锚点位置（占视口高度的比例）。
+   * 0.5 表示正中间；实际使用 0.4（距顶部 40%），参考 iA Writer / Typora / Ulysses 等主流写作应用，
+   * 视觉焦点自然落在屏幕上方 1/3~1/2 区间，比 1/2 正中央体验更佳。
+   */
+  static TYPEWRITER_ANCHOR_RATIO = 0.4;
+
+  /**
    * @constructor
    * @param {Partial<EditorConfiguration>} options
    */
@@ -1100,6 +1130,8 @@ export default class Editor {
     this.vimCompartment = new Compartment();
     /** @type {Compartment} */
     this.readOnlyCompartment = new Compartment();
+    /** @type {Compartment} */
+    this.historyCompartment = new Compartment();
 
     /** @type {ReturnType<typeof setTimeout> | number} */
     this.dealSpecialWordsTimer = 0;
@@ -1798,16 +1830,23 @@ export default class Editor {
       return;
     }
     const scroller = editorView.scrollDOM;
-    if (scroller.scrollTop <= 0) {
+    const { scrollTop } = scroller;
+    if (scrollTop <= 0) {
       this.previewer.scrollToLineNum(0);
       return;
     }
-    if (scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 20) {
+    if (scrollTop + scroller.clientHeight >= scroller.scrollHeight - 20) {
       this.previewer.scrollToLineNum(null);
       return;
     }
-    const currentTop = scroller.scrollTop;
+    const isTypewriter = this.options.writingStyle === 'typewriter';
+    const currentTop = scrollTop;
     const targetLineBlock = editorView.lineBlockAtHeight(currentTop);
+    if (isTypewriter) {
+      const targetLine = editorView.state.doc.lineAt(targetLineBlock.from).number;
+      this.previewer.scrollToLineNumWithOffset(targetLine, scroller.clientHeight * Editor.TYPEWRITER_ANCHOR_RATIO);
+      return;
+    }
     const targetLine = editorView.state.doc.lineAt(targetLineBlock.from).number - 1;
     const lineHeight = targetLineBlock.height;
     const lineTop = targetLineBlock.top;
@@ -1821,6 +1860,9 @@ export default class Editor {
    * @param {MouseEvent} evt
    */
   onMouseDown = (editorView, evt) => {
+    if (this.options.writingStyle === 'typewriter') {
+      return;
+    }
     this.$cherry.$event.emit('cleanAllSubMenus');
 
     if (!Number.isFinite(evt.clientX) || !Number.isFinite(evt.clientY)) {
@@ -1920,7 +1962,7 @@ export default class Editor {
     const extensions = [
       cachedCherryHighlighting,
       markdown(),
-      history(),
+      this.historyCompartment.of(history()),
       search(),
       closeBrackets(),
       cachedDefaultHighlighting,
@@ -2139,7 +2181,7 @@ export default class Editor {
 
     textArea.style.display = 'none';
 
-    const editor = new CM6Adapter(view, this.vimCompartment, this.readOnlyCompartment);
+    const editor = new CM6Adapter(view, this.vimCompartment, this.readOnlyCompartment, this.historyCompartment);
     this.previewer = previewer;
     this.editor = editor;
 
@@ -2232,12 +2274,14 @@ export default class Editor {
 
     const { view } = this.editor;
     const { doc } = view.state;
+    const scroller = view.scrollDOM;
 
     // 边界处理：跳转到文档末尾
     if (beginLine === null) {
       cancelAnimationFrame(this.animation.timer);
       this.disableScrollListener = true;
-      view.scrollDOM.scrollTop = view.scrollDOM.scrollHeight;
+      const maxScrollTop = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+      scroller.scrollTop = maxScrollTop;
       this.animation.timer = 0;
       return;
     }
@@ -2249,8 +2293,9 @@ export default class Editor {
     const endLineBlock = view.lineBlockAt(targetEndLine.from);
 
     // 计算精确的滚动位置：行顶部位置 + 行高 * 百分比偏移
-    const targetScrollTop = beginLineBlock.top + (endLineBlock.top - beginLineBlock.top) * percent;
-    this.animation.destinationTop = Math.ceil(targetScrollTop - 15);
+    const targetScrollTop = beginLineBlock.top + (endLineBlock.top - beginLineBlock.top) * percent - 15;
+    const maxScrollTop = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+    this.animation.destinationTop = Math.ceil(Math.max(0, Math.min(maxScrollTop, targetScrollTop)));
     if (this.animation.timer) {
       return;
     }
@@ -2333,11 +2378,16 @@ export default class Editor {
     Array.from(editorDom.classList)
       .filter((className) => className.startsWith('cherry-editor-writing-style--'))
       .forEach((className) => editorDom.classList.remove(className));
+    // 先卸载 typewriter 模式的监听器，避免残留
+    this.uninstallTypewriterListener();
     if (writingStyle === 'normal') {
       return;
     }
     editorDom.classList.add(className);
     this.refreshWritingStatus();
+    if (writingStyle === 'typewriter') {
+      this.installTypewriterListener();
+    }
   }
 
   /**
@@ -2349,12 +2399,13 @@ export default class Editor {
       return;
     }
     const className = `cherry-editor-writing-style--${writingStyle}`;
+    const dom = this.getEditorDom();
     /**
      * @type {HTMLStyleElement}
      */
-    const style = document.querySelector('#cherry-editor-writing-style') || document.createElement('style');
+    const style = dom.querySelector('#cherry-editor-writing-style') || document.createElement('style');
     style.id = 'cherry-editor-writing-style';
-    Array.from(document.head.childNodes).find((node) => node === style) || document.head.appendChild(style);
+    dom.querySelector('#cherry-editor-writing-style') || dom.appendChild(style);
     const { sheet } = style;
     Array.from(Array(sheet.cssRules.length)).forEach(() => sheet.deleteRule(0));
 
@@ -2377,10 +2428,112 @@ export default class Editor {
     }
 
     if (writingStyle === 'typewriter') {
-      const height = this.editor.scrollDOM.clientHeight / 2;
-      sheet.insertRule(`.${className} .cm-editor .cm-scroller::before { height: ${height}px; }`, 0);
-      sheet.insertRule(`.${className} .cm-editor .cm-scroller::after { height: ${height}px; }`, 0);
-      this.editor.scrollDOM.scrollTop = height;
+      // 由于 CodeMirror 6 的 .cm-scroller 默认是 flex-direction: row，
+      // 直接给 ::before/::after 加 height 无法撑开垂直空间。这里改用 padding 实现
+      // 上下留白，让首行能滚到锚点、末行也能滚到锚点（padding 会计入 scrollHeight）。
+      // 锚点为距顶部 TYPEWRITER_ANCHOR_RATIO（默认 40%）的位置：
+      //   - padding-top  = 视口 * ratio      （让首行能落在锚点）
+      //   - padding-bottom = 视口 * (1-ratio)（让末行能落在锚点）
+      const { clientHeight } = this.editor.scrollDOM;
+      const ratio = Editor.TYPEWRITER_ANCHOR_RATIO;
+      const paddingTop = clientHeight * ratio;
+      const paddingBottom = clientHeight * (1 - ratio);
+      sheet.insertRule(
+        `.${className} .cm-editor .cm-scroller { padding-top: ${paddingTop}px; padding-bottom: ${paddingBottom}px; box-sizing: border-box; }`,
+        0,
+      );
+      // padding 变化需要下一帧才会影响 CodeMirror 的坐标度量，这里延迟到下一帧再执行滚动
+      requestAnimationFrame(() => this.scrollCursorToCenter());
+    }
+  }
+
+  /**
+   * 将当前光标所在行滚动到编辑区可视区域的垂直中间（typewriter 模式）
+   */
+  scrollCursorToCenter() {
+    if (!this.editor || !this.editor.view) {
+      return;
+    }
+    const { view } = this.editor;
+    const { scrollDOM } = view;
+    if (!scrollDOM) {
+      return;
+    }
+    const cursorPos = view.state.selection.main.head;
+    const cursorCoords = view.coordsAtPos(cursorPos);
+    if (!cursorCoords) {
+      return;
+    }
+    const scrollRect = scrollDOM.getBoundingClientRect();
+    // 光标当前视口位置相对于 scrollDOM 顶部的距离
+    const cursorTopInScroll = cursorCoords.top - scrollRect.top + scrollDOM.scrollTop;
+    const lineHeight = cursorCoords.bottom - cursorCoords.top;
+    // 目标：让光标行位于可视区域距顶部 TYPEWRITER_ANCHOR_RATIO 的位置
+    const anchorY = scrollDOM.clientHeight * Editor.TYPEWRITER_ANCHOR_RATIO;
+    const targetScrollTop = cursorTopInScroll - anchorY + lineHeight / 2;
+    // 限制在 [0, maxScrollTop] 之间，避免负值
+    const maxScrollTop = Math.max(0, scrollDOM.scrollHeight - scrollDOM.clientHeight);
+    const finalTop = Math.max(0, Math.min(maxScrollTop, Math.round(targetScrollTop)));
+    if (Math.abs(scrollDOM.scrollTop - finalTop) > 1) {
+      scrollDOM.scrollTop = finalTop;
+    }
+  }
+
+  /**
+   * 安装 typewriter 模式的事件监听器：光标变化 / 窗口尺寸变化时重新居中
+   */
+  installTypewriterListener() {
+    if (!this.editor || this._typewriterInstalled) {
+      return;
+    }
+    this._typewriterInstalled = true;
+
+    // 光标或选区变化时重新居中
+    this._typewriterCursorHandler = () => {
+      // 使用 rAF 让 DOM 更新后再取坐标，避免拿到旧的位置
+      if (this._typewriterRaf) {
+        cancelAnimationFrame(this._typewriterRaf);
+      }
+      this._typewriterRaf = requestAnimationFrame(() => {
+        this._typewriterRaf = null;
+        this.scrollCursorToCenter();
+      });
+    };
+    this.editor.on('cursorActivity', this._typewriterCursorHandler);
+    // 文档变化（如输入、粘贴）也需要重新居中
+    this.editor.on('change', this._typewriterCursorHandler);
+
+    // 窗口尺寸变化时需要重算 padding 高度并重新居中
+    this._typewriterResizeHandler = () => {
+      this.refreshWritingStatus();
+    };
+    window.addEventListener('resize', this._typewriterResizeHandler);
+  }
+
+  /**
+   * 卸载 typewriter 模式的事件监听器
+   */
+  uninstallTypewriterListener() {
+    if (!this._typewriterInstalled) {
+      return;
+    }
+    this._typewriterInstalled = false;
+    if (this._typewriterRaf) {
+      cancelAnimationFrame(this._typewriterRaf);
+      this._typewriterRaf = null;
+    }
+    if (this.editor && this._typewriterCursorHandler) {
+      try {
+        this.editor.off('cursorActivity', this._typewriterCursorHandler);
+        this.editor.off('change', this._typewriterCursorHandler);
+      } catch (e) {
+        // ignore
+      }
+    }
+    this._typewriterCursorHandler = null;
+    if (this._typewriterResizeHandler) {
+      window.removeEventListener('resize', this._typewriterResizeHandler);
+      this._typewriterResizeHandler = null;
     }
   }
 
@@ -2677,5 +2830,17 @@ export default class Editor {
   addTrackedEvent(elm, evType, fn, useCapture = false) {
     addEvent(elm, evType, fn, useCapture);
     this.domEventListeners.push({ elm, evType, fn, useCapture });
+  }
+
+  /**
+   * 清空undo/redo栈
+   * 通过重置 CodeMirror 6 的 history 扩展来清除全部撤销/重做历史，
+   * 清空后当前文档状态将作为新的初始状态，无法再撤销到此前的修改。
+   */
+  clearUndoRedo() {
+    const cm6Adapter = this.editor;
+    if (cm6Adapter && typeof cm6Adapter.clearHistory === 'function') {
+      cm6Adapter.clearHistory();
+    }
   }
 }

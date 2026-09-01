@@ -187,6 +187,34 @@ describe('utils/lazyLoadImg loading lifecycle', () => {
     expect(failure).toHaveBeenCalledOnce();
   });
 
+  it.each([
+    ['load', 'onload', 'afterLoadOneImgCallback'],
+    ['error', 'onerror', 'failLoadOneImgCallback'],
+  ] as const)('ignores a pending image %s event after destruction', (eventName, handlerName, callbackName) => {
+    const { lazyLoad, previewerDom, callbacks } = createLazyLoad();
+    const previewImage = document.createElement('img');
+    previewImage.dataset.src = 'pending.png';
+    vi.spyOn(previewImage, 'getBoundingClientRect').mockReturnValue(createRect(0, 20, 100, 100));
+    previewerDom.appendChild(previewImage);
+
+    let loaderImage: HTMLImageElement | undefined;
+    const nativeCreate = document.createElement.bind(document);
+    vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+      const element = nativeCreate(tagName);
+      if (tagName === 'img') loaderImage = element;
+      return element;
+    });
+
+    lazyLoad.loadOneImg();
+    expect(loaderImage).toBeDefined();
+    lazyLoad.destroy();
+
+    expect(() => loaderImage?.[handlerName]?.(new Event(eventName))).not.toThrow();
+    expect(callbacks[callbackName]).not.toHaveBeenCalled();
+    expect(previewImage.hasAttribute('data-src')).toBe(true);
+    expect(previewImage.hasAttribute('src')).toBe(false);
+  });
+
   it('starts one polling loop and destroys all timers and references', () => {
     const { lazyLoad } = createLazyLoad({ maxNumPerTime: 2 });
     const loadOneImg = vi.spyOn(lazyLoad, 'loadOneImg').mockReturnValue(false);

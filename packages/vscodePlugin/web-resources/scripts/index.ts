@@ -1,6 +1,7 @@
 import Cherry from 'cherry-markdown';
 import 'cherry-markdown/dist/cherry-markdown.min.css';
 import type { CherryTheme } from '../../src/config';
+import { getVSCodeMathJaxConfig, waitForMathJax } from '../../src/mathjaxConfig';
 import type {
   EditorState,
   ExtensionToWebviewMessage,
@@ -29,6 +30,10 @@ interface CherryInstance {
   onChange(callback: (value: string | { markdown?: string }) => void): void;
   setTheme(theme: CherryTheme): void;
   setValue(value: string): void;
+  editor?: {
+    getCursor(): { line: number; ch: number };
+    setCursor(line: number, ch: number): void;
+  };
 }
 
 interface CherryConstructor {
@@ -69,6 +74,8 @@ let uploadRequestId = 0;
   let pendingMarkdown: string | undefined;
   let stateGeneration = 0;
 let editDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+let suppressScrollMessages = false;
+let suppressScrollMessagesTimer: ReturnType<typeof setTimeout> | undefined;
 const uploadCallbacks = new Map<number, UploadCallback | undefined>();
 
 /**
@@ -169,6 +176,7 @@ function createBasicConfig(state: EditorState): Record<string, unknown> {
         },
         mathBlock: {
           engine: 'MathJax', // katex或MathJax
+          plugins: false,
         },
         inlineMath: {
           engine: 'MathJax', // katex或MathJax
@@ -303,10 +311,14 @@ function needsMathJax(markdown: string): boolean {
 }
 
 async function ensureMathJax(markdown: string): Promise<void> {
-  if (!needsMathJax(markdown) || window.MathJax) return;
-  await import(/* webpackChunkName: "mathjax" */ 'mathjax/es5/tex-svg.js').catch((error) => {
-    console.error('MathJax load failed:', error);
-  });
+  if (!needsMathJax(markdown)) return;
+  if (!window.MathJax) window.MathJax = getVSCodeMathJaxConfig();
+  if (!('tex2svg' in (window.MathJax as object))) {
+    await import(/* webpackChunkName: "mathjax" */ 'mathjax/es5/tex-svg-full.js').catch((error) => {
+      console.error('MathJax load failed:', error);
+    });
+  }
+  if (window.MathJax) await waitForMathJax(window.MathJax);
   if (cherry && window.MathJax) cherry.options.externals.MathJax = window.MathJax;
 }
 
@@ -338,13 +350,27 @@ async function applyEditorState(state: EditorState): Promise<void> {
   await ensureMathJax(state.text);
   if (generation !== stateGeneration) return;
   if (!preserveUnacknowledgedEdit) {
+    const textChanged = editorState?.text !== state.text;
     editorState = state;
     editInFlight = undefined;
     pendingMarkdown = undefined;
     clearTimeout(editDebounceTimer);
-    suppressEditMessage = true;
-    cherry.setValue(state.text);
-    suppressEditMessage = false;
+    if (textChanged) {
+      const cursor = cherry.editor?.getCursor?.();
+      suppressEditMessage = true;
+      suppressScrollMessages = true;
+      if (suppressScrollMessagesTimer) clearTimeout(suppressScrollMessagesTimer);
+      try {
+        cherry.setValue(state.text);
+        if (cursor) cherry.editor?.setCursor?.(cursor.line, cursor.ch);
+      } finally {
+        suppressEditMessage = false;
+        suppressScrollMessagesTimer = setTimeout(() => {
+          suppressScrollMessages = false;
+          suppressScrollMessagesTimer = undefined;
+        }, 150);
+      }
+    }
   } else {
     editorState = { ...state, text: editorState?.text ?? state.text };
   }
@@ -449,6 +475,7 @@ function postScrollPosition(domContainer: HTMLElement): void {
 }
 
 function postScrollMessage(line: number): void {
+  if (suppressScrollMessages) return;
   vscode.postMessage({ type: 'preview-scroll', data: line });
 }
 

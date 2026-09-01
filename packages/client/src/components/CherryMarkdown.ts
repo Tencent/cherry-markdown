@@ -37,7 +37,7 @@ type CherryMenuHook = ReturnType<typeof Cherry.createMenuHook>;
 type ToolbarRightConfig = NonNullable<CherryOptions<CustomConfig>['toolbars']>['toolbarRight'];
 
 interface ToolbarMenuHookContext {
-  $cherry: Pick<CherryEditorInstance, 'getMarkdown' | 'switchModel' | 'focusMode'> & {
+  $cherry: Pick<CherryEditorInstance, 'getMarkdown' | 'switchModel' | 'focusMode' | 'wrapperDom'> & {
     getStatus(): { editor: string };
   };
   updateMarkdown: boolean;
@@ -63,8 +63,14 @@ const customMenuChangeModule = Cherry.createMenuHook('编辑', {
   onClick(this: ToolbarMenuHookContext) {
     const { editor } = this.$cherry.getStatus();
     let nextMode: EditorMode;
+    this.$cherry.wrapperDom
+      ?.querySelector('.cherry-sidebar .cherry-toolbar-button.cherry-toolbar-pen')
+      ?.classList.add('active');
     if (editor === 'show') {
       nextMode = 'previewOnly';
+      this.$cherry.wrapperDom
+        ?.querySelector('.cherry-sidebar .cherry-toolbar-button.cherry-toolbar-pen')
+        ?.classList.remove('active');
       this.$cherry.switchModel('previewOnly');
     } else if (this.$cherry.focusMode) {
       nextMode = 'editOnly';
