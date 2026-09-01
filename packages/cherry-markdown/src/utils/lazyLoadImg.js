@@ -177,6 +177,9 @@ export default class LazyLoadImg {
       this.tryLoadOneImg(
         originSrc,
         () => {
+          if (this.isDestroyed) {
+            return;
+          }
           img.setAttribute('src', originSrc);
           img.removeAttribute('data-src');
           this.srcLoadedList.push(originSrc);
@@ -186,6 +189,9 @@ export default class LazyLoadImg {
           this.loadOneImg();
         },
         () => {
+          if (this.isDestroyed) {
+            return;
+          }
           this.loadFailed(originSrc);
           this.loadingImgNum -= 1;
           this.srcLoadingList.splice(this.srcLoadingList.indexOf(originSrc), 1);
