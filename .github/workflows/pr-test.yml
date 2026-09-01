@@ -21,7 +21,7 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v6
@@ -43,10 +43,15 @@ jobs:
       - name: Verify Milkdown published-package consumer
         run: vp run -F @cherry-markdown/milkdown test:consumer
 
-      - name: Install Chromium
-        run: yarn playwright install --with-deps chromium
+      - name: Install Chromium, Firefox and WebKit
+        run: yarn playwright install --with-deps chromium firefox webkit
 
       - name: Test Milkdown reliability in Chromium
+        run: vp run -F @cherry-markdown/milkdown test:e2e
+
+      - name: Test Milkdown browser and touch matrix
+        env:
+          MILKDOWN_BROWSER_MATRIX: '1'
         run: vp run -F @cherry-markdown/milkdown test:e2e
 
       - name: Upload Milkdown browser failure evidence

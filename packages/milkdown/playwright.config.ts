@@ -5,13 +5,32 @@ import { fileURLToPath } from 'node:url';
 const port = Number(process.env.MILKDOWN_E2E_PORT ?? 4177);
 const packageRoot = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = resolve(packageRoot, '../..');
-const browserProjects = process.env.MILKDOWN_BROWSER_MATRIX
-  ? [
-      { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-      { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-      { name: 'webkit', use: { ...devices['Desktop Safari'] } },
-    ]
-  : [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }];
+const browserProjects = [
+  {
+    name: 'chromium',
+    use: { ...devices['Desktop Chrome'] },
+    testIgnore: [/browser-matrix\.spec\.ts$/, /touch\.spec\.ts$/],
+  },
+  ...(process.env.MILKDOWN_BROWSER_MATRIX
+    ? [
+        {
+          name: 'firefox-matrix',
+          use: { ...devices['Desktop Firefox'] },
+          testMatch: /browser-matrix\.spec\.ts$/,
+        },
+        {
+          name: 'webkit-matrix',
+          use: { ...devices['Desktop Safari'] },
+          testMatch: /browser-matrix\.spec\.ts$/,
+        },
+        {
+          name: 'chromium-touch',
+          use: { ...devices['Pixel 5'] },
+          testMatch: /touch\.spec\.ts$/,
+        },
+      ]
+    : []),
+];
 
 export default defineConfig({
   testDir: './e2e',

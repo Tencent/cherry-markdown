@@ -786,6 +786,22 @@ test('physical delete, clipboard, undo/redo and composition input stay synchroni
   await attachEvidence(page, testInfo, actions, errors);
 });
 
+test('ordinary top-level blocks can be physically dragged to reorder without changing their Markdown', async ({ page }) => {
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.evaluate(() => {
+    const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+    scope.cherry.setValue('First block\n\nSecond block\n\nThird block');
+  });
+  const blocks = page.locator('.ProseMirror > p[data-cherry-drag-node]');
+  await expect(blocks).toHaveCount(3);
+  await blocks.nth(0).dragTo(blocks.nth(2));
+  await expect.poll(async () =>
+    page.evaluate(() => (window as typeof window & { cherry: { getMarkdown(): string } }).cherry.getMarkdown().trim()),
+  ).toBe('Second block\n\nFirst block\n\nThird block');
+  await expect(page.locator('.ProseMirror > p').nth(1)).toContainText('First block');
+});
+
 test('ordered-list toolbar keeps Cherry default nested-list behavior', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);

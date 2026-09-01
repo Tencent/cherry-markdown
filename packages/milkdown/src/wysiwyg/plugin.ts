@@ -137,6 +137,103 @@ function toggleTaskItem(
   return true;
 }
 
+interface CherryDraggedBlock {
+  from: number;
+  node: ProseMirrorNode;
+}
+
+function topLevelBlockAt(view: Parameters<NonNullable<Plugin['spec']['view']>>[0], target: EventTarget | null) {
+  const element = target instanceof Element ? target.closest<HTMLElement>('[data-cherry-drag-node]') : null;
+  if (!element || !view.dom.contains(element) || element.parentElement !== view.dom) return undefined;
+  let found: { from: number; node: ProseMirrorNode; element: HTMLElement } | undefined;
+  view.state.doc.forEach((node, from) => {
+    if (found || view.nodeDOM(from) !== element) return;
+    found = { from, node, element };
+  });
+  return found;
+}
+
+// ProseMirror only enables native dragging for schemas that explicitly opt in
+// with `draggable: true`. Cherry's ordinary paragraphs, headings and lists are
+// supplied by Milkdown's stock schema, so install the same behaviour at the
+// editor boundary instead of rewriting every upstream schema. Only direct
+// document blocks participate; nested list/compound content keeps its normal
+// text-selection and drag semantics.
+const cherryBlockDragDrop = $prose(
+  () =>
+    new Plugin({
+      view: (view) => {
+        let dragged: CherryDraggedBlock | undefined;
+        let over: HTMLElement | undefined;
+
+        const markBlocks = () => {
+          view.state.doc.forEach((node, from) => {
+            if (node.isInline) return;
+            const element = view.nodeDOM(from);
+            if (!(element instanceof HTMLElement) || element.parentElement !== view.dom) return;
+            element.dataset.cherryDragNode = '';
+            element.draggable = true;
+          });
+        };
+        const clearOver = () => {
+          over?.classList.remove('cherry-drag-over');
+          over = undefined;
+        };
+        const onDragStart = (event: DragEvent) => {
+          const block = topLevelBlockAt(view, event.target);
+          if (!block) return;
+          dragged = { from: block.from, node: block.node };
+          event.dataTransfer?.setData('application/x-cherry-milkdown-node', String(block.from));
+          if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+          block.element.classList.add('cherry-dragging');
+        };
+        const onDragOver = (event: DragEvent) => {
+          if (!dragged) return;
+          const block = topLevelBlockAt(view, event.target);
+          if (!block || block.from === dragged.from) return;
+          event.preventDefault();
+          if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+          clearOver();
+          over = block.element;
+          over.classList.add('cherry-drag-over');
+        };
+        const onDrop = (event: DragEvent) => {
+          if (!dragged) return;
+          const target = topLevelBlockAt(view, event.target);
+          if (!target || target.from === dragged.from) return;
+          event.preventDefault();
+          const insertAt = dragged.from < target.from ? target.from - dragged.node.nodeSize : target.from;
+          view.dispatch(view.state.tr.delete(dragged.from, dragged.from + dragged.node.nodeSize)
+            .insert(insertAt, dragged.node)
+            .scrollIntoView());
+          dragged = undefined;
+          clearOver();
+        };
+        const onDragEnd = () => {
+          dragged = undefined;
+          clearOver();
+          view.dom.querySelector('.cherry-dragging')?.classList.remove('cherry-dragging');
+        };
+
+        view.dom.addEventListener('dragstart', onDragStart);
+        view.dom.addEventListener('dragover', onDragOver);
+        view.dom.addEventListener('drop', onDrop);
+        view.dom.addEventListener('dragend', onDragEnd);
+        markBlocks();
+        return {
+          update: markBlocks,
+          destroy: () => {
+            view.dom.removeEventListener('dragstart', onDragStart);
+            view.dom.removeEventListener('dragover', onDragOver);
+            view.dom.removeEventListener('drop', onDrop);
+            view.dom.removeEventListener('dragend', onDragEnd);
+            clearOver();
+          },
+        };
+      },
+    }),
+);
+
 const cherryTaskListToggle = $prose(
   () =>
     new Plugin({
@@ -216,5 +313,6 @@ export const cherryWysiwyg: MilkdownPlugin[] = [
   ...cherryStructureViews,
   cherryTaskListToggle,
   cherryTaskListPresentation,
+  cherryBlockDragDrop,
   ...cherryWysiwygRemark,
 ].flat();
