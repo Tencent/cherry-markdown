@@ -20,7 +20,7 @@ test('core preview editing remains synchronized across Firefox and WebKit', asyn
     const scope = window as typeof window & { cherry: { setValue(value: string): void } };
     scope.cherry.setValue('First\n\nSecond');
   });
-  const blocks = editor.locator('p[data-cherry-drag-node]');
+  const blocks = editor.locator('p');
   await expect(blocks).toHaveCount(2);
   await blocks.nth(0).dragTo(blocks.nth(1));
   await expect.poll(async () =>

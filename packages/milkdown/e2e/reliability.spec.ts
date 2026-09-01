@@ -793,7 +793,7 @@ test('ordinary top-level blocks can be physically dragged to reorder without cha
     const scope = window as typeof window & { cherry: { setValue(value: string): void } };
     scope.cherry.setValue('First block\n\nSecond block\n\nThird block');
   });
-  const blocks = page.locator('.ProseMirror > p[data-cherry-drag-node]');
+  const blocks = page.locator('.ProseMirror > p');
   await expect(blocks).toHaveCount(3);
   await blocks.nth(0).dragTo(blocks.nth(2));
   await expect.poll(async () =>

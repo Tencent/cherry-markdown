@@ -143,8 +143,9 @@ interface CherryDraggedBlock {
 }
 
 function topLevelBlockAt(view: Parameters<NonNullable<Plugin['spec']['view']>>[0], target: EventTarget | null) {
-  const element = target instanceof Element ? target.closest<HTMLElement>('[data-cherry-drag-node]') : null;
-  if (!element || !view.dom.contains(element) || element.parentElement !== view.dom) return undefined;
+  let element = target instanceof Element ? (target as HTMLElement) : null;
+  while (element && element.parentElement !== view.dom) element = element.parentElement;
+  if (!element || element.parentElement !== view.dom) return undefined;
   let found: { from: number; node: ProseMirrorNode; element: HTMLElement } | undefined;
   view.state.doc.forEach((node, from) => {
     if (found || view.nodeDOM(from) !== element) return;
@@ -166,15 +167,6 @@ const cherryBlockDragDrop = $prose(
         let dragged: CherryDraggedBlock | undefined;
         let over: HTMLElement | undefined;
 
-        const markBlocks = () => {
-          view.state.doc.forEach((node, from) => {
-            if (node.isInline) return;
-            const element = view.nodeDOM(from);
-            if (!(element instanceof HTMLElement) || element.parentElement !== view.dom) return;
-            element.dataset.cherryDragNode = '';
-            element.draggable = true;
-          });
-        };
         const clearOver = () => {
           over?.classList.remove('cherry-drag-over');
           over = undefined;
@@ -186,6 +178,11 @@ const cherryBlockDragDrop = $prose(
           event.dataTransfer?.setData('application/x-cherry-milkdown-node', String(block.from));
           if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
           block.element.classList.add('cherry-dragging');
+        };
+        const onPointerDown = (event: PointerEvent) => {
+          if (event.button !== 0) return;
+          const block = topLevelBlockAt(view, event.target);
+          if (block && !block.element.draggable) block.element.draggable = true;
         };
         const onDragOver = (event: DragEvent) => {
           if (!dragged) return;
@@ -216,14 +213,15 @@ const cherryBlockDragDrop = $prose(
         };
 
         view.dom.addEventListener('dragstart', onDragStart);
+        view.dom.addEventListener('pointerdown', onPointerDown);
         view.dom.addEventListener('dragover', onDragOver);
         view.dom.addEventListener('drop', onDrop);
         view.dom.addEventListener('dragend', onDragEnd);
-        markBlocks();
         return {
-          update: markBlocks,
+          update: () => {},
           destroy: () => {
             view.dom.removeEventListener('dragstart', onDragStart);
+            view.dom.removeEventListener('pointerdown', onPointerDown);
             view.dom.removeEventListener('dragover', onDragOver);
             view.dom.removeEventListener('drop', onDrop);
             view.dom.removeEventListener('dragend', onDragEnd);
