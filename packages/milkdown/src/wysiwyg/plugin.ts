@@ -266,9 +266,12 @@ const cherryBlockDragDrop = $prose(
 
         view.dom.addEventListener('dragstart', onDragStart);
         view.dom.addEventListener('pointerdown', onPointerDown);
-        window.addEventListener('pointermove', onPointerMove, { passive: false });
-        window.addEventListener('pointerup', onPointerUp, { passive: false });
-        window.addEventListener('pointercancel', onPointerUp, { passive: false });
+        // Keep pointer tracking scoped to the editor surface. Cherry's image
+        // resize handles and diagram controls live outside `.ProseMirror`;
+        // listening on window would compete with their drag lifecycle.
+        view.dom.addEventListener('pointermove', onPointerMove, { passive: false });
+        view.dom.addEventListener('pointerup', onPointerUp, { passive: false });
+        view.dom.addEventListener('pointercancel', onPointerUp, { passive: false });
         view.dom.addEventListener('dragover', onDragOver);
         view.dom.addEventListener('drop', onDrop);
         view.dom.addEventListener('dragend', onDragEnd);
@@ -276,9 +279,9 @@ const cherryBlockDragDrop = $prose(
           destroy: () => {
             view.dom.removeEventListener('dragstart', onDragStart);
             view.dom.removeEventListener('pointerdown', onPointerDown);
-            window.removeEventListener('pointermove', onPointerMove);
-            window.removeEventListener('pointerup', onPointerUp);
-            window.removeEventListener('pointercancel', onPointerUp);
+            view.dom.removeEventListener('pointermove', onPointerMove);
+            view.dom.removeEventListener('pointerup', onPointerUp);
+            view.dom.removeEventListener('pointercancel', onPointerUp);
             view.dom.removeEventListener('dragover', onDragOver);
             view.dom.removeEventListener('drop', onDrop);
             view.dom.removeEventListener('dragend', onDragEnd);
