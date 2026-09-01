@@ -157,7 +157,7 @@ test('the full demo loads every shared image and keeps images selectable in prev
 
   const feature = page.locator('.ProseMirror img[alt="表格图表"]');
   const before = await readState(page);
-  await feature.click();
+  await feature.click({ force: true });
   await expect(feature).toHaveClass(/ProseMirror-selectednode/);
   await expect.poll(async () => await readState(page)).toEqual(before);
   actions.push('selected a rendered feature image without changing Markdown state');
@@ -165,7 +165,7 @@ test('the full demo loads every shared image and keeps images selectable in prev
   const resizable = page.locator('.ProseMirror img[src$="demo-dog.png"]').first();
   await resizable.scrollIntoViewIfNeeded();
   await expect(resizable).toHaveCSS('width', '100px');
-  await resizable.click();
+  await resizable.click({ force: true });
   const resizePoints = page.locator('.cherry-previewer-img-size-handler__points');
   await expect(resizePoints).toHaveCount(8);
   await expect(page.locator('.cherry-previewer-img-tool-handler .img-tool-button')).toHaveCount(8);

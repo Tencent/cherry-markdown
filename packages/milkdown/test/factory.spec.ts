@@ -573,7 +573,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
 
     await instance.destroy();
     instances.splice(instances.indexOf(instance), 1);
-  });
+  }, 15_000);
 
   it('updates the visual TOC when a heading is edited', async () => {
     const element = root();

@@ -140,6 +140,7 @@ function toggleTaskItem(
 interface CherryDraggedBlock {
   from: number;
   node: ProseMirrorNode;
+  element: HTMLElement;
 }
 
 function topLevelBlockAt(view: Parameters<NonNullable<Plugin['spec']['view']>>[0], target: EventTarget | null) {
@@ -154,18 +155,19 @@ function topLevelBlockAt(view: Parameters<NonNullable<Plugin['spec']['view']>>[0
   return found;
 }
 
-// ProseMirror only enables native dragging for schemas that explicitly opt in
-// with `draggable: true`. Cherry's ordinary paragraphs, headings and lists are
-// supplied by Milkdown's stock schema, so install the same behaviour at the
-// editor boundary instead of rewriting every upstream schema. Only direct
-// document blocks participate; nested list/compound content keeps its normal
-// text-selection and drag semantics.
+// Cherry's ordinary paragraphs, headings and lists are supplied by Milkdown's
+// stock schema without a drag handle. Implement block movement at the editor
+// boundary using the pointer lifecycle, instead of rewriting upstream schema
+// nodes or mutating every rendered element. Only direct document blocks
+// participate; nested list/compound content keeps its normal text-selection
+// and drag semantics.
 const cherryBlockDragDrop = $prose(
   () =>
     new Plugin({
       view: (view) => {
         let dragged: CherryDraggedBlock | undefined;
         let over: HTMLElement | undefined;
+        let pointerCandidate: (CherryDraggedBlock & { x: number; y: number; pointerId: number }) | undefined;
 
         const clearOver = () => {
           over?.classList.remove('cherry-drag-over');
@@ -174,15 +176,68 @@ const cherryBlockDragDrop = $prose(
         const onDragStart = (event: DragEvent) => {
           const block = topLevelBlockAt(view, event.target);
           if (!block) return;
-          dragged = { from: block.from, node: block.node };
+          dragged = block;
           event.dataTransfer?.setData('application/x-cherry-milkdown-node', String(block.from));
           if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
           block.element.classList.add('cherry-dragging');
         };
+        const reorder = (target: ReturnType<typeof topLevelBlockAt>) => {
+          if (!dragged || !target || target.from === dragged.from) return false;
+          const insertAt = dragged.from < target.from ? target.from - dragged.node.nodeSize : target.from;
+          view.dispatch(view.state.tr.delete(dragged.from, dragged.from + dragged.node.nodeSize)
+            .insert(insertAt, dragged.node)
+            .scrollIntoView());
+          return true;
+        };
         const onPointerDown = (event: PointerEvent) => {
-          if (event.button !== 0) return;
+          if (event.button !== 0 && event.pointerType === 'mouse') return;
+          const target = event.target instanceof HTMLElement ? event.target : undefined;
+          // NodeView controls (image resize, Mermaid/ECharts actions, table
+          // buttons and inline source editors) own their pointer lifecycle.
+          // Never turn those interactions into a top-level block move.
+          if (
+            target?.closest(
+                'button,input,textarea,select,[contenteditable="false"],.cherry-embed,' +
+                '.cherry-previewer-img-size-handler,.cherry-previewer-img-tool-handler,.cherry-node-actions,' +
+                '[data-cherry-table-control],img,a,table,pre,code,math-field',
+            )
+          ) return;
           const block = topLevelBlockAt(view, event.target);
-          if (block && !block.element.draggable) block.element.draggable = true;
+          if (!block) return;
+          if (block.element.querySelector('img,button,input,textarea,select,math-field,.cherry-embed')) return;
+          pointerCandidate = { ...block, x: event.clientX, y: event.clientY, pointerId: event.pointerId };
+        };
+        const onPointerMove = (event: PointerEvent) => {
+          if (!pointerCandidate || event.pointerId !== pointerCandidate.pointerId) return;
+          if (!(event.target instanceof Node) || !view.dom.contains(event.target)) {
+            pointerCandidate = undefined;
+            return;
+          }
+          const distance = Math.hypot(event.clientX - pointerCandidate.x, event.clientY - pointerCandidate.y);
+          if (!dragged && distance < 6) return;
+          if (!dragged) {
+            dragged = pointerCandidate;
+            pointerCandidate.element.classList.add('cherry-dragging');
+          }
+          event.preventDefault();
+          const target = topLevelBlockAt(view, document.elementFromPoint(event.clientX, event.clientY));
+          clearOver();
+          const current = dragged;
+          if (target && current && target.from !== current.from) {
+            over = target.element;
+            over.classList.add('cherry-drag-over');
+          }
+        };
+        const onPointerUp = (event: PointerEvent) => {
+          if (!pointerCandidate || event.pointerId !== pointerCandidate.pointerId) return;
+          const wasDragging = Boolean(dragged);
+          const target = topLevelBlockAt(view, document.elementFromPoint(event.clientX, event.clientY));
+          if (wasDragging) {
+            event.preventDefault();
+            reorder(target);
+            onDragEnd();
+          }
+          pointerCandidate = undefined;
         };
         const onDragOver = (event: DragEvent) => {
           if (!dragged) return;
@@ -199,10 +254,7 @@ const cherryBlockDragDrop = $prose(
           const target = topLevelBlockAt(view, event.target);
           if (!target || target.from === dragged.from) return;
           event.preventDefault();
-          const insertAt = dragged.from < target.from ? target.from - dragged.node.nodeSize : target.from;
-          view.dispatch(view.state.tr.delete(dragged.from, dragged.from + dragged.node.nodeSize)
-            .insert(insertAt, dragged.node)
-            .scrollIntoView());
+          reorder(target);
           dragged = undefined;
           clearOver();
         };
@@ -214,14 +266,19 @@ const cherryBlockDragDrop = $prose(
 
         view.dom.addEventListener('dragstart', onDragStart);
         view.dom.addEventListener('pointerdown', onPointerDown);
+        window.addEventListener('pointermove', onPointerMove, { passive: false });
+        window.addEventListener('pointerup', onPointerUp, { passive: false });
+        window.addEventListener('pointercancel', onPointerUp, { passive: false });
         view.dom.addEventListener('dragover', onDragOver);
         view.dom.addEventListener('drop', onDrop);
         view.dom.addEventListener('dragend', onDragEnd);
         return {
-          update: () => {},
           destroy: () => {
             view.dom.removeEventListener('dragstart', onDragStart);
             view.dom.removeEventListener('pointerdown', onPointerDown);
+            window.removeEventListener('pointermove', onPointerMove);
+            window.removeEventListener('pointerup', onPointerUp);
+            window.removeEventListener('pointercancel', onPointerUp);
             view.dom.removeEventListener('dragover', onDragOver);
             view.dom.removeEventListener('drop', onDrop);
             view.dom.removeEventListener('dragend', onDragEnd);

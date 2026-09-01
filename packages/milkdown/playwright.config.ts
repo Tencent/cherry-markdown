@@ -9,7 +9,9 @@ const browserProjects = [
   {
     name: 'chromium',
     use: { ...devices['Desktop Chrome'] },
-    testIgnore: [/browser-matrix\.spec\.ts$/, /touch\.spec\.ts$/],
+    testIgnore: process.env.MILKDOWN_BROWSER_MATRIX
+      ? [/.*/]
+      : [/browser-matrix\.spec\.ts$/, /touch\.spec\.ts$/],
   },
   ...(process.env.MILKDOWN_BROWSER_MATRIX
     ? [
@@ -36,6 +38,7 @@ export default defineConfig({
   testDir: './e2e',
   outputDir: './test-results',
   timeout: 60_000,
+  workers: process.env.MILKDOWN_BROWSER_MATRIX ? 1 : undefined,
   expect: { timeout: 10_000 },
   fullyParallel: false,
   retries: process.env.CI ? 1 : 0,
