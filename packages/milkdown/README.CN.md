@@ -59,7 +59,21 @@ cherry.destroy(); // Milkdown 随当前 Cherry 实例一起清理
 
 `plugins` 会在内置 WYSIWYG 插件之后加载，可用于注册业务 NodeView。
 
-扩展模式保留 Cherry 原工具栏；焦点在预览区时，格式命令优先作用于当前 Milkdown 选区。图片、文件、Draw.io、图表等选择器继续使用 Cherry 原交互，并把结果插入触发时保存的 Milkdown 选区。也可以在预览空段落输入 `/` 调出插入命令或使用 Markdown 快捷输入。复合块标题和正文都直接编辑，结构按钮只在悬停或选中节点时出现。表格使用 Milkdown `table-block`，可增删、拖拽行列并修改列对齐；公式使用 MathLive，点击公式即可输入。
+扩展模式保留 Cherry 原工具栏；焦点在预览区时，格式命令优先作用于当前 Milkdown 选区。图片、文件、Draw.io、图表等选择器继续使用 Cherry 原交互，并把结果插入触发时保存的 Milkdown 选区。标题、列表、引用和代码块可通过 Markdown 快捷输入创建，右侧不会打开 Cherry 源码编辑器的 suggest 面板。复合块标题和正文都直接编辑，结构按钮只在悬停或选中节点时出现。表格使用 Milkdown `table-block`，可增删、拖拽行列并修改列对齐；公式使用 MathLive，点击公式即可输入。
+
+纯预览单栏不需要 Milkdown 再定义一种模式，布局和工具栏仍只使用 Cherry 原配置：
+
+```js
+const cherry = new Cherry({
+  id: 'editor',
+  value: '# 可直接编辑的预览',
+  editor: { defaultModel: 'previewOnly' },
+  toolbars: { toolbar: false },
+  extensions: [milkdown()],
+});
+```
+
+此时 CodeMirror 和全局工具栏都不可见，但预览文档仍可直接编辑。可以用 Markdown 快捷输入创建块，并使用 `Command/Ctrl + Alt + 0…6` 将当前块切换为段落或 H1-H6。
 
 可通过 `mathlive` 传入宏和虚拟键盘模式：
 

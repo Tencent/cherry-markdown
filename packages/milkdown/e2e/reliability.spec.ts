@@ -4,6 +4,7 @@ import { PNG } from 'pngjs';
 import { cherryCompatibilityCases } from '../test/fixtures/compatibility';
 
 const demoPath = '/index.html';
+const previewOnlyPath = '/preview-only.html';
 const visualPath = '/visual.html';
 
 type BrowserState = {
@@ -330,6 +331,50 @@ test('rapid inline-code editing never rolls back and mode/API updates stay consi
   await attachEvidence(page, testInfo, actions, errors);
 });
 
+test('focused inline edits preserve Cherry layout, dimensions and scroll position', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.evaluate(() => {
+    const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+    scope.cherry.setValue('# Stable heading\n\nStable `seed` text.\n\n## Anchor\n\nAfter.');
+  });
+
+  const preview = page.locator('.cherry-previewer').first();
+  const inlineCode = page.locator('.ProseMirror code').filter({ hasText: /^seed$/ }).first();
+  const anchor = page.locator('.ProseMirror h2', { hasText: 'Anchor' }).first();
+  await anchor.scrollIntoViewIfNeeded();
+  const before = await Promise.all([preview.boundingBox(), anchor.boundingBox()]);
+  expect(before[0]).not.toBeNull();
+  expect(before[1]).not.toBeNull();
+  const scrollTop = await preview.evaluate((element) => element.scrollTop);
+  await inlineCode.click();
+  await page.keyboard.press('ArrowLeft');
+
+  for (const character of 'abcde') {
+    await page.keyboard.insertText(character);
+    await page.waitForTimeout(5);
+    const after = await Promise.all([preview.boundingBox(), anchor.boundingBox()]);
+    expect(after[0]).not.toBeNull();
+    expect(after[1]).not.toBeNull();
+    expect(Math.abs(after[1]!.y - before[1]!.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(after[0]!.height - before[0]!.height)).toBeLessThanOrEqual(1);
+    await expect.poll(() => preview.evaluate((element) => element.scrollTop)).toBe(scrollTop);
+  }
+  actions.push('typed five focused inline-code characters without layout or scroll jumps');
+
+  const overflow = await page.evaluate(() => {
+    const container = document.querySelector('.cherry-previewer');
+    if (!container) return null;
+    return { scrollWidth: container.scrollWidth, clientWidth: container.clientWidth };
+  });
+  expect(overflow).not.toBeNull();
+  expect(overflow!.scrollWidth).toBeLessThanOrEqual(overflow!.clientWidth + 1);
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
 test('Cherry toolbar operates on the focused Milkdown surface', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
@@ -633,6 +678,109 @@ test('Markdown shortcuts create H6 and code blocks without a right-side suggest 
   await page.keyboard.insertText('/');
   await expect(page.locator('.cherry-milkdown-slash')).toHaveCount(0);
   actions.push('created a directly editable fenced code block and kept the right preview free of suggest popups');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('Cherry previewOnly becomes a toolbar-free WYSIWYG surface without a second mode config', async ({
+  page,
+}, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(previewOnlyPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+
+  await expect(page.locator('.ProseMirror')).toBeVisible();
+  await expect(page.locator('.cherry-editor')).toBeHidden();
+  await expect(page.locator('.cherry-toolbar')).toBeHidden();
+  await expect(page.locator('.cherry-toolbar-right')).toBeHidden();
+  await expect(page.locator('.cherry-sidebar')).toBeHidden();
+  actions.push('opened Cherry native previewOnly with no global editing toolbar');
+
+  const setMarkdown = (value: string) =>
+    page.evaluate((next) => {
+      const scope = window as typeof window & { cherry: { setValue(markdown: string): void } };
+      scope.cherry.setValue(next);
+    }, value);
+
+  await setMarkdown('# Direct heading\n\nBody');
+  await expect(page.locator('.ProseMirror h1')).toHaveCount(1);
+  await expect(page.locator('.ProseMirror h1')).toHaveText('Direct heading');
+  await page.locator('.ProseMirror h1').click();
+  await page.keyboard.press('ControlOrMeta+Alt+2');
+  await expect(page.locator('.ProseMirror h2')).toHaveText('Direct heading');
+  await expect.poll(async () => (await readState(page)).cherry.startsWith('## Direct heading')).toBe(true);
+  actions.push('changed an existing heading to H2 with the toolbar-free heading shortcut');
+
+  await setMarkdown('');
+  await expect.poll(() => page.locator('.ProseMirror > *').count()).toBe(1);
+  await page.locator('.ProseMirror p').click();
+  await page.keyboard.insertText('```');
+  await page.keyboard.press('Enter');
+  await page.keyboard.insertText('previewOnly();');
+  await expect(page.locator('.ProseMirror .cherry-milkdown-code-block code')).toHaveText('previewOnly();');
+  await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('```\npreviewOnly();\n```');
+  await expect(page.locator('.cherry-suggester-panel:visible')).toHaveCount(0);
+  actions.push('created and edited a fenced code block without a source suggest panel');
+
+  const state = await readState(page);
+  expect(state.cherry).toBe(state.codeMirror);
+  expect(state.cherry).toBe(state.milkdown);
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('physical delete, clipboard, undo/redo and composition input stay synchronized', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  const setValue = (value: string) =>
+    page.evaluate((markdown) => {
+      const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+      scope.cherry.setValue(markdown);
+    }, value);
+  const markdown = () => page.evaluate(() => (window as typeof window & { cherry: { getMarkdown(): string } }).cherry.getMarkdown());
+
+  await setValue('Delete me');
+  const paragraph = page.locator('.ProseMirror p').first();
+  await paragraph.click();
+  await page.keyboard.press('End');
+  await page.keyboard.press('Shift+Home');
+  await page.keyboard.press('Backspace');
+  await expect.poll(async () => (await markdown()).trim()).toBe('');
+  actions.push('deleted a selected paragraph with Backspace');
+
+  await page.keyboard.insertText('Copy me');
+  await page.keyboard.press('ControlOrMeta+A');
+  await page.keyboard.press('ControlOrMeta+C');
+  await page.keyboard.press('Backspace');
+  await page.keyboard.press('ControlOrMeta+V');
+  await expect.poll(async () => (await markdown()).trim()).toBe('Copy me');
+  actions.push('copied, deleted and pasted text through the browser clipboard');
+
+  await page.keyboard.press('End');
+  await page.keyboard.insertText(' one');
+  await page.waitForTimeout(800);
+  await page.keyboard.insertText(' two');
+  await expect.poll(async () => (await markdown()).trim()).toBe('Copy me one two');
+  await page.keyboard.press('ControlOrMeta+z');
+  await expect.poll(async () => (await markdown()).trim()).toBe('Copy me one');
+  await page.keyboard.press('ControlOrMeta+Shift+z');
+  await expect.poll(async () => (await markdown()).trim()).toBe('Copy me one two');
+  actions.push('undid and redid two user input groups without reverting the document');
+
+  await setValue('汉');
+  const compositionTarget = page.locator('.ProseMirror p').first();
+  await compositionTarget.evaluate((element) => {
+    element.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '' }));
+    element.dispatchEvent(new CompositionEvent('compositionupdate', { bubbles: true, data: '汉字' }));
+    element.textContent = '汉字';
+    element.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '汉字' }));
+  });
+  await expect.poll(async () => (await markdown()).trim()).toBe('汉字');
+  actions.push('completed a composition-style Chinese input and kept Markdown synchronized');
 
   expect(errors).toEqual([]);
   await attachEvidence(page, testInfo, actions, errors);

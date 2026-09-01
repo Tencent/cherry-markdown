@@ -295,6 +295,22 @@ export function createCherryEditingBridge(
     return setTextBlock(sameLevel ? paragraph : heading, sameLevel ? undefined : { level });
   };
 
+  const handleHeadingShortcut = (event: KeyboardEvent) => {
+    if (!isActive() || event.shiftKey || !(event.metaKey || event.ctrlKey) || !event.altKey) return;
+    if (!/^[0-6]$/.test(event.key)) return;
+    const level = Number(event.key);
+    const { heading, paragraph } = view.state.schema.nodes;
+    const handled =
+      level === 0
+        ? Boolean(paragraph && setTextBlock(paragraph))
+        : Boolean(heading && setTextBlock(heading, { level }));
+    if (!handled) return;
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  view.dom.addEventListener('keydown', handleHeadingShortcut, true);
+
   const toggleCustomMark = (name: string, attrs?: Record<string, string>) => {
     const type = view.state.schema.marks[name];
     if (!type) return false;
@@ -692,6 +708,7 @@ export function createCherryEditingBridge(
       view.dom.removeEventListener('focusin', rememberPreview);
       view.dom.removeEventListener('pointerdown', activatePreview, true);
       view.dom.removeEventListener('click', syncAnchorNavigation, true);
+      view.dom.removeEventListener('keydown', handleHeadingShortcut, true);
       sourceDom?.removeEventListener('pointerdown', deactivatePreviewFromSource, true);
     },
   };

@@ -16,6 +16,7 @@ declare global {
 
 export default function App() {
   const editorRoot = useRef<HTMLDivElement>(null);
+  const previewOnly = window.location.pathname.endsWith('/preview-only.html');
 
   useEffect(() => {
     let cancelled = false;
@@ -29,13 +30,18 @@ export default function App() {
       window.Cherry = Cherry;
       window.milkdown = milkdown;
       await loadDemoDependencies();
-      // The complete demo config remains shared with Cherry's root example.
-      // @ts-expect-error The legacy JavaScript demo config does not publish declarations.
-      const { basicConfig } = await import('../../../../examples/assets/scripts/index-demo.js');
+      // Both demos consume Cherry's existing public configurations. Milkdown
+      // only adds preview editing; it does not define another layout mode.
+      const configModule = previewOnly
+        ? // @ts-expect-error Cherry's shared JavaScript demo config does not publish declarations.
+          await import('../../../../examples/assets/scripts/preview-demo.js')
+        : // @ts-expect-error Cherry's shared JavaScript demo config does not publish declarations.
+          await import('../../../../examples/assets/scripts/index-demo.js');
+      const cherryConfig = previewOnly ? configModule.previewConfig : configModule.basicConfig;
       if (cancelled) return;
 
       cherry = new Cherry({
-        ...basicConfig,
+        ...cherryConfig,
         el: root,
         value: basicMd,
         extensions: [
@@ -68,7 +74,7 @@ export default function App() {
   return (
     <>
       <div id="dom_mask" aria-hidden="true" />
-      <div id="markdown" ref={editorRoot} />
+      <div id="markdown" ref={editorRoot} className={previewOnly ? 'preview-only-page' : undefined} />
     </>
   );
 }
