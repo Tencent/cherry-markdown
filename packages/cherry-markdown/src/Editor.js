@@ -1069,6 +1069,13 @@ const markField = StateField.define({
 /** @type {import('~types/editor')} */
 export default class Editor {
   /**
+   * typewriter 模式下光标行在视口中的垂直锚点位置（占视口高度的比例）。
+   * 0.5 表示正中间；实际使用 0.4（距顶部 40%），参考 iA Writer / Typora / Ulysses 等主流写作应用，
+   * 视觉焦点自然落在屏幕上方 1/3~1/2 区间，比 1/2 正中央体验更佳。
+   */
+  static TYPEWRITER_ANCHOR_RATIO = 0.4;
+
+  /**
    * @constructor
    * @param {Partial<EditorConfiguration>} options
    */
@@ -1823,16 +1830,23 @@ export default class Editor {
       return;
     }
     const scroller = editorView.scrollDOM;
-    if (scroller.scrollTop <= 0) {
+    const { scrollTop } = scroller;
+    if (scrollTop <= 0) {
       this.previewer.scrollToLineNum(0);
       return;
     }
-    if (scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 20) {
+    if (scrollTop + scroller.clientHeight >= scroller.scrollHeight - 20) {
       this.previewer.scrollToLineNum(null);
       return;
     }
-    const currentTop = scroller.scrollTop;
+    const isTypewriter = this.options.writingStyle === 'typewriter';
+    const currentTop = scrollTop;
     const targetLineBlock = editorView.lineBlockAtHeight(currentTop);
+    if (isTypewriter) {
+      const targetLine = editorView.state.doc.lineAt(targetLineBlock.from).number;
+      this.previewer.scrollToLineNumWithOffset(targetLine, scroller.clientHeight * Editor.TYPEWRITER_ANCHOR_RATIO);
+      return;
+    }
     const targetLine = editorView.state.doc.lineAt(targetLineBlock.from).number - 1;
     const lineHeight = targetLineBlock.height;
     const lineTop = targetLineBlock.top;
@@ -1846,6 +1860,9 @@ export default class Editor {
    * @param {MouseEvent} evt
    */
   onMouseDown = (editorView, evt) => {
+    if (this.options.writingStyle === 'typewriter') {
+      return;
+    }
     this.$cherry.$event.emit('cleanAllSubMenus');
 
     if (!Number.isFinite(evt.clientX) || !Number.isFinite(evt.clientY)) {
@@ -2257,12 +2274,14 @@ export default class Editor {
 
     const { view } = this.editor;
     const { doc } = view.state;
+    const scroller = view.scrollDOM;
 
     // 边界处理：跳转到文档末尾
     if (beginLine === null) {
       cancelAnimationFrame(this.animation.timer);
       this.disableScrollListener = true;
-      view.scrollDOM.scrollTop = view.scrollDOM.scrollHeight;
+      const maxScrollTop = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+      scroller.scrollTop = maxScrollTop;
       this.animation.timer = 0;
       return;
     }
@@ -2274,8 +2293,9 @@ export default class Editor {
     const endLineBlock = view.lineBlockAt(targetEndLine.from);
 
     // 计算精确的滚动位置：行顶部位置 + 行高 * 百分比偏移
-    const targetScrollTop = beginLineBlock.top + (endLineBlock.top - beginLineBlock.top) * percent;
-    this.animation.destinationTop = Math.ceil(targetScrollTop - 15);
+    const targetScrollTop = beginLineBlock.top + (endLineBlock.top - beginLineBlock.top) * percent - 15;
+    const maxScrollTop = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+    this.animation.destinationTop = Math.ceil(Math.max(0, Math.min(maxScrollTop, targetScrollTop)));
     if (this.animation.timer) {
       return;
     }
@@ -2410,13 +2430,19 @@ export default class Editor {
     if (writingStyle === 'typewriter') {
       // 由于 CodeMirror 6 的 .cm-scroller 默认是 flex-direction: row，
       // 直接给 ::before/::after 加 height 无法撑开垂直空间。这里改用 padding 实现
-      // 上下半屏留白，让首行/末行也能滚动到编辑区的垂直中间（padding 会计入 scrollHeight）
-      const height = this.editor.scrollDOM.clientHeight / 2;
+      // 上下留白，让首行能滚到锚点、末行也能滚到锚点（padding 会计入 scrollHeight）。
+      // 锚点为距顶部 TYPEWRITER_ANCHOR_RATIO（默认 40%）的位置：
+      //   - padding-top  = 视口 * ratio      （让首行能落在锚点）
+      //   - padding-bottom = 视口 * (1-ratio)（让末行能落在锚点）
+      const { clientHeight } = this.editor.scrollDOM;
+      const ratio = Editor.TYPEWRITER_ANCHOR_RATIO;
+      const paddingTop = clientHeight * ratio;
+      const paddingBottom = clientHeight * (1 - ratio);
       sheet.insertRule(
-        `.${className} .cm-editor .cm-scroller { padding-top: ${height}px; padding-bottom: ${height}px; box-sizing: border-box; }`,
+        `.${className} .cm-editor .cm-scroller { padding-top: ${paddingTop}px; padding-bottom: ${paddingBottom}px; box-sizing: border-box; }`,
         0,
       );
-      // 伪元素高度需要下一帧才会影响 CodeMirror 的坐标度量，这里延迟到下一帧再执行滚动
+      // padding 变化需要下一帧才会影响 CodeMirror 的坐标度量，这里延迟到下一帧再执行滚动
       requestAnimationFrame(() => this.scrollCursorToCenter());
     }
   }
@@ -2442,9 +2468,9 @@ export default class Editor {
     // 光标当前视口位置相对于 scrollDOM 顶部的距离
     const cursorTopInScroll = cursorCoords.top - scrollRect.top + scrollDOM.scrollTop;
     const lineHeight = cursorCoords.bottom - cursorCoords.top;
-    // 目标：让光标行位于可视区域的垂直中间
-    const desiredCenter = scrollDOM.clientHeight / 2;
-    const targetScrollTop = cursorTopInScroll - desiredCenter + lineHeight / 2;
+    // 目标：让光标行位于可视区域距顶部 TYPEWRITER_ANCHOR_RATIO 的位置
+    const anchorY = scrollDOM.clientHeight * Editor.TYPEWRITER_ANCHOR_RATIO;
+    const targetScrollTop = cursorTopInScroll - anchorY + lineHeight / 2;
     // 限制在 [0, maxScrollTop] 之间，避免负值
     const maxScrollTop = Math.max(0, scrollDOM.scrollHeight - scrollDOM.clientHeight);
     const finalTop = Math.max(0, Math.min(maxScrollTop, Math.round(targetScrollTop)));
