@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
 
 test('touch focus and composition-style input keep the preview editor usable', async ({ page }) => {
-  await page.goto('/preview-only.html', { waitUntil: 'commit' });
+  await page.goto('/preview-only.html?touch=1', { waitUntil: 'commit' }).catch(async (error) => {
+    if (!page.url().includes('/preview-only.html')) throw error;
+  });
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   await page.evaluate(() => {
     const scope = window as typeof window & { cherry: { setValue(value: string): void } };
