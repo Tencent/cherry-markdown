@@ -178,8 +178,8 @@ export const cherryCompatibilityCases: readonly CherryCompatibilityCase[] = [
     id: 'custom-hook',
     label: 'business custom hook',
     markdown: ':::custom\nOpaque source\n:::',
-    mode: 'passthrough',
+    mode: 'native-source',
     expectedText: 'Opaque source',
-    interaction: interaction('passthrough', ':::custom\nOpaque source\n:::', '.cherry-embed'),
+    interaction: interaction('native-source', ':::custom\nOpaque source\n:::', '.cherry-embed'),
   },
 ] as const;

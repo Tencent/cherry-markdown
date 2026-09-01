@@ -331,9 +331,16 @@ function createBlockNode(match: BlockMatch, parse: ParseMarkdown): MarkdownNode 
         ?.replace(/^\s*:::\s*/, '')
         .trim()
         .split(/\s+/, 1)[0] ?? '';
-    // Compound layouts stay structured in the preview editor. Only the
-    // alignment-only blocks have no child model and remain opaque.
-    if (/^(?:left|center|right|justify)$/i.test(rawType)) {
+    // Compound layouts stay structured in the preview editor. Unknown
+    // business directives must not be guessed as panels: their syntax and
+    // semantics belong to the application. Keep the complete source in the
+    // native Cherry shell until the caller supplies a Milkdown schema,
+    // parser, serializer and NodeView through `plugins`.
+    const normalizedType = rawType.toLowerCase();
+    const isStructured =
+      /^(?:panel|primary|info|warning|danger|success|cols|tabs|timeline)$/i.test(normalizedType) ||
+      /^\d+cols$/i.test(rawType);
+    if (/^(?:left|center|right|justify)$/i.test(rawType) || !isStructured) {
       return { type: 'cherryNativeBlock', source: match.source };
     }
     return parsePanel(match.source, parse);

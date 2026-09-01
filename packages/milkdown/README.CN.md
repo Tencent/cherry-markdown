@@ -16,7 +16,7 @@ Cherry Markdown 的 Milkdown 即见即所得扩展。推荐模式是把 Milkdown
 - HTML 使用无脚本权限的沙箱预览，并提供按需开启的节点内源码模式。
 - `:line:` 等表格图表直接复用 Cherry 原生 DOM 和 ECharts 生命周期；选中后只在当前节点内编辑完整 Markdown 源码。
 
-该包不会把 Cherry 扩展默认显示成 raw 源码卡片。业务自定义语法需要通过 Milkdown 插件提供 schema、parser、serializer 和 NodeView，未注册语法不宣称支持。
+该包不会把 Cherry 扩展默认显示成 raw 源码卡片。业务自定义语法要实现结构化编辑，需要通过 Milkdown 插件提供 schema、parser、serializer 和 NodeView；未注册的块指令会安全地复用 Cherry 原生外壳，并可在节点内部编辑完整源码，不会被猜测成某一种 Panel。
 
 ## 安装
 
@@ -124,7 +124,7 @@ yarn test:e2e
 
 ## 当前边界
 
-CherryEngine 仍通过 `cherry-markdown/dist/cherry-markdown.engine.core.esm.js` 深层入口提供兼容能力。图表属于可视化嵌入对象，任意 HTML 因安全原因不会直接作为 ProseMirror 正文编辑；业务自定义 Hook 仍需提供 Milkdown 插件。
+CherryEngine 仍通过 `cherry-markdown/dist/cherry-markdown.engine.core.esm.js` 深层入口提供兼容能力。图表属于可视化嵌入对象，任意 HTML 因安全原因不会直接作为 ProseMirror 正文编辑；业务自定义 Hook 仍需提供 Milkdown 插件才能结构化编辑，否则完整指令源码会保留在 Cherry 原生外壳内原位编辑。
 
 ## 许可证
 

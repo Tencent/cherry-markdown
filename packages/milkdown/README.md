@@ -16,7 +16,7 @@ A Milkdown WYSIWYG extension for Cherry Markdown. The recommended mode mounts Mi
 - HTML uses a script-disabled sandbox preview and an opt-in inline source mode.
 - `:line:` and other table charts reuse Cherry's native DOM and ECharts lifecycle; selection opens the full Markdown source inside that node only.
 
-Cherry extensions are not presented as raw source cards. Business-specific syntax must provide a Milkdown schema, parser, serializer, and NodeView through a plugin; unregistered syntax is not claimed as supported.
+Cherry extensions are not presented as raw source cards. Business-specific syntax must provide a Milkdown schema, parser, serializer, and NodeView through a plugin for structured editing. An unregistered block directive is safely rendered through Cherry's native shell and can be edited in-place as its complete source; it is never guessed as a structured panel.
 
 ## Install
 
@@ -124,7 +124,7 @@ Unit and real-browser tests share one typed Cherry syntax capability matrix. The
 
 ## Current boundary
 
-CherryEngine is still loaded from the private `cherry-markdown/dist/cherry-markdown.engine.core.esm.js` path for compatibility. Diagrams remain visual embedded objects, arbitrary HTML is not exposed as editable ProseMirror content for security, and business-specific hooks require an explicit Milkdown plugin.
+CherryEngine is still loaded from the private `cherry-markdown/dist/cherry-markdown.engine.core.esm.js` path for compatibility. Diagrams remain visual embedded objects, arbitrary HTML is not exposed as editable ProseMirror content for security, and business-specific hooks require an explicit Milkdown plugin for structured editing (otherwise the complete directive source remains editable inside Cherry's native shell).
 
 ## License
 

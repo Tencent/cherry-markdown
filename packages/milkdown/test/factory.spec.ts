@@ -1020,6 +1020,23 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect((window as typeof window & { __bad?: boolean }).__bad).toBeUndefined();
   });
 
+  it('keeps unknown business directives intact and edits them in the native Cherry shell', async () => {
+    const element = root();
+    const source = ':::business-card\nOpaque source\n:::';
+    const instance = await createCherryMilkdown({ root: element, value: source, engine: { makeHtml: (value) => value } });
+    instances.push(instance);
+    expect(element.querySelector('.cherry-embed--cherry_native_block')).not.toBeNull();
+    selectNode(instance, 'cherry_native_block');
+    element.querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
+    const editor = element.querySelector<HTMLElement>('.cherry-embed__source code');
+    expect(editor).not.toBeNull();
+    if (editor) {
+      editor.textContent = ':::business-card\nUpdated source\n:::';
+      editor.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+    }
+    await vi.waitFor(() => expect(instance.getMarkdown()).toContain('Updated source'));
+  });
+
   it('updates Markdown and emits debounced changes without rendering a second pane', async () => {
     const element = root();
     const onChange = vi.fn();
