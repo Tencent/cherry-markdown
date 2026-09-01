@@ -1208,8 +1208,9 @@ test('manual interaction matrix covers focus, edit, create and delete for remain
   // Formula: click the MathLive field, type, and verify immediate Markdown sync.
   await setValue('$x$');
   const math = page.locator('.ProseMirror math-field').first();
-  await math.click();
-  await page.keyboard.press('End');
+  const mathBox = await math.boundingBox();
+  expect(mathBox).not.toBeNull();
+  await page.mouse.click(mathBox!.x + mathBox!.width - 2, mathBox!.y + mathBox!.height / 2);
   await math.pressSequentially('^2');
   await expect.poll(async () => (await readState(page)).cherry).toContain('$x^2$');
   actions.push('focused and edited an inline MathLive formula');
