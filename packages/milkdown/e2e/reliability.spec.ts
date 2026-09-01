@@ -75,12 +75,22 @@ test('table ECharts renders, updates and keeps all Markdown owners in sync', asy
   await expect(page.locator('.ProseMirror')).toBeVisible();
   actions.push('opened full Cherry demo');
 
-  const chart = page.locator('.cherry-table-chart:visible').first();
-  await expect(chart).toBeVisible();
+  // Lazy chart NodeViews reserve a zero-area wrapper until they enter the
+  // viewport; select the node first, then scroll it into view to activate it.
+  const chart = page.locator('.cherry-table-chart').first();
   await chart.scrollIntoViewIfNeeded();
+  await expect(chart).toBeVisible();
   const wrapper = chart.locator('.cherry-echarts-wrapper').first();
   await expect(wrapper).toBeVisible();
   await expect(wrapper.locator('svg')).toHaveCount(1);
+  await expect
+    .poll(async () =>
+      chart.evaluate((element) => ({
+        shellMargin: getComputedStyle(element).margin,
+        nativeFigureMargin: getComputedStyle(element.querySelector('.cherry-table-figure')!).margin,
+      })),
+    )
+    .toEqual({ shellMargin: '0px', nativeFigureMargin: '16px 0px' });
   actions.push('observed native SVG table chart');
 
   const chartBox = await chart.boundingBox();
@@ -186,7 +196,7 @@ test('the full demo loads every shared image and keeps images selectable in prev
   actions.push('rendered nested foreground and background font styles without leaking Markdown markers');
 
   const nativeLineChart = page
-    .locator('.cherry-embed--cherry_native_block')
+    .locator('.cherry-compound--cols')
     .filter({ hasText: '示例（折线图）' })
     .first();
   await nativeLineChart.scrollIntoViewIfNeeded();
@@ -207,7 +217,9 @@ test('Mermaid keeps Cherry native resize and alignment controls in the preview e
     scope.cherry.setValue('```mermaid\ngraph TD\n  Start --> Finish\n```');
   });
 
-  const mermaid = page.locator('.ProseMirror .cherry-embed--cherry_diagram[data-type="mermaid"]');
+  const mermaidSelector = '.ProseMirror .cherry-embed--cherry_diagram[data-type="mermaid"]';
+  await expect.poll(() => page.locator(mermaidSelector).count()).toBe(1);
+  const mermaid = page.locator(mermaidSelector).first();
   await expect(mermaid).toBeVisible();
   await expect(mermaid.locator('svg')).toHaveCount(1);
   await mermaid.click();
@@ -347,6 +359,119 @@ test('Cherry toolbar operates on the focused Milkdown surface', async ({ page },
   await attachEvidence(page, testInfo, actions, errors);
 });
 
+test('every Cherry size submenu item formats the focused Milkdown selection', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+
+  for (const [label, size] of [
+    ['小', '12'],
+    ['中', '17'],
+    ['大', '24'],
+    ['特大', '32'],
+  ] as const) {
+    await page.evaluate(() => {
+      const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+      scope.cherry.setValue('Format me now');
+    });
+    const paragraph = page.locator('.ProseMirror p', { hasText: 'Format me now' });
+    await paragraph.click();
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.locator('.toolbar-left [title="大小"]').click();
+    await page.locator(`.cherry-dropdown [title="${label}"]`).click();
+    await expect(page.locator(`.ProseMirror .cherry-wysiwyg-size[data-cherry-size="${size}"]`)).toHaveText('Format me now');
+    await expect
+      .poll(async () => {
+        const state = await readState(page);
+        return { markdown: state.cherry, synchronized: state.cherry === state.codeMirror && state.cherry === state.milkdown };
+      })
+      .toEqual({ markdown: `!${size} Format me now!`, synchronized: true });
+    actions.push(`applied size ${label} (${size}px) to a real preview selection`);
+  }
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('every Cherry strike submenu item operates on the focused Milkdown selection', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+
+  const cases = [
+    ['删除线', '~~Format me now~~'],
+    ['下划线', '/Format me now/'],
+    ['下标', '^^Format me now^^'],
+    ['上标', '^Format me now^'],
+    ['拼音', '{ Format me now | Format me now }'],
+    ['加粗斜体', '***Format me now***'],
+  ] as const;
+  for (const [label, expected] of cases) {
+    await page.evaluate(() => {
+      const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+      scope.cherry.setValue('Format me now');
+    });
+    await page.locator('.ProseMirror p', { hasText: 'Format me now' }).click();
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.locator('.toolbar-left [title="删除线"]').click();
+    await page.locator(`.cherry-dropdown [title="${label}"]`).click();
+    await expect.poll(async () => (await readState(page)).cherry).toContain(expected);
+    await expect.poll(async () => {
+      const state = await readState(page);
+      return state.cherry === state.codeMirror && state.cherry === state.milkdown;
+    }).toBe(true);
+    actions.push(`applied strike submenu item ${label} to the complete preview selection`);
+  }
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('all toolbar heading levels H1 through H5 can be created and edited in preview', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  for (const level of [1, 2, 3, 4, 5] as const) {
+    await page.evaluate(() => {
+      const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+      scope.cherry.setValue('Heading item');
+    });
+    await page.locator('.ProseMirror p', { hasText: 'Heading item' }).click();
+    await page.locator('.toolbar-left [title="标题"]').click();
+    await page.locator(`.cherry-dropdown [title="${['', '一级标题', '二级标题', '三级标题', '四级标题', '五级标题'][level]}"]`).click();
+    await expect(page.locator(`.ProseMirror h${level}`)).toHaveText('Heading item');
+    await expect.poll(async () => (await readState(page)).cherry.trim()).toBe(`${'#'.repeat(level)} Heading item`);
+    actions.push(`created H${level} from a preview paragraph and kept its Markdown synchronized`);
+  }
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('all Cherry panel types can be created from the preview caret', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  for (const type of ['tips', 'info', 'warning', 'danger', 'success'] as const) {
+    const renderedType = type === 'tips' ? 'primary' : type;
+    await page.evaluate(() => {
+      const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+      scope.cherry.setValue('Panel text');
+    });
+    await page.locator('.ProseMirror p', { hasText: 'Panel text' }).click();
+    await page.locator('.toolbar-left [title="面板"]').click();
+    await page.locator(`.cherry-dropdown [title="${type}"]`).click();
+    await expect(page.locator(`.ProseMirror .cherry-panel__${renderedType}`)).toBeVisible();
+    await expect.poll(async () => (await readState(page)).cherry).toContain(`::: ${renderedType}`);
+    actions.push(`created ${type} Panel from the preview caret`);
+  }
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
 test('heading toggles back to paragraph and code blocks stay in the preview editor', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
@@ -467,7 +592,7 @@ test('physical clicks edit code and navigate links and TOC inside the preview', 
   await attachEvidence(page, testInfo, actions, errors);
 });
 
-test('slash menu exposes H6 and keyboard code-block conversion without leaving preview', async ({ page }, testInfo) => {
+test('Markdown shortcuts create H6 and code blocks without a right-side suggest popup', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
   await page.goto(demoPath);
@@ -480,28 +605,34 @@ test('slash menu exposes H6 and keyboard code-block conversion without leaving p
     }, value);
 
   await setMarkdown('');
-  await page.locator('.ProseMirror p').click();
+  await expect.poll(() => page.locator('.ProseMirror > *').count()).toBe(1);
+  await page.locator('.ProseMirror p').first().click();
   await page.keyboard.insertText('/');
-  const slashMenu = page.locator('.cherry-milkdown-slash');
-  await expect(slashMenu).toBeVisible();
-  await slashMenu.getByRole('option', { name: '标题 6' }).click();
+  await expect(page.locator('.cherry-milkdown-slash')).toHaveCount(0);
+  await page.keyboard.press('Backspace');
+  actions.push('typed a slash in a plain preview paragraph without opening a suggest popup');
+
+  await setMarkdown('');
+  await expect.poll(() => page.locator('.ProseMirror > *').count()).toBe(1);
+  await page.locator('.ProseMirror p').click();
+  await page.keyboard.insertText('###### ');
   await page.keyboard.insertText('Sixth level');
   await expect(page.locator('.ProseMirror h6')).toHaveText('Sixth level');
   await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('###### Sixth level');
-  actions.push('created and edited H6 through the caret-anchored slash menu');
+  actions.push('created and edited H6 through the Markdown shortcut without a suggest popup');
 
   await setMarkdown('');
+  await expect.poll(() => page.locator('.ProseMirror > *').count()).toBe(1);
   await page.locator('.ProseMirror p').click();
-  await page.keyboard.insertText('/');
-  await expect(slashMenu).toBeVisible();
-  for (let index = 0; index < 7; index += 1) await page.keyboard.press('ArrowDown');
-  await expect(slashMenu.getByRole('option', { name: '代码块' })).toHaveAttribute('aria-selected', 'true');
+  await page.keyboard.insertText('```');
   await page.keyboard.press('Enter');
   await page.keyboard.insertText('slashCode();');
   await expect(page.locator('.ProseMirror .cherry-milkdown-code-block code')).toHaveText('slashCode();');
   await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('```\nslashCode();\n```');
   await expect(page.locator('.cherry-editor .cm-content')).not.toBeFocused();
-  actions.push('used arrow keys and Enter to create a directly editable code block without focusing CodeMirror');
+  await page.keyboard.insertText('/');
+  await expect(page.locator('.cherry-milkdown-slash')).toHaveCount(0);
+  actions.push('created a directly editable fenced code block and kept the right preview free of suggest popups');
 
   expect(errors).toEqual([]);
   await attachEvidence(page, testInfo, actions, errors);
@@ -533,6 +664,51 @@ test('ordered-list toolbar keeps Cherry default nested-list behavior', async ({ 
       synchronized: true,
     });
   actions.push('used the ordered-list toolbar on an empty paragraph and preserved Cherry nested-list defaults');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('unordered, task-list, table and rule creation stay in the preview editor', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  const setValue = (value: string) =>
+    page.evaluate((markdown) => {
+      const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+      scope.cherry.setValue(markdown);
+    }, value);
+
+  await setValue('Bullet item');
+  await page.locator('.ProseMirror p', { hasText: 'Bullet item' }).click();
+  await page.locator('.toolbar-left [title="无序列表"]').click();
+  await expect(page.locator('.ProseMirror > ul > li')).toHaveCount(1);
+  await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('- Bullet item');
+  actions.push('created an unordered list from the preview caret');
+
+  await setValue('Task item');
+  await page.locator('.ProseMirror p', { hasText: 'Task item' }).click();
+  await page.locator('.toolbar-left [title="清单"]').click();
+  await expect(page.locator('.ProseMirror li[data-item-type="task"]')).toHaveCount(1);
+  await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('- [x] Task item');
+  actions.push('created and rendered a task list from the preview caret');
+
+  await setValue('Rule');
+  await page.locator('.ProseMirror p', { hasText: 'Rule' }).click();
+  await page.locator('.toolbar-left [title="插入"]').click();
+  await page.locator('.cherry-dropdown[name="insert"] [title="分隔线"]').click();
+  await expect(page.locator('.ProseMirror hr')).toHaveCount(1);
+  await expect.poll(async () => (await readState(page)).cherry).toContain('---');
+  actions.push('created a horizontal rule from the Insert submenu');
+
+  await setValue('Table');
+  await page.locator('.ProseMirror p', { hasText: 'Table' }).click();
+  await page.locator('.toolbar-left [title="插入"]').click();
+  await page.locator('.cherry-dropdown[name="insert"] [title="表格"]').click();
+  await expect(page.locator('.ProseMirror .milkdown-table-block table.children')).toBeVisible();
+  await expect.poll(async () => (await readState(page)).cherry).toContain('|');
+  actions.push('created a GFM table from the Insert submenu');
 
   expect(errors).toEqual([]);
   await attachEvidence(page, testInfo, actions, errors);
@@ -609,10 +785,16 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
   const components = [
     { id: 'heading', native: '#native .cherry-previewer h1', milkdown: '#milkdown .ProseMirror h1' },
     { id: 'paragraph', native: '#native .cherry-previewer > p', milkdown: '#milkdown .ProseMirror > p' },
+    { id: 'task-list', native: '#native .check-list-item', milkdown: '#milkdown .ProseMirror li[data-item-type="task"]' },
     { id: 'blockquote', native: '#native blockquote', milkdown: '#milkdown blockquote' },
-    { id: 'table', native: '#native table', milkdown: '#milkdown table' },
+    { id: 'table', native: '#native table', milkdown: '#milkdown .milkdown-table-block table.children' },
+    {
+      id: 'table-chart',
+      native: '#native .cherry-table-wrapper:has(.cherry-echarts-wrapper)',
+      milkdown: '#milkdown .cherry-table-chart',
+    },
     { id: 'panel', native: '#native .cherry-panel', milkdown: '#milkdown .cherry-panel' },
-    { id: 'detail', native: '#native details', milkdown: '#milkdown details' },
+    { id: 'detail', native: '#native details', milkdown: '#milkdown .cherry-detail' },
     {
       id: 'code-block',
       native: '#native [data-type="codeBlock"]',
@@ -657,15 +839,24 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
       contentType: 'image/png',
     });
     expect(changedPixels / (nativeImage.width * nativeImage.height), component.id).toBeLessThanOrEqual(0.005);
-    const nativeBox = await nativeLocator.boundingBox();
-    const milkdownBox = await milkdownLocator.boundingBox();
-    if (!nativeBox || !milkdownBox) throw new Error(`Missing visual box for ${component.id}`);
-    layout.push({
-      id: component.id,
-      native: { top: nativeBox.y, bottom: nativeBox.y + nativeBox.height },
-      milkdown: { top: milkdownBox.y, bottom: milkdownBox.y + milkdownBox.height },
-    });
   }
+  // Rendering the lazy chart can settle layout while the component screenshots
+  // scroll through the page. Take one stable document-coordinate snapshot
+  // after all renderers have been activated instead of mixing scroll states
+  // from different screenshots.
+  await page.waitForTimeout(100);
+  layout.push(
+    ...(await page.evaluate((items) => {
+      const read = (selector: string) => {
+        const element = document.querySelector(selector);
+        if (!element) return null;
+        const rect = element.getBoundingClientRect();
+        return { top: rect.top + window.scrollY, bottom: rect.bottom + window.scrollY };
+      };
+      return items.map((item) => ({ id: item.id, native: read(item.native), milkdown: read(item.milkdown) }));
+    }, components)),
+  );
+  if (layout.some((item) => !item.native || !item.milkdown)) throw new Error('Missing visual layout selector');
   const stylePairs = await page.evaluate(() => {
     const properties = [
       'font-family',
@@ -680,9 +871,20 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
       'border-top-width',
       'border-top-color',
     ];
-    return ['h1', 'p', 'blockquote', 'table', 'pre'].map((selector) => {
-      const native = document.querySelector(`#native .cherry-previewer ${selector}`);
-      const milkdown = document.querySelector(`#milkdown .ProseMirror ${selector}`);
+    return [
+      ['h1', '#native .cherry-previewer h1', '#milkdown .ProseMirror h1'],
+      ['p', '#native .cherry-previewer > p', '#milkdown .ProseMirror > p'],
+      ['blockquote', '#native blockquote', '#milkdown blockquote'],
+      ['table', '#native table', '#milkdown .milkdown-table-block table.children'],
+      [
+        'pre',
+        '#native [data-type="codeBlock"] > .custom-codeblock-wrapper > pre',
+        '#milkdown .cherry-milkdown-code-block > pre',
+      ],
+      ['task-icon', '#native .check-list-item .ch-icon', '#milkdown .ProseMirror li[data-item-type="task"] .ch-icon'],
+    ].map(([selector, nativeSelector, milkdownSelector]) => {
+      const native = document.querySelector(nativeSelector);
+      const milkdown = document.querySelector(milkdownSelector);
       if (!native || !milkdown) throw new Error(`Missing visual contract selector: ${selector}`);
       const nativeStyle = getComputedStyle(native);
       const milkdownStyle = getComputedStyle(milkdown);
@@ -729,6 +931,233 @@ test('the shared Cherry syntax matrix renders in the real demo without renderer 
   }
 
   expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('manual interaction matrix covers focus, edit, create and delete for remaining nodes', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  const setValue = (value: string) =>
+    page.evaluate((markdown) => {
+      const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+      scope.cherry.setValue(markdown);
+    }, value);
+  const sync = async (expected: string) => {
+    await expect
+      .poll(async () => {
+        const state = await readState(page);
+        return { markdown: state.cherry, synchronized: state.cherry === state.codeMirror && state.cherry === state.milkdown };
+      })
+      .toEqual({ markdown: expected, synchronized: true });
+  };
+
+  // Inline marks: real text selection, toolbar command, and source round-trip.
+  await setValue('Bold text');
+  const paragraph = page.locator('.ProseMirror p').first();
+  await paragraph.click({ position: { x: 8, y: 10 } });
+  for (let index = 0; index <= 'Bold text'.length; index += 1) await page.keyboard.press('ArrowLeft');
+  for (let index = 0; index < 'Bold'.length; index += 1) await page.keyboard.press('Shift+ArrowRight');
+  await page.locator('.toolbar-left [title="加粗"]').click();
+  await sync('**Bold** text');
+  actions.push('selected paragraph text and applied bold through Cherry toolbar');
+
+  // Custom Cherry menus must keep their legacy editor API when the preview
+  // owns the selection. This is a real submenu click, not a direct bridge
+  // invocation.
+  await setValue('Custom menu text');
+  const customParagraph = page.locator('.ProseMirror p').first();
+  await customParagraph.click({ position: { x: 8, y: 10 } });
+  for (let index = 0; index <= 'Custom'.length + 5; index += 1) await page.keyboard.press('ArrowLeft');
+  for (let index = 0; index < 'Custom'.length; index += 1) await page.keyboard.press('Shift+ArrowRight');
+  await page.locator('.toolbar-left [title="自定义菜单+自定义菜单图标"]').click();
+  await page.locator('.cherry-dropdown:visible').last().locator('[title="加粗斜体"]').click();
+  await sync('***Custom*** menu text');
+  actions.push('ran the custom Cherry bold-italic submenu on a preview selection');
+
+  await setValue('Custom submenu');
+  const customSubmenuParagraph = page.locator('.ProseMirror p').first();
+  await customSubmenuParagraph.click({ position: { x: 8, y: 10 } });
+  await page.keyboard.press('End');
+  await page.keyboard.press('Shift+Home');
+  await page.locator('.toolbar-left [title="自定义菜单+子菜单"]').click();
+  await page.locator('.cherry-dropdown:visible').last().locator('[title="快捷键"]').click();
+  await sync('Custom submenu快捷键看这里：<https://codemirror.net/docs/ref/#commands>\n');
+  actions.push('ran a custom multi-level submenu on a preview selection');
+
+  // GFM table: focus a cell, edit it, then use the native row/column controls.
+  await setValue('| A | B |\n| --- | ---: |\n| 1 | 2 |');
+  const table = page.locator('.ProseMirror .milkdown-table-block').first();
+  const tableCell = table.locator('table.children tbody td p').first();
+  await tableCell.click();
+  await page.keyboard.press('End');
+  await page.keyboard.insertText('x');
+  await expect.poll(async () => (await readState(page)).cherry).toContain('1x');
+  await tableCell.hover();
+  const tableRows = table.locator('table.children tbody tr');
+  const rowsBefore = await tableRows.count();
+  const tableBox = await table.locator('table.children').boundingBox();
+  expect(tableBox).not.toBeNull();
+  // Milkdown resolves the cell under the pointer before checking its edge, so
+  // hover a few pixels inside the right border rather than outside the table.
+  await page.mouse.move(tableBox!.x + tableBox!.width - 2, tableBox!.y + tableBox!.height / 2);
+  const rowLine = table.locator('[data-role="x-line-drag-handle"]');
+  await expect(rowLine).toHaveAttribute('data-show', 'true');
+  await rowLine.locator('.add-button').click();
+  await expect.poll(() => tableRows.count()).toBe(rowsBefore + 1);
+  await table.locator('[data-role="row-drag-handle"]').hover();
+  const rowDelete = table.locator('[data-role="row-drag-handle"] .button-group button').first();
+  await expect(rowDelete).toBeVisible();
+  await rowDelete.click();
+  await expect.poll(() => tableRows.count()).toBe(rowsBefore);
+  const colsBefore = await table.locator('table.children tbody tr').first().locator(':scope > *').count();
+  await page.mouse.move(tableBox!.x + tableBox!.width / 2, tableBox!.y + tableBox!.height - 2);
+  const colLine = table.locator('[data-role="y-line-drag-handle"]');
+  await expect(colLine).toHaveAttribute('data-show', 'true');
+  await colLine.locator('.add-button').click();
+  await expect.poll(() => table.locator('table.children tbody tr').first().locator(':scope > *').count()).toBe(colsBefore + 1);
+  await table.locator('[data-role="col-drag-handle"]').hover();
+  const colDelete = table.locator('[data-role="col-drag-handle"] .button-group button').last();
+  await expect(colDelete).toBeVisible();
+  await colDelete.click();
+  await expect.poll(() => table.locator('table.children tbody tr').first().locator(':scope > *').count()).toBe(colsBefore);
+  await expect.poll(async () => (await readState(page)).cherry).toContain('1x');
+  actions.push('edited a table cell and created a row and column with preview controls');
+
+  // GFM task items expose a Cherry-style leading checkbox. Clicking the
+  // control toggles only the list item's checked attribute; text remains
+  // editable and the Markdown owners update immediately.
+  await setValue('- [ ] todo');
+  const taskItem = page.locator('.ProseMirror li[data-item-type="task"]').first();
+  await expect(taskItem).toBeVisible();
+  const taskIcon = taskItem.locator('.ch-icon').first();
+  await expect(taskIcon).toHaveClass(/ch-icon-square/);
+  await expect(taskItem).toHaveClass(/cherry-list-item/);
+  await expect(taskItem).toHaveClass(/check-list-item/);
+  await expect
+    .poll(async () => taskIcon.evaluate((element) => ({
+      font: getComputedStyle(element).fontFamily,
+      margin: getComputedStyle(element).margin,
+      display: getComputedStyle(element).display,
+    })))
+    .toEqual(expect.objectContaining({ margin: '0px 6px 0px -20px', display: 'inline' }));
+  const clickTaskCheckbox = async () => {
+    await taskItem.scrollIntoViewIfNeeded();
+    const taskBox = await taskItem.boundingBox();
+    if (!taskBox) throw new Error('Missing task-list item box');
+    // Use a physical pointer event in the checkbox hit area. This mirrors a
+    // user's click on Cherry's leading checkbox and avoids relying on a
+    // selector-relative synthetic click point after the node re-renders.
+    await page.mouse.click(taskBox.x + 8, taskBox.y + taskBox.height / 2);
+  };
+  await clickTaskCheckbox();
+  await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('- [x] todo');
+  await clickTaskCheckbox();
+  await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('- [ ] todo');
+  actions.push('toggled a task-list checkbox twice without leaving the preview editor');
+
+  // Formula: click the MathLive field, type, and verify immediate Markdown sync.
+  await setValue('$x$');
+  const math = page.locator('.ProseMirror math-field').first();
+  await math.click();
+  await page.keyboard.press('End');
+  await math.pressSequentially('^2');
+  await expect.poll(async () => (await readState(page)).cherry).toContain('$x^2$');
+  actions.push('focused and edited an inline MathLive formula');
+
+  await setValue('Formula menu');
+  await page.locator('.ProseMirror p').first().click();
+  await page.locator('.toolbar-left [title="公式"]').click();
+  const formulaItem = page.locator('.cherry-formula-item:visible').first();
+  await expect(formulaItem).toBeVisible();
+  await formulaItem.click();
+  await expect.poll(async () => (await readState(page)).cherry).toContain('$\\times$');
+  actions.push('opened the Cherry formula palette and inserted a symbol into Milkdown');
+
+  // Panel and Timeline: titles are native inputs; add/delete controls operate in place.
+  await setValue(':::warning Notice\nBody\n:::');
+  const panel = page.locator('.ProseMirror .cherry-panel').first();
+  const panelTitle = panel.locator('.cherry-compound__title');
+  await panelTitle.fill('Updated Notice');
+  await expect.poll(async () => (await readState(page)).cherry).toContain(':::warning Updated Notice');
+  actions.push('edited a Panel title in place');
+
+  await setValue(':::timeline\n:: 2025\nFirst\n:: 2026\nSecond\n:::');
+  const timeline = page.locator('.ProseMirror .cherry-compound--timeline').first();
+  const timelineLabel = timeline.locator('.cherry-compound-item__label').first();
+  await timelineLabel.fill('2024');
+  await expect.poll(async () => (await readState(page)).cherry).toContain(':: 2024');
+  await timeline.getByRole('button', { name: '增加项目' }).click();
+  await expect.poll(() => timeline.locator('.cherry-compound-item').count()).toBe(3);
+  await timeline.locator('.cherry-compound-item').last().getByRole('button', { name: '删除项目' }).click();
+  await expect.poll(() => timeline.locator('.cherry-compound-item').count()).toBe(2);
+  actions.push('edited, added and deleted a Timeline item in place');
+
+  // Creating a timeline from a plain paragraph includes Cherry's empty
+  // placeholder items. They must be legal empty paragraphs, never empty text
+  // nodes rejected by ProseMirror.
+  await setValue('Alpha beta');
+  await page.locator('.ProseMirror p').first().click();
+  await page.locator('.toolbar-left [title="时间线"]').click();
+  await expect(page.locator('.ProseMirror .cherry-compound--timeline .cherry-compound-item')).toHaveCount(5);
+  actions.push('created a Timeline from plain text without empty-node errors');
+
+  // Restricted HTML: source editing remains in-node and dangerous markup never enters the DOM.
+  await setValue('<div>HTML</div>');
+  const html = page.locator('.ProseMirror .cherry-embed').first();
+  await html.click();
+  await html.getByRole('button', { name: '在节点内编辑源码' }).click();
+  const htmlSource = html.locator('.cherry-embed__source code');
+  await htmlSource.fill('<script>alert(1)</script><p>Safe</p>');
+  await expect.poll(async () => (await readState(page)).cherry).toContain('Safe');
+  await expect(html.locator('script')).toHaveCount(0);
+  actions.push('edited HTML source in place and verified script sanitization');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('compound nodes expose in-place creation, editing, deletion and disclosure controls', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  const setValue = (value: string) =>
+    page.evaluate((markdown) => {
+      const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+      scope.cherry.setValue(markdown);
+    }, value);
+
+  await setValue(':::tabs\n:: One\nFirst\n:: Two\nSecond\n:::');
+  const tabs = page.locator('.ProseMirror .cherry-compound--tabs');
+  await expect(tabs).toBeVisible();
+  await expect.poll(() => tabs.locator('.cherry-compound-item').count()).toBe(2);
+  const tabLabel = tabs.locator('.cherry-compound-item__label').first();
+  await tabLabel.click();
+  await tabLabel.press('ControlOrMeta+A');
+  await page.keyboard.insertText('Renamed');
+  await expect.poll(async () => (await readState(page)).cherry).toContain(':: Renamed');
+  await tabs.getByRole('button', { name: '增加项目' }).click();
+  await expect.poll(() => tabs.locator('.cherry-compound-item').count()).toBe(3);
+  await tabs.locator('.cherry-compound-item').last().getByRole('button', { name: '删除项目' }).click();
+  await expect.poll(() => tabs.locator('.cherry-compound-item').count()).toBe(2);
+  actions.push('edited, added and deleted a tab item in place');
+
+  await setValue('+++ More\nBody\n+++');
+  const detail = page.locator('.ProseMirror .cherry-detail');
+  const item = detail.locator('[data-role="detail-item"]').first();
+  await expect(item).toBeVisible();
+  const disclosure = item.getByRole('button', { name: '切换默认展开状态' });
+  await disclosure.click();
+  await expect(item).toHaveAttribute('data-open', 'true');
+  const detailLabel = item.locator('.cherry-compound-item__label');
+  await detailLabel.click();
+  await detailLabel.press('ControlOrMeta+A');
+  await page.keyboard.insertText('More details');
+  await expect.poll(async () => (await readState(page)).cherry).toContain('+++- More details');
+  expect(errors).toEqual([]);
+  actions.push('toggled Detail independently from its editable title');
   await attachEvidence(page, testInfo, actions, errors);
 });
 

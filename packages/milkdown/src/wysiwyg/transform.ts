@@ -224,7 +224,10 @@ export function findCherryInlineMatches(source: string): CherryInlineMatch[] {
 }
 
 function parseChildren(body: string, parse: ParseMarkdown): MarkdownNode[] {
-  return parse(body).length ? parse(body) : [{ type: 'paragraph', children: [{ type: 'text', value: '' }] }];
+  // ProseMirror forbids empty text nodes.  An empty compound item still needs
+  // a legal block so its title/actions remain editable, but the paragraph must
+  // have no text child rather than a synthetic `text('')` node.
+  return parse(body).length ? parse(body) : [{ type: 'paragraph', children: [] }];
 }
 
 function offsetPositions(nodes: MarkdownNode[], offset: number) {
@@ -328,7 +331,9 @@ function createBlockNode(match: BlockMatch, parse: ParseMarkdown): MarkdownNode 
         ?.replace(/^\s*:::\s*/, '')
         .trim()
         .split(/\s+/, 1)[0] ?? '';
-    if (/^(?:\d+cols|cols|tabs|timeline|left|center|right|justify)$/i.test(rawType)) {
+    // Compound layouts stay structured in the preview editor. Only the
+    // alignment-only blocks have no child model and remain opaque.
+    if (/^(?:left|center|right|justify)$/i.test(rawType)) {
       return { type: 'cherryNativeBlock', source: match.source };
     }
     return parsePanel(match.source, parse);

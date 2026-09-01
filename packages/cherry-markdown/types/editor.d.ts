@@ -151,6 +151,8 @@ export interface CM6Adapter {
 
   // 选区操作（需要封装）
   getSelections(): string[];
+  /** 获取主选区文本（兼容旧版自定义菜单 API） */
+  getSelection(): string;
   replaceSelection(text: string, select?: 'around' | 'start'): void;
   replaceSelections(texts: string[], select?: 'around' | 'start'): void;
 

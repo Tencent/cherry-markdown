@@ -457,6 +457,15 @@ class CM6Adapter {
   }
 
   /**
+   * 获取主选区文本（兼容旧版自定义菜单直接调用 editor.editor.getSelection() 的写法）
+   * @returns {string}
+   */
+  getSelection() {
+    const { from, to } = this.view.state.selection.main;
+    return this.view.state.doc.sliceString(from, to);
+  }
+
+  /**
    * 替换当前选中的文本
    * @param {string} text - 替换文本
    * @param {'around' | 'start'} [select='around'] - 替换后的选区行为

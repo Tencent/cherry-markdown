@@ -92,37 +92,6 @@
   background: rgb(54 110 244 / 8%);
 }
 
-.cherry-milkdown-slash {
-  position: absolute;
-  z-index: 30;
-  display: grid;
-  min-width: 160px;
-  max-height: min(360px, 60vh);
-  padding: 6px;
-  overflow-y: auto;
-  border: 1px solid var(--cherry-milkdown-border);
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 8px 30px rgb(31 35 41 / 16%);
-}
-
-.cherry-milkdown-slash[hidden] {
-  display: none;
-}
-
-.cherry-milkdown-slash button {
-  padding: 7px 10px;
-  border: 0;
-  border-radius: 5px;
-  background: transparent;
-  text-align: left;
-}
-
-.cherry-milkdown-slash button:hover,
-.cherry-milkdown-slash button.is-active {
-  background: var(--cherry-milkdown-soft);
-}
-
 .cherry-milkdown-code-block {
   position: relative;
   display: block;
@@ -329,20 +298,22 @@
   opacity: 0.68;
 }
 
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound__title,
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound-item__label {
+.cherry-milkdown .cherry-compound__title,
+.cherry-milkdown .cherry-compound-item__label {
   flex: 1;
   min-width: 3em;
   border: 0;
   outline: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   font-weight: 600;
 }
 
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound__title:empty::before,
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound-item__label:empty::before {
+.cherry-milkdown .cherry-compound__title::placeholder,
+.cherry-milkdown .cherry-compound-item__label::placeholder {
   color: var(--cherry-milkdown-muted);
-  content: attr(data-placeholder);
-  pointer-events: none;
 }
 
 .cherry-milkdown:not(.cherry-previewer) .cherry-compound__content {
@@ -397,6 +368,55 @@
 
 .cherry-milkdown:not(.cherry-previewer) .cherry-compound-item__content > :last-child {
   margin-bottom: 0;
+}
+
+.cherry-milkdown .cherry-compound-item--detail[data-open='false'] > .cherry-compound-item__content {
+  display: none;
+}
+
+/* Keep the structured Detail node visually identical to Cherry's native
+ * details/summary renderer while leaving the title as a real editable input. */
+.cherry-milkdown .cherry-detail .cherry-compound-item--detail {
+  margin-bottom: var(--spacing-md);
+  overflow: hidden;
+  border: 1px solid var(--accordion-border);
+  border-radius: calc(var(--accordion-radius) + 1px);
+  background: var(--accordion-bg);
+  box-shadow: var(--accordion-shadow);
+}
+
+.cherry-milkdown .cherry-detail .cherry-compound-item--detail > .cherry-compound-item__header {
+  position: relative;
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) calc(var(--spacing-lg) + var(--spacing-xl));
+  cursor: pointer;
+  user-select: none;
+  color: var(--accordion-summary-color);
+  background: var(--accordion-summary-bg);
+}
+
+.cherry-milkdown .cherry-detail .cherry-compound-item--detail > .cherry-compound-item__header::before {
+  position: absolute;
+  top: 50%;
+  left: var(--spacing-md);
+  content: '▼';
+  transform: translateY(-50%);
+  transition: transform 0.2s ease;
+}
+
+.cherry-milkdown .cherry-detail .cherry-compound-item--detail[data-open='true'] > .cherry-compound-item__header::before {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.cherry-milkdown .cherry-detail .cherry-compound-item--detail[data-open='false'] > .cherry-compound-item__header {
+  border-radius: var(--accordion-radius);
+}
+
+.cherry-milkdown .cherry-detail .cherry-compound-item--detail > .cherry-detail-body {
+  padding: var(--spacing-lg);
+  color: var(--accordion-body-color);
+  background: var(--accordion-body-bg);
+  border-top: 1px solid var(--accordion-body-border);
+  line-height: var(--line-height-relaxed);
 }
 
 .cherry-source-node,
@@ -542,6 +562,10 @@
 
 .cherry-milkdown .milkdown-table-block .handle[data-show="true"] {
   display: flex;
+}
+
+.cherry-milkdown .milkdown-table-block .drag-preview[data-show="false"] {
+  display: none;
 }
 
 .cherry-milkdown .milkdown-table-block .cell-handle {
@@ -700,17 +724,15 @@
 .cherry-milkdown--previewer .cherry-node-actions,
 .cherry-milkdown--previewer .cherry-embed__controls {
   position: absolute;
-  z-index: 2;
+  z-index: 20;
   top: 4px;
   right: 6px;
   margin: 0;
 }
 
-.cherry-milkdown--previewer .cherry-compound__title:focus:empty::before,
-.cherry-milkdown--previewer .cherry-compound-item__label:focus:empty::before {
+.cherry-milkdown--previewer .cherry-compound__title:focus::placeholder,
+.cherry-milkdown--previewer .cherry-compound-item__label:focus::placeholder {
   color: var(--base-sub-font-color);
-  content: attr(data-placeholder);
-  pointer-events: none;
 }
 
 .cherry-milkdown--previewer .cherry-compound-item__label {
@@ -730,8 +752,55 @@
 }
 
 .cherry-milkdown--previewer .milkdown-table-block {
-  margin: var(--spacing-lg) 0;
+  /* Native Cherry's table wrapper includes the table's 16px trailing
+   * margin in its own box before the next block. The editable TableBlock
+   * exposes that margin outside the box, so add the same 6px remainder. */
+  margin: 0 0 calc(var(--spacing-lg) + 16px);
   padding: 0;
+}
+
+/* TableBlock supplies Cherry-compatible row/column operations in embedded
+ * mode. Its handles are pointer-revealed, so the unfocused preview keeps the
+ * same layout as the native Cherry table. */
+.cherry-milkdown--previewer .milkdown-table-block {
+  padding-left: 0;
+}
+
+.cherry-milkdown--previewer .milkdown-table-block + .cherry-compound {
+  margin-top: 0;
+}
+
+/* Milkdown's ProseMirror base stylesheet removes the bottom margin from the
+ * first list in a document. Cherry keeps a 16px separation before the next
+ * block, so restore that spacing only inside the embedded preview. */
+.cherry-milkdown--previewer .ProseMirror > ul,
+.cherry-milkdown--previewer .ProseMirror > ol {
+  margin-bottom: 16px;
+}
+
+/* Cherry's native preview code block does not reserve a line-number gutter.
+ * Keep the editor's code content at the native x-origin in preview mode; the
+ * language/copy controls remain available only on hover or focus. */
+.cherry-milkdown--previewer .cherry-milkdown-code-block__gutter {
+  display: none;
+}
+
+.cherry-milkdown--previewer .cherry-milkdown-code-block__content {
+  position: static;
+  top: auto;
+  display: block;
+  width: 100%;
+  min-height: 0;
+  margin-left: 0;
+}
+
+.cherry-milkdown--previewer .cherry-milkdown-code-block > pre {
+  position: static;
+  min-height: 0;
+  margin: 7px 0;
+  padding: 14px;
+  color: #545454;
+  font: 14px/21px Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
 }
 
 .cherry-milkdown--previewer th > p,
@@ -743,6 +812,16 @@
  * Cherry centers an unaligned header while keeping body cells left aligned. */
 .cherry-milkdown--previewer th[style*="text-align: left"] {
   text-align: center !important;
+}
+
+/* Task markers are injected as the same Cherry icon-font spans used by the
+ * native renderer.  Keep only the interaction affordance here; the native
+ * `.check-list-item .ch-icon` margin, font and baseline come from
+ * cherry-markdown.css. */
+.cherry-milkdown .ProseMirror li[data-item-type='task'] .cherry-task-checkbox,
+.cherry-milkdown .ProseMirror li[data-item-type='task'] .ch-icon {
+  cursor: pointer;
+  user-select: none;
 }
 
 /* Cherry wraps tables in `.cherry-table-container`, so its table bottom
@@ -757,6 +836,44 @@
   padding: 0;
   border: 0;
   background: transparent;
+}
+
+/* The Cherry table hook already owns the spacing through its inner
+ * `.cherry-table-figure` (margin: 16px 0).  The NodeView shell must not add a
+ * second outer margin, otherwise charts in columns are shifted vertically
+ * and no longer line up with the native preview. */
+.cherry-milkdown--previewer .cherry-table-chart {
+  /* The native panel follows a chart by 10px; keep the NodeView's controls
+   * out of the unfocused flow while matching that exact block gap. */
+  margin: 16px 0 10px;
+}
+
+/* Let the hook-generated `.cherry-table-wrapper` participate in the same
+ * margin-collapse context as native Cherry.  A block preview shell inserts an
+ * extra 16px above the inner `.cherry-table-figure`; `contents` keeps the
+ * NodeView controls while making the rendered Cherry DOM the layout owner. */
+.cherry-milkdown--previewer .cherry-table-chart__preview.is-rendered {
+  display: contents;
+}
+
+/* The generated native wrapper already includes the table figure's bottom
+ * margin.  Its top margin is the outer block spacing in Cherry's renderer;
+ * move that spacing to the NodeView shell so the shell does not add a second
+ * collapsed 16px above the wrapper. */
+.cherry-milkdown--previewer .cherry-table-chart .cherry-table-figure {
+  margin-top: 0;
+}
+
+/* Inside Cherry's Columns/Panel layout the native renderer owns the outer
+ * block margin (`.cherry-panel--col > :last-child { margin-bottom: 0 }`) and
+ * leaves the figure's 16px top margin intact. Mirror that nested contract so
+ * the chart does not inherit the top-level NodeView spacing. */
+.cherry-milkdown--previewer .cherry-panel-cols .cherry-table-chart {
+  margin: 0;
+}
+
+.cherry-milkdown--previewer .cherry-panel-cols .cherry-table-chart .cherry-table-figure {
+  margin-top: 16px;
 }
 
 .cherry-milkdown--previewer .cherry-embed--cherry_native_block {

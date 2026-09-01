@@ -149,10 +149,15 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
   // Milkdown components are useful for standalone consumers, but mounting them
   // for every table, image and link in the full manual adds a large
   // amount of DOM and event work before the user edits anything.
+  // Table operations are part of Cherry's preview editing contract, so keep
+  // the table block mounted in embedded mode as well. Image/link floating
+  // components remain standalone-only because Cherry delegates those controls
+  // to its native preview handlers.
+  const tableBlockComponent = await import('@milkdown/kit/component/table-block');
   const interactiveComponents = options.nativePreview
     ? undefined
     : await Promise.all([
-        import('@milkdown/kit/component/table-block'),
+        Promise.resolve(tableBlockComponent),
         import('@milkdown/kit/component/image-inline'),
         import('@milkdown/kit/component/link-tooltip'),
       ]);
@@ -230,24 +235,22 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
         renderers: options.renderers,
         onError: options.onError,
       });
-      if (interactiveComponents) {
-        ctx.set(interactiveComponents[0].tableBlockConfig.key, {
-          renderButton: (type) => {
-            const icons = {
-              add_row: '+',
-              add_col: '+',
-              delete_row: '×',
-              delete_col: '×',
-              align_col_left: '⇤',
-              align_col_center: '↔',
-              align_col_right: '⇥',
-              col_drag_handle: '⠿',
-              row_drag_handle: '⠿',
-            } as const;
-            return icons[type];
-          },
-        });
-      }
+      ctx.set(tableBlockComponent.tableBlockConfig.key, {
+        renderButton: (type) => {
+          const icons = {
+            add_row: '+',
+            add_col: '+',
+            delete_row: '×',
+            delete_col: '×',
+            align_col_left: '⇤',
+            align_col_center: '↔',
+            align_col_right: '⇥',
+            col_drag_handle: '⠿',
+            row_drag_handle: '⠿',
+          } as const;
+          return icons[type];
+        },
+      });
       ctx.update(editorViewOptionsCtx, (previous) => ({
         ...previous,
         editable: () => !options.readonly,
@@ -263,11 +266,10 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
     .use(immediateChangePlugin)
     .use(cherryWysiwyg);
 
+  editor.use(tableBlockComponent.tableBlock);
+
   if (interactiveComponents) {
-    editor
-      .use(interactiveComponents[0].tableBlock)
-      .use(interactiveComponents[1].imageInlineComponent)
-      .use(interactiveComponents[2].linkTooltipPlugin);
+    editor.use(interactiveComponents[1].imageInlineComponent).use(interactiveComponents[2].linkTooltipPlugin);
   }
 
   for (const plugin of options.plugins ?? []) editor.use(plugin);
@@ -282,7 +284,7 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
     const view = ctx.get(editorViewCtx);
     const last = view.state.doc.lastChild;
     if (!last || ['heading', 'paragraph'].includes(last.type.name)) return;
-    const paragraph = view.state.schema.nodes.paragraph;
+    const { paragraph } = view.state.schema.nodes;
     if (paragraph) view.dispatch(view.state.tr.insert(view.state.doc.content.size, paragraph.create()));
   });
   serializedBaseline = editor.action(getMarkdown());

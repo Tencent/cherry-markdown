@@ -1,5 +1,5 @@
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
-import { NodeSelection, Plugin } from '@milkdown/kit/prose/state';
+import { NodeSelection, Plugin, type Transaction } from '@milkdown/kit/prose/state';
 import { Decoration, DecorationSet } from '@milkdown/kit/prose/view';
 import type { EditorView, NodeView, ViewMutationRecord } from '@milkdown/kit/prose/view';
 import type { SerializerState } from '@milkdown/kit/transformer';
@@ -60,14 +60,82 @@ function mermaidLayout(source: string) {
   };
 }
 
-function sanitizedEngineFragment(html: string, inline = false): DocumentFragment {
+const SAFE_HTML_TAGS = new Set([
+  'A',
+  'B',
+  'BLOCKQUOTE',
+  'BR',
+  'CODE',
+  'DEL',
+  'DIV',
+  'EM',
+  'FIGCAPTION',
+  'FIGURE',
+  'H1',
+  'H2',
+  'H3',
+  'H4',
+  'H5',
+  'H6',
+  'HR',
+  'I',
+  'IMG',
+  'LI',
+  'MARK',
+  'OL',
+  'P',
+  'PRE',
+  'SECTION',
+  'SMALL',
+  'SPAN',
+  'STRONG',
+  'SUB',
+  'SUP',
+  'TABLE',
+  'TBODY',
+  'TD',
+  'TH',
+  'THEAD',
+  'TR',
+  'UL',
+  'U',
+]);
+const SAFE_HTML_ATTRIBUTES = new Set([
+  'alt',
+  'aria-label',
+  'class',
+  'colspan',
+  'height',
+  'id',
+  'rel',
+  'role',
+  'rowspan',
+  'src',
+  'style',
+  'tabindex',
+  'target',
+  'title',
+  'width',
+]);
+const SAFE_HTML_CSS =
+  /^(?:background(?:-color)?|border(?:-(?:bottom|left|radius|right|top)(?:-color|-style|-width)?)?|color|font(?:-size|-style|-weight)?|margin(?:-(?:bottom|left|right|top))?|padding(?:-(?:bottom|left|right|top))?|text-align|text-decoration|white-space|width|height)$/i;
+
+function sanitizedEngineFragment(html: string, inline = false, restricted = false): DocumentFragment {
   const template = document.createElement('template');
   template.innerHTML = html;
   template.content.querySelectorAll('script, iframe, object, embed, base, meta, form').forEach((node) => node.remove());
   template.content.querySelectorAll<HTMLElement>('*').forEach((element) => {
+    if (restricted && !SAFE_HTML_TAGS.has(element.tagName)) {
+      element.replaceWith(...Array.from(element.childNodes));
+      return;
+    }
     for (const attribute of Array.from(element.attributes)) {
       const name = attribute.name.toLowerCase();
       const value = attribute.value.trim().toLowerCase();
+      if (restricted && !SAFE_HTML_ATTRIBUTES.has(name)) {
+        element.removeAttribute(attribute.name);
+        continue;
+      }
       if (
         name.startsWith('on') ||
         (['href', 'src', 'xlink:href', 'formaction', 'srcset'].includes(name) &&
@@ -75,6 +143,15 @@ function sanitizedEngineFragment(html: string, inline = false): DocumentFragment
         (name === 'style' && /(?:expression\s*\(|javascript\s*:)/.test(value))
       ) {
         element.removeAttribute(attribute.name);
+        continue;
+      }
+      if (restricted && name === 'style') {
+        const safeStyle = Array.from(element.style)
+          .filter((property) => SAFE_HTML_CSS.test(property))
+          .map((property) => `${property}:${element.style.getPropertyValue(property)}`)
+          .join(';');
+        if (safeStyle) element.setAttribute('style', safeStyle);
+        else element.removeAttribute('style');
       }
     }
   });
@@ -317,12 +394,21 @@ function iconButton(label: string, title: string, action: () => void, readonly =
 }
 
 function editableLabel(className: string, value: string, placeholder: string, readonly: boolean, commit: () => void) {
-  const label = document.createElement('span');
+  const label = document.createElement('input');
+  label.type = 'text';
+  label.value = value;
+  label.placeholder = placeholder;
   label.className = className;
-  label.textContent = value;
   label.dataset.placeholder = placeholder;
-  label.contentEditable = String(!readonly);
+  label.readOnly = readonly;
   label.spellcheck = false;
+  // Keep the browser's native caret/selection behavior.  ProseMirror must not
+  // interpret a click inside an editable compound label as a node selection.
+  label.addEventListener('pointerdown', (event) => {
+    event.stopImmediatePropagation();
+    if (!readonly && event.button === 0) label.focus();
+  });
+  label.addEventListener('mousedown', (event) => event.stopImmediatePropagation());
   label.addEventListener('input', commit);
   label.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
@@ -343,7 +429,7 @@ class CompoundItemView implements NodeView {
   private node: ProseNode;
   private readonly view: EditorView;
   private readonly getPos: () => number | undefined;
-  private readonly label: HTMLElement;
+  private readonly label: HTMLInputElement;
   private readonly disclosure: HTMLButtonElement;
 
   constructor(node: ProseNode, view: EditorView, getPos: () => number | undefined, readonly: boolean) {
@@ -351,18 +437,19 @@ class CompoundItemView implements NodeView {
     this.view = view;
     this.getPos = getPos;
     const role = String(node.attrs.role);
-    this.dom = document.createElement(role === 'detail-item' ? 'details' : 'section');
+    // Do not use a native <details>/<summary> pair here.  Browsers place
+    // non-summary children outside the collapsed box, which makes the hidden
+    // header overlap following ProseMirror nodes and steals pointer events.
+    // The disclosure button below owns this small, predictable state instead.
+    this.dom = document.createElement('section');
     this.dom.className = 'cherry-compound-item';
     this.dom.dataset.role = role;
-    if (this.dom instanceof HTMLDetailsElement) {
-      this.dom.open = Boolean(node.attrs.open);
-      this.dom.addEventListener('toggle', () => {
-        if (this.dom instanceof HTMLDetailsElement && this.dom.open !== Boolean(this.node.attrs.open)) {
-          this.updateAttrs({ open: this.dom.open });
-        }
-      });
-    }
-    const header = document.createElement(role === 'detail-item' ? 'summary' : 'header');
+    if (role === 'detail-item') this.dom.classList.add('cherry-compound-item--detail');
+    this.dom.dataset.open = String(Boolean(node.attrs.open));
+    // A native <summary> toggles the whole <details> element for every click,
+    // including text selection.  Use a regular header and keep disclosure as
+    // an explicit control so the title remains directly editable.
+    const header = document.createElement('header');
     header.className = 'cherry-compound-item__header';
     this.disclosure = iconButton(
       node.attrs.open ? '⌄' : '›',
@@ -379,12 +466,9 @@ class CompoundItemView implements NodeView {
       String(node.attrs.label ?? ''),
       node.attrs.role === 'column' ? '' : '直接输入标题',
       readonly,
-      () => this.updateAttrs({ label: this.label.textContent ?? '' }),
+      () => this.updateAttrs({ label: this.label.value }),
     );
     this.label.hidden = node.attrs.role === 'column';
-    if (role === 'detail-item') {
-      this.label.addEventListener('click', (event) => event.preventDefault());
-    }
     const actions = document.createElement('span');
     actions.className = 'cherry-node-actions';
     actions.append(
@@ -401,25 +485,30 @@ class CompoundItemView implements NodeView {
       this.view.dispatch(this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos)));
       this.view.focus();
     });
-    if (role === 'detail-item') {
-      this.disclosure.addEventListener('click', (event) => event.preventDefault());
-    }
     this.contentDOM = document.createElement('div');
     this.contentDOM.className = `cherry-compound-item__content${
-      role === 'detail-item' ? ' cherry-detail-body' : role === 'column' ? ' cherry-panel--col' : ''
+      role === 'detail-item'
+        ? ' cherry-detail-body'
+        : role === 'column'
+          ? ' cherry-panel--col'
+          : role === 'tab'
+            ? ' cherry-tabs-item__content'
+            : role === 'timeline-item'
+              ? ' cherry-timeline--desc'
+              : ''
     }`;
+    if (role === 'tab') this.dom.classList.add('cherry-tabs-item');
+    if (role === 'timeline-item') this.dom.classList.add('cherry-timeline--item');
     this.dom.append(header, this.contentDOM);
   }
 
   update(node: ProseNode) {
     if (node.type !== this.node.type) return false;
     this.node = node;
-    if (document.activeElement !== this.label) this.label.textContent = String(node.attrs.label ?? '');
+    if (document.activeElement !== this.label) this.label.value = String(node.attrs.label ?? '');
     this.dom.dataset.role = String(node.attrs.role);
     this.disclosure.textContent = node.attrs.open ? '⌄' : '›';
-    if (this.dom instanceof HTMLDetailsElement && this.dom.open !== Boolean(node.attrs.open)) {
-      this.dom.open = Boolean(node.attrs.open);
-    }
+    this.dom.dataset.open = String(Boolean(node.attrs.open));
     return true;
   }
 
@@ -441,21 +530,60 @@ class CompoundItemView implements NodeView {
   }
 
   private updateAttrs(attrs: Record<string, unknown>) {
-    const pos = this.getPos();
+    const pos = this.resolvePos();
     if (typeof pos === 'number') {
-      this.view.dispatch(
-        this.view.state.tr.setNodeMarkup(pos, undefined, { ...this.node.attrs, ...attrs, source: '' }),
-      );
+      const transaction = this.view.state.tr.setNodeMarkup(pos, undefined, {
+        ...this.node.attrs,
+        ...attrs,
+        source: '',
+      });
+      this.clearParentSource(transaction, pos);
+      this.view.dispatch(transaction);
     }
   }
 
   private remove = () => {
-    const pos = this.getPos();
-    if (typeof pos === 'number') this.view.dispatch(this.view.state.tr.delete(pos, pos + this.node.nodeSize));
+    const pos = this.resolvePos();
+    if (typeof pos !== 'number') return;
+    const transaction = this.view.state.tr.delete(pos, pos + this.node.nodeSize);
+    this.clearParentSource(transaction, pos);
+    this.view.dispatch(transaction);
   };
 
+  private clearParentSource(transaction: Transaction, position: number) {
+    try {
+      const resolved = this.view.state.doc.resolve(position);
+      const parentPosition = resolved.before(resolved.depth);
+      const parent = transaction.doc.nodeAt(parentPosition);
+      if (parent && (parent.type.name === 'cherry_panel' || parent.type.name === 'cherry_detail')) {
+        transaction.setNodeMarkup(parentPosition, undefined, { ...parent.attrs, source: '' });
+      }
+    } catch {
+      // The parent may be mapped away while deleting the final child. The
+      // transaction still contains the requested local edit in that case.
+    }
+  }
+
+  private resolvePos() {
+    try {
+      const direct = this.getPos();
+      if (typeof direct === 'number') return direct;
+    } catch {
+      // Fall through while ProseMirror is mapping a transaction.
+    }
+    try {
+      const mapped = this.view.posAtDOM(this.dom, 0);
+      for (const candidate of [mapped, mapped - 1]) {
+        if (candidate >= 0 && this.view.state.doc.nodeAt(candidate)?.type === this.node.type) return candidate;
+      }
+    } catch {
+      // The DOM can be detached briefly during an external Markdown update.
+    }
+    return undefined;
+  }
+
   private move(direction: -1 | 1) {
-    const pos = this.getPos();
+    const pos = this.resolvePos();
     if (typeof pos !== 'number') return;
     const resolved = this.view.state.doc.resolve(pos);
     const { parent } = resolved;
@@ -466,6 +594,11 @@ class CompoundItemView implements NodeView {
     const targetPos = direction < 0 ? pos - target.nodeSize : pos + this.node.nodeSize + target.nodeSize;
     const transaction = this.view.state.tr.delete(pos, pos + this.node.nodeSize);
     transaction.insert(direction < 0 ? targetPos : targetPos - this.node.nodeSize, this.node);
+    const parentPosition = resolved.before(resolved.depth);
+    const parentNode = transaction.doc.nodeAt(parentPosition);
+    if (parentNode && (parentNode.type.name === 'cherry_panel' || parentNode.type.name === 'cherry_detail')) {
+      transaction.setNodeMarkup(parentPosition, undefined, { ...parentNode.attrs, source: '' });
+    }
     this.view.dispatch(transaction);
   }
 }
@@ -478,7 +611,7 @@ class CompoundView implements NodeView {
   private node: ProseNode;
   private readonly view: EditorView;
   private readonly getPos: () => number | undefined;
-  private readonly title: HTMLElement;
+  private readonly title: HTMLInputElement;
   private readonly kind: HTMLButtonElement;
   private readonly add: HTMLButtonElement;
 
@@ -533,7 +666,11 @@ class CompoundView implements NodeView {
 
   stopEvent(event: Event) {
     const target = event.target as HTMLElement;
-    return this.title.contains(target) || Boolean(target.closest('button'));
+    return (
+      this.title.contains(target) ||
+      Boolean(target.closest('button')) ||
+      Boolean(target.closest('input[data-placeholder]'))
+    );
   }
 
   ignoreMutation(mutation: ViewMutationRecord) {
@@ -552,7 +689,9 @@ class CompoundView implements NodeView {
             ? 'cherry-panel-cols cherry-panel-cols__cols'
             : kind === 'tabs'
               ? 'cherry-tabs'
-              : '';
+              : kind === 'timeline'
+                ? 'cherry-timeline cherry-timeline__vertical'
+                : '';
     this.dom.className = `cherry-compound cherry-compound--${kind} ${cherryClass}`.trim();
     const header = this.title.parentElement;
     if (header) {
@@ -565,7 +704,7 @@ class CompoundView implements NodeView {
     this.add.hidden =
       this.readonly ||
       (node.type.name !== 'cherry_detail' && !['cols', 'tabs', 'timeline'].includes(String(node.attrs.kind)));
-    if (document.activeElement !== this.title) this.title.textContent = String(node.attrs.title ?? '');
+    if (document.activeElement !== this.title) this.title.value = String(node.attrs.title ?? '');
   }
 
   private setAttrs(attrs: Record<string, unknown>) {
@@ -577,7 +716,7 @@ class CompoundView implements NodeView {
     }
   }
 
-  private updateTitle = () => this.setAttrs({ title: this.title.textContent ?? '' });
+  private updateTitle = () => this.setAttrs({ title: this.title.value });
 
   private cycleKind = () => {
     if (this.node.type.name === 'cherry_detail') return;
@@ -1007,7 +1146,9 @@ class EmbedView implements NodeView {
     if (this.node.type.name.startsWith('cherry_html') || this.node.type.name === 'cherry_native_block') {
       try {
         const html = this.config.engine.makeHtml(String(this.node.attrs.source));
-        this.preview.replaceChildren(sanitizedEngineFragment(html, this.node.isInline));
+        this.preview.replaceChildren(
+          sanitizedEngineFragment(html, this.node.isInline, this.node.type.name.startsWith('cherry_html')),
+        );
       } catch {
         this.preview.textContent = String(this.node.attrs.source);
       }
@@ -1235,10 +1376,12 @@ class TableChartView implements NodeView {
   private render() {
     if (this.destroyed) return;
     destroyCherryRenderedContent(this.config.engine, this.preview);
+    this.preview.classList.remove('is-rendered');
     try {
       const html = this.config.engine.makeHtml(String(this.node.attrs.source ?? ''));
       this.preview.replaceChildren(sanitizedEngineFragment(html));
       this.preview.style.removeProperty('min-height');
+      this.preview.classList.add('is-rendered');
       delete this.preview.dataset.renderError;
     } catch (error) {
       this.preview.textContent = String(this.node.attrs.source ?? '');
@@ -1307,7 +1450,7 @@ export const cherryLinkTargetClickPlugin = $prose(
             if (!(link instanceof HTMLAnchorElement) || link.closest('.cherry-source-node--cherry_toc')) return false;
             const marker = link?.nextElementSibling;
             const target = marker?.classList.contains('cherry-link-target')
-              ? marker.getAttribute('data-target') ?? ''
+              ? (marker.getAttribute('data-target') ?? '')
               : '';
 
             // Never mutate attributes on ProseMirror-owned link DOM here.

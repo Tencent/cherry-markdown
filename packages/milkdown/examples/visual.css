@@ -1,0 +1,39 @@
+/* Layout-only styles for the isolated native/Milkdown visual contract page.
+ * Content appearance still comes exclusively from Cherry's stylesheet and
+ * the Milkdown package stylesheet; this file merely puts both instances in
+ * equal-sized comparison columns and hides editing chrome from the baseline. */
+body {
+  display: flex;
+  margin: 0;
+  background: #fff;
+}
+
+.comparison {
+  box-sizing: border-box;
+  flex: 0 0 720px;
+  width: 720px;
+  height: 920px;
+  overflow: hidden;
+}
+
+.comparison .cherry {
+  height: 100%;
+}
+
+.comparison .cherry-toolbar,
+.comparison .cherry-editor,
+.comparison .cherry-drag {
+  display: none !important;
+}
+
+.comparison .cherry-previewer {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 24px;
+}
+
+.cherry-node-actions,
+.cherry-embed__controls,
+.cherry-embed__source {
+  display: none !important;
+}

@@ -195,6 +195,13 @@ export default class PreviewerBubble {
    * @returns {boolean|HTMLElement}
    */
   isCherryTable(element) {
+    // Milkdown owns the table surface when the preview editing extension is
+    // mounted. Its ProseMirror table controls must not be handed to Cherry's
+    // CodeMirror table bubble (the two DOM models have different source
+    // locations and the legacy handler cannot resolve Milkdown cells).
+    if (typeof Element !== 'undefined' && element instanceof Element && element.closest('.milkdown-table-block')) {
+      return false;
+    }
     // 获取最近的表格元素
     const table = this.$getClosestNode(element, 'TABLE');
     if (!table) {

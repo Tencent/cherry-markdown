@@ -108,6 +108,7 @@ class CherryCodeBlockView implements NodeView {
   private readonly language: HTMLSelectElement;
   private readonly copy: HTMLButtonElement;
   private readonly pre: HTMLPreElement;
+  private copyTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
     node: ProseNode,
@@ -183,6 +184,7 @@ class CherryCodeBlockView implements NodeView {
   }
 
   destroy() {
+    if (this.copyTimer) clearTimeout(this.copyTimer);
     this.language.removeEventListener('change', this.updateLanguage);
     this.copy.removeEventListener('click', this.copyCode);
     this.contentDOM.removeEventListener('click', this.activateContent);
@@ -261,10 +263,17 @@ class CherryCodeBlockView implements NodeView {
 
   private copyCode = () => {
     const value = this.node.textContent;
-    if (navigator.clipboard?.writeText) void navigator.clipboard.writeText(value);
+    if (navigator.clipboard?.writeText) {
+      void navigator.clipboard.writeText(value).catch(() => {
+        // Clipboard permission is optional in embedded previews. Do not leak
+        // an unhandled rejection or block ordinary code editing.
+      });
+    }
+    if (this.copyTimer) clearTimeout(this.copyTimer);
     this.copy.textContent = '已复制';
-    setTimeout(() => {
+    this.copyTimer = setTimeout(() => {
       this.copy.textContent = '复制';
+      this.copyTimer = undefined;
     }, 800);
   };
 }

@@ -47,6 +47,28 @@ const TRANSFORMED_MARKDOWN_COMMANDS = new Set([
   'timeline',
   'toc',
   'video',
+  // Compound and chart submenu names are separate Cherry menu instances but
+  // still transform the current Markdown selection.
+  'tips',
+  'info',
+  'warning',
+  'danger',
+  'success',
+  'pinyin',
+  'lineTable',
+  'barTable',
+  'radarTable',
+  'mapTable',
+  'heatmapTable',
+  'scatterTable',
+  'sankeyTable',
+  'pieTable',
+  'insertFlow',
+  'insertSeq',
+  'insertState',
+  'insertClass',
+  'insertPie',
+  'insertGantt',
 ]);
 
 // Cherry's compound block menus (and its list menus) transform the complete
@@ -54,6 +76,48 @@ const TRANSFORMED_MARKDOWN_COMMANDS = new Set([
 // path so an empty paragraph is replaced by one valid block instead of
 // leaving a trailing paragraph behind.
 const CHERRY_LINE_TRANSFORM_COMMANDS = new Set(['ol', 'ul', 'checklist', 'panel', 'detail', 'timeline']);
+
+// Commands handled by the explicit Milkdown paths below (or by Cherry's
+// non-document UI).  Any other updateMarkdown menu is a user supplied menu;
+// route it through the same source-transform contract instead of silently
+// falling back to CodeMirror.  This keeps custom menus working in the preview
+// while preserving Cherry's global menus and selectors.
+const KNOWN_NON_TRANSFORM_COMMANDS = new Set([
+  'bold',
+  'italic',
+  'strikethrough',
+  'inlineCode',
+  'code',
+  'codeBlock',
+  'quote',
+  'hr',
+  'table',
+  'header',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'undo',
+  'redo',
+  'underline',
+  'sub',
+  'sup',
+  'size',
+  'color',
+  'mobilePreview',
+  'copy',
+  'theme',
+  'codeTheme',
+  'fullScreen',
+  'export',
+  'changeLocale',
+  'wordCount',
+  'shortcutKey',
+  'search',
+  'togglePreview',
+]);
 
 function selectedText(view: EditorView) {
   const { from, to } = view.state.selection;
@@ -259,7 +323,18 @@ export function createCherryEditingBridge(
         const to = $to.depth === 1 ? $to.after(1) : $from.after(1);
         transaction = transaction.replaceWith(from, to, parsed.content);
       } else {
-        transaction = transaction.replaceSelection(new Slice(parsed.content, 0, 0));
+        // A Cherry inline/custom menu returns Markdown such as `***text***`.
+        // Milkdown's parser wraps that fragment in a paragraph; inserting the
+        // paragraph node into another paragraph splits the block and leaves
+        // the unselected suffix in a second paragraph.  Peel that synthetic
+        // wrapper when the current selection is inline content.
+        const inlineContent =
+          $from.parent.inlineContent &&
+          parsed.content.childCount === 1 &&
+          parsed.content.firstChild?.type.name === 'paragraph'
+            ? parsed.content.firstChild.content
+            : parsed.content;
+        transaction = transaction.replaceSelection(new Slice(inlineContent, 0, 0));
       }
       if (!select) transaction.setSelection(view.state.selection.map(transaction.doc, transaction.mapping));
       view.dispatch(transaction);
@@ -391,6 +466,12 @@ export function createCherryEditingBridge(
       (isLineCommand && view.state.selection.$from.parent.isTextblock
         ? view.state.selection.$from.parent.textContent
         : '');
+    // Async Cherry menus (image/file/formula/chart pickers) must resolve
+    // against the selection that opened them. If the document changed while
+    // the picker was open, skip the stale result instead of inserting it at a
+    // newer, unrelated caret position.
+    const savedSelection = view.state.selection;
+    const savedDocument = view.state.doc;
     const previousIsSelections = menu.isSelections;
     menu.isSelections = true;
     let result: unknown;
@@ -402,6 +483,9 @@ export function createCherryEditingBridge(
     if (result instanceof Promise) {
       void result.then((value) => {
         if (typeof value === 'string' && value !== selection) {
+          if (view.state.doc !== savedDocument) return;
+          const transaction = view.state.tr.setSelection(savedSelection.map(view.state.tr.doc, view.state.tr.mapping));
+          view.dispatch(transaction);
           const blockCommand = CHERRY_LINE_TRANSFORM_COMMANDS.has(command.name);
           insertMarkdown(value, false, blockCommand);
         }
@@ -500,7 +584,20 @@ export function createCherryEditingBridge(
         });
       }
       default:
-        return TRANSFORMED_MARKDOWN_COMMANDS.has(command.name) ? runCherryTransform(command) : false;
+        // Custom menus are intentionally not enumerated here: applications
+        // may register arbitrary names.  Cherry marks document-producing
+        // menus with updateMarkdown=true, so unknown commands can safely use
+        // the transform bridge while global UI menus remain on Cherry.
+        {
+          const menu = command.menu as CherryMenuLike | undefined;
+          if (
+            TRANSFORMED_MARKDOWN_COMMANDS.has(command.name) ||
+            (menu?.updateMarkdown !== false && !KNOWN_NON_TRANSFORM_COMMANDS.has(command.name))
+          ) {
+            return runCherryTransform(command);
+          }
+          return false;
+        }
     }
   };
 
@@ -526,6 +623,20 @@ export function createCherryEditingBridge(
     }
     if (command.name === 'code' || command.name === 'codeBlock') {
       return { active: parent.type.name === 'code_block', enabled: true };
+    }
+    const markNames: Record<string, string> = {
+      bold: 'strong',
+      italic: 'emphasis',
+      strikethrough: 'strike_through',
+      inlineCode: 'inlineCode',
+      underline: 'cherry_underline',
+      sub: 'cherry_subscript',
+      sup: 'cherry_superscript',
+    };
+    const markName = markNames[command.name];
+    if (markName) {
+      const mark = view.state.schema.marks[markName];
+      return { active: Boolean(mark?.isInSet(parent.marks)), enabled: Boolean(mark) && view.editable };
     }
     return { active: false, enabled: view.editable };
   };
