@@ -43,6 +43,93 @@ describe('Previewer rendering pipeline', () => {
     expect(Reflect.get(previewer, 'applyingDomChanges')).toBe(false);
   });
 
+  it('lets an integration own only the preview content surface', () => {
+    const { previewer, previewerDom, cherry, highlightLine } = createPreviewer();
+    const update = vi.fn(({ container, markdown, html }) => {
+      container.innerHTML = `<article contenteditable="true">${markdown}</article>`;
+      expect(html).toContain('native preview');
+    });
+    const destroy = vi.fn();
+    const renderer = { update, destroy };
+
+    previewer.setContentRenderer(renderer);
+    previewer.update('<p>native preview</p>');
+
+    expect(update).toHaveBeenCalledWith({
+      container: previewerDom,
+      markdown: '# Document',
+      html: '<p>native preview</p>',
+    });
+    expect(previewerDom.classList.contains('cherry-previewer')).toBe(true);
+    expect(previewerDom.querySelector('[contenteditable="true"]')?.textContent).toBe('# Document');
+    expect(highlightLine).toHaveBeenCalledWith(0);
+    expect(cherry.wrapperDom.contains(previewerDom)).toBe(true);
+
+    expect(previewer.clearContentRenderer(renderer)).toBe(true);
+    expect(destroy).toHaveBeenCalledOnce();
+    previewer.update('<p data-sign="native">restored</p>');
+    expect(previewerDom.textContent).toBe('restored');
+  });
+
+  it('forwards source and revision context only for contextual updates', () => {
+    const { previewer } = createPreviewer();
+    const renderer = { update: vi.fn() };
+    previewer.setContentRenderer(renderer);
+
+    previewer.update('<p>local</p>', { source: 'milkdown:1', revision: 7 });
+
+    expect(renderer.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        html: '<p>local</p>',
+        updateContext: { source: 'milkdown:1', revision: 7 },
+      }),
+    );
+  });
+
+  it('does not let an older integration clear the current preview renderer', () => {
+    const { previewer } = createPreviewer();
+    const first = { update: vi.fn(), destroy: vi.fn() };
+    const second = { update: vi.fn(), destroy: vi.fn() };
+
+    previewer.setContentRenderer(first);
+    previewer.setContentRenderer(second);
+
+    expect(first.destroy).toHaveBeenCalledOnce();
+    expect(previewer.clearContentRenderer(first)).toBe(false);
+    previewer.update('<p>current</p>');
+    expect(second.update).toHaveBeenCalledOnce();
+  });
+
+  it('routes commands and deferred inserts only through the active preview editor bridge', () => {
+    const { previewer } = createPreviewer();
+    const first = {
+      isActive: vi.fn(() => true),
+      queryCommandState: vi.fn(() => ({ active: true, enabled: true, value: 2 })),
+      runCommand: vi.fn(() => true),
+      insert: vi.fn(() => true),
+    };
+    const second = {
+      isActive: vi.fn(() => false),
+      runCommand: vi.fn(() => true),
+      insert: vi.fn(() => true),
+    };
+
+    previewer.setEditingBridge(first);
+    expect(previewer.queryEditingCommandState({ name: 'header' })).toEqual({ active: true, enabled: true, value: 2 });
+    expect(previewer.runEditingCommand({ name: 'bold' })).toBe(true);
+    expect(previewer.insertEditingContent('![image](url)', { source: 'picker' })).toBe(true);
+    expect(first.runCommand).toHaveBeenCalledWith({ name: 'bold' });
+    expect(first.insert).toHaveBeenCalledWith('![image](url)', { source: 'picker' });
+
+    previewer.setEditingBridge(second);
+    expect(previewer.queryEditingCommandState({ name: 'header' })).toBeNull();
+    expect(previewer.runEditingCommand({ name: 'italic' })).toBe(false);
+    expect(previewer.insertEditingContent('ignored')).toBe(false);
+    expect(second.runCommand).not.toHaveBeenCalled();
+    expect(previewer.clearEditingBridge(first)).toBe(false);
+    expect(previewer.clearEditingBridge(second)).toBe(true);
+  });
+
   it('incrementally inserts, updates, and deletes rendered blocks', () => {
     const engine = createEngine();
     const { previewer, previewerDom } = createPreviewer();

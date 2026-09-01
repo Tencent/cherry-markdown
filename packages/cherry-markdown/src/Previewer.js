@@ -33,6 +33,20 @@ import LazyLoadImg from '@/utils/lazyLoadImg';
  */
 export default class Previewer {
   /**
+   * Optional owner for the previewer's content DOM.  Cherry keeps owning the
+   * preview shell (layout, theme, scrolling and toolbars), while integrations
+   * such as Milkdown can own only the document surface.
+   *
+   * @private
+   * @type {{
+   *   update: (context: {container: HTMLElement, markdown: string, html: string}) => void | Promise<void>;
+   *   destroy?: () => void | Promise<void>;
+   * } | null}
+   */
+  contentRenderer = null;
+  editingBridge = null;
+
+  /**
    * @property
    * @private
    * @type {boolean} 等待预览区域更新。预览区域更新时，预览区的滚动不会引起编辑器滚动，避免因插入的元素高度变化导致编辑区域跳动
@@ -505,6 +519,9 @@ export default class Previewer {
       if (this.applyingDomChanges) {
         return;
       }
+      if (this.editingBridge?.handleScroll?.(domContainer) === true) {
+        return;
+      }
       if (this.disableScrollListener) {
         // 如果正在动画滚动,不要重置标志,让动画继续控制
         return;
@@ -812,12 +829,108 @@ export default class Previewer {
    */
   refresh(html) {
     const domContainer = this.getDomContainer();
+    if (this.contentRenderer) {
+      this.$updateContentRenderer(html, domContainer);
+      return;
+    }
     domContainer.innerHTML = html;
   }
 
-  update(html) {
+  /**
+   * Lets an integration render inside the existing Cherry preview surface.
+   * The preview container itself is deliberately retained so Cherry's layout,
+   * themes, scrolling and surrounding interactions remain unchanged.
+   *
+   * @param {{
+   *   update: (context: {container: HTMLElement, markdown: string, html: string}) => void | Promise<void>;
+   *   destroy?: () => void | Promise<void>;
+   * }} renderer
+   */
+  setContentRenderer(renderer) {
+    if (!renderer || typeof renderer.update !== 'function') {
+      throw new TypeError('Previewer.setContentRenderer: renderer.update must be a function.');
+    }
+    if (this.contentRenderer === renderer) {
+      return;
+    }
+    this.contentRenderer?.destroy?.();
+    this.contentRenderer = renderer;
+  }
+
+  /**
+   * Releases a custom document renderer without replacing the preview shell.
+   * Passing the renderer guards against an older integration clearing a newer
+   * owner during asynchronous teardown.
+   *
+   * @param {object} [renderer]
+   * @returns {boolean}
+   */
+  clearContentRenderer(renderer) {
+    if (!this.contentRenderer || (renderer && renderer !== this.contentRenderer)) {
+      return false;
+    }
+    const currentRenderer = this.contentRenderer;
+    this.contentRenderer = null;
+    currentRenderer.destroy?.();
+    this.getDomContainer().replaceChildren();
+    return true;
+  }
+
+  /** Registers command/insert handling for an editor mounted in the preview surface. */
+  setEditingBridge(bridge) {
+    if (!bridge || typeof bridge.isActive !== 'function') {
+      throw new TypeError('Previewer.setEditingBridge: bridge.isActive must be a function.');
+    }
+    this.editingBridge = bridge;
+  }
+
+  clearEditingBridge(bridge) {
+    if (!this.editingBridge || (bridge && bridge !== this.editingBridge)) return false;
+    this.editingBridge = null;
+    return true;
+  }
+
+  runEditingCommand(command) {
+    if (!this.editingBridge?.isActive?.()) return false;
+    return this.editingBridge.runCommand?.(command) === true;
+  }
+
+  queryEditingCommandState(command) {
+    if (!this.editingBridge?.isActive?.()) return null;
+    return this.editingBridge.queryCommandState?.(command) ?? null;
+  }
+
+  insertEditingContent(content, options = {}) {
+    if (!this.editingBridge?.isActive?.()) return false;
+    return this.editingBridge.insert?.(content, options) === true;
+  }
+
+  $updateContentRenderer(html, domContainer = this.getDomContainer(), updateContext) {
+    const renderer = this.contentRenderer;
+    if (!renderer) {
+      return false;
+    }
+    const context = {
+      container: domContainer,
+      markdown: this.$cherry?.getMarkdown?.() ?? '',
+      html,
+      ...(updateContext ? { updateContext } : {}),
+    };
+    const result = renderer.update(context);
+    if (result && typeof result.catch === 'function') {
+      result.catch((error) => Logger.error('Custom preview content renderer failed.', error));
+    }
+    this.afterUpdate();
+    return true;
+  }
+
+  update(html, updateContext) {
     // 销毁后不执行更新
     if (this.isDestroyed) {
+      return;
+    }
+    if (this.contentRenderer && !this.isPreviewerHidden()) {
+      this.$updateContentRenderer(html, this.getDomContainer(), updateContext);
       return;
     }
     // 更新时保留图片懒加载逻辑
@@ -1292,6 +1405,14 @@ export default class Previewer {
   }
 
   scrollToLineNum(lineNum, linePercent) {
+    if (this.editingBridge?.handleEditorScroll?.(lineNum, linePercent) === true) {
+      if (this.animation.timer) {
+        cancelAnimationFrame(this.animation.timer);
+        this.animation.timer = 0;
+      }
+      this.disableScrollListener = false;
+      return;
+    }
     const top = this.$getTopByLineNum(lineNum, linePercent);
     this.$scrollAnimation(top);
   }
@@ -1376,6 +1497,11 @@ export default class Previewer {
     }
 
     this.isDestroyed = true;
+
+    if (this.contentRenderer) {
+      this.clearContentRenderer(this.contentRenderer);
+    }
+    this.clearEditingBridge(this.editingBridge);
 
     // 清理滚动事件监听
     this.removeScroll();

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 // @ts-check
+/** @typedef {import('~types/cherry').CherryUpdateContext} CherryUpdateContext */
 import {
   EditorView,
   keymap,
@@ -28,7 +29,15 @@ import {
   rectangularSelection,
   dropCursor,
 } from '@codemirror/view';
-import { EditorState, StateEffect, StateField, EditorSelection, Transaction, Compartment } from '@codemirror/state';
+import {
+  Annotation,
+  EditorState,
+  StateEffect,
+  StateField,
+  EditorSelection,
+  Transaction,
+  Compartment,
+} from '@codemirror/state';
 import { markdown } from '@codemirror/lang-markdown';
 import { search, searchKeymap, SearchQuery } from '@codemirror/search';
 import {
@@ -53,6 +62,8 @@ import { base64Reg, imgDrawioXmlReg, createUrlReg, getCodeBlockRule } from './ut
 import { addEvent, removeEvent } from './utils/event';
 import { handleNewlineIndentList } from './utils/autoindent';
 import diff from 'fast-diff';
+
+const cherryUpdateContextAnnotation = Annotation.define();
 
 /**
  * 自定义语法高亮器 - 将 Lezer tags 映射为 cm-* 类名
@@ -443,6 +454,15 @@ class CM6Adapter {
    */
   getSelections() {
     return this.view.state.selection.ranges.map((range) => this.view.state.doc.sliceString(range.from, range.to));
+  }
+
+  /**
+   * 获取主选区文本（兼容旧版自定义菜单直接调用 editor.editor.getSelection() 的写法）
+   * @returns {string}
+   */
+  getSelection() {
+    const { from, to } = this.view.state.selection.main;
+    return this.view.state.doc.sliceString(from, to);
   }
 
   /**
@@ -2061,6 +2081,7 @@ export default class Editor {
                   from: fromA,
                   to: toA,
                   origin,
+                  updateContext: tr.annotation(cherryUpdateContextAnnotation),
                   _cm6: { transaction: tr, update },
                 };
                 adapter.emit('change', changeEvent);
@@ -2179,8 +2200,8 @@ export default class Editor {
       this.$cherry.$event.emit('focus', { evt, cherry: this.$cherry });
     });
 
-    editor.on('change', () => {
-      this.options.onChange(null, editor);
+    editor.on('change', (changeEvent) => {
+      this.options.onChange(/** @type {import('~types/editor').CherryEditorChangeEvent} */ (changeEvent), editor);
       this.dealSpecialWords();
       if (this.options.autoSave2Textarea) {
         textArea.value = editor.view.state.doc.toString();
@@ -2523,13 +2544,14 @@ export default class Editor {
    * 设置编辑器值
    * @param {string} value 新内容
    * @param {boolean} [keepCursor=false] 是否保持光标位置
+   * @param {CherryUpdateContext} [updateContext] 更新来源和版本
    *
    * 协作场景说明：
    *  - keepCursor 为 true 时，会基于 fast-diff 计算新旧内容之间的最小变更集，
    *    并通过 EditorView.dispatch({ changes }) 让 CodeMirror 6 自身的 ChangeSet
    *    机制自动映射当前 selection（包括多光标/选区端点）。
    */
-  setValue(value = '', keepCursor = false) {
+  setValue(value = '', keepCursor = false, updateContext) {
     if (!this.editor) {
       return;
     }
@@ -2541,6 +2563,7 @@ export default class Editor {
           to: this.editor.state.doc.length,
           insert: value,
         },
+        annotations: updateContext ? cherryUpdateContextAnnotation.of(updateContext) : undefined,
       });
       return;
     }
@@ -2561,7 +2584,10 @@ export default class Editor {
     }
 
     // 不指定 selection，CodeMirror 会基于 changes 自动映射当前光标/选区
-    this.editor.dispatch({ changes });
+    this.editor.dispatch({
+      changes,
+      annotations: updateContext ? cherryUpdateContextAnnotation.of(updateContext) : undefined,
+    });
 
     this.dealSpecialWords();
     // this.editor.scrollDOM.scrollTop = currentScrollTop;

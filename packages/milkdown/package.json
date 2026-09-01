@@ -1,0 +1,98 @@
+{
+  "name": "@cherry-markdown/milkdown",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "WYSIWYG Milkdown editor for Cherry Markdown",
+  "keywords": [
+    "cherry-markdown",
+    "markdown",
+    "milkdown",
+    "prosemirror",
+    "wysiwyg"
+  ],
+  "license": "Apache-2.0",
+  "author": "Cherry Oteam",
+  "homepage": "https://github.com/Tencent/cherry-markdown#readme",
+  "bugs": {
+    "url": "https://github.com/Tencent/cherry-markdown/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tencent/cherry-markdown.git",
+    "directory": "packages/milkdown"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "style": "./styles.css",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./styles.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "styles.css",
+    "README.md",
+    "README.CN.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "./styles.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rimraf ./dist && tsc --project tsconfig.build.json",
+    "build:demo": "yarn workspace cherry-markdown build && yarn build && node ./scripts/build-demo.mjs",
+    "build:types": "tsc --project tsconfig.build.json",
+    "clean": "rimraf ./dist",
+    "dev:demo": "vite --config vite.demo.config.mjs",
+    "preview:demo": "vite preview --config vite.demo.config.mjs",
+    "test": "yarn workspace cherry-markdown build:engine && vitest run --config vitest.config.ts",
+    "test:e2e": "playwright test --config playwright.config.ts",
+    "test:consumer": "yarn workspace cherry-markdown build && yarn build && node ./scripts/verify-consumer.mjs",
+    "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project examples/react/tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "@milkdown/kit": "^7.21.3",
+    "cherry-markdown": "^0.11.9",
+    "mathlive": "^0.110.0",
+    "mermaid": "^11.14.0"
+  },
+  "peerDependenciesMeta": {
+    "mermaid": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@milkdown/kit": "^7.21.3",
+    "@playwright/test": "^1.62.1",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^6.0.5",
+    "cherry-markdown": "*",
+    "echarts": "^6.0.0",
+    "mathlive": "^0.110.0",
+    "mermaid": "^11.14.0",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "rimraf": "^3.0.2",
+    "vite": "^8.2.1"
+  },
+  "dependencies": {
+    "prismjs": "^1.24.1",
+    "remark-math": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=22",
+    "yarn": ">=1.22.18"
+  }
+}

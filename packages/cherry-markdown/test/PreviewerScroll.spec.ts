@@ -145,6 +145,40 @@ describe('Previewer scroll synchronization', () => {
     expect(scrollToLineNum).not.toHaveBeenCalled();
   });
 
+  it('lets an active preview editing bridge own scroll synchronization', () => {
+    const { previewer, previewerDom } = createPreviewer();
+    const scrollToLineNum = vi.fn();
+    const handleScroll = vi.fn(() => true);
+    Reflect.set(previewer, 'editor', { scrollToLineNum });
+    Reflect.set(previewer, 'editingBridge', { handleScroll });
+    defineDimension(previewerDom, 'offsetHeight', 100);
+    defineDimension(previewerDom, 'scrollHeight', 1000);
+    previewerDom.scrollTop = 100;
+    previewer.bindScroll();
+
+    previewerDom.dispatchEvent(new Event('scroll'));
+
+    expect(handleScroll).toHaveBeenCalledWith(previewerDom);
+    expect(scrollToLineNum).not.toHaveBeenCalled();
+  });
+
+  it('lets an active preview editing bridge cancel source-driven preview animation', () => {
+    const cancelAnimationFrame = vi.fn();
+    vi.stubGlobal('cancelAnimationFrame', cancelAnimationFrame);
+    const { previewer } = createPreviewer();
+    const handleEditorScroll = vi.fn(() => true);
+    Reflect.set(previewer, 'editingBridge', { handleEditorScroll });
+    Reflect.set(previewer, 'animation', { timer: 42, destinationTop: 120 });
+    Reflect.set(previewer, 'disableScrollListener', true);
+
+    previewer.scrollToLineNum(12, 0.5);
+
+    expect(handleEditorScroll).toHaveBeenCalledWith(12, 0.5);
+    expect(cancelAnimationFrame).toHaveBeenCalledWith(42);
+    expect(Reflect.get(previewer, 'animation').timer).toBe(0);
+    expect(Reflect.get(previewer, 'disableScrollListener')).toBe(false);
+  });
+
   it('cancels active animation on wheel and removes the scroll listener', () => {
     const cancelAnimationFrame = vi.fn();
     vi.stubGlobal('cancelAnimationFrame', cancelAnimationFrame);
