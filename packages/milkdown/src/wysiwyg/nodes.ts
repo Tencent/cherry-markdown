@@ -353,6 +353,93 @@ export const cherryLinkTargetSchema = leafSchema('cherry_link_target', 'cherryLi
   target: sourceAttr(),
 });
 
+/** Cherry's footnote reference DOM is a numbered link, not Milkdown's plain
+ * `sup[data-type="footnote_reference"]`. Keeping it as an atom preserves the
+ * native visual contract while still allowing the surrounding heading text to
+ * remain editable. */
+export const cherryFootnoteReferenceSchema = $nodeSchema('cherry_footnote_reference', () => ({
+  group: 'inline',
+  inline: true,
+  atom: true,
+  selectable: true,
+  attrs: {
+    label: sourceAttr(),
+    number: { default: 0, validate: 'number' as const },
+  },
+  parseDOM: [
+    {
+      tag: 'sup.cherry-footnote-number',
+      getAttrs: (dom: HTMLElement) => {
+        const link = dom.querySelector('a');
+        return {
+          label: link?.getAttribute('data-key') ?? dom.dataset.label ?? '',
+          number: Number(link?.getAttribute('data-index') ?? dom.dataset.number ?? 0),
+        };
+      },
+    },
+  ],
+  toDOM: (node) => {
+    const label = String(node.attrs.label ?? '');
+    const number = Number(node.attrs.number ?? 0);
+    const href = `#fn:${number}`;
+    return [
+      'sup',
+      { class: 'cherry-footnote-number', 'data-label': label, 'data-number': String(number) },
+      [
+        'a',
+        {
+          href,
+          id: `fnref:${number}`,
+          title: label,
+          'data-index': String(number),
+          'data-key': label,
+          class: 'footnote',
+          contenteditable: 'false',
+        },
+        `[${number}]`,
+      ],
+    ];
+  },
+  parseMarkdown: {
+    match: (node) => node.type === 'cherryFootnoteReference',
+    runner: (state, node, type) =>
+      state.addNode(type, {
+        label: String(node.label ?? ''),
+        number: Number(node.number ?? 0),
+      }),
+  },
+  toMarkdown: {
+    match: (node) => node.type.name === 'cherry_footnote_reference',
+    runner: (state, node) =>
+      state.addNode('footnoteReference', undefined, undefined, {
+        label: String(node.attrs.label ?? ''),
+        identifier: String(node.attrs.label ?? ''),
+      }),
+  },
+}));
+
+export const cherryFootnoteNavigationPlugin = $prose(
+  () =>
+    new Plugin({
+      view: (view) => {
+        const onClick = (event: MouseEvent) => {
+          const target = event.target instanceof Element ? event.target.closest('a.footnote') : null;
+          if (!(target instanceof HTMLAnchorElement)) return;
+          const label = target.dataset.key ?? '';
+          const definition = [...view.dom.querySelectorAll<HTMLElement>('[data-type="footnote_definition"]')].find(
+            (element) => element.dataset.label === label,
+          );
+          if (!definition) return;
+          event.preventDefault();
+          event.stopPropagation();
+          definition.scrollIntoView({ block: 'nearest' });
+        };
+        view.dom.addEventListener('click', onClick, true);
+        return { destroy: () => view.dom.removeEventListener('click', onClick, true) };
+      },
+    }),
+);
+
 class LinkTargetView implements NodeView {
   dom: HTMLElement;
   private node: ProseNode;
@@ -1589,6 +1676,7 @@ export const cherryStructureSchemas = [
   cherryHtmlInlineSchema,
   cherryEmojiSchema,
   cherryLinkTargetSchema,
+  cherryFootnoteReferenceSchema,
 ];
 
 export const cherryStructureViews = [
@@ -1605,6 +1693,7 @@ export const cherryStructureViews = [
   cherryHtmlInlineView,
   cherryEmojiView,
   cherryLinkTargetView,
+  cherryFootnoteNavigationPlugin,
   cherryLinkTargetClickPlugin,
   cherryTocRefreshPlugin,
 ];

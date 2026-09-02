@@ -1144,6 +1144,11 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
     { id: 'panel', native: '#native .cherry-panel', milkdown: '#milkdown .cherry-panel' },
     { id: 'detail', native: '#native details', milkdown: '#milkdown .cherry-detail' },
     {
+      id: 'footnote-reference',
+      native: '#native .cherry-footnote-number',
+      milkdown: '#milkdown .cherry-footnote-number',
+    },
+    {
       id: 'code-block',
       native: '#native [data-type="codeBlock"]',
       milkdown: '#milkdown .cherry-milkdown-code-block',

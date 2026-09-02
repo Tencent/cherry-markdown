@@ -564,6 +564,75 @@ function transformInline(node: MarkdownNode, source: string, root = false) {
   node.children = next;
 }
 
+/**
+ * The full Cherry manual is split into independently parsed segments so that
+ * diagrams and other native blocks can stay opaque. Milkdown's GFM parser
+ * needs the footnote definitions in the same parse operation as their
+ * references; when a segment is parsed recursively it can therefore return a
+ * literal `[^label]` text node even though the original document had a valid
+ * footnote AST node. Normalize that boundary here, after all segment merging,
+ * so a parser quirk cannot leak into the editor document.
+ */
+function normalizeFootnoteReferences(tree: MarkdownNode, source: string) {
+  const numbers = new Map<string, number>();
+  for (const match of source.matchAll(/\[\^([^\]\n]+)\](?!:)/g)) {
+    const label = String(match[1] ?? '');
+    if (!numbers.has(label)) numbers.set(label, numbers.size + 1);
+  }
+  if (!numbers.size) return;
+
+  const skipped = new Set([
+    'code',
+    'inlineCode',
+    'cherryDiagram',
+    'cherryNativeBlock',
+    'cherryHtmlBlock',
+    'cherryHtmlInline',
+    'cherryTableChart',
+  ]);
+  const expandText = (node: MarkdownNode): MarkdownNode[] => {
+    const value = String(node.value ?? '');
+    const parts: MarkdownNode[] = [];
+    let cursor = 0;
+    const pattern = /\[\^([^\]\n]+)\](?!:)/g;
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(value))) {
+      const label = String(match[1] ?? '');
+      const number = numbers.get(label);
+      if (!number) continue;
+      if (match.index > cursor) parts.push({ ...node, value: value.slice(cursor, match.index) });
+      parts.push({
+        type: 'cherryFootnoteReference',
+        label,
+        number,
+      });
+      cursor = match.index + match[0].length;
+    }
+    if (!parts.length) return [node];
+    if (cursor < value.length) parts.push({ ...node, value: value.slice(cursor) });
+    return parts;
+  };
+  const visit = (node: MarkdownNode): MarkdownNode => {
+    if (node.type === 'footnoteReference' || node.type === 'cherryFootnoteReference') {
+      const label = String(node.label ?? node.identifier ?? '');
+      return {
+        ...node,
+        type: 'cherryFootnoteReference',
+        label,
+        number: numbers.get(label) ?? Number(node.number ?? 0),
+      };
+    }
+    if (node.type === 'text') return expandText(node)[0] ?? node;
+    if (skipped.has(node.type)) return node;
+    if (!node.children) return node;
+    const children = node.children.flatMap((child) => (child.type === 'text' ? expandText(child) : [visit(child)]));
+    return { ...node, children };
+  };
+  if (tree.children) {
+    tree.children = tree.children.flatMap((child) => (child.type === 'text' ? expandText(child) : [visit(child)]));
+  }
+}
+
 export function transformCherryWysiwygTree(
   tree: MarkdownNode,
   source: string,
@@ -572,6 +641,7 @@ export function transformCherryWysiwygTree(
 ) {
   replaceRootBlocks(tree, source, parse, options.supplementalDefinitions ?? true);
   replaceTableCharts(tree, source);
+  normalizeFootnoteReferences(tree, source);
   transformInline(tree, source, true);
   return tree;
 }
