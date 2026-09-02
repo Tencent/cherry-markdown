@@ -109,7 +109,7 @@ yarn build:demo
 yarn preview:demo
 ```
 
-The user-facing demo is a minimal React + Vite application whose entry is `examples/react/App.tsx`; `index.html` only contains the root element required by Vite. It reuses the root demo's layout, configuration, toolbar, theme, ECharts plugin, and full Markdown manual. Its only integration difference is `extensions: [milkdown()]`, with the Cherry instance destroyed during React unmount.
+The user-facing demo is a minimal React + Vite application whose entry is `examples/react/App.tsx`; `index.html` only contains the root element required by Vite. It reuses the root demo's layout, configuration, toolbar, theme, ECharts plugin, and full Markdown manual. Its only integration difference is `extensions: [milkdown()]`, with the Cherry instance destroyed during React unmount. Open `index.html?mode=previewOnly` for the toolbar-free preview-only mode; Cherry's existing `editor.defaultModel` and `toolbars` configuration select the mode, so there is no second React editor.
 
 ## Reliability checks
 

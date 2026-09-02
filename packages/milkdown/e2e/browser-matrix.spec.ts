@@ -5,11 +5,11 @@ test('core preview editing remains synchronized across Firefox and WebKit', asyn
   // smoke tests use the same React/Cherry integration on the lightweight
   // preview-only route so Firefox/WebKit are not blocked by the manual's
   // hundreds of lazy diagram assets.
-  await page.goto('/preview-only.html?matrix=1', { waitUntil: 'commit' }).catch(async (error) => {
+  await page.goto('/index.html?mode=previewOnly&matrix=1', { waitUntil: 'commit' }).catch(async (error) => {
     // Firefox can report a same-document second navigation while the React
     // entry is being committed. Continue only when the requested document is
     // already active; any other navigation failure remains a hard error.
-    if (!page.url().includes('/preview-only.html')) throw error;
+    if (!page.url().includes('mode=previewOnly')) throw error;
   });
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   await page.evaluate(() => {

@@ -4,8 +4,7 @@ import { PNG } from 'pngjs';
 import { cherryCompatibilityCases } from '../test/fixtures/compatibility';
 
 const demoPath = '/index.html';
-const previewOnlyPath = '/preview-only.html';
-const visualPath = '/visual.html';
+const previewOnlyPath = '/index.html?mode=previewOnly';
 const mathJaxJsDelivrUrl = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
 const mathJaxUnpkgUrl = 'https://unpkg.com/mathjax@3.2.2/es5/tex-svg.js';
 
@@ -16,6 +15,86 @@ type BrowserState = {
 };
 
 const evidenceByPage = new WeakMap<Page, { actions: string[]; errors: string[] }>();
+
+const visualFixture = [
+  '# Visual contract',
+  '',
+  'Paragraph with **bold**, *italic*, `inline code`, ==highlight== and !!#d54941 color!!.',
+  '',
+  '- [ ] todo',
+  '- [x] done',
+  '',
+  '> Native Cherry blockquote',
+  '',
+  '| Name | Value |',
+  '| --- | ---: |',
+  '| Cherry | 1 |',
+  '| Milkdown | 2 |',
+  '',
+  '| :line:{"title":"Trend"} | Jan | Feb |',
+  '| --- | ---: | ---: |',
+  '| Sales | 1 | 2 |',
+  '',
+  ':::warning Notice',
+  'Panel body.',
+  ':::',
+  '',
+  '## Footnote[^note]',
+  '',
+  '[^note]: Native footnote reference.',
+  '',
+  '+++ More abilities',
+  'Detail body.',
+  '+++',
+  '',
+  '```js',
+  'const visual = true;',
+  '```',
+].join('\n');
+
+async function mountVisualReference(page: Page) {
+  await page.goto(previewOnlyPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.evaluate((value) => {
+    const scope = window as typeof window & {
+      Cherry: new (options: Record<string, unknown>) => { destroy(): void };
+      cherry: { setValue(markdown: string): void };
+    };
+    const milkdownRoot = document.querySelector('#markdown');
+    if (!milkdownRoot) throw new Error('Missing React demo root');
+    scope.cherry.setValue(value);
+
+    const style = document.createElement('style');
+    style.dataset.visualReference = 'true';
+    style.textContent = `
+      body { display: flex; margin: 0; background: #fff; }
+      #markdown.preview-only-page, #visual-native {
+        box-sizing: border-box; flex: 0 0 720px; width: 720px; height: 920px;
+        overflow: hidden; margin: 0;
+      }
+      #markdown.preview-only-page .cherry, #visual-native .cherry { height: 100%; }
+      #markdown.preview-only-page .cherry-previewer, #visual-native .cherry-previewer {
+        width: 100% !important; height: 100% !important; padding: 24px;
+      }
+      #markdown.preview-only-page .cherry-toolbar, #markdown.preview-only-page .cherry-editor,
+      #visual-native .cherry-toolbar, #visual-native .cherry-editor { display: none !important; }
+    `;
+    document.head.append(style);
+
+    const nativeRoot = document.createElement('div');
+    nativeRoot.id = 'visual-native';
+    document.body.append(nativeRoot);
+    const nativeCherry = new scope.Cherry({
+      el: nativeRoot,
+      value,
+      editor: { defaultModel: 'previewOnly', height: '920px' },
+      toolbars: { toolbar: false, toolbarRight: false, sidebar: false },
+    });
+    (window as typeof window & { visualNativeCherry?: { destroy(): void } }).visualNativeCherry = nativeCherry;
+  }, visualFixture);
+  await page.waitForFunction(() => Boolean(document.querySelector('#markdown .ProseMirror h1')));
+  await page.waitForFunction(() => Boolean(document.querySelector('#visual-native .cherry-previewer h1')));
+}
 
 function captureBrowserErrors(page: Page, actions: string[] = []) {
   const errors: string[] = [];
@@ -1127,31 +1206,30 @@ test('focusing any Cherry link does not move it or rewrite ProseMirror DOM', asy
 test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', async ({ page }, testInfo) => {
   const errors = captureBrowserErrors(page);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto(visualPath);
-  await page.evaluate(() => (window as typeof window & { visualReady: Promise<void> }).visualReady);
+  await mountVisualReference(page);
 
   const components = [
-    { id: 'heading', native: '#native .cherry-previewer h1', milkdown: '#milkdown .ProseMirror h1' },
-    { id: 'paragraph', native: '#native .cherry-previewer > p', milkdown: '#milkdown .ProseMirror > p' },
-    { id: 'task-list', native: '#native .check-list-item', milkdown: '#milkdown .ProseMirror li[data-item-type="task"]' },
-    { id: 'blockquote', native: '#native blockquote', milkdown: '#milkdown blockquote' },
-    { id: 'table', native: '#native table', milkdown: '#milkdown .milkdown-table-block table.children' },
+    { id: 'heading', native: '#visual-native .cherry-previewer h1', milkdown: '#markdown .ProseMirror h1' },
+    { id: 'paragraph', native: '#visual-native .cherry-previewer > p', milkdown: '#markdown .ProseMirror > p' },
+    { id: 'task-list', native: '#visual-native .check-list-item', milkdown: '#markdown .ProseMirror li[data-item-type="task"]' },
+    { id: 'blockquote', native: '#visual-native blockquote', milkdown: '#markdown blockquote' },
+    { id: 'table', native: '#visual-native table', milkdown: '#markdown .milkdown-table-block table.children' },
     {
       id: 'table-chart',
-      native: '#native .cherry-table-wrapper:has(.cherry-echarts-wrapper)',
-      milkdown: '#milkdown .cherry-table-chart',
+      native: '#visual-native .cherry-table-wrapper:has(.cherry-echarts-wrapper)',
+      milkdown: '#markdown .cherry-table-chart',
     },
-    { id: 'panel', native: '#native .cherry-panel', milkdown: '#milkdown .cherry-panel' },
-    { id: 'detail', native: '#native details', milkdown: '#milkdown .cherry-detail' },
+    { id: 'panel', native: '#visual-native .cherry-panel', milkdown: '#markdown .cherry-panel' },
+    { id: 'detail', native: '#visual-native details', milkdown: '#markdown .cherry-detail' },
     {
       id: 'footnote-reference',
-      native: '#native .cherry-footnote-number',
-      milkdown: '#milkdown .cherry-footnote-number',
+      native: '#visual-native .cherry-footnote-number',
+      milkdown: '#markdown .cherry-footnote-number',
     },
     {
       id: 'code-block',
-      native: '#native [data-type="codeBlock"]',
-      milkdown: '#milkdown .cherry-milkdown-code-block',
+      native: '#visual-native [data-type="codeBlock"]',
+      milkdown: '#markdown .cherry-milkdown-code-block',
     },
   ];
   const layout: Array<{
@@ -1225,16 +1303,16 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
       'border-top-color',
     ];
     return [
-      ['h1', '#native .cherry-previewer h1', '#milkdown .ProseMirror h1'],
-      ['p', '#native .cherry-previewer > p', '#milkdown .ProseMirror > p'],
-      ['blockquote', '#native blockquote', '#milkdown blockquote'],
-      ['table', '#native table', '#milkdown .milkdown-table-block table.children'],
+      ['h1', '#visual-native .cherry-previewer h1', '#markdown .ProseMirror h1'],
+      ['p', '#visual-native .cherry-previewer > p', '#markdown .ProseMirror > p'],
+      ['blockquote', '#visual-native blockquote', '#markdown blockquote'],
+      ['table', '#visual-native table', '#markdown .milkdown-table-block table.children'],
       [
         'pre',
-        '#native [data-type="codeBlock"] > .custom-codeblock-wrapper > pre',
-        '#milkdown .cherry-milkdown-code-block > pre',
+        '#visual-native [data-type="codeBlock"] > .custom-codeblock-wrapper > pre',
+        '#markdown .cherry-milkdown-code-block > pre',
       ],
-      ['task-icon', '#native .check-list-item .ch-icon', '#milkdown .ProseMirror li[data-item-type="task"] .ch-icon'],
+      ['task-icon', '#visual-native .check-list-item .ch-icon', '#markdown .ProseMirror li[data-item-type="task"] .ch-icon'],
     ].map(([selector, nativeSelector, milkdownSelector]) => {
       const native = document.querySelector(nativeSelector);
       const milkdown = document.querySelector(milkdownSelector);
@@ -1257,6 +1335,11 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
     expect(Math.abs(milkdownGap - nativeGap), `${previous.id} -> ${current.id} gap`).toBeLessThanOrEqual(1);
   }
   expect(errors).toEqual([]);
+  await page.evaluate(() => {
+    (window as typeof window & { visualNativeCherry?: { destroy(): void } }).visualNativeCherry?.destroy();
+    document.querySelector('#visual-native')?.remove();
+    document.querySelector('style[data-visual-reference]')?.remove();
+  });
 });
 
 test('Milkdown keeps Cherry heading and ruby semantics without truncation', async ({ page }) => {
@@ -1567,8 +1650,8 @@ test('repeated mount and destroy returns DOM and heap resources to the warmed ba
   test.setTimeout(90_000);
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
-  await page.goto(visualPath);
-  await page.evaluate(() => (window as typeof window & { visualReady: Promise<void> }).visualReady);
+  await page.goto(previewOnlyPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   const rounds = Number(process.env.MILKDOWN_STRESS_ROUNDS ?? 10);
 
   const readHeap = async () => {

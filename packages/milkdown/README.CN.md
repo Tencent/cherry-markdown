@@ -109,7 +109,7 @@ yarn build:demo
 yarn preview:demo
 ```
 
-用户可见 demo 是一个最小 React + Vite 工程，入口位于 `examples/react/App.tsx`；`index.html` 只保留 Vite 所需的根节点。它复用仓库根 demo 的布局、配置、工具栏、主题、ECharts 插件和整份 Markdown 手册，业务接入上的唯一差异是增加 `extensions: [milkdown()]`，并在 React 卸载时销毁 Cherry 实例。
+用户可见 demo 是一个最小 React + Vite 工程，入口位于 `examples/react/App.tsx`；`index.html` 只保留 Vite 所需的根节点。它复用仓库根 demo 的布局、配置、工具栏、主题、ECharts 插件和整份 Markdown 手册，业务接入上的唯一差异是增加 `extensions: [milkdown()]`，并在 React 卸载时销毁 Cherry 实例。纯预览可直接打开 `index.html?mode=previewOnly`，仍由 Cherry 的 `editor.defaultModel` 和 `toolbars` 配置决定，不存在第二套 React 编辑器。
 
 ## 可靠性验证
 

@@ -16,7 +16,9 @@ declare global {
 
 export default function App() {
   const editorRoot = useRef<HTMLDivElement>(null);
-  const previewOnly = window.location.pathname.endsWith('/preview-only.html');
+  // One React demo serves both Cherry layouts. The mode is selected through
+  // Cherry's existing configuration, not by mounting a second editor/page.
+  const previewOnly = new URLSearchParams(window.location.search).get('mode') === 'previewOnly';
 
   useEffect(() => {
     let cancelled = false;
