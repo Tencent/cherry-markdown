@@ -199,35 +199,13 @@
 .cherry-wysiwyg-size,
 .cherry-wysiwyg-sub,
 .cherry-wysiwyg-sup,
-.cherry-wysiwyg-underline,
-.cherry-wysiwyg-ruby {
+.cherry-wysiwyg-underline {
   border-radius: 2px;
 }
 
 .cherry-wysiwyg-underline {
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-.cherry-wysiwyg-ruby {
-  position: relative;
-  display: inline-block;
-  margin-top: 0.8em;
-}
-
-.cherry-wysiwyg-ruby::before {
-  position: absolute;
-  right: 0;
-  bottom: 88%;
-  left: 0;
-  overflow: hidden;
-  color: var(--cherry-milkdown-muted);
-  font-size: 0.58em;
-  line-height: 1;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  content: attr(data-ruby);
 }
 
 .cherry-math {

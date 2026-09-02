@@ -758,6 +758,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(bridge?.ownsPreviewElement?.(image!, 'image')).toBe(true);
     expect(bridge?.updatePreviewElement?.(image!, { kind: 'image', width: '160px', height: '90px' })).toBe(true);
     await vi.waitFor(() => expect(markdown).toContain('![uploaded#160px#90px](https://example.com/image.png)'));
+    expect(bridge?.resolvePreviewElement?.('image')).toBeInstanceOf(HTMLImageElement);
     expect(bridge?.updatePreviewElement?.(image!, { kind: 'image', type: 'border' })).toBe(true);
     await vi.waitFor(() => expect(markdown).toContain('![uploaded#160px#90px#B](https://example.com/image.png)'));
     expect(bridge?.updatePreviewElement?.(image!, { kind: 'image', type: 'center' })).toBe(true);
@@ -947,6 +948,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     }
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(instance.getMarkdown()).toContain('B-->C');
+    expect(sourcePanel?.hidden).toBe(false);
   });
 
   it('updates Mermaid size and alignment through the preview editing bridge', async () => {

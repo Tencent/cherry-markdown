@@ -74,6 +74,10 @@ export interface CherryPreviewerHost {
   clearContentRenderer(renderer?: CherryPreviewContentRenderer): boolean;
   setEditingBridge?(bridge: CherryPreviewEditingBridge): void;
   clearEditingBridge?(bridge?: CherryPreviewEditingBridge): boolean;
+  /** Mounts the native Cherry selection bubble before the first selection. */
+  ensureEditingBubble?(): unknown;
+  showEditingBubble?(rect: { top: number; bottom: number; left: number; right: number }): boolean;
+  hideEditingBubble?(): void;
 }
 
 export interface CherryToolbarCommand {
@@ -112,12 +116,16 @@ export interface CherryPreviewEditingBridge {
   ownsPreviewElement?(target: Element, kind: CherryPreviewElementKind): boolean;
   /** Apply an existing Cherry preview control to an element owned by this editing surface. */
   updatePreviewElement?(target: Element, change: CherryPreviewElementChange): boolean;
+  /** Resolve the currently selected element after a preview transaction replaced its DOM node. */
+  resolvePreviewElement?(kind: CherryPreviewElementKind): Element | null;
   destroy?(): void;
 }
 
 /** Minimal public surface used to connect Milkdown to an existing Cherry previewer. */
 export interface CherryMilkdownHost {
   engine: CherryEngineLike;
+  /** Native source bubble, hidden while the preview owns focus. */
+  bubble?: { hideBubble?(): void };
   /** Cherry's existing source editor. Used by the preview bridge for scroll synchronization. */
   editor?: {
     scrollToLineNum(lineNum: number | null, endLine?: number, percent?: number): void;

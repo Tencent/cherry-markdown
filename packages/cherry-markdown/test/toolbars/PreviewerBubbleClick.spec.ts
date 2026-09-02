@@ -57,4 +57,23 @@ describe('toolbars/PreviewerBubble draw.io click integration', () => {
 
     expect(begin).toHaveBeenCalledWith(image);
   });
+
+  it('reserves bridge-owned image clicks for preview editing', () => {
+    const { bubble, previewer, previewerDom, cherry } = createPreviewerBubble();
+    const onClickPreview = vi.fn();
+    Reflect.set(cherry.options, 'callback', { onClickPreview });
+    Reflect.set(previewer, 'editingBridge', {
+      isActive: () => true,
+      ownsPreviewElement: (target: Element, kind: string) => target instanceof HTMLImageElement && kind === 'image',
+      updatePreviewElement: vi.fn(),
+    });
+    const showImageTools = vi.spyOn(bubble, '$showImgPreviewerBubbles').mockImplementation(() => undefined);
+    const image = document.createElement('img');
+    previewerDom.appendChild(image);
+
+    image.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(onClickPreview).not.toHaveBeenCalled();
+    expect(showImageTools).toHaveBeenCalledWith(image, expect.any(MouseEvent));
+  });
 });

@@ -43,7 +43,10 @@ export async function attachCherryMilkdownPreview(
     instance = undefined;
     instanceRoot = container;
     container.replaceChildren();
-    container.classList.add('cherry-milkdown--previewer');
+    // Cherry's published stylesheet scopes all typography and block spacing
+    // under `.cherry-markdown`. Reuse that contract on the Milkdown root
+    // instead of maintaining a second, subtly divergent style system.
+    container.classList.add('cherry-markdown', 'cherry-milkdown--previewer');
     const editor = await createCherryMilkdown({
       ...options,
       root: container,
@@ -72,6 +75,9 @@ export async function attachCherryMilkdownPreview(
     instance = editor;
     editingBridge = createCherryEditingBridge(cherry, editor);
     previewer.setEditingBridge?.(editingBridge);
+    // Construct the native Bubble eagerly so the first text selection does
+    // not synchronously build menus and reflow the preview surface.
+    previewer.ensureEditingBubble?.();
     if (editor.getMarkdown() !== latestMarkdown) editor.setMarkdown(latestMarkdown, { emit: false });
   };
 
@@ -112,7 +118,7 @@ export async function attachCherryMilkdownPreview(
           previewer.clearEditingBridge?.(editingBridge);
           editingBridge?.destroy?.();
           editingBridge = undefined;
-          instanceRoot?.classList.remove('cherry-milkdown--previewer');
+          instanceRoot?.classList.remove('cherry-markdown', 'cherry-milkdown--previewer');
           instanceRoot = undefined;
         })();
       }
