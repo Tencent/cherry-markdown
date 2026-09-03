@@ -1,34 +1,72 @@
 /**
- * Regression test: two fresh engine instances must render the same document
- * to byte-identical HTML.
+ * Regression test: fresh Engine instances must render the same document to
+ * byte-identical HTML (cross-instance determinism).
  *
- * Motivation: paragraph-level cache key prefixes (~~C{n}) come from a
- * module-level counter shared across instances. On documents where a block's
- * hashed content still contains another hook's placeholder token, `data-sign`
- * ends up instance-dependent, so fresh instances produce slightly different
- * HTML (previously only stable within one instance).
+ * Root cause: paragraph cache key prefixes (`~~C{n}`) come from a module-level
+ * counter shared across instances, so different instances number their
+ * placeholders differently (`~~C2` vs `~~C16`). When a paragraph's markdown is
+ * hashed for `data-sign` while it still contains another hook's `~~C{n}`
+ * placeholder (e.g. an unterminated block-math region followed by an inline
+ * formula), the hash — and therefore the output `data-sign` — drifts per
+ * instance.
+ *
+ * Minimal trigger (verified): "$$\n行内公式： $e=mc^2$"
  */
 import CherryEngine from '../../src/index.engine.core';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-function richMarkdown() {
-  // 文档需同时包含段落级占位与行内公式，触发“hash 内容含另一 hook 占位符”路径
+const MINIMAL_TRIGGER = '$$\n行内公式： $e=mc^2$';
+
+function exampleMarkdown() {
   return readFileSync(resolve(process.cwd(), 'test/example.md'), 'utf8');
 }
 
+function plain(n) {
+  return Array.from({ length: n }, (_, i) => `P${i}: normal **bold ${i}** *em* and [link ${i}](https://e.com/${i}).`).join('\n\n');
+}
+
+// 一组覆盖常见语法形态的文档，用于通用确定性断言
+const corpus = [
+  MINIMAL_TRIGGER,
+  plain(8),
+  '<div data-x="1"><b>bold</b></div>\n\nplain *em* after html',
+  '| a | b |\n| - | - |\n| 1 | 2 |\n\nrow text',
+  '```js\nconst x = 1;\n```\n\npara after code',
+  '# Heading **b**\n\n- li1\n- li2\n\n> quote',
+];
+
+function render(md) {
+  return new CherryEngine().makeHtml(md);
+}
+
 describe('Engine cross-instance determinism', () => {
-  it('two fresh engines produce byte-identical HTML for the same document', () => {
-    const md = richMarkdown();
-    const htmlA = new CherryEngine().makeHtml(md);
-    const htmlB = new CherryEngine().makeHtml(md);
-    expect(htmlA).toBe(htmlB);
+  it('two fresh engines agree on the minimal trigger', () => {
+    expect(render(MINIMAL_TRIGGER)).toBe(render(MINIMAL_TRIGGER));
   });
 
-  it('three fresh engines all agree (stability)', () => {
-    const md = richMarkdown();
-    const outs = [new CherryEngine().makeHtml(md), new CherryEngine().makeHtml(md), new CherryEngine().makeHtml(md)];
-    expect(outs[1]).toBe(outs[0]);
-    expect(outs[2]).toBe(outs[0]);
+  it('two fresh engines agree on the rich example document', () => {
+    const md = exampleMarkdown();
+    expect(render(md)).toBe(render(md));
+  });
+
+  it('three fresh engines all agree across a markdown corpus', () => {
+    for (const md of corpus) {
+      const out = [render(md), render(md), render(md)];
+      expect(out[1]).toBe(out[0]);
+      expect(out[2]).toBe(out[0]);
+    }
+  });
+
+  it('creating more engines later does not change an existing engine output', () => {
+    const md = exampleMarkdown();
+    const e1 = new CherryEngine();
+    const first = e1.makeHtml(md);
+    const e2 = new CherryEngine();
+    e2.makeHtml(md);
+    const e3 = new CherryEngine();
+    e3.makeHtml(MINIMAL_TRIGGER);
+    // 全局计数器在构造 e2/e3 时被归零，不应影响已存在的 e1
+    expect(e1.makeHtml(md)).toBe(first);
   });
 });
