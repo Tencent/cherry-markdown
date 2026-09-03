@@ -10,10 +10,11 @@
  */
 import CherryEngine from '../../src/index.engine.core';
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 function richMarkdown() {
   // 文档需同时包含段落级占位与行内公式，触发“hash 内容含另一 hook 占位符”路径
-  return readFileSync(new URL('../example.md', import.meta.url), 'utf8');
+  return readFileSync(resolve(process.cwd(), 'test/example.md'), 'utf8');
 }
 
 describe('Engine cross-instance determinism', () => {

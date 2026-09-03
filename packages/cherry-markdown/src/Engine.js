@@ -46,6 +46,8 @@ export default class Engine {
     });
     this.initMath(markdownParams);
     this.$configInit(markdownParams);
+    // 实例级确定性：内建段落 hook 每次从 ~~C0 开始编号，跨实例占位符一致
+    ParagraphBase.resetCacheCounter();
     this.hookCenter = new HookCenter(hooksConfig, markdownParams, cherry);
     this.hooks = this.hookCenter.getHookList();
     this.asyncRenderHandler = new AsyncRenderHandler(cherry);
