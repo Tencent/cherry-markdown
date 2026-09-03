@@ -12,32 +12,64 @@
  *
  * Minimal trigger (verified): "$$\n行内公式： $e=mc^2$"
  */
+import { describe, expect, it } from 'vite-plus/test';
 import CherryEngine from '../../src/index.engine.core';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import Engine from '../../src/Engine';
+
+type EngineOptions = ConstructorParameters<typeof CherryEngine>[0];
+
+function createEngine(options: EngineOptions = {}): Engine {
+  // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
+  return new CherryEngine(options);
+}
 
 const MINIMAL_TRIGGER = '$$\n行内公式： $e=mc^2$';
 
-function exampleMarkdown() {
-  return readFileSync(resolve(process.cwd(), 'test/example.md'), 'utf8');
+function richMarkdown() {
+  return [
+    '# Heading **bold**',
+    '',
+    'Plain paragraph with *italic* and `code` and [link](https://e.com).',
+    '',
+    '$$\n\\begin{aligned}\nE &= mc^2 \\\\\nF &= ma\n\\end{aligned}\n$$',
+    '',
+    '行内公式： $e=mc^2$',
+    '',
+    '| a | b |',
+    '| - | - |',
+    '| 1 | 2 |',
+    '',
+    '```js\nconst x = 1;\n```',
+    '',
+    '- li1',
+    '- li2',
+    '',
+    '> blockquote line',
+    '',
+    '<div data-x="1"><b>html</b></div>',
+    '',
+    // 追加最小触发形态（未闭合块级公式后接行内公式）
+    '$$\n行内公式： $e=mc^2$',
+  ].join('\n');
 }
 
-function plain(n) {
-  return Array.from({ length: n }, (_, i) => `P${i}: normal **bold ${i}** *em* and [link ${i}](https://e.com/${i}).`).join('\n\n');
+function plain(n: number) {
+  return Array.from({ length: n }, (_, i) => `P${i}: normal **bold ${i}** *em* and [link ${i}](https://e.com/${i}).`).join(
+    '\n\n',
+  );
 }
 
-// 一组覆盖常见语法形态的文档，用于通用确定性断言
 const corpus = [
   MINIMAL_TRIGGER,
+  richMarkdown(),
   plain(8),
-  '<div data-x="1"><b>bold</b></div>\n\nplain *em* after html',
   '| a | b |\n| - | - |\n| 1 | 2 |\n\nrow text',
   '```js\nconst x = 1;\n```\n\npara after code',
-  '# Heading **b**\n\n- li1\n- li2\n\n> quote',
+  '- li1\n- li2\n\n> quote',
 ];
 
-function render(md) {
-  return new CherryEngine().makeHtml(md);
+function render(md: string): string {
+  return createEngine().makeHtml(md);
 }
 
 describe('Engine cross-instance determinism', () => {
@@ -45,8 +77,8 @@ describe('Engine cross-instance determinism', () => {
     expect(render(MINIMAL_TRIGGER)).toBe(render(MINIMAL_TRIGGER));
   });
 
-  it('two fresh engines agree on the rich example document', () => {
-    const md = exampleMarkdown();
+  it('two fresh engines agree on the rich synthetic document', () => {
+    const md = richMarkdown();
     expect(render(md)).toBe(render(md));
   });
 
@@ -59,14 +91,12 @@ describe('Engine cross-instance determinism', () => {
   });
 
   it('creating more engines later does not change an existing engine output', () => {
-    const md = exampleMarkdown();
-    const e1 = new CherryEngine();
+    const md = richMarkdown();
+    const e1 = createEngine();
     const first = e1.makeHtml(md);
-    const e2 = new CherryEngine();
-    e2.makeHtml(md);
-    const e3 = new CherryEngine();
-    e3.makeHtml(MINIMAL_TRIGGER);
-    // 全局计数器在构造 e2/e3 时被归零，不应影响已存在的 e1
+    createEngine().makeHtml(md);
+    createEngine().makeHtml(MINIMAL_TRIGGER);
+    // 全局计数器在创建后续引擎时被归零，不应影响已存在的 e1
     expect(e1.makeHtml(md)).toBe(first);
   });
 });
