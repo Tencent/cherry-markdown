@@ -75,9 +75,6 @@ export async function attachCherryMilkdownPreview(
     instance = editor;
     editingBridge = createCherryEditingBridge(cherry, editor);
     previewer.setEditingBridge?.(editingBridge);
-    // Construct the native Bubble eagerly so the first text selection does
-    // not synchronously build menus and reflow the preview surface.
-    previewer.ensureEditingBubble?.();
     if (editor.getMarkdown() !== latestMarkdown) editor.setMarkdown(latestMarkdown, { emit: false });
   };
 

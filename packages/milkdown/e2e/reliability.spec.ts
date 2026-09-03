@@ -503,8 +503,7 @@ test('preview text selection uses the native Cherry Bubble and preserves the sel
         ?.getPreviewer?.().editingBridge,
     ),
   );
-  await expect(page.locator('.cherry-bubble--preview')).toHaveCount(1);
-  await expect(page.locator('.cherry-bubble--preview')).toBeHidden();
+  await expect(page.locator('.cherry-bubble--preview')).toHaveCount(0);
   await page.evaluate(() => {
     const scope = window as typeof window & { cherry: { setValue(value: string): void } };
     scope.cherry.setValue('Bubble 可编辑文本');
@@ -532,6 +531,7 @@ test('preview text selection uses the native Cherry Bubble and preserves the sel
   await expect.poll(() => page.evaluate(() => getSelection()?.toString())).toBe('Bubble 可编辑文本');
 
   const bubble = page.locator('.cherry-bubble--preview');
+  await expect(bubble).toHaveCount(1);
   await expect(bubble).toBeVisible();
   await expect(bubble.locator('.cherry-toolbar-button')).toHaveCount(10);
   const layoutAfter = await paragraph.evaluate((element) => {
@@ -589,9 +589,43 @@ test('generic Cherry Bubble is hidden for code-block selections', async ({ page 
   await page.keyboard.press('Home');
   await page.keyboard.press('Shift+End');
   await expect.poll(() => page.evaluate(() => getSelection()?.toString())).toContain('const value = 1;');
-  await expect(page.locator('.cherry-bubble--preview')).toBeHidden();
+  await expect(page.locator('.cherry-bubble--preview')).toHaveCount(0);
   await expect(page.locator('.cherry-milkdown-code-block__language')).toBeVisible();
   actions.push('selected code and kept the generic Bubble hidden while code controls remained available');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('Mermaid keeps node controls without mounting the generic text Bubble', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(previewOnlyPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.evaluate(() => {
+    const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+    scope.cherry.setValue('```mermaid\ngraph TD\n  Start --> Finish\n```');
+  });
+
+  const mermaid = page.locator('.ProseMirror .cherry-embed--cherry_diagram[data-type="mermaid"]').first();
+  await expect(mermaid).toBeVisible();
+  await expect(mermaid.locator('svg')).toHaveCount(1);
+  await expect(page.locator('.cherry-bubble--preview')).toHaveCount(0);
+
+  await mermaid.click();
+  await expect(mermaid).toHaveClass(/is-selected/);
+  await expect(page.locator('.cherry-previewer-img-size-handler__points')).toHaveCount(8);
+  await expect(page.locator('.cherry-previewer-img-tool-handler .img-tool-button')).toHaveCount(5);
+  await expect(page.locator('.cherry-bubble--preview')).toHaveCount(0);
+  actions.push('selected Mermaid and kept only its native node controls');
+
+  await mermaid.getByRole('button', { name: '在节点内编辑源码' }).click();
+  const source = mermaid.locator('.cherry-embed__source code');
+  await expect(source).toBeVisible();
+  await source.selectText();
+  await expect.poll(() => page.evaluate(() => getSelection()?.toString())).toContain('graph TD');
+  await expect(page.locator('.cherry-bubble--preview')).toHaveCount(0);
+  actions.push('selected Mermaid source without mounting the inline-format Bubble');
 
   expect(errors).toEqual([]);
   await attachEvidence(page, testInfo, actions, errors);
@@ -1509,9 +1543,9 @@ test('manual interaction matrix covers focus, edit, create and delete for remain
   await expect(taskItem).toHaveClass(/check-list-item/);
   await expect
     .poll(async () => taskIcon.evaluate((element) => ({
-      font: getComputedStyle(element).fontFamily,
-      margin: getComputedStyle(element).margin,
-      display: getComputedStyle(element).display,
+        font: getComputedStyle(element).fontFamily,
+        margin: getComputedStyle(element).margin,
+        display: getComputedStyle(element).display,
     })))
     .toEqual(expect.objectContaining({ margin: '0px 6px 0px -20px', display: 'inline' }));
   const clickTaskCheckbox = async () => {
@@ -1537,9 +1571,9 @@ test('manual interaction matrix covers focus, edit, create and delete for remain
   // otherwise Chromium can legitimately deliver the click before MathLive
   // has installed its shadow editor and the keystrokes are dropped.
   await expect.poll(async () => math.evaluate((field) => ({
-    upgraded: Boolean(customElements.get('math-field')),
-    value: (field as HTMLElement & { value?: string }).value,
-    readOnly: (field as HTMLElement & { readOnly?: boolean }).readOnly,
+        upgraded: Boolean(customElements.get('math-field')),
+        value: (field as HTMLElement & { value?: string }).value,
+        readOnly: (field as HTMLElement & { readOnly?: boolean }).readOnly,
   }))).toEqual({ upgraded: true, value: 'x', readOnly: false });
   const mathBox = await math.boundingBox();
   expect(mathBox).not.toBeNull();

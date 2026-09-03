@@ -1,7 +1,7 @@
 import { commandsCtx, editorViewCtx, parserCtx, serializerCtx } from '@milkdown/kit/core';
 import { Slice } from '@milkdown/kit/prose/model';
 import { toggleMark } from '@milkdown/kit/prose/commands';
-import { NodeSelection } from '@milkdown/kit/prose/state';
+import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
 import type { EditorView } from '@milkdown/kit/prose/view';
 import {
   insertHrCommand,
@@ -237,6 +237,11 @@ export function createCherryEditingBridge(
   const activatePreview = (event: PointerEvent) => {
     rememberPreview();
     cherry.bubble?.hideBubble?.();
+    // A node-specific interaction must immediately dismiss a text-format
+    // Bubble left over from the previous selection. If this pointer gesture
+    // produces another eligible text selection, selectionchange will show it
+    // again after ProseMirror has committed that selection.
+    cherry.getPreviewer().hideEditingBubble?.();
     if (event.button !== 0 || !view.editable || view.hasFocus()) return;
     const target = event.target instanceof Element ? event.target : null;
     if (target?.closest('button, input, select, textarea, [contenteditable="false"]')) return;
@@ -285,6 +290,60 @@ export function createCherryEditingBridge(
     });
     return found;
   };
+  const selectionSupportsInlineBubble = (selection: typeof view.state.selection) => {
+    // The generic Cherry Bubble changes ProseMirror inline marks. Native text
+    // selected inside an atom NodeView (Mermaid source, HTML source, MathLive,
+    // etc.) is not a ProseMirror TextSelection and must never opt into it.
+    if (!(selection instanceof TextSelection) || selection.empty) return false;
+    if (!selection.$from.parent.inlineContent || !selection.$to.parent.inlineContent) return false;
+
+    const inlineMarkTypes = [
+      'strong',
+      'emphasis',
+      'strike_through',
+      'inlineCode',
+      'cherry_underline',
+      'cherry_subscript',
+      'cherry_superscript',
+      'cherry_font_size',
+      'cherry_color',
+      'cherry_background_color',
+    ]
+      .map((name) => view.state.schema.marks[name])
+      .filter((mark): mark is NonNullable<typeof mark> => Boolean(mark));
+    if (!inlineMarkTypes.length) return false;
+
+    const textblocks = new Set([selection.$from.parent, selection.$to.parent]);
+    let blocked = false;
+    selection.$from.doc.nodesBetween(selection.from, selection.to, (node, position) => {
+      if (node.type.spec.code === true || node.type.name === 'code_block') {
+        blocked = true;
+        return false;
+      }
+      // Inline atoms and leaf nodes own their interaction. A selection that
+      // includes one cannot safely apply the full text-format menu.
+      if (!node.isText && (node.isAtom || node.isLeaf)) {
+        blocked = true;
+        return false;
+      }
+      // An isolating node is allowed as an ancestor (for example text inside
+      // a Panel), but not when the selection crosses the complete node.
+      if (
+        node.type.spec.isolating === true &&
+        position >= selection.from &&
+        position + node.nodeSize <= selection.to
+      ) {
+        blocked = true;
+        return false;
+      }
+      if (node.isTextblock) textblocks.add(node);
+      return !blocked;
+    });
+    if (blocked) return false;
+    return Array.from(textblocks).every((node) =>
+      inlineMarkTypes.some((mark) => node.type.allowsMarkType(mark)),
+    );
+  };
   const refreshPreviewBubble = () => {
     if (bubbleRefreshQueued) return;
     bubbleRefreshQueued = true;
@@ -296,37 +355,8 @@ export function createCherryEditingBridge(
       }
       const selection = view.state.selection;
       try {
-        // Code blocks have their own language/copy controls and do not accept
-        // inline marks. Never show the generic Bubble for a selection that
-        // touches one, including a selection spanning a code block boundary.
-        if (selectionTouchesCodeBlock(selection)) {
+        if (!selectionSupportsInlineBubble(selection)) {
           cherry.getPreviewer().hideEditingBubble?.();
-          return;
-        }
-        // Browser selection updates can arrive one event before ProseMirror's
-        // DOM observer commits the corresponding state selection (notably for
-        // End/Shift+Home and IME composition). Read the native range as a
-        // display-only fallback; command execution still uses PM selection.
-        const nativeSelection = view.dom.ownerDocument.getSelection?.();
-        const nativeRange =
-          nativeSelection &&
-          !nativeSelection.isCollapsed &&
-          nativeSelection.rangeCount > 0 &&
-          view.dom.contains(nativeSelection.anchorNode) &&
-          view.dom.contains(nativeSelection.focusNode)
-            ? nativeSelection.getRangeAt(0).getBoundingClientRect()
-            : null;
-        if (selection.empty || selection instanceof NodeSelection || !selection.$from.parent.inlineContent) {
-          if (!nativeRange || (!nativeRange.width && !nativeRange.height)) {
-            cherry.getPreviewer().hideEditingBubble?.();
-            return;
-          }
-          cherry.getPreviewer().showEditingBubble?.({
-            top: nativeRange.top,
-            bottom: nativeRange.bottom,
-            left: nativeRange.left,
-            right: nativeRange.right,
-          });
           return;
         }
         const from = view.coordsAtPos(selection.from);
