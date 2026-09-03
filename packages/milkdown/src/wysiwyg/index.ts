@@ -16,6 +16,8 @@ export {
   cherryHtmlBlockSchema,
   cherryHtmlInlineSchema,
   cherryLinkTargetSchema,
+  cherryFootnoteReferenceSchema,
+  cherryFootnoteNavigationPlugin,
   cherryPanelSchema,
   cherryStructureSchemas,
   cherryTocRefreshPlugin,

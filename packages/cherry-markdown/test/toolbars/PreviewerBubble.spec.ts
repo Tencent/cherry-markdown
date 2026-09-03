@@ -25,6 +25,46 @@ describe('toolbars/PreviewerBubble production behavior', () => {
     expect(bubble.$shouldRemoveBubbleKey('hover', 'hover')).toBe(true);
   });
 
+  it('uses an active preview editing bridge as the previewOnly editor', () => {
+    const { bubble, previewer, cherry } = createPreviewerBubble();
+    previewer.options.enablePreviewerBubble = false;
+    Reflect.set(cherry, 'getStatus', () => ({ editor: 'hide', previewer: 'show' }));
+    Reflect.set(previewer, 'editor', null);
+    Reflect.set(bubble, 'editor', null);
+
+    expect(bubble.$isEnableBubbleAndEditorShow()).toBe(false);
+
+    Reflect.set(previewer, 'editingBridge', { isActive: () => true });
+
+    expect(bubble.$isEnableBubbleAndEditorShow()).toBe(true);
+  });
+
+  it('does not duplicate Milkdown table, list, or task controls', () => {
+    const { bubble, previewer, previewerDom } = createPreviewerBubble();
+    Reflect.set(previewer, 'editingBridge', { isActive: () => true });
+    const showTable = vi.spyOn(bubble, '$showTablePreviewerBubbles').mockImplementation(() => {});
+    const showList = vi.spyOn(bubble, '$showListPreviewerBubbles').mockImplementation(() => {});
+    const toggleTask = vi.spyOn(bubble, '$dealCheckboxClick').mockImplementation(() => {});
+    const table = document.createElement('table');
+    const cell = document.createElement('td');
+    table.appendChild(cell);
+    const listItem = document.createElement('li');
+    const paragraph = document.createElement('p');
+    listItem.appendChild(paragraph);
+    const checkbox = document.createElement('span');
+    checkbox.className = 'ch-icon ch-icon-square';
+    previewerDom.append(table, listItem, checkbox);
+
+    cell.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+    cell.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    paragraph.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    checkbox.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(showTable).not.toHaveBeenCalled();
+    expect(showList).not.toHaveBeenCalled();
+    expect(toggleTask).not.toHaveBeenCalled();
+  });
+
   it('creates and removes paired bubble containers and handlers', () => {
     const { bubble, wrapperDom } = createPreviewerBubble();
     wrapperDom.style.overflow = 'auto';

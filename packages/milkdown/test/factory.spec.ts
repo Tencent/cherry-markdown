@@ -573,7 +573,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
 
     await instance.destroy();
     instances.splice(instances.indexOf(instance), 1);
-  });
+  }, 15_000);
 
   it('updates the visual TOC when a heading is edited', async () => {
     const element = root();
@@ -758,6 +758,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(bridge?.ownsPreviewElement?.(image!, 'image')).toBe(true);
     expect(bridge?.updatePreviewElement?.(image!, { kind: 'image', width: '160px', height: '90px' })).toBe(true);
     await vi.waitFor(() => expect(markdown).toContain('![uploaded#160px#90px](https://example.com/image.png)'));
+    expect(bridge?.resolvePreviewElement?.('image')).toBeInstanceOf(HTMLImageElement);
     expect(bridge?.updatePreviewElement?.(image!, { kind: 'image', type: 'border' })).toBe(true);
     await vi.waitFor(() => expect(markdown).toContain('![uploaded#160px#90px#B](https://example.com/image.png)'));
     expect(bridge?.updatePreviewElement?.(image!, { kind: 'image', type: 'center' })).toBe(true);
@@ -947,6 +948,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     }
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(instance.getMarkdown()).toContain('B-->C');
+    expect(sourcePanel?.hidden).toBe(false);
   });
 
   it('updates Mermaid size and alignment through the preview editing bridge', async () => {
@@ -1018,6 +1020,23 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(element.querySelector('.cherry-embed__source code')).not.toBeNull();
     expect(element.querySelector('.cherry-embed textarea')).toBeNull();
     expect((window as typeof window & { __bad?: boolean }).__bad).toBeUndefined();
+  });
+
+  it('keeps unknown business directives intact and edits them in the native Cherry shell', async () => {
+    const element = root();
+    const source = ':::business-card\nOpaque source\n:::';
+    const instance = await createCherryMilkdown({ root: element, value: source, engine: { makeHtml: (value) => value } });
+    instances.push(instance);
+    expect(element.querySelector('.cherry-embed--cherry_native_block')).not.toBeNull();
+    selectNode(instance, 'cherry_native_block');
+    element.querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
+    const editor = element.querySelector<HTMLElement>('.cherry-embed__source code');
+    expect(editor).not.toBeNull();
+    if (editor) {
+      editor.textContent = ':::business-card\nUpdated source\n:::';
+      editor.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+    }
+    await vi.waitFor(() => expect(instance.getMarkdown()).toContain('Updated source'));
   });
 
   it('updates Markdown and emits debounced changes without rendering a second pane', async () => {

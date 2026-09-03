@@ -23,6 +23,7 @@ import Logger from './Logger';
 import { addEvent, removeEvent } from './utils/event';
 import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile, exportWordFile } from './utils/export';
 import PreviewerBubble from './toolbars/PreviewerBubble';
+import Bubble from './toolbars/Bubble';
 import LazyLoadImg from '@/utils/lazyLoadImg';
 
 /**
@@ -45,6 +46,9 @@ export default class Previewer {
    */
   contentRenderer = null;
   editingBridge = null;
+
+  /** @private */
+  editingBubble = null;
 
   /**
    * @property
@@ -887,7 +891,54 @@ export default class Previewer {
   clearEditingBridge(bridge) {
     if (!this.editingBridge || (bridge && bridge !== this.editingBridge)) return false;
     this.editingBridge = null;
+    this.hideEditingBubble();
     return true;
+  }
+
+  /**
+   * Lazily creates the native Cherry selection bubble for an embedded preview
+   * editor. The menu instances and styles are the same ones used by
+   * CodeMirror, but the DOM is mounted in the preview scroller.
+   * @returns {Bubble|null}
+   */
+  ensureEditingBubble() {
+    const container = this.getDomContainer();
+    if (this.editingBubble) {
+      // A renderer reset (or a mobile preview container swap) can replace the
+      // preview children without destroying the bridge. Re-attach the already
+      // initialized native bubble instead of creating a second menu instance.
+      const bubbleDom = this.editingBubble.getBubbleDom?.();
+      if (bubbleDom && bubbleDom.parentNode !== container) container.appendChild(bubbleDom);
+      return this.editingBubble;
+    }
+    const config = this.$cherry?.options?.toolbars?.bubble;
+    if (!Array.isArray(config) || config.length === 0) return null;
+    const dom = document.createElement('div');
+    dom.className = 'cherry-bubble cherry-bubble--preview';
+    this.editingBubble = new Bubble({
+      dom,
+      $cherry: this.$cherry,
+      buttonConfig: config,
+      customMenu: this.$cherry.options.toolbars.customMenu,
+      engine: this.$cherry.engine,
+      previewMode: true,
+      editorDom: container,
+      mountTarget: container,
+    });
+    this.$cherry.toolbar?.collectMenuInfo?.(this.editingBubble);
+    return this.editingBubble;
+  }
+
+  showEditingBubble(rect) {
+    if (!this.editingBridge?.isActive?.()) return false;
+    const bubble = this.ensureEditingBubble();
+    if (!bubble) return false;
+    bubble.showPreviewBubble(rect, this.getDomContainer());
+    return true;
+  }
+
+  hideEditingBubble() {
+    this.editingBubble?.hideBubble?.();
   }
 
   runEditingCommand(command) {
@@ -1502,6 +1553,8 @@ export default class Previewer {
       this.clearContentRenderer(this.contentRenderer);
     }
     this.clearEditingBridge(this.editingBridge);
+    this.editingBubble?.destroy?.();
+    this.editingBubble = null;
 
     // 清理滚动事件监听
     this.removeScroll();

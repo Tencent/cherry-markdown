@@ -137,6 +137,165 @@ function toggleTaskItem(
   return true;
 }
 
+interface CherryDraggedBlock {
+  from: number;
+  node: ProseMirrorNode;
+  element: HTMLElement;
+}
+
+function topLevelBlockAt(view: Parameters<NonNullable<Plugin['spec']['view']>>[0], target: EventTarget | null) {
+  let element = target instanceof Element ? (target as HTMLElement) : null;
+  while (element && element.parentElement !== view.dom) element = element.parentElement;
+  if (!element || element.parentElement !== view.dom) return undefined;
+  let found: { from: number; node: ProseMirrorNode; element: HTMLElement } | undefined;
+  view.state.doc.forEach((node, from) => {
+    if (found || view.nodeDOM(from) !== element) return;
+    found = { from, node, element };
+  });
+  return found;
+}
+
+// Cherry's ordinary paragraphs, headings and lists are supplied by Milkdown's
+// stock schema without a drag handle. Implement block movement at the editor
+// boundary using the pointer lifecycle, instead of rewriting upstream schema
+// nodes or mutating every rendered element. Only direct document blocks
+// participate; nested list/compound content keeps its normal text-selection
+// and drag semantics.
+const cherryBlockDragDrop = $prose(
+  () =>
+    new Plugin({
+      view: (view) => {
+        let dragged: CherryDraggedBlock | undefined;
+        let over: HTMLElement | undefined;
+        let pointerCandidate: (CherryDraggedBlock & { x: number; y: number; pointerId: number }) | undefined;
+
+        const clearOver = () => {
+          over?.classList.remove('cherry-drag-over');
+          over = undefined;
+        };
+        const onDragStart = (event: DragEvent) => {
+          const block = topLevelBlockAt(view, event.target);
+          if (!block) return;
+          dragged = block;
+          event.dataTransfer?.setData('application/x-cherry-milkdown-node', String(block.from));
+          if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+          block.element.classList.add('cherry-dragging');
+        };
+        const reorder = (target: ReturnType<typeof topLevelBlockAt>) => {
+          if (!dragged || !target || target.from === dragged.from) return false;
+          const insertAt = dragged.from < target.from ? target.from - dragged.node.nodeSize : target.from;
+          view.dispatch(view.state.tr.delete(dragged.from, dragged.from + dragged.node.nodeSize)
+            .insert(insertAt, dragged.node)
+            .scrollIntoView());
+          return true;
+        };
+        const onPointerDown = (event: PointerEvent) => {
+          // A previous candidate must never leak into a subsequent click on a
+          // Cherry-owned control (for example after a synthetic/forced click
+          // in automation where the native pointerup is not delivered).
+          pointerCandidate = undefined;
+          if (event.button !== 0 && event.pointerType === 'mouse') return;
+          const target = event.target instanceof HTMLElement ? event.target : undefined;
+          // NodeView controls (image resize, Mermaid/ECharts actions, table
+          // buttons and inline source editors) own their pointer lifecycle.
+          // Never turn those interactions into a top-level block move.
+          if (
+            target?.closest(
+                'button,input,textarea,select,[contenteditable="false"],.cherry-embed,' +
+                '.cherry-previewer-img-size-handler,.cherry-previewer-img-tool-handler,.cherry-node-actions,' +
+                '[data-cherry-table-control],img,a,table,pre,code,math-field',
+            )
+          ) return;
+          const block = topLevelBlockAt(view, event.target);
+          if (!block) return;
+          if (block.element.querySelector('img,button,input,textarea,select,math-field,.cherry-embed')) return;
+          pointerCandidate = { ...block, x: event.clientX, y: event.clientY, pointerId: event.pointerId };
+        };
+        const onPointerMove = (event: PointerEvent) => {
+          if (!pointerCandidate || event.pointerId !== pointerCandidate.pointerId) return;
+          if (!(event.target instanceof Node) || !view.dom.contains(event.target)) {
+            pointerCandidate = undefined;
+            return;
+          }
+          const distance = Math.hypot(event.clientX - pointerCandidate.x, event.clientY - pointerCandidate.y);
+          if (!dragged && distance < 6) return;
+          if (!dragged) {
+            dragged = pointerCandidate;
+            pointerCandidate.element.classList.add('cherry-dragging');
+          }
+          event.preventDefault();
+          const target = topLevelBlockAt(view, document.elementFromPoint(event.clientX, event.clientY));
+          clearOver();
+          const current = dragged;
+          if (target && current && target.from !== current.from) {
+            over = target.element;
+            over.classList.add('cherry-drag-over');
+          }
+        };
+        const onPointerUp = (event: PointerEvent) => {
+          if (!pointerCandidate || event.pointerId !== pointerCandidate.pointerId) return;
+          const wasDragging = Boolean(dragged);
+          const target = topLevelBlockAt(view, document.elementFromPoint(event.clientX, event.clientY));
+          if (wasDragging) {
+            event.preventDefault();
+            reorder(target);
+            onDragEnd();
+          }
+          pointerCandidate = undefined;
+        };
+        const onDragOver = (event: DragEvent) => {
+          if (!dragged) return;
+          const block = topLevelBlockAt(view, event.target);
+          if (!block || block.from === dragged.from) return;
+          event.preventDefault();
+          if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+          clearOver();
+          over = block.element;
+          over.classList.add('cherry-drag-over');
+        };
+        const onDrop = (event: DragEvent) => {
+          if (!dragged) return;
+          const target = topLevelBlockAt(view, event.target);
+          if (!target || target.from === dragged.from) return;
+          event.preventDefault();
+          reorder(target);
+          dragged = undefined;
+          clearOver();
+        };
+        const onDragEnd = () => {
+          dragged = undefined;
+          clearOver();
+          view.dom.querySelector('.cherry-dragging')?.classList.remove('cherry-dragging');
+        };
+
+        view.dom.addEventListener('dragstart', onDragStart);
+        view.dom.addEventListener('pointerdown', onPointerDown);
+        // Keep pointer tracking scoped to the editor surface. Cherry's image
+        // resize handles and diagram controls live outside `.ProseMirror`;
+        // listening on window would compete with their drag lifecycle.
+        view.dom.addEventListener('pointermove', onPointerMove, { passive: false });
+        view.dom.addEventListener('pointerup', onPointerUp, { passive: false });
+        view.dom.addEventListener('pointercancel', onPointerUp, { passive: false });
+        view.dom.addEventListener('dragover', onDragOver);
+        view.dom.addEventListener('drop', onDrop);
+        view.dom.addEventListener('dragend', onDragEnd);
+        return {
+          destroy: () => {
+            view.dom.removeEventListener('dragstart', onDragStart);
+            view.dom.removeEventListener('pointerdown', onPointerDown);
+            view.dom.removeEventListener('pointermove', onPointerMove);
+            view.dom.removeEventListener('pointerup', onPointerUp);
+            view.dom.removeEventListener('pointercancel', onPointerUp);
+            view.dom.removeEventListener('dragover', onDragOver);
+            view.dom.removeEventListener('drop', onDrop);
+            view.dom.removeEventListener('dragend', onDragEnd);
+            clearOver();
+          },
+        };
+      },
+    }),
+);
+
 const cherryTaskListToggle = $prose(
   () =>
     new Plugin({
@@ -216,5 +375,6 @@ export const cherryWysiwyg: MilkdownPlugin[] = [
   ...cherryStructureViews,
   cherryTaskListToggle,
   cherryTaskListPresentation,
+  cherryBlockDragDrop,
   ...cherryWysiwygRemark,
 ].flat();

@@ -4,7 +4,9 @@ import { PNG } from 'pngjs';
 import { cherryCompatibilityCases } from '../test/fixtures/compatibility';
 
 const demoPath = '/index.html';
-const visualPath = '/visual.html';
+const previewOnlyPath = '/index.html?mode=previewOnly';
+const mathJaxJsDelivrUrl = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
+const mathJaxUnpkgUrl = 'https://unpkg.com/mathjax@3.2.2/es5/tex-svg.js';
 
 type BrowserState = {
   cherry: string;
@@ -13,6 +15,86 @@ type BrowserState = {
 };
 
 const evidenceByPage = new WeakMap<Page, { actions: string[]; errors: string[] }>();
+
+const visualFixture = [
+  '# Visual contract',
+  '',
+  'Paragraph with **bold**, *italic*, `inline code`, ==highlight== and !!#d54941 color!!.',
+  '',
+  '- [ ] todo',
+  '- [x] done',
+  '',
+  '> Native Cherry blockquote',
+  '',
+  '| Name | Value |',
+  '| --- | ---: |',
+  '| Cherry | 1 |',
+  '| Milkdown | 2 |',
+  '',
+  '| :line:{"title":"Trend"} | Jan | Feb |',
+  '| --- | ---: | ---: |',
+  '| Sales | 1 | 2 |',
+  '',
+  ':::warning Notice',
+  'Panel body.',
+  ':::',
+  '',
+  '## Footnote[^note]',
+  '',
+  '[^note]: Native footnote reference.',
+  '',
+  '+++ More abilities',
+  'Detail body.',
+  '+++',
+  '',
+  '```js',
+  'const visual = true;',
+  '```',
+].join('\n');
+
+async function mountVisualReference(page: Page) {
+  await page.goto(previewOnlyPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.evaluate((value) => {
+    const scope = window as typeof window & {
+      Cherry: new (options: Record<string, unknown>) => { destroy(): void };
+      cherry: { setValue(markdown: string): void };
+    };
+    const milkdownRoot = document.querySelector('#markdown');
+    if (!milkdownRoot) throw new Error('Missing React demo root');
+    scope.cherry.setValue(value);
+
+    const style = document.createElement('style');
+    style.dataset.visualReference = 'true';
+    style.textContent = `
+      body { display: flex; margin: 0; background: #fff; }
+      #markdown.preview-only-page, #visual-native {
+        box-sizing: border-box; flex: 0 0 720px; width: 720px; height: 920px;
+        overflow: hidden; margin: 0;
+      }
+      #markdown.preview-only-page .cherry, #visual-native .cherry { height: 100%; }
+      #markdown.preview-only-page .cherry-previewer, #visual-native .cherry-previewer {
+        width: 100% !important; height: 100% !important; padding: 24px;
+      }
+      #markdown.preview-only-page .cherry-toolbar, #markdown.preview-only-page .cherry-editor,
+      #visual-native .cherry-toolbar, #visual-native .cherry-editor { display: none !important; }
+    `;
+    document.head.append(style);
+
+    const nativeRoot = document.createElement('div');
+    nativeRoot.id = 'visual-native';
+    document.body.append(nativeRoot);
+    const nativeCherry = new scope.Cherry({
+      el: nativeRoot,
+      value,
+      editor: { defaultModel: 'previewOnly', height: '920px' },
+      toolbars: { toolbar: false, toolbarRight: false, sidebar: false },
+    });
+    (window as typeof window & { visualNativeCherry?: { destroy(): void } }).visualNativeCherry = nativeCherry;
+  }, visualFixture);
+  await page.waitForFunction(() => Boolean(document.querySelector('#markdown .ProseMirror h1')));
+  await page.waitForFunction(() => Boolean(document.querySelector('#visual-native .cherry-previewer h1')));
+}
 
 function captureBrowserErrors(page: Page, actions: string[] = []) {
   const errors: string[] = [];
@@ -64,6 +146,13 @@ test.afterEach(async ({ page }, testInfo) => {
   if (testInfo.status === testInfo.expectedStatus) return;
   const evidence = evidenceByPage.get(page) ?? { actions: [], errors: [] };
   await attachEvidence(page, testInfo, evidence.actions, evidence.errors);
+});
+
+test.beforeEach(async ({ page }) => {
+  // Keep the shared Cherry demo configuration intact while avoiding a
+  // Chromium/jsDelivr connection-reset issue in isolated local and CI
+  // browsers. Both URLs serve the same pinned MathJax 3.2.2 browser bundle.
+  await page.route(mathJaxJsDelivrUrl, (route) => route.continue({ url: mathJaxUnpkgUrl }));
 });
 
 test('table ECharts renders, updates and keeps all Markdown owners in sync', async ({ page }, testInfo) => {
@@ -156,7 +245,7 @@ test('the full demo loads every shared image and keeps images selectable in prev
 
   const feature = page.locator('.ProseMirror img[alt="表格图表"]');
   const before = await readState(page);
-  await feature.click();
+  await feature.click({ force: true });
   await expect(feature).toHaveClass(/ProseMirror-selectednode/);
   await expect.poll(async () => await readState(page)).toEqual(before);
   actions.push('selected a rendered feature image without changing Markdown state');
@@ -164,7 +253,7 @@ test('the full demo loads every shared image and keeps images selectable in prev
   const resizable = page.locator('.ProseMirror img[src$="demo-dog.png"]').first();
   await resizable.scrollIntoViewIfNeeded();
   await expect(resizable).toHaveCSS('width', '100px');
-  await resizable.click();
+  await resizable.click({ force: true });
   const resizePoints = page.locator('.cherry-previewer-img-size-handler__points');
   await expect(resizePoints).toHaveCount(8);
   await expect(page.locator('.cherry-previewer-img-tool-handler .img-tool-button')).toHaveCount(8);
@@ -330,6 +419,50 @@ test('rapid inline-code editing never rolls back and mode/API updates stay consi
   await attachEvidence(page, testInfo, actions, errors);
 });
 
+test('focused inline edits preserve Cherry layout, dimensions and scroll position', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.evaluate(() => {
+    const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+    scope.cherry.setValue('# Stable heading\n\nStable `seed` text.\n\n## Anchor\n\nAfter.');
+  });
+
+  const preview = page.locator('.cherry-previewer').first();
+  const inlineCode = page.locator('.ProseMirror code').filter({ hasText: /^seed$/ }).first();
+  const anchor = page.locator('.ProseMirror h2', { hasText: 'Anchor' }).first();
+  await anchor.scrollIntoViewIfNeeded();
+  const before = await Promise.all([preview.boundingBox(), anchor.boundingBox()]);
+  expect(before[0]).not.toBeNull();
+  expect(before[1]).not.toBeNull();
+  const scrollTop = await preview.evaluate((element) => element.scrollTop);
+  await inlineCode.click();
+  await page.keyboard.press('ArrowLeft');
+
+  for (const character of 'abcde') {
+    await page.keyboard.insertText(character);
+    await page.waitForTimeout(5);
+    const after = await Promise.all([preview.boundingBox(), anchor.boundingBox()]);
+    expect(after[0]).not.toBeNull();
+    expect(after[1]).not.toBeNull();
+    expect(Math.abs(after[1]!.y - before[1]!.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(after[0]!.height - before[0]!.height)).toBeLessThanOrEqual(1);
+    await expect.poll(() => preview.evaluate((element) => element.scrollTop)).toBe(scrollTop);
+  }
+  actions.push('typed five focused inline-code characters without layout or scroll jumps');
+
+  const overflow = await page.evaluate(() => {
+    const container = document.querySelector('.cherry-previewer');
+    if (!container) return null;
+    return { scrollWidth: container.scrollWidth, clientWidth: container.clientWidth };
+  });
+  expect(overflow).not.toBeNull();
+  expect(overflow!.scrollWidth).toBeLessThanOrEqual(overflow!.clientWidth + 1);
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
 test('Cherry toolbar operates on the focused Milkdown surface', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
@@ -359,11 +492,151 @@ test('Cherry toolbar operates on the focused Milkdown surface', async ({ page },
   await attachEvidence(page, testInfo, actions, errors);
 });
 
+test('preview text selection uses the native Cherry Bubble and preserves the selection for commands', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(previewOnlyPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.waitForFunction(() =>
+    Boolean(
+      (window as typeof window & { cherry?: { getPreviewer?: () => { editingBridge?: unknown } } }).cherry
+        ?.getPreviewer?.().editingBridge,
+    ),
+  );
+  await expect(page.locator('.cherry-bubble--preview')).toHaveCount(0);
+  await page.evaluate(() => {
+    const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+    scope.cherry.setValue('Bubble 可编辑文本');
+  });
+
+  const paragraph = page.locator('.ProseMirror p').filter({ hasText: 'Bubble 可编辑文本' }).first();
+  await expect(paragraph).toBeVisible();
+  const layoutBefore = await paragraph.evaluate((element) => {
+    const container = element.closest('.cherry-previewer') as HTMLElement | null;
+    const rect = element.getBoundingClientRect();
+    return {
+      top: rect.top,
+      left: rect.left,
+      width: rect.width,
+      clientWidth: container?.clientWidth ?? 0,
+      scrollHeight: container?.scrollHeight ?? 0,
+    };
+  });
+  const box = await paragraph.boundingBox();
+  expect(box).not.toBeNull();
+  await page.mouse.move(box!.x + 4, box!.y + box!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box!.x + box!.width - 4, box!.y + box!.height / 2, { steps: 6 });
+  await page.mouse.up();
+  await expect.poll(() => page.evaluate(() => getSelection()?.toString())).toBe('Bubble 可编辑文本');
+
+  const bubble = page.locator('.cherry-bubble--preview');
+  await expect(bubble).toHaveCount(1);
+  await expect(bubble).toBeVisible();
+  await expect(bubble.locator('.cherry-toolbar-button')).toHaveCount(10);
+  const layoutAfter = await paragraph.evaluate((element) => {
+    const container = element.closest('.cherry-previewer') as HTMLElement | null;
+    const rect = element.getBoundingClientRect();
+    return {
+      top: rect.top,
+      left: rect.left,
+      width: rect.width,
+      clientWidth: container?.clientWidth ?? 0,
+      scrollHeight: container?.scrollHeight ?? 0,
+    };
+  });
+  expect(Math.abs(layoutAfter.top - layoutBefore.top)).toBeLessThan(1);
+  expect(Math.abs(layoutAfter.left - layoutBefore.left)).toBeLessThan(1);
+  expect(layoutAfter.width).toBe(layoutBefore.width);
+  expect(layoutAfter.clientWidth).toBe(layoutBefore.clientWidth);
+  expect(layoutAfter.scrollHeight).toBe(layoutBefore.scrollHeight);
+  actions.push('selected preview text and displayed the native Cherry Bubble button set');
+
+  await bubble.locator('.cherry-toolbar-button[title="加粗"]').click();
+  await expect.poll(async () => (await readState(page)).cherry).toContain('**Bubble 可编辑文本**');
+  await expect.poll(async () => {
+    const state = await readState(page);
+    return state.cherry === state.codeMirror && state.cherry === state.milkdown;
+  }).toBe(true);
+  actions.push('clicked native Bubble bold and verified all three Markdown owners stayed synchronized');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('generic Cherry Bubble is hidden for code-block selections', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(previewOnlyPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.waitForFunction(() =>
+    Boolean(
+      (window as typeof window & { cherry?: { getPreviewer?: () => { editingBridge?: unknown } } }).cherry
+        ?.getPreviewer?.().editingBridge,
+    ),
+  );
+  await page.evaluate(() => {
+    const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+    scope.cherry.setValue('```javascript\nconst value = 1;\n```');
+  });
+  await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('```javascript\nconst value = 1;\n```');
+
+  const code = page.locator('.ProseMirror .cherry-milkdown-code-block__content').filter({
+    hasText: 'const value = 1;',
+  });
+  await expect(code).toBeVisible();
+  await code.click();
+  await page.keyboard.press('Home');
+  await page.keyboard.press('Shift+End');
+  await expect.poll(() => page.evaluate(() => getSelection()?.toString())).toContain('const value = 1;');
+  await expect(page.locator('.cherry-bubble--preview')).toHaveCount(0);
+  await expect(page.locator('.cherry-milkdown-code-block__language')).toBeVisible();
+  actions.push('selected code and kept the generic Bubble hidden while code controls remained available');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('Mermaid keeps node controls without mounting the generic text Bubble', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(previewOnlyPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.evaluate(() => {
+    const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+    scope.cherry.setValue('```mermaid\ngraph TD\n  Start --> Finish\n```');
+  });
+
+  const mermaid = page.locator('.ProseMirror .cherry-embed--cherry_diagram[data-type="mermaid"]').first();
+  await expect(mermaid).toBeVisible();
+  await expect(mermaid.locator('svg')).toHaveCount(1);
+  await expect(page.locator('.cherry-bubble--preview')).toHaveCount(0);
+
+  await mermaid.click();
+  await expect(mermaid).toHaveClass(/is-selected/);
+  await expect(page.locator('.cherry-previewer-img-size-handler__points')).toHaveCount(8);
+  await expect(page.locator('.cherry-previewer-img-tool-handler .img-tool-button')).toHaveCount(5);
+  await expect(page.locator('.cherry-bubble--preview')).toHaveCount(0);
+  actions.push('selected Mermaid and kept only its native node controls');
+
+  await mermaid.getByRole('button', { name: '在节点内编辑源码' }).click();
+  const source = mermaid.locator('.cherry-embed__source code');
+  await expect(source).toBeVisible();
+  await source.selectText();
+  await expect.poll(() => page.evaluate(() => getSelection()?.toString())).toContain('graph TD');
+  await expect(page.locator('.cherry-bubble--preview')).toHaveCount(0);
+  actions.push('selected Mermaid source without mounting the inline-format Bubble');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
 test('every Cherry size submenu item formats the focused Milkdown selection', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
   await page.goto(demoPath);
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await expect(page.locator('.ProseMirror')).toBeVisible();
 
   for (const [label, size] of [
     ['小', '12'],
@@ -375,6 +648,13 @@ test('every Cherry size submenu item formats the focused Milkdown selection', as
       const scope = window as typeof window & { cherry: { setValue(value: string): void } };
       scope.cherry.setValue('Format me now');
     });
+    await expect
+      .poll(async () => {
+        const state = await readState(page);
+        return { markdown: state.cherry, sourceSynchronized: state.cherry === state.codeMirror };
+      })
+      .toEqual({ markdown: 'Format me now', sourceSynchronized: true });
+    await expect(page.locator('.ProseMirror .cherry-wysiwyg-size')).toHaveCount(0);
     const paragraph = page.locator('.ProseMirror p', { hasText: 'Format me now' });
     await paragraph.click();
     await page.keyboard.press('ControlOrMeta+A');
@@ -638,6 +918,187 @@ test('Markdown shortcuts create H6 and code blocks without a right-side suggest 
   await attachEvidence(page, testInfo, actions, errors);
 });
 
+test('Cherry previewOnly becomes a toolbar-free WYSIWYG surface without a second mode config', async ({
+  page,
+}, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(previewOnlyPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+
+  await expect(page.locator('.ProseMirror')).toBeVisible();
+  await expect(page.locator('.cherry-editor')).toBeHidden();
+  await expect(page.locator('.cherry-toolbar')).toBeHidden();
+  await expect(page.locator('.cherry-toolbar-right')).toBeHidden();
+  await expect(page.locator('.cherry-sidebar')).toBeHidden();
+  actions.push('opened Cherry native previewOnly with no global editing toolbar');
+
+  const setMarkdown = (value: string) =>
+    page.evaluate((next) => {
+      const scope = window as typeof window & { cherry: { setValue(markdown: string): void } };
+      scope.cherry.setValue(next);
+    }, value);
+
+  await setMarkdown('# Direct heading\n\nBody');
+  await expect(page.locator('.ProseMirror h1')).toHaveCount(1);
+  await expect(page.locator('.ProseMirror h1')).toHaveText('Direct heading');
+  await page.locator('.ProseMirror h1').click();
+  await page.keyboard.press('ControlOrMeta+Alt+2');
+  await expect(page.locator('.ProseMirror h2')).toHaveText('Direct heading');
+  await expect.poll(async () => (await readState(page)).cherry.startsWith('## Direct heading')).toBe(true);
+  actions.push('changed an existing heading to H2 with the toolbar-free heading shortcut');
+
+  await setMarkdown('');
+  await expect.poll(() => page.locator('.ProseMirror > *').count()).toBe(1);
+  await page.locator('.ProseMirror p').click();
+  await page.keyboard.insertText('```');
+  await page.keyboard.press('Enter');
+  await page.keyboard.insertText('previewOnly();');
+  await expect(page.locator('.ProseMirror .cherry-milkdown-code-block code')).toHaveText('previewOnly();');
+  await expect.poll(async () => (await readState(page)).cherry.trim()).toBe('```\npreviewOnly();\n```');
+  await expect(page.locator('.cherry-suggester-panel:visible')).toHaveCount(0);
+  actions.push('created and edited a fenced code block without a source suggest panel');
+
+  await setMarkdown('![Preview dog#100px#80px](/images/demo-dog.png)');
+  const image = page.locator('.ProseMirror img[alt^="Preview dog"]').first();
+  await expect(image).toBeVisible();
+  await image.click({ force: true });
+  await expect(page.locator('.viewer-container')).toHaveCount(0);
+  await expect(page.locator('.cherry-previewer-img-size-handler__points')).toHaveCount(8);
+  await expect(page.locator('.cherry-previewer-img-tool-handler .img-tool-button')).toHaveCount(8);
+  await page.locator('.cherry-previewer-img-tool-handler [title="边框"]').click();
+  await expect(image).toHaveClass(/cherry-img-deco-border/);
+  await expect
+    .poll(async () => {
+      const current = await readState(page);
+      return current.cherry === current.codeMirror && current.cherry === current.milkdown && current.cherry.includes('#B');
+    })
+    .toBe(true);
+  actions.push('selected and decorated an image with Cherry node controls without opening the read-only viewer');
+
+  await setMarkdown('```mermaid\ngraph TD\n  PreviewOnly --> Editable\n```');
+  const mermaid = page.locator('.ProseMirror .cherry-embed--cherry_diagram[data-type="mermaid"]').first();
+  await expect(mermaid).toBeVisible();
+  await expect(mermaid.locator('svg')).toHaveCount(1);
+  await mermaid.click();
+  await expect(page.locator('.cherry-previewer-img-size-handler__points')).toHaveCount(8);
+  await expect(page.locator('.cherry-previewer-img-tool-handler .img-tool-button')).toHaveCount(5);
+  await page.locator('.cherry-previewer-img-tool-handler [title="居中"]').click();
+  await expect(mermaid).toHaveClass(/cherry-mermaid-align-center/);
+  await expect.poll(async () => (await readState(page)).cherry.includes('#center')).toBe(true);
+  await mermaid.click();
+  await mermaid.getByRole('button', { name: '在节点内编辑源码' }).click();
+  await expect(mermaid.locator('.cherry-embed__source')).toBeVisible();
+  const mermaidSource = mermaid.locator('.cherry-embed__source code');
+  await mermaidSource.click();
+  await page.keyboard.press('End');
+  await page.keyboard.insertText('\n%% preview-only-edit');
+  await expect(mermaid.locator('.cherry-embed__source')).toBeVisible();
+  await expect(mermaidSource).toContainText('preview-only-edit');
+  await expect.poll(async () => (await readState(page)).cherry.includes('preview-only-edit')).toBe(true);
+  await expect(page.locator('.cherry-previewer-img-size-handler')).toHaveCount(0);
+  actions.push('aligned Mermaid and continuously edited its in-node source without losing focus or opening a global toolbar');
+
+  await setMarkdown('| Name | Value |\n| --- | ---: |\n| Cherry | 1 |');
+  const table = page.locator('.ProseMirror .milkdown-table-block').first();
+  const cell = table.locator('td').first();
+  await expect(table).toBeVisible();
+  await cell.hover();
+  await cell.click();
+  await page.keyboard.press('End');
+  await page.keyboard.insertText(' updated');
+  await expect(cell).toContainText('updated');
+  await expect(table.locator('.handle')).not.toHaveCount(0);
+  await expect(page.locator('.cherry-previewer-table-hover-handler')).toHaveCount(0);
+  await expect(page.locator('.cherry-previewer-table-content-handler')).toHaveCount(0);
+  await expect
+    .poll(async () => {
+      const current = await readState(page);
+      return {
+        synchronized: current.cherry === current.codeMirror && current.cherry === current.milkdown,
+        updated: current.cherry.includes('updated'),
+      };
+    })
+    .toEqual({ synchronized: true, updated: true });
+  actions.push('edited the Milkdown table-block without duplicate Cherry bubbles and synchronized all owners');
+
+  const state = await readState(page);
+  expect(state.cherry).toBe(state.codeMirror);
+  expect(state.cherry).toBe(state.milkdown);
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('physical delete, clipboard, undo/redo and composition input stay synchronized', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  const setValue = (value: string) =>
+    page.evaluate((markdown) => {
+      const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+      scope.cherry.setValue(markdown);
+    }, value);
+  const markdown = () => page.evaluate(() => (window as typeof window & { cherry: { getMarkdown(): string } }).cherry.getMarkdown());
+
+  await setValue('Delete me');
+  const paragraph = page.locator('.ProseMirror p').first();
+  await paragraph.click();
+  await page.keyboard.press('ControlOrMeta+A');
+  await page.keyboard.press('Backspace');
+  await expect.poll(async () => (await markdown()).trim()).toBe('');
+  actions.push('deleted a selected paragraph with Backspace');
+
+  await page.keyboard.insertText('Copy me');
+  await page.keyboard.press('ControlOrMeta+A');
+  await page.keyboard.press('ControlOrMeta+C');
+  await page.keyboard.press('Backspace');
+  await page.keyboard.press('ControlOrMeta+V');
+  await expect.poll(async () => (await markdown()).trim()).toBe('Copy me');
+  actions.push('copied, deleted and pasted text through the browser clipboard');
+
+  await page.keyboard.press('End');
+  await page.keyboard.insertText(' one');
+  await page.waitForTimeout(800);
+  await page.keyboard.insertText(' two');
+  await expect.poll(async () => (await markdown()).trim()).toBe('Copy me one two');
+  await page.keyboard.press('ControlOrMeta+z');
+  await expect.poll(async () => (await markdown()).trim()).toBe('Copy me one');
+  await page.keyboard.press('ControlOrMeta+Shift+z');
+  await expect.poll(async () => (await markdown()).trim()).toBe('Copy me one two');
+  actions.push('undid and redid two user input groups without reverting the document');
+
+  await setValue('汉');
+  const compositionTarget = page.locator('.ProseMirror p').first();
+  await compositionTarget.evaluate((element) => {
+    element.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '' }));
+    element.dispatchEvent(new CompositionEvent('compositionupdate', { bubbles: true, data: '汉字' }));
+    element.textContent = '汉字';
+    element.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '汉字' }));
+  });
+  await expect.poll(async () => (await markdown()).trim()).toBe('汉字');
+  actions.push('completed a composition-style Chinese input and kept Markdown synchronized');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
+test('ordinary top-level blocks can be physically dragged to reorder without changing their Markdown', async ({ page }) => {
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.evaluate(() => {
+    const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+    scope.cherry.setValue('First block\n\nSecond block\n\nThird block');
+  });
+  const blocks = page.locator('.ProseMirror > p');
+  await expect(blocks).toHaveCount(3);
+  await blocks.nth(0).dragTo(blocks.nth(2));
+  await expect.poll(async () =>
+    page.evaluate(() => (window as typeof window & { cherry: { getMarkdown(): string } }).cherry.getMarkdown().trim()),
+  ).toBe('Second block\n\nFirst block\n\nThird block');
+  await expect(page.locator('.ProseMirror > p').nth(1)).toContainText('First block');
+});
+
 test('ordered-list toolbar keeps Cherry default nested-list behavior', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
@@ -779,26 +1240,30 @@ test('focusing any Cherry link does not move it or rewrite ProseMirror DOM', asy
 test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', async ({ page }, testInfo) => {
   const errors = captureBrowserErrors(page);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto(visualPath);
-  await page.evaluate(() => (window as typeof window & { visualReady: Promise<void> }).visualReady);
+  await mountVisualReference(page);
 
   const components = [
-    { id: 'heading', native: '#native .cherry-previewer h1', milkdown: '#milkdown .ProseMirror h1' },
-    { id: 'paragraph', native: '#native .cherry-previewer > p', milkdown: '#milkdown .ProseMirror > p' },
-    { id: 'task-list', native: '#native .check-list-item', milkdown: '#milkdown .ProseMirror li[data-item-type="task"]' },
-    { id: 'blockquote', native: '#native blockquote', milkdown: '#milkdown blockquote' },
-    { id: 'table', native: '#native table', milkdown: '#milkdown .milkdown-table-block table.children' },
+    { id: 'heading', native: '#visual-native .cherry-previewer h1', milkdown: '#markdown .ProseMirror h1' },
+    { id: 'paragraph', native: '#visual-native .cherry-previewer > p', milkdown: '#markdown .ProseMirror > p' },
+    { id: 'task-list', native: '#visual-native .check-list-item', milkdown: '#markdown .ProseMirror li[data-item-type="task"]' },
+    { id: 'blockquote', native: '#visual-native blockquote', milkdown: '#markdown blockquote' },
+    { id: 'table', native: '#visual-native table', milkdown: '#markdown .milkdown-table-block table.children' },
     {
       id: 'table-chart',
-      native: '#native .cherry-table-wrapper:has(.cherry-echarts-wrapper)',
-      milkdown: '#milkdown .cherry-table-chart',
+      native: '#visual-native .cherry-table-wrapper:has(.cherry-echarts-wrapper)',
+      milkdown: '#markdown .cherry-table-chart',
     },
-    { id: 'panel', native: '#native .cherry-panel', milkdown: '#milkdown .cherry-panel' },
-    { id: 'detail', native: '#native details', milkdown: '#milkdown .cherry-detail' },
+    { id: 'panel', native: '#visual-native .cherry-panel', milkdown: '#markdown .cherry-panel' },
+    { id: 'detail', native: '#visual-native details', milkdown: '#markdown .cherry-detail' },
+    {
+      id: 'footnote-reference',
+      native: '#visual-native .cherry-footnote-number',
+      milkdown: '#markdown .cherry-footnote-number',
+    },
     {
       id: 'code-block',
-      native: '#native [data-type="codeBlock"]',
-      milkdown: '#milkdown .cherry-milkdown-code-block',
+      native: '#visual-native [data-type="codeBlock"]',
+      milkdown: '#markdown .cherry-milkdown-code-block',
     },
   ];
   const layout: Array<{
@@ -872,16 +1337,16 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
       'border-top-color',
     ];
     return [
-      ['h1', '#native .cherry-previewer h1', '#milkdown .ProseMirror h1'],
-      ['p', '#native .cherry-previewer > p', '#milkdown .ProseMirror > p'],
-      ['blockquote', '#native blockquote', '#milkdown blockquote'],
-      ['table', '#native table', '#milkdown .milkdown-table-block table.children'],
+      ['h1', '#visual-native .cherry-previewer h1', '#markdown .ProseMirror h1'],
+      ['p', '#visual-native .cherry-previewer > p', '#markdown .ProseMirror > p'],
+      ['blockquote', '#visual-native blockquote', '#markdown blockquote'],
+      ['table', '#visual-native table', '#markdown .milkdown-table-block table.children'],
       [
         'pre',
-        '#native [data-type="codeBlock"] > .custom-codeblock-wrapper > pre',
-        '#milkdown .cherry-milkdown-code-block > pre',
+        '#visual-native [data-type="codeBlock"] > .custom-codeblock-wrapper > pre',
+        '#markdown .cherry-milkdown-code-block > pre',
       ],
-      ['task-icon', '#native .check-list-item .ch-icon', '#milkdown .ProseMirror li[data-item-type="task"] .ch-icon'],
+      ['task-icon', '#visual-native .check-list-item .ch-icon', '#markdown .ProseMirror li[data-item-type="task"] .ch-icon'],
     ].map(([selector, nativeSelector, milkdownSelector]) => {
       const native = document.querySelector(nativeSelector);
       const milkdown = document.querySelector(milkdownSelector);
@@ -903,6 +1368,47 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
     const milkdownGap = current.milkdown.top - previous.milkdown.bottom;
     expect(Math.abs(milkdownGap - nativeGap), `${previous.id} -> ${current.id} gap`).toBeLessThanOrEqual(1);
   }
+  expect(errors).toEqual([]);
+  await page.evaluate(() => {
+    (window as typeof window & { visualNativeCherry?: { destroy(): void } }).visualNativeCherry?.destroy();
+    document.querySelector('#visual-native')?.remove();
+    document.querySelector('style[data-visual-reference]')?.remove();
+  });
+});
+
+test('Milkdown keeps Cherry heading and ruby semantics without truncation', async ({ page }) => {
+  const errors = captureBrowserErrors(page);
+  await page.goto(demoPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+
+  const heading = page.locator('.ProseMirror h1').filter({ hasText: 'Cherry Markdown' }).first();
+  await expect(heading).toBeVisible();
+  await expect(heading.locator('ruby')).toBeVisible();
+  await expect(heading.locator('ruby rt')).toHaveText(/jiǎn míng shǒu cè/);
+
+  const metrics = await heading.evaluate((element) => {
+    const root = element.closest('.cherry-markdown');
+    const ruby = element.querySelector('ruby');
+    const annotation = ruby?.querySelector('rt');
+    if (!root || !ruby || !annotation) throw new Error('Missing Cherry ruby heading structure');
+    const probe = document.createElement('h1');
+    probe.textContent = 'probe';
+    root.append(probe);
+    const probeColor = getComputedStyle(probe).color;
+    probe.remove();
+    return {
+      headingColor: getComputedStyle(element).color,
+      probeColor,
+      rubyTag: ruby.tagName,
+      annotationOverflow: getComputedStyle(annotation).overflow,
+      annotationText: annotation.textContent,
+    };
+  });
+
+  expect(metrics.rubyTag).toBe('RUBY');
+  expect(metrics.annotationText).toContain('jiǎn míng shǒu cè');
+  expect(metrics.annotationOverflow).not.toBe('hidden');
+  expect(metrics.headingColor).toBe(metrics.probeColor);
   expect(errors).toEqual([]);
 });
 
@@ -1037,9 +1543,9 @@ test('manual interaction matrix covers focus, edit, create and delete for remain
   await expect(taskItem).toHaveClass(/check-list-item/);
   await expect
     .poll(async () => taskIcon.evaluate((element) => ({
-      font: getComputedStyle(element).fontFamily,
-      margin: getComputedStyle(element).margin,
-      display: getComputedStyle(element).display,
+        font: getComputedStyle(element).fontFamily,
+        margin: getComputedStyle(element).margin,
+        display: getComputedStyle(element).display,
     })))
     .toEqual(expect.objectContaining({ margin: '0px 6px 0px -20px', display: 'inline' }));
   const clickTaskCheckbox = async () => {
@@ -1060,8 +1566,18 @@ test('manual interaction matrix covers focus, edit, create and delete for remain
   // Formula: click the MathLive field, type, and verify immediate Markdown sync.
   await setValue('$x$');
   const math = page.locator('.ProseMirror math-field').first();
-  await math.click();
-  await page.keyboard.press('End');
+  // MathLive upgrades the custom element asynchronously.  Wait for the
+  // upgraded, editable field before sending physical pointer/keyboard input;
+  // otherwise Chromium can legitimately deliver the click before MathLive
+  // has installed its shadow editor and the keystrokes are dropped.
+  await expect.poll(async () => math.evaluate((field) => ({
+        upgraded: Boolean(customElements.get('math-field')),
+        value: (field as HTMLElement & { value?: string }).value,
+        readOnly: (field as HTMLElement & { readOnly?: boolean }).readOnly,
+  }))).toEqual({ upgraded: true, value: 'x', readOnly: false });
+  const mathBox = await math.boundingBox();
+  expect(mathBox).not.toBeNull();
+  await page.mouse.click(mathBox!.x + mathBox!.width - 2, mathBox!.y + mathBox!.height / 2);
   await math.pressSequentially('^2');
   await expect.poll(async () => (await readState(page)).cherry).toContain('$x^2$');
   actions.push('focused and edited an inline MathLive formula');
@@ -1168,8 +1684,8 @@ test('repeated mount and destroy returns DOM and heap resources to the warmed ba
   test.setTimeout(90_000);
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
-  await page.goto(visualPath);
-  await page.evaluate(() => (window as typeof window & { visualReady: Promise<void> }).visualReady);
+  await page.goto(previewOnlyPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   const rounds = Number(process.env.MILKDOWN_STRESS_ROUNDS ?? 10);
 
   const readHeap = async () => {

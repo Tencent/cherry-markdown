@@ -2,13 +2,14 @@ import { markRule } from '@milkdown/kit/prose';
 import { $inputRule, $mark } from '@milkdown/kit/utils';
 
 type MarkAttrs = Record<string, string>;
+type MarkDom = [string, Record<string, string>, ...(number | string | MarkDom)[]];
 
 interface MarkDefinition {
   name: string;
   mdastType: string;
   attrs?: Record<string, { default: string; validate: 'string' }>;
   parseAttrs?: (node: Record<string, unknown>) => MarkAttrs;
-  dom: (attrs: MarkAttrs) => [string, Record<string, string>, number];
+  dom: (attrs: MarkAttrs) => MarkDom;
   serialize: (text: string, attrs: MarkAttrs) => string;
   input?: {
     pattern: RegExp;
@@ -70,7 +71,15 @@ const definitions: MarkDefinition[] = [
     mdastType: 'cherry_ruby',
     attrs: { annotation: stringAttr },
     parseAttrs: (node) => ({ annotation: String(node.annotation ?? '') }),
-    dom: ({ annotation }) => ['span', { class: 'cherry-wysiwyg-ruby', 'data-ruby': annotation }, 0],
+    // Use the browser's native ruby layout, which is also what Cherry's
+    // renderer emits. Keeping the annotation in an <rt> child avoids a
+    // parallel pseudo-element layout that can truncate or shift headings.
+    dom: ({ annotation }) => [
+      'ruby',
+      { class: 'cherry-wysiwyg-ruby' },
+      ['span', {}, 0],
+      ['rt', {}, annotation],
+    ],
     serialize: (text, { annotation }) => `{${text}|${annotation}}`,
     input: {
       pattern: /(?:^|\s)\{([^|\n]+?)\|([^}\n]+?)\}$/,
@@ -107,11 +116,11 @@ export const cherryWysiwygMarkSchemas = definitions.map((definition) =>
       },
     ],
     toDOM: (mark) => {
-      const [tag, attrs, content] = definition.dom(mark.attrs as MarkAttrs);
+      const [tag, attrs, ...children] = definition.dom(mark.attrs as MarkAttrs);
       const serializedAttrs = Object.fromEntries(
         Object.keys(definition.attrs ?? {}).map((name) => [attrDatasetName(name), String(mark.attrs[name] ?? '')]),
       );
-      return [tag, { ...attrs, ...serializedAttrs, 'data-cherry-mark': definition.name }, content];
+      return [tag, { ...attrs, ...serializedAttrs, 'data-cherry-mark': definition.name }, ...children];
     },
     parseMarkdown: {
       match: (node) => node.type === definition.mdastType,

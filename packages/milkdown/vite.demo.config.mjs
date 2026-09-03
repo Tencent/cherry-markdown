@@ -73,7 +73,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: resolve(examplesRoot, 'index.html'),
-        visual: resolve(examplesRoot, 'visual.html'),
       },
     },
   },

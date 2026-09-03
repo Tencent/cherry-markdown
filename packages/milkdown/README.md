@@ -16,7 +16,7 @@ A Milkdown WYSIWYG extension for Cherry Markdown. The recommended mode mounts Mi
 - HTML uses a script-disabled sandbox preview and an opt-in inline source mode.
 - `:line:` and other table charts reuse Cherry's native DOM and ECharts lifecycle; selection opens the full Markdown source inside that node only.
 
-Cherry extensions are not presented as raw source cards. Business-specific syntax must provide a Milkdown schema, parser, serializer, and NodeView through a plugin; unregistered syntax is not claimed as supported.
+Cherry extensions are not presented as raw source cards. Business-specific syntax must provide a Milkdown schema, parser, serializer, and NodeView through a plugin for structured editing. An unregistered block directive is safely rendered through Cherry's native shell and can be edited in-place as its complete source; it is never guessed as a structured panel.
 
 ## Install
 
@@ -59,7 +59,21 @@ cherry.destroy(); // Milkdown is cleaned up with this Cherry instance.
 
 Plugins passed through `plugins` are loaded after the built-in WYSIWYG plugins and can register business NodeViews.
 
-In extension mode the original Cherry toolbar remains in place and routes formatting to the currently focused preview selection. Pickers such as image, file, Draw.io, and chart keep Cherry's original UI and insert at the saved Milkdown selection. Type `/` on an empty preview block for insertion commands, or use native Markdown shortcuts. Structural controls appear only while hovering or selecting their node. Tables use Milkdown's `table-block` controls for row and column insertion, deletion, dragging, and alignment. Selecting a formula activates MathLive in place.
+In extension mode the original Cherry toolbar remains in place and routes formatting to the currently focused preview selection. Pickers such as image, file, Draw.io, and chart keep Cherry's original UI and insert at the saved Milkdown selection. Native Markdown input rules create headings, lists, quotes, and code blocks without opening Cherry's source-editor suggest panel. Structural controls appear only while hovering or selecting their node. Tables use Milkdown's `table-block` controls for row and column insertion, deletion, dragging, and alignment. Selecting a formula activates MathLive in place.
+
+Cherry's native single-pane preview mode works without another Milkdown mode option. Cherry remains the only owner of layout and toolbar visibility:
+
+```js
+const cherry = new Cherry({
+  id: 'editor',
+  value: '# Directly editable preview',
+  editor: { defaultModel: 'previewOnly' },
+  toolbars: { toolbar: false },
+  extensions: [milkdown()],
+});
+```
+
+This keeps CodeMirror and all global toolbars hidden while the preview document remains directly editable. Use Markdown input rules to create blocks and `Mod-Alt-0…6` to change the current block to a paragraph or H1-H6. The preview deliberately does not open Cherry's source-editor suggest panel.
 
 Configure MathLive macros and its virtual keyboard through `mathlive`:
 
@@ -95,7 +109,7 @@ yarn build:demo
 yarn preview:demo
 ```
 
-The user-facing demo is a minimal React + Vite application whose entry is `examples/react/App.tsx`; `index.html` only contains the root element required by Vite. It reuses the root demo's layout, configuration, toolbar, theme, ECharts plugin, and full Markdown manual. Its only integration difference is `extensions: [milkdown()]`, with the Cherry instance destroyed during React unmount.
+The user-facing demo is a minimal React + Vite application whose entry is `examples/react/App.tsx`; `index.html` only contains the root element required by Vite. It reuses the root demo's layout, configuration, toolbar, theme, ECharts plugin, and full Markdown manual. Its only integration difference is `extensions: [milkdown()]`, with the Cherry instance destroyed during React unmount. Open `index.html?mode=previewOnly` for the toolbar-free preview-only mode; Cherry's existing `editor.defaultModel` and `toolbars` configuration select the mode, so there is no second React editor.
 
 ## Reliability checks
 
@@ -110,7 +124,7 @@ Unit and real-browser tests share one typed Cherry syntax capability matrix. The
 
 ## Current boundary
 
-CherryEngine is still loaded from the private `cherry-markdown/dist/cherry-markdown.engine.core.esm.js` path for compatibility. Diagrams remain visual embedded objects, arbitrary HTML is not exposed as editable ProseMirror content for security, and business-specific hooks require an explicit Milkdown plugin.
+CherryEngine is still loaded from the private `cherry-markdown/dist/cherry-markdown.engine.core.esm.js` path for compatibility. Diagrams remain visual embedded objects, arbitrary HTML is not exposed as editable ProseMirror content for security, and business-specific hooks require an explicit Milkdown plugin for structured editing (otherwise the complete directive source remains editable inside Cherry's native shell).
 
 ## License
 

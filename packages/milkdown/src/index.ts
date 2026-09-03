@@ -216,6 +216,30 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
       }),
   );
 
+  const tablePointerSelectionPlugin = $prose(
+    () =>
+      new Plugin({
+        view: (view) => {
+          const selectCellAtPointer = (event: PointerEvent) => {
+            const target = event.target;
+            if (!(target instanceof Element) || !target.closest('.milkdown-table-block td, .milkdown-table-block th')) {
+              return;
+            }
+            const position = view.posAtCoords({ left: event.clientX, top: event.clientY });
+            if (!position) return;
+            const selection = TextSelection.near(view.state.doc.resolve(position.pos));
+            if (!view.state.selection.eq(selection)) {
+              view.dispatch(view.state.tr.setSelection(selection));
+            }
+          };
+          view.dom.addEventListener('pointerdown', selectCellAtPointer, true);
+          return {
+            destroy: () => view.dom.removeEventListener('pointerdown', selectCellAtPointer, true),
+          };
+        },
+      }),
+  );
+
   const editor = Editor.make()
     .config((ctx) => {
       ctx.set(rootCtx, root);
@@ -264,6 +288,7 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
     .use(indent)
     .use(trailing)
     .use(immediateChangePlugin)
+    .use(tablePointerSelectionPlugin)
     .use(cherryWysiwyg);
 
   editor.use(tableBlockComponent.tableBlock);

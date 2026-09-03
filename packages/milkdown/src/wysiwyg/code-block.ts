@@ -119,7 +119,6 @@ class CherryCodeBlockView implements NodeView {
     this.dom = document.createElement('div');
     this.dom.className = 'cherry-milkdown-code-block';
     this.dom.dataset.type = 'codeBlock';
-    this.dom.addEventListener('click', this.stopLegacyClick);
 
     const tools = document.createElement('div');
     tools.className = 'cherry-milkdown-code-block__tools';
@@ -188,7 +187,6 @@ class CherryCodeBlockView implements NodeView {
     this.language.removeEventListener('change', this.updateLanguage);
     this.copy.removeEventListener('click', this.copyCode);
     this.contentDOM.removeEventListener('click', this.activateContent);
-    this.dom.removeEventListener('click', this.stopLegacyClick);
   }
 
   private sync() {
@@ -258,8 +256,6 @@ class CherryCodeBlockView implements NodeView {
     );
     this.view.focus();
   };
-
-  private stopLegacyClick = (event: MouseEvent) => event.stopPropagation();
 
   private copyCode = () => {
     const value = this.node.textContent;

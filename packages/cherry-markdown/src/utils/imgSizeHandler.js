@@ -98,6 +98,7 @@ const imgSizeHandler = {
     this.onInvalidTarget = options.onInvalidTarget || null;
     this.validateTarget = options.validateTarget || null;
     this.resolveTarget = options.resolveTarget || null;
+    this.deferChangeUntilResizeStop = options.deferChangeUntilResizeStop || false;
     this.previewerDom = previewerDom;
     this.container = container;
     this.buts = this.initBubbleButtons();
@@ -168,7 +169,7 @@ const imgSizeHandler = {
     }, 120);
   },
   refreshTarget() {
-    if (!this.isMermaid || !this.previewerDom) {
+    if (!this.previewerDom) {
       return;
     }
     if (typeof this.resolveTarget === 'function') {
@@ -209,6 +210,7 @@ const imgSizeHandler = {
     this.onInvalidTarget = null;
     this.validateTarget = null;
     this.resolveTarget = null;
+    this.deferChangeUntilResizeStop = false;
     this.onPositionUpdated = null;
   },
   updateBubbleButs() {
@@ -361,12 +363,14 @@ const imgSizeHandler = {
     // 左对齐 (left): 均不需要移动 left
 
     this.updateBubbleButs();
-    // mermaid figure 拖拽过程中实时更新元素尺寸，使缩放可见
-    if (this.isMermaid) {
+    // Mermaid and bridge-owned images update the rendered element directly
+    // while dragging. The bridge commits Markdown once on mouseup so a large
+    // editable preview is not reparsed for every pointer movement.
+    if (this.isMermaid || this.deferChangeUntilResizeStop) {
       this.img.style.width = `${this.buts.style.width}px`;
       this.img.style.height = `${this.buts.style.height}px`;
     }
-    if (!this.isMermaid) {
+    if (!this.isMermaid && !this.deferChangeUntilResizeStop) {
       this.change();
     }
   },

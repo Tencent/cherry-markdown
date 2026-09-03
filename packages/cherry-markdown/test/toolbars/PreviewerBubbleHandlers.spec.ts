@@ -9,6 +9,7 @@ vi.mock('../../src/utils/imgSizeHandler', () => ({
     showBubble: vi.fn(),
     bindChange: vi.fn(),
     updatePosition: vi.fn(),
+    refreshTarget: vi.fn(),
     remove: vi.fn(),
     $isResizing: vi.fn(() => false),
     img: null,
@@ -21,6 +22,7 @@ vi.mock('../../src/utils/imgToolHandler', () => ({
     showBubble: vi.fn(),
     bindChange: vi.fn(),
     remove: vi.fn(),
+    refreshTarget: vi.fn(),
   },
 }));
 
@@ -185,11 +187,45 @@ describe('toolbars/PreviewerBubble handler integration', () => {
 
     const sizeOptions = vi.mocked(imgSizeHandler.showBubble).mock.calls[0][3];
     expect(sizeOptions.validateTarget()).toBe(true);
+    expect(sizeOptions.deferChangeUntilResizeStop).toBeFalsy();
     sizeOptions.onInvalidTarget();
     expect(removeImageBubbles).toHaveBeenCalledOnce();
 
     imgSizeHandler.remove();
     expect(off).toHaveBeenCalledWith('editor.size.change', expect.any(Function));
+  });
+
+  it('defers bridge-owned image Markdown updates until resize stops', () => {
+    const { bubble, previewer, previewerDom, wrapperDom } = enableHandlerContext();
+    document.body.appendChild(wrapperDom);
+    const image = document.createElement('img');
+    const updatePreviewElement = vi.fn();
+    const resolvePreviewElement = vi.fn(() => image);
+    Reflect.set(previewer, 'editingBridge', {
+      isActive: () => true,
+      ownsPreviewElement: (target, kind) => target instanceof HTMLImageElement && kind === 'image',
+      updatePreviewElement,
+      resolvePreviewElement,
+    });
+    previewerDom.appendChild(image);
+
+    bubble.$showImgPreviewerBubbles(image, new MouseEvent('click'));
+
+    const sizeOptions = vi.mocked(imgSizeHandler.showBubble).mock.calls[0][3];
+    expect(sizeOptions.deferChangeUntilResizeStop).toBe(true);
+    Reflect.set(imgSizeHandler, 'img', image);
+    expect(sizeOptions.validateTarget()).toBe(true);
+    expect(sizeOptions.resolveTarget()).toBe(image);
+    expect(resolvePreviewElement).toHaveBeenCalledWith('image');
+    const toolOptions = vi.mocked(imgToolHandler.showBubble).mock.calls[0][5];
+    expect(toolOptions.resolveTarget()).toBe(image);
+    const sizeChange = vi.mocked(imgSizeHandler.bindChange).mock.calls[0][0];
+    sizeChange(image, { width: 150, height: 90 });
+    expect(updatePreviewElement).toHaveBeenCalledWith(image, {
+      kind: 'image',
+      width: 150,
+      height: 90,
+    });
   });
 
   it('returns a no-op handler when image Markdown selection fails', () => {
@@ -244,6 +280,40 @@ describe('toolbars/PreviewerBubble handler integration', () => {
     imgSizeHandler.remove();
     expect(off).toHaveBeenCalledWith('editor.size.change', expect.any(Function));
     expect(bubble.mermaidSession.disposeHandlers).toHaveBeenCalledOnce();
+  });
+
+  it('keeps bridge-owned Mermaid controls attached to the replacement node', () => {
+    const { bubble, previewer, previewerDom, wrapperDom } = enableHandlerContext();
+    document.body.appendChild(wrapperDom);
+    const figure = document.createElement('figure');
+    figure.dataset.type = 'mermaid';
+    const replacement = document.createElement('figure');
+    replacement.dataset.type = 'mermaid';
+    const updatePreviewElement = vi.fn();
+    const resolvePreviewElement = vi.fn(() => replacement);
+    Reflect.set(previewer, 'editingBridge', {
+      isActive: () => true,
+      ownsPreviewElement: (target, kind) => (target === figure || target === replacement) && kind === 'mermaid',
+      updatePreviewElement,
+      resolvePreviewElement,
+    });
+    previewerDom.append(figure, replacement);
+
+    bubble.$showMermaidPreviewerBubbles(figure, new MouseEvent('click'));
+
+    const sizeOptions = vi.mocked(imgSizeHandler.showBubble).mock.calls[0][3];
+    const toolOptions = vi.mocked(imgToolHandler.showBubble).mock.calls[0][5];
+    Reflect.set(imgSizeHandler, 'img', replacement);
+    Reflect.set(imgSizeHandler, 'isMermaid', true);
+    expect(sizeOptions.resolveTarget()).toBe(replacement);
+    expect(toolOptions.resolveTarget()).toBe(replacement);
+    expect(sizeOptions.validateTarget()).toBe(true);
+    expect(bubble.$isImgHandlerValid({ strict: true })).toBe(true);
+    expect(resolvePreviewElement).toHaveBeenCalledWith('mermaid');
+    const alignChange = vi.mocked(imgToolHandler.bindChange).mock.calls[0][0];
+    alignChange(figure, 'center');
+    expect(updatePreviewElement).toHaveBeenCalledWith(figure, { kind: 'mermaid', type: 'center' });
+    expect(bubble.mermaidSession.beginEdit).not.toHaveBeenCalled();
   });
 
   it('recreates invalid table handlers and removes invalid image handlers', () => {

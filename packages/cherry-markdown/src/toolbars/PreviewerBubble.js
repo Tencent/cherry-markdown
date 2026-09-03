@@ -227,10 +227,24 @@ export default class PreviewerBubble {
   }
 
   /**
+   * 是否由预览编辑器接管当前预览区域
+   * @returns {boolean}
+   */
+  $isPreviewEditingBridgeActive() {
+    return this.previewer.editingBridge?.isActive?.() === true;
+  }
+
+  /**
    * 是否开启了预览区操作 && 是否有编辑区
    * @returns {boolean}
    */
   $isEnableBubbleAndEditorShow() {
+    // An active preview editing bridge is the editor in previewOnly mode.
+    // Node controls delegate their Markdown updates to that bridge, so they
+    // do not depend on CodeMirror visibility or the native bubble switch.
+    if (this.$isPreviewEditingBridgeActive()) {
+      return true;
+    }
     if (!this.previewer.options.enablePreviewerBubble) {
       return false;
     }
@@ -255,7 +269,10 @@ export default class PreviewerBubble {
     switch (target.tagName) {
       case 'TD':
       case 'TH': {
-        if (!this.$isEnableBubbleAndEditorShow()) {
+        // Milkdown's table-block owns table structure and controls. Showing
+        // Cherry's CodeMirror-backed table bubble at the same time creates a
+        // second toolbar and can apply an operation twice.
+        if (this.$isPreviewEditingBridgeActive() || !this.$isEnableBubbleAndEditorShow()) {
           return;
         }
         const table = this.isCherryTable(e.target);
@@ -370,16 +387,25 @@ export default class PreviewerBubble {
    * @returns
    */
   $onClick(e) {
-    // 如果有自定义的onClickPreview回调函数，则先执行；返回false时中断后续处理
-    if (this.previewer.$cherry.options.callback?.onClickPreview?.(e) === false) {
+    const { target } = e;
+    const editingBridge = this.previewer.editingBridge;
+    const bridgeOwnsImage =
+      target instanceof HTMLImageElement &&
+      editingBridge?.isActive?.() === true &&
+      editingBridge.ownsPreviewElement?.(target, 'image') === true;
+    // Preserve Cherry's callback ordering for native preview clicks. The
+    // bridge-owned image exception is the only new path; all other targets
+    // still pass through onClickPreview before element-specific handling.
+    if (!bridgeOwnsImage && this.previewer.$cherry.options.callback?.onClickPreview?.(e) === false) {
       return false;
     }
-
-    const { target } = e;
     if (!(target instanceof Element)) {
       return;
     }
 
+    // In an editable preview, a plain click on a bridge-owned image selects
+    // it for resize/style operations. Do not let a read-only preview callback
+    // (for example the demo image viewer) consume that same click.
     // 编辑draw.io不受previewer.options.enablePreviewerBubble配置的影响
     if (target instanceof HTMLImageElement) {
       if (
@@ -500,15 +526,17 @@ export default class PreviewerBubble {
     }
 
     // ========== 以下是编辑工具栏功能 ==========
-    // 需要同时满足两个条件：
-    // 1. enablePreviewerBubble=true（开启预览区操作）
-    // 2. 有编辑器可用（Stream 模式下没有编辑器，自动跳过）
+    // Native Cherry follows enablePreviewerBubble and CodeMirror visibility;
+    // an active preview editing bridge owns these node-level operations.
     if (!this.$isEnableBubbleAndEditorShow()) {
       return;
     }
 
     // checkbox 所见即所得编辑操作
-    if (target.className === 'ch-icon ch-icon-square' || target.className === 'ch-icon ch-icon-check') {
+    if (
+      !this.$isPreviewEditingBridgeActive() &&
+      (target.className === 'ch-icon ch-icon-square' || target.className === 'ch-icon ch-icon-check')
+    ) {
       this.$dealCheckboxClick(e);
     }
 
@@ -526,6 +554,9 @@ export default class PreviewerBubble {
         break;
       case 'TD':
       case 'TH':
+        if (this.$isPreviewEditingBridgeActive()) {
+          return;
+        }
         // 表格编辑功能
         if (target instanceof HTMLElement) {
           const table = this.isCherryTable(target);
@@ -537,6 +568,9 @@ export default class PreviewerBubble {
         }
         break;
       case 'P':
+        if (this.$isPreviewEditingBridgeActive()) {
+          return;
+        }
         // 列表所见即所得编辑
         if (
           target instanceof HTMLParagraphElement &&
@@ -670,13 +704,39 @@ export default class PreviewerBubble {
       return true;
     }
 
+    // Async render completion can race with a Milkdown transaction that
+    // replaced the selected image DOM. Resolve the current NodeSelection
+    // before strict cleanup so a valid editing session is not discarded.
+    imgSizeHandler.refreshTarget?.();
+    if (this.bubbleHandler.imgTool === imgToolHandler) {
+      imgToolHandler.refreshTarget?.();
+    }
+
     const target = imgSizeHandler.img;
     if (!target || !document.contains(target) || !this.previewerDom.contains(target)) {
       return false;
     }
 
+    const editingBridge = this.previewer.editingBridge;
+    if (
+      imgSizeHandler.isMermaid &&
+      editingBridge?.isActive?.() === true &&
+      editingBridge.ownsPreviewElement?.(target, 'mermaid') === true
+    ) {
+      return true;
+    }
+
     if (target.tagName !== 'IMG') {
       return false;
+    }
+    if (
+      editingBridge?.isActive?.() === true &&
+      editingBridge.ownsPreviewElement?.(target, 'image') === true
+    ) {
+      // During Cherry async-render completion ProseMirror may have inserted
+      // the replacement image but not laid it out yet (0x0 for this frame).
+      // A resolved, bridge-owned NodeSelection is still a valid target.
+      return true;
     }
     const rect = target.getBoundingClientRect();
     return rect.width > 0 && rect.height > 0;
@@ -825,16 +885,19 @@ export default class PreviewerBubble {
    * @param {HTMLImageElement} htmlElement 用户点击的图片dom
    */
   $showImgPreviewerBubbles(htmlElement, event) {
-    // 图片编辑功能需要编辑器支持
-    if (!this.$hasEditor()) {
-      return;
-    }
-    this.$createPreviewerBubbles('click', 'img-handler');
     const editingBridge = this.previewer.editingBridge;
     const bridgeCanOwnImage =
       editingBridge?.isActive?.() &&
       typeof editingBridge.ownsPreviewElement === 'function' &&
-      typeof editingBridge.updatePreviewElement === 'function';
+      typeof editingBridge.updatePreviewElement === 'function' &&
+      typeof editingBridge.resolvePreviewElement === 'function';
+    // Native image editing needs CodeMirror. A preview editing bridge can
+    // update the selected image transaction directly, including stream-like
+    // hosts that do not expose a source editor.
+    if (!this.$hasEditor() && !bridgeCanOwnImage) {
+      return;
+    }
+    this.$createPreviewerBubbles('click', 'img-handler');
     const bridgeOwnsImage = bridgeCanOwnImage && editingBridge.ownsPreviewElement(htmlElement, 'image');
     if (bridgeCanOwnImage && !bridgeOwnsImage) {
       return { emit: () => {} };
@@ -850,11 +913,19 @@ export default class PreviewerBubble {
 
     const onInvalidTarget = () => this.$removeImgPreviewerBubbles();
     const validateTarget = () => this.$isImgHandlerValid();
+    const resolveTarget = bridgeOwnsImage
+      ? () => editingBridge.resolvePreviewElement('image')
+      : null;
 
     const imgSizeDiv = document.createElement('div');
     imgSizeDiv.className = 'cherry-previewer-img-size-handler';
     this.bubble.click.appendChild(imgSizeDiv);
-    imgSizeHandler.showBubble(htmlElement, imgSizeDiv, this.previewerDom, { onInvalidTarget, validateTarget });
+    imgSizeHandler.showBubble(htmlElement, imgSizeDiv, this.previewerDom, {
+      onInvalidTarget,
+      validateTarget,
+      resolveTarget,
+      deferChangeUntilResizeStop: bridgeOwnsImage,
+    });
     imgSizeHandler.bindChange(
       bridgeOwnsImage
         ? (target, style) =>
@@ -872,6 +943,7 @@ export default class PreviewerBubble {
     imgToolHandler.showBubble(htmlElement, imgToolDiv, this.previewerDom, event, this.previewer.$cherry.getLocales(), {
       onInvalidTarget,
       validateTarget,
+      resolveTarget,
     });
     imgToolHandler.bindChange(
       bridgeOwnsImage
@@ -1219,7 +1291,8 @@ export default class PreviewerBubble {
       editingBridge?.isActive?.() &&
       typeof editingBridge.ownsPreviewElement === 'function' &&
       editingBridge.ownsPreviewElement(figureElement, 'mermaid') &&
-      typeof editingBridge.updatePreviewElement === 'function';
+      typeof editingBridge.updatePreviewElement === 'function' &&
+      typeof editingBridge.resolvePreviewElement === 'function';
     const bridgeSource = bridgeOwnsMermaid ? figureElement.querySelector('.cherry-embed__source:not([hidden])') : null;
     if (sourceMode || bridgeSource) {
       return;
@@ -1234,7 +1307,11 @@ export default class PreviewerBubble {
     const handlerOptions = bridgeOwnsMermaid
       ? {
           onInvalidTarget,
-          validateTarget: () => document.contains(figureElement) && this.previewerDom.contains(figureElement),
+          resolveTarget: () => editingBridge.resolvePreviewElement('mermaid'),
+          validateTarget: () => {
+            const target = editingBridge.resolvePreviewElement('mermaid');
+            return !!target && document.contains(target) && this.previewerDom.contains(target);
+          },
         }
       : this.mermaidSession.createHandlerOptions(onInvalidTarget);
 

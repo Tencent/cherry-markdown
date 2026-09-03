@@ -611,17 +611,8 @@
       }
     }
     &--typewriter {
-      .cm-lineWrapping {
-        position: relative;
-        &::before {
-          content: '';
-          display: block;
-        }
-        &::after {
-          content: '';
-          display: block;
-        }
-      }
+      // typewriter 模式下的上下留白由 JS 动态注入 .cm-scroller::before / ::after 实现
+      // 以保证首行/末行也能滚动到可视区的垂直中间
     }
   }
 

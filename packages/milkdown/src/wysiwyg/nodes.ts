@@ -353,6 +353,93 @@ export const cherryLinkTargetSchema = leafSchema('cherry_link_target', 'cherryLi
   target: sourceAttr(),
 });
 
+/** Cherry's footnote reference DOM is a numbered link, not Milkdown's plain
+ * `sup[data-type="footnote_reference"]`. Keeping it as an atom preserves the
+ * native visual contract while still allowing the surrounding heading text to
+ * remain editable. */
+export const cherryFootnoteReferenceSchema = $nodeSchema('cherry_footnote_reference', () => ({
+  group: 'inline',
+  inline: true,
+  atom: true,
+  selectable: true,
+  attrs: {
+    label: sourceAttr(),
+    number: { default: 0, validate: 'number' as const },
+  },
+  parseDOM: [
+    {
+      tag: 'sup.cherry-footnote-number',
+      getAttrs: (dom: HTMLElement) => {
+        const link = dom.querySelector('a');
+        return {
+          label: link?.getAttribute('data-key') ?? dom.dataset.label ?? '',
+          number: Number(link?.getAttribute('data-index') ?? dom.dataset.number ?? 0),
+        };
+      },
+    },
+  ],
+  toDOM: (node) => {
+    const label = String(node.attrs.label ?? '');
+    const number = Number(node.attrs.number ?? 0);
+    const href = `#fn:${number}`;
+    return [
+      'sup',
+      { class: 'cherry-footnote-number', 'data-label': label, 'data-number': String(number) },
+      [
+        'a',
+        {
+          href,
+          id: `fnref:${number}`,
+          title: label,
+          'data-index': String(number),
+          'data-key': label,
+          class: 'footnote',
+          contenteditable: 'false',
+        },
+        `[${number}]`,
+      ],
+    ];
+  },
+  parseMarkdown: {
+    match: (node) => node.type === 'cherryFootnoteReference',
+    runner: (state, node, type) =>
+      state.addNode(type, {
+        label: String(node.label ?? ''),
+        number: Number(node.number ?? 0),
+      }),
+  },
+  toMarkdown: {
+    match: (node) => node.type.name === 'cherry_footnote_reference',
+    runner: (state, node) =>
+      state.addNode('footnoteReference', undefined, undefined, {
+        label: String(node.attrs.label ?? ''),
+        identifier: String(node.attrs.label ?? ''),
+      }),
+  },
+}));
+
+export const cherryFootnoteNavigationPlugin = $prose(
+  () =>
+    new Plugin({
+      view: (view) => {
+        const onClick = (event: MouseEvent) => {
+          const target = event.target instanceof Element ? event.target.closest('a.footnote') : null;
+          if (!(target instanceof HTMLAnchorElement)) return;
+          const label = target.dataset.key ?? '';
+          const definition = [...view.dom.querySelectorAll<HTMLElement>('[data-type="footnote_definition"]')].find(
+            (element) => element.dataset.label === label,
+          );
+          if (!definition) return;
+          event.preventDefault();
+          event.stopPropagation();
+          definition.scrollIntoView({ block: 'nearest' });
+        };
+        view.dom.addEventListener('click', onClick, true);
+        return { destroy: () => view.dom.removeEventListener('click', onClick, true) };
+      },
+    }),
+);
+
 class LinkTargetView implements NodeView {
   dom: HTMLElement;
   private node: ProseNode;
@@ -975,6 +1062,8 @@ class EmbedView implements NodeView {
   private visibilityObserver?: IntersectionObserver;
   private renderActivated = false;
   private destroyed = false;
+  private sourceEditing = false;
+  private applyingSourceTransaction = false;
 
   constructor(
     node: ProseNode,
@@ -1001,7 +1090,8 @@ class EmbedView implements NodeView {
       '在节点内编辑源码',
       () => {
         this.sourcePanel.hidden = !this.sourcePanel.hidden;
-        if (!this.sourcePanel.hidden) this.source.focus();
+        this.sourceEditing = !this.sourcePanel.hidden;
+        if (this.sourceEditing) this.source.focus();
       },
       config.readonly,
     );
@@ -1013,7 +1103,7 @@ class EmbedView implements NodeView {
     this.source.contentEditable = String(!config.readonly);
     this.source.spellcheck = false;
     this.source.addEventListener('input', this.updateSource);
-    this.source.addEventListener('blur', this.flushSourceRender);
+    this.source.addEventListener('blur', this.handleSourceBlur);
     this.sourcePanel.append(this.source);
     this.dom.append(this.preview, controls, this.sourcePanel);
     this.scheduleRender();
@@ -1037,7 +1127,13 @@ class EmbedView implements NodeView {
 
   deselectNode() {
     this.dom.classList.remove('is-selected');
-    this.sourcePanel.hidden = true;
+    // setNodeMarkup() is dispatched for every source input so Markdown stays
+    // synchronized immediately. ProseMirror may briefly move the selection
+    // away from the atom while applying that transaction. Hiding the panel at
+    // that point removes the focused editor from layout and drops the rest of
+    // the user's keystrokes. Keep the in-node editor open while it owns focus;
+    // an explicit click outside still closes it after blur.
+    if (!this.sourceEditing) this.sourcePanel.hidden = true;
   }
 
   stopEvent(event: Event) {
@@ -1116,7 +1212,20 @@ class EmbedView implements NodeView {
       attrs.value = value;
       attrs.source = `\`\`\`${attrs.diagramType}\n${value}\n\`\`\``;
     } else attrs.source = value;
+    this.applyingSourceTransaction = true;
     this.view.dispatch(this.view.state.tr.setNodeMarkup(pos, undefined, attrs));
+    this.applyingSourceTransaction = false;
+    // Updating an atom's attributes can make the browser blur a contenteditable
+    // inside its NodeView even though the user is still typing there. Restore
+    // that same editing owner without changing the document selection.
+    if (this.sourceEditing && document.activeElement !== this.source) {
+      this.source.focus({ preventScroll: true });
+    }
+    queueMicrotask(() => {
+      if (!this.destroyed && this.sourceEditing && document.activeElement !== this.source) {
+        this.source.focus({ preventScroll: true });
+      }
+    });
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => {
       this.timer = undefined;
@@ -1128,6 +1237,13 @@ class EmbedView implements NodeView {
     if (this.timer) clearTimeout(this.timer);
     this.timer = undefined;
     if (this.renderActivated || this.node.type.name !== 'cherry_diagram') this.render();
+  };
+
+  private handleSourceBlur = () => {
+    if (this.applyingSourceTransaction) return;
+    this.sourceEditing = false;
+    this.sourcePanel.hidden = true;
+    this.flushSourceRender();
   };
 
   private render() {
@@ -1560,6 +1676,7 @@ export const cherryStructureSchemas = [
   cherryHtmlInlineSchema,
   cherryEmojiSchema,
   cherryLinkTargetSchema,
+  cherryFootnoteReferenceSchema,
 ];
 
 export const cherryStructureViews = [
@@ -1576,6 +1693,7 @@ export const cherryStructureViews = [
   cherryHtmlInlineView,
   cherryEmojiView,
   cherryLinkTargetView,
+  cherryFootnoteNavigationPlugin,
   cherryLinkTargetClickPlugin,
   cherryTocRefreshPlugin,
 ];

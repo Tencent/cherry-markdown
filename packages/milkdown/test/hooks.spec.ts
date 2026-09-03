@@ -107,7 +107,14 @@ describe('Cherry built-in hook fixtures', () => {
     const first = instance.getMarkdown();
     const engine = new CherryEngine();
     expect(first.length).toBeGreaterThan(fullManual.length * 0.9);
-    for (const marker of ['## 时间线', '## 语法高亮', '## 表格配图', '## 流程图', '# 编辑器操作能力', '## 协议']) {
+    for (const marker of [
+      '## 时间线',
+      '## 语法高亮',
+      '## 表格配图',
+      '## 流程图[^不通用提醒]',
+      '# 编辑器操作能力',
+      '## 协议',
+    ]) {
       expect(first).toContain(marker);
     }
     expect(normalizeHtml(new CherryEngine().makeHtml(first))).toBe(
@@ -140,5 +147,30 @@ describe('Cherry built-in hook fixtures', () => {
 
     instance.setMarkdown(first, { emit: false });
     expect(instance.getMarkdown()).toBe(first);
+    const flowHeading = [...root.querySelectorAll('h2')].find((element) => element.textContent?.includes('流程图'));
+    expect(flowHeading?.outerHTML).toContain('cherry-footnote-number');
+    expect(flowHeading?.textContent).not.toContain('^');
+  });
+
+  it('renders GFM footnote references as inline nodes instead of literal heading text', async () => {
+    const root = document.createElement('div');
+    document.body.append(root);
+    const instance = await createCherryMilkdown({
+      root,
+      value: '## 流程图[^不通用提醒]\n\n[^不通用提醒]: 该语法不是通用语法',
+      nativePreview: true,
+    });
+    instances.push(instance);
+    const heading = root.querySelector('h2');
+    expect(heading?.outerHTML).toContain('cherry-footnote-number');
+    expect(heading?.textContent).toBe('流程图[1]');
+    expect(heading?.querySelector('sup.cherry-footnote-number a[href="#fn:1"]')).not.toBeNull();
+    expect(heading?.textContent).not.toContain('^');
+    const scrollIntoView = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', { configurable: true, value: scrollIntoView });
+    heading
+      ?.querySelector<HTMLAnchorElement>('a.footnote')
+      ?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(scrollIntoView).toHaveBeenCalled();
   });
 });

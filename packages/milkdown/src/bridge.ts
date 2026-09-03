@@ -1,7 +1,7 @@
 import { commandsCtx, editorViewCtx, parserCtx, serializerCtx } from '@milkdown/kit/core';
 import { Slice } from '@milkdown/kit/prose/model';
 import { toggleMark } from '@milkdown/kit/prose/commands';
-import { NodeSelection } from '@milkdown/kit/prose/state';
+import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
 import type { EditorView } from '@milkdown/kit/prose/view';
 import {
   insertHrCommand,
@@ -76,6 +76,18 @@ const TRANSFORMED_MARKDOWN_COMMANDS = new Set([
 // path so an empty paragraph is replaced by one valid block instead of
 // leaving a trailing paragraph behind.
 const CHERRY_LINE_TRANSFORM_COMMANDS = new Set(['ol', 'ul', 'checklist', 'panel', 'detail', 'timeline']);
+
+const INLINE_FORMAT_COMMANDS = new Set([
+  'bold',
+  'italic',
+  'strikethrough',
+  'inlineCode',
+  'underline',
+  'sub',
+  'sup',
+  'size',
+  'color',
+]);
 
 // Commands handled by the explicit Milkdown paths below (or by Cherry's
 // non-document UI).  Any other updateMarkdown menu is a user supplied menu;
@@ -224,6 +236,12 @@ export function createCherryEditingBridge(
   };
   const activatePreview = (event: PointerEvent) => {
     rememberPreview();
+    cherry.bubble?.hideBubble?.();
+    // A node-specific interaction must immediately dismiss a text-format
+    // Bubble left over from the previous selection. If this pointer gesture
+    // produces another eligible text selection, selectionchange will show it
+    // again after ProseMirror has committed that selection.
+    cherry.getPreviewer().hideEditingBubble?.();
     if (event.button !== 0 || !view.editable || view.hasFocus()) return;
     const target = event.target instanceof Element ? event.target : null;
     if (target?.closest('button, input, select, textarea, [contenteditable="false"]')) return;
@@ -239,6 +257,7 @@ export function createCherryEditingBridge(
     // does not change the editing owner; only an explicit pointer interaction
     // in the source editor should hand ownership back.
     previewWasActive = false;
+    cherry.getPreviewer().hideEditingBubble?.();
   };
   view.dom.addEventListener('focusin', rememberPreview);
   view.dom.addEventListener('pointerdown', activatePreview, true);
@@ -246,6 +265,120 @@ export function createCherryEditingBridge(
   const sourceEditor = cherry.getCodeMirror?.();
   const sourceDom = sourceEditor?.dom;
   sourceDom?.addEventListener('pointerdown', deactivatePreviewFromSource, true);
+
+  let bubbleRefreshQueued = false;
+  const selectionTouchesCodeBlock = (selection: typeof view.state.selection) => {
+    const isCodeNode = (node: (typeof selection.$from)['parent']) =>
+      node.type.spec.code === true || node.type.name === 'code_block';
+    const hasCodeBlockAncestor = (position: typeof selection.$from) => {
+      for (let depth = position.depth; depth >= 0; depth -= 1) {
+        if (isCodeNode(position.node(depth))) return true;
+      }
+      return false;
+    };
+
+    if (
+      selection.ranges.some((range) => hasCodeBlockAncestor(range.$from) || hasCodeBlockAncestor(range.$to))
+    ) {
+      return true;
+    }
+
+    let found = false;
+    selection.$from.doc.nodesBetween(selection.from, selection.to, (node) => {
+      if (isCodeNode(node)) found = true;
+      return !found;
+    });
+    return found;
+  };
+  const selectionSupportsInlineBubble = (selection: typeof view.state.selection) => {
+    // The generic Cherry Bubble changes ProseMirror inline marks. Native text
+    // selected inside an atom NodeView (Mermaid source, HTML source, MathLive,
+    // etc.) is not a ProseMirror TextSelection and must never opt into it.
+    if (!(selection instanceof TextSelection) || selection.empty) return false;
+    if (!selection.$from.parent.inlineContent || !selection.$to.parent.inlineContent) return false;
+
+    const inlineMarkTypes = [
+      'strong',
+      'emphasis',
+      'strike_through',
+      'inlineCode',
+      'cherry_underline',
+      'cherry_subscript',
+      'cherry_superscript',
+      'cherry_font_size',
+      'cherry_color',
+      'cherry_background_color',
+    ]
+      .map((name) => view.state.schema.marks[name])
+      .filter((mark): mark is NonNullable<typeof mark> => Boolean(mark));
+    if (!inlineMarkTypes.length) return false;
+
+    const textblocks = new Set([selection.$from.parent, selection.$to.parent]);
+    let blocked = false;
+    selection.$from.doc.nodesBetween(selection.from, selection.to, (node, position) => {
+      if (node.type.spec.code === true || node.type.name === 'code_block') {
+        blocked = true;
+        return false;
+      }
+      // Inline atoms and leaf nodes own their interaction. A selection that
+      // includes one cannot safely apply the full text-format menu.
+      if (!node.isText && (node.isAtom || node.isLeaf)) {
+        blocked = true;
+        return false;
+      }
+      // An isolating node is allowed as an ancestor (for example text inside
+      // a Panel), but not when the selection crosses the complete node.
+      if (
+        node.type.spec.isolating === true &&
+        position >= selection.from &&
+        position + node.nodeSize <= selection.to
+      ) {
+        blocked = true;
+        return false;
+      }
+      if (node.isTextblock) textblocks.add(node);
+      return !blocked;
+    });
+    if (blocked) return false;
+    return Array.from(textblocks).every((node) =>
+      inlineMarkTypes.some((mark) => node.type.allowsMarkType(mark)),
+    );
+  };
+  const refreshPreviewBubble = () => {
+    if (bubbleRefreshQueued) return;
+    bubbleRefreshQueued = true;
+    queueMicrotask(() => {
+      bubbleRefreshQueued = false;
+      if (!isActive() || !view.hasFocus() || !view.editable) {
+        cherry.getPreviewer().hideEditingBubble?.();
+        return;
+      }
+      const selection = view.state.selection;
+      try {
+        if (!selectionSupportsInlineBubble(selection)) {
+          cherry.getPreviewer().hideEditingBubble?.();
+          return;
+        }
+        const from = view.coordsAtPos(selection.from);
+        const to = view.coordsAtPos(selection.to);
+        cherry.getPreviewer().showEditingBubble?.({
+          top: Math.min(from.top, to.top),
+          bottom: Math.max(from.bottom, to.bottom),
+          left: Math.min(from.left, to.left),
+          right: Math.max(from.right, to.right),
+        });
+      } catch {
+        cherry.getPreviewer().hideEditingBubble?.();
+      }
+    });
+  };
+  const onPreviewSelectionChange = () => refreshPreviewBubble();
+  view.dom.addEventListener('mouseup', onPreviewSelectionChange, true);
+  view.dom.addEventListener('keyup', onPreviewSelectionChange, true);
+  view.dom.addEventListener('focusin', onPreviewSelectionChange, true);
+  view.dom.ownerDocument.addEventListener('selectionchange', onPreviewSelectionChange, true);
+  const hidePreviewBubbleOnScroll = () => cherry.getPreviewer().hideEditingBubble?.();
+  previewContainer.addEventListener('scroll', hidePreviewBubbleOnScroll, { passive: true });
 
   // Ownership is switched by explicit pointer/focus interaction, not by the
   // transient DOM focus move caused by opening a Cherry toolbar submenu.
@@ -294,6 +427,22 @@ export function createCherryEditingBridge(
     const sameLevel = $from.parent.type === heading && Number($from.parent.attrs.level) === level;
     return setTextBlock(sameLevel ? paragraph : heading, sameLevel ? undefined : { level });
   };
+
+  const handleHeadingShortcut = (event: KeyboardEvent) => {
+    if (!isActive() || event.shiftKey || !(event.metaKey || event.ctrlKey) || !event.altKey) return;
+    if (!/^[0-6]$/.test(event.key)) return;
+    const level = Number(event.key);
+    const { heading, paragraph } = view.state.schema.nodes;
+    const handled =
+      level === 0
+        ? Boolean(paragraph && setTextBlock(paragraph))
+        : Boolean(heading && setTextBlock(heading, { level }));
+    if (!handled) return;
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  view.dom.addEventListener('keydown', handleHeadingShortcut, true);
 
   const toggleCustomMark = (name: string, attrs?: Record<string, string>) => {
     const type = view.state.schema.marks[name];
@@ -500,6 +649,7 @@ export function createCherryEditingBridge(
   };
 
   const runCommand = (command: CherryToolbarCommand) => {
+    if (selectionTouchesCodeBlock(view.state.selection) && INLINE_FORMAT_COMMANDS.has(command.name)) return false;
     switch (command.name) {
       case 'bold':
         call(toggleStrongCommand);
@@ -604,6 +754,9 @@ export function createCherryEditingBridge(
   const queryCommandState = (command: CherryToolbarCommand) => {
     const { $from } = view.state.selection;
     const { parent } = $from;
+    if (selectionTouchesCodeBlock(view.state.selection) && INLINE_FORMAT_COMMANDS.has(command.name)) {
+      return { active: false, enabled: false };
+    }
     if (command.name === 'header') {
       const level = parent.type.name === 'heading' ? Number(parent.attrs.level) : 0;
       return {
@@ -688,11 +841,32 @@ export function createCherryEditingBridge(
       }
       return target instanceof HTMLElement ? updateMermaid(target, presentation) : false;
     },
+    resolvePreviewElement: (kind) => {
+      const selection = view.state.selection;
+      if (!(selection instanceof NodeSelection)) return null;
+      const node = selection.node;
+      if (kind === 'image' && node.type.name !== 'image') return null;
+      if (
+        kind === 'mermaid' &&
+        (node.type.name !== 'cherry_diagram' || node.attrs.diagramType !== 'mermaid')
+      ) {
+        return null;
+      }
+      const dom = view.nodeDOM(selection.from);
+      return dom instanceof Element ? dom : null;
+    },
     destroy() {
       view.dom.removeEventListener('focusin', rememberPreview);
       view.dom.removeEventListener('pointerdown', activatePreview, true);
       view.dom.removeEventListener('click', syncAnchorNavigation, true);
+      view.dom.removeEventListener('keydown', handleHeadingShortcut, true);
+      view.dom.removeEventListener('mouseup', onPreviewSelectionChange, true);
+      view.dom.removeEventListener('keyup', onPreviewSelectionChange, true);
+      view.dom.removeEventListener('focusin', onPreviewSelectionChange, true);
+      view.dom.ownerDocument.removeEventListener('selectionchange', onPreviewSelectionChange, true);
       sourceDom?.removeEventListener('pointerdown', deactivatePreviewFromSource, true);
+      previewContainer.removeEventListener('scroll', hidePreviewBubbleOnScroll);
+      cherry.getPreviewer().hideEditingBubble?.();
     },
   };
 }

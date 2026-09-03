@@ -60,7 +60,9 @@ export default class MathBlock extends ParagraphBase {
 
     // 既无MathJax又无katex时，原样输出
     let result = '';
-    const $content = content.replace(/\\~D/g, '$').replace(/\\~T/g, '~').replace(/~T/g, '~');
+    let $content = content.replace(/\\~D/g, '$').replace(/\\~T/g, '~').replace(/~T/g, '~');
+    const hasCursor = /CHERRYFLOWSESSIONCURSOR/.test($content);
+    $content = $content.replace('CHERRYFLOWSESSIONCURSOR', '');
     // 保留一份源码到渲染节点上，供 formulaUtilsHandler 直接读取，避免再次对全文做正则解析。
     const encodedFormulaSource = encodeURIComponent($content);
 
@@ -120,7 +122,8 @@ export default class MathBlock extends ParagraphBase {
       data-lines="${lines}" data-formula-source="${encodedFormulaSource}">$$${escapeFormulaPunctuations(content)}$$</div>`;
     }
 
-    return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch);
+    const appendCursor = hasCursor ? 'CHERRYFLOWSESSIONCURSOR' : '';
+    return leadingChar + this.getCacheWithSpace(this.pushCache(result, sign, lines), wholeMatch) + appendCursor;
   }
 
   isSelfClosing() {
