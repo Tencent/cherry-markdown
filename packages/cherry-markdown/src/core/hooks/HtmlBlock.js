@@ -225,15 +225,22 @@ export default class HtmlBlock extends ParagraphBase {
     config.HTML_INTEGRATION_POINTS.foreignobject = true;
 
     const $strArr = $str.split(/(?=<p data-sign=)/);
-    // 如果内容很大，则分批处理，用空间换sanitizer.sanitize消耗的时间
+    // 分批缓存只用于内容较大（>50 段）的文档：未变化的分批可以跨渲染复用，只有尾部变更时重 sanitize。
+    // ≤50 段只有一个批次（slice(i, i + batch) 即整篇），不存在分批复用价值；缓存整篇在真实编辑
+    // （每次渲染内容都不同）下必然 miss，反而白付一次全文 hash 与 map 开销，故保持上游直通路径。
     const batch = 50;
-    // 最大缓存容量（冗余20%）
-    const maxCacheLength = Math.max(20, Math.round((1.2 * $strArr.length) / batch));
-    const cacheMap = {};
     if ($strArr.length > batch) {
+      // 缓存容量按当前文档的分段数缩放（冗余 30%，下限 200，上限 4000），
+      // 长会话流式增长下缓存保持有界，不会因容量过小频繁淘汰前缀批次。
+      const maxCacheLength = Math.min(4000, Math.max(200, Math.ceil(1.3 * Math.ceil($strArr.length / batch))));
+      const cacheMap = {};
       const ret = [];
       for (let i = 0; i < $strArr.length; i += batch) {
         const batchStr = $strArr.slice(i, i + batch).join('');
+        // 缓存 key 指纹的是分批后的输入文本（纯内容）。假设同一 Engine 实例内 sanitize 配置恒定：
+        // htmlWhiteListAppend 在 Engine 构造时固化，config 其余项亦由该 hook 的实例配置决定。
+        // 若运行期变更白名单/属性配置，需重建 Engine 或 clearEngineCache 后再渲染，
+        // 否则可能复用旧配置产出的 sanitize 结果。
         const cacheKey = this.$engine.hashHex(batchStr);
         cacheMap[cacheKey] = batchStr;
         ret.push(
@@ -241,6 +248,11 @@ export default class HtmlBlock extends ParagraphBase {
             cacheKey,
             (cacheKey) => sanitizer.sanitize(cacheMap[cacheKey], config),
             maxCacheLength,
+            // 负数契约：超容量时从「最新插入」的一端淘汰（语义见 ParagraphBase.cacheAndGetData），
+            // 保留最早插入的稳定前缀批次——流式/续写场景 md 变更集中在尾部，
+            // 尾部条目是下一轮即被覆盖的瞬态，而前缀批次每轮渲染都会被命中。
+            // 淘汰量沿用原实现 -1 * round(maxCacheLength / 10)：容量下限 200 时该值恒 ≥20，
+            // 不会出现 round 到 0 触发 splice(-0)=splice(0) 清空整批缓存的情况。
             -1 * Math.round(maxCacheLength / 10),
           ),
         );
