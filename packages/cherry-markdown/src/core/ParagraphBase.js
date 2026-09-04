@@ -29,6 +29,15 @@ export default class ParagraphBase extends SyntaxBase {
   static IN_PARAGRAPH_CACHE_KEY_PREFIX = '!';
   static IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX = '\\!';
 
+  /**
+   * 每个 Engine 实例构造前调用：把共享的段落缓存计数器归零，
+   * 使同一套内建 hook 在不同实例中获得一致的 `~~C{n}` 占位符编号，
+   * 保证跨实例渲染输出（data-sign 等）一致。
+   */
+  static resetCacheCounter() {
+    cacheCounter = 0;
+  }
+
   constructor({ needCache, defaultCache = {} } = { needCache: false }) {
     super({});
     this.needCache = !!needCache;
