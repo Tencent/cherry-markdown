@@ -19,6 +19,7 @@ import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
+import { normalizeMathDelimiters } from '@/utils/mathDelimiter';
 
 export default class MathBlock extends ParagraphBase {
   static HOOK_NAME = 'mathBlock';
@@ -149,7 +150,10 @@ export default class MathBlock extends ParagraphBase {
   }
 
   beforeMakeHtml(str) {
-    let $str = this.makeMath(str);
+    const normalizedStr = normalizeMathDelimiters(str, {
+      '\\[': { replacement: '~D~D', selfClosing: this.isSelfClosing() },
+    });
+    let $str = this.makeMath(normalizedStr);
     if (this.isSelfClosing()) {
       const $oldStr = $str;
       $str = this.$dealUnclosingMath($str);

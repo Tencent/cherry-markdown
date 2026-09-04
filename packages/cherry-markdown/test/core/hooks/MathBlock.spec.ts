@@ -190,6 +190,24 @@ describe('core/hooks/MathBlock', () => {
     expect(html.endsWith('tail')).toBe(false);
   });
 
+  it('renders TeX block formula delimiters directly', () => {
+    const { hook } = createMathBlock('MathJax');
+    hook.engine = 'node';
+
+    const html = hook.restoreCache(hook.beforeMakeHtml('\\[\nx^2\n\\]'));
+
+    expect(html).toContain('$$x\\^2$$');
+    expect(html).toContain('data-formula-source="x%5E2"');
+  });
+
+  it('keeps escaped, empty, and unclosed TeX block delimiters unchanged', () => {
+    const { hook } = createMathBlock('MathJax');
+
+    expect(hook.beforeMakeHtml('\\\\[not math\\\\]')).toBe('\\\\[not math\\\\]');
+    expect(hook.beforeMakeHtml('\\[\n\\]')).toBe('\\[\n\\]');
+    expect(hook.beforeMakeHtml('before \\[unclosed')).toBe('before \\[unclosed');
+  });
+
   it('closes unfinished block formulas in self-closing and flow modes', () => {
     const selfClosing = createMathBlock('MathJax', true).hook;
     const flow = createMathBlock('MathJax', false, true).hook;
@@ -203,6 +221,13 @@ describe('core/hooks/MathBlock', () => {
     expect(selfClosingHtml).toContain('data-formula-source="x%5E2"');
     expect(flowHtml).toContain('$$x\\^2$$');
     expect(flowHtml).toContain('CHERRYFLOWSESSIONCURSOR');
+
+    const texSelfClosingHtml = selfClosing.restoreCache(selfClosing.beforeMakeHtml('\\[x^2'));
+    const texFlowHtml = flow.restoreCache(flow.beforeMakeHtml('\\[x^2CHERRYFLOWSESSIONCURSOR'));
+
+    expect(texSelfClosingHtml).toContain('data-formula-source="x%5E2"');
+    expect(texFlowHtml).toContain('data-formula-source="x%5E2"');
+    expect(texFlowHtml).toContain('CHERRYFLOWSESSIONCURSOR');
   });
 
   it('keeps escaped formula markers unchanged', () => {
