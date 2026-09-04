@@ -36,6 +36,7 @@ import Image from './hooks/Image';
 import List from './hooks/List';
 import Blockquote from './hooks/Blockquote';
 import AutoLink from './hooks/AutoLink';
+import MathDelimiter from './hooks/MathDelimiter';
 import MathBlock from './hooks/MathBlock';
 import InlineMath from './hooks/InlineMath';
 import Toc from './hooks/Toc';
@@ -63,6 +64,7 @@ const hooksConfig = [
   FrontMatter,
   CodeBlock,
   InlineCode,
+  MathDelimiter,
   /**
    * 理论上行内公式（InlineMath）应该在段落公式（MathBlock）的后面，否则行内公式会破坏段落公式的渲染
    * 但实际交换顺序后，发现没啥问题，还顺带解决了[这个issue #1090](https://github.com/Tencent/cherry-markdown/issues/1090)的问题
