@@ -19,6 +19,7 @@ import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
 import { getTableRule, isLookbehindSupported, mathBlockReg } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
+import { normalizeMathDelimiters } from '@/utils/mathDelimiter';
 
 /**
  * 行内公式的语法
@@ -128,14 +129,21 @@ export default class InlineMath extends ParagraphBase {
   }
 
   beforeMakeHtml(str) {
-    let $str = str;
-    // 格里处理行内公式，让一个td里的行内公式语法生效，让跨td的行内公式语法失效
-    $str = $str.replace(getTableRule(true), (whole, ...args) => {
+    let result = '';
+    let cursor = 0;
+    // 表格里处理行内公式，让一个td里的行内公式语法生效，让跨td的行内公式语法失效
+    str.replace(getTableRule(true), (whole, ...args) => {
+      const offset = args[args.length - 2];
+      result += this.makeInlineMathWithSelfClosing(this.normalizeTexInlineMath(str.slice(cursor, offset)));
       const arr = whole.split('|');
-      return arr
+      result += arr
         .map((oneTd, index) => {
+          const normalizedTd = normalizeMathDelimiters(oneTd, {
+            '\\(': { replacement: '~D', selfClosing: index === arr.length - 1 && this.isSelfClosing() },
+            '\\[': { replacement: '~D~D' },
+          });
           // 单元格里的段落公式直接替换成行内公式
-          const tdContent = this.transformBlockMathToInlineMath(oneTd);
+          const tdContent = this.transformBlockMathToInlineMath(normalizedTd);
           // 判断是否为最后一个td
           if (index === arr.length - 1) {
             return this.makeInlineMathWithSelfClosing(tdContent);
@@ -145,9 +153,17 @@ export default class InlineMath extends ParagraphBase {
         .join('|')
         .replace(/\\~D/g, '~D') // 出现反斜杠的情况（如/$e=m^2$）会导致多一个反斜杠，这里替换掉
         .replace(/~D/g, '\\~D');
+      cursor = offset + whole.length;
+      return whole;
     });
-    $str = this.makeInlineMathWithSelfClosing($str);
-    return $str;
+    result += this.makeInlineMathWithSelfClosing(this.normalizeTexInlineMath(str.slice(cursor)));
+    return result;
+  }
+
+  normalizeTexInlineMath(str) {
+    return normalizeMathDelimiters(str, {
+      '\\(': { replacement: '~D', selfClosing: this.isSelfClosing() },
+    });
   }
 
   makeInlineMathWithSelfClosing(str) {
