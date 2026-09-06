@@ -143,9 +143,15 @@ export interface CherryMilkdownPreviewOptions extends Omit<
   onChange?: CherryMilkdownOptions['onChange'];
 }
 
-export interface CherryMilkdownPreviewInstance extends CherryMilkdownInstance {
+export interface CherryMilkdownPreviewHandle {
+  /** Whether the preview surface has created its Milkdown editor. */
+  readonly mounted: boolean;
+  /** Returns the editor after the preview has first become visible. */
+  getInstance(): CherryMilkdownInstance | undefined;
   /** Detaches Milkdown and restores Cherry's native rendered preview. */
   detach(): Promise<void>;
+  /** Alias for detach(), so the handle can participate in ordinary cleanup flows. */
+  destroy(): Promise<void>;
 }
 
 export interface CherryMilkdownInstance {

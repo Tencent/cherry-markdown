@@ -1,4 +1,5 @@
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
+import { footnoteDefinitionSchema } from '@milkdown/kit/preset/gfm';
 import { NodeSelection, Plugin, type Transaction } from '@milkdown/kit/prose/state';
 import { Decoration, DecorationSet } from '@milkdown/kit/prose/view';
 import type { EditorView, NodeView, ViewMutationRecord } from '@milkdown/kit/prose/view';
@@ -417,6 +418,78 @@ export const cherryFootnoteReferenceSchema = $nodeSchema('cherry_footnote_refere
       }),
   },
 }));
+
+class CherryFootnoteDefinitionView implements NodeView {
+  readonly dom: HTMLElement;
+  readonly contentDOM: HTMLElement;
+  private node: ProseNode;
+  private readonly reference: HTMLAnchorElement;
+
+  constructor(node: ProseNode, private readonly view: EditorView) {
+    this.node = node;
+    this.dom = document.createElement('div');
+    this.dom.className = 'footnote cherry-footnote-definition';
+    this.dom.dataset.type = 'footnote_definition';
+    const item = document.createElement('div');
+    item.className = 'one-footnote';
+    this.reference = document.createElement('a');
+    this.reference.className = 'footnote-ref';
+    this.reference.contentEditable = 'false';
+    this.reference.addEventListener('click', this.navigateToReference);
+    this.contentDOM = document.createElement('div');
+    this.contentDOM.className = 'cherry-footnote-definition__content';
+    item.append(this.reference, this.contentDOM);
+    this.dom.append(item);
+    this.sync();
+  }
+
+  update(node: ProseNode) {
+    if (node.type !== this.node.type) return false;
+    this.node = node;
+    this.sync();
+    return true;
+  }
+
+  stopEvent(event: Event) {
+    return event.target === this.reference;
+  }
+
+  destroy() {
+    this.reference.removeEventListener('click', this.navigateToReference);
+  }
+
+  private number() {
+    const label = String(this.node.attrs.label ?? '');
+    let result = 0;
+    this.view.state.doc.descendants((candidate) => {
+      if (result || candidate.type.name !== 'cherry_footnote_reference') return;
+      if (String(candidate.attrs.label ?? '') === label) result = Number(candidate.attrs.number ?? 0);
+    });
+    return result || 1;
+  }
+
+  private sync() {
+    const label = String(this.node.attrs.label ?? '');
+    const number = this.number();
+    this.dom.dataset.label = label;
+    this.reference.href = `#fnref:${number}`;
+    this.reference.id = `fn:${number}`;
+    this.reference.title = label;
+    this.reference.textContent = `[${number}]`;
+  }
+
+  private navigateToReference = (event: MouseEvent) => {
+    const target = this.view.dom.querySelector<HTMLElement>(`#${CSS.escape(this.reference.hash.slice(1))}`);
+    if (!target) return;
+    event.preventDefault();
+    target.scrollIntoView({ block: 'nearest' });
+  };
+}
+
+export const cherryFootnoteDefinitionView = $view(
+  footnoteDefinitionSchema.node,
+  () => (node, view) => new CherryFootnoteDefinitionView(node, view),
+);
 
 export const cherryFootnoteNavigationPlugin = $prose(
   () =>
@@ -1054,6 +1127,7 @@ class EmbedView implements NodeView {
   private readonly view: EditorView;
   private readonly getPos: () => number | undefined;
   private readonly preview: HTMLElement;
+  private controls?: HTMLElement;
   private readonly sourcePanel: HTMLElement;
   private readonly source: HTMLElement;
   private timer?: ReturnType<typeof setTimeout>;
@@ -1062,8 +1136,11 @@ class EmbedView implements NodeView {
   private visibilityObserver?: IntersectionObserver;
   private renderActivated = false;
   private destroyed = false;
+  private sourceOpen = false;
   private sourceEditing = false;
   private applyingSourceTransaction = false;
+  private sourceToggle?: HTMLButtonElement;
+  private controlsResizeObserver?: ResizeObserver;
 
   constructor(
     node: ProseNode,
@@ -1081,6 +1158,7 @@ class EmbedView implements NodeView {
     this.preview.className = 'cherry-embed__preview';
     const controls = document.createElement(node.isInline ? 'span' : 'figcaption');
     controls.className = 'cherry-embed__controls';
+    this.controls = controls;
     controls.hidden = node.type.name === 'cherry_emoji';
     const type = document.createElement('span');
     type.className = 'cherry-embed__type';
@@ -1088,13 +1166,11 @@ class EmbedView implements NodeView {
     const edit = iconButton(
       '源码',
       '在节点内编辑源码',
-      () => {
-        this.sourcePanel.hidden = !this.sourcePanel.hidden;
-        this.sourceEditing = !this.sourcePanel.hidden;
-        if (this.sourceEditing) this.source.focus();
-      },
+      this.toggleSource,
       config.readonly,
     );
+    this.sourceToggle = edit;
+    edit.setAttribute('aria-expanded', 'false');
     controls.append(type, edit);
     this.sourcePanel = document.createElement(node.isInline ? 'span' : 'pre');
     this.sourcePanel.className = 'cherry-embed__source';
@@ -1106,6 +1182,15 @@ class EmbedView implements NodeView {
     this.source.addEventListener('blur', this.handleSourceBlur);
     this.sourcePanel.append(this.source);
     this.dom.append(this.preview, controls, this.sourcePanel);
+    this.syncControlsPlacement();
+    // NodeViews are constructed before ProseMirror has inserted them into the
+    // live document, so the first measurement can be zero. Re-measure on the
+    // next microtask once the figure has a real layout box.
+    queueMicrotask(() => this.syncControlsPlacement());
+    if (typeof ResizeObserver !== 'undefined' && node.type.name === 'cherry_diagram' && !node.isInline) {
+      this.controlsResizeObserver = new ResizeObserver(() => this.syncControlsPlacement());
+      this.controlsResizeObserver.observe(this.dom);
+    }
     this.scheduleRender();
     this.syncSource();
   }
@@ -1127,13 +1212,11 @@ class EmbedView implements NodeView {
 
   deselectNode() {
     this.dom.classList.remove('is-selected');
-    // setNodeMarkup() is dispatched for every source input so Markdown stays
-    // synchronized immediately. ProseMirror may briefly move the selection
-    // away from the atom while applying that transaction. Hiding the panel at
-    // that point removes the focused editor from layout and drops the rest of
-    // the user's keystrokes. Keep the in-node editor open while it owns focus;
-    // an explicit click outside still closes it after blur.
-    if (!this.sourceEditing) this.sourcePanel.hidden = true;
+    // NodeSelection changes are not an explicit request to close the source
+    // editor.  A transaction from a sibling Detail/Panel (or a source input)
+    // can briefly deselect this NodeView while the same editor is still open.
+    // Closing here races with ProseMirror's update and makes the source appear
+    // to disappear at random.
   }
 
   stopEvent(event: Event) {
@@ -1150,7 +1233,9 @@ class EmbedView implements NodeView {
   destroy() {
     this.destroyed = true;
     this.renderVersion += 1;
+    this.closeSourceListener();
     this.visibilityObserver?.disconnect();
+    this.controlsResizeObserver?.disconnect();
     this.dom.removeEventListener('pointerdown', this.activateRender);
     if (this.timer) clearTimeout(this.timer);
     this.cleanup?.();
@@ -1188,6 +1273,42 @@ class EmbedView implements NodeView {
         : String(this.node.attrs.source ?? '');
   }
 
+  private toggleSource = () => {
+    this.setSourceOpen(!this.sourceOpen, true);
+  };
+
+  private setSourceOpen(open: boolean, focus = false) {
+    this.sourceOpen = open;
+    this.sourceEditing = open;
+    this.sourcePanel.hidden = !open;
+    this.dom.classList.toggle('is-source-open', open);
+    this.sourceToggle?.classList.toggle('is-active', open);
+    this.sourceToggle?.setAttribute('aria-expanded', String(open));
+    if (open) {
+      document.addEventListener('pointerdown', this.closeSourceOnOutsidePointer, true);
+      if (focus) this.source.focus({ preventScroll: true });
+    } else {
+      this.closeSourceListener();
+    }
+  }
+
+  private closeSourceOnOutsidePointer = (event: PointerEvent) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (this.dom.contains(event.target as Node)) return;
+    // Disclosure and node-action buttons are editor controls. Their
+    // mousedown intentionally does not take focus, but the pointer still
+    // bubbles through document capture. Do not interpret expanding a sibling
+    // Detail/Panel as an explicit request to close this source editor.
+    if (target?.closest('.cherry-compound-item__disclosure, .cherry-compound__kind, .cherry-node-actions')) {
+      return;
+    }
+    this.setSourceOpen(false);
+  };
+
+  private closeSourceListener() {
+    document.removeEventListener('pointerdown', this.closeSourceOnOutsidePointer, true);
+  }
+
   private syncDiagramPresentation() {
     this.dom.classList.remove(...MERMAID_ALIGNMENT_CLASSES);
     this.dom.style.removeProperty('width');
@@ -1201,6 +1322,31 @@ class EmbedView implements NodeView {
     if (layout.width) this.dom.style.width = layout.width;
     if (layout.height) this.dom.style.height = layout.height;
     if (layout.alignment) this.dom.classList.add(`cherry-mermaid-align-${layout.alignment}`);
+    this.syncControlsPlacement();
+  }
+
+  /**
+   * Mermaid SVGs can use the whole viewport, including the top-right corner.
+   * Keep the optional source action outside that viewport whenever the preview
+   * column has room. This is an overlay only (the figure dimensions and
+   * document scroll height are unchanged).
+   */
+  private syncControlsPlacement() {
+    if (!this.controls || this.node.isInline) return;
+    if (this.node.type.name !== 'cherry_diagram') return;
+    const figure = this.dom.getBoundingClientRect();
+    const parent = this.dom.parentElement?.getBoundingClientRect();
+    const controlsWidth = this.controls.getBoundingClientRect().width;
+    // Prefer the side overlay whenever the containing preview column has room
+    // for it. This is based on actual layout rather than a fixed Mermaid size,
+    // so resized/narrow preview panes use the same collision-free rule.
+    const controlsOutside = Boolean(
+      figure.width > 0 &&
+        parent &&
+        controlsWidth > 0 &&
+        figure.right + controlsWidth + 8 <= parent.right,
+    );
+    this.dom.classList.toggle('cherry-embed--controls-outside', controlsOutside);
   }
 
   private updateSource = () => {
@@ -1240,15 +1386,18 @@ class EmbedView implements NodeView {
   };
 
   private handleSourceBlur = () => {
+    // Blur is not a close command.  ProseMirror and browser controls can move
+    // focus briefly while applying a transaction; the explicit outside
+    // pointer listener is the only path that closes the source panel.
     if (this.applyingSourceTransaction) return;
     this.sourceEditing = false;
-    this.sourcePanel.hidden = true;
     this.flushSourceRender();
   };
 
   private render() {
     this.renderVersion += 1;
     const version = this.renderVersion;
+    this.syncControlsPlacement();
     this.cleanup?.();
     this.cleanup = undefined;
     if (this.node.type.name === 'cherry_emoji') {
@@ -1313,7 +1462,9 @@ class TableChartView implements NodeView {
   private readonly sourcePanel: HTMLElement;
   private observer?: IntersectionObserver;
   private destroyed = false;
+  private sourceOpen = false;
   private editingSource = false;
+  private sourceToggle?: HTMLButtonElement;
 
   constructor(
     node: ProseNode,
@@ -1335,6 +1486,8 @@ class TableChartView implements NodeView {
     const type = document.createElement('span');
     type.textContent = String(node.attrs.chartType);
     const edit = iconButton('源码', '在节点内编辑表格图表源码', this.openSource, config.readonly);
+    this.sourceToggle = edit;
+    edit.setAttribute('aria-expanded', 'false');
     controls.append(type, edit);
     this.sourcePanel = document.createElement('pre');
     this.sourcePanel.className = 'cherry-embed__source cherry-table-chart__source';
@@ -1363,12 +1516,14 @@ class TableChartView implements NodeView {
 
   selectNode() {
     this.dom.classList.add('is-selected');
-    if (!this.config.readonly) this.sourcePanel.hidden = false;
+    if (!this.config.readonly) this.setSourceOpen(true);
   }
 
   deselectNode() {
     this.dom.classList.remove('is-selected');
-    if (!this.editingSource) this.sourcePanel.hidden = true;
+    // Selection changes caused by a sibling transaction must not close an
+    // already-open source editor.  Explicit outside pointer input is handled
+    // by setSourceOpen() and is the only close path.
   }
 
   stopEvent(event: Event) {
@@ -1378,12 +1533,17 @@ class TableChartView implements NodeView {
     );
   }
 
-  ignoreMutation(mutation: ViewMutationRecord) {
-    return this.sourcePanel.contains(mutation.target);
+  ignoreMutation() {
+    // This is a leaf NodeView: source edits are committed explicitly and the
+    // preview is owned by Cherry/ECharts. ECharts mutates its SVG every frame
+    // while animating; letting ProseMirror observe those mutations reparses
+    // and recreates the whole NodeView, causing flicker and repeated charts.
+    return true;
   }
 
   destroy() {
     this.destroyed = true;
+    this.closeSourceListener();
     this.observer?.disconnect();
     this.dom.removeEventListener('mousedown', this.selectFromEmptyArea, true);
     this.dom.removeEventListener('click', this.selectFromEmptyArea, true);
@@ -1429,6 +1589,7 @@ class TableChartView implements NodeView {
   private openSource = () => {
     this.editingSource = true;
     this.dom.classList.add('is-editing');
+    this.setSourceOpen(true, true);
     this.selectNode();
     const pos = this.resolvePos();
     if (typeof pos === 'number') {
@@ -1440,8 +1601,34 @@ class TableChartView implements NodeView {
     this.commitSource();
     this.editingSource = false;
     this.dom.classList.remove('is-editing');
-    if (!this.dom.classList.contains('is-selected')) this.sourcePanel.hidden = true;
   };
+
+  private setSourceOpen(open: boolean, focus = false) {
+    this.sourceOpen = open;
+    this.sourcePanel.hidden = !open;
+    this.dom.classList.toggle('is-source-open', open);
+    this.sourceToggle?.classList.toggle('is-active', open);
+    this.sourceToggle?.setAttribute('aria-expanded', String(open));
+    if (open) {
+      document.addEventListener('pointerdown', this.closeSourceOnOutsidePointer, true);
+      if (focus) this.source.focus({ preventScroll: true });
+    } else {
+      this.closeSourceListener();
+    }
+  }
+
+  private closeSourceOnOutsidePointer = (event: PointerEvent) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (this.dom.contains(event.target as Node)) return;
+    if (target?.closest('.cherry-compound-item__disclosure, .cherry-compound__kind, .cherry-node-actions')) {
+      return;
+    }
+    this.setSourceOpen(false);
+  };
+
+  private closeSourceListener() {
+    document.removeEventListener('pointerdown', this.closeSourceOnOutsidePointer, true);
+  }
 
   private commitSource = () => {
     if (this.config.readonly) return;
@@ -1693,6 +1880,7 @@ export const cherryStructureViews = [
   cherryHtmlInlineView,
   cherryEmojiView,
   cherryLinkTargetView,
+  cherryFootnoteDefinitionView,
   cherryFootnoteNavigationPlugin,
   cherryLinkTargetClickPlugin,
   cherryTocRefreshPlugin,

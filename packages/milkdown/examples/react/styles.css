@@ -36,12 +36,3 @@ iframe.cherry-dialog-iframe {
   height: 100%;
   margin: 0 auto;
 }
-
-#markdown.preview-only-page .cherry {
-  box-shadow: none;
-}
-
-#markdown.preview-only-page .cherry-previewer {
-  padding: 0;
-  border-left: 0;
-}

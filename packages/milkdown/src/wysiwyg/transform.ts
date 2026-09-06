@@ -248,7 +248,13 @@ function parsePanel(source: string, parse: ParseMarkdown): MarkdownNode {
   lines.pop();
   const [rawType = 'panel', ...titleParts] = header.split(/\s+/);
   const legacyCols = /^(\d+)cols$/i.exec(rawType);
-  const kind = legacyCols ? 'cols' : rawType.toLowerCase();
+  // Keep the spelling used by the author in `rawType` so a round-trip that
+  // only changes the body can still emit `:::p`, `:::i`, etc.  The rendered
+  // Cherry hook canonicalises those aliases (p -> primary, i -> info, ...),
+  // so Milkdown must use the same canonical kind for its native class and
+  // structured view.  Treating aliases as opaque native blocks used to add a
+  // misleading “HTML 源码” control to ordinary Cherry panels.
+  const kind = legacyCols ? 'cols' : canonicalPanelKind(rawType);
   const title = titleParts.join(' ');
   const body = lines.join('\n');
   const node: MarkdownNode = {
@@ -291,6 +297,36 @@ function parsePanel(source: string, parse: ParseMarkdown): MarkdownNode {
     node.children = parseChildren(body, parse);
   }
   return node;
+}
+
+function canonicalPanelKind(rawType: string) {
+  switch (rawType.trim().toLowerCase()) {
+    case 'p':
+      return 'primary';
+    case 'i':
+      return 'info';
+    case 'w':
+      return 'warning';
+    case 'd':
+      return 'danger';
+    case 's':
+      return 'success';
+    case 'l':
+      return 'left';
+    case 'c':
+      return 'center';
+    case 'r':
+      return 'right';
+    case 'j':
+      return 'justify';
+    case 't':
+      return 'tabs';
+    case '2cols':
+    case '3cols':
+      return 'cols';
+    default:
+      return rawType.trim().toLowerCase();
+  }
 }
 
 function parseDetail(source: string, parse: ParseMarkdown): MarkdownNode {
@@ -336,11 +372,9 @@ function createBlockNode(match: BlockMatch, parse: ParseMarkdown): MarkdownNode 
     // semantics belong to the application. Keep the complete source in the
     // native Cherry shell until the caller supplies a Milkdown schema,
     // parser, serializer and NodeView through `plugins`.
-    const normalizedType = rawType.toLowerCase();
-    const isStructured =
-      /^(?:panel|primary|info|warning|danger|success|cols|tabs|timeline)$/i.test(normalizedType) ||
-      /^\d+cols$/i.test(rawType);
-    if (/^(?:left|center|right|justify)$/i.test(rawType) || !isStructured) {
+    const structuredType = canonicalPanelKind(rawType);
+    const isStructured = /^(?:panel|primary|info|warning|danger|success|cols|tabs|timeline)$/i.test(structuredType);
+    if (!isStructured) {
       return { type: 'cherryNativeBlock', source: match.source };
     }
     return parsePanel(match.source, parse);
@@ -423,23 +457,32 @@ function replaceRootBlocks(
   };
   const parseSegment = (segment: string, baseOffset: number) => {
     if (!segment) return [];
+    const omitSyntheticEmptyParagraphs = (nodes: MarkdownNode[]) =>
+      nodes.filter(
+        (node) =>
+          node.type !== 'paragraph' || Boolean(node.value?.length) || Boolean(node.children?.length),
+      );
     const fallback = () =>
       originalChildren.filter((node) => {
         const range = nodeRange(node);
         return range && range.from >= baseOffset && range.to <= baseOffset + segment.length;
       });
     if (!supplementalDefinitions) {
-      const nodes = resolveReferences(parse(segment, { supplementalDefinitions: false }), segment);
+      const nodes = omitSyntheticEmptyParagraphs(
+        resolveReferences(parse(segment, { supplementalDefinitions: false }), segment),
+      );
       return nodes.length || !segment.trim() ? offsetPositions(nodes, baseOffset) : fallback();
     }
     const separator = '\n\n';
     const nodes = parse(`${segment}${separator}${supplementalDefinitions}`, { supplementalDefinitions: false });
-    const resolved = resolveReferences(
-      nodes.filter((node) => {
-        const from = node.position?.start?.offset;
-        return typeof from !== 'number' || from < segment.length + separator.length;
-      }),
-      segment,
+    const resolved = omitSyntheticEmptyParagraphs(
+      resolveReferences(
+        nodes.filter((node) => {
+          const from = node.position?.start?.offset;
+          return typeof from !== 'number' || from < segment.length + separator.length;
+        }),
+        segment,
+      ),
     );
     return resolved.length || !segment.trim() ? offsetPositions(resolved, baseOffset) : fallback();
   };
@@ -633,6 +676,30 @@ function normalizeFootnoteReferences(tree: MarkdownNode, source: string) {
   }
 }
 
+/**
+ * Cherry renders footnote definitions in one footer after the document and
+ * leaves an ordinary blank line where the definition source was written.
+ * Keep that visual contract while retaining Milkdown's structured, editable
+ * footnote_definition nodes at the end of the ProseMirror document.
+ */
+function relocateFootnoteDefinitions(tree: MarkdownNode) {
+  if (!tree.children?.some((child) => child.type === 'footnoteDefinition')) return;
+  const body: MarkdownNode[] = [];
+  const definitions: MarkdownNode[] = [];
+  let inDefinitionGroup = false;
+  for (const child of tree.children) {
+    if (child.type === 'footnoteDefinition') {
+      definitions.push(child);
+      if (!inDefinitionGroup) body.push({ type: 'paragraph', children: [] });
+      inDefinitionGroup = true;
+      continue;
+    }
+    inDefinitionGroup = false;
+    body.push(child);
+  }
+  tree.children = [...body, ...definitions];
+}
+
 export function transformCherryWysiwygTree(
   tree: MarkdownNode,
   source: string,
@@ -642,6 +709,7 @@ export function transformCherryWysiwygTree(
   replaceRootBlocks(tree, source, parse, options.supplementalDefinitions ?? true);
   replaceTableCharts(tree, source);
   normalizeFootnoteReferences(tree, source);
+  relocateFootnoteDefinitions(tree);
   transformInline(tree, source, true);
   return tree;
 }

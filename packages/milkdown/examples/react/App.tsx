@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import Cherry from 'cherry-markdown';
-import { milkdown } from '@cherry-markdown/milkdown';
 import basicMd from '../../../../examples/assets/markdown/index.md?raw';
 import { loadDemoDependencies, renderECharts } from './demo-support';
 
@@ -8,7 +7,7 @@ declare global {
   interface Window {
     Cherry: typeof Cherry;
     cherry?: Cherry;
-    milkdown: typeof milkdown;
+    milkdown?: typeof import('@cherry-markdown/milkdown').milkdown;
     milkdownMarkdown?: string;
     echarts?: typeof import('echarts/core');
   }
@@ -18,7 +17,11 @@ export default function App() {
   const editorRoot = useRef<HTMLDivElement>(null);
   // One React demo serves both Cherry layouts. The mode is selected through
   // Cherry's existing configuration, not by mounting a second editor/page.
-  const previewOnly = new URLSearchParams(window.location.search).get('mode') === 'previewOnly';
+  const requestedMode = new URLSearchParams(window.location.search).get('mode');
+  const mode =
+    requestedMode === 'previewOnly' || requestedMode === 'editOnly' ? requestedMode : 'edit&preview';
+  const previewOnly = mode === 'previewOnly';
+  const editOnly = mode === 'editOnly';
 
   useEffect(() => {
     let cancelled = false;
@@ -30,7 +33,16 @@ export default function App() {
       // The shared legacy demo config registers toolbar hooks from these
       // globals while its module is evaluated.
       window.Cherry = Cherry;
-      window.milkdown = milkdown;
+      let milkdownFactory: typeof import('@cherry-markdown/milkdown').milkdown | undefined;
+      if (!editOnly) {
+        const [milkdownModule] = await Promise.all([
+          import('@cherry-markdown/milkdown'),
+          import('@cherry-markdown/milkdown/styles.css'),
+          import('@milkdown/kit/prose/view/style/prosemirror.css'),
+        ]);
+        milkdownFactory = milkdownModule.milkdown;
+      }
+      if (milkdownFactory) window.milkdown = milkdownFactory;
       await loadDemoDependencies();
       // Both demos consume Cherry's existing public configurations. Milkdown
       // only adds preview editing; it does not define another layout mode.
@@ -44,22 +56,28 @@ export default function App() {
 
       cherry = new Cherry({
         ...cherryConfig,
+        editor: {
+          ...cherryConfig.editor,
+          defaultModel: mode,
+        },
         el: root,
         value: basicMd,
-        extensions: [
-          milkdown({
-            debounce: 0,
-            renderers: { echarts: renderECharts },
-            onChange: ({ markdown }) => {
-              window.milkdownMarkdown = markdown;
-            },
-            onImmediateChange: ({ markdown }) => {
-              // The E2E diagnostic mirrors the editor's committed document;
-              // public onChange remains debounced for consumers.
-              window.milkdownMarkdown = markdown;
-            },
-          }),
-        ],
+        extensions: milkdownFactory
+          ? [
+              milkdownFactory({
+                debounce: 0,
+                renderers: { echarts: renderECharts },
+                onChange: ({ markdown }) => {
+                  window.milkdownMarkdown = markdown;
+                },
+                onImmediateChange: ({ markdown }) => {
+                  // The E2E diagnostic mirrors the editor's committed document;
+                  // public onChange remains debounced for consumers.
+                  window.milkdownMarkdown = markdown;
+                },
+              }),
+            ]
+          : undefined,
       });
       window.cherry = cherry;
       window.milkdownMarkdown = cherry.getMarkdown();
@@ -70,6 +88,7 @@ export default function App() {
       cancelled = true;
       cherry?.destroy();
       if (window.cherry === cherry) delete window.cherry;
+      if (editOnly) delete window.milkdown;
     };
   }, []);
 

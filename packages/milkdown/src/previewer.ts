@@ -3,7 +3,7 @@ import { createCherryEditingBridge } from './bridge.js';
 import type {
   CherryMilkdownHost,
   CherryMilkdownInstance,
-  CherryMilkdownPreviewInstance,
+  CherryMilkdownPreviewHandle,
   CherryMilkdownPreviewOptions,
   CherryPreviewContentRenderer,
 } from './types.js';
@@ -19,7 +19,7 @@ let previewInstanceId = 0;
 export async function attachCherryMilkdownPreview(
   cherry: CherryMilkdownHost,
   options: CherryMilkdownPreviewOptions = {},
-): Promise<CherryMilkdownPreviewInstance> {
+): Promise<CherryMilkdownPreviewHandle> {
   const previewer = cherry.getPreviewer();
   if (!previewer?.setContentRenderer || !previewer?.clearContentRenderer) {
     throw new TypeError(
@@ -29,28 +29,40 @@ export async function attachCherryMilkdownPreview(
 
   let instance: CherryMilkdownInstance | undefined;
   let instanceRoot: HTMLElement | undefined;
+  let addedCherryMarkdownClass = false;
   let creation: Promise<void> | undefined;
   let destruction: Promise<void> | undefined;
   let editingBridge: ReturnType<typeof createCherryEditingBridge> | undefined;
   let latestMarkdown = cherry.getMarkdown();
+  let appliedHostMarkdown = latestMarkdown;
   const updateSource = `@cherry-markdown/milkdown:${++previewInstanceId}`;
   let localRevision = 0;
   let detached = false;
+  let failed = false;
   let creationErrorReported = false;
 
+  const clearInstanceRootClasses = () => {
+    instanceRoot?.classList.remove('cherry-milkdown--previewer');
+    if (addedCherryMarkdownClass) instanceRoot?.classList.remove('cherry-markdown');
+    addedCherryMarkdownClass = false;
+  };
+
   const createIn = async (container: HTMLElement) => {
+    const creationMarkdown = latestMarkdown;
     if (instance) await instance.destroy();
     instance = undefined;
+    clearInstanceRootClasses();
     instanceRoot = container;
     container.replaceChildren();
     // Cherry's published stylesheet scopes all typography and block spacing
     // under `.cherry-markdown`. Reuse that contract on the Milkdown root
     // instead of maintaining a second, subtly divergent style system.
+    addedCherryMarkdownClass = !container.classList.contains('cherry-markdown');
     container.classList.add('cherry-markdown', 'cherry-milkdown--previewer');
     const editor = await createCherryMilkdown({
       ...options,
       root: container,
-      value: latestMarkdown,
+      value: creationMarkdown,
       engine: cherry.engine,
       nativePreview: true,
       onError: (error, phase) => {
@@ -63,6 +75,7 @@ export async function attachCherryMilkdownPreview(
       onImmediateChange: (result) => {
         if (detached) return;
         latestMarkdown = result.markdown;
+        appliedHostMarkdown = result.markdown;
         localRevision += 1;
         if (result.markdown === cherry.getMarkdown()) return;
         cherry.setValue(result.markdown, true, { source: updateSource, revision: localRevision });
@@ -75,12 +88,13 @@ export async function attachCherryMilkdownPreview(
     instance = editor;
     editingBridge = createCherryEditingBridge(cherry, editor);
     previewer.setEditingBridge?.(editingBridge);
-    if (editor.getMarkdown() !== latestMarkdown) editor.setMarkdown(latestMarkdown, { emit: false });
+    if (creationMarkdown !== latestMarkdown) editor.setMarkdown(latestMarkdown, { emit: false });
+    appliedHostMarkdown = latestMarkdown;
   };
 
   const renderer: CherryPreviewContentRenderer = {
     async update({ container, markdown, updateContext }) {
-      if (detached) return;
+      if (detached || failed) return;
       if (!instance || instanceRoot !== container || !container.contains(instanceRoot.querySelector('.milkdown'))) {
         latestMarkdown = markdown;
         if (!creation) {
@@ -88,7 +102,11 @@ export async function attachCherryMilkdownPreview(
             creation = undefined;
           });
         }
-        await creation;
+        try {
+          await creation;
+        } catch (error) {
+          await restoreNativePreview(error);
+        }
         return;
       }
       if (
@@ -99,9 +117,10 @@ export async function attachCherryMilkdownPreview(
         return;
       }
       latestMarkdown = markdown;
-      if (instance.getMarkdown() !== markdown) {
+      if (appliedHostMarkdown !== markdown) {
         const { scrollLeft, scrollTop } = container;
         instance.setMarkdown(markdown, { emit: false });
+        appliedHostMarkdown = markdown;
         container.scrollLeft = scrollLeft;
         container.scrollTop = scrollTop;
       }
@@ -109,13 +128,13 @@ export async function attachCherryMilkdownPreview(
     destroy() {
       if (!destruction) {
         destruction = (async () => {
-          if (creation) await creation;
+          if (creation) await creation.catch(() => undefined);
           if (instance) await instance.destroy();
           instance = undefined;
           previewer.clearEditingBridge?.(editingBridge);
           editingBridge?.destroy?.();
           editingBridge = undefined;
-          instanceRoot?.classList.remove('cherry-markdown', 'cherry-milkdown--previewer');
+          clearInstanceRootClasses();
           instanceRoot = undefined;
         })();
       }
@@ -123,21 +142,27 @@ export async function attachCherryMilkdownPreview(
     },
   };
 
+  const restoreNativePreview = async (error: unknown) => {
+    if (detached || failed) return;
+    failed = true;
+    previewer.clearContentRenderer(renderer);
+    // clearContentRenderer() starts cleanup but Cherry's API is synchronous.
+    // Wait for the renderer's idempotent teardown before restoring native
+    // HTML; otherwise a late editor.destroy() can erase the fallback DOM.
+    await renderer.destroy?.();
+    if (!creationErrorReported) options.onError?.(error, 'create');
+    previewer.update(cherry.engine.makeHtml(cherry.getMarkdown()));
+  };
+
   previewer.setContentRenderer(renderer);
   try {
     previewer.update(cherry.engine.makeHtml(latestMarkdown));
-    if (creation) await creation;
-    if (!instance) throw new Error('attachCherryMilkdownPreview: Milkdown failed to mount in the Cherry previewer.');
+    const initialCreation = creation;
+    if (initialCreation) await initialCreation.catch(restoreNativePreview);
   } catch (error) {
-    detached = true;
-    previewer.clearContentRenderer(renderer);
-    await renderer.destroy?.();
-    previewer.update(cherry.engine.makeHtml(cherry.getMarkdown()));
-    if (!creationErrorReported) options.onError?.(error, 'create');
-    throw error;
+    await restoreNativePreview(error);
   }
 
-  const attached = instance;
   const detach = async () => {
     if (detached) return;
     detached = true;
@@ -146,7 +171,12 @@ export async function attachCherryMilkdownPreview(
     previewer.update(cherry.engine.makeHtml(cherry.getMarkdown()));
   };
   return {
-    ...attached,
+    get mounted() {
+      return Boolean(instance);
+    },
+    getInstance() {
+      return instance;
+    },
     detach,
     destroy: detach,
   };

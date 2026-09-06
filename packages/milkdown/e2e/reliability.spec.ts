@@ -5,6 +5,7 @@ import { cherryCompatibilityCases } from '../test/fixtures/compatibility';
 
 const demoPath = '/index.html';
 const previewOnlyPath = '/index.html?mode=previewOnly';
+const editOnlyPath = '/index.html?mode=editOnly';
 const mathJaxJsDelivrUrl = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
 const mathJaxUnpkgUrl = 'https://unpkg.com/mathjax@3.2.2/es5/tex-svg.js';
 
@@ -78,6 +79,7 @@ async function mountVisualReference(page: Page) {
       }
       #markdown.preview-only-page .cherry-toolbar, #markdown.preview-only-page .cherry-editor,
       #visual-native .cherry-toolbar, #visual-native .cherry-editor { display: none !important; }
+      #markdown .cherry-flex-toc, #visual-native .cherry-flex-toc { display: none !important; }
     `;
     document.head.append(style);
 
@@ -94,6 +96,23 @@ async function mountVisualReference(page: Page) {
   }, visualFixture);
   await page.waitForFunction(() => Boolean(document.querySelector('#markdown .ProseMirror h1')));
   await page.waitForFunction(() => Boolean(document.querySelector('#visual-native .cherry-previewer h1')));
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        const root = document.querySelector('#markdown .ProseMirror');
+        if (!root) throw new Error('Missing Milkdown visual root');
+        let timer = window.setTimeout(finish, 250);
+        const observer = new MutationObserver(() => {
+          window.clearTimeout(timer);
+          timer = window.setTimeout(finish, 250);
+        });
+        function finish() {
+          observer.disconnect();
+          resolve();
+        }
+        observer.observe(root, { childList: true, subtree: true });
+      }),
+  );
 }
 
 function captureBrowserErrors(page: Page, actions: string[] = []) {
@@ -631,6 +650,60 @@ test('Mermaid keeps node controls without mounting the generic text Bubble', asy
   await attachEvidence(page, testInfo, actions, errors);
 });
 
+test('Mermaid node controls overlay the corner and source focus uses one code surface', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(previewOnlyPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+  await page.evaluate(() => {
+    const scope = window as typeof window & { cherry: { setValue(value: string): void } };
+    scope.cherry.setValue('```mermaid\ngraph LR\n  A[公司] --> B[市场]\n```');
+  });
+
+  const mermaid = page.locator('.ProseMirror .cherry-embed--cherry_diagram[data-type="mermaid"]').first();
+  await expect(mermaid.locator('svg')).toHaveCount(1);
+  const figureInitial = await mermaid.boundingBox();
+  await mermaid.hover();
+  const chart = mermaid.locator('.cherry-embed__preview');
+  const controls = mermaid.locator('.cherry-embed__controls');
+  const chartBox = await chart.boundingBox();
+  const controlsBox = await controls.boundingBox();
+  expect(chartBox).not.toBeNull();
+  expect(controlsBox).not.toBeNull();
+  expect(controlsBox!.y).toBeGreaterThanOrEqual(chartBox!.y);
+  const controlsOutside = await mermaid.evaluate((element) =>
+    element.classList.contains('cherry-embed--controls-outside'),
+  );
+  if (controlsOutside) {
+    expect(controlsBox!.x).toBeGreaterThanOrEqual(chartBox!.x + chartBox!.width);
+  } else {
+    expect(controlsBox!.x + controlsBox!.width).toBeLessThanOrEqual(chartBox!.x + chartBox!.width + 1);
+  }
+  expect(
+    controlsBox!.x >= chartBox!.x + chartBox!.width ||
+      controlsBox!.x + controlsBox!.width <= chartBox!.x ||
+      controlsBox!.y >= chartBox!.y + chartBox!.height ||
+      controlsBox!.y + controlsBox!.height <= chartBox!.y,
+  ).toBe(true);
+  const figureAfterHover = await mermaid.boundingBox();
+  expect(figureAfterHover).toEqual(figureInitial);
+  actions.push('kept Mermaid source controls outside compact diagrams without changing layout height');
+
+  await mermaid.getByRole('button', { name: '在节点内编辑源码' }).click();
+  const source = mermaid.locator('.cherry-embed__source');
+  const code = source.locator('code');
+  await expect(code).toBeVisible();
+  await expect(code).toHaveCSS('display', 'block');
+  await code.focus();
+  await expect.poll(() => code.evaluate((element) => getComputedStyle(element).outlineStyle)).toBe('none');
+  await expect.poll(() => source.evaluate((element) => getComputedStyle(element).outlineStyle)).toBe('solid');
+  await expect(code).toHaveCSS('white-space', 'pre-wrap');
+  actions.push('used one block-level code surface with a single source-panel focus ring');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
 test('every Cherry size submenu item formats the focused Milkdown selection', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
@@ -1029,6 +1102,55 @@ test('Cherry previewOnly becomes a toolbar-free WYSIWYG surface without a second
   await attachEvidence(page, testInfo, actions, errors);
 });
 
+test('editOnly stays a native Cherry editor without loading or mounting Milkdown', async ({ page }, testInfo) => {
+  const actions: string[] = [];
+  const errors = captureBrowserErrors(page, actions);
+  await page.goto(editOnlyPath);
+  await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
+
+  await expect(page.locator('.cherry-editor')).toBeVisible();
+  await expect(page.locator('.cherry-previewer')).toBeHidden();
+  await expect(page.locator('.ProseMirror')).toHaveCount(0);
+  const isolation = await page.evaluate(() => {
+    const icon = document.querySelector('.ch-icon');
+    const resources = performance.getEntriesByType('resource').map((entry) => entry.name);
+    return {
+      milkdownGlobal: typeof (window as typeof window & { milkdown?: unknown }).milkdown,
+      milkdownRuntimeResources: resources.filter((resource) =>
+        /packages\/milkdown\/(?:dist\/|styles\.css)|prosemirror\.css/.test(resource),
+      ),
+      iconFontLoaded: document.fonts.check('16px ch-icon'),
+      iconPseudoFont: icon ? getComputedStyle(icon, '::before').fontFamily : '',
+    };
+  });
+  expect(isolation).toEqual({
+    milkdownGlobal: 'undefined',
+    milkdownRuntimeResources: [],
+    iconFontLoaded: true,
+    iconPseudoFont: 'ch-icon',
+  });
+  actions.push('opened native Cherry editOnly without Milkdown runtime, styles or editor DOM');
+
+  const source = page.locator('.cherry-editor .cm-content');
+  await source.click();
+  await page.keyboard.press('ControlOrMeta+A');
+  await page.keyboard.insertText('## Native edit-only source\n\nNo Milkdown extension.');
+  await expect.poll(async () => (await readState(page)).cherry).toContain('Native edit-only source');
+
+  await page.evaluate(() => {
+    const scope = window as typeof window & {
+      cherry: { switchModel(mode: 'previewOnly'): void };
+    };
+    scope.cherry.switchModel('previewOnly');
+  });
+  await expect(page.locator('.cherry-previewer h2')).toHaveText('Native edit-only source');
+  await expect(page.locator('.ProseMirror')).toHaveCount(0);
+  actions.push('kept Cherry native rendering after a later mode switch because no Milkdown extension was registered');
+
+  expect(errors).toEqual([]);
+  await attachEvidence(page, testInfo, actions, errors);
+});
+
 test('physical delete, clipboard, undo/redo and composition input stay synchronized', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
@@ -1241,6 +1363,14 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
   const errors = captureBrowserErrors(page);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await mountVisualReference(page);
+  await expect(page.locator('#markdown .cherry-table-chart__preview.is-rendered')).toBeVisible();
+  await expect(page.locator('#visual-native .cherry-echarts-wrapper')).toBeVisible();
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      ),
+  );
 
   const components = [
     { id: 'heading', native: '#visual-native .cherry-previewer h1', milkdown: '#markdown .ProseMirror h1' },
@@ -1271,19 +1401,56 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
     native: { top: number; bottom: number };
     milkdown: { top: number; bottom: number };
   }> = [];
+  const screenshotRenderedBox = async (selector: string, path: string, allowAnimations = false) => {
+    const locator = page.locator(selector).first();
+    await expect(locator).toBeVisible();
+    await locator.scrollIntoViewIfNeeded();
+    if (allowAnimations) {
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const current = page.locator(selector).first();
+        await expect(current.locator('.cherry-echarts-wrapper svg')).toBeVisible();
+        try {
+          return await current.screenshot({ animations: 'allow', path });
+        } catch (error) {
+          if (!String(error).includes('not attached') || attempt === 2) throw error;
+        }
+      }
+    }
+    const box = await locator.boundingBox();
+    if (!box) throw new Error(`Missing visual screenshot box: ${selector}`);
+    return page.screenshot({ animations: 'disabled', clip: box, path });
+  };
   for (const component of components) {
     const nativeLocator = page.locator(component.native).first();
     const milkdownLocator = page.locator(component.milkdown).first();
     await expect(nativeLocator, component.id).toBeVisible();
     await expect(milkdownLocator, component.id).toBeVisible();
-    const nativeScreenshot = await nativeLocator.screenshot({
-      animations: 'disabled',
-      path: testInfo.outputPath(`${component.id}-native.png`),
-    });
-    const milkdownScreenshot = await milkdownLocator.screenshot({
-      animations: 'disabled',
-      path: testInfo.outputPath(`${component.id}-milkdown.png`),
-    });
+    if (component.id === 'table-chart') {
+      await nativeLocator.scrollIntoViewIfNeeded();
+      await expect(nativeLocator.locator('.cherry-echarts-wrapper svg')).toBeVisible();
+      await milkdownLocator.scrollIntoViewIfNeeded();
+      await expect(milkdownLocator.locator('.cherry-echarts-wrapper svg')).toBeVisible();
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+          ),
+      );
+      // The wrapper is inserted before ECharts finishes its first paint. A
+      // rendered SVG node alone therefore does not mean the chart pixels are
+      // stable yet, especially after scrolling a lazy chart back into view.
+      await page.waitForTimeout(1200);
+    }
+    const nativeScreenshot = await screenshotRenderedBox(
+      component.native,
+      testInfo.outputPath(`${component.id}-native.png`),
+      component.id === 'table-chart',
+    );
+    const milkdownScreenshot = await screenshotRenderedBox(
+      component.milkdown,
+      testInfo.outputPath(`${component.id}-milkdown.png`),
+      component.id === 'table-chart',
+    );
     const nativeImage = PNG.sync.read(nativeScreenshot);
     const milkdownImage = PNG.sync.read(milkdownScreenshot);
     expect({ width: milkdownImage.width, height: milkdownImage.height }, `${component.id} dimensions`).toEqual({
@@ -1343,7 +1510,7 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
       ['table', '#visual-native table', '#markdown .milkdown-table-block table.children'],
       [
         'pre',
-        '#visual-native [data-type="codeBlock"] > .custom-codeblock-wrapper > pre',
+        '#visual-native [data-type="codeBlock"] > pre',
         '#markdown .cherry-milkdown-code-block > pre',
       ],
       ['task-icon', '#visual-native .check-list-item .ch-icon', '#markdown .ProseMirror li[data-item-type="task"] .ch-icon'],
@@ -1361,9 +1528,12 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
     });
   });
   for (const pair of stylePairs) expect(pair.milkdown, pair.selector).toEqual(pair.native);
-  for (let index = 1; index < layout.length; index += 1) {
-    const previous = layout[index - 1]!;
-    const current = layout[index]!;
+  const blockLayout = layout
+    .filter((item) => item.id !== 'footnote-reference')
+    .sort((left, right) => left.native.top - right.native.top);
+  for (let index = 1; index < blockLayout.length; index += 1) {
+    const previous = blockLayout[index - 1]!;
+    const current = blockLayout[index]!;
     const nativeGap = current.native.top - previous.native.bottom;
     const milkdownGap = current.milkdown.top - previous.milkdown.bottom;
     expect(Math.abs(milkdownGap - nativeGap), `${previous.id} -> ${current.id} gap`).toBeLessThanOrEqual(1);

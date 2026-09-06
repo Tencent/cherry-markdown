@@ -157,7 +157,7 @@ describe('Cherry built-in hook fixtures', () => {
     document.body.append(root);
     const instance = await createCherryMilkdown({
       root,
-      value: '## 流程图[^不通用提醒]\n\n[^不通用提醒]: 该语法不是通用语法',
+      value: '## 流程图[^不通用提醒]\n\n[^不通用提醒]: 该语法不是通用语法\n\n脚注之后的正文',
       nativePreview: true,
     });
     instances.push(instance);
@@ -172,5 +172,16 @@ describe('Cherry built-in hook fixtures', () => {
       ?.querySelector<HTMLAnchorElement>('a.footnote')
       ?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
     expect(scrollIntoView).toHaveBeenCalled();
+
+    const definition = root.querySelector<HTMLElement>('[data-type="footnote_definition"]');
+    const followingParagraph = [...root.querySelectorAll('p')].find(
+      (paragraph) => paragraph.textContent === '脚注之后的正文',
+    );
+    expect(definition).not.toBeNull();
+    expect(definition?.classList.contains('cherry-footnote-definition')).toBe(true);
+    expect(definition?.querySelector('.one-footnote > a.footnote-ref')?.textContent).toBe('[1]');
+    expect(followingParagraph).not.toBeUndefined();
+    if (!definition || !followingParagraph) throw new Error('Missing footnote definition ordering fixture');
+    expect(followingParagraph.compareDocumentPosition(definition) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

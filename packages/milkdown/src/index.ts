@@ -375,7 +375,7 @@ export type {
   CherryMilkdownInstance,
   CherryMilkdownMathliveOptions,
   CherryMilkdownOptions,
-  CherryMilkdownPreviewInstance,
+  CherryMilkdownPreviewHandle,
   CherryMilkdownPreviewOptions,
   CherryVisualRenderer,
   CherryVisualRenderContext,

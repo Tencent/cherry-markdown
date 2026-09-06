@@ -183,7 +183,16 @@ const cherryBlockDragDrop = $prose(
         };
         const reorder = (target: ReturnType<typeof topLevelBlockAt>) => {
           if (!dragged || !target || target.from === dragged.from) return false;
-          const insertAt = dragged.from < target.from ? target.from - dragged.node.nodeSize : target.from;
+          const mappedTargetFrom = dragged.from < target.from ? target.from - dragged.node.nodeSize : target.from;
+          // Dropping a block onto its immediate next sibling maps that
+          // sibling back to the source position after deletion. Inserting at
+          // that mapped position is a no-op (notably in Firefox/WebKit), so
+          // cross the adjacent sibling while retaining the existing
+          // insert-before behavior for more distant targets.
+          const insertAt =
+            dragged.from < target.from && mappedTargetFrom === dragged.from
+              ? mappedTargetFrom + target.node.nodeSize
+              : mappedTargetFrom;
           view.dispatch(view.state.tr.delete(dragged.from, dragged.from + dragged.node.nodeSize)
             .insert(insertAt, dragged.node)
             .scrollIntoView());

@@ -55,7 +55,7 @@ const cherry = new Cherry({
 cherry.destroy(); // Milkdown 随当前 Cherry 实例一起清理
 ```
 
-`attachCherryMilkdownPreview(cherry, options)` 继续兼容需要显式 detach 句柄的旧接入；`createCherryMilkdown` 仍可用于不需要 Cherry 页面壳的独立编辑器。两者都不是 Cherry 页面中的推荐接入方式。
+`attachCherryMilkdownPreview(cherry, options)` 可用于需要显式生命周期句柄的接入；句柄的 `mounted` 和 `getInstance()` 会反映预览区的延迟挂载状态。`createCherryMilkdown` 仍可用于不需要 Cherry 页面壳的独立编辑器。两者都不是 Cherry 页面中的推荐接入方式。
 
 `plugins` 会在内置 WYSIWYG 插件之后加载，可用于注册业务 NodeView。
 
@@ -109,7 +109,7 @@ yarn build:demo
 yarn preview:demo
 ```
 
-用户可见 demo 是一个最小 React + Vite 工程，入口位于 `examples/react/App.tsx`；`index.html` 只保留 Vite 所需的根节点。它复用仓库根 demo 的布局、配置、工具栏、主题、ECharts 插件和整份 Markdown 手册，业务接入上的唯一差异是增加 `extensions: [milkdown()]`，并在 React 卸载时销毁 Cherry 实例。纯预览可直接打开 `index.html?mode=previewOnly`，仍由 Cherry 的 `editor.defaultModel` 和 `toolbars` 配置决定，不存在第二套 React 编辑器。
+用户可见 demo 是一个最小 React + Vite 工程，入口位于 `examples/react/App.tsx`；`index.html` 只保留 Vite 所需的根节点。它复用仓库根 demo 的布局、配置、工具栏、主题、ECharts 插件和整份 Markdown 手册，业务接入上的唯一差异是增加 `extensions: [milkdown()]`，并在 React 卸载时销毁 Cherry 实例。纯预览可直接打开 `index.html?mode=previewOnly`，仍由 Cherry 的 `editor.defaultModel` 和 `toolbars` 配置决定，不存在第二套 React 编辑器。打开 `index.html?mode=editOnly` 可从 Cherry 纯源码模式启动：预览首次可见时才会用最新 Markdown 创建 Milkdown，之后切换模式继续复用同一实例。
 
 ## 可靠性验证
 

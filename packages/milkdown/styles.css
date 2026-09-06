@@ -408,6 +408,13 @@
   background: #fff;
 }
 
+.cherry-node-actions button.is-active,
+.cherry-embed__controls button.is-active,
+.cherry-embed__controls button[aria-expanded='true'] {
+  color: var(--cherry-milkdown-primary);
+  background: rgb(54 110 244 / 10%);
+}
+
 .cherry-source-node__header {
   display: flex;
   justify-content: space-between;
@@ -418,13 +425,36 @@
 .cherry-source-node__source,
 .cherry-embed__source {
   display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: min(40vh, 360px);
   margin-top: 8px;
   padding: 10px 12px;
   border-radius: 6px;
   outline: 0;
   background: #f6f8fa;
   white-space: pre-wrap;
+  overflow: auto;
+  overflow-wrap: anywhere;
   font: 13px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+/* The source editor is a single code surface. Keeping the editable code
+ * element block-level prevents Chromium from painting a focus outline around
+ * every inline line box. The focus ring belongs to the complete source panel,
+ * just like Cherry's native code block. */
+.cherry-embed__source > code {
+  display: block;
+  min-height: 1.6em;
+  outline: none;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+}
+
+.cherry-embed__source:focus-within {
+  outline: 1px solid var(--cherry-milkdown-primary);
+  outline-offset: -1px;
 }
 
 .cherry-source-node__source[hidden],
@@ -494,7 +524,8 @@
 
 .cherry-embed:hover > .cherry-embed__controls,
 .cherry-embed.is-selected > .cherry-embed__controls,
-.cherry-embed:focus-within > .cherry-embed__controls {
+.cherry-embed:focus-within > .cherry-embed__controls,
+.cherry-embed__controls:hover {
   opacity: 1;
 }
 
@@ -703,9 +734,70 @@
 .cherry-milkdown--previewer .cherry-embed__controls {
   position: absolute;
   z-index: 20;
-  top: 4px;
+  /* Controls are an overlay, like Cherry's native preview actions: they do
+   * not add a block to the document or create a second scrollbar.  The solid
+   * background keeps the small action target legible without changing the
+   * rendered node's dimensions. */
+  top: 6px;
   right: 6px;
   margin: 0;
+}
+
+/* Match Cherry's bubble/toolbar contract instead of inventing a second
+ * button theme for embedded nodes.  All values resolve through Cherry's
+ * semantic variables when present, with the fallbacks kept for standalone
+ * Milkdown consumers. */
+.cherry-milkdown--previewer .cherry-embed__controls {
+  gap: var(--spacing-xs, 4px);
+  min-height: var(--bubble-btn-height, 28px);
+  padding: var(--bubble-padding, 4px);
+  border: var(--border-width-1, 1px) solid var(--bubble-border, var(--cherry-milkdown-border));
+  border-radius: var(--bubble-radius, 4px);
+  background-color: var(--bubble-bg, var(--toolbar-bg, #fff));
+  box-shadow: var(--bubble-shadow, 0 2px 8px rgb(0 0 0 / 10%));
+}
+
+/* A compact Mermaid SVG has no empty corner for an action bubble. Move the
+ * optional control to the immediate right of the figure instead of covering
+ * diagram nodes. It remains absolutely positioned, so it does not add a
+ * line-height, layout height, or second scrollbar. */
+.cherry-milkdown--previewer .cherry-embed.cherry-embed--controls-outside {
+  overflow: visible;
+}
+
+.cherry-milkdown--previewer .cherry-embed--controls-outside > .cherry-embed__controls {
+  top: 0;
+  right: auto;
+  left: calc(100% + var(--spacing-xs, 4px));
+  width: max-content;
+  max-width: none;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.cherry-milkdown--previewer .cherry-embed__controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--bubble-btn-height, 28px);
+  min-height: var(--bubble-btn-height, 28px);
+  padding: 0 var(--bubble-padding, 4px);
+  border: 0;
+  border-radius: var(--bubble-radius, 4px);
+  color: var(--toolbar-btn-color, var(--cherry-milkdown-muted));
+  background: var(--toolbar-btn-bg, transparent);
+  cursor: pointer;
+  font: inherit;
+  transition: color 150ms, background-color 150ms;
+}
+
+.cherry-milkdown--previewer .cherry-embed__controls button:hover,
+.cherry-milkdown--previewer .cherry-embed__controls button:focus-visible,
+.cherry-milkdown--previewer .cherry-embed__controls button.is-active,
+.cherry-milkdown--previewer .cherry-embed__controls button[aria-expanded='true'] {
+  color: var(--toolbar-btn-hover-color, var(--cherry-milkdown-primary));
+  background-color: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
+  outline: none;
 }
 
 .cherry-milkdown--previewer .cherry-compound__title:focus::placeholder,
@@ -756,34 +848,19 @@
   margin-bottom: 16px;
 }
 
-/* Cherry's native preview code block does not reserve a line-number gutter.
- * Keep the editor's code content at the native x-origin in preview mode; the
- * language/copy controls remain available only on hover or focus. */
-.cherry-milkdown--previewer .cherry-milkdown-code-block__gutter {
-  display: none;
-}
-
-.cherry-milkdown--previewer .cherry-milkdown-code-block__content {
-  position: static;
-  top: auto;
-  display: block;
-  width: 100%;
-  min-height: 0;
-  margin-left: 0;
-}
-
-.cherry-milkdown--previewer .cherry-milkdown-code-block > pre {
-  position: static;
-  min-height: 0;
-  margin: 7px 0;
-  padding: 14px;
-  color: #545454;
-  font: 14px/21px Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
-}
-
 .cherry-milkdown--previewer th > p,
 .cherry-milkdown--previewer td > p {
   margin: 0;
+}
+
+.cherry-milkdown--previewer .cherry-footnote-definition .one-footnote {
+  display: flex;
+  align-items: flex-start;
+}
+
+.cherry-milkdown--previewer .cherry-footnote-definition__content {
+  flex: 1;
+  min-width: 0;
 }
 
 /* Milkdown's GFM schema normalizes an omitted alignment to inline `left`.

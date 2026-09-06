@@ -24,10 +24,15 @@ vi.mock('mathlive', () => ({}));
 // Keep typechecking independent from generated Cherry declarations while loading the
 // actual workspace package at runtime. The test command builds Cherry before Vitest.
 const { default: Cherry } = await vi.importActual<{
-  default: new (options: { el: HTMLElement; value: string; extensions: ReturnType<typeof milkdown>[] }) => {
+  default: new (options: {
+    el: HTMLElement;
+    value: string;
+    editor?: { defaultModel: 'edit&preview' | 'editOnly' | 'previewOnly' };
+    extensions: ReturnType<typeof milkdown>[];
+  }) => {
     getMarkdown(): string;
     setValue(markdown: string): void;
-    switchModel(model: 'editOnly' | 'previewOnly'): void;
+    switchModel(model: 'edit&preview' | 'editOnly' | 'previewOnly'): void;
     destroy(): void;
   };
 }>('cherry-markdown');
@@ -106,6 +111,41 @@ describe('createCherryMilkdown WYSIWYG', () => {
     await vi.waitFor(() => expect(element.childElementCount).toBe(0));
   });
 
+  it('defers an initial editOnly mount until the preview first becomes visible', async () => {
+    const element = root();
+    const onError = vi.fn();
+    const cherry = new Cherry({
+      el: element,
+      value: '# Hidden initial value',
+      editor: { defaultModel: 'editOnly' },
+      extensions: [milkdown({ debounce: 0, onError })],
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(element.querySelector('.cherry-previewer')?.classList.contains('cherry-previewer--hidden')).toBe(true);
+    expect(element.querySelector('.ProseMirror')).toBeNull();
+    expect(onError).not.toHaveBeenCalled();
+
+    cherry.setValue('## Latest hidden source\n\nBefore first preview.');
+    cherry.switchModel('previewOnly');
+    await vi.waitFor(() => expect(element.querySelector('.ProseMirror h2')?.textContent).toBe('Latest hidden source'));
+    const previewEditor = element.querySelector('.ProseMirror');
+    expect(previewEditor).not.toBeNull();
+
+    cherry.switchModel('editOnly');
+    cherry.setValue('## Updated while suspended\n\nLatest body.');
+    cherry.switchModel('edit&preview');
+    await vi.waitFor(() =>
+      expect(element.querySelector('.ProseMirror h2')?.textContent).toBe('Updated while suspended'),
+    );
+    expect(element.querySelector('.ProseMirror')).toBe(previewEditor);
+    expect(cherry.getMarkdown()).toContain('Latest body.');
+    expect(onError).not.toHaveBeenCalled();
+
+    cherry.destroy();
+    await vi.waitFor(() => expect(element.childElementCount).toBe(0));
+  });
+
   it('exposes milkdown() as the instance extension and returns Cherry-owned cleanup', async () => {
     const element = root();
     let renderer: CherryPreviewContentRenderer | undefined;
@@ -175,11 +215,9 @@ describe('createCherryMilkdown WYSIWYG', () => {
     };
     const onError = vi.fn();
 
-    await expect(
-      attachCherryMilkdownPreview(host, {
-        onError,
-      }),
-    ).rejects.toThrow(error);
+    const handle = await attachCherryMilkdownPreview(host, { onError });
+    expect(handle.mounted).toBe(false);
+    expect(handle.getInstance()).toBeUndefined();
     expect(onError).toHaveBeenCalledTimes(1);
     expect(onError).toHaveBeenCalledWith(error, 'create');
     expect(renderer).toBeUndefined();
@@ -190,7 +228,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     const element = root();
     element.className = 'cherry-previewer cherry-markdown theme__default';
     let renderer: CherryPreviewContentRenderer | undefined;
-    let markdown = '# Before\n\nCherry preview body.';
+    let markdown = '# Before[^note]\n\n[^note]: Definition\n\nCherry preview body.';
     const engine = { makeHtml: vi.fn((value: string) => `<h1>${value}</h1>`) };
     const previewer = {
       getDom: () => element,
@@ -216,15 +254,21 @@ describe('createCherryMilkdown WYSIWYG', () => {
       }),
     };
 
-    const instance = await attachCherryMilkdownPreview(host, { debounce: 0 });
+    const handle = await attachCherryMilkdownPreview(host, { debounce: 0 });
+    const instance = handle.getInstance();
+    expect(instance).toBeDefined();
+    if (!instance) throw new Error('expected visible preview to mount Milkdown');
     instances.push(instance);
 
     expect(element.classList.contains('cherry-previewer')).toBe(true);
     expect(element.classList.contains('cherry-markdown')).toBe(true);
-    expect(element.querySelector('h1')?.textContent).toBe('Before');
+    expect(element.querySelector('h1')?.textContent).toBe('Before[1]');
     expect(instance.engine).toBe(engine);
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(host.setValue).not.toHaveBeenCalled();
+    const setMarkdown = vi.spyOn(instance, 'setMarkdown');
+    await previewer.update(engine.makeHtml(markdown));
+    expect(setMarkdown).not.toHaveBeenCalled();
 
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     let headingEnd = -1;
@@ -244,11 +288,13 @@ describe('createCherryMilkdown WYSIWYG', () => {
 
     markdown = '# From source editor';
     await previewer.update(engine.makeHtml(markdown));
+    expect(setMarkdown).toHaveBeenCalledTimes(1);
     expect(element.querySelector('h1')?.textContent).toBe('From source editor');
 
-    await instance.detach();
+    await handle.detach();
     expect(previewer.clearContentRenderer).toHaveBeenCalled();
     expect(element.classList.contains('cherry-milkdown--previewer')).toBe(false);
+    expect(element.classList.contains('cherry-markdown')).toBe(true);
     expect(element.textContent).toContain('# From source editor');
   });
 
@@ -274,7 +320,10 @@ describe('createCherryMilkdown WYSIWYG', () => {
         markdown = value;
       }),
     };
-    const instance = await attachCherryMilkdownPreview(host, { debounce: 1000 });
+    const handle = await attachCherryMilkdownPreview(host, { debounce: 1000 });
+    const instance = handle.getInstance();
+    expect(instance).toBeDefined();
+    if (!instance) throw new Error('expected visible preview to mount Milkdown');
     instances.push(instance);
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     let position = -1;
@@ -530,6 +579,30 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(destroyChart).toHaveBeenCalled();
   });
 
+  it('does not insert a synthetic paragraph between a table chart and the following Cherry block', async () => {
+    const element = root();
+    const value = [
+      '| :line:{"title":"Trend"} | Jan | Feb |',
+      '| --- | ---: | ---: |',
+      '| Sales | 1 | 2 |',
+      '',
+      ':::warning Notice',
+      'Panel body.',
+      ':::',
+    ].join('\n');
+    const engine = {
+      makeHtml: () =>
+        '<div class="cherry-table-wrapper"><figure class="cherry-table-figure"><div class="cherry-echarts-wrapper"></div></figure><table><tbody><tr><td>Sales</td></tr></tbody></table></div>',
+    };
+    const instance = await createCherryMilkdown({ root: element, value, engine });
+    instances.push(instance);
+
+    const chart = element.querySelector('.cherry-table-chart');
+    expect(chart).not.toBeNull();
+    expect(chart?.nextElementSibling?.classList.contains('cherry-panel')).toBe(true);
+    expect(element.querySelector('.cherry-table-chart + p:empty + .cherry-panel')).toBeNull();
+  });
+
   it('keeps preview tables directly editable with Cherry-compatible row and column controls', async () => {
     const element = root();
     const cherry = new Cherry({
@@ -609,6 +682,19 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(nodes[1]?.dataset.type).toBe('mermaid');
     expect(nodes[1]?.querySelector<HTMLElement>('.cherry-embed__source')?.hidden).toBe(true);
     await vi.waitFor(() => expect(nodes[1]?.querySelector('[data-rendered-mermaid]')).not.toBeNull());
+  });
+
+  it('canonicalizes Cherry panel aliases instead of treating them as raw HTML', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({ root: element, value: ':::p Alias title\nPanel body\n:::' });
+    instances.push(instance);
+
+    const panel = element.querySelector<HTMLElement>('.cherry-compound');
+    expect(panel).not.toBeNull();
+    expect(panel?.classList.contains('cherry-panel__primary')).toBe(true);
+    expect(panel?.querySelector('[title="在节点内编辑源码"]')).toBeNull();
+    expect((panel?.querySelector('.cherry-compound__title') as HTMLInputElement | null)?.value).toBe('Alias title');
+    expect(instance.getMarkdown()).toContain(':::p Alias title');
   });
 
   it('uses a custom renderer for other visual diagram nodes', async () => {
@@ -715,7 +801,10 @@ describe('createCherryMilkdown WYSIWYG', () => {
         markdown = value;
       }),
     };
-    const instance = await attachCherryMilkdownPreview(host, { debounce: 0 });
+    const handle = await attachCherryMilkdownPreview(host, { debounce: 0 });
+    const instance = handle.getInstance();
+    expect(instance).toBeDefined();
+    if (!instance) throw new Error('expected visible preview to mount Milkdown');
     instances.push(instance);
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     let start = -1;
@@ -802,7 +891,10 @@ describe('createCherryMilkdown WYSIWYG', () => {
         markdown = value;
       }),
     };
-    const instance = await attachCherryMilkdownPreview(host, { debounce: 0 });
+    const handle = await attachCherryMilkdownPreview(host, { debounce: 0 });
+    const instance = handle.getInstance();
+    expect(instance).toBeDefined();
+    if (!instance) throw new Error('expected visible preview to mount Milkdown');
     instances.push(instance);
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     const blocks = Array.from(view.dom.children) as HTMLElement[];
@@ -931,15 +1023,19 @@ describe('createCherryMilkdown WYSIWYG', () => {
     const element = root();
     const instance = await createCherryMilkdown({
       root: element,
-      value: '```mermaid\ngraph TD; A-->B;\n```',
+      value: '```mermaid\ngraph TD; A-->B;\n```\n\n+++ More\nBody\n+++',
       debounce: 0,
     });
     instances.push(instance);
     selectNode(instance, 'cherry_diagram');
     const sourcePanel = element.querySelector<HTMLElement>('.cherry-embed__source');
     expect(sourcePanel?.hidden).toBe(true);
-    element.querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
+    const toggle = element.querySelector<HTMLButtonElement>('.cherry-embed__controls button');
+    expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+    toggle?.click();
     expect(sourcePanel?.hidden).toBe(false);
+    expect(toggle?.getAttribute('aria-expanded')).toBe('true');
+    expect(toggle?.classList.contains('is-active')).toBe(true);
     const source = sourcePanel?.querySelector<HTMLElement>('code');
     expect(source?.textContent).toContain('A-->B');
     if (source) {
@@ -949,6 +1045,14 @@ describe('createCherryMilkdown WYSIWYG', () => {
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(instance.getMarkdown()).toContain('B-->C');
     expect(sourcePanel?.hidden).toBe(false);
+
+    const disclosure = element.querySelector<HTMLButtonElement>('.cherry-compound-item__disclosure');
+    disclosure?.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true }));
+    disclosure?.click();
+    expect(sourcePanel?.hidden).toBe(false);
+    toggle?.click();
+    expect(sourcePanel?.hidden).toBe(true);
+    expect(toggle?.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('updates Mermaid size and alignment through the preview editing bridge', async () => {
@@ -983,7 +1087,10 @@ describe('createCherryMilkdown WYSIWYG', () => {
         markdown = value;
       }),
     };
-    const instance = await attachCherryMilkdownPreview(host, { debounce: 0 });
+    const handle = await attachCherryMilkdownPreview(host, { debounce: 0 });
+    const instance = handle.getInstance();
+    expect(instance).toBeDefined();
+    if (!instance) throw new Error('expected visible preview to mount Milkdown');
     instances.push(instance);
     const figure = element.querySelector<HTMLElement>('.cherry-embed--cherry_diagram[data-type="mermaid"]');
 
