@@ -247,10 +247,12 @@ test('the full demo loads every shared image and keeps images selectable in prev
   await page.goto(demoPath);
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
 
-  const images = page.locator('.ProseMirror img:not(.ProseMirror-separator)');
+  // The preview editor intentionally keeps Cherry's preview container as the
+  // stable surface; Milkdown may change the internal ProseMirror wrapper class.
+  const images = page.locator('#markdown img:not(.ProseMirror-separator)');
   await expect.poll(() => images.count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(15);
-  await expect(page.locator('.ProseMirror img[alt="表格图表"]')).toBeVisible();
-  await expect(page.locator('.ProseMirror img[alt="字体样式"]')).toBeVisible();
+  await expect(page.locator('#markdown img[alt="表格图表"]')).toBeVisible();
+  await expect(page.locator('#markdown img[alt="字体样式"]')).toBeVisible();
   const broken = await images.evaluateAll((elements) =>
     elements
       .filter((element) => {
@@ -262,7 +264,7 @@ test('the full demo loads every shared image and keeps images selectable in prev
   expect(broken).toEqual([]);
   actions.push(`loaded ${await images.count()} shared demo images with intrinsic dimensions`);
 
-  const feature = page.locator('.ProseMirror img[alt="表格图表"]');
+  const feature = page.locator('#markdown img[alt="表格图表"]');
   const before = await readState(page);
   await feature.click({ force: true });
   await expect(feature).toHaveClass(/ProseMirror-selectednode/);
