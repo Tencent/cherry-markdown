@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react';
-import { createReadStream } from 'node:fs';
+import { createReadStream, realpathSync } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { dirname, extname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,6 +9,7 @@ const packageRoot = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = resolve(packageRoot, '../..');
 const examplesRoot = resolve(packageRoot, 'examples');
 const sharedExamplesRoot = resolve(workspaceRoot, 'examples');
+const linkedNodeModules = realpathSync(resolve(workspaceRoot, 'node_modules'));
 
 const contentTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -66,6 +67,13 @@ function sharedDemoAssets() {
 export default defineConfig({
   root: examplesRoot,
   base: './',
+  server: {
+    fs: {
+      // The workspace demo links dependencies from the shared node_modules
+      // store; allow Vite to serve their runtime assets (MathLive fonts).
+      allow: [workspaceRoot, linkedNodeModules],
+    },
+  },
   plugins: [react(), sharedDemoAssets()],
   build: {
     outDir: resolve(packageRoot, 'preview'),

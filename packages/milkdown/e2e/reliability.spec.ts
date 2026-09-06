@@ -248,7 +248,7 @@ test('the full demo loads every shared image and keeps images selectable in prev
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
 
   const images = page.locator('.ProseMirror img:not(.ProseMirror-separator)');
-  expect(await images.count()).toBeGreaterThanOrEqual(15);
+  await expect.poll(() => images.count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(15);
   await expect(page.locator('.ProseMirror img[alt="表格图表"]')).toBeVisible();
   await expect(page.locator('.ProseMirror img[alt="字体样式"]')).toBeVisible();
   const broken = await images.evaluateAll((elements) =>
