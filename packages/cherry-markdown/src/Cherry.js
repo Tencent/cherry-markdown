@@ -44,7 +44,7 @@ import locales from '@/locales/index';
 import Logger from '@/Logger';
 
 import { urlProcessorProxy } from './UrlCache';
-import { CherryStatic } from './CherryStatic';
+import { CherryStatic, getInstancePlugins } from './CherryStatic';
 import { destroySearcherBridge, initSearcherBridge } from './toolbars/searcher/SearcherBridge';
 import { LIST_CONTENT } from '@/utils/regexp';
 
@@ -69,6 +69,7 @@ export default class Cherry extends CherryStatic {
   constructor(options) {
     super();
     Cherry.initialized = true;
+    /** @type {typeof Cherry} */ (this.constructor).initialized = true;
     const defaultConfigCopy = cloneDeep(Cherry.config.defaults);
     this.defaultToolbar = defaultConfigCopy.toolbars.toolbar;
     $expectTarget(options, Object);
@@ -137,7 +138,6 @@ export default class Cherry extends CherryStatic {
     /**
      * @type {import('./Engine').default}
      */
-    // TODO(plugin-unification): Run future synchronous plugin configure hooks here before Engine construction.
     this.engine = new Engine(this.options, this);
     if (this.init() !== false) {
       this.mountPlugins();
@@ -146,8 +146,7 @@ export default class Cherry extends CherryStatic {
 
   /** Mount instance-scoped plugins without making construction async. */
   mountPlugins() {
-    const plugins = Array.isArray(this.options.plugins) ? this.options.plugins : [];
-    plugins.forEach((plugin) => {
+    getInstancePlugins(this.constructor).forEach(({ plugin, args }) => {
       if (!plugin || typeof plugin.mount !== 'function') {
         Logger.warn('Cherry plugin ignored because mount() is missing.');
         return;
@@ -155,7 +154,7 @@ export default class Cherry extends CherryStatic {
       this.pluginMountTask = this.pluginMountTask.then(async () => {
         if (this.isDestroyed) return;
         try {
-          const cleanup = await plugin.mount(this);
+          const cleanup = await plugin.mount(this, ...args);
           if (typeof cleanup !== 'function') return;
           if (this.isDestroyed) {
             await cleanup();
@@ -793,6 +792,7 @@ export default class Cherry extends CherryStatic {
       this.floatMenu.destroy();
     }
     this.options.toolbars[type] = toolbar;
+    this.previewer?.resetEditingBubble();
     this.createToolbar();
     this.createToolbarRight();
     this.createBubble();

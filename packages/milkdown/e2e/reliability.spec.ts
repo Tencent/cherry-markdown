@@ -601,6 +601,37 @@ test('preview text selection uses the native Cherry Bubble and preserves the sel
     .toBe(true);
   actions.push('clicked native Bubble bold and verified all three Markdown owners stayed synchronized');
 
+  await page.evaluate(() => {
+    const cherry = (
+      window as typeof window & {
+        cherry: { switchModel(mode: string): void };
+      }
+    ).cherry;
+    cherry.switchModel('editOnly');
+  });
+  await expect(bubble).toBeHidden();
+  expect(await page.evaluate(() => (window as any).cherry.getPreviewer().editingBridge.isActive())).toBe(false);
+  await page.evaluate(() => {
+    const cherry = (window as any).cherry;
+    cherry.switchModel('previewOnly');
+    cherry.resetToolbar('bubble', ['italic']);
+  });
+  await expect(bubble).toHaveCount(0);
+  const restoredBox = await paragraph.boundingBox();
+  expect(restoredBox).not.toBeNull();
+  await page.mouse.move(restoredBox!.x + 4, restoredBox!.y + restoredBox!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(restoredBox!.x + restoredBox!.width - 4, restoredBox!.y + restoredBox!.height / 2, { steps: 6 });
+  await page.mouse.up();
+  await expect.poll(() => page.evaluate(() => getSelection()?.toString())).toBe('Bubble 可编辑文本');
+  await expect(bubble).toBeVisible();
+  await expect(bubble.locator('.cherry-toolbar-button')).toHaveCount(1);
+  await bubble.locator('.cherry-toolbar-button[title="斜体"]').click();
+  await expect(paragraph.locator('em')).toContainText('Bubble 可编辑文本');
+  await page.evaluate(() => (window as any).cherry.resetToolbar('bubble', []));
+  await expect(bubble).toHaveCount(0);
+  actions.push('released preview ownership in editOnly and rebuilt the Bubble from updated Cherry configuration');
+
   expect(errors).toEqual([]);
   await attachEvidence(page, testInfo, actions, errors);
 });
@@ -1923,7 +1954,6 @@ test('repeated mount and destroy returns DOM and heap resources to the warmed ba
   await page.evaluate(async () => {
     const scope = window as typeof window & {
       Cherry: new (options: Record<string, unknown>) => { destroy(): void };
-      milkdown: (options?: Record<string, unknown>) => unknown;
     };
     const host = document.createElement('div');
     document.body.append(host);
@@ -1932,7 +1962,6 @@ test('repeated mount and destroy returns DOM and heap resources to the warmed ba
       value: '# warmup',
       editor: { defaultModel: 'previewOnly' },
       toolbars: { toolbar: false, toolbarRight: false, sidebar: false },
-      plugins: [scope.milkdown({ debounce: 0 })],
     });
     while (!host.querySelector('.ProseMirror')) await new Promise(requestAnimationFrame);
     instance.destroy();
@@ -1945,7 +1974,6 @@ test('repeated mount and destroy returns DOM and heap resources to the warmed ba
   const final = await page.evaluate(async (mountRounds) => {
     const scope = window as typeof window & {
       Cherry: new (options: Record<string, unknown>) => { destroy(): void };
-      milkdown: (options?: Record<string, unknown>) => unknown;
     };
     for (let index = 0; index < mountRounds; index += 1) {
       const host = document.createElement('div');
@@ -1956,7 +1984,6 @@ test('repeated mount and destroy returns DOM and heap resources to the warmed ba
         value: `# stress ${index}\n\n| A | B |\n| --- | --- |\n| ${index} | value |`,
         editor: { defaultModel: 'previewOnly' },
         toolbars: { toolbar: false, toolbarRight: false, sidebar: false },
-        plugins: [scope.milkdown({ debounce: 0 })],
       });
       while (!host.querySelector('.ProseMirror')) await new Promise(requestAnimationFrame);
       instance.destroy();

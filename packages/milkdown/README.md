@@ -34,20 +34,21 @@ import '@milkdown/kit/prose/view/style/prosemirror.css';
 
 ## Usage
 
+Register once before constructing the first Cherry instance. Subsequent instances mount automatically. Registration options are shared; editor state and cleanup remain per instance. Initial `editOnly` and CherryStream do not mount.
+
 ```js
 import Cherry from 'cherry-markdown';
 import { milkdown } from '@cherry-markdown/milkdown';
 
+Cherry.usePlugin(milkdown, {
+  onChange({ markdown }) {
+    console.log(markdown);
+  },
+});
+
 const cherry = new Cherry({
   id: 'editor',
   value: '# Title\n\nInline math $E=mc^2$ and !!red colored text!!.',
-  plugins: [
-    milkdown({
-      onChange({ markdown }) {
-        console.log(markdown);
-      },
-    }),
-  ],
 });
 
 // Preview edits are written to Cherry's Markdown/CodeMirror automatically.
@@ -57,7 +58,7 @@ cherry.destroy(); // Milkdown is cleaned up with this Cherry instance.
 
 `attachCherryMilkdownPreview(cherry, options)` remains available for integrations that need an explicit lifecycle handle. Its `mounted` flag and `getInstance()` method reflect lazy preview mounting. `createCherryMilkdown` remains available for a standalone surface without Cherry's page shell. Neither is the recommended Cherry integration.
 
-Plugins passed through `plugins` are loaded after the built-in WYSIWYG plugins and can register business NodeViews.
+Milkdown-internal plugins passed through `createCherryMilkdown({ plugins })` are loaded after the built-in WYSIWYG plugins and can register business NodeViews.
 
 In plugin mode the original Cherry toolbar remains owned by the source editor; it does not take over the Milkdown selection. The native Cherry Bubble operates on selected preview text, while image and Mermaid preview controls continue to use Cherry's original UI. Native Markdown input rules create headings, lists, quotes, and code blocks without opening Cherry's source-editor suggest panel. Structural controls appear only while hovering or selecting their node. Tables use Milkdown's `table-block` controls for row and column insertion, deletion, dragging, and alignment. Selecting a formula activates MathLive in place.
 
@@ -71,7 +72,6 @@ const cherry = new Cherry({
   value: '# Directly editable preview',
   editor: { defaultModel: 'previewOnly' },
   toolbars: { toolbar: false },
-  plugins: [milkdown()],
 });
 ```
 
@@ -111,7 +111,7 @@ yarn build:demo
 yarn preview:demo
 ```
 
-The user-facing demo is a minimal React + Vite application whose entry is `examples/react/App.tsx`; `index.html` only contains the root element required by Vite. It reuses the root demo's layout, configuration, toolbar, theme, ECharts plugin, and full Markdown manual. Its only integration difference is `plugins: [milkdown()]`, with the Cherry instance destroyed during React unmount. Open `index.html?mode=previewOnly` for the toolbar-free preview-only mode; Cherry's existing `editor.defaultModel` and `toolbars` configuration select the mode, so there is no second React editor. `editOnly` remains Cherry's source editor and does not mount Milkdown. CherryStream is not supported by this plugin.
+The user-facing demo is a minimal React + Vite application whose entry is `examples/react/App.tsx`; `index.html` only contains the root element required by Vite. It reuses the root demo's layout, configuration, toolbar, theme, ECharts plugin, and full Markdown manual. Its only integration difference is `Cherry.usePlugin(milkdown)`, with the Cherry instance destroyed during React unmount. Open `index.html?mode=previewOnly` for the toolbar-free preview-only mode; Cherry's existing `editor.defaultModel` and `toolbars` configuration select the mode, so there is no second React editor. `editOnly` remains Cherry's source editor and does not mount Milkdown. CherryStream is not supported by this plugin.
 
 ## Reliability checks
 

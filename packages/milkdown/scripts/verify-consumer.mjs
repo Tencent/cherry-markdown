@@ -84,13 +84,14 @@ import 'cherry-markdown/dist/cherry-markdown.css';
 import '@cherry-markdown/milkdown/styles.css';
 import '@milkdown/kit/prose/view/style/prosemirror.css';
 
+Cherry.usePlugin(milkdown);
+
 function App() {
   const editorRoot = useRef(null);
   useEffect(() => {
     const cherry = new Cherry({
       el: editorRoot.current,
       value: '# Published package consumer',
-      plugins: [milkdown()],
     });
     window.cherry = cherry;
     return () => cherry.destroy();

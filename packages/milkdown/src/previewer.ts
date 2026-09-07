@@ -20,6 +20,10 @@ export async function attachCherryMilkdownPreview(
   cherry: CherryMilkdownHost,
   options: CherryMilkdownPreviewOptions = {},
 ): Promise<CherryMilkdownPreviewHandle> {
+  const mode = cherry.options?.editor?.defaultModel ?? 'edit&preview';
+  if (!cherry.editor || (mode !== 'edit&preview' && mode !== 'previewOnly')) {
+    return { mounted: false, getInstance: () => undefined, detach: async () => {}, destroy: async () => {} };
+  }
   const previewer = cherry.getPreviewer();
   if (!previewer?.setContentRenderer || !previewer?.clearContentRenderer) {
     throw new TypeError(
@@ -182,17 +186,11 @@ export async function attachCherryMilkdownPreview(
   };
 }
 
-/** Creates an instance-scoped Cherry plugin that edits the existing preview with Milkdown. */
-export function milkdown(options: CherryMilkdownPreviewOptions = {}): CherryPlugin<CherryMilkdownHost> {
-  return {
-    name: '@cherry-markdown/milkdown',
-    async mount(cherry) {
-      const mode = cherry.options?.editor?.defaultModel ?? 'edit&preview';
-      // Milkdown enhances an editable Cherry preview. A source-only Cherry
-      // instance and CherryStream have no editable preview surface to own.
-      if (mode === 'editOnly' || !cherry.editor) return;
-      const instance = await attachCherryMilkdownPreview(cherry, options);
-      return () => instance.detach();
-    },
-  };
-}
+/** Register once with Cherry.usePlugin(milkdown, options), before creating Cherry instances. */
+export const milkdown: CherryPlugin<CherryMilkdownHost, CherryMilkdownPreviewOptions> = {
+  name: '@cherry-markdown/milkdown',
+  async mount(cherry, options = {}) {
+    const instance = await attachCherryMilkdownPreview(cherry, options);
+    return () => instance.detach();
+  },
+};

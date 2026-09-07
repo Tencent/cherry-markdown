@@ -70,16 +70,14 @@ export interface Cherry<T extends CherryCustomOptions = CherryCustomOptions> {
 export type CherryPluginCleanup = () => void | Promise<void>;
 
 /** An instance-scoped plugin mounted after Cherry has initialized. */
-export interface CherryPlugin<TCherry = unknown> {
+export interface CherryPlugin<TCherry = unknown, TOptions = unknown> {
   name: string;
-  mount(cherry: TCherry): void | CherryPluginCleanup | Promise<void | CherryPluginCleanup>;
+  mount(cherry: TCherry, options?: TOptions): void | CherryPluginCleanup | Promise<void | CherryPluginCleanup>;
 }
 
 export type CherryOptions<T extends CherryCustomOptions = CherryCustomOptions> = Partial<CherryOptionsBase<T>>;
 
 export interface CherryOptionsBase<T extends CherryCustomOptions = CherryCustomOptions> {
-  /** Instance-scoped plugins such as the Milkdown preview editor. */
-  plugins: CherryPlugin[];
   openai: any;
   /** 第三方依赖 */
   externals: CherryExternalsOptions;
@@ -780,10 +778,24 @@ export type CherryDefaultToolbar =
   | 'wordCount';
 
 export type CherryDefaultBubbleToolbar =
-  CherryToolbarSeparator | 'bold' | 'italic' | 'strikethrough' | 'sub' | 'sup' | 'size' | 'color';
+  | CherryToolbarSeparator
+  | 'bold'
+  | 'italic'
+  | 'strikethrough'
+  | 'sub'
+  | 'sup'
+  | 'size'
+  | 'color';
 
 export type CherryDefaultFloatToolbar =
-  CherryToolbarSeparator | 'h1' | 'h2' | 'h3' | 'checklist' | 'quote' | 'quickTable' | 'code';
+  | CherryToolbarSeparator
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'checklist'
+  | 'quote'
+  | 'quickTable'
+  | 'code';
 
 export type SupportPlatform = 'wechat' | 'toutiao';
 export interface CherryPublishToolbarOption {
@@ -850,7 +862,8 @@ export interface CherryToolbarsOptions<F extends CherryToolbarsCustomType = Cher
         | keyof Partial<F['CustomMenuType']>
         | {
             [K in keyof Partial<F['CustomMenuType']> | CherryDefaultToolbar]?: (
-              keyof F['CustomMenuType'] | CherryDefaultToolbar
+              | keyof F['CustomMenuType']
+              | CherryDefaultToolbar
             )[];
           }
       )[]

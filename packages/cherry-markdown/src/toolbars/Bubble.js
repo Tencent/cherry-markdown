@@ -45,35 +45,29 @@ export default class Bubble extends Toolbar {
     this.bubbleDom = this.options.dom;
     this.editorDom = this.options.editorDom || this.options.editor.getEditorDom();
     this.initBubbleDom();
-    if (this.options.mountTarget) {
-      this.options.mountTarget.appendChild(this.bubbleDom);
+    const mountTarget = this.options.mountTarget;
+    if (mountTarget) {
+      mountTarget.appendChild(this.bubbleDom);
     } else {
-      this.addSelectionChangeListener();
-      // 添加空值检查，确保 .cm-editor 存在
       const cmEditor = this.editorDom.querySelector('.cm-editor');
-      if (cmEditor) {
-        cmEditor.appendChild(this.bubbleDom);
-      } else {
-        Logger.warn('Bubble: .cm-editor not found, appending to editorDom instead');
-        this.editorDom.appendChild(this.bubbleDom);
-      }
+      (cmEditor || this.editorDom).appendChild(this.bubbleDom);
+      if (!cmEditor) Logger.warn('Bubble: .cm-editor not found, appending to editorDom instead');
     }
-    if (this.options.previewMode) {
-      // Keep the ProseMirror text selection alive while a Cherry bubble button
-      // is clicked.  A mousedown focus change would otherwise collapse the
-      // selection before MenuBase#fire can hand the command to Milkdown.
-      this.boundPreviewPointerDown = (event) => {
+    if (this.options.observeSelection !== false) {
+      this.addSelectionChangeListener();
+    }
+    if (this.options.preserveSelectionOnPointerDown) {
+      this.boundPreserveSelection = (event) => {
         if (event.target?.closest?.('.cherry-toolbar-button')) event.preventDefault();
       };
-      this.boundPreviewMouseDown = (event) => {
-        if (event.target?.closest?.('.cherry-toolbar-button')) event.preventDefault();
-      };
-      this.bubbleDom.addEventListener('pointerdown', this.boundPreviewPointerDown);
-      this.bubbleDom.addEventListener('mousedown', this.boundPreviewMouseDown);
+      this.bubbleDom.addEventListener('pointerdown', this.boundPreserveSelection);
+      this.bubbleDom.addEventListener('mousedown', this.boundPreserveSelection);
     }
-    Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
-      this.$cherry.toolbar.shortcutKeyMap[key] = value;
-    });
+    if (this.options.observeSelection !== false) {
+      Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
+        this.$cherry.toolbar.shortcutKeyMap[key] = value;
+      });
+    }
   }
 
   appendMenusToDom(menus) {
@@ -171,21 +165,11 @@ export default class Bubble extends Toolbar {
   }
 
   /**
-   * Show this same Cherry bubble over a selection owned by an embedded editor.
-   * Coordinates are viewport rects and the bubble is a viewport-fixed overlay.
-   * It is still mounted inside the preview shell so Cherry theme variables and
-   * lifecycle ownership remain unchanged.
+   * Show the Bubble at an externally owned selection rect.
    * @param {{top:number; bottom:number; left:number; right:number}} rect
-   * @param {HTMLElement} container
    */
-  showPreviewBubble(rect, container) {
-    if (!this.bubbleDom || !container) return;
-    // The preview surface is itself a scrolling element. Keeping the bubble
-    // in that element's normal containing block makes showing it change the
-    // scrollable overflow and can move the text/scrollbar by one frame. Use a
-    // viewport-fixed overlay instead; the selection rect is already in
-    // viewport coordinates and scrolling simply hides the bubble via the
-    // bridge listener.
+  showAt(rect) {
+    if (!this.bubbleDom) return;
     this.bubbleDom.style.position = 'fixed';
     this.visible = true;
     const topArrowHeight = this.bubbleTop?.getBoundingClientRect().height || 0;
@@ -193,9 +177,7 @@ export default class Bubble extends Toolbar {
     const gap = 2;
     const bubbleHeight = this.bubbleDom.offsetHeight;
     const above = rect.top - bubbleHeight - bottomArrowHeight >= 4;
-    const top = above
-      ? rect.top - bubbleHeight - bottomArrowHeight - gap
-      : rect.bottom + topArrowHeight + gap;
+    const top = above ? rect.top - bubbleHeight - bottomArrowHeight - gap : rect.bottom + topArrowHeight + gap;
     const center = (rect.left + rect.right) / 2;
     const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
     const minLeft = 8;
@@ -318,17 +300,17 @@ export default class Bubble extends Toolbar {
    */
   destroy() {
     // 移除 Cherry 事件监听 - 使用绑定的方法引用以确保正确注销
-    if (this.$cherry && this.$cherry.$event) {
+    if (this.$cherry && this.$cherry.$event && this.boundHandleAfterChange) {
       this.$cherry.$event.off('afterChange', this.boundHandleAfterChange);
       this.$cherry.$event.off('layoutChange', this.boundHandleLayoutChange);
       this.$cherry.$event.off('onScroll', this.boundHandleScroll);
       this.$cherry.$event.off('beforeSelectionChange', this.boundHandleBeforeSelectionChange);
     }
-    if (this.bubbleDom && this.options?.previewMode) {
-      this.bubbleDom.removeEventListener('pointerdown', this.boundPreviewPointerDown);
-      this.bubbleDom.removeEventListener('mousedown', this.boundPreviewMouseDown);
+    if (this.bubbleDom && this.boundPreserveSelection) {
+      this.bubbleDom.removeEventListener('pointerdown', this.boundPreserveSelection);
+      this.bubbleDom.removeEventListener('mousedown', this.boundPreserveSelection);
     }
-    if (this.options?.previewMode && this.bubbleDom?.parentNode) {
+    if (this.options?.mountTarget && this.bubbleDom?.parentNode) {
       this.bubbleDom.parentNode.removeChild(this.bubbleDom);
     }
     // 清理 DOM 引用

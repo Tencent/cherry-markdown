@@ -4,7 +4,11 @@ import Cherry from '../src/Cherry';
 type TestPlugin = { name: string; mount: (cherry: Cherry) => unknown };
 
 function pluginHost(plugins: TestPlugin[]) {
-  const host = Object.create(Cherry.prototype) as Cherry & {
+  class RegisteredCherry extends Cherry {
+    static initialized = false;
+  }
+  plugins.forEach((plugin) => RegisteredCherry.usePlugin(plugin));
+  const host = Object.create(RegisteredCherry.prototype) as Cherry & {
     pluginCleanups: Array<() => void | Promise<void>>;
     isDestroyed: boolean;
     __editorDestroy: ReturnType<typeof vi.fn>;
@@ -14,7 +18,7 @@ function pluginHost(plugins: TestPlugin[]) {
   const editorDestroy = vi.fn();
   const wrapperRemove = vi.fn();
   const clearEvents = vi.fn();
-  Reflect.set(host, 'options', { plugins });
+  Reflect.set(host, 'options', {});
   host.pluginCleanups = [];
   Reflect.set(host, 'pluginMountTask', Promise.resolve());
   host.isDestroyed = false;
@@ -28,6 +32,45 @@ function pluginHost(plugins: TestPlugin[]) {
 }
 
 describe('Cherry instance plugins', () => {
+  it('registers once with options and mounts independently for every instance', async () => {
+    class RegisteredCherry extends Cherry {
+      static initialized = false;
+    }
+    const cleanups = [vi.fn(), vi.fn()];
+    let index = 0;
+    const plugin = { name: 'shared', mount: vi.fn(() => cleanups[index++]) };
+    const options = { debounce: 20 };
+    RegisteredCherry.usePlugin(plugin, options);
+    RegisteredCherry.usePlugin(plugin, options);
+    const first = pluginHost([]);
+    const second = pluginHost([]);
+    Reflect.set(first, 'constructor', RegisteredCherry);
+    Reflect.set(second, 'constructor', RegisteredCherry);
+    await first.mountPlugins();
+    await second.mountPlugins();
+    expect(plugin.mount).toHaveBeenCalledTimes(2);
+    expect(plugin.mount).toHaveBeenNthCalledWith(1, first, options);
+    expect(plugin.mount).toHaveBeenNthCalledWith(2, second, options);
+    first.destroy();
+    expect(cleanups[0]).toHaveBeenCalledOnce();
+    expect(cleanups[1]).not.toHaveBeenCalled();
+    second.destroy();
+    expect(cleanups[1]).toHaveBeenCalledOnce();
+  });
+
+  it('preserves legacy install registration and rejects registration after initialization', () => {
+    class RegisteredCherry extends Cherry {
+      static initialized = false;
+    }
+    const legacy = { install: vi.fn() };
+    const options = { mermaid: {} };
+    RegisteredCherry.usePlugin(legacy, options);
+    RegisteredCherry.usePlugin(legacy, options);
+    expect(legacy.install).toHaveBeenCalledExactlyOnceWith(RegisteredCherry.config.defaults, options);
+    RegisteredCherry.initialized = true;
+    expect(() => RegisteredCherry.usePlugin({ mount: vi.fn() })).toThrow(/before Cherry is instantiated/);
+  });
+
   it('mounts asynchronous plugins per instance and destroys only their own cleanup', async () => {
     const cleanupA = vi.fn();
     const cleanupB = vi.fn();

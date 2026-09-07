@@ -45,6 +45,7 @@ export function createCherryEditingBridge(
   options: { enableBubble?: boolean; enableToolbarBridge?: boolean } = {},
 ): CherryPreviewEditingBridge {
   let previewWasActive = false;
+  let destroyed = false;
   const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
   const serialize = instance.editor.action((ctx) => ctx.get(serializerCtx));
   const previewContainer = cherry.getPreviewer().getDom();
@@ -277,11 +278,18 @@ export function createCherryEditingBridge(
     view.dom.ownerDocument.addEventListener('selectionchange', onPreviewSelectionChange, true);
   }
   const hidePreviewBubbleOnScroll = () => cherry.getPreviewer().hideEditingBubble?.();
+  const releasePreview = () => {
+    previewWasActive = false;
+    hidePreviewBubbleOnScroll();
+  };
+  cherry.$event?.on('previewerClose', releasePreview);
   previewContainer.addEventListener('scroll', hidePreviewBubbleOnScroll, { passive: true });
 
   // Ownership is switched by explicit pointer/focus interaction, not by the
   // transient DOM focus move caused by opening a Cherry toolbar submenu.
   const isActive = () => {
+    if (destroyed || cherry.isDestroyed || !previewWasActive) return false;
+    if (cherry.getPreviewer().isPreviewerHidden?.()) return false;
     // Lightweight hosts used by integrations may not expose CodeMirror DOM
     // events. Preserve the legacy focus-based fallback for those hosts.
     if (!sourceDom) {
@@ -763,6 +771,9 @@ export function createCherryEditingBridge(
       return dom instanceof Element ? dom : null;
     },
     destroy() {
+      if (destroyed) return;
+      destroyed = true;
+      cherry.$event?.off('previewerClose', releasePreview);
       view.dom.removeEventListener('focusin', rememberPreview);
       view.dom.removeEventListener('pointerdown', activatePreview, true);
       view.dom.removeEventListener('click', syncAnchorNavigation, true);

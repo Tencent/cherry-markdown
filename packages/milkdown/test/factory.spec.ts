@@ -2,7 +2,7 @@ import { editorViewCtx } from '@milkdown/kit/core';
 import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   attachCherryMilkdownPreview,
   createCherryMilkdown,
@@ -23,20 +23,36 @@ vi.mock('mathlive', () => ({}));
 
 // Keep typechecking independent from generated Cherry declarations while loading the
 // actual workspace package at runtime. The test command builds Cherry before Vitest.
-const { default: Cherry } = await vi.importActual<{
-  default: new (options: {
+const { default: BaseCherry } = await vi.importActual<{
+  default: {
+    usePlugin(plugin: typeof milkdown, options?: { debounce?: number; onError?: (...args: any[]) => void }): void;
+  } & (new (options: {
     el: HTMLElement;
     value: string;
     editor?: { defaultModel: 'edit&preview' | 'editOnly' | 'previewOnly' };
-    plugins: ReturnType<typeof milkdown>[];
   }) => {
     getMarkdown(): string;
-    getPreviewer(): { ensureEditingBubble(): unknown };
+    getPreviewer(): {
+      ensureEditingBubble(): unknown;
+      editingBridge: CherryPreviewEditingBridge;
+    };
+    resetToolbar(type: string, menus: string[]): void;
+    toolbar: { menus: { hooks: Record<string, unknown> }; shortcutKeyMap: Record<string, unknown> };
     setValue(markdown: string): void;
     switchModel(model: 'edit&preview' | 'editOnly' | 'previewOnly'): void;
     destroy(): void;
-  };
+  });
 }>('cherry-markdown');
+
+let Cherry: typeof BaseCherry;
+const pluginErrors = vi.fn();
+beforeEach(() => {
+  Cherry = class extends BaseCherry {
+    static initialized = false;
+  };
+  pluginErrors.mockClear();
+  Cherry.usePlugin(milkdown, { debounce: 0, onError: pluginErrors });
+});
 
 const instances: CherryMilkdownInstance[] = [];
 const fullManual = readFileSync(resolve(import.meta.dirname, '../../../examples/assets/markdown/index.md'), 'utf8');
@@ -73,13 +89,31 @@ function selectNode(instance: CherryMilkdownInstance, typeName: string) {
 }
 
 describe('createCherryMilkdown WYSIWYG', () => {
-  it('integrates through a real new Cherry({ plugins: [milkdown()] }) instance', async () => {
+  it.each(['editOnly', 'stream'])('leaves %s hosts untouched through either entry point', async (mode) => {
+    const getPreviewer = vi.fn();
+    const host: CherryMilkdownHost = {
+      engine: { makeHtml: vi.fn() },
+      editor: mode === 'stream' ? undefined : { scrollToLineNum: vi.fn() },
+      options: { editor: { defaultModel: mode === 'stream' ? 'previewOnly' : mode } },
+      getMarkdown: vi.fn(),
+      getPreviewer,
+      setValue: vi.fn(),
+    };
+    const handle = await attachCherryMilkdownPreview(host);
+    expect(handle.mounted).toBe(false);
+    await handle.detach();
+    const cleanup = await milkdown.mount(host);
+    await cleanup?.();
+    expect(getPreviewer).not.toHaveBeenCalled();
+    expect(host.engine.makeHtml).not.toHaveBeenCalled();
+    expect(host.setValue).not.toHaveBeenCalled();
+  });
+  it('integrates through Cherry.usePlugin(milkdown) for every new instance', async () => {
     const element = root();
     const initialMarkdown = '# Real Cherry\n\n* [Original marker](https://example.com){target=\\_blank}';
     const cherry = new Cherry({
       el: element,
       value: initialMarkdown,
-      plugins: [milkdown({ debounce: 0 })],
     });
 
     await vi.waitFor(() => expect(element.querySelector('.cherry-milkdown--previewer .ProseMirror')).not.toBeNull());
@@ -103,10 +137,16 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(preview?.scrollTop).toBe(73);
     expect(preview?.scrollLeft).toBe(11);
     const previewEditor = element.querySelector('.ProseMirror');
+    previewEditor?.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(cherry.getPreviewer().editingBridge.isActive()).toBe(true);
     cherry.switchModel('editOnly');
+    expect(cherry.getPreviewer().editingBridge.isActive()).toBe(false);
     expect(element.querySelector('.cherry-previewer')?.classList.contains('cherry-previewer--hidden')).toBe(true);
     cherry.switchModel('previewOnly');
     await vi.waitFor(() => expect(element.querySelector('.ProseMirror')).toBe(previewEditor));
+    expect(cherry.getPreviewer().editingBridge.isActive()).toBe(false);
+    previewEditor?.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(cherry.getPreviewer().editingBridge.isActive()).toBe(true);
 
     cherry.destroy();
     await vi.waitFor(() => expect(element.childElementCount).toBe(0));
@@ -114,12 +154,11 @@ describe('createCherryMilkdown WYSIWYG', () => {
 
   it('does not attach Milkdown to an editOnly Cherry instance', async () => {
     const element = root();
-    const onError = vi.fn();
+    const onError = pluginErrors;
     const cherry = new Cherry({
       el: element,
       value: '# Hidden initial value',
       editor: { defaultModel: 'editOnly' },
-      plugins: [milkdown({ debounce: 0, onError })],
     });
 
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -146,7 +185,6 @@ describe('createCherryMilkdown WYSIWYG', () => {
       el: element,
       value: 'Select this text',
       editor: { defaultModel: 'previewOnly' },
-      plugins: [milkdown({ debounce: 0 })],
     });
 
     await vi.waitFor(() => expect(element.querySelector('.ProseMirror')).not.toBeNull());
@@ -154,14 +192,25 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(element.querySelector('.cherry-toolbar')?.classList.contains('preview-only')).toBe(true);
     expect(element.querySelector('.cherry-bubble--preview')).toBeNull();
 
+    const menus = { ...cherry.toolbar.menus.hooks };
+    const shortcuts = { ...cherry.toolbar.shortcutKeyMap };
     cherry.getPreviewer().ensureEditingBubble();
     expect(element.querySelector('.cherry-bubble--preview')).not.toBeNull();
+    expect(cherry.toolbar.menus.hooks).toEqual(menus);
+    expect(cherry.toolbar.shortcutKeyMap).toEqual(shortcuts);
+    const originalBubble = element.querySelector('.cherry-bubble--preview');
+    cherry.resetToolbar('bubble', ['italic']);
+    expect(originalBubble?.isConnected).toBe(false);
+    cherry.getPreviewer().ensureEditingBubble();
+    expect(element.querySelectorAll('.cherry-bubble--preview .cherry-toolbar-button')).toHaveLength(1);
+    cherry.resetToolbar('bubble', []);
+    expect(cherry.getPreviewer().ensureEditingBubble()).toBeNull();
 
     cherry.destroy();
     await vi.waitFor(() => expect(element.childElementCount).toBe(0));
   });
 
-  it('exposes milkdown() as an instance plugin and returns Cherry-owned cleanup', async () => {
+  it('exposes a mount plugin and returns Cherry-owned cleanup', async () => {
     const element = root();
     let renderer: CherryPreviewContentRenderer | undefined;
     const previewer = {
@@ -187,10 +236,10 @@ describe('createCherryMilkdown WYSIWYG', () => {
       getPreviewer: () => previewer,
       setValue: vi.fn(),
     };
-    const extension = milkdown({ debounce: 0 });
+    const extension = milkdown;
 
     expect(extension.name).toBe('@cherry-markdown/milkdown');
-    const cleanup = await extension.mount(host);
+    const cleanup = await extension.mount(host, { debounce: 0 });
     expect(element.querySelector('h1')?.textContent).toBe('Extension preview');
     expect(cleanup).toBeTypeOf('function');
     await cleanup?.();
@@ -219,6 +268,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     const error = new Error('broken preview initialization');
     let renderCount = 0;
     const host: CherryMilkdownHost = {
+      editor: { scrollToLineNum: vi.fn() },
       engine: {
         makeHtml: (value: string) => {
           renderCount += 1;
@@ -264,6 +314,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     };
     const host: CherryMilkdownHost = {
       engine,
+      editor: { scrollToLineNum: vi.fn() },
       getMarkdown: () => markdown,
       getPreviewer: () => previewer,
       setValue: vi.fn((value: string) => {
@@ -323,6 +374,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     let renderer: CherryPreviewContentRenderer | undefined;
     let markdown = 'Use `a` here.';
     const host: CherryMilkdownHost = {
+      editor: { scrollToLineNum: vi.fn() },
       engine: { makeHtml: (value: string) => `<p>${value}</p>` },
       getMarkdown: () => markdown,
       getPreviewer: () => ({
@@ -631,7 +683,6 @@ describe('createCherryMilkdown WYSIWYG', () => {
     const cherry = new Cherry({
       el: element,
       value: '| Name | Value |\n| --- | --- |\n| Milkdown | WYSIWYG |',
-      plugins: [milkdown({ debounce: 0 })],
     });
 
     await vi.waitFor(() => expect(element.querySelector('.cherry-milkdown--previewer table')).not.toBeNull());
@@ -830,6 +881,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     };
     const host: CherryMilkdownHost = {
       engine: { makeHtml: (value: string) => value },
+      editor: { scrollToLineNum: vi.fn() },
       getMarkdown: () => markdown,
       getPreviewer: () => previewer,
       getCodeMirror: () => ({ hasFocus: false }),
@@ -1128,6 +1180,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     const host: CherryMilkdownHost = {
       engine: { makeHtml: (value: string) => value },
       getMarkdown: () => markdown,
+      editor: { scrollToLineNum: vi.fn() },
       getPreviewer: () => previewer,
       getCodeMirror: () => ({ hasFocus: false }),
       setValue: vi.fn((value: string) => {

@@ -61,19 +61,32 @@ describe('toolbars/PreviewerBubble draw.io click integration', () => {
   it('reserves bridge-owned image clicks for preview editing', () => {
     const { bubble, previewer, previewerDom, cherry } = createPreviewerBubble();
     const onClickPreview = vi.fn();
+    const image = document.createElement('img');
     Reflect.set(cherry.options, 'callback', { onClickPreview });
     Reflect.set(previewer, 'editingBridge', {
       isActive: () => true,
       ownsPreviewElement: (target: Element, kind: string) => target instanceof HTMLImageElement && kind === 'image',
       updatePreviewElement: vi.fn(),
+      resolvePreviewElement: () => image,
     });
     const showImageTools = vi.spyOn(bubble, '$showImgPreviewerBubbles').mockImplementation(() => undefined);
-    const image = document.createElement('img');
     previewerDom.appendChild(image);
 
     image.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
     expect(onClickPreview).not.toHaveBeenCalled();
     expect(showImageTools).toHaveBeenCalledWith(image, expect.any(MouseEvent));
+  });
+
+  it('honors onClickPreview cancellation for native preview images', () => {
+    const { bubble, previewerDom, cherry } = createPreviewerBubble();
+    Reflect.set(cherry.options, 'callback', { onClickPreview: () => false });
+    const showImageTools = vi.spyOn(bubble, '$showImgPreviewerBubbles').mockImplementation(() => undefined);
+    const image = document.createElement('img');
+    previewerDom.appendChild(image);
+
+    image.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(showImageTools).not.toHaveBeenCalled();
   });
 });

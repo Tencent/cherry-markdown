@@ -69,6 +69,7 @@ export interface CherryPreviewContentRenderer {
 }
 
 export interface CherryPreviewerHost {
+  isPreviewerHidden?(): boolean;
   getDom(): HTMLElement;
   update(html: string, updateContext?: CherryUpdateContext): void;
   setContentRenderer(renderer: CherryPreviewContentRenderer): void | Promise<void>;
@@ -126,6 +127,8 @@ export interface CherryPreviewEditingBridge {
 
 /** Minimal public surface used to connect Milkdown to an existing Cherry previewer. */
 export interface CherryMilkdownHost {
+  readonly isDestroyed?: boolean;
+  $event?: { on(event: string, handler: () => void): void; off(event: string, handler: () => void): void };
   engine: CherryEngineLike;
   /** Native source bubble, hidden while the preview owns focus. */
   bubble?: { hideBubble?(): void };

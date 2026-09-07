@@ -949,19 +949,24 @@ export default class Previewer {
       buttonConfig: config,
       customMenu: this.$cherry.options.toolbars.customMenu,
       engine: this.$cherry.engine,
-      previewMode: true,
       editorDom: container,
       mountTarget: container,
+      observeSelection: false,
+      preserveSelectionOnPointerDown: true,
     });
-    this.$cherry.toolbar?.collectMenuInfo?.(this.editingBubble);
     return this.editingBubble;
+  }
+
+  resetEditingBubble() {
+    this.editingBubble?.destroy();
+    this.editingBubble = null;
   }
 
   showEditingBubble(rect) {
     if (!this.editingBridge?.isActive?.()) return false;
     const bubble = this.ensureEditingBubble();
     if (!bubble) return false;
-    bubble.showPreviewBubble(rect, this.getDomContainer());
+    bubble.showAt(rect);
     return true;
   }
 
@@ -1134,6 +1139,7 @@ export default class Previewer {
   }
 
   editOnly() {
+    this.hideEditingBubble();
     const html = this.options.previewerCache.html ? this.options.previewerCache.html : this.getDomContainer().innerHTML;
     this.doHtmlCache(html);
     this.$dealEditAndPreviewOnly(true);

@@ -34,20 +34,21 @@ import '@milkdown/kit/prose/view/style/prosemirror.css';
 
 ## 使用
 
+在创建第一个 Cherry 实例前注册一次；后续实例自动接入。参数由注册共享，编辑状态和清理函数按实例独立维护。初始 `editOnly` 和 CherryStream 不挂载。
+
 ```js
 import Cherry from 'cherry-markdown';
 import { milkdown } from '@cherry-markdown/milkdown';
 
+Cherry.usePlugin(milkdown, {
+  onChange({ markdown }) {
+    console.log(markdown);
+  },
+});
+
 const cherry = new Cherry({
   id: 'editor',
   value: '# 标题\n\n行内公式 $E=mc^2$ 和 !!red 红色文字!!。',
-  plugins: [
-    milkdown({
-      onChange({ markdown }) {
-        console.log(markdown);
-      },
-    }),
-  ],
 });
 
 // 预览区编辑会自动回写 cherry.getMarkdown() / CodeMirror。
@@ -57,7 +58,7 @@ cherry.destroy(); // Milkdown 随当前 Cherry 实例一起清理
 
 `attachCherryMilkdownPreview(cherry, options)` 可用于需要显式生命周期句柄的接入；句柄的 `mounted` 和 `getInstance()` 会反映预览区的延迟挂载状态。`createCherryMilkdown` 仍可用于不需要 Cherry 页面壳的独立编辑器。两者都不是 Cherry 页面中的推荐接入方式。
 
-`plugins` 会在内置 WYSIWYG 插件之后加载，可用于注册业务 NodeView。
+`createCherryMilkdown({ plugins })` 中的 Milkdown 内部插件会在内置 WYSIWYG 插件之后加载，可用于注册业务 NodeView。
 
 插件模式下，Cherry 顶部工具栏继续归源码编辑器所有，不接管 Milkdown 选区。选中预览文本时仍可使用 Cherry 原生 Bubble，图片和 Mermaid 预览控件也继续复用 Cherry 原交互。标题、列表、引用和代码块可通过 Markdown 快捷输入创建，右侧不会打开 Cherry 源码编辑器的 suggest 面板。复合块标题和正文都直接编辑，结构按钮只在悬停或选中节点时出现。表格使用 Milkdown `table-block`，可增删、拖拽行列并修改列对齐；公式使用 MathLive，点击公式即可输入。
 
@@ -71,7 +72,6 @@ const cherry = new Cherry({
   value: '# 可直接编辑的预览',
   editor: { defaultModel: 'previewOnly' },
   toolbars: { toolbar: false },
-  plugins: [milkdown()],
 });
 ```
 
@@ -111,7 +111,7 @@ yarn build:demo
 yarn preview:demo
 ```
 
-用户可见 demo 是一个最小 React + Vite 工程，入口位于 `examples/react/App.tsx`；`index.html` 只保留 Vite 所需的根节点。它复用仓库根 demo 的布局、配置、工具栏、主题、ECharts 插件和整份 Markdown 手册，业务接入上的唯一差异是增加 `plugins: [milkdown()]`，并在 React 卸载时销毁 Cherry 实例。纯预览可直接打开 `index.html?mode=previewOnly`，仍由 Cherry 的 `editor.defaultModel` 和 `toolbars` 配置决定，不存在第二套 React 编辑器。`editOnly` 保持 Cherry 原生源码编辑，不挂载 Milkdown；CherryStream 暂不支持该插件。
+用户可见 demo 是一个最小 React + Vite 工程，入口位于 `examples/react/App.tsx`；`index.html` 只保留 Vite 所需的根节点。它复用仓库根 demo 的布局、配置、工具栏、主题、ECharts 插件和整份 Markdown 手册，业务接入上的唯一差异是增加 `Cherry.usePlugin(milkdown)`，并在 React 卸载时销毁 Cherry 实例。纯预览可直接打开 `index.html?mode=previewOnly`，仍由 Cherry 的 `editor.defaultModel` 和 `toolbars` 配置决定，不存在第二套 React 编辑器。`editOnly` 保持 Cherry 原生源码编辑，不挂载 Milkdown；CherryStream 暂不支持该插件。
 
 ## 可靠性验证
 

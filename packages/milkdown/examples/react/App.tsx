@@ -3,11 +3,12 @@ import Cherry from 'cherry-markdown';
 import basicMd from '../../../../examples/assets/markdown/index.md?raw';
 import { loadDemoDependencies, renderECharts } from './demo-support';
 
+let milkdownRegistered = false;
+
 declare global {
   interface Window {
     Cherry: typeof Cherry;
     cherry?: Cherry;
-    milkdown?: typeof import('@cherry-markdown/milkdown').milkdown;
     milkdownMarkdown?: string;
     echarts?: typeof import('echarts/core');
   }
@@ -33,16 +34,15 @@ export default function App() {
       // The shared legacy demo config registers toolbar hooks from these
       // globals while its module is evaluated.
       window.Cherry = Cherry;
-      let milkdownFactory: typeof import('@cherry-markdown/milkdown').milkdown | undefined;
+      let milkdownPlugin: typeof import('@cherry-markdown/milkdown').milkdown | undefined;
       if (!editOnly) {
         const [milkdownModule] = await Promise.all([
           import('@cherry-markdown/milkdown'),
           import('@cherry-markdown/milkdown/styles.css'),
           import('@milkdown/kit/prose/view/style/prosemirror.css'),
         ]);
-        milkdownFactory = milkdownModule.milkdown;
+        milkdownPlugin = milkdownModule.milkdown;
       }
-      if (milkdownFactory) window.milkdown = milkdownFactory;
       await loadDemoDependencies();
       // Both supported demos consume Cherry's existing public configurations.
       // editOnly intentionally remains a plain Cherry source editor.
@@ -54,6 +54,18 @@ export default function App() {
       const cherryConfig = previewOnly ? configModule.previewConfig : configModule.basicConfig;
       if (cancelled) return;
 
+      if (milkdownPlugin && !milkdownRegistered) {
+        Cherry.usePlugin(milkdownPlugin, {
+          debounce: 0,
+          enableToolbarBridge,
+          renderers: { echarts: renderECharts },
+          onChange: ({ markdown }: { markdown: string }) => {
+            window.milkdownMarkdown = markdown;
+          },
+        });
+        milkdownRegistered = true;
+      }
+
       cherry = new Cherry({
         ...cherryConfig,
         editor: {
@@ -62,23 +74,6 @@ export default function App() {
         },
         el: root,
         value: basicMd,
-        plugins: milkdownFactory
-          ? [
-              milkdownFactory({
-                debounce: 0,
-                enableToolbarBridge,
-                renderers: { echarts: renderECharts },
-                onChange: ({ markdown }) => {
-                  window.milkdownMarkdown = markdown;
-                },
-                onImmediateChange: ({ markdown }) => {
-                  // The E2E diagnostic mirrors the editor's committed document;
-                  // public onChange remains debounced for consumers.
-                  window.milkdownMarkdown = markdown;
-                },
-              }),
-            ]
-          : undefined,
       });
       window.cherry = cherry;
       window.milkdownMarkdown = cherry.getMarkdown();
@@ -89,7 +84,6 @@ export default function App() {
       cancelled = true;
       cherry?.destroy();
       if (window.cherry === cherry) delete window.cherry;
-      if (editOnly) delete window.milkdown;
     };
   }, []);
 

@@ -25,7 +25,7 @@ describe('toolbars/PreviewerBubble production behavior', () => {
     expect(bubble.$shouldRemoveBubbleKey('hover', 'hover')).toBe(true);
   });
 
-  it('uses an active preview editing bridge as the previewOnly editor', () => {
+  it('keeps the native preview bubble gate independent from an editing bridge', () => {
     const { bubble, previewer, cherry } = createPreviewerBubble();
     previewer.options.enablePreviewerBubble = false;
     Reflect.set(cherry, 'getStatus', () => ({ editor: 'hide', previewer: 'show' }));
@@ -36,7 +36,7 @@ describe('toolbars/PreviewerBubble production behavior', () => {
 
     Reflect.set(previewer, 'editingBridge', { isActive: () => true });
 
-    expect(bubble.$isEnableBubbleAndEditorShow()).toBe(true);
+    expect(bubble.$isEnableBubbleAndEditorShow()).toBe(false);
   });
 
   it('does not duplicate Milkdown table, list, or task controls', () => {
@@ -87,6 +87,18 @@ describe('toolbars/PreviewerBubble production behavior', () => {
     bubble.$removePreviewerBubble('hover');
     expect(hoverEmit).toHaveBeenCalledWith('remove');
     expect(wrapperDom.style.overflow).toBe('');
+  });
+
+  it.each(['disabled', 'hidden'])('does not open native image controls when %s', (condition) => {
+    const { bubble, previewer, previewerDom, cherry } = createPreviewerBubble();
+    if (condition === 'disabled') previewer.options.enablePreviewerBubble = false;
+    else Reflect.set(cherry, 'getStatus', () => ({ editor: 'hide', previewer: 'show' }));
+    const begin = vi.spyOn(bubble, 'beginChangeImgValue');
+    const image = document.createElement('img');
+    previewerDom.appendChild(image);
+    image.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(begin).not.toHaveBeenCalled();
+    expect(bubble.bubble.click).toBeUndefined();
   });
 
   it('validates image and table handler targets without loose mocks', () => {
