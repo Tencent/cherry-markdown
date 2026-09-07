@@ -86,6 +86,33 @@ describe('Previewer rendering pipeline', () => {
     );
   });
 
+  it('runs afterUpdate only after an asynchronous renderer has committed its DOM', async () => {
+    const { previewer, previewerDom, highlightLine } = createPreviewer();
+    let finish: (() => void) | undefined;
+    const renderer = {
+      update: vi.fn(
+        ({ container }: { container: HTMLElement }) =>
+          new Promise<void>((resolve) => {
+            finish = () => {
+              container.innerHTML = '<h1>Async ready</h1>';
+              resolve();
+            };
+          }),
+      ),
+    };
+    previewer.setContentRenderer(renderer);
+
+    previewer.update('<h1>native</h1>');
+    expect(highlightLine).not.toHaveBeenCalled();
+    expect(previewerDom.textContent).toBe('');
+
+    finish?.();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(previewerDom.textContent).toBe('Async ready');
+    expect(highlightLine).toHaveBeenCalledWith(0);
+  });
+
   it('does not let an older integration clear the current preview renderer', () => {
     const { previewer } = createPreviewer();
     const first = { update: vi.fn(), destroy: vi.fn() };
@@ -98,6 +125,31 @@ describe('Previewer rendering pipeline', () => {
     expect(previewer.clearContentRenderer(first)).toBe(false);
     previewer.update('<p>current</p>');
     expect(second.update).toHaveBeenCalledOnce();
+  });
+
+  it('waits for asynchronous teardown before activating a replacement renderer', async () => {
+    const { previewer } = createPreviewer();
+    let finishDestroy: (() => void) | undefined;
+    const first = {
+      update: vi.fn(),
+      destroy: vi.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            finishDestroy = resolve;
+          }),
+      ),
+    };
+    const next = { update: vi.fn(), destroy: vi.fn() };
+    previewer.setContentRenderer(first);
+
+    const replacement = previewer.setContentRenderer(next);
+    previewer.update('<p>while cleaning</p>');
+    expect(next.update).not.toHaveBeenCalled();
+
+    finishDestroy?.();
+    await replacement;
+    previewer.update('<p>ready</p>');
+    expect(next.update).toHaveBeenCalledOnce();
   });
 
   it('routes commands and deferred inserts only through the active preview editor bridge', () => {
@@ -115,7 +167,11 @@ describe('Previewer rendering pipeline', () => {
     };
 
     previewer.setEditingBridge(first);
-    expect(previewer.queryEditingCommandState({ name: 'header' })).toEqual({ active: true, enabled: true, value: 2 });
+    expect(previewer.queryEditingCommandState({ name: 'header' })).toEqual({
+      active: true,
+      enabled: true,
+      value: 2,
+    });
     expect(previewer.runEditingCommand({ name: 'bold' })).toBe(true);
     expect(previewer.insertEditingContent('![image](url)', { source: 'picker' })).toBe(true);
     expect(first.runCommand).toHaveBeenCalledWith({ name: 'bold' });
@@ -277,7 +333,11 @@ describe('Previewer virtual DOM helpers', () => {
     expect(converted.properties.style.cssText).toContain('width:calc(100% - 2px)');
     expect(converted.properties.style.cssText).toContain('color: red');
     expect(converted.properties.height).toBe('20');
-    expect(converted.properties.dataset).toMatchObject({ sign: 'stable', rowSpan: '2', colSpan: '3' });
+    expect(converted.properties.dataset).toMatchObject({
+      sign: 'stable',
+      rowSpan: '2',
+      colSpan: '3',
+    });
     expect(converted.children).toHaveLength(1);
 
     source.setAttribute('data-cm-atomic', 'true');

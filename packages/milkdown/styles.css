@@ -35,7 +35,7 @@
   min-height: 100%;
 }
 
-.cherry-link-target {
+.cherry-milkdown .cherry-link-target {
   display: none;
 }
 
@@ -70,10 +70,10 @@
   color: var(--cherry-milkdown-muted);
 }
 
-.cherry-node-actions button,
-.cherry-compound__kind,
-.cherry-compound-item__disclosure,
-.cherry-embed__controls button {
+.cherry-milkdown .cherry-node-actions button,
+.cherry-milkdown .cherry-compound__kind,
+.cherry-milkdown .cherry-compound-item__disclosure,
+.cherry-milkdown .cherry-embed__controls button {
   box-sizing: border-box;
   min-height: 24px;
   padding: 2px 6px;
@@ -84,15 +84,15 @@
   font: inherit;
 }
 
-.cherry-node-actions button:hover,
-.cherry-compound__kind:hover,
-.cherry-compound-item__disclosure:hover,
-.cherry-embed__controls button:hover {
+.cherry-milkdown .cherry-node-actions button:hover,
+.cherry-milkdown .cherry-compound__kind:hover,
+.cherry-milkdown .cherry-compound-item__disclosure:hover,
+.cherry-milkdown .cherry-embed__controls button:hover {
   color: var(--cherry-milkdown-primary);
   background: rgb(54 110 244 / 8%);
 }
 
-.cherry-milkdown-code-block {
+.cherry-milkdown .cherry-milkdown-code-block {
   position: relative;
   display: block;
   box-sizing: border-box;
@@ -104,14 +104,14 @@
   font-size: var(--font-size-sm);
 }
 
-.cherry-milkdown-code-block:focus-within,
-.cherry-milkdown-code-block.is-selected {
+.cherry-milkdown .cherry-milkdown-code-block:focus-within,
+.cherry-milkdown .cherry-milkdown-code-block.is-selected {
   outline: 1px solid var(--cherry-milkdown-primary);
   outline-offset: -1px;
   box-shadow: 0 0 0 2px rgb(54 110 244 / 10%);
 }
 
-.cherry-milkdown-code-block > pre {
+.cherry-milkdown .cherry-milkdown-code-block > pre {
   position: relative;
   box-sizing: border-box;
   min-height: 53px;
@@ -119,7 +119,7 @@
   overflow: auto;
 }
 
-.cherry-milkdown-code-block__content {
+.cherry-milkdown .cherry-milkdown-code-block__content {
   position: relative;
   top: 4px;
   display: block;
@@ -138,7 +138,7 @@
   overflow-wrap: anywhere;
 }
 
-.cherry-milkdown-code-block__gutter {
+.cherry-milkdown .cherry-milkdown-code-block__gutter {
   position: absolute;
   top: 18px;
   left: 14px;
@@ -153,12 +153,12 @@
   user-select: none;
 }
 
-.cherry-milkdown-code-block__gutter > span {
+.cherry-milkdown .cherry-milkdown-code-block__gutter > span {
   display: block;
   padding: 0;
 }
 
-.cherry-milkdown-code-block__tools {
+.cherry-milkdown .cherry-milkdown-code-block__tools {
   position: absolute;
   z-index: 4;
   top: 8px;
@@ -170,14 +170,14 @@
   transition: opacity 120ms ease;
 }
 
-.cherry-milkdown-code-block:hover .cherry-milkdown-code-block__tools,
-.cherry-milkdown-code-block:focus-within .cherry-milkdown-code-block__tools,
-.cherry-milkdown-code-block.is-selected .cherry-milkdown-code-block__tools {
+.cherry-milkdown .cherry-milkdown-code-block:hover .cherry-milkdown-code-block__tools,
+.cherry-milkdown .cherry-milkdown-code-block:focus-within .cherry-milkdown-code-block__tools,
+.cherry-milkdown .cherry-milkdown-code-block.is-selected .cherry-milkdown-code-block__tools {
   opacity: 1;
 }
 
-.cherry-milkdown-code-block__language,
-.cherry-milkdown-code-block__copy {
+.cherry-milkdown .cherry-milkdown-code-block__language,
+.cherry-milkdown .cherry-milkdown-code-block__copy {
   box-sizing: border-box;
   height: 27px;
   padding: 3px 8px;
@@ -188,48 +188,48 @@
   font: inherit;
 }
 
-.cherry-milkdown-code-block__copy:hover,
-.cherry-milkdown-code-block__language:hover {
+.cherry-milkdown .cherry-milkdown-code-block__copy:hover,
+.cherry-milkdown .cherry-milkdown-code-block__language:hover {
   color: var(--toolbar-btn-hover-color, var(--cherry-milkdown-primary));
   background: var(--toolbar-btn-hover-bg, #f5f7fa);
 }
 
-.cherry-wysiwyg-color,
-.cherry-wysiwyg-bg,
-.cherry-wysiwyg-size,
-.cherry-wysiwyg-sub,
-.cherry-wysiwyg-sup,
-.cherry-wysiwyg-underline {
+.cherry-milkdown .cherry-wysiwyg-color,
+.cherry-milkdown .cherry-wysiwyg-bg,
+.cherry-milkdown .cherry-wysiwyg-size,
+.cherry-milkdown .cherry-wysiwyg-sub,
+.cherry-milkdown .cherry-wysiwyg-sup,
+.cherry-milkdown .cherry-wysiwyg-underline {
   border-radius: 2px;
 }
 
-.cherry-wysiwyg-underline {
+.cherry-milkdown .cherry-wysiwyg-underline {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-.cherry-math {
+.cherry-milkdown .cherry-math {
   border-radius: 5px;
 }
 
-.cherry-math--inline {
+.cherry-milkdown .cherry-math--inline {
   display: inline-flex;
   margin: 0 2px;
   vertical-align: middle;
 }
 
-.cherry-math--block {
+.cherry-milkdown .cherry-math--block {
   display: block;
   margin: 16px 0;
   padding: 12px;
   text-align: center;
 }
 
-.cherry-math.is-selected {
+.cherry-milkdown .cherry-math.is-selected {
   box-shadow: 0 0 0 2px rgb(54 110 244 / 20%);
 }
 
-.cherry-math__field {
+.cherry-milkdown .cherry-math__field {
   min-width: 1.6em;
   border: 0;
   outline: 0;
@@ -325,18 +325,18 @@
   align-items: center;
 }
 
-.cherry-node-actions {
+.cherry-milkdown .cherry-node-actions {
   display: inline-flex;
   opacity: 0;
   transition: opacity 120ms ease;
 }
 
-.cherry-compound:hover > .cherry-compound__header .cherry-node-actions,
-.cherry-compound.is-selected > .cherry-compound__header .cherry-node-actions,
-.cherry-compound:focus-within > .cherry-compound__header .cherry-node-actions,
-.cherry-compound-item:hover > .cherry-compound-item__header .cherry-node-actions,
-.cherry-compound-item.is-selected > .cherry-compound-item__header .cherry-node-actions,
-.cherry-compound-item:focus-within > .cherry-compound-item__header .cherry-node-actions {
+.cherry-milkdown .cherry-compound:hover > .cherry-compound__header .cherry-node-actions,
+.cherry-milkdown .cherry-compound.is-selected > .cherry-compound__header .cherry-node-actions,
+.cherry-milkdown .cherry-compound:focus-within > .cherry-compound__header .cherry-node-actions,
+.cherry-milkdown .cherry-compound-item:hover > .cherry-compound-item__header .cherry-node-actions,
+.cherry-milkdown .cherry-compound-item.is-selected > .cherry-compound-item__header .cherry-node-actions,
+.cherry-milkdown .cherry-compound-item:focus-within > .cherry-compound-item__header .cherry-node-actions {
   opacity: 1;
 }
 
@@ -397,8 +397,8 @@
   line-height: var(--line-height-relaxed);
 }
 
-.cherry-source-node,
-.cherry-embed {
+.cherry-milkdown .cherry-source-node,
+.cherry-milkdown .cherry-embed {
   position: relative;
   box-sizing: border-box;
   margin: 16px 0;
@@ -408,22 +408,22 @@
   background: #fff;
 }
 
-.cherry-node-actions button.is-active,
-.cherry-embed__controls button.is-active,
-.cherry-embed__controls button[aria-expanded='true'] {
+.cherry-milkdown .cherry-node-actions button.is-active,
+.cherry-milkdown .cherry-embed__controls button.is-active,
+.cherry-milkdown .cherry-embed__controls button[aria-expanded='true'] {
   color: var(--cherry-milkdown-primary);
   background: rgb(54 110 244 / 10%);
 }
 
-.cherry-source-node__header {
+.cherry-milkdown .cherry-source-node__header {
   display: flex;
   justify-content: space-between;
   color: var(--cherry-milkdown-muted);
   font-size: 12px;
 }
 
-.cherry-source-node__source,
-.cherry-embed__source {
+.cherry-milkdown .cherry-source-node__source,
+.cherry-milkdown .cherry-embed__source {
   display: block;
   box-sizing: border-box;
   max-width: 100%;
@@ -443,7 +443,7 @@
  * element block-level prevents Chromium from painting a focus outline around
  * every inline line box. The focus ring belongs to the complete source panel,
  * just like Cherry's native code block. */
-.cherry-embed__source > code {
+.cherry-milkdown .cherry-embed__source > code {
   display: block;
   min-height: 1.6em;
   outline: none;
@@ -452,13 +452,13 @@
   font: inherit;
 }
 
-.cherry-embed__source:focus-within {
+.cherry-milkdown .cherry-embed__source:focus-within {
   outline: 1px solid var(--cherry-milkdown-primary);
   outline-offset: -1px;
 }
 
-.cherry-source-node__source[hidden],
-.cherry-embed__source[hidden] {
+.cherry-milkdown .cherry-source-node__source[hidden],
+.cherry-milkdown .cherry-embed__source[hidden] {
   display: none;
 }
 
@@ -478,12 +478,12 @@
   list-style: none;
 }
 
-.cherry-embed.is-selected {
+.cherry-milkdown .cherry-embed.is-selected {
   border-color: var(--cherry-milkdown-primary);
   box-shadow: 0 0 0 2px rgb(54 110 244 / 14%);
 }
 
-.cherry-embed--cherry_emoji {
+.cherry-milkdown .cherry-embed--cherry_emoji {
   display: inline-flex;
   margin: 0 2px;
   padding: 0;
@@ -491,12 +491,12 @@
   vertical-align: middle;
 }
 
-.cherry-embed__preview.is-loading::before {
+.cherry-milkdown .cherry-embed__preview.is-loading::before {
   color: var(--cherry-milkdown-muted);
   content: "正在渲染…";
 }
 
-.cherry-embed__preview svg {
+.cherry-milkdown .cherry-embed__preview svg {
   display: block;
   max-width: 100%;
   height: auto;
@@ -506,11 +506,11 @@
 /* ProseMirror uses pre-wrap on the editable document. Native Cherry HTML
  * contains formatting whitespace between elements, which must collapse just
  * as it does in the original previewer or it creates phantom blank lines. */
-.cherry-embed__preview {
+.cherry-milkdown .cherry-embed__preview {
   white-space: normal;
 }
 
-.cherry-embed__controls {
+.cherry-milkdown .cherry-embed__controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -522,10 +522,10 @@
   transition: opacity 120ms ease;
 }
 
-.cherry-embed:hover > .cherry-embed__controls,
-.cherry-embed.is-selected > .cherry-embed__controls,
-.cherry-embed:focus-within > .cherry-embed__controls,
-.cherry-embed__controls:hover {
+.cherry-milkdown .cherry-embed:hover > .cherry-embed__controls,
+.cherry-milkdown .cherry-embed.is-selected > .cherry-embed__controls,
+.cherry-milkdown .cherry-embed:focus-within > .cherry-embed__controls,
+.cherry-milkdown .cherry-embed__controls:hover {
   opacity: 1;
 }
 

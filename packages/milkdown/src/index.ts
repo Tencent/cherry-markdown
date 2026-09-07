@@ -16,8 +16,8 @@ import { commonmark } from '@milkdown/kit/preset/commonmark';
 import { gfm } from '@milkdown/kit/preset/gfm';
 import { NodeSelection, Plugin, TextSelection, type Selection } from '@milkdown/kit/prose/state';
 import { $prose, getMarkdown } from '@milkdown/kit/utils';
-import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core.esm.js';
 import type { CherryMilkdownInstance, CherryMilkdownOptions } from './types.js';
+import { createSelectionTracker } from './selection-tracker.js';
 import { cherryWysiwyg, cherryWysiwygConfigCtx } from './wysiwyg/index.js';
 
 const DEFAULT_DEBOUNCE = 30;
@@ -144,6 +144,7 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
   let engine: CherryMilkdownInstance['engine'];
   let currentMarkdown = options.value ?? '';
   let serializedBaseline = '';
+  const selectionTracker = createSelectionTracker();
 
   // Cherry's preview already supplies the native visual shell. The floating
   // Milkdown components are useful for standalone consumers, but mounting them
@@ -165,7 +166,12 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
   try {
     // Cherry's generated declaration keeps the optional object return mode in
     // `makeHtml`, while this integration always calls its default string mode.
-    engine = options.engine ?? (new CherryEngine(options.cherryOptions) as unknown as CherryMilkdownInstance['engine']);
+    if (options.engine) {
+      engine = options.engine;
+    } else {
+      const { default: CherryEngine } = await import('cherry-markdown/dist/cherry-markdown.engine.core.esm.js');
+      engine = new CherryEngine(options.cherryOptions) as unknown as CherryMilkdownInstance['engine'];
+    }
   } catch (error) {
     options.onError?.(error, 'create');
     throw error;
@@ -287,6 +293,7 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
     .use(cursor)
     .use(indent)
     .use(trailing)
+    .use(selectionTracker.plugin)
     .use(immediateChangePlugin)
     .use(tablePointerSelectionPlugin)
     .use(cherryWysiwyg);
@@ -320,6 +327,9 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
   return {
     editor,
     engine,
+    trackSelection() {
+      return selectionTracker.track(editor.action((ctx) => ctx.get(editorViewCtx).state.selection));
+    },
     getMarkdown() {
       if (changeMicrotaskQueued && !suppressChanges && !destroyed) {
         const serialized = editor.action(getMarkdown());

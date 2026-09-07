@@ -18,6 +18,12 @@ import type {
   CherryPreviewEditingBridge,
   CherryToolbarCommand,
 } from './types.js';
+import {
+  CHERRY_LINE_TRANSFORM_COMMANDS,
+  INLINE_FORMAT_COMMANDS,
+  KNOWN_NON_TRANSFORM_COMMANDS,
+  TRANSFORMED_MARKDOWN_COMMANDS,
+} from './bridge/command-contract.js';
 
 interface CherryMenuLike {
   isSelections?: boolean;
@@ -27,109 +33,6 @@ interface CherryMenuLike {
   $getTypeAndColor?: (shortKey: string) => { type: string; color?: string } | undefined;
   bubbleColor?: { toggle(options: { forceHide: boolean }): void };
 }
-
-const TRANSFORMED_MARKDOWN_COMMANDS = new Set([
-  'align',
-  'audio',
-  'checklist',
-  'detail',
-  'draw.io',
-  'file',
-  'formula',
-  'graph',
-  'image',
-  'insert',
-  'link',
-  'panel',
-  'proTable',
-  'quickTable',
-  'ruby',
-  'timeline',
-  'toc',
-  'video',
-  // Compound and chart submenu names are separate Cherry menu instances but
-  // still transform the current Markdown selection.
-  'tips',
-  'info',
-  'warning',
-  'danger',
-  'success',
-  'pinyin',
-  'lineTable',
-  'barTable',
-  'radarTable',
-  'mapTable',
-  'heatmapTable',
-  'scatterTable',
-  'sankeyTable',
-  'pieTable',
-  'insertFlow',
-  'insertSeq',
-  'insertState',
-  'insertClass',
-  'insertPie',
-  'insertGantt',
-]);
-
-// Cherry's compound block menus (and its list menus) transform the complete
-// source line under the caret. Keep these commands on the same replacement
-// path so an empty paragraph is replaced by one valid block instead of
-// leaving a trailing paragraph behind.
-const CHERRY_LINE_TRANSFORM_COMMANDS = new Set(['ol', 'ul', 'checklist', 'panel', 'detail', 'timeline']);
-
-const INLINE_FORMAT_COMMANDS = new Set([
-  'bold',
-  'italic',
-  'strikethrough',
-  'inlineCode',
-  'underline',
-  'sub',
-  'sup',
-  'size',
-  'color',
-]);
-
-// Commands handled by the explicit Milkdown paths below (or by Cherry's
-// non-document UI).  Any other updateMarkdown menu is a user supplied menu;
-// route it through the same source-transform contract instead of silently
-// falling back to CodeMirror.  This keeps custom menus working in the preview
-// while preserving Cherry's global menus and selectors.
-const KNOWN_NON_TRANSFORM_COMMANDS = new Set([
-  'bold',
-  'italic',
-  'strikethrough',
-  'inlineCode',
-  'code',
-  'codeBlock',
-  'quote',
-  'hr',
-  'table',
-  'header',
-  'h1',
-  'h2',
-  'h3',
-  'h4',
-  'h5',
-  'h6',
-  'undo',
-  'redo',
-  'underline',
-  'sub',
-  'sup',
-  'size',
-  'color',
-  'mobilePreview',
-  'copy',
-  'theme',
-  'codeTheme',
-  'fullScreen',
-  'export',
-  'changeLocale',
-  'wordCount',
-  'shortcutKey',
-  'search',
-  'togglePreview',
-]);
 
 function selectedText(view: EditorView) {
   const { from, to } = view.state.selection;
@@ -277,9 +180,7 @@ export function createCherryEditingBridge(
       return false;
     };
 
-    if (
-      selection.ranges.some((range) => hasCodeBlockAncestor(range.$from) || hasCodeBlockAncestor(range.$to))
-    ) {
+    if (selection.ranges.some((range) => hasCodeBlockAncestor(range.$from) || hasCodeBlockAncestor(range.$to))) {
       return true;
     }
 
@@ -328,11 +229,7 @@ export function createCherryEditingBridge(
       }
       // An isolating node is allowed as an ancestor (for example text inside
       // a Panel), but not when the selection crosses the complete node.
-      if (
-        node.type.spec.isolating === true &&
-        position >= selection.from &&
-        position + node.nodeSize <= selection.to
-      ) {
+      if (node.type.spec.isolating === true && position >= selection.from && position + node.nodeSize <= selection.to) {
         blocked = true;
         return false;
       }
@@ -340,9 +237,7 @@ export function createCherryEditingBridge(
       return !blocked;
     });
     if (blocked) return false;
-    return Array.from(textblocks).every((node) =>
-      inlineMarkTypes.some((mark) => node.type.allowsMarkType(mark)),
-    );
+    return Array.from(textblocks).every((node) => inlineMarkTypes.some((mark) => node.type.allowsMarkType(mark)));
   };
   const refreshPreviewBubble = () => {
     if (bubbleRefreshQueued) return;
@@ -528,7 +423,11 @@ export function createCherryEditingBridge(
     }
 
     if (change.type) {
-      const decorationAliases: Record<string, string> = { border: '#B', shadow: '#S', radius: '#R' };
+      const decorationAliases: Record<string, string> = {
+        border: '#B',
+        shadow: '#S',
+        radius: '#R',
+      };
       const decoration = decorationAliases[change.type];
       if (decoration) {
         const aliases: Record<string, RegExp> = {
@@ -548,7 +447,10 @@ export function createCherryEditingBridge(
     }
 
     const nextAlt = `${base}${[...sizes, ...decorations, ...(alignment ? [alignment] : [])].join('')}`;
-    const transaction = view.state.tr.setNodeMarkup(position, undefined, { ...node.attrs, alt: nextAlt });
+    const transaction = view.state.tr.setNodeMarkup(position, undefined, {
+      ...node.attrs,
+      alt: nextAlt,
+    });
     transaction.setSelection(NodeSelection.create(transaction.doc, position));
     view.dispatch(transaction);
     return true;
@@ -595,7 +497,10 @@ export function createCherryEditingBridge(
       ' ',
     )}`;
     const nextSource = lines.join('\n');
-    const transaction = view.state.tr.setNodeMarkup(position, undefined, { ...node.attrs, source: nextSource });
+    const transaction = view.state.tr.setNodeMarkup(position, undefined, {
+      ...node.attrs,
+      source: nextSource,
+    });
     transaction.setSelection(NodeSelection.create(transaction.doc, position));
     view.dispatch(transaction);
     return true;
@@ -615,12 +520,9 @@ export function createCherryEditingBridge(
       (isLineCommand && view.state.selection.$from.parent.isTextblock
         ? view.state.selection.$from.parent.textContent
         : '');
-    // Async Cherry menus (image/file/formula/chart pickers) must resolve
-    // against the selection that opened them. If the document changed while
-    // the picker was open, skip the stale result instead of inserting it at a
-    // newer, unrelated caret position.
-    const savedSelection = view.state.selection;
-    const savedDocument = view.state.doc;
+    // Async Cherry menus (image/file/formula/chart pickers) resolve against a
+    // bookmark mapped through all intervening ProseMirror transactions.
+    const trackedSelection = instance.trackSelection?.();
     const previousIsSelections = menu.isSelections;
     menu.isSelections = true;
     let result: unknown;
@@ -630,17 +532,19 @@ export function createCherryEditingBridge(
       menu.isSelections = previousIsSelections;
     }
     if (result instanceof Promise) {
-      void result.then((value) => {
-        if (typeof value === 'string' && value !== selection) {
-          if (view.state.doc !== savedDocument) return;
-          const transaction = view.state.tr.setSelection(savedSelection.map(view.state.tr.doc, view.state.tr.mapping));
-          view.dispatch(transaction);
+      void Promise.resolve(result)
+        .then((value) => {
+          if (typeof value !== 'string' || value === selection) return;
+          const mappedSelection = trackedSelection?.resolve();
+          if (!mappedSelection) return;
+          view.dispatch(view.state.tr.setSelection(mappedSelection));
           const blockCommand = CHERRY_LINE_TRANSFORM_COMMANDS.has(command.name);
           insertMarkdown(value, false, blockCommand);
-        }
-      });
+        })
+        .finally(() => trackedSelection?.release());
       return true;
     }
+    trackedSelection?.release();
     if (typeof result === 'string' && result !== selection) {
       const blockCommand = CHERRY_LINE_TRANSFORM_COMMANDS.has(command.name);
       insertMarkdown(result, false, blockCommand);
@@ -733,21 +637,20 @@ export function createCherryEditingBridge(
           color: color.color ?? '',
         });
       }
-      default:
+      default: {
         // Custom menus are intentionally not enumerated here: applications
         // may register arbitrary names.  Cherry marks document-producing
         // menus with updateMarkdown=true, so unknown commands can safely use
         // the transform bridge while global UI menus remain on Cherry.
-        {
-          const menu = command.menu as CherryMenuLike | undefined;
-          if (
-            TRANSFORMED_MARKDOWN_COMMANDS.has(command.name) ||
-            (menu?.updateMarkdown !== false && !KNOWN_NON_TRANSFORM_COMMANDS.has(command.name))
-          ) {
-            return runCherryTransform(command);
-          }
-          return false;
+        const menu = command.menu as CherryMenuLike | undefined;
+        if (
+          TRANSFORMED_MARKDOWN_COMMANDS.has(command.name) ||
+          (menu?.updateMarkdown !== false && !KNOWN_NON_TRANSFORM_COMMANDS.has(command.name))
+        ) {
+          return runCherryTransform(command);
         }
+        return false;
+      }
     }
   };
 
@@ -789,7 +692,10 @@ export function createCherryEditingBridge(
     const markName = markNames[command.name];
     if (markName) {
       const mark = view.state.schema.marks[markName];
-      return { active: Boolean(mark?.isInSet(parent.marks)), enabled: Boolean(mark) && view.editable };
+      return {
+        active: Boolean(mark?.isInSet(parent.marks)),
+        enabled: Boolean(mark) && view.editable,
+      };
     }
     return { active: false, enabled: view.editable };
   };
@@ -846,10 +752,7 @@ export function createCherryEditingBridge(
       if (!(selection instanceof NodeSelection)) return null;
       const node = selection.node;
       if (kind === 'image' && node.type.name !== 'image') return null;
-      if (
-        kind === 'mermaid' &&
-        (node.type.name !== 'cherry_diagram' || node.attrs.diagramType !== 'mermaid')
-      ) {
+      if (kind === 'mermaid' && (node.type.name !== 'cherry_diagram' || node.attrs.diagramType !== 'mermaid')) {
         return null;
       }
       const dom = view.nodeDOM(selection.from);

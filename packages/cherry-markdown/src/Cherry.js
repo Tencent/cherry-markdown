@@ -125,6 +125,8 @@ export default class Cherry extends CherryStatic {
     this.isDestroyed = false;
     /** @type {Array<() => void | Promise<void>>} */
     this.extensionCleanups = [];
+    /** @type {Promise<void>} */
+    this.extensionMountTask = Promise.resolve();
     this.lastMarkdownText = '';
     this.$event = new Event(this.instanceId);
 
@@ -149,18 +151,22 @@ export default class Cherry extends CherryStatic {
         Logger.warn('Cherry extension ignored because mount() is missing.');
         return;
       }
-      Promise.resolve()
-        .then(() => extension.mount(this))
-        .then((cleanup) => {
+      this.extensionMountTask = this.extensionMountTask.then(async () => {
+        if (this.isDestroyed) return;
+        try {
+          const cleanup = await extension.mount(this);
           if (typeof cleanup !== 'function') return;
           if (this.isDestroyed) {
-            Promise.resolve(cleanup()).catch((error) => Logger.error('Cherry extension cleanup failed.', error));
+            await cleanup();
             return;
           }
           this.extensionCleanups.push(cleanup);
-        })
-        .catch((error) => Logger.error(`Cherry extension "${extension.name || 'anonymous'}" failed to mount.`, error));
+        } catch (error) {
+          Logger.error(`Cherry extension "${extension.name || 'anonymous'}" failed to mount.`, error);
+        }
+      });
     });
+    return this.extensionMountTask;
   }
 
   /**
@@ -301,9 +307,12 @@ export default class Cherry extends CherryStatic {
   destroy() {
     if (this.isDestroyed) return;
     this.isDestroyed = true;
-    this.extensionCleanups.splice(0).forEach((cleanup) => {
-      Promise.resolve(cleanup()).catch((error) => Logger.error('Cherry extension cleanup failed.', error));
-    });
+    this.extensionCleanups
+      .splice(0)
+      .reverse()
+      .forEach((cleanup) => {
+        Promise.resolve(cleanup()).catch((error) => Logger.error('Cherry extension cleanup failed.', error));
+      });
 
     // 先销毁搜索面板桥接（解绑监听、清理面板 DOM）
     destroySearcherBridge(this);

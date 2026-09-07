@@ -31,6 +31,7 @@ const { default: Cherry } = await vi.importActual<{
     extensions: ReturnType<typeof milkdown>[];
   }) => {
     getMarkdown(): string;
+    getPreviewer(): { ensureEditingBubble(): unknown };
     setValue(markdown: string): void;
     switchModel(model: 'edit&preview' | 'editOnly' | 'previewOnly'): void;
     destroy(): void;
@@ -111,7 +112,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     await vi.waitFor(() => expect(element.childElementCount).toBe(0));
   });
 
-  it('defers an initial editOnly mount until the preview first becomes visible', async () => {
+  it('does not attach Milkdown to an editOnly Cherry instance', async () => {
     const element = root();
     const onError = vi.fn();
     const cherry = new Cherry({
@@ -126,21 +127,35 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(element.querySelector('.ProseMirror')).toBeNull();
     expect(onError).not.toHaveBeenCalled();
 
-    cherry.setValue('## Latest hidden source\n\nBefore first preview.');
+    cherry.setValue('## Latest hidden source\n\nNo preview integration.');
     cherry.switchModel('previewOnly');
-    await vi.waitFor(() => expect(element.querySelector('.ProseMirror h2')?.textContent).toBe('Latest hidden source'));
-    const previewEditor = element.querySelector('.ProseMirror');
-    expect(previewEditor).not.toBeNull();
-
-    cherry.switchModel('editOnly');
-    cherry.setValue('## Updated while suspended\n\nLatest body.');
-    cherry.switchModel('edit&preview');
     await vi.waitFor(() =>
-      expect(element.querySelector('.ProseMirror h2')?.textContent).toBe('Updated while suspended'),
+      expect(element.querySelector('.cherry-previewer h2')?.textContent).toBe('Latest hidden source'),
     );
-    expect(element.querySelector('.ProseMirror')).toBe(previewEditor);
-    expect(cherry.getMarkdown()).toContain('Latest body.');
+    expect(element.querySelector('.ProseMirror')).toBeNull();
+    expect(cherry.getMarkdown()).toContain('No preview integration.');
     expect(onError).not.toHaveBeenCalled();
+
+    cherry.destroy();
+    await vi.waitFor(() => expect(element.childElementCount).toBe(0));
+  });
+
+  it('mounts previewOnly without a top toolbar and lazily reuses the Cherry Bubble', async () => {
+    const element = root();
+    const cherry = new Cherry({
+      el: element,
+      value: 'Select this text',
+      editor: { defaultModel: 'previewOnly' },
+      extensions: [milkdown({ debounce: 0 })],
+    });
+
+    await vi.waitFor(() => expect(element.querySelector('.ProseMirror')).not.toBeNull());
+    expect(element.querySelector('.cherry--no-toolbar')).not.toBeNull();
+    expect(element.querySelector('.cherry-toolbar')?.classList.contains('preview-only')).toBe(true);
+    expect(element.querySelector('.cherry-bubble--preview')).toBeNull();
+
+    cherry.getPreviewer().ensureEditingBubble();
+    expect(element.querySelector('.cherry-bubble--preview')).not.toBeNull();
 
     cherry.destroy();
     await vi.waitFor(() => expect(element.childElementCount).toBe(0));
@@ -166,6 +181,8 @@ describe('createCherryMilkdown WYSIWYG', () => {
     };
     const host: CherryMilkdownHost = {
       engine: { makeHtml: (value: string) => `<p>${value}</p>` },
+      editor: { scrollToLineNum: vi.fn() },
+      options: { editor: { defaultModel: 'previewOnly' } },
       getMarkdown: () => '# Extension preview',
       getPreviewer: () => previewer,
       setValue: vi.fn(),
@@ -281,7 +298,10 @@ describe('createCherryMilkdown WYSIWYG', () => {
       expect(host.setValue).toHaveBeenCalledWith(
         expect.stringContaining('Before editable'),
         true,
-        expect.objectContaining({ source: expect.stringContaining('@cherry-markdown/milkdown:'), revision: 1 }),
+        expect.objectContaining({
+          source: expect.stringContaining('@cherry-markdown/milkdown:'),
+          revision: 1,
+        }),
       ),
     );
     expect(markdown).toContain('Before editable');
@@ -488,7 +508,10 @@ describe('createCherryMilkdown WYSIWYG', () => {
 
   it('preserves parameterized Cherry marks when parsing editor DOM', async () => {
     const element = root();
-    const instance = await createCherryMilkdown({ root: element, value: '!!#f00 red!! !20 large! {字|zi}' });
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: '!!#f00 red!! !20 large! {字|zi}',
+    });
     instances.push(instance);
 
     const color = element.querySelector('.cherry-wysiwyg-color');
@@ -686,7 +709,10 @@ describe('createCherryMilkdown WYSIWYG', () => {
 
   it('canonicalizes Cherry panel aliases instead of treating them as raw HTML', async () => {
     const element = root();
-    const instance = await createCherryMilkdown({ root: element, value: ':::p Alias title\nPanel body\n:::' });
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: ':::p Alias title\nPanel body\n:::',
+    });
     instances.push(instance);
 
     const panel = element.querySelector<HTMLElement>('.cherry-compound');
@@ -715,7 +741,11 @@ describe('createCherryMilkdown WYSIWYG', () => {
 
   it('edits panel content directly without opening a source editor', async () => {
     const element = root();
-    const instance = await createCherryMilkdown({ root: element, value: '::: warning\nBefore\n:::', debounce: 0 });
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: '::: warning\nBefore\n:::',
+      debounce: 0,
+    });
     instances.push(instance);
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     let position = -1;
@@ -729,7 +759,10 @@ describe('createCherryMilkdown WYSIWYG', () => {
 
   it('edits compound titles in place with native text controls', async () => {
     const element = root();
-    const instance = await createCherryMilkdown({ root: element, value: ':::warning Before\nBody\n:::' });
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: ':::warning Before\nBody\n:::',
+    });
     instances.push(instance);
     const title = element.querySelector<HTMLInputElement>('.cherry-compound__title');
 
@@ -744,7 +777,10 @@ describe('createCherryMilkdown WYSIWYG', () => {
 
   it('selects Detail from real header mouse input while its title remains directly editable', async () => {
     const element = root();
-    const instance = await createCherryMilkdown({ root: element, value: '+++ 更多能力\n正文\n+++' });
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: '+++ 更多能力\n正文\n+++',
+    });
     instances.push(instance);
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     const detail = element.querySelector<HTMLElement>('[data-role="detail-item"]');
@@ -899,7 +935,17 @@ describe('createCherryMilkdown WYSIWYG', () => {
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     const blocks = Array.from(view.dom.children) as HTMLElement[];
     element.getBoundingClientRect = () =>
-      ({ top: 0, bottom: 400, left: 0, right: 600, width: 600, height: 400, x: 0, y: 0, toJSON() {} }) as DOMRect;
+      ({
+        top: 0,
+        bottom: 400,
+        left: 0,
+        right: 600,
+        width: 600,
+        height: 400,
+        x: 0,
+        y: 0,
+        toJSON() {},
+      }) as DOMRect;
     blocks.forEach((block, index) => {
       block.getBoundingClientRect = () => {
         const top = index * 100 - element.scrollTop;
@@ -1132,7 +1178,11 @@ describe('createCherryMilkdown WYSIWYG', () => {
   it('keeps unknown business directives intact and edits them in the native Cherry shell', async () => {
     const element = root();
     const source = ':::business-card\nOpaque source\n:::';
-    const instance = await createCherryMilkdown({ root: element, value: source, engine: { makeHtml: (value) => value } });
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: source,
+      engine: { makeHtml: (value) => value },
+    });
     instances.push(instance);
     expect(element.querySelector('.cherry-embed--cherry_native_block')).not.toBeNull();
     selectNode(instance, 'cherry_native_block');
@@ -1159,7 +1209,10 @@ describe('createCherryMilkdown WYSIWYG', () => {
 
   it('preserves the active text selection across API/source Markdown synchronization', async () => {
     const element = root();
-    const instance = await createCherryMilkdown({ root: element, value: 'Before selected text after.' });
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: 'Before selected text after.',
+    });
     instances.push(instance);
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     const paragraph = view.state.doc.firstChild;
@@ -1172,9 +1225,37 @@ describe('createCherryMilkdown WYSIWYG', () => {
     expect(view.state.doc.textBetween(selection.from, selection.to)).toBe('selected text');
   });
 
+  it('maps a saved async-menu selection through intervening document changes', async () => {
+    const element = root();
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: 'Before and after\n\nSecond paragraph.',
+      engine: { makeHtml: (value: string) => value },
+    });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let start = -1;
+    view.state.doc.descendants((node, position) => {
+      if (start < 0 && node.isText && node.text?.startsWith('Before')) start = position;
+    });
+    view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, start, start + 6)));
+    const tracked = instance.trackSelection?.();
+
+    const end = view.state.doc.content.size - 1;
+    view.dispatch(view.state.tr.insertText(' updated', end));
+    const mapped = tracked?.resolve();
+
+    expect(mapped).not.toBeNull();
+    expect(view.state.doc.textBetween(mapped!.from, mapped!.to)).toBe('Before');
+    tracked?.release();
+  });
+
   it('applies external Markdown as a minimal ProseMirror transaction', async () => {
     const element = root();
-    const instance = await createCherryMilkdown({ root: element, value: 'Stable paragraph.\n\nBefore.' });
+    const instance = await createCherryMilkdown({
+      root: element,
+      value: 'Stable paragraph.\n\nBefore.',
+    });
     instances.push(instance);
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     const unchangedParagraph = view.state.doc.firstChild;

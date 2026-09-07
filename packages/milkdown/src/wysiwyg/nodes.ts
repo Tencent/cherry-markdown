@@ -7,59 +7,17 @@ import type { SerializerState } from '@milkdown/kit/transformer';
 import { $nodeSchema, $prose, $view } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
 import type { CherryWysiwygConfig } from './config.js';
+import {
+  destroyCherryRenderedContent,
+  MERMAID_ALIGNMENT_CLASSES,
+  mermaidLayout,
+  renderMermaid,
+} from './diagram-runtime.js';
 import type { CherryVisualRendererResult } from './types.js';
-import type { CherryEngineLike } from '../types.js';
-
-let mermaidRenderId = 0;
 const headingNavigationTasks = new WeakMap<
   EditorView,
   { frames: number[]; timers: Array<ReturnType<typeof setTimeout>> }
 >();
-
-function destroyCherryRenderedContent(engine: CherryEngineLike, container: Element) {
-  if (engine.destroyRenderedContent) {
-    engine.destroyRenderedContent(container);
-    return;
-  }
-
-  const charts = [
-    ...(container.matches('.cherry-echarts-wrapper') ? [container] : []),
-    ...container.querySelectorAll('.cherry-echarts-wrapper'),
-  ];
-  if (charts.length === 0) return;
-
-  for (const hook of engine.hooks?.paragraph ?? []) {
-    const destroyChart = hook.chartRenderEngine?.destroyChart;
-    if (!destroyChart) continue;
-    charts.forEach((chart) => destroyChart.call(hook.chartRenderEngine, chart));
-  }
-}
-
-async function renderMermaid(source: string) {
-  const { default: mermaid } = await import('mermaid');
-  mermaid.initialize({ securityLevel: 'strict', startOnLoad: false });
-  mermaidRenderId += 1;
-  return (await mermaid.render(`cherry-milkdown-mermaid-${mermaidRenderId}`, source)).svg;
-}
-
-const MERMAID_ALIGNMENT_CLASSES = [
-  'cherry-mermaid-align-center',
-  'cherry-mermaid-align-right',
-  'cherry-mermaid-align-left',
-  'cherry-mermaid-align-float-right',
-  'cherry-mermaid-align-float-left',
-];
-
-function mermaidLayout(source: string) {
-  const opener = source.split(/\r?\n/, 1)[0] ?? '';
-  const sizes = opener.match(/#([0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)/gi) ?? [];
-  const alignment = opener.match(/#(center|right|left|float-right|float-left)/i)?.[1] ?? '';
-  return {
-    width: sizes[0]?.slice(1) ?? '',
-    height: sizes[1]?.slice(1) ?? '',
-    alignment,
-  };
-}
 
 const SAFE_HTML_TAGS = new Set([
   'A',
@@ -425,7 +383,10 @@ class CherryFootnoteDefinitionView implements NodeView {
   private node: ProseNode;
   private readonly reference: HTMLAnchorElement;
 
-  constructor(node: ProseNode, private readonly view: EditorView) {
+  constructor(
+    node: ProseNode,
+    private readonly view: EditorView,
+  ) {
     this.node = node;
     this.dom = document.createElement('div');
     this.dom.className = 'footnote cherry-footnote-definition';
@@ -1163,12 +1124,7 @@ class EmbedView implements NodeView {
     const type = document.createElement('span');
     type.className = 'cherry-embed__type';
     type.textContent = node.type.name === 'cherry_diagram' ? String(node.attrs.diagramType) : 'HTML';
-    const edit = iconButton(
-      '源码',
-      '在节点内编辑源码',
-      this.toggleSource,
-      config.readonly,
-    );
+    const edit = iconButton('源码', '在节点内编辑源码', this.toggleSource, config.readonly);
     this.sourceToggle = edit;
     edit.setAttribute('aria-expanded', 'false');
     controls.append(type, edit);
@@ -1341,10 +1297,7 @@ class EmbedView implements NodeView {
     // for it. This is based on actual layout rather than a fixed Mermaid size,
     // so resized/narrow preview panes use the same collision-free rule.
     const controlsOutside = Boolean(
-      figure.width > 0 &&
-        parent &&
-        controlsWidth > 0 &&
-        figure.right + controlsWidth + 8 <= parent.right,
+      figure.width > 0 && parent && controlsWidth > 0 && figure.right + controlsWidth + 8 <= parent.right,
     );
     this.dom.classList.toggle('cherry-embed--controls-outside', controlsOutside);
   }

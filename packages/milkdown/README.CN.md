@@ -109,7 +109,7 @@ yarn build:demo
 yarn preview:demo
 ```
 
-用户可见 demo 是一个最小 React + Vite 工程，入口位于 `examples/react/App.tsx`；`index.html` 只保留 Vite 所需的根节点。它复用仓库根 demo 的布局、配置、工具栏、主题、ECharts 插件和整份 Markdown 手册，业务接入上的唯一差异是增加 `extensions: [milkdown()]`，并在 React 卸载时销毁 Cherry 实例。纯预览可直接打开 `index.html?mode=previewOnly`，仍由 Cherry 的 `editor.defaultModel` 和 `toolbars` 配置决定，不存在第二套 React 编辑器。打开 `index.html?mode=editOnly` 可从 Cherry 纯源码模式启动：预览首次可见时才会用最新 Markdown 创建 Milkdown，之后切换模式继续复用同一实例。
+用户可见 demo 是一个最小 React + Vite 工程，入口位于 `examples/react/App.tsx`；`index.html` 只保留 Vite 所需的根节点。它复用仓库根 demo 的布局、配置、工具栏、主题、ECharts 插件和整份 Markdown 手册，业务接入上的唯一差异是增加 `extensions: [milkdown()]`，并在 React 卸载时销毁 Cherry 实例。纯预览可直接打开 `index.html?mode=previewOnly`，仍由 Cherry 的 `editor.defaultModel` 和 `toolbars` 配置决定，不存在第二套 React 编辑器。`editOnly` 保持 Cherry 原生源码编辑，不挂载 Milkdown；CherryStream 暂不支持该扩展。
 
 ## 可靠性验证
 

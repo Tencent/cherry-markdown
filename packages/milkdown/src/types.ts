@@ -1,4 +1,5 @@
 import type { Editor } from '@milkdown/kit/core';
+import type { Selection } from '@milkdown/kit/prose/state';
 import type { MilkdownPlugin } from '@milkdown/kit/ctx';
 import type { CherryOptions } from 'cherry-markdown/types/cherry';
 import type { CherryVisualRenderer } from './wysiwyg/index.js';
@@ -70,8 +71,8 @@ export interface CherryPreviewContentRenderer {
 export interface CherryPreviewerHost {
   getDom(): HTMLElement;
   update(html: string, updateContext?: CherryUpdateContext): void;
-  setContentRenderer(renderer: CherryPreviewContentRenderer): void;
-  clearContentRenderer(renderer?: CherryPreviewContentRenderer): boolean;
+  setContentRenderer(renderer: CherryPreviewContentRenderer): void | Promise<void>;
+  clearContentRenderer(renderer?: CherryPreviewContentRenderer): boolean | Promise<boolean>;
   setEditingBridge?(bridge: CherryPreviewEditingBridge): void;
   clearEditingBridge?(bridge?: CherryPreviewEditingBridge): boolean;
   /** Mounts the native Cherry selection bubble before the first selection. */
@@ -130,6 +131,7 @@ export interface CherryMilkdownHost {
   editor?: {
     scrollToLineNum(lineNum: number | null, endLine?: number, percent?: number): void;
   };
+  options?: { editor?: { defaultModel?: string } };
   getMarkdown(): string;
   getPreviewer(): CherryPreviewerHost;
   setValue(markdown: string, keepCursor?: boolean, updateContext?: CherryUpdateContext): void;
@@ -157,6 +159,8 @@ export interface CherryMilkdownPreviewHandle {
 export interface CherryMilkdownInstance {
   editor: Editor;
   engine: CherryEngineLike;
+  /** @internal Keeps an async Cherry picker anchored while transactions occur. */
+  trackSelection?(): { resolve(): Selection | null; release(): void };
   getMarkdown(): string;
   setMarkdown(markdown: string, options?: { emit?: boolean }): void;
   focus(): void;

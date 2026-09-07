@@ -45,6 +45,8 @@ export default class Previewer {
    * } | null}
    */
   contentRenderer = null;
+  /** @private Prevents an older asynchronous teardown from claiming a newer renderer slot. */
+  contentRendererGeneration = 0;
   editingBridge = null;
 
   /** @private */
@@ -857,7 +859,20 @@ export default class Previewer {
     if (this.contentRenderer === renderer) {
       return;
     }
-    this.contentRenderer?.destroy?.();
+    const previous = this.contentRenderer;
+    const generation = ++this.contentRendererGeneration;
+    this.contentRenderer = null;
+    const destruction = previous?.destroy?.();
+    if (destruction && typeof destruction.then === 'function') {
+      return Promise.resolve(destruction)
+        .catch((error) => Logger.error('Custom preview content renderer cleanup failed.', error))
+        .then(() => {
+          if (this.isDestroyed || generation !== this.contentRendererGeneration) {
+            return renderer.destroy?.();
+          }
+          this.contentRenderer = renderer;
+        });
+    }
     this.contentRenderer = renderer;
   }
 
@@ -867,16 +882,29 @@ export default class Previewer {
    * owner during asynchronous teardown.
    *
    * @param {object} [renderer]
-   * @returns {boolean}
+   * @returns {boolean|Promise<boolean>}
    */
   clearContentRenderer(renderer) {
     if (!this.contentRenderer || (renderer && renderer !== this.contentRenderer)) {
       return false;
     }
     const currentRenderer = this.contentRenderer;
+    const container = this.getDomContainer();
+    const generation = ++this.contentRendererGeneration;
     this.contentRenderer = null;
-    currentRenderer.destroy?.();
-    this.getDomContainer().replaceChildren();
+    const finish = () => {
+      if (generation === this.contentRendererGeneration && !this.contentRenderer) {
+        container.replaceChildren();
+      }
+      return true;
+    };
+    const destruction = currentRenderer.destroy?.();
+    if (destruction && typeof destruction.then === 'function') {
+      return Promise.resolve(destruction)
+        .catch((error) => Logger.error('Custom preview content renderer cleanup failed.', error))
+        .then(finish);
+    }
+    finish();
     return true;
   }
 
@@ -967,11 +995,22 @@ export default class Previewer {
       html,
       ...(updateContext ? { updateContext } : {}),
     };
-    const result = renderer.update(context);
-    if (result && typeof result.catch === 'function') {
-      result.catch((error) => Logger.error('Custom preview content renderer failed.', error));
+    let result;
+    try {
+      result = renderer.update(context);
+    } catch (error) {
+      Logger.error('Custom preview content renderer failed.', error);
+      return false;
     }
-    this.afterUpdate();
+    if (result && typeof result.then === 'function') {
+      Promise.resolve(result)
+        .then(() => {
+          if (!this.isDestroyed && this.contentRenderer === renderer) this.afterUpdate();
+        })
+        .catch((error) => Logger.error('Custom preview content renderer failed.', error));
+    } else {
+      this.afterUpdate();
+    }
     return true;
   }
 

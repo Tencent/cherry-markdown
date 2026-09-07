@@ -18,8 +18,7 @@ export default function App() {
   // One React demo serves both Cherry layouts. The mode is selected through
   // Cherry's existing configuration, not by mounting a second editor/page.
   const requestedMode = new URLSearchParams(window.location.search).get('mode');
-  const mode =
-    requestedMode === 'previewOnly' || requestedMode === 'editOnly' ? requestedMode : 'edit&preview';
+  const mode = requestedMode === 'previewOnly' || requestedMode === 'editOnly' ? requestedMode : 'edit&preview';
   const previewOnly = mode === 'previewOnly';
   const editOnly = mode === 'editOnly';
 
@@ -44,8 +43,8 @@ export default function App() {
       }
       if (milkdownFactory) window.milkdown = milkdownFactory;
       await loadDemoDependencies();
-      // Both demos consume Cherry's existing public configurations. Milkdown
-      // only adds preview editing; it does not define another layout mode.
+      // Both supported demos consume Cherry's existing public configurations.
+      // editOnly intentionally remains a plain Cherry source editor.
       const configModule = previewOnly
         ? // @ts-expect-error Cherry's shared JavaScript demo config does not publish declarations.
           await import('../../../../examples/assets/scripts/preview-demo.js')

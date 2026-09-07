@@ -16,6 +16,7 @@ function extensionHost(extensions: TestExtension[]) {
   const clearEvents = vi.fn();
   Reflect.set(host, 'options', { extensions });
   host.extensionCleanups = [];
+  Reflect.set(host, 'extensionMountTask', Promise.resolve());
   host.isDestroyed = false;
   Reflect.set(host, 'editor', { destroy: editorDestroy });
   Reflect.set(host, 'wrapperDom', { remove: wrapperRemove });
@@ -81,5 +82,36 @@ describe('Cherry instance extensions', () => {
     host.mountExtensions();
     await vi.waitFor(() => expect(healthyMount).toHaveBeenCalledWith(host));
     await vi.waitFor(() => expect(host.extensionCleanups).toEqual([cleanup]));
+  });
+
+  it('mounts in declaration order and destroys in reverse dependency order', async () => {
+    const calls: string[] = [];
+    let releaseFirst: (() => void) | undefined;
+    const host = extensionHost([
+      {
+        name: 'first',
+        mount: async () => {
+          calls.push('mount:first');
+          await new Promise<void>((resolve) => (releaseFirst = resolve));
+          return () => calls.push('destroy:first');
+        },
+      },
+      {
+        name: 'second',
+        mount: async () => {
+          calls.push('mount:second');
+          return () => calls.push('destroy:second');
+        },
+      },
+    ]);
+
+    const mounted = host.mountExtensions();
+    await vi.waitFor(() => expect(calls).toEqual(['mount:first']));
+    releaseFirst?.();
+    await mounted;
+    expect(calls).toEqual(['mount:first', 'mount:second']);
+
+    host.destroy();
+    expect(calls).toEqual(['mount:first', 'mount:second', 'destroy:second', 'destroy:first']);
   });
 });

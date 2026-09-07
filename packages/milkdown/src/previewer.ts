@@ -145,16 +145,13 @@ export async function attachCherryMilkdownPreview(
   const restoreNativePreview = async (error: unknown) => {
     if (detached || failed) return;
     failed = true;
-    previewer.clearContentRenderer(renderer);
-    // clearContentRenderer() starts cleanup but Cherry's API is synchronous.
-    // Wait for the renderer's idempotent teardown before restoring native
-    // HTML; otherwise a late editor.destroy() can erase the fallback DOM.
+    await previewer.clearContentRenderer(renderer);
     await renderer.destroy?.();
     if (!creationErrorReported) options.onError?.(error, 'create');
     previewer.update(cherry.engine.makeHtml(cherry.getMarkdown()));
   };
 
-  previewer.setContentRenderer(renderer);
+  await previewer.setContentRenderer(renderer);
   try {
     previewer.update(cherry.engine.makeHtml(latestMarkdown));
     const initialCreation = creation;
@@ -166,7 +163,7 @@ export async function attachCherryMilkdownPreview(
   const detach = async () => {
     if (detached) return;
     detached = true;
-    previewer.clearContentRenderer(renderer);
+    await previewer.clearContentRenderer(renderer);
     await renderer.destroy?.();
     previewer.update(cherry.engine.makeHtml(cherry.getMarkdown()));
   };
@@ -187,6 +184,10 @@ export function milkdown(options: CherryMilkdownPreviewOptions = {}): CherryExte
   return {
     name: '@cherry-markdown/milkdown',
     async mount(cherry) {
+      const mode = cherry.options?.editor?.defaultModel ?? 'edit&preview';
+      // Milkdown enhances an editable Cherry preview. A source-only Cherry
+      // instance and CherryStream have no editable preview surface to own.
+      if (mode === 'editOnly' || !cherry.editor) return;
       const instance = await attachCherryMilkdownPreview(cherry, options);
       return () => instance.detach();
     },

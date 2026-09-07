@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,9 +30,25 @@ function pack(directory) {
 }
 
 try {
-  const cherryTarball = pack(cherryRoot);
-  const milkdownTarball = pack(packageRoot);
   const milkdownManifest = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'));
+  const compatibleCherryVersion = milkdownManifest.peerDependencies['cherry-markdown'].match(/\d+\.\d+\.\d+/)?.[0];
+  if (!compatibleCherryVersion) throw new Error('Milkdown must declare a concrete compatible Cherry peer version.');
+
+  // Changesets applies the Cherry patch version only during release. Stage the
+  // exact package contents under that target version so npm validates the
+  // future published dependency tree without weakening peer resolution.
+  const stagedCherryRoot = join(fixtureRoot, 'staged-cherry-markdown');
+  cpSync(cherryRoot, stagedCherryRoot, {
+    recursive: true,
+    filter: (source) => basename(source) !== 'node_modules',
+  });
+  const stagedCherryManifestPath = join(stagedCherryRoot, 'package.json');
+  const stagedCherryManifest = JSON.parse(readFileSync(stagedCherryManifestPath, 'utf8'));
+  stagedCherryManifest.version = compatibleCherryVersion;
+  writeFileSync(stagedCherryManifestPath, `${JSON.stringify(stagedCherryManifest, null, 2)}\n`);
+
+  const cherryTarball = pack(stagedCherryRoot);
+  const milkdownTarball = pack(packageRoot);
   const peers = Object.entries(milkdownManifest.peerDependencies)
     .filter(([name]) => name !== 'cherry-markdown')
     .map(([name, range]) => `${name}@${String(range).replace(/^\^/, '')}`);
