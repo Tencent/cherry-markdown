@@ -28,7 +28,7 @@ const { default: Cherry } = await vi.importActual<{
     el: HTMLElement;
     value: string;
     editor?: { defaultModel: 'edit&preview' | 'editOnly' | 'previewOnly' };
-    extensions: ReturnType<typeof milkdown>[];
+    plugins: ReturnType<typeof milkdown>[];
   }) => {
     getMarkdown(): string;
     getPreviewer(): { ensureEditingBubble(): unknown };
@@ -73,13 +73,13 @@ function selectNode(instance: CherryMilkdownInstance, typeName: string) {
 }
 
 describe('createCherryMilkdown WYSIWYG', () => {
-  it('integrates through a real new Cherry({ extensions: [milkdown()] }) instance', async () => {
+  it('integrates through a real new Cherry({ plugins: [milkdown()] }) instance', async () => {
     const element = root();
     const initialMarkdown = '# Real Cherry\n\n* [Original marker](https://example.com){target=\\_blank}';
     const cherry = new Cherry({
       el: element,
       value: initialMarkdown,
-      extensions: [milkdown({ debounce: 0 })],
+      plugins: [milkdown({ debounce: 0 })],
     });
 
     await vi.waitFor(() => expect(element.querySelector('.cherry-milkdown--previewer .ProseMirror')).not.toBeNull());
@@ -119,7 +119,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
       el: element,
       value: '# Hidden initial value',
       editor: { defaultModel: 'editOnly' },
-      extensions: [milkdown({ debounce: 0, onError })],
+      plugins: [milkdown({ debounce: 0, onError })],
     });
 
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -146,7 +146,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
       el: element,
       value: 'Select this text',
       editor: { defaultModel: 'previewOnly' },
-      extensions: [milkdown({ debounce: 0 })],
+      plugins: [milkdown({ debounce: 0 })],
     });
 
     await vi.waitFor(() => expect(element.querySelector('.ProseMirror')).not.toBeNull());
@@ -161,7 +161,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     await vi.waitFor(() => expect(element.childElementCount).toBe(0));
   });
 
-  it('exposes milkdown() as the instance extension and returns Cherry-owned cleanup', async () => {
+  it('exposes milkdown() as an instance plugin and returns Cherry-owned cleanup', async () => {
     const element = root();
     let renderer: CherryPreviewContentRenderer | undefined;
     const previewer = {
@@ -631,7 +631,7 @@ describe('createCherryMilkdown WYSIWYG', () => {
     const cherry = new Cherry({
       el: element,
       value: '| Name | Value |\n| --- | --- |\n| Milkdown | WYSIWYG |',
-      extensions: [milkdown({ debounce: 0 })],
+      plugins: [milkdown({ debounce: 0 })],
     });
 
     await vi.waitFor(() => expect(element.querySelector('.cherry-milkdown--previewer table')).not.toBeNull());

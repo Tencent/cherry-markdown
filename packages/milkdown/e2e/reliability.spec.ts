@@ -1932,7 +1932,7 @@ test('repeated mount and destroy returns DOM and heap resources to the warmed ba
       value: '# warmup',
       editor: { defaultModel: 'previewOnly' },
       toolbars: { toolbar: false, toolbarRight: false, sidebar: false },
-      extensions: [scope.milkdown({ debounce: 0 })],
+      plugins: [scope.milkdown({ debounce: 0 })],
     });
     while (!host.querySelector('.ProseMirror')) await new Promise(requestAnimationFrame);
     instance.destroy();
@@ -1956,7 +1956,7 @@ test('repeated mount and destroy returns DOM and heap resources to the warmed ba
         value: `# stress ${index}\n\n| A | B |\n| --- | --- |\n| ${index} | value |`,
         editor: { defaultModel: 'previewOnly' },
         toolbars: { toolbar: false, toolbarRight: false, sidebar: false },
-        extensions: [scope.milkdown({ debounce: 0 })],
+        plugins: [scope.milkdown({ debounce: 0 })],
       });
       while (!host.querySelector('.ProseMirror')) await new Promise(requestAnimationFrame);
       instance.destroy();

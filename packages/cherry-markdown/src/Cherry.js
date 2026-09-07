@@ -124,9 +124,9 @@ export default class Cherry extends CherryStatic {
     this.options.instanceId = this.instanceId;
     this.isDestroyed = false;
     /** @type {Array<() => void | Promise<void>>} */
-    this.extensionCleanups = [];
+    this.pluginCleanups = [];
     /** @type {Promise<void>} */
-    this.extensionMountTask = Promise.resolve();
+    this.pluginMountTask = Promise.resolve();
     this.lastMarkdownText = '';
     this.$event = new Event(this.instanceId);
 
@@ -137,36 +137,37 @@ export default class Cherry extends CherryStatic {
     /**
      * @type {import('./Engine').default}
      */
+    // TODO(plugin-unification): Run future synchronous plugin configure hooks here before Engine construction.
     this.engine = new Engine(this.options, this);
     if (this.init() !== false) {
-      this.mountExtensions();
+      this.mountPlugins();
     }
   }
 
-  /** Mount instance-scoped integrations without making construction async. */
-  mountExtensions() {
-    const extensions = Array.isArray(this.options.extensions) ? this.options.extensions : [];
-    extensions.forEach((extension) => {
-      if (!extension || typeof extension.mount !== 'function') {
-        Logger.warn('Cherry extension ignored because mount() is missing.');
+  /** Mount instance-scoped plugins without making construction async. */
+  mountPlugins() {
+    const plugins = Array.isArray(this.options.plugins) ? this.options.plugins : [];
+    plugins.forEach((plugin) => {
+      if (!plugin || typeof plugin.mount !== 'function') {
+        Logger.warn('Cherry plugin ignored because mount() is missing.');
         return;
       }
-      this.extensionMountTask = this.extensionMountTask.then(async () => {
+      this.pluginMountTask = this.pluginMountTask.then(async () => {
         if (this.isDestroyed) return;
         try {
-          const cleanup = await extension.mount(this);
+          const cleanup = await plugin.mount(this);
           if (typeof cleanup !== 'function') return;
           if (this.isDestroyed) {
             await cleanup();
             return;
           }
-          this.extensionCleanups.push(cleanup);
+          this.pluginCleanups.push(cleanup);
         } catch (error) {
-          Logger.error(`Cherry extension "${extension.name || 'anonymous'}" failed to mount.`, error);
+          Logger.error(`Cherry plugin "${plugin.name || 'anonymous'}" failed to mount.`, error);
         }
       });
     });
-    return this.extensionMountTask;
+    return this.pluginMountTask;
   }
 
   /**
@@ -307,7 +308,7 @@ export default class Cherry extends CherryStatic {
   destroy() {
     if (this.isDestroyed) return;
     this.isDestroyed = true;
-    this.extensionCleanups
+    this.pluginCleanups
       .splice(0)
       .reverse()
       .forEach((cleanup) => {

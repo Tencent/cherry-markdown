@@ -62,7 +62,7 @@ export default function App() {
         },
         el: root,
         value: basicMd,
-        extensions: milkdownFactory
+        plugins: milkdownFactory
           ? [
               milkdownFactory({
                 debounce: 0,

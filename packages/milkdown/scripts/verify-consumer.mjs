@@ -90,7 +90,7 @@ function App() {
     const cherry = new Cherry({
       el: editorRoot.current,
       value: '# Published package consumer',
-      extensions: [milkdown()],
+      plugins: [milkdown()],
     });
     window.cherry = cherry;
     return () => cherry.destroy();

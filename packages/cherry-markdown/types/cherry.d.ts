@@ -67,19 +67,19 @@ export interface Cherry<T extends CherryCustomOptions = CherryCustomOptions> {
   options: CherryOptions<T>;
 }
 
-export type CherryExtensionCleanup = () => void | Promise<void>;
+export type CherryPluginCleanup = () => void | Promise<void>;
 
-/** An instance-scoped integration mounted after Cherry has initialized. */
-export interface CherryExtension<TCherry = unknown> {
+/** An instance-scoped plugin mounted after Cherry has initialized. */
+export interface CherryPlugin<TCherry = unknown> {
   name: string;
-  mount(cherry: TCherry): void | CherryExtensionCleanup | Promise<void | CherryExtensionCleanup>;
+  mount(cherry: TCherry): void | CherryPluginCleanup | Promise<void | CherryPluginCleanup>;
 }
 
 export type CherryOptions<T extends CherryCustomOptions = CherryCustomOptions> = Partial<CherryOptionsBase<T>>;
 
 export interface CherryOptionsBase<T extends CherryCustomOptions = CherryCustomOptions> {
-  /** Instance-scoped integrations such as the Milkdown preview editor. */
-  extensions: CherryExtension[];
+  /** Instance-scoped plugins such as the Milkdown preview editor. */
+  plugins: CherryPlugin[];
   openai: any;
   /** 第三方依赖 */
   externals: CherryExternalsOptions;

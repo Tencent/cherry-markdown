@@ -63,6 +63,7 @@ export class CherryStatic {
    * @returns {void}
    */
   static usePlugin(PluginClass, ...args) {
+    // TODO(plugin-unification): Register global plugin factories here and merge them into each instance's options.plugins.
     if (this === CherryStatic) {
       throw new Error('`usePlugin` is not allowed to called through CherryStatic class.');
     }

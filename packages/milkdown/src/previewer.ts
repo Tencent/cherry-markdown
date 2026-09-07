@@ -1,4 +1,4 @@
-import type { CherryExtension } from 'cherry-markdown/types/cherry';
+import type { CherryPlugin } from 'cherry-markdown/types/cherry';
 import { createCherryEditingBridge } from './bridge.js';
 import type {
   CherryMilkdownHost,
@@ -182,8 +182,8 @@ export async function attachCherryMilkdownPreview(
   };
 }
 
-/** Creates an instance-scoped Cherry extension that edits the existing preview with Milkdown. */
-export function milkdown(options: CherryMilkdownPreviewOptions = {}): CherryExtension<CherryMilkdownHost> {
+/** Creates an instance-scoped Cherry plugin that edits the existing preview with Milkdown. */
+export function milkdown(options: CherryMilkdownPreviewOptions = {}): CherryPlugin<CherryMilkdownHost> {
   return {
     name: '@cherry-markdown/milkdown',
     async mount(cherry) {
