@@ -4,6 +4,7 @@ import { PNG } from 'pngjs';
 import { cherryCompatibilityCases } from '../test/fixtures/compatibility';
 
 const demoPath = '/index.html';
+const toolbarBridgePath = '/index.html?toolbarBridge=1';
 const previewOnlyPath = '/index.html?mode=previewOnly';
 const editOnlyPath = '/index.html?mode=editOnly';
 const mathJaxJsDelivrUrl = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
@@ -290,10 +291,16 @@ test('the full demo loads every shared image and keeps images selectable in prev
   await page.locator('.cherry-previewer-img-tool-handler [title="边框"]').click();
   await expect(resizable).toHaveClass(/cherry-img-deco-border/);
   await expect(resizable).toHaveCSS('border-top-style', 'solid');
-  await expect.poll(async () => {
-    const state = await readState(page);
-    return state.cherry === state.codeMirror && state.cherry === state.milkdown && /一条dog#\d+px#\d+px#B/.test(state.cherry);
-  }).toBe(true);
+  await expect
+    .poll(async () => {
+      const state = await readState(page);
+      return (
+        state.cherry === state.codeMirror &&
+        state.cherry === state.milkdown &&
+        /一条dog#\d+px#\d+px#B/.test(state.cherry)
+      );
+    })
+    .toBe(true);
   actions.push('resized and decorated a preview image with Cherry native controls while keeping Markdown synchronized');
 
   const nestedFontLink = page
@@ -305,10 +312,7 @@ test('the full demo loads every shared image and keeps images selectable in prev
   await expect(nestedFontLink.locator('.cherry-wysiwyg-bg')).toHaveCSS('background-color', 'rgb(0, 0, 0)');
   actions.push('rendered nested foreground and background font styles without leaking Markdown markers');
 
-  const nativeLineChart = page
-    .locator('.cherry-compound--cols')
-    .filter({ hasText: '示例（折线图）' })
-    .first();
+  const nativeLineChart = page.locator('.cherry-compound--cols').filter({ hasText: '示例（折线图）' }).first();
   await nativeLineChart.scrollIntoViewIfNeeded();
   await expect(nativeLineChart.locator('.cherry-echarts-wrapper svg')).toHaveCount(1);
   actions.push('rendered the table ECharts nested inside the native two-column example');
@@ -451,7 +455,10 @@ test('focused inline edits preserve Cherry layout, dimensions and scroll positio
   });
 
   const preview = page.locator('.cherry-previewer').first();
-  const inlineCode = page.locator('.ProseMirror code').filter({ hasText: /^seed$/ }).first();
+  const inlineCode = page
+    .locator('.ProseMirror code')
+    .filter({ hasText: /^seed$/ })
+    .first();
   const anchor = page.locator('.ProseMirror h2', { hasText: 'Anchor' }).first();
   await anchor.scrollIntoViewIfNeeded();
   const before = await Promise.all([preview.boundingBox(), anchor.boundingBox()]);
@@ -484,7 +491,9 @@ test('focused inline edits preserve Cherry layout, dimensions and scroll positio
   await attachEvidence(page, testInfo, actions, errors);
 });
 
-test('Cherry toolbar operates on the focused Milkdown surface', async ({ page }, testInfo) => {
+test('Cherry toolbar keeps source ownership unless its Milkdown bridge is explicitly enabled', async ({
+  page,
+}, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
   await page.goto(demoPath);
@@ -493,6 +502,12 @@ test('Cherry toolbar operates on the focused Milkdown surface', async ({ page },
     const scope = window as typeof window & { cherry: { setValue(value: string): void } };
     scope.cherry.setValue('Toolbar bridge text.');
   });
+
+  const source = page.locator('.cherry-editor .cm-content');
+  await source.click();
+  await page.keyboard.press('Home');
+  for (let index = 0; index < 'Toolbar '.length; index += 1) await page.keyboard.press('ArrowRight');
+  for (let index = 0; index < 'bridge'.length; index += 1) await page.keyboard.press('Shift+ArrowRight');
 
   const paragraph = page.locator('.ProseMirror p', { hasText: 'Toolbar bridge text.' });
   await expect(paragraph).toBeVisible();
@@ -506,22 +521,25 @@ test('Cherry toolbar operates on the focused Milkdown surface', async ({ page },
       const state = await readState(page);
       return { synchronized: state.cherry === state.codeMirror, markdown: state.cherry.trim() };
     })
-    .toEqual({ synchronized: true, markdown: '**Toolbar** bridge text.' });
-  actions.push('selected preview text and applied Cherry bold toolbar command');
+    .toEqual({ synchronized: true, markdown: 'Toolbar **bridge** text.' });
+  actions.push('kept the Cherry toolbar on its saved source selection while the preview owned focus');
 
   expect(errors).toEqual([]);
   await attachEvidence(page, testInfo, actions, errors);
 });
 
-test('preview text selection uses the native Cherry Bubble and preserves the selection for commands', async ({ page }, testInfo) => {
+test('preview text selection uses the native Cherry Bubble and preserves the selection for commands', async ({
+  page,
+}, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
   await page.goto(previewOnlyPath);
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   await page.waitForFunction(() =>
     Boolean(
-      (window as typeof window & { cherry?: { getPreviewer?: () => { editingBridge?: unknown } } }).cherry
-        ?.getPreviewer?.().editingBridge,
+      (
+        window as typeof window & { cherry?: { getPreviewer?: () => { editingBridge?: unknown } } }
+      ).cherry?.getPreviewer?.().editingBridge,
     ),
   );
   await expect(page.locator('.cherry-bubble--preview')).toHaveCount(0);
@@ -575,10 +593,12 @@ test('preview text selection uses the native Cherry Bubble and preserves the sel
 
   await bubble.locator('.cherry-toolbar-button[title="加粗"]').click();
   await expect.poll(async () => (await readState(page)).cherry).toContain('**Bubble 可编辑文本**');
-  await expect.poll(async () => {
-    const state = await readState(page);
-    return state.cherry === state.codeMirror && state.cherry === state.milkdown;
-  }).toBe(true);
+  await expect
+    .poll(async () => {
+      const state = await readState(page);
+      return state.cherry === state.codeMirror && state.cherry === state.milkdown;
+    })
+    .toBe(true);
   actions.push('clicked native Bubble bold and verified all three Markdown owners stayed synchronized');
 
   expect(errors).toEqual([]);
@@ -592,8 +612,9 @@ test('generic Cherry Bubble is hidden for code-block selections', async ({ page 
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   await page.waitForFunction(() =>
     Boolean(
-      (window as typeof window & { cherry?: { getPreviewer?: () => { editingBridge?: unknown } } }).cherry
-        ?.getPreviewer?.().editingBridge,
+      (
+        window as typeof window & { cherry?: { getPreviewer?: () => { editingBridge?: unknown } } }
+      ).cherry?.getPreviewer?.().editingBridge,
     ),
   );
   await page.evaluate(() => {
@@ -709,7 +730,7 @@ test('Mermaid node controls overlay the corner and source focus uses one code su
 test('every Cherry size submenu item formats the focused Milkdown selection', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
-  await page.goto(demoPath);
+  await page.goto(toolbarBridgePath);
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   await expect(page.locator('.ProseMirror')).toBeVisible();
 
@@ -735,11 +756,16 @@ test('every Cherry size submenu item formats the focused Milkdown selection', as
     await page.keyboard.press('ControlOrMeta+A');
     await page.locator('.toolbar-left [title="大小"]').click();
     await page.locator(`.cherry-dropdown [title="${label}"]`).click();
-    await expect(page.locator(`.ProseMirror .cherry-wysiwyg-size[data-cherry-size="${size}"]`)).toHaveText('Format me now');
+    await expect(page.locator(`.ProseMirror .cherry-wysiwyg-size[data-cherry-size="${size}"]`)).toHaveText(
+      'Format me now',
+    );
     await expect
       .poll(async () => {
         const state = await readState(page);
-        return { markdown: state.cherry, synchronized: state.cherry === state.codeMirror && state.cherry === state.milkdown };
+        return {
+          markdown: state.cherry,
+          synchronized: state.cherry === state.codeMirror && state.cherry === state.milkdown,
+        };
       })
       .toEqual({ markdown: `!${size} Format me now!`, synchronized: true });
     actions.push(`applied size ${label} (${size}px) to a real preview selection`);
@@ -752,7 +778,7 @@ test('every Cherry size submenu item formats the focused Milkdown selection', as
 test('every Cherry strike submenu item operates on the focused Milkdown selection', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
-  await page.goto(demoPath);
+  await page.goto(toolbarBridgePath);
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
 
   const cases = [
@@ -773,10 +799,12 @@ test('every Cherry strike submenu item operates on the focused Milkdown selectio
     await page.locator('.toolbar-left [title="删除线"]').click();
     await page.locator(`.cherry-dropdown [title="${label}"]`).click();
     await expect.poll(async () => (await readState(page)).cherry).toContain(expected);
-    await expect.poll(async () => {
-      const state = await readState(page);
-      return state.cherry === state.codeMirror && state.cherry === state.milkdown;
-    }).toBe(true);
+    await expect
+      .poll(async () => {
+        const state = await readState(page);
+        return state.cherry === state.codeMirror && state.cherry === state.milkdown;
+      })
+      .toBe(true);
     actions.push(`applied strike submenu item ${label} to the complete preview selection`);
   }
 
@@ -787,7 +815,7 @@ test('every Cherry strike submenu item operates on the focused Milkdown selectio
 test('all toolbar heading levels H1 through H5 can be created and edited in preview', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
-  await page.goto(demoPath);
+  await page.goto(toolbarBridgePath);
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   for (const level of [1, 2, 3, 4, 5] as const) {
     await page.evaluate(() => {
@@ -796,7 +824,9 @@ test('all toolbar heading levels H1 through H5 can be created and edited in prev
     });
     await page.locator('.ProseMirror p', { hasText: 'Heading item' }).click();
     await page.locator('.toolbar-left [title="标题"]').click();
-    await page.locator(`.cherry-dropdown [title="${['', '一级标题', '二级标题', '三级标题', '四级标题', '五级标题'][level]}"]`).click();
+    await page
+      .locator(`.cherry-dropdown [title="${['', '一级标题', '二级标题', '三级标题', '四级标题', '五级标题'][level]}"]`)
+      .click();
     await expect(page.locator(`.ProseMirror h${level}`)).toHaveText('Heading item');
     await expect.poll(async () => (await readState(page)).cherry.trim()).toBe(`${'#'.repeat(level)} Heading item`);
     actions.push(`created H${level} from a preview paragraph and kept its Markdown synchronized`);
@@ -808,7 +838,7 @@ test('all toolbar heading levels H1 through H5 can be created and edited in prev
 test('all Cherry panel types can be created from the preview caret', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
-  await page.goto(demoPath);
+  await page.goto(toolbarBridgePath);
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   for (const type of ['tips', 'info', 'warning', 'danger', 'success'] as const) {
     const renderedType = type === 'tips' ? 'primary' : type;
@@ -830,7 +860,7 @@ test('all Cherry panel types can be created from the preview caret', async ({ pa
 test('heading toggles back to paragraph and code blocks stay in the preview editor', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
-  await page.goto(demoPath);
+  await page.goto(toolbarBridgePath);
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   await page.evaluate(() => {
     const scope = window as typeof window & { cherry: { setValue(value: string): void } };
@@ -933,10 +963,12 @@ test('physical clicks edit code and navigate links and TOC inside the preview', 
   const tocLink = editor.locator('.cherry-source-node--cherry_toc a', { hasText: 'Target' });
   await tocLink.scrollIntoViewIfNeeded();
   await tocLink.click();
-  await expect.poll(async () => {
-    const [headingBox, previewBox] = await Promise.all([targetHeading.boundingBox(), preview.boundingBox()]);
-    return headingBox && previewBox ? Math.abs(headingBox.y - previewBox.y) : Number.POSITIVE_INFINITY;
-  }).toBeLessThan(32);
+  await expect
+    .poll(async () => {
+      const [headingBox, previewBox] = await Promise.all([targetHeading.boundingBox(), preview.boundingBox()]);
+      return headingBox && previewBox ? Math.abs(headingBox.y - previewBox.y) : Number.POSITIVE_INFINITY;
+    })
+    .toBeLessThan(32);
   await expect(page).toHaveURL(/#target$/);
   actions.push('navigated to a generated heading through the native-looking TOC');
 
@@ -1046,7 +1078,9 @@ test('Cherry previewOnly becomes a toolbar-free WYSIWYG surface without a second
   await expect
     .poll(async () => {
       const current = await readState(page);
-      return current.cherry === current.codeMirror && current.cherry === current.milkdown && current.cherry.includes('#B');
+      return (
+        current.cherry === current.codeMirror && current.cherry === current.milkdown && current.cherry.includes('#B')
+      );
     })
     .toBe(true);
   actions.push('selected and decorated an image with Cherry node controls without opening the read-only viewer');
@@ -1072,7 +1106,9 @@ test('Cherry previewOnly becomes a toolbar-free WYSIWYG surface without a second
   await expect(mermaidSource).toContainText('preview-only-edit');
   await expect.poll(async () => (await readState(page)).cherry.includes('preview-only-edit')).toBe(true);
   await expect(page.locator('.cherry-previewer-img-size-handler')).toHaveCount(0);
-  actions.push('aligned Mermaid and continuously edited its in-node source without losing focus or opening a global toolbar');
+  actions.push(
+    'aligned Mermaid and continuously edited its in-node source without losing focus or opening a global toolbar',
+  );
 
   await setMarkdown('| Name | Value |\n| --- | ---: |\n| Cherry | 1 |');
   const table = page.locator('.ProseMirror .milkdown-table-block').first();
@@ -1163,7 +1199,8 @@ test('physical delete, clipboard, undo/redo and composition input stay synchroni
       const scope = window as typeof window & { cherry: { setValue(value: string): void } };
       scope.cherry.setValue(markdown);
     }, value);
-  const markdown = () => page.evaluate(() => (window as typeof window & { cherry: { getMarkdown(): string } }).cherry.getMarkdown());
+  const markdown = () =>
+    page.evaluate(() => (window as typeof window & { cherry: { getMarkdown(): string } }).cherry.getMarkdown());
 
   await setValue('Delete me');
   const paragraph = page.locator('.ProseMirror p').first();
@@ -1207,7 +1244,9 @@ test('physical delete, clipboard, undo/redo and composition input stay synchroni
   await attachEvidence(page, testInfo, actions, errors);
 });
 
-test('ordinary top-level blocks can be physically dragged to reorder without changing their Markdown', async ({ page }) => {
+test('ordinary top-level blocks can be physically dragged to reorder without changing their Markdown', async ({
+  page,
+}) => {
   await page.goto(demoPath);
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   await page.evaluate(() => {
@@ -1217,16 +1256,20 @@ test('ordinary top-level blocks can be physically dragged to reorder without cha
   const blocks = page.locator('.ProseMirror > p');
   await expect(blocks).toHaveCount(3);
   await blocks.nth(0).dragTo(blocks.nth(2));
-  await expect.poll(async () =>
-    page.evaluate(() => (window as typeof window & { cherry: { getMarkdown(): string } }).cherry.getMarkdown().trim()),
-  ).toBe('Second block\n\nFirst block\n\nThird block');
+  await expect
+    .poll(async () =>
+      page.evaluate(() =>
+        (window as typeof window & { cherry: { getMarkdown(): string } }).cherry.getMarkdown().trim(),
+      ),
+    )
+    .toBe('Second block\n\nFirst block\n\nThird block');
   await expect(page.locator('.ProseMirror > p').nth(1)).toContainText('First block');
 });
 
 test('ordered-list toolbar keeps Cherry default nested-list behavior', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
-  await page.goto(demoPath);
+  await page.goto(toolbarBridgePath);
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   await page.evaluate(() => {
     const scope = window as typeof window & { cherry: { setValue(value: string): void } };
@@ -1257,7 +1300,7 @@ test('ordered-list toolbar keeps Cherry default nested-list behavior', async ({ 
 test('unordered, task-list, table and rule creation stay in the preview editor', async ({ page }, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
-  await page.goto(demoPath);
+  await page.goto(toolbarBridgePath);
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   const setValue = (value: string) =>
     page.evaluate((markdown) => {
@@ -1324,14 +1367,7 @@ test('focusing any Cherry link does not move it or rewrite ProseMirror DOM', asy
   await expect.poll(async () => (await readState(page)).cherry).toContain('新窗口打开');
   const closeToc = page.locator('.cherry-flex-toc__full .ch-icon-chevronsRight');
   if (await closeToc.isVisible()) await closeToc.click();
-  const linkNames = [
-    '普通链接',
-    '红色超链接',
-    '黑底白字超链接',
-    '新窗口打开',
-    'https://example.com/auto',
-    '锚点链接',
-  ];
+  const linkNames = ['普通链接', '红色超链接', '黑底白字超链接', '新窗口打开', 'https://example.com/auto', '锚点链接'];
   for (const name of linkNames) {
     const link = page.getByRole('link', { name, exact: true });
     await link.scrollIntoViewIfNeeded();
@@ -1368,16 +1404,17 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
   await expect(page.locator('#markdown .cherry-table-chart__preview.is-rendered')).toBeVisible();
   await expect(page.locator('#visual-native .cherry-echarts-wrapper')).toBeVisible();
   await page.evaluate(
-    () =>
-      new Promise<void>((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-      ),
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
   );
 
   const components = [
     { id: 'heading', native: '#visual-native .cherry-previewer h1', milkdown: '#markdown .ProseMirror h1' },
     { id: 'paragraph', native: '#visual-native .cherry-previewer > p', milkdown: '#markdown .ProseMirror > p' },
-    { id: 'task-list', native: '#visual-native .check-list-item', milkdown: '#markdown .ProseMirror li[data-item-type="task"]' },
+    {
+      id: 'task-list',
+      native: '#visual-native .check-list-item',
+      milkdown: '#markdown .ProseMirror li[data-item-type="task"]',
+    },
     { id: 'blockquote', native: '#visual-native blockquote', milkdown: '#markdown blockquote' },
     { id: 'table', native: '#visual-native table', milkdown: '#markdown .milkdown-table-block table.children' },
     {
@@ -1433,10 +1470,7 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
       await milkdownLocator.scrollIntoViewIfNeeded();
       await expect(milkdownLocator.locator('.cherry-echarts-wrapper svg')).toBeVisible();
       await page.evaluate(
-        () =>
-          new Promise<void>((resolve) =>
-            requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-          ),
+        () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
       );
       // The wrapper is inserted before ECharts finishes its first paint. A
       // rendered SVG node alone therefore does not mean the chart pixels are
@@ -1510,12 +1544,12 @@ test('native and unfocused Milkdown previews satisfy the 0.5% visual contract', 
       ['p', '#visual-native .cherry-previewer > p', '#markdown .ProseMirror > p'],
       ['blockquote', '#visual-native blockquote', '#markdown blockquote'],
       ['table', '#visual-native table', '#markdown .milkdown-table-block table.children'],
+      ['pre', '#visual-native [data-type="codeBlock"] > pre', '#markdown .cherry-milkdown-code-block > pre'],
       [
-        'pre',
-        '#visual-native [data-type="codeBlock"] > pre',
-        '#markdown .cherry-milkdown-code-block > pre',
+        'task-icon',
+        '#visual-native .check-list-item .ch-icon',
+        '#markdown .ProseMirror li[data-item-type="task"] .ch-icon',
       ],
-      ['task-icon', '#visual-native .check-list-item .ch-icon', '#markdown .ProseMirror li[data-item-type="task"] .ch-icon'],
     ].map(([selector, nativeSelector, milkdownSelector]) => {
       const native = document.querySelector(nativeSelector);
       const milkdown = document.querySelector(milkdownSelector);
@@ -1612,10 +1646,12 @@ test('the shared Cherry syntax matrix renders in the real demo without renderer 
   await attachEvidence(page, testInfo, actions, errors);
 });
 
-test('manual interaction matrix covers focus, edit, create and delete for remaining nodes', async ({ page }, testInfo) => {
+test('manual interaction matrix covers focus, edit, create and delete for remaining nodes', async ({
+  page,
+}, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
-  await page.goto(demoPath);
+  await page.goto(toolbarBridgePath);
   await page.waitForFunction(() => Boolean((window as typeof window & { cherry?: unknown }).cherry));
   const setValue = (value: string) =>
     page.evaluate((markdown) => {
@@ -1626,7 +1662,10 @@ test('manual interaction matrix covers focus, edit, create and delete for remain
     await expect
       .poll(async () => {
         const state = await readState(page);
-        return { markdown: state.cherry, synchronized: state.cherry === state.codeMirror && state.cherry === state.milkdown };
+        return {
+          markdown: state.cherry,
+          synchronized: state.cherry === state.codeMirror && state.cherry === state.milkdown,
+        };
       })
       .toEqual({ markdown: expected, synchronized: true });
   };
@@ -1694,12 +1733,16 @@ test('manual interaction matrix covers focus, edit, create and delete for remain
   const colLine = table.locator('[data-role="y-line-drag-handle"]');
   await expect(colLine).toHaveAttribute('data-show', 'true');
   await colLine.locator('.add-button').click();
-  await expect.poll(() => table.locator('table.children tbody tr').first().locator(':scope > *').count()).toBe(colsBefore + 1);
+  await expect
+    .poll(() => table.locator('table.children tbody tr').first().locator(':scope > *').count())
+    .toBe(colsBefore + 1);
   await table.locator('[data-role="col-drag-handle"]').hover();
   const colDelete = table.locator('[data-role="col-drag-handle"] .button-group button').last();
   await expect(colDelete).toBeVisible();
   await colDelete.click();
-  await expect.poll(() => table.locator('table.children tbody tr').first().locator(':scope > *').count()).toBe(colsBefore);
+  await expect
+    .poll(() => table.locator('table.children tbody tr').first().locator(':scope > *').count())
+    .toBe(colsBefore);
   await expect.poll(async () => (await readState(page)).cherry).toContain('1x');
   actions.push('edited a table cell and created a row and column with preview controls');
 
@@ -1714,11 +1757,13 @@ test('manual interaction matrix covers focus, edit, create and delete for remain
   await expect(taskItem).toHaveClass(/cherry-list-item/);
   await expect(taskItem).toHaveClass(/check-list-item/);
   await expect
-    .poll(async () => taskIcon.evaluate((element) => ({
+    .poll(async () =>
+      taskIcon.evaluate((element) => ({
         font: getComputedStyle(element).fontFamily,
         margin: getComputedStyle(element).margin,
         display: getComputedStyle(element).display,
-    })))
+      })),
+    )
     .toEqual(expect.objectContaining({ margin: '0px 6px 0px -20px', display: 'inline' }));
   const clickTaskCheckbox = async () => {
     await taskItem.scrollIntoViewIfNeeded();
@@ -1742,11 +1787,15 @@ test('manual interaction matrix covers focus, edit, create and delete for remain
   // upgraded, editable field before sending physical pointer/keyboard input;
   // otherwise Chromium can legitimately deliver the click before MathLive
   // has installed its shadow editor and the keystrokes are dropped.
-  await expect.poll(async () => math.evaluate((field) => ({
+  await expect
+    .poll(async () =>
+      math.evaluate((field) => ({
         upgraded: Boolean(customElements.get('math-field')),
         value: (field as HTMLElement & { value?: string }).value,
         readOnly: (field as HTMLElement & { readOnly?: boolean }).readOnly,
-  }))).toEqual({ upgraded: true, value: 'x', readOnly: false });
+      })),
+    )
+    .toEqual({ upgraded: true, value: 'x', readOnly: false });
   const mathBox = await math.boundingBox();
   expect(mathBox).not.toBeNull();
   await page.mouse.click(mathBox!.x + mathBox!.width - 2, mathBox!.y + mathBox!.height / 2);
@@ -1806,7 +1855,9 @@ test('manual interaction matrix covers focus, edit, create and delete for remain
   await attachEvidence(page, testInfo, actions, errors);
 });
 
-test('compound nodes expose in-place creation, editing, deletion and disclosure controls', async ({ page }, testInfo) => {
+test('compound nodes expose in-place creation, editing, deletion and disclosure controls', async ({
+  page,
+}, testInfo) => {
   const actions: string[] = [];
   const errors = captureBrowserErrors(page, actions);
   await page.goto(demoPath);

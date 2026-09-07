@@ -86,7 +86,10 @@ export async function attachCherryMilkdownPreview(
       return;
     }
     instance = editor;
-    editingBridge = createCherryEditingBridge(cherry, editor);
+    editingBridge = createCherryEditingBridge(cherry, editor, {
+      enableBubble: options.enableBubble,
+      enableToolbarBridge: options.enableToolbarBridge,
+    });
     previewer.setEditingBridge?.(editingBridge);
     if (creationMarkdown !== latestMarkdown) editor.setMarkdown(latestMarkdown, { emit: false });
     appliedHostMarkdown = latestMarkdown;

@@ -42,6 +42,7 @@ function selectedText(view: EditorView) {
 export function createCherryEditingBridge(
   cherry: CherryMilkdownHost,
   instance: CherryMilkdownInstance,
+  options: { enableBubble?: boolean; enableToolbarBridge?: boolean } = {},
 ): CherryPreviewEditingBridge {
   let previewWasActive = false;
   const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
@@ -268,10 +269,13 @@ export function createCherryEditingBridge(
     });
   };
   const onPreviewSelectionChange = () => refreshPreviewBubble();
-  view.dom.addEventListener('mouseup', onPreviewSelectionChange, true);
-  view.dom.addEventListener('keyup', onPreviewSelectionChange, true);
-  view.dom.addEventListener('focusin', onPreviewSelectionChange, true);
-  view.dom.ownerDocument.addEventListener('selectionchange', onPreviewSelectionChange, true);
+  const enableBubble = options.enableBubble !== false;
+  if (enableBubble) {
+    view.dom.addEventListener('mouseup', onPreviewSelectionChange, true);
+    view.dom.addEventListener('keyup', onPreviewSelectionChange, true);
+    view.dom.addEventListener('focusin', onPreviewSelectionChange, true);
+    view.dom.ownerDocument.addEventListener('selectionchange', onPreviewSelectionChange, true);
+  }
   const hidePreviewBubbleOnScroll = () => cherry.getPreviewer().hideEditingBubble?.();
   previewContainer.addEventListener('scroll', hidePreviewBubbleOnScroll, { passive: true });
 
@@ -638,10 +642,9 @@ export function createCherryEditingBridge(
         });
       }
       default: {
-        // Custom menus are intentionally not enumerated here: applications
-        // may register arbitrary names.  Cherry marks document-producing
-        // menus with updateMarkdown=true, so unknown commands can safely use
-        // the transform bridge while global UI menus remain on Cherry.
+        // Keep updateMarkdown as a compatibility fallback until custom menus
+        // can explicitly declare their Milkdown capability, for example:
+        // customMenu: { name: 'mySyntax', milkdown: { supported: false, fallback: 'source' } }
         const menu = command.menu as CherryMenuLike | undefined;
         if (
           TRANSFORMED_MARKDOWN_COMMANDS.has(command.name) ||
@@ -702,6 +705,7 @@ export function createCherryEditingBridge(
 
   return {
     isActive,
+    acceptsToolbarCommands: options.enableToolbarBridge === true,
     // Milkdown owns the preview DOM, so map its top-level nodes back to the
     // serialized Markdown instead of using Cherry's native data-lines mapper.
     handleScroll: (container) => {
@@ -763,10 +767,12 @@ export function createCherryEditingBridge(
       view.dom.removeEventListener('pointerdown', activatePreview, true);
       view.dom.removeEventListener('click', syncAnchorNavigation, true);
       view.dom.removeEventListener('keydown', handleHeadingShortcut, true);
-      view.dom.removeEventListener('mouseup', onPreviewSelectionChange, true);
-      view.dom.removeEventListener('keyup', onPreviewSelectionChange, true);
-      view.dom.removeEventListener('focusin', onPreviewSelectionChange, true);
-      view.dom.ownerDocument.removeEventListener('selectionchange', onPreviewSelectionChange, true);
+      if (enableBubble) {
+        view.dom.removeEventListener('mouseup', onPreviewSelectionChange, true);
+        view.dom.removeEventListener('keyup', onPreviewSelectionChange, true);
+        view.dom.removeEventListener('focusin', onPreviewSelectionChange, true);
+        view.dom.ownerDocument.removeEventListener('selectionchange', onPreviewSelectionChange, true);
+      }
       sourceDom?.removeEventListener('pointerdown', deactivatePreviewFromSource, true);
       previewContainer.removeEventListener('scroll', hidePreviewBubbleOnScroll);
       cherry.getPreviewer().hideEditingBubble?.();

@@ -969,13 +969,21 @@ export default class Previewer {
     this.editingBubble?.hideBubble?.();
   }
 
+  /** @private Only the preview selection Bubble may send formatting commands to an embedded editor. */
+  $isEditingBubbleMenu(menu) {
+    if (!menu || !this.editingBubble?.menus?.hooks) return false;
+    return Object.values(this.editingBubble.menus.hooks).includes(menu);
+  }
+
   runEditingCommand(command) {
     if (!this.editingBridge?.isActive?.()) return false;
+    if (!this.$isEditingBubbleMenu(command?.menu) && this.editingBridge.acceptsToolbarCommands !== true) return false;
     return this.editingBridge.runCommand?.(command) === true;
   }
 
   queryEditingCommandState(command) {
     if (!this.editingBridge?.isActive?.()) return null;
+    if (!this.$isEditingBubbleMenu(command?.menu) && this.editingBridge.acceptsToolbarCommands !== true) return null;
     return this.editingBridge.queryCommandState?.(command) ?? null;
   }
 

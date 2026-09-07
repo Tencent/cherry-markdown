@@ -154,8 +154,11 @@ describe('Previewer rendering pipeline', () => {
 
   it('routes commands and deferred inserts only through the active preview editor bridge', () => {
     const { previewer } = createPreviewer();
+    const previewBubbleMenu = {};
+    const topToolbarMenu = {};
     const first = {
       isActive: vi.fn(() => true),
+      acceptsToolbarCommands: false,
       queryCommandState: vi.fn(() => ({ active: true, enabled: true, value: 2 })),
       runCommand: vi.fn(() => true),
       insert: vi.fn(() => true),
@@ -167,14 +170,21 @@ describe('Previewer rendering pipeline', () => {
     };
 
     previewer.setEditingBridge(first);
-    expect(previewer.queryEditingCommandState({ name: 'header' })).toEqual({
+    Reflect.set(previewer, 'editingBubble', { menus: { hooks: { bold: previewBubbleMenu } } });
+    expect(previewer.queryEditingCommandState({ name: 'header', menu: previewBubbleMenu })).toEqual({
       active: true,
       enabled: true,
       value: 2,
     });
-    expect(previewer.runEditingCommand({ name: 'bold' })).toBe(true);
+    expect(previewer.runEditingCommand({ name: 'bold', menu: previewBubbleMenu })).toBe(true);
+    expect(previewer.queryEditingCommandState({ name: 'header', menu: topToolbarMenu })).toBeNull();
+    expect(previewer.runEditingCommand({ name: 'bold', menu: topToolbarMenu })).toBe(false);
+    first.acceptsToolbarCommands = true;
+    expect(previewer.runEditingCommand({ name: 'bold', menu: topToolbarMenu })).toBe(true);
     expect(previewer.insertEditingContent('![image](url)', { source: 'picker' })).toBe(true);
-    expect(first.runCommand).toHaveBeenCalledWith({ name: 'bold' });
+    expect(first.runCommand).toHaveBeenCalledTimes(2);
+    expect(first.runCommand).toHaveBeenCalledWith({ name: 'bold', menu: previewBubbleMenu });
+    expect(first.runCommand).toHaveBeenCalledWith({ name: 'bold', menu: topToolbarMenu });
     expect(first.insert).toHaveBeenCalledWith('![image](url)', { source: 'picker' });
 
     previewer.setEditingBridge(second);

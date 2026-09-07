@@ -837,12 +837,13 @@ describe('createCherryMilkdown WYSIWYG', () => {
         markdown = value;
       }),
     };
-    const handle = await attachCherryMilkdownPreview(host, { debounce: 0 });
+    const handle = await attachCherryMilkdownPreview(host, { debounce: 0, enableToolbarBridge: true });
     const instance = handle.getInstance();
     expect(instance).toBeDefined();
     if (!instance) throw new Error('expected visible preview to mount Milkdown');
     instances.push(instance);
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    expect(bridge?.acceptsToolbarCommands).toBe(true);
     let start = -1;
     view.state.doc.descendants((node, position) => {
       if (node.isText && node.text?.startsWith('Before')) start = position;

@@ -106,6 +106,8 @@ export interface CherryPreviewElementChange {
 
 export interface CherryPreviewEditingBridge {
   isActive(): boolean;
+  /** Whether the visible Cherry source toolbar may target this preview editor. */
+  acceptsToolbarCommands?: boolean;
   /** Return true when the preview editor owns scroll synchronization. */
   handleScroll?(container: HTMLElement): boolean;
   /** Return true to suppress Cherry's source-to-preview line animation. */
@@ -142,6 +144,10 @@ export interface CherryMilkdownPreviewOptions extends Omit<
   CherryMilkdownOptions,
   'root' | 'value' | 'engine' | 'onChange'
 > {
+  /** Shows Cherry's native selection Bubble over editable preview text. Defaults to true. */
+  enableBubble?: boolean;
+  /** Lets Cherry's top source toolbar target the Milkdown selection. Defaults to false. */
+  enableToolbarBridge?: boolean;
   onChange?: CherryMilkdownOptions['onChange'];
 }
 

@@ -21,6 +21,7 @@ export default function App() {
   const mode = requestedMode === 'previewOnly' || requestedMode === 'editOnly' ? requestedMode : 'edit&preview';
   const previewOnly = mode === 'previewOnly';
   const editOnly = mode === 'editOnly';
+  const enableToolbarBridge = new URLSearchParams(window.location.search).get('toolbarBridge') === '1';
 
   useEffect(() => {
     let cancelled = false;
@@ -65,6 +66,7 @@ export default function App() {
           ? [
               milkdownFactory({
                 debounce: 0,
+                enableToolbarBridge,
                 renderers: { echarts: renderECharts },
                 onChange: ({ markdown }) => {
                   window.milkdownMarkdown = markdown;

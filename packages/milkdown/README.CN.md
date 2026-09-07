@@ -59,7 +59,9 @@ cherry.destroy(); // Milkdown 随当前 Cherry 实例一起清理
 
 `plugins` 会在内置 WYSIWYG 插件之后加载，可用于注册业务 NodeView。
 
-扩展模式保留 Cherry 原工具栏；焦点在预览区时，格式命令优先作用于当前 Milkdown 选区。图片、文件、Draw.io、图表等选择器继续使用 Cherry 原交互，并把结果插入触发时保存的 Milkdown 选区。标题、列表、引用和代码块可通过 Markdown 快捷输入创建，右侧不会打开 Cherry 源码编辑器的 suggest 面板。复合块标题和正文都直接编辑，结构按钮只在悬停或选中节点时出现。表格使用 Milkdown `table-block`，可增删、拖拽行列并修改列对齐；公式使用 MathLive，点击公式即可输入。
+扩展模式下，Cherry 顶部工具栏继续归源码编辑器所有，不接管 Milkdown 选区。选中预览文本时仍可使用 Cherry 原生 Bubble，图片和 Mermaid 预览控件也继续复用 Cherry 原交互。标题、列表、引用和代码块可通过 Markdown 快捷输入创建，右侧不会打开 Cherry 源码编辑器的 suggest 面板。复合块标题和正文都直接编辑，结构按钮只在悬停或选中节点时出现。表格使用 Milkdown `table-block`，可增删、拖拽行列并修改列对齐；公式使用 MathLive，点击公式即可输入。
+
+`enableBubble` 默认是 `true`。`enableToolbarBridge` 默认是 `false`；只有明确希望 Cherry 顶部工具栏操作当前 Milkdown 选区时才开启。
 
 纯预览单栏不需要 Milkdown 再定义一种模式，布局和工具栏仍只使用 Cherry 原配置：
 
