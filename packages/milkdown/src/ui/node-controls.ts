@@ -1,4 +1,5 @@
 import { Plugin, NodeSelection } from '@milkdown/kit/prose/state';
+import type { Node as ProseMirrorNode } from '@milkdown/kit/prose/model';
 import { $prose } from '@milkdown/kit/utils';
 
 /** Property controls belong to this editor, not Cherry's Previewer handlers. */
@@ -14,10 +15,20 @@ export function nodeControls(root: HTMLElement) {
           panel.hidden = true;
           root.append(panel);
           let disposed = false;
+          // Moving focus into a native control temporarily clears ProseMirror's
+          // NodeSelection. Keep the last eligible position so a change event
+          // from the panel still applies to the node the user selected.
+          let lastNodePos: number | null = null;
+          const isControllable = (node: ProseMirrorNode | null) =>
+            node?.type?.name === 'image' ||
+            (node?.type?.name === 'cherry_diagram' && node?.attrs?.diagramType === 'mermaid');
           const apply = (transform: (value: string) => string) => {
-            const { selection } = view.state;
-            if (!view.editable || !(selection instanceof NodeSelection)) return;
-            const { node, from } = selection;
+            if (!view.editable) return;
+            const { selection, doc } = view.state;
+            const from = selection instanceof NodeSelection ? selection.from : lastNodePos;
+            if (from === null || from === undefined) return;
+            const node = doc.nodeAt(from);
+            if (!node || !isControllable(node)) return;
             const key = node.type.name === 'image' ? 'alt' : 'source';
             view.dispatch(
               view.state.tr.setNodeMarkup(from, undefined, {
@@ -60,7 +71,7 @@ export function nodeControls(root: HTMLElement) {
           width.max = '10000';
           width.placeholder = '宽度 px';
           width.setAttribute('aria-label', '节点宽度');
-          width.addEventListener('change', () => {
+          const applyWidth = () => {
             const value = Number(width.value);
             if (!Number.isFinite(value) || value < 1 || value > 10000) return;
             apply((source) =>
@@ -69,7 +80,11 @@ export function nodeControls(root: HTMLElement) {
                 return pattern.test(line) ? line.replace(pattern, `#${value}px`) : `${line}#${value}px`;
               }),
             );
-          });
+          };
+          // Apply while typing as well as on blur. This avoids losing the cached
+          // NodeSelection when a native number input briefly owns focus.
+          width.addEventListener('input', applyWidth);
+          width.addEventListener('change', applyWidth);
           panel.append(align, width);
           const hide = () => {
             panel.hidden = true;
@@ -77,17 +92,11 @@ export function nodeControls(root: HTMLElement) {
           const update = () => {
             if (disposed) return;
             const { selection } = view.state;
-            if (
-              !view.editable ||
-              !(selection instanceof NodeSelection) ||
-              !(
-                selection.node.type.name === 'image' ||
-                (selection.node.type.name === 'cherry_diagram' && selection.node.attrs.diagramType === 'mermaid')
-              )
-            ) {
+            if (!view.editable || !(selection instanceof NodeSelection) || !isControllable(selection.node)) {
               hide();
               return;
             }
+            lastNodePos = selection.from;
             const dom = view.nodeDOM(selection.from);
             if (!(dom instanceof Element)) {
               hide();

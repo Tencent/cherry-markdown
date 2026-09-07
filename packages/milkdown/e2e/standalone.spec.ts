@@ -107,6 +107,17 @@ test('Mermaid renders and source editing stays open without text Bubble', async 
   );
 });
 
+test('image controls keep the selected node while native inputs take focus', async ({ page }) => {
+  await setMarkdown(page, '![dog#100px](assets/images/demo-dog.png)');
+  const image = page.locator('.ProseMirror img').first();
+  await image.click();
+  const width = page.getByLabel('节点宽度', { exact: true });
+  await expect(width).toBeVisible();
+  await width.fill('180');
+  await expect(image).toHaveAttribute('alt', 'dog#180px');
+  await expect(image).toHaveAttribute('style', /width: 180px/);
+});
+
 test('table chart owns its rendered resources and responds to API updates', async ({ page }) => {
   await setMarkdown(page, '| :line:{"title":"Trend"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 1 | 2 |');
   await expect(page.locator('.cherry-echarts-wrapper svg')).toBeVisible();
