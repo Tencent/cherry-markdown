@@ -4,7 +4,10 @@ import JSON5 from 'json5';
 /** Optional ECharts renderer. Import this entry only when charts are needed. */
 export const echarts: CherryVisualRenderer = async ({ container, source }) => {
   // Accept object-literal data used in the Cherry manual, never executable JS.
-  const option = JSON5.parse(source);
+  // Cherry's native ECharts code-block examples are object literals followed by
+  // a JavaScript statement terminator. JSON5 accepts the object literal but not
+  // that trailing semicolon, so remove only a final terminator before parsing.
+  const option = JSON5.parse(source.trim().replace(/;\s*$/, ''));
   return mountChart(container, option);
 };
 
