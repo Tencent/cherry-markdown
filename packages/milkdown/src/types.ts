@@ -7,18 +7,7 @@ import type { CherryVisualRenderer } from './wysiwyg/index.js';
 export type CherryMilkdownErrorPhase = 'create' | 'parse' | 'render';
 
 export interface CherryEngineLike {
-  /** @internal Compatibility surface used only to dispose native table-chart instances. */
-  hooks?: Partial<
-    Record<
-      'sentence' | 'paragraph',
-      Array<{
-        chartRenderEngine?: {
-          destroyChart?(target: Element): void;
-        };
-      }>
-    >
-  >;
-  /** Optional future/public cleanup contract. Older Cherry versions use the hook fallback below. */
+  /** Optional cleanup supplied by a custom renderer; not required of CherryEngine. */
   destroyRenderedContent?(container: Element): void;
   makeHtml(markdown: string): string;
 }
@@ -27,148 +16,34 @@ export interface CherryMilkdownChange {
   markdown: string;
 }
 
-export interface CherryUpdateContext {
-  source?: string;
-  revision?: number;
-}
-
 export interface CherryMilkdownMathliveOptions {
   macros?: Record<string, string>;
   virtualKeyboardMode?: 'auto' | 'manual' | 'onfocus' | 'off';
 }
 
 export interface CherryMilkdownOptions {
-  root: HTMLElement;
+  el: HTMLElement;
+  /** Native Cherry theme; does not change the document. */
+  theme?: string;
+  /** Selection formatting controls. No top toolbar is mounted. */
+  bubble?: boolean;
   value?: string;
-  /** Reuse the current Cherry instance's engine when mounting in its previewer. */
+  /** Optional renderer supplied by the consumer. No Cherry editor instance is required. */
   engine?: CherryEngineLike;
   cherryOptions?: Partial<CherryOptions>;
   readonly?: boolean;
   debounce?: number;
   mathlive?: CherryMilkdownMathliveOptions;
   plugins?: MilkdownPlugin[];
-  /** @internal Use Cherry's native preview surface without Milkdown's floating component chrome. */
-  nativePreview?: boolean;
   renderers?: Record<string, CherryVisualRenderer>;
   onChange?: (result: CherryMilkdownChange) => void;
   onError?: (error: unknown, phase: CherryMilkdownErrorPhase) => void;
-  /** @internal Immediate document synchronization used by the Cherry preview extension. */
-  onImmediateChange?: (result: CherryMilkdownChange) => void;
-}
-
-export interface CherryPreviewContentRendererContext {
-  container: HTMLElement;
-  markdown: string;
-  html: string;
-  updateContext?: CherryUpdateContext;
-}
-
-export interface CherryPreviewContentRenderer {
-  update(context: CherryPreviewContentRendererContext): void | Promise<void>;
-  destroy?(): void | Promise<void>;
-}
-
-export interface CherryPreviewerHost {
-  isPreviewerHidden?(): boolean;
-  getDom(): HTMLElement;
-  update(html: string, updateContext?: CherryUpdateContext): void;
-  setContentRenderer(renderer: CherryPreviewContentRenderer): void | Promise<void>;
-  clearContentRenderer(renderer?: CherryPreviewContentRenderer): boolean | Promise<boolean>;
-  setEditingBridge?(bridge: CherryPreviewEditingBridge): void;
-  clearEditingBridge?(bridge?: CherryPreviewEditingBridge): boolean;
-  /** Mounts the native Cherry selection bubble before the first selection. */
-  ensureEditingBubble?(): unknown;
-  showEditingBubble?(rect: { top: number; bottom: number; left: number; right: number }): boolean;
-  hideEditingBubble?(): void;
-}
-
-export interface CherryToolbarCommand {
-  name: string;
-  shortKey: string;
-  event?: Event;
-  menu?: unknown;
-}
-
-export interface CherryToolbarCommandState {
-  active: boolean;
-  enabled: boolean;
-  value?: string | number;
-  subMenuIndex?: number;
-}
-
-export type CherryPreviewElementKind = 'image' | 'mermaid';
-
-export interface CherryPreviewElementChange {
-  kind: CherryPreviewElementKind;
-  width?: number | string;
-  height?: number | string;
-  type?: string;
-}
-
-export interface CherryPreviewEditingBridge {
-  isActive(): boolean;
-  /** Whether the visible Cherry source toolbar may target this preview editor. */
-  acceptsToolbarCommands?: boolean;
-  /** Return true when the preview editor owns scroll synchronization. */
-  handleScroll?(container: HTMLElement): boolean;
-  /** Return true to suppress Cherry's source-to-preview line animation. */
-  handleEditorScroll?(lineNum: number | null, linePercent?: number): boolean;
-  queryCommandState?(command: CherryToolbarCommand): CherryToolbarCommandState;
-  runCommand?(command: CherryToolbarCommand): boolean;
-  insert?(content: string, options: { select: boolean; focus: boolean }): boolean;
-  /** Whether a native preview control may operate on an element owned by this editing surface. */
-  ownsPreviewElement?(target: Element, kind: CherryPreviewElementKind): boolean;
-  /** Apply an existing Cherry preview control to an element owned by this editing surface. */
-  updatePreviewElement?(target: Element, change: CherryPreviewElementChange): boolean;
-  /** Resolve the currently selected element after a preview transaction replaced its DOM node. */
-  resolvePreviewElement?(kind: CherryPreviewElementKind): Element | null;
-  destroy?(): void;
-}
-
-/** Minimal public surface used to connect Milkdown to an existing Cherry previewer. */
-export interface CherryMilkdownHost {
-  readonly isDestroyed?: boolean;
-  $event?: { on(event: string, handler: () => void): void; off(event: string, handler: () => void): void };
-  engine: CherryEngineLike;
-  /** Native source bubble, hidden while the preview owns focus. */
-  bubble?: { hideBubble?(): void };
-  /** Cherry's existing source editor. Used by the preview bridge for scroll synchronization. */
-  editor?: {
-    scrollToLineNum(lineNum: number | null, endLine?: number, percent?: number): void;
-  };
-  options?: { editor?: { defaultModel?: string } };
-  getMarkdown(): string;
-  getPreviewer(): CherryPreviewerHost;
-  setValue(markdown: string, keepCursor?: boolean, updateContext?: CherryUpdateContext): void;
-  getCodeMirror?(): { dom?: HTMLElement; hasFocus: boolean | (() => boolean) };
-}
-
-export interface CherryMilkdownPreviewOptions extends Omit<
-  CherryMilkdownOptions,
-  'root' | 'value' | 'engine' | 'onChange'
-> {
-  /** Shows Cherry's native selection Bubble over editable preview text. Defaults to true. */
-  enableBubble?: boolean;
-  /** Lets Cherry's top source toolbar target the Milkdown selection. Defaults to false. */
-  enableToolbarBridge?: boolean;
-  onChange?: CherryMilkdownOptions['onChange'];
-}
-
-export interface CherryMilkdownPreviewHandle {
-  /** Whether the preview surface has created its Milkdown editor. */
-  readonly mounted: boolean;
-  /** Returns the editor after the preview has first become visible. */
-  getInstance(): CherryMilkdownInstance | undefined;
-  /** Detaches Milkdown and restores Cherry's native rendered preview. */
-  detach(): Promise<void>;
-  /** Alias for detach(), so the handle can participate in ordinary cleanup flows. */
-  destroy(): Promise<void>;
 }
 
 export interface CherryMilkdownInstance {
   editor: Editor;
   engine: CherryEngineLike;
-  /** @internal Keeps an async Cherry picker anchored while transactions occur. */
+  /** @internal Keeps an async picker anchored while transactions occur. */
   trackSelection?(): { resolve(): Selection | null; release(): void };
   getMarkdown(): string;
   setMarkdown(markdown: string, options?: { emit?: boolean }): void;

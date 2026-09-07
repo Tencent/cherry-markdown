@@ -4,6 +4,6 @@
     "rootDir": ".",
     "types": ["node", "vitest/globals"]
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "vitest.config.ts"],
+  "include": ["src/**/*.ts", "test/**/*.ts", "e2e/**/*.ts", "vitest.config.ts", "playwright.config.ts"],
   "exclude": ["dist", "node_modules"]
 }

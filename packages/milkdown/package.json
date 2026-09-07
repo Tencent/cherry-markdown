@@ -30,7 +30,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./styles.css": "./styles.css",
+    "./style.css": "./styles.css",
+    "./echarts": {
+      "types": "./dist/renderers/echarts.d.ts",
+      "import": "./dist/renderers/echarts.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -38,6 +42,7 @@
     "styles.css",
     "README.md",
     "README.CN.md",
+    "ARCHITECTURE.md",
     "LICENSE"
   ],
   "sideEffects": [
@@ -60,11 +65,15 @@
   },
   "peerDependencies": {
     "@milkdown/kit": "^7.21.3",
-    "cherry-markdown": "^0.11.11",
+    "cherry-markdown": "^0.11.10",
+    "echarts": "^6.0.0",
     "mathlive": "^0.110.0",
     "mermaid": "^11.14.0"
   },
   "peerDependenciesMeta": {
+    "echarts": {
+      "optional": true
+    },
     "mermaid": {
       "optional": true
     }
@@ -88,6 +97,7 @@
     "vite": "^8.2.1"
   },
   "dependencies": {
+    "json5": "^2.2.3",
     "prismjs": "^1.24.1",
     "remark-math": "^6.0.0"
   },

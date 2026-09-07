@@ -23,7 +23,6 @@ import Logger from './Logger';
 import { addEvent, removeEvent } from './utils/event';
 import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile, exportWordFile } from './utils/export';
 import PreviewerBubble from './toolbars/PreviewerBubble';
-import Bubble from './toolbars/Bubble';
 import LazyLoadImg from '@/utils/lazyLoadImg';
 
 /**
@@ -33,25 +32,6 @@ import LazyLoadImg from '@/utils/lazyLoadImg';
  *  与左侧输入区域滚动同步
  */
 export default class Previewer {
-  /**
-   * Optional owner for the previewer's content DOM.  Cherry keeps owning the
-   * preview shell (layout, theme, scrolling and toolbars), while integrations
-   * such as Milkdown can own only the document surface.
-   *
-   * @private
-   * @type {{
-   *   update: (context: {container: HTMLElement, markdown: string, html: string}) => void | Promise<void>;
-   *   destroy?: () => void | Promise<void>;
-   * } | null}
-   */
-  contentRenderer = null;
-  /** @private Prevents an older asynchronous teardown from claiming a newer renderer slot. */
-  contentRendererGeneration = 0;
-  editingBridge = null;
-
-  /** @private */
-  editingBubble = null;
-
   /**
    * @property
    * @private
@@ -525,9 +505,6 @@ export default class Previewer {
       if (this.applyingDomChanges) {
         return;
       }
-      if (this.editingBridge?.handleScroll?.(domContainer) === true) {
-        return;
-      }
       if (this.disableScrollListener) {
         // 如果正在动画滚动,不要重置标志,让动画继续控制
         return;
@@ -835,205 +812,12 @@ export default class Previewer {
    */
   refresh(html) {
     const domContainer = this.getDomContainer();
-    if (this.contentRenderer) {
-      this.$updateContentRenderer(html, domContainer);
-      return;
-    }
     domContainer.innerHTML = html;
   }
 
-  /**
-   * Lets an integration render inside the existing Cherry preview surface.
-   * The preview container itself is deliberately retained so Cherry's layout,
-   * themes, scrolling and surrounding interactions remain unchanged.
-   *
-   * @param {{
-   *   update: (context: {container: HTMLElement, markdown: string, html: string}) => void | Promise<void>;
-   *   destroy?: () => void | Promise<void>;
-   * }} renderer
-   */
-  setContentRenderer(renderer) {
-    if (!renderer || typeof renderer.update !== 'function') {
-      throw new TypeError('Previewer.setContentRenderer: renderer.update must be a function.');
-    }
-    if (this.contentRenderer === renderer) {
-      return;
-    }
-    const previous = this.contentRenderer;
-    const generation = ++this.contentRendererGeneration;
-    this.contentRenderer = null;
-    const destruction = previous?.destroy?.();
-    if (destruction && typeof destruction.then === 'function') {
-      return Promise.resolve(destruction)
-        .catch((error) => Logger.error('Custom preview content renderer cleanup failed.', error))
-        .then(() => {
-          if (this.isDestroyed || generation !== this.contentRendererGeneration) {
-            return renderer.destroy?.();
-          }
-          this.contentRenderer = renderer;
-        });
-    }
-    this.contentRenderer = renderer;
-  }
-
-  /**
-   * Releases a custom document renderer without replacing the preview shell.
-   * Passing the renderer guards against an older integration clearing a newer
-   * owner during asynchronous teardown.
-   *
-   * @param {object} [renderer]
-   * @returns {boolean|Promise<boolean>}
-   */
-  clearContentRenderer(renderer) {
-    if (!this.contentRenderer || (renderer && renderer !== this.contentRenderer)) {
-      return false;
-    }
-    const currentRenderer = this.contentRenderer;
-    const container = this.getDomContainer();
-    const generation = ++this.contentRendererGeneration;
-    this.contentRenderer = null;
-    const finish = () => {
-      if (generation === this.contentRendererGeneration && !this.contentRenderer) {
-        container.replaceChildren();
-      }
-      return true;
-    };
-    const destruction = currentRenderer.destroy?.();
-    if (destruction && typeof destruction.then === 'function') {
-      return Promise.resolve(destruction)
-        .catch((error) => Logger.error('Custom preview content renderer cleanup failed.', error))
-        .then(finish);
-    }
-    finish();
-    return true;
-  }
-
-  /** Registers command/insert handling for an editor mounted in the preview surface. */
-  setEditingBridge(bridge) {
-    if (!bridge || typeof bridge.isActive !== 'function') {
-      throw new TypeError('Previewer.setEditingBridge: bridge.isActive must be a function.');
-    }
-    this.editingBridge = bridge;
-  }
-
-  clearEditingBridge(bridge) {
-    if (!this.editingBridge || (bridge && bridge !== this.editingBridge)) return false;
-    this.editingBridge = null;
-    this.hideEditingBubble();
-    return true;
-  }
-
-  /**
-   * Lazily creates the native Cherry selection bubble for an embedded preview
-   * editor. The menu instances and styles are the same ones used by
-   * CodeMirror, but the DOM is mounted in the preview scroller.
-   * @returns {Bubble|null}
-   */
-  ensureEditingBubble() {
-    const container = this.getDomContainer();
-    if (this.editingBubble) {
-      // A renderer reset (or a mobile preview container swap) can replace the
-      // preview children without destroying the bridge. Re-attach the already
-      // initialized native bubble instead of creating a second menu instance.
-      const bubbleDom = this.editingBubble.getBubbleDom?.();
-      if (bubbleDom && bubbleDom.parentNode !== container) container.appendChild(bubbleDom);
-      return this.editingBubble;
-    }
-    const config = this.$cherry?.options?.toolbars?.bubble;
-    if (!Array.isArray(config) || config.length === 0) return null;
-    const dom = document.createElement('div');
-    dom.className = 'cherry-bubble cherry-bubble--preview';
-    this.editingBubble = new Bubble({
-      dom,
-      $cherry: this.$cherry,
-      buttonConfig: config,
-      customMenu: this.$cherry.options.toolbars.customMenu,
-      engine: this.$cherry.engine,
-      editorDom: container,
-      mountTarget: container,
-      observeSelection: false,
-      preserveSelectionOnPointerDown: true,
-    });
-    return this.editingBubble;
-  }
-
-  resetEditingBubble() {
-    this.editingBubble?.destroy();
-    this.editingBubble = null;
-  }
-
-  showEditingBubble(rect) {
-    if (!this.editingBridge?.isActive?.()) return false;
-    const bubble = this.ensureEditingBubble();
-    if (!bubble) return false;
-    bubble.showAt(rect);
-    return true;
-  }
-
-  hideEditingBubble() {
-    this.editingBubble?.hideBubble?.();
-  }
-
-  /** @private Only the preview selection Bubble may send formatting commands to an embedded editor. */
-  $isEditingBubbleMenu(menu) {
-    if (!menu || !this.editingBubble?.menus?.hooks) return false;
-    return Object.values(this.editingBubble.menus.hooks).includes(menu);
-  }
-
-  runEditingCommand(command) {
-    if (!this.editingBridge?.isActive?.()) return false;
-    if (!this.$isEditingBubbleMenu(command?.menu) && this.editingBridge.acceptsToolbarCommands !== true) return false;
-    return this.editingBridge.runCommand?.(command) === true;
-  }
-
-  queryEditingCommandState(command) {
-    if (!this.editingBridge?.isActive?.()) return null;
-    if (!this.$isEditingBubbleMenu(command?.menu) && this.editingBridge.acceptsToolbarCommands !== true) return null;
-    return this.editingBridge.queryCommandState?.(command) ?? null;
-  }
-
-  insertEditingContent(content, options = {}) {
-    if (!this.editingBridge?.isActive?.()) return false;
-    return this.editingBridge.insert?.(content, options) === true;
-  }
-
-  $updateContentRenderer(html, domContainer = this.getDomContainer(), updateContext) {
-    const renderer = this.contentRenderer;
-    if (!renderer) {
-      return false;
-    }
-    const context = {
-      container: domContainer,
-      markdown: this.$cherry?.getMarkdown?.() ?? '',
-      html,
-      ...(updateContext ? { updateContext } : {}),
-    };
-    let result;
-    try {
-      result = renderer.update(context);
-    } catch (error) {
-      Logger.error('Custom preview content renderer failed.', error);
-      return false;
-    }
-    if (result && typeof result.then === 'function') {
-      Promise.resolve(result)
-        .then(() => {
-          if (!this.isDestroyed && this.contentRenderer === renderer) this.afterUpdate();
-        })
-        .catch((error) => Logger.error('Custom preview content renderer failed.', error));
-    } else {
-      this.afterUpdate();
-    }
-    return true;
-  }
-
-  update(html, updateContext) {
+  update(html) {
     // 销毁后不执行更新
     if (this.isDestroyed) {
-      return;
-    }
-    if (this.contentRenderer && !this.isPreviewerHidden()) {
-      this.$updateContentRenderer(html, this.getDomContainer(), updateContext);
       return;
     }
     // 更新时保留图片懒加载逻辑
@@ -1139,7 +923,6 @@ export default class Previewer {
   }
 
   editOnly() {
-    this.hideEditingBubble();
     const html = this.options.previewerCache.html ? this.options.previewerCache.html : this.getDomContainer().innerHTML;
     this.doHtmlCache(html);
     this.$dealEditAndPreviewOnly(true);
@@ -1509,14 +1292,6 @@ export default class Previewer {
   }
 
   scrollToLineNum(lineNum, linePercent) {
-    if (this.editingBridge?.handleEditorScroll?.(lineNum, linePercent) === true) {
-      if (this.animation.timer) {
-        cancelAnimationFrame(this.animation.timer);
-        this.animation.timer = 0;
-      }
-      this.disableScrollListener = false;
-      return;
-    }
     const top = this.$getTopByLineNum(lineNum, linePercent);
     this.$scrollAnimation(top);
   }
@@ -1601,13 +1376,6 @@ export default class Previewer {
     }
 
     this.isDestroyed = true;
-
-    if (this.contentRenderer) {
-      this.clearContentRenderer(this.contentRenderer);
-    }
-    this.clearEditingBridge(this.editingBridge);
-    this.editingBubble?.destroy?.();
-    this.editingBubble = null;
 
     // 清理滚动事件监听
     this.removeScroll();

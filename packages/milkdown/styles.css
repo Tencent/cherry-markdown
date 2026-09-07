@@ -1,17 +1,61 @@
+@import "cherry-markdown/dist/cherry-markdown.css";
+@import "@milkdown/kit/prose/view/style/prosemirror.css";
 @import "mathlive/fonts.css";
 
+/* Editing controls are outside the native columns' grid. Only content items
+ * participate in layout; the NodeView wrapper must not become a spare column. */
+.cherry-milkdown .cherry-compound--cols,
+.cherry-milkdown .cherry-compound-item[data-role="column"] {
+  position: relative;
+}
+.cherry-milkdown .cherry-compound--cols > .cherry-compound__header,
+.cherry-milkdown .cherry-compound-item[data-role="column"] > .cherry-compound-item__header {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1;
+}
+.cherry-milkdown .cherry-panel--col > .cherry-compound-item__content > :first-child {
+  margin-top: 0;
+}
+.cherry-milkdown .cherry-panel--col > .cherry-compound-item__content > :last-child {
+  margin-bottom: 0;
+}
+
+.cherry-milkdown .cherry-milkdown-bubble {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  padding: 4px;
+  border: 1px solid var(--base-border-color);
+  border-radius: 8px;
+  background: var(--base-editor-bg, white);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
+}
+.cherry-milkdown .cherry-milkdown-bubble[hidden] { display: none; }
+.cherry-milkdown-bubble button {
+  border: 0;
+  border-radius: 4px;
+  padding: 6px 10px;
+  background: transparent;
+  color: var(--base-font-color);
+  font: inherit;
+  cursor: pointer;
+}
+.cherry-milkdown-bubble button:hover,
+.cherry-milkdown-bubble button[aria-pressed="true"] {
+  color: var(--md-link-color);
+  background: var(--md-inline-code-bg);
+}
+
 .cherry-milkdown {
+  display: block;
+  height: auto;
   --cherry-milkdown-primary: var(--md-link-color, #366ef4);
   --cherry-milkdown-border: var(--base-border-color, #d8dce5);
   --cherry-milkdown-muted: var(--base-sub-font-color, #646a73);
   --cherry-milkdown-soft: var(--md-inline-code-bg, #f5f7fa);
   --cherry-milkdown-panel: var(--panel-primary-bg, #eef3ff);
-}
-
-.cherry-milkdown:not(.cherry-previewer) {
-  min-height: 320px;
-  color: #1f2329;
-  background: #fff;
 }
 
 .cherry-milkdown .milkdown,
@@ -23,15 +67,8 @@
   position: relative;
 }
 
-.cherry-milkdown:not(.cherry-previewer) .ProseMirror {
-  box-sizing: border-box;
-  padding: 24px 40px 48px;
-  outline: none;
-  font: 16px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-.cherry-milkdown--previewer .milkdown,
-.cherry-milkdown--previewer .ProseMirror {
+.cherry-milkdown .milkdown,
+.cherry-milkdown .ProseMirror {
   min-height: 100%;
 }
 
@@ -39,35 +76,24 @@
   display: none;
 }
 
-.cherry-milkdown--previewer .cherry-source-node--cherry_frontmatter {
+.cherry-milkdown .cherry-source-node--cherry_frontmatter {
   display: none;
 }
 
-.cherry-milkdown--previewer .cherry-source-node--cherry_toc {
+.cherry-milkdown .cherry-source-node--cherry_toc {
   margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
 }
 
-.cherry-milkdown--previewer .ProseMirror {
+.cherry-milkdown .ProseMirror {
   box-sizing: border-box;
   padding: 0;
   outline: none;
   color: inherit;
   background: transparent;
   font: inherit;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .ProseMirror > :first-child {
-  margin-top: 0;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .ProseMirror blockquote {
-  margin-left: 0;
-  padding-left: 16px;
-  border-left: 4px solid var(--cherry-milkdown-border);
-  color: var(--cherry-milkdown-muted);
 }
 
 .cherry-milkdown .cherry-node-actions button,
@@ -237,45 +263,6 @@
   font-size: 1.08em;
 }
 
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound {
-  position: relative;
-  margin: 18px 0;
-  border: 1px solid var(--cherry-milkdown-border);
-  border-left: 4px solid var(--cherry-milkdown-primary);
-  border-radius: 8px;
-  background: var(--cherry-milkdown-panel);
-}
-
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound--warning {
-  border-left-color: #e2a100;
-  background: #fff8df;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound--danger {
-  border-left-color: #d54941;
-  background: #fff0ef;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound--success {
-  border-left-color: #2ba471;
-  background: #e8f8f2;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound__header {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  min-height: 28px;
-  padding: 4px 10px 0;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound__kind {
-  color: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  opacity: 0.68;
-}
-
 .cherry-milkdown .cherry-compound__title,
 .cherry-milkdown .cherry-compound-item__label {
   flex: 1;
@@ -294,41 +281,17 @@
   color: var(--cherry-milkdown-muted);
 }
 
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound__content {
-  padding: 4px 14px 10px;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound--cols > .cherry-compound__content {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound-item {
-  position: relative;
-  min-width: 0;
-  padding: 6px 8px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: rgb(255 255 255 / 56%);
-}
-
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound-item:hover,
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound-item.is-selected,
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound-item:focus-within {
-  border-color: rgb(54 110 244 / 24%);
-}
-
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound-item__header {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
 .cherry-milkdown .cherry-node-actions {
   display: inline-flex;
+  width: max-content;
+  white-space: nowrap;
+  flex-wrap: nowrap;
   opacity: 0;
   transition: opacity 120ms ease;
+}
+
+.cherry-milkdown .cherry-compound--cols > .cherry-compound__header {
+  top: -24px;
 }
 
 .cherry-milkdown .cherry-compound:hover > .cherry-compound__header .cherry-node-actions,
@@ -338,14 +301,6 @@
 .cherry-milkdown .cherry-compound-item.is-selected > .cherry-compound-item__header .cherry-node-actions,
 .cherry-milkdown .cherry-compound-item:focus-within > .cherry-compound-item__header .cherry-node-actions {
   opacity: 1;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound-item__content > :first-child {
-  margin-top: 0;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .cherry-compound-item__content > :last-child {
-  margin-bottom: 0;
 }
 
 .cherry-milkdown .cherry-compound-item--detail[data-open='false'] > .cherry-compound-item__content {
@@ -462,22 +417,6 @@
   display: none;
 }
 
-.cherry-milkdown:not(.cherry-previewer) .toc > .toc-title {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .toc ul {
-  margin: 0;
-  padding-left: 24px;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .toc-li {
-  list-style: none;
-}
-
 .cherry-milkdown .cherry-embed.is-selected {
   border-color: var(--cherry-milkdown-primary);
   box-shadow: 0 0 0 2px rgb(54 110 244 / 14%);
@@ -527,23 +466,6 @@
 .cherry-milkdown .cherry-embed:focus-within > .cherry-embed__controls,
 .cherry-milkdown .cherry-embed__controls:hover {
   opacity: 1;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .ProseMirror table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .ProseMirror th,
-.cherry-milkdown:not(.cherry-previewer) .ProseMirror td {
-  min-width: 80px;
-  padding: 8px 12px;
-  border: 1px solid var(--cherry-milkdown-border);
-  vertical-align: top;
-}
-
-.cherry-milkdown:not(.cherry-previewer) .ProseMirror th {
-  background: var(--cherry-milkdown-soft);
 }
 
 .cherry-milkdown .milkdown-table-block {
@@ -697,41 +619,30 @@
   display: none;
 }
 
-@media (max-width: 720px) {
-  .cherry-milkdown:not(.cherry-previewer) .ProseMirror {
-    padding: 20px 16px 40px;
-  }
-
-  .cherry-milkdown:not(.cherry-previewer) .cherry-compound__header,
-  .cherry-milkdown:not(.cherry-previewer) .cherry-compound-item__header {
-    align-items: flex-start;
-  }
-}
-
-/* Embedded mode inherits Cherry's existing preview DOM contract. */
-.cherry-milkdown--previewer .cherry-compound.cherry-detail {
+/* NodeViews retain the native Cherry DOM presentation contract. */
+.cherry-milkdown .cherry-compound.cherry-detail {
   margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
 }
 
-.cherry-milkdown--previewer .cherry-detail > .cherry-compound__header {
+.cherry-milkdown .cherry-detail > .cherry-compound__header {
   display: none;
 }
 
-.cherry-milkdown--previewer .cherry-detail > .cherry-compound__content {
+.cherry-milkdown .cherry-detail > .cherry-compound__content {
   padding: 0;
 }
 
-.cherry-milkdown--previewer .cherry-compound__header,
-.cherry-milkdown--previewer .cherry-compound-item__header,
-.cherry-milkdown--previewer .cherry-embed {
+.cherry-milkdown .cherry-compound__header,
+.cherry-milkdown .cherry-compound-item__header,
+.cherry-milkdown .cherry-embed {
   position: relative;
 }
 
-.cherry-milkdown--previewer .cherry-node-actions,
-.cherry-milkdown--previewer .cherry-embed__controls {
+.cherry-milkdown .cherry-node-actions,
+.cherry-milkdown .cherry-embed__controls {
   position: absolute;
   z-index: 20;
   /* Controls are an overlay, like Cherry's native preview actions: they do
@@ -747,7 +658,7 @@
  * button theme for embedded nodes.  All values resolve through Cherry's
  * semantic variables when present, with the fallbacks kept for standalone
  * Milkdown consumers. */
-.cherry-milkdown--previewer .cherry-embed__controls {
+.cherry-milkdown .cherry-embed__controls {
   gap: var(--spacing-xs, 4px);
   min-height: var(--bubble-btn-height, 28px);
   padding: var(--bubble-padding, 4px);
@@ -761,11 +672,11 @@
  * optional control to the immediate right of the figure instead of covering
  * diagram nodes. It remains absolutely positioned, so it does not add a
  * line-height, layout height, or second scrollbar. */
-.cherry-milkdown--previewer .cherry-embed.cherry-embed--controls-outside {
+.cherry-milkdown .cherry-embed.cherry-embed--controls-outside {
   overflow: visible;
 }
 
-.cherry-milkdown--previewer .cherry-embed--controls-outside > .cherry-embed__controls {
+.cherry-milkdown .cherry-embed--controls-outside > .cherry-embed__controls {
   top: 0;
   right: auto;
   left: calc(100% + var(--spacing-xs, 4px));
@@ -775,7 +686,7 @@
   white-space: nowrap;
 }
 
-.cherry-milkdown--previewer .cherry-embed__controls button {
+.cherry-milkdown .cherry-embed__controls button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -791,25 +702,25 @@
   transition: color 150ms, background-color 150ms;
 }
 
-.cherry-milkdown--previewer .cherry-embed__controls button:hover,
-.cherry-milkdown--previewer .cherry-embed__controls button:focus-visible,
-.cherry-milkdown--previewer .cherry-embed__controls button.is-active,
-.cherry-milkdown--previewer .cherry-embed__controls button[aria-expanded='true'] {
+.cherry-milkdown .cherry-embed__controls button:hover,
+.cherry-milkdown .cherry-embed__controls button:focus-visible,
+.cherry-milkdown .cherry-embed__controls button.is-active,
+.cherry-milkdown .cherry-embed__controls button[aria-expanded='true'] {
   color: var(--toolbar-btn-hover-color, var(--cherry-milkdown-primary));
   background-color: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
   outline: none;
 }
 
-.cherry-milkdown--previewer .cherry-compound__title:focus::placeholder,
-.cherry-milkdown--previewer .cherry-compound-item__label:focus::placeholder {
+.cherry-milkdown .cherry-compound__title:focus::placeholder,
+.cherry-milkdown .cherry-compound-item__label:focus::placeholder {
   color: var(--base-sub-font-color);
 }
 
-.cherry-milkdown--previewer .cherry-compound-item__label {
+.cherry-milkdown .cherry-compound-item__label {
   user-select: text;
 }
 
-.cherry-milkdown--previewer .cherry-compound-item__disclosure {
+.cherry-milkdown .cherry-compound-item__disclosure {
   position: absolute;
   z-index: 2;
   top: 0;
@@ -821,7 +732,7 @@
   opacity: 0;
 }
 
-.cherry-milkdown--previewer .milkdown-table-block {
+.cherry-milkdown .milkdown-table-block {
   /* Native Cherry's table wrapper includes the table's 16px trailing
    * margin in its own box before the next block. The editable TableBlock
    * exposes that margin outside the box, so add the same 6px remainder. */
@@ -832,40 +743,40 @@
 /* TableBlock supplies Cherry-compatible row/column operations in embedded
  * mode. Its handles are pointer-revealed, so the unfocused preview keeps the
  * same layout as the native Cherry table. */
-.cherry-milkdown--previewer .milkdown-table-block {
+.cherry-milkdown .milkdown-table-block {
   padding-left: 0;
 }
 
-.cherry-milkdown--previewer .milkdown-table-block + .cherry-compound {
+.cherry-milkdown .milkdown-table-block + .cherry-compound {
   margin-top: 0;
 }
 
 /* Milkdown's ProseMirror base stylesheet removes the bottom margin from the
  * first list in a document. Cherry keeps a 16px separation before the next
  * block, so restore that spacing only inside the embedded preview. */
-.cherry-milkdown--previewer .ProseMirror > ul,
-.cherry-milkdown--previewer .ProseMirror > ol {
+.cherry-milkdown .ProseMirror > ul,
+.cherry-milkdown .ProseMirror > ol {
   margin-bottom: 16px;
 }
 
-.cherry-milkdown--previewer th > p,
-.cherry-milkdown--previewer td > p {
+.cherry-milkdown th > p,
+.cherry-milkdown td > p {
   margin: 0;
 }
 
-.cherry-milkdown--previewer .cherry-footnote-definition .one-footnote {
+.cherry-milkdown .cherry-footnote-definition .one-footnote {
   display: flex;
   align-items: flex-start;
 }
 
-.cherry-milkdown--previewer .cherry-footnote-definition__content {
+.cherry-milkdown .cherry-footnote-definition__content {
   flex: 1;
   min-width: 0;
 }
 
 /* Milkdown's GFM schema normalizes an omitted alignment to inline `left`.
  * Cherry centers an unaligned header while keeping body cells left aligned. */
-.cherry-milkdown--previewer th[style*="text-align: left"] {
+.cherry-milkdown th[style*="text-align: left"] {
   text-align: center !important;
 }
 
@@ -882,11 +793,11 @@
 /* Cherry wraps tables in `.cherry-table-container`, so its table bottom
  * margin and the following panel top margin do not collapse. Milkdown keeps
  * the editable table as a direct ProseMirror child; restore the same gap. */
-.cherry-milkdown--previewer .ProseMirror > table + .cherry-panel {
+.cherry-milkdown .ProseMirror > table + .cherry-panel {
   margin-top: calc(var(--spacing-lg) + 10px);
 }
 
-.cherry-milkdown--previewer .cherry-embed {
+.cherry-milkdown .cherry-embed {
   margin: var(--spacing-lg) 0;
   padding: 0;
   border: 0;
@@ -897,7 +808,7 @@
  * `.cherry-table-figure` (margin: 16px 0).  The NodeView shell must not add a
  * second outer margin, otherwise charts in columns are shifted vertically
  * and no longer line up with the native preview. */
-.cherry-milkdown--previewer .cherry-table-chart {
+.cherry-milkdown .cherry-table-chart {
   /* The native panel follows a chart by 10px; keep the NodeView's controls
    * out of the unfocused flow while matching that exact block gap. */
   margin: 16px 0 10px;
@@ -907,7 +818,7 @@
  * margin-collapse context as native Cherry.  A block preview shell inserts an
  * extra 16px above the inner `.cherry-table-figure`; `contents` keeps the
  * NodeView controls while making the rendered Cherry DOM the layout owner. */
-.cherry-milkdown--previewer .cherry-table-chart__preview.is-rendered {
+.cherry-milkdown .cherry-table-chart__preview.is-rendered {
   display: contents;
 }
 
@@ -915,7 +826,7 @@
  * margin.  Its top margin is the outer block spacing in Cherry's renderer;
  * move that spacing to the NodeView shell so the shell does not add a second
  * collapsed 16px above the wrapper. */
-.cherry-milkdown--previewer .cherry-table-chart .cherry-table-figure {
+.cherry-milkdown .cherry-table-chart .cherry-table-figure {
   margin-top: 0;
 }
 
@@ -923,27 +834,27 @@
  * block margin (`.cherry-panel--col > :last-child { margin-bottom: 0 }`) and
  * leaves the figure's 16px top margin intact. Mirror that nested contract so
  * the chart does not inherit the top-level NodeView spacing. */
-.cherry-milkdown--previewer .cherry-panel-cols .cherry-table-chart {
+.cherry-milkdown .cherry-panel-cols .cherry-table-chart {
   margin: 0;
 }
 
-.cherry-milkdown--previewer .cherry-panel-cols .cherry-table-chart .cherry-table-figure {
+.cherry-milkdown .cherry-panel-cols .cherry-table-chart .cherry-table-figure {
   margin-top: 16px;
 }
 
-.cherry-milkdown--previewer .cherry-embed--cherry_native_block {
+.cherry-milkdown .cherry-embed--cherry_native_block {
   margin: 0;
 }
 
-.cherry-milkdown--previewer math-field::part(menu-toggle),
-.cherry-milkdown--previewer math-field::part(virtual-keyboard-toggle) {
+.cherry-milkdown math-field::part(menu-toggle),
+.cherry-milkdown math-field::part(virtual-keyboard-toggle) {
   opacity: 0;
   transition: opacity 120ms ease;
 }
 
-.cherry-milkdown--previewer math-field:hover::part(menu-toggle),
-.cherry-milkdown--previewer math-field:hover::part(virtual-keyboard-toggle),
-.cherry-milkdown--previewer math-field:focus-within::part(menu-toggle),
-.cherry-milkdown--previewer math-field:focus-within::part(virtual-keyboard-toggle) {
+.cherry-milkdown math-field:hover::part(menu-toggle),
+.cherry-milkdown math-field:hover::part(virtual-keyboard-toggle),
+.cherry-milkdown math-field:focus-within::part(menu-toggle),
+.cherry-milkdown math-field:focus-within::part(virtual-keyboard-toggle) {
   opacity: 1;
 }

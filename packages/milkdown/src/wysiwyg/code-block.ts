@@ -5,18 +5,27 @@ import { Decoration, DecorationSet } from '@milkdown/kit/prose/view';
 import type { EditorView, NodeView, ViewMutationRecord } from '@milkdown/kit/prose/view';
 import { $prose, $view } from '@milkdown/kit/utils';
 import Prism from 'prismjs';
-import 'prismjs/components/prism-bash.js';
-import 'prismjs/components/prism-c.js';
-import 'prismjs/components/prism-cpp.js';
-import 'prismjs/components/prism-csharp.js';
-import 'prismjs/components/prism-go.js';
-import 'prismjs/components/prism-java.js';
-import 'prismjs/components/prism-json.js';
-import 'prismjs/components/prism-markdown.js';
-import 'prismjs/components/prism-python.js';
-import 'prismjs/components/prism-sql.js';
-import 'prismjs/components/prism-typescript.js';
-import 'prismjs/components/prism-yaml.js';
+
+let languagesReady: Promise<unknown> | undefined;
+export function loadCodeLanguages() {
+  // Read the CJS export before loading grammars that reference Prism globally.
+  void Prism.languages;
+  languagesReady ??= (async () => {
+    await import('prismjs/components/prism-bash.js');
+    await import('prismjs/components/prism-c.js');
+    await import('prismjs/components/prism-cpp.js');
+    await import('prismjs/components/prism-csharp.js');
+    await import('prismjs/components/prism-go.js');
+    await import('prismjs/components/prism-java.js');
+    await import('prismjs/components/prism-json.js');
+    await import('prismjs/components/prism-markdown.js');
+    await import('prismjs/components/prism-python.js');
+    await import('prismjs/components/prism-sql.js');
+    await import('prismjs/components/prism-typescript.js');
+    await import('prismjs/components/prism-yaml.js');
+  })();
+  return languagesReady;
+}
 
 const CODE_LANGUAGES = [
   '',
@@ -190,6 +199,7 @@ class CherryCodeBlockView implements NodeView {
   }
 
   private sync() {
+    this.language.disabled = !this.view.editable;
     const language = languageName(this.node.attrs.language);
     if (language && !Array.from(this.language.options).some((option) => option.value === language)) {
       const option = document.createElement('option');
@@ -212,6 +222,7 @@ class CherryCodeBlockView implements NodeView {
   }
 
   private updateLanguage = () => {
+    if (!this.view.editable) return;
     const position = this.getPos();
     if (typeof position !== 'number') return;
     this.view.dispatch(this.view.state.tr.setNodeAttribute(position, 'language', this.language.value));
@@ -288,6 +299,34 @@ export const cherryCodeBlockHighlightPlugin = $prose(
           transaction.docChanged ? buildHighlights(state.doc) : previous,
       },
       props: {
+        handleKeyDown(view, event) {
+          const { selection } = view.state;
+          if (
+            !view.editable ||
+            !(selection instanceof TextSelection) ||
+            !selection.$head.parent.type.spec.code ||
+            event.ctrlKey ||
+            event.metaKey ||
+            event.altKey ||
+            !['Home', 'End'].includes(event.key)
+          )
+            return false;
+          // Native Home/End can include the non-editable gutter or a layout
+          // newline. Resolve logical line boundaries in the document instead,
+          // so the next input never races a deferred DOM selection update.
+          const text = selection.$head.parent.textContent;
+          const offset = selection.$head.parentOffset;
+          const lineEnd = text.indexOf('\n', offset);
+          const target =
+            selection.$head.start() +
+            (event.key === 'Home' ? text.lastIndexOf('\n', offset - 1) + 1 : lineEnd < 0 ? text.length : lineEnd);
+          view.dispatch(
+            view.state.tr
+              .setSelection(TextSelection.create(view.state.doc, event.shiftKey ? selection.anchor : target, target))
+              .scrollIntoView(),
+          );
+          return true;
+        },
         decorations(state) {
           return this.getState(state);
         },

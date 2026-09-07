@@ -42,32 +42,21 @@ export default class Bubble extends Toolbar {
 
   init() {
     this.options.editor = this.$cherry.editor;
+    this.addSelectionChangeListener();
     this.bubbleDom = this.options.dom;
-    this.editorDom = this.options.editorDom || this.options.editor.getEditorDom();
+    this.editorDom = this.options.editor.getEditorDom();
     this.initBubbleDom();
-    const mountTarget = this.options.mountTarget;
-    if (mountTarget) {
-      mountTarget.appendChild(this.bubbleDom);
+    // 添加空值检查，确保 .cm-editor 存在
+    const cmEditor = this.editorDom.querySelector('.cm-editor');
+    if (cmEditor) {
+      cmEditor.appendChild(this.bubbleDom);
     } else {
-      const cmEditor = this.editorDom.querySelector('.cm-editor');
-      (cmEditor || this.editorDom).appendChild(this.bubbleDom);
-      if (!cmEditor) Logger.warn('Bubble: .cm-editor not found, appending to editorDom instead');
+      Logger.warn('Bubble: .cm-editor not found, appending to editorDom instead');
+      this.editorDom.appendChild(this.bubbleDom);
     }
-    if (this.options.observeSelection !== false) {
-      this.addSelectionChangeListener();
-    }
-    if (this.options.preserveSelectionOnPointerDown) {
-      this.boundPreserveSelection = (event) => {
-        if (event.target?.closest?.('.cherry-toolbar-button')) event.preventDefault();
-      };
-      this.bubbleDom.addEventListener('pointerdown', this.boundPreserveSelection);
-      this.bubbleDom.addEventListener('mousedown', this.boundPreserveSelection);
-    }
-    if (this.options.observeSelection !== false) {
-      Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
-        this.$cherry.toolbar.shortcutKeyMap[key] = value;
-      });
-    }
+    Object.entries(this.shortcutKeyMap).forEach(([key, value]) => {
+      this.$cherry.toolbar.shortcutKeyMap[key] = value;
+    });
   }
 
   appendMenusToDom(menus) {
@@ -162,33 +151,6 @@ export default class Bubble extends Toolbar {
 
   hideBubble() {
     this.visible = false;
-  }
-
-  /**
-   * Show the Bubble at an externally owned selection rect.
-   * @param {{top:number; bottom:number; left:number; right:number}} rect
-   */
-  showAt(rect) {
-    if (!this.bubbleDom) return;
-    this.bubbleDom.style.position = 'fixed';
-    this.visible = true;
-    const topArrowHeight = this.bubbleTop?.getBoundingClientRect().height || 0;
-    const bottomArrowHeight = this.bubbleBottom?.getBoundingClientRect().height || 0;
-    const gap = 2;
-    const bubbleHeight = this.bubbleDom.offsetHeight;
-    const above = rect.top - bubbleHeight - bottomArrowHeight >= 4;
-    const top = above ? rect.top - bubbleHeight - bottomArrowHeight - gap : rect.bottom + topArrowHeight + gap;
-    const center = (rect.left + rect.right) / 2;
-    const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-    const minLeft = 8;
-    const maxLeft = Math.max(minLeft, viewportWidth - this.bubbleDom.offsetWidth - 8);
-    const left = Math.max(minLeft, Math.min(maxLeft, center - this.bubbleDom.offsetWidth / 2));
-    this.bubbleDom.style.top = `${top}px`;
-    this.bubbleDom.style.left = `${left}px`;
-    this.bubbleTop.style.display = above ? 'none' : 'block';
-    this.bubbleBottom.style.display = above ? 'block' : 'none';
-    const arrowLeft = Math.max(10, Math.min(this.bubbleDom.offsetWidth - 10, center - left));
-    this.$setBubbleCursorPosition(`${arrowLeft}px`);
   }
 
   /**
@@ -300,18 +262,11 @@ export default class Bubble extends Toolbar {
    */
   destroy() {
     // 移除 Cherry 事件监听 - 使用绑定的方法引用以确保正确注销
-    if (this.$cherry && this.$cherry.$event && this.boundHandleAfterChange) {
+    if (this.$cherry && this.$cherry.$event) {
       this.$cherry.$event.off('afterChange', this.boundHandleAfterChange);
       this.$cherry.$event.off('layoutChange', this.boundHandleLayoutChange);
       this.$cherry.$event.off('onScroll', this.boundHandleScroll);
       this.$cherry.$event.off('beforeSelectionChange', this.boundHandleBeforeSelectionChange);
-    }
-    if (this.bubbleDom && this.boundPreserveSelection) {
-      this.bubbleDom.removeEventListener('pointerdown', this.boundPreserveSelection);
-      this.bubbleDom.removeEventListener('mousedown', this.boundPreserveSelection);
-    }
-    if (this.options?.mountTarget && this.bubbleDom?.parentNode) {
-      this.bubbleDom.parentNode.removeChild(this.bubbleDom);
     }
     // 清理 DOM 引用
     this.bubbleDom = null;

@@ -23,7 +23,7 @@ export interface CherryCompatibilityCase {
 
 function interaction(mode: CherryCompatibilityMode, markdown: string, expectedDom: string) {
   return {
-    create: 'Markdown 快捷键或 Cherry 菜单',
+    create: 'Markdown 快捷键或 setMarkdown',
     focus: '鼠标点击内容或节点空白区域',
     modify: mode === 'structured' ? '原位编辑结构化内容' : mode === 'native-source' ? '节点内源码编辑' : '原样透传',
     delete: 'Backspace/Delete 删除节点或内容',
@@ -32,7 +32,7 @@ function interaction(mode: CherryCompatibilityMode, markdown: string, expectedDo
     passthrough: mode === 'passthrough',
     expectedMarkdown: markdown,
     expectedDom,
-    sync: 'Milkdown、Cherry getMarkdown、CodeMirror 三份内容一致',
+    sync: 'Milkdown 文档与 getMarkdown 内容一致',
   } as const;
 }
 

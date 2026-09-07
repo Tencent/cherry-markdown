@@ -1,5 +1,4 @@
 import { createRoot } from 'react-dom/client';
-import 'cherry-markdown/dist/cherry-markdown.css';
 import App from './App';
 import './styles.css';
 

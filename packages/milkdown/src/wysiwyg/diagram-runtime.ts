@@ -11,22 +11,7 @@ export const MERMAID_ALIGNMENT_CLASSES = [
 ];
 
 export function destroyCherryRenderedContent(engine: CherryEngineLike, container: Element) {
-  if (engine.destroyRenderedContent) {
-    engine.destroyRenderedContent(container);
-    return;
-  }
-
-  const charts = [
-    ...(container.matches('.cherry-echarts-wrapper') ? [container] : []),
-    ...container.querySelectorAll('.cherry-echarts-wrapper'),
-  ];
-  if (charts.length === 0) return;
-
-  for (const hook of engine.hooks?.paragraph ?? []) {
-    const destroyChart = hook.chartRenderEngine?.destroyChart;
-    if (!destroyChart) continue;
-    charts.forEach((chart) => destroyChart.call(hook.chartRenderEngine, chart));
-  }
+  engine.destroyRenderedContent?.(container);
 }
 
 export async function renderMermaid(source: string) {

@@ -43,25 +43,10 @@ if (!isBrowser()) {
 
 const VERSION = `${process.env.BUILD_VERSION}`;
 
-// Registrations belong to a Cherry constructor; editor state belongs to each mount.
-const instancePlugins = new WeakMap();
-export function getInstancePlugins(constructor) {
-  const inherited = constructor && Object.getPrototypeOf(constructor);
-  const registrations = new Map();
-  for (const entry of [
-    ...(inherited ? getInstancePlugins(inherited) : []),
-    ...(instancePlugins.get(constructor) || []),
-  ]) {
-    registrations.set(entry.plugin, entry);
-  }
-  return [...registrations.values()];
-}
-
 /**
  * @typedef {object} CherryPluginClass
  * @property {boolean} [$cherry$mounted]
- * @property {function(object, ...any[]): void} [install]
- * @property {function(object, ...any[]): any} [mount]
+ * @property {function(object, ...any[]): void} install
  */
 
 export class CherryStatic {
@@ -84,16 +69,6 @@ export class CherryStatic {
     // @ts-expect-error 子类静态属性由 Cherry / CherryEngine 挂载
     if (this.initialized) {
       throw new Error('The function `usePlugin` should be called before Cherry is instantiated.');
-    }
-    if (typeof PluginClass.mount === 'function') {
-      const registrations = instancePlugins.get(this) || [];
-      if (!registrations.some(({ plugin }) => plugin === PluginClass)) {
-        instancePlugins.set(this, [...registrations, { plugin: PluginClass, args }]);
-      }
-      return;
-    }
-    if (typeof PluginClass.install !== 'function') {
-      throw new TypeError('Cherry plugins must provide install() or mount().');
     }
     if (PluginClass.$cherry$mounted === true) {
       return;

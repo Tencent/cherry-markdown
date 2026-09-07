@@ -564,6 +564,7 @@ class CompoundItemView implements NodeView {
     // The disclosure button below owns this small, predictable state instead.
     this.dom = document.createElement('section');
     this.dom.className = 'cherry-compound-item';
+    if (role === 'column') this.dom.classList.add('cherry-panel--col');
     this.dom.dataset.role = role;
     if (role === 'detail-item') this.dom.classList.add('cherry-compound-item--detail');
     this.dom.dataset.open = String(Boolean(node.attrs.open));
@@ -610,9 +611,7 @@ class CompoundItemView implements NodeView {
     this.contentDOM.className = `cherry-compound-item__content${
       role === 'detail-item'
         ? ' cherry-detail-body'
-        : role === 'column'
-          ? ' cherry-panel--col'
-          : role === 'tab'
+        : role === 'tab'
             ? ' cherry-tabs-item__content'
             : role === 'timeline-item'
               ? ' cherry-timeline--desc'
@@ -624,7 +623,7 @@ class CompoundItemView implements NodeView {
   }
 
   update(node: ProseNode) {
-    if (node.type !== this.node.type) return false;
+    if (node.type !== this.node.type || node.attrs.role !== this.node.attrs.role) return false;
     this.node = node;
     if (document.activeElement !== this.label) this.label.value = String(node.attrs.label ?? '');
     this.dom.dataset.role = String(node.attrs.role);
@@ -807,7 +806,7 @@ class CompoundView implements NodeView {
         : isPanel
           ? `cherry-panel cherry-panel__${kind === 'panel' ? 'primary' : kind}`
           : kind === 'cols'
-            ? 'cherry-panel-cols cherry-panel-cols__cols'
+            ? ''
             : kind === 'tabs'
               ? 'cherry-tabs'
               : kind === 'timeline'
@@ -821,6 +820,13 @@ class CompoundView implements NodeView {
       }`;
     }
     this.contentDOM.className = `cherry-compound__content${isPanel ? ' cherry-panel--body' : ''}`;
+    if (kind === 'cols') {
+      this.contentDOM.classList.add('cherry-panel-cols', 'cherry-panel-cols__cols');
+      this.contentDOM.style.setProperty('--cols', String(node.childCount));
+    } else {
+      this.contentDOM.style.removeProperty('--cols');
+    }
+    this.title.hidden = node.type.name === 'cherry_detail' || kind === 'cols';
     this.kind.textContent = kind;
     this.add.hidden =
       this.readonly ||
@@ -1418,6 +1424,8 @@ class TableChartView implements NodeView {
   private sourceOpen = false;
   private editingSource = false;
   private sourceToggle?: HTMLButtonElement;
+  private cleanup?: () => void;
+  private renderVersion = 0;
 
   constructor(
     node: ProseNode,
@@ -1496,6 +1504,8 @@ class TableChartView implements NodeView {
 
   destroy() {
     this.destroyed = true;
+    this.renderVersion += 1;
+    this.cleanup?.();
     this.closeSourceListener();
     this.observer?.disconnect();
     this.dom.removeEventListener('mousedown', this.selectFromEmptyArea, true);
@@ -1631,6 +1641,9 @@ class TableChartView implements NodeView {
 
   private render() {
     if (this.destroyed) return;
+    const version = ++this.renderVersion;
+    this.cleanup?.();
+    this.cleanup = undefined;
     destroyCherryRenderedContent(this.config.engine, this.preview);
     this.preview.classList.remove('is-rendered');
     try {
@@ -1639,6 +1652,32 @@ class TableChartView implements NodeView {
       this.preview.style.removeProperty('min-height');
       this.preview.classList.add('is-rendered');
       delete this.preview.dataset.renderError;
+      const renderer = this.config.renderers?.tableChart;
+      if (renderer) {
+        const container = document.createElement('figure');
+        container.className = 'cherry-table-figure';
+        this.preview.querySelector('.cherry-table-wrapper')?.prepend(container);
+        void Promise.resolve()
+          .then(() =>
+            renderer({
+              container,
+              engine: this.config.engine,
+              source: String(this.node.attrs.source ?? ''),
+              syntax: String(this.node.attrs.chartType ?? ''),
+            }),
+          )
+          .then((result) => {
+            if (this.destroyed || version !== this.renderVersion) {
+              if (typeof result === 'function') result();
+              return;
+            }
+            if (typeof result === 'function') this.cleanup = result;
+            else if (typeof result === 'string') container.replaceChildren(sanitizedEngineFragment(result));
+          })
+          .catch((error) => {
+            if (!this.destroyed && version === this.renderVersion) this.config.onError?.(error, 'render');
+          });
+      }
     } catch (error) {
       this.preview.textContent = String(this.node.attrs.source ?? '');
       this.preview.dataset.renderError = 'true';

@@ -316,16 +316,6 @@ export default class MenuBase {
    */
   fire(event, shortKey = '') {
     event?.stopPropagation();
-    if (
-      this.$cherry.previewer?.runEditingCommand?.({
-        name: this.name,
-        shortKey,
-        event,
-        menu: this,
-      })
-    ) {
-      return;
-    }
     if (typeof this.onClick === 'function') {
       const selections = this.editor.getSelections();
       // 判断是不是多选
@@ -705,15 +695,6 @@ export default class MenuBase {
    * @returns {number|number[]} 当前激活的子菜单索引或索引数组
    */
   getActiveSubMenuIndex(subMenuDomPanel) {
-    const state = this.$cherry.previewer?.queryEditingCommandState?.({
-      name: this.name,
-      shortKey: '',
-      menu: this,
-    });
-    const index = Number(state?.subMenuIndex);
-    if (Number.isInteger(index)) {
-      return index >= 0 && index < this.subMenuConfig.length ? index : -1;
-    }
     return -1;
   }
 }

@@ -3,7 +3,7 @@ import { editorViewCtx } from '@milkdown/kit/core';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { createCherryMilkdown, type CherryMilkdownInstance } from '../src';
+import { cherryMilkdown, type CherryMilkdownInstance } from '../src';
 
 vi.mock('mathlive', () => ({}));
 vi.mock('mermaid', () => ({
@@ -88,7 +88,7 @@ describe('Cherry built-in hook fixtures', () => {
   it.each(fixtures)('%s loads, serializes, and renders with CherryEngine', async (_name, value) => {
     const root = document.createElement('div');
     document.body.append(root);
-    const instance = await createCherryMilkdown({ root, value });
+    const instance = await cherryMilkdown({ el: root, value });
     instances.push(instance);
     const markdown = instance.getMarkdown();
     expect(markdown.trim().length).toBeGreaterThan(0);
@@ -102,7 +102,7 @@ describe('Cherry built-in hook fixtures', () => {
   it('round-trips the complete Cherry manual with stable Markdown and equivalent rendering', async () => {
     const root = document.createElement('div');
     document.body.append(root);
-    const instance = await createCherryMilkdown({ root, value: fullManual, nativePreview: true });
+    const instance = await cherryMilkdown({ el: root, value: fullManual });
     instances.push(instance);
     const first = instance.getMarkdown();
     const engine = new CherryEngine();
@@ -155,10 +155,9 @@ describe('Cherry built-in hook fixtures', () => {
   it('renders GFM footnote references as inline nodes instead of literal heading text', async () => {
     const root = document.createElement('div');
     document.body.append(root);
-    const instance = await createCherryMilkdown({
-      root,
+    const instance = await cherryMilkdown({
+      el: root,
       value: '## 流程图[^不通用提醒]\n\n[^不通用提醒]: 该语法不是通用语法\n\n脚注之后的正文',
-      nativePreview: true,
     });
     instances.push(instance);
     const heading = root.querySelector('h2');

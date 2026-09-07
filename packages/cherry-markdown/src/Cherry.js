@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** @typedef {import('~types/cherry').CherryUpdateContext} CherryUpdateContext */
 import mergeWith from '@/utils/toolkit/mergeWith';
 import cloneDeep from '@/utils/toolkit/cloneDeep';
 import Editor from './Editor';
@@ -44,7 +43,7 @@ import locales from '@/locales/index';
 import Logger from '@/Logger';
 
 import { urlProcessorProxy } from './UrlCache';
-import { CherryStatic, getInstancePlugins } from './CherryStatic';
+import { CherryStatic } from './CherryStatic';
 import { destroySearcherBridge, initSearcherBridge } from './toolbars/searcher/SearcherBridge';
 import { LIST_CONTENT } from '@/utils/regexp';
 
@@ -69,7 +68,6 @@ export default class Cherry extends CherryStatic {
   constructor(options) {
     super();
     Cherry.initialized = true;
-    /** @type {typeof Cherry} */ (this.constructor).initialized = true;
     const defaultConfigCopy = cloneDeep(Cherry.config.defaults);
     this.defaultToolbar = defaultConfigCopy.toolbars.toolbar;
     $expectTarget(options, Object);
@@ -123,11 +121,6 @@ export default class Cherry extends CherryStatic {
      */
     this.instanceId = `cherry-${new Date().getTime()}${Math.random()}`;
     this.options.instanceId = this.instanceId;
-    this.isDestroyed = false;
-    /** @type {Array<() => void | Promise<void>>} */
-    this.pluginCleanups = [];
-    /** @type {Promise<void>} */
-    this.pluginMountTask = Promise.resolve();
     this.lastMarkdownText = '';
     this.$event = new Event(this.instanceId);
 
@@ -139,34 +132,7 @@ export default class Cherry extends CherryStatic {
      * @type {import('./Engine').default}
      */
     this.engine = new Engine(this.options, this);
-    if (this.init() !== false) {
-      this.mountPlugins();
-    }
-  }
-
-  /** Mount instance-scoped plugins without making construction async. */
-  mountPlugins() {
-    getInstancePlugins(this.constructor).forEach(({ plugin, args }) => {
-      if (!plugin || typeof plugin.mount !== 'function') {
-        Logger.warn('Cherry plugin ignored because mount() is missing.');
-        return;
-      }
-      this.pluginMountTask = this.pluginMountTask.then(async () => {
-        if (this.isDestroyed) return;
-        try {
-          const cleanup = await plugin.mount(this, ...args);
-          if (typeof cleanup !== 'function') return;
-          if (this.isDestroyed) {
-            await cleanup();
-            return;
-          }
-          this.pluginCleanups.push(cleanup);
-        } catch (error) {
-          Logger.error(`Cherry plugin "${plugin.name || 'anonymous'}" failed to mount.`, error);
-        }
-      });
-    });
-    return this.pluginMountTask;
+    this.init();
   }
 
   /**
@@ -305,15 +271,6 @@ export default class Cherry extends CherryStatic {
   }
 
   destroy() {
-    if (this.isDestroyed) return;
-    this.isDestroyed = true;
-    this.pluginCleanups
-      .splice(0)
-      .reverse()
-      .forEach((cleanup) => {
-        Promise.resolve(cleanup()).catch((error) => Logger.error('Cherry extension cleanup failed.', error));
-      });
-
     // 先销毁搜索面板桥接（解绑监听、清理面板 DOM）
     destroySearcherBridge(this);
 
@@ -321,7 +278,6 @@ export default class Cherry extends CherryStatic {
     if (this.editor) {
       this.editor.destroy();
     }
-    this.previewer?.destroy?.();
 
     // 清理 DOM
     if (this.noMountEl) {
@@ -540,20 +496,13 @@ export default class Cherry extends CherryStatic {
    * 覆盖编辑区的内容
    * @param {string} content markdown内容
    * @param {boolean} [keepCursor=false] 是否保持光标位置
-   * @param {CherryUpdateContext} [updateContext] 更新来源和版本
    *
    * 协作场景说明：
    *  - keepCursor 为 true 时，底层会基于 fast-diff 计算最小变更集，并由 CodeMirror 6
    *    的 ChangeSet 机制自动映射当前光标/选区位置。
    */
-  setValue(content, keepCursor = false, updateContext) {
-    this.editor.setValue(content, keepCursor, updateContext);
-    // Contextual updates come from another editing surface. Keep the public
-    // Markdown snapshot current synchronously without changing the legacy
-    // getValue() behavior for normal CodeMirror input.
-    if (updateContext) {
-      this.lastMarkdownText = content;
-    }
+  setValue(content, keepCursor = false) {
+    this.editor.setValue(content, keepCursor);
   }
 
   /**
@@ -564,15 +513,6 @@ export default class Cherry extends CherryStatic {
    * @param {boolean} [focus=true] 保持编辑器处于focus状态
    */
   insert(content, isSelect = false, anchor = false, focus = true) {
-    if (
-      !anchor &&
-      this.previewer?.insertEditingContent?.(content, {
-        select: isSelect,
-        focus,
-      })
-    ) {
-      return;
-    }
     const editorView = this.editor.editor;
     let insertPos;
 
@@ -792,7 +732,6 @@ export default class Cherry extends CherryStatic {
       this.floatMenu.destroy();
     }
     this.options.toolbars[type] = toolbar;
-    this.previewer?.resetEditingBubble();
     this.createToolbar();
     this.createToolbarRight();
     this.createBubble();
@@ -1091,7 +1030,7 @@ export default class Cherry extends CherryStatic {
   /**
    * 编辑器内容变更时触发,更新预览区内容
    * @private
-   * @param {Event & {updateContext?: {source?: string, revision?: number}}} evt - 编辑事件对象
+   * @param {Event} evt - 编辑事件对象(未使用)
    * @param {import('@codemirror/view').EditorView | Object} editorView - 编辑器实例
    */
   editText(evt, editorView) {
@@ -1118,11 +1057,10 @@ export default class Cherry extends CherryStatic {
         const markdownText = view.state.doc.toString();
         this.lastMarkdownText = markdownText;
         const html = this.engine.makeHtml(markdownText);
-        this.previewer.update(html, evt?.updateContext);
+        this.previewer.update(html);
         this.$event.emit('afterChange', {
           markdownText,
           html,
-          updateContext: evt?.updateContext,
         });
       }, interval);
     } catch (e) {

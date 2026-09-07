@@ -1,133 +1,68 @@
 # @cherry-markdown/milkdown
 
-[简体中文](./README.CN.md)
-
-A Milkdown WYSIWYG extension for Cherry Markdown. The recommended mode mounts Milkdown in the existing Cherry previewer: Cherry keeps ownership of the page, theme, toolbar, layout, and preview interactions while Milkdown makes that content directly editable.
-
-## Features
-
-- Native editable Milkdown nodes for CommonMark and GFM.
-- Direct editing for tables, task lists, links, images, quotes, and code blocks.
-- Inline and block formulas edited in place with MathLive and serialized as Cherry LaTeX.
-- Editable marks for Cherry colors, backgrounds, font size, subscript, superscript, ruby, underline, and highlight.
-- Panels, details, columns, tabs, and timelines keep their body in the continuous editor flow; titles are edited directly in place.
-- A live TOC plus compact document metadata and reference nodes with no field forms or modal dialogs.
-- Mermaid renders by default. PlantUML and ECharts can use application renderers; source opens inside the selected node only when requested.
-- HTML uses a script-disabled sandbox preview and an opt-in inline source mode.
-- `:line:` and other table charts reuse Cherry's native DOM and ECharts lifecycle; selection opens the full Markdown source inside that node only.
-
-Cherry plugins are not presented as raw source cards. Business-specific syntax must provide a Milkdown schema, parser, serializer, and NodeView through a plugin for structured editing. An unregistered block directive is safely rendered through Cherry's native shell and can be edited in-place as its complete source; it is never guessed as a structured panel.
-
-## Install
+A standalone Cherry-style WYSIWYG editor. Milkdown owns the document, selection,
+and undo history. The released CherryEngine renders extension syntax; Cherry CSS
+provides native themes. No Cherry editor, CodeMirror, top toolbar, or source
+suggestion UI is instantiated.
 
 ```sh
-npm install @cherry-markdown/milkdown @milkdown/kit cherry-markdown mathlive mermaid
+npm install @cherry-markdown/milkdown @milkdown/kit cherry-markdown mathlive
+# Optional diagrams
+npm install mermaid echarts
 ```
 
-Import Cherry's original styles and the Milkdown editing behavior styles:
+```ts
+import { cherryMilkdown } from '@cherry-markdown/milkdown';
+import '@cherry-markdown/milkdown/style.css';
 
-```js
-import 'cherry-markdown/dist/cherry-markdown.css';
-import '@cherry-markdown/milkdown/styles.css';
-import '@milkdown/kit/prose/view/style/prosemirror.css';
-```
-
-## Usage
-
-Register once before constructing the first Cherry instance. Subsequent instances mount automatically. Registration options are shared; editor state and cleanup remain per instance. Initial `editOnly` and CherryStream do not mount.
-
-```js
-import Cherry from 'cherry-markdown';
-import { milkdown } from '@cherry-markdown/milkdown';
-
-Cherry.usePlugin(milkdown, {
-  onChange({ markdown }) {
-    console.log(markdown);
-  },
+const editor = await cherryMilkdown({
+  el: document.getElementById('editor')!,
+  value: '# Heading',
+  onChange({ markdown }) { console.log(markdown); },
 });
-
-const cherry = new Cherry({
-  id: 'editor',
-  value: '# Title\n\nInline math $E=mc^2$ and !!red colored text!!.',
-});
-
-// Preview edits are written to Cherry's Markdown/CodeMirror automatically.
-// Source edits are synchronized back into the current Milkdown preview.
-cherry.destroy(); // Milkdown is cleaned up with this Cherry instance.
+editor.getMarkdown();
+editor.setMarkdown('# Updated');
+await editor.destroy();
 ```
 
-`attachCherryMilkdownPreview(cherry, options)` remains available for integrations that need an explicit lifecycle handle. Its `mounted` flag and `getInstance()` method reflect lazy preview mounting. `createCherryMilkdown` remains available for a standalone surface without Cherry's page shell. Neither is the recommended Cherry integration.
+There is one instance and one lifecycle. React consumers create in an effect and
+destroy on cleanup, including instances whose asynchronous creation finishes
+after unmount. See the single React example in examples/react/App.tsx.
+The unpublished attach/usePlugin/mode bridge APIs have been removed.
 
-Milkdown-internal plugins passed through `createCherryMilkdown({ plugins })` are loaded after the built-in WYSIWYG plugins and can register business NodeViews.
+Options: el, value, readonly, theme, bubble (default true), debounce (30ms),
+cherryOptions (engine options only), engine (optional makeHtml provider), renderers,
+mathlive, plugins (Milkdown plugins), onChange and onError.
+Changes update the document immediately; debounce applies only to notifications.
+Destroy removes only the subtree owned by this instance.
 
-In plugin mode the original Cherry toolbar remains owned by the source editor; it does not take over the Milkdown selection. The native Cherry Bubble operates on selected preview text, while image and Mermaid preview controls continue to use Cherry's original UI. Native Markdown input rules create headings, lists, quotes, and code blocks without opening Cherry's source-editor suggest panel. Structural controls appear only while hovering or selecting their node. Tables use Milkdown's `table-block` controls for row and column insertion, deletion, dragging, and alignment. Selecting a formula activates MathLive in place.
+The selection Bubble operates directly on ProseMirror marks. Code blocks, atomic
+nodes, formula fields and embedded source selections do not qualify. Images and
+Mermaid expose width/alignment controls independently of the text Bubble.
 
-`enableBubble` defaults to `true`. `enableToolbarBridge` defaults to `false`; enable it only when the Cherry top toolbar should explicitly operate on the current Milkdown selection.
+Optional chart renderers:
 
-Cherry's native single-pane preview mode works without another Milkdown mode option. Cherry remains the only owner of layout and toolbar visibility:
-
-```js
-const cherry = new Cherry({
-  id: 'editor',
-  value: '# Directly editable preview',
-  editor: { defaultModel: 'previewOnly' },
-  toolbars: { toolbar: false },
-});
+```ts
+import { echarts, tableChart } from '@cherry-markdown/milkdown/echarts';
+const editor = await cherryMilkdown({ el, value, renderers: { echarts, tableChart } });
 ```
 
-This keeps CodeMirror and all global toolbars hidden while the preview document remains directly editable. Use Markdown input rules to create blocks and `Mod-Alt-0…6` to change the current block to a paragraph or H1-H6. The preview deliberately does not open Cherry's source-editor suggest panel.
+The public ECharts code renderer accepts JSON/JSON5 data, never executable JavaScript. Without a
+renderer the native table/source remains available. Map charts require a
+consumer-owned geographic data provider and renderer.
 
-Configure MathLive macros and its virtual keyboard through `mathlive`:
-
-```js
-createCherryMilkdown({
-  root,
-  mathlive: {
-    macros: { RR: '\\mathbb{R}' },
-    virtualKeyboardMode: 'onfocus',
-  },
-});
-```
-
-Use `renderers` to render special diagram formats asynchronously. A renderer may return an HTML string, a cleanup function, or write directly to `container`:
-
-```js
-createCherryMilkdown({
-  root,
-  renderers: {
-    echarts: async ({ container, source }) => {
-      const chart = createECharts(container, source);
-      return () => chart.dispose();
-    },
-  },
-});
-```
-
-## Local example
+From the repository root:
 
 ```sh
-yarn dev:demo
-yarn build:demo
-yarn preview:demo
+yarn workspace @cherry-markdown/milkdown build:demo
+yarn workspace @cherry-markdown/milkdown dev:demo --host 127.0.0.1 --port 4201
+yarn workspace @cherry-markdown/milkdown typecheck
+yarn workspace @cherry-markdown/milkdown test
+yarn workspace @cherry-markdown/milkdown test:e2e
+yarn workspace @cherry-markdown/milkdown test:consumer
 ```
 
-The user-facing demo is a minimal React + Vite application whose entry is `examples/react/App.tsx`; `index.html` only contains the root element required by Vite. It reuses the root demo's layout, configuration, toolbar, theme, ECharts plugin, and full Markdown manual. Its only integration difference is `Cherry.usePlugin(milkdown)`, with the Cherry instance destroyed during React unmount. Open `index.html?mode=previewOnly` for the toolbar-free preview-only mode; Cherry's existing `editor.defaultModel` and `toolbars` configuration select the mode, so there is no second React editor. `editOnly` remains Cherry's source editor and does not mount Milkdown. CherryStream is not supported by this plugin.
-
-## Reliability checks
-
-```sh
-yarn test
-yarn typecheck
-yarn test:consumer
-yarn test:e2e
-```
-
-Unit and real-browser tests share one typed Cherry syntax capability matrix. The Chromium PR gate covers table charts, rapid continuous editing, alternating mode/API updates, unfocused pixel comparison, and repeated mount/destroy. A scheduled Chromium, Firefox, and WebKit matrix runs 20 lifecycle stress rounds. Failures retain the trace, video, screenshots, console errors, final Markdown, and action sequence.
-
-## Current boundary
-
-CherryEngine is still loaded from the private `cherry-markdown/dist/cherry-markdown.engine.core.esm.js` path for compatibility. Diagrams remain visual embedded objects, arbitrary HTML is not exposed as editable ProseMirror content for security, and business-specific hooks require an explicit Milkdown plugin for structured editing (otherwise the complete directive source remains editable inside Cherry's native shell).
-
-## License
-
-Apache-2.0. See [LICENSE](./LICENSE).
+The consumer build installs released cherry-markdown@0.11.10 rather than repacking
+the workspace's Cherry build. This migration is not a claim of full production
+parity: advanced chart settings, full visual parity and image drag-resizing still
+need acceptance. See [architecture and acceptance boundaries](./ARCHITECTURE.md).

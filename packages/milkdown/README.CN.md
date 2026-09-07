@@ -1,133 +1,89 @@
 # @cherry-markdown/milkdown
 
-[English](./README.md)
+独立的 Cherry 风格即见即所得编辑器。Milkdown/ProseMirror 管理唯一文档、
+选区和历史；已发布的 CherryEngine 提供扩展语法 HTML，Cherry CSS 提供主题。
+不会创建 Cherry、CodeMirror、顶部工具栏或源码联想面板。
 
-Cherry Markdown 的 Milkdown 即见即所得扩展。推荐模式是把 Milkdown 挂载到现有 Cherry 预览区：页面、主题、工具栏和预览交互仍由 Cherry 管理，Milkdown 只让当前预览内容可以直接编辑。
-
-## 能力
-
-- CommonMark/GFM 使用 Milkdown 原生可编辑节点。
-- 表格、任务列表、链接、图片、引用和代码块直接编辑。
-- 行内和块级公式通过 MathLive 原地可视输入，仍序列化为 Cherry LaTeX。
-- Cherry 颜色、背景色、字号、上下标、ruby、下划线和高亮使用可编辑 mark。
-- Panel、Detail、Cols、Tabs、Timeline 保持连续正文编辑流，标题和正文都在原位置直接修改。
-- TOC 自动跟随标题；frontmatter 和 comment reference 使用紧凑的原位源码节点，不显示字段表单或弹窗。
-- Mermaid 默认渲染为图形；PlantUML、ECharts 可通过 `renderers` 接入。源码只在用户主动选择后于节点内部展开。
-- HTML 使用无脚本权限的沙箱预览，并提供按需开启的节点内源码模式。
-- `:line:` 等表格图表直接复用 Cherry 原生 DOM 和 ECharts 生命周期；选中后只在当前节点内编辑完整 Markdown 源码。
-
-该包不会把 Cherry 扩展默认显示成 raw 源码卡片。业务自定义语法要实现结构化编辑，需要通过 Milkdown 插件提供 schema、parser、serializer 和 NodeView；未注册的块指令会安全地复用 Cherry 原生外壳，并可在节点内部编辑完整源码，不会被猜测成某一种 Panel。
-
-## 安装
+## 接入
 
 ```sh
-npm install @cherry-markdown/milkdown @milkdown/kit cherry-markdown mathlive mermaid
+npm install @cherry-markdown/milkdown @milkdown/kit cherry-markdown mathlive
+# 按需安装图表依赖
+npm install mermaid echarts
 ```
 
-全局引入 Cherry 原样式和 Milkdown 的编辑行为样式：
+```ts
+import { cherryMilkdown } from '@cherry-markdown/milkdown';
+import '@cherry-markdown/milkdown/style.css';
 
-```js
-import 'cherry-markdown/dist/cherry-markdown.css';
-import '@cherry-markdown/milkdown/styles.css';
-import '@milkdown/kit/prose/view/style/prosemirror.css';
-```
-
-## 使用
-
-在创建第一个 Cherry 实例前注册一次；后续实例自动接入。参数由注册共享，编辑状态和清理函数按实例独立维护。初始 `editOnly` 和 CherryStream 不挂载。
-
-```js
-import Cherry from 'cherry-markdown';
-import { milkdown } from '@cherry-markdown/milkdown';
-
-Cherry.usePlugin(milkdown, {
+const editor = await cherryMilkdown({
+  el: document.getElementById('editor')!,
+  value: '# 标题',
   onChange({ markdown }) {
     console.log(markdown);
   },
 });
 
-const cherry = new Cherry({
-  id: 'editor',
-  value: '# 标题\n\n行内公式 $E=mc^2$ 和 !!red 红色文字!!。',
-});
-
-// 预览区编辑会自动回写 cherry.getMarkdown() / CodeMirror。
-// 源码编辑也会自动更新当前 Milkdown 预览内容。
-cherry.destroy(); // Milkdown 随当前 Cherry 实例一起清理
+editor.getMarkdown();
+editor.setMarkdown('# 新内容');
+await editor.destroy();
 ```
 
-`attachCherryMilkdownPreview(cherry, options)` 可用于需要显式生命周期句柄的接入；句柄的 `mounted` 和 `getInstance()` 会反映预览区的延迟挂载状态。`createCherryMilkdown` 仍可用于不需要 Cherry 页面壳的独立编辑器。两者都不是 Cherry 页面中的推荐接入方式。
+无需 attach、Cherry.usePlugin 或 mode 配置。旧的 PR 内部接入入口已删除，
+不提供尚未发布 API 的兼容层。React 在 effect 中创建，在清理中销毁；
+异步创建完成前卸载时也必须销毁迟到的实例，参见唯一的 React 示例。
 
-`createCherryMilkdown({ plugins })` 中的 Milkdown 内部插件会在内置 WYSIWYG 插件之后加载，可用于注册业务 NodeView。
+## 配置
 
-插件模式下，Cherry 顶部工具栏继续归源码编辑器所有，不接管 Milkdown 选区。选中预览文本时仍可使用 Cherry 原生 Bubble，图片和 Mermaid 预览控件也继续复用 Cherry 原交互。标题、列表、引用和代码块可通过 Markdown 快捷输入创建，右侧不会打开 Cherry 源码编辑器的 suggest 面板。复合块标题和正文都直接编辑，结构按钮只在悬停或选中节点时出现。表格使用 Milkdown `table-block`，可增删、拖拽行列并修改列对齐；公式使用 MathLive，点击公式即可输入。
+- `el`：容器。编辑器只清理自己创建的子树，不清空调用方其他 DOM。
+- `value`：初始 Markdown。
+- `readonly`：关闭编辑及编辑控件。
+- `theme`：Cherry 主题名，默认原生 default。
+- `bubble`：是否显示文本选区格式菜单，默认 true。不加载 Cherry Toolbar。
+- `debounce`：外部 onChange 通知延迟，默认 30ms；不延迟文档更新。
+- `cherryOptions`：传给独立 CherryEngine 的解析配置，不提供 Cherry 编辑器能力。
+- `engine`：可选渲染器，至少实现 makeHtml。不得要求其具有 Previewer。
+- `renderers`：复杂节点渲染函数，可返回清理函数；支持异步，迟到结果会清理。
+- `mathlive`：公式宏和虚拟键盘设置。
+- `plugins`：原生 Milkdown 插件，不是 Cherry.usePlugin。
+- `onError(error, phase)`：create / parse / render 错误。
 
-`enableBubble` 默认是 `true`。`enableToolbarBridge` 默认是 `false`；只有明确希望 Cherry 顶部工具栏操作当前 Milkdown 选区时才开启。
+普通文本直接编辑；代码块直接编辑并支持语言选择；复杂节点在内部编辑源码。
+Bubble 不对代码块、公式、HTML/图表源码或跨原子节点的选区生效。
+选中图片或 Mermaid 可编辑宽度及对齐。
 
-纯预览单栏不需要 Milkdown 再定义一种模式，布局和工具栏仍只使用 Cherry 原配置：
+## 可选 ECharts
 
-```js
-const cherry = new Cherry({
-  id: 'editor',
-  value: '# 可直接编辑的预览',
-  editor: { defaultModel: 'previewOnly' },
-  toolbars: { toolbar: false },
-});
-```
+```ts
+import { echarts, tableChart } from '@cherry-markdown/milkdown/echarts';
 
-此时 CodeMirror 和全局工具栏都不可见，但预览文档仍可直接编辑。可以用 Markdown 快捷输入创建块，并使用 `Command/Ctrl + Alt + 0…6` 将当前块切换为段落或 H1-H6。
-
-可通过 `mathlive` 传入宏和虚拟键盘模式：
-
-```js
-createCherryMilkdown({
-  root,
-  mathlive: {
-    macros: { RR: '\\mathbb{R}' },
-    virtualKeyboardMode: 'onfocus',
-  },
+const editor = await cherryMilkdown({
+  el,
+  value,
+  renderers: { echarts, tableChart },
 });
 ```
 
-`renderers` 可为特殊图表提供异步渲染；回调返回 HTML 字符串、清理函数或直接写入 `container`：
+公开的 echarts renderer 接受 JSON/JSON5 数据，不执行 Markdown 中的 JavaScript。
+未配置图表 renderer 时保留普通表格与源码。地图需要业务提供地理数据和
+renderer；不会根据 Markdown URL 自动请求外部地图。
 
-```js
-createCherryMilkdown({
-  root,
-  renderers: {
-    echarts: async ({ container, source }) => {
-      const chart = createECharts(container, source);
-      return () => chart.dispose();
-    },
-  },
-});
-```
+## 开发与验证
 
-## 本地示例
+在仓库根目录执行：
 
 ```sh
-yarn dev:demo
-yarn build:demo
-yarn preview:demo
+yarn workspace @cherry-markdown/milkdown build:demo
+yarn workspace @cherry-markdown/milkdown dev:demo --host 127.0.0.1 --port 4201
+yarn workspace @cherry-markdown/milkdown typecheck
+yarn workspace @cherry-markdown/milkdown test
+yarn workspace @cherry-markdown/milkdown test:e2e
+yarn workspace @cherry-markdown/milkdown test:consumer
 ```
 
-用户可见 demo 是一个最小 React + Vite 工程，入口位于 `examples/react/App.tsx`；`index.html` 只保留 Vite 所需的根节点。它复用仓库根 demo 的布局、配置、工具栏、主题、ECharts 插件和整份 Markdown 手册，业务接入上的唯一差异是增加 `Cherry.usePlugin(milkdown)`，并在 React 卸载时销毁 Cherry 实例。纯预览可直接打开 `index.html?mode=previewOnly`，仍由 Cherry 的 `editor.defaultModel` 和 `toolbars` 配置决定，不存在第二套 React 编辑器。`editOnly` 保持 Cherry 原生源码编辑，不挂载 Milkdown；CherryStream 暂不支持该插件。
+只有一个 React 页面，默认即为独立编辑器；不再读取 previewOnly 等查询参数。
+consumer 验证安装真正发布的 cherry-markdown@0.11.10，不重打包工作区 Cherry。
 
-## 可靠性验证
-
-```sh
-yarn test
-yarn typecheck
-yarn test:consumer
-yarn test:e2e
-```
-
-单元测试与真实浏览器共享一份 Cherry 语法能力清单。Chromium PR 门禁覆盖表格图表、快速连续编辑、模式/API 交替更新、未聚焦像素对比和重复创建销毁；定时任务在 Chromium、Firefox 和 WebKit 运行 20 轮生命周期压力测试。失败会保留 trace、视频、截图、console、最终 Markdown 和动作序列。
-
-## 当前边界
-
-CherryEngine 仍通过 `cherry-markdown/dist/cherry-markdown.engine.core.esm.js` 深层入口提供兼容能力。图表属于可视化嵌入对象，任意 HTML 因安全原因不会直接作为 ProseMirror 正文编辑；业务自定义 Hook 仍需提供 Milkdown 插件才能结构化编辑，否则完整指令源码会保留在 Cherry 原生外壳内原位编辑。
-
-## 许可证
-
-Apache-2.0，详见 [LICENSE](./LICENSE)。
+本次是架构迁移，不等于已达到全功能生产验收。高级图表配置、所有节点的
+原生视觉像素对照、图片拖拽缩放和全手册交互仍须验收；详见
+[迁移边界](./ARCHITECTURE.md)。

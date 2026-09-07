@@ -18,12 +18,15 @@ import { NodeSelection, Plugin, TextSelection, type Selection } from '@milkdown/
 import { $prose, getMarkdown } from '@milkdown/kit/utils';
 import type { CherryMilkdownInstance, CherryMilkdownOptions } from './types.js';
 import { createSelectionTracker } from './selection-tracker.js';
+import { selectionBubble } from './ui/bubble.js';
+import { nodeControls } from './ui/node-controls.js';
+import { loadCodeLanguages } from './wysiwyg/code-block.js';
 import { cherryWysiwyg, cherryWysiwygConfigCtx } from './wysiwyg/index.js';
 
 const DEFAULT_DEBOUNCE = 30;
 
 function assertRoot(root: HTMLElement): void {
-  if (!(root instanceof HTMLElement)) throw new TypeError('createCherryMilkdown: options.root must be an HTMLElement.');
+  if (!(root instanceof HTMLElement)) throw new TypeError('cherryMilkdown: options.el must be an HTMLElement.');
 }
 
 function restoreSelection(editor: Editor, previous: Selection, selectedText: string): void {
@@ -89,7 +92,7 @@ function replaceMarkdownWithMinimalTransaction(editor: Editor, markdown: string)
       to = from + (to - nextTo);
       nextTo = from;
     }
-    view.dispatch(view.state.tr.replace(from, to, nextDocument.slice(from, nextTo)));
+    view.dispatch(view.state.tr.replace(from, to, nextDocument.slice(from, nextTo)).setMeta('addToHistory', false));
   });
 }
 
@@ -132,9 +135,14 @@ function reconcileSerializedMarkdown(raw: string, previous: string, next: string
   return next;
 }
 
-export async function createCherryMilkdown(options: CherryMilkdownOptions): Promise<CherryMilkdownInstance> {
-  const { root } = options;
-  assertRoot(root);
+export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<CherryMilkdownInstance> {
+  const { el } = options;
+  assertRoot(el);
+  const root = document.createElement('div');
+  root.className = 'cherry cherry-markdown cherry-milkdown';
+  if (options.theme && options.theme !== 'default')
+    root.classList.add(`theme__${options.theme.replace(/^theme__/, '')}`);
+  el.append(root);
   const debounce = Math.max(0, options.debounce ?? DEFAULT_DEBOUNCE);
   let notificationTimer: ReturnType<typeof setTimeout> | undefined;
   let changeMicrotaskQueued = false;
@@ -146,24 +154,11 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
   let serializedBaseline = '';
   const selectionTracker = createSelectionTracker();
 
-  // Cherry's preview already supplies the native visual shell. The floating
-  // Milkdown components are useful for standalone consumers, but mounting them
-  // for every table, image and link in the full manual adds a large
-  // amount of DOM and event work before the user edits anything.
-  // Table operations are part of Cherry's preview editing contract, so keep
-  // the table block mounted in embedded mode as well. Image/link floating
-  // components remain standalone-only because Cherry delegates those controls
-  // to its native preview handlers.
-  const tableBlockComponent = await import('@milkdown/kit/component/table-block');
-  const interactiveComponents = options.nativePreview
-    ? undefined
-    : await Promise.all([
-        Promise.resolve(tableBlockComponent),
-        import('@milkdown/kit/component/image-inline'),
-        import('@milkdown/kit/component/link-tooltip'),
-      ]);
+  let tableBlockComponent: typeof import('@milkdown/kit/component/table-block');
 
   try {
+    tableBlockComponent = await import('@milkdown/kit/component/table-block');
+    await loadCodeLanguages();
     // Cherry's generated declaration keeps the optional object return mode in
     // `makeHtml`, while this integration always calls its default string mode.
     if (options.engine) {
@@ -173,6 +168,7 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
       engine = new CherryEngine(options.cherryOptions) as unknown as CherryMilkdownInstance['engine'];
     }
   } catch (error) {
+    root.remove();
     options.onError?.(error, 'create');
     throw error;
   }
@@ -186,6 +182,7 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
   };
 
   const flushDocumentChange = () => {
+    if (!changeMicrotaskQueued) return;
     changeMicrotaskQueued = false;
     if (destroyed || suppressChanges) return;
     try {
@@ -193,7 +190,6 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
       currentMarkdown = reconcileSerializedMarkdown(currentMarkdown, serializedBaseline, serialized);
       serializedBaseline = serialized;
       const markdown = currentMarkdown;
-      options.onImmediateChange?.({ markdown });
       scheduleNotification(markdown);
     } catch (error) {
       options.onError?.(error, 'parse');
@@ -227,7 +223,7 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
       new Plugin({
         view: (view) => {
           const selectCellAtPointer = (event: PointerEvent) => {
-            const target = event.target;
+            const { target } = event;
             if (!(target instanceof Element) || !target.closest('.milkdown-table-block td, .milkdown-table-block th')) {
               return;
             }
@@ -300,15 +296,16 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
 
   editor.use(tableBlockComponent.tableBlock);
 
-  if (interactiveComponents) {
-    editor.use(interactiveComponents[1].imageInlineComponent).use(interactiveComponents[2].linkTooltipPlugin);
-  }
+  if (options.bubble !== false && !options.readonly) editor.use(selectionBubble(root));
+  if (!options.readonly) editor.use(nodeControls(root));
 
   for (const plugin of options.plugins ?? []) editor.use(plugin);
 
   try {
     await editor.create();
   } catch (error) {
+    await editor.destroy().catch(() => {});
+    root.remove();
     options.onError?.(error, 'create');
     throw error;
   }
@@ -340,6 +337,11 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
     },
     setMarkdown(markdown, setOptions = {}) {
       if (destroyed) return;
+      // A newer API value supersedes queued local notifications, including a
+      // microtask scheduled before this call. Never emit a stale draft later.
+      changeMicrotaskQueued = false;
+      if (notificationTimer) clearTimeout(notificationTimer);
+      notificationTimer = undefined;
       try {
         suppressChanges = true;
         currentMarkdown = markdown;
@@ -357,7 +359,6 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
         suppressChanges = false;
       }
       if (setOptions.emit !== false) {
-        options.onImmediateChange?.({ markdown: currentMarkdown });
         scheduleNotification(currentMarkdown);
       }
     },
@@ -369,15 +370,16 @@ export async function createCherryMilkdown(options: CherryMilkdownOptions): Prom
       destroyed = true;
       if (notificationTimer) clearTimeout(notificationTimer);
       notificationTimer = undefined;
-      await editor.destroy();
-      root.classList.remove('cherry-milkdown');
-      root.replaceChildren();
+      try {
+        await editor.destroy();
+      } finally {
+        root.remove();
+      }
     },
   };
 }
 
 export type {
-  CherryMilkdownHost,
   CherryEngineLike,
   CherryDiagramRenderContext,
   CherryMilkdownChange,
@@ -385,10 +387,7 @@ export type {
   CherryMilkdownInstance,
   CherryMilkdownMathliveOptions,
   CherryMilkdownOptions,
-  CherryMilkdownPreviewHandle,
-  CherryMilkdownPreviewOptions,
   CherryVisualRenderer,
   CherryVisualRenderContext,
   CherryVisualRendererResult,
 } from './types.js';
-export { attachCherryMilkdownPreview, milkdown } from './previewer.js';
