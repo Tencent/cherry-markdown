@@ -1,4 +1,4 @@
-import { findCherryInlineMatches, transformCherryWysiwygTree } from '../src/wysiwyg';
+import { findCherryInlineMatches, findEmbeddedTableCharts, transformCherryWysiwygTree } from '../src/wysiwyg';
 
 describe('Cherry WYSIWYG markdown transform', () => {
   it('converts Cherry inline syntax into editable semantic marks', () => {
@@ -75,6 +75,29 @@ describe('Cherry WYSIWYG markdown transform', () => {
         source,
       }),
     ]);
+  });
+
+  it('finds rendered table charts inside native layouts but ignores fenced examples', () => {
+    const rendered = [
+      '| :line:{"title":"Real"} | Jan | Feb |',
+      '| --- | --- | --- |',
+      '| Sales | 1 | 2 |',
+    ].join('\n');
+    const source = [
+      '::: 2cols',
+      '**示例**',
+      '```markdown',
+      '| :line:{"title":"Example"} | Jan | Feb |',
+      '| --- | --- | --- |',
+      '| Sales | 9 | 9 |',
+      '```',
+      '::',
+      '**效果**',
+      rendered,
+      ':::',
+    ].join('\n');
+
+    expect(findEmbeddedTableCharts(source)).toEqual([{ syntax: 'line', source: rendered }]);
   });
 
   it('keeps absolute table positions after native blocks split a full document', () => {

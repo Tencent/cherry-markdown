@@ -14,6 +14,7 @@ import {
   renderMermaid,
 } from './diagram-runtime.js';
 import type { CherryVisualRendererResult } from './types.js';
+import { findEmbeddedTableCharts, tableChartType } from './table-chart.js';
 const headingNavigationTasks = new WeakMap<
   EditorView,
   { frames: number[]; timers: Array<ReturnType<typeof setTimeout>> }
@@ -1215,6 +1216,7 @@ class EmbedView implements NodeView {
     if (this.timer) clearTimeout(this.timer);
     this.pendingPreview?.remove();
     this.cleanup?.();
+    destroyCherryRenderedContent(this.config.engine, this.preview);
   }
 
   private scheduleRender() {
@@ -1361,10 +1363,14 @@ class EmbedView implements NodeView {
     }
     if (this.node.type.name.startsWith('cherry_html') || this.node.type.name === 'cherry_native_block') {
       try {
+        this.cleanup?.();
+        this.cleanup = undefined;
+        destroyCherryRenderedContent(this.config.engine, this.preview);
         const html = this.config.engine.makeHtml(String(this.node.attrs.source));
         this.preview.replaceChildren(
           sanitizedEngineFragment(html, this.node.isInline, this.node.type.name.startsWith('cherry_html')),
         );
+        if (this.node.type.name === 'cherry_native_block') this.enhanceNativeTableCharts(version);
       } catch {
         this.preview.textContent = String(this.node.attrs.source);
       }
@@ -1435,6 +1441,52 @@ class EmbedView implements NodeView {
         this.preview.append(status);
         this.config.onError?.(error, 'render');
       });
+  }
+
+  private enhanceNativeTableCharts(version: number) {
+    const renderer = this.config.renderers?.tableChart;
+    if (!renderer) return;
+    const charts = findEmbeddedTableCharts(String(this.node.attrs.source ?? ''));
+    if (!charts.length) return;
+    const wrappers = Array.from(this.preview.querySelectorAll<HTMLElement>('.cherry-table-wrapper'))
+      .filter((wrapper) => !wrapper.querySelector('.cherry-echarts-wrapper, .cherry-table-figure'))
+      .map((wrapper) => ({
+        wrapper,
+        syntax: tableChartType(wrapper.querySelector('th')?.textContent ?? ''),
+      }))
+      .filter(({ syntax }) => Boolean(syntax));
+    const cleanups: Array<() => void> = [];
+    this.cleanup = () => cleanups.splice(0).forEach((cleanup) => cleanup());
+
+    charts.forEach((chart) => {
+      const wrapperIndex = wrappers.findIndex(({ syntax }) => syntax === chart.syntax);
+      if (wrapperIndex < 0) return;
+      const [{ wrapper }] = wrappers.splice(wrapperIndex, 1);
+      const container = document.createElement('figure');
+      container.className = 'cherry-table-figure';
+      wrapper.prepend(container);
+      void Promise.resolve(
+        renderer({
+          container,
+          engine: this.config.engine,
+          source: chart.source,
+          syntax: chart.syntax,
+        }),
+      )
+        .then((result) => {
+          if (this.destroyed || version !== this.renderVersion) {
+            if (typeof result === 'function') result();
+            container.remove();
+            return;
+          }
+          if (typeof result === 'function') cleanups.push(result);
+          else if (typeof result === 'string') container.replaceChildren(sanitizedEngineFragment(result));
+        })
+        .catch((error: unknown) => {
+          container.remove();
+          if (!this.destroyed && version === this.renderVersion) this.config.onError?.(error, 'render');
+        });
+    });
   }
 }
 

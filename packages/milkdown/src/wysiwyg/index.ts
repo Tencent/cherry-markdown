@@ -26,6 +26,7 @@ export {
 } from './nodes.js';
 export { cherryWysiwyg } from './plugin.js';
 export { findCherryInlineMatches, transformCherryWysiwygTree } from './transform.js';
+export { findEmbeddedTableCharts, tableChartType } from './table-chart.js';
 export type {
   CherryDiagramRenderContext,
   CherryInlineMatch,

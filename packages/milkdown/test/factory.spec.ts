@@ -324,6 +324,42 @@ describe('cherryMilkdown WYSIWYG', () => {
     expect(element.querySelector('.cherry-table-chart + p:empty + .cherry-panel')).toBeNull();
   });
 
+  it('enhances a table chart nested in Cherry-owned columns without rendering the fenced example', async () => {
+    const element = root();
+    const chart = [
+      '| :line:{"title":"Real"} | Jan | Feb |',
+      '| --- | --- | --- |',
+      '| Sales | 1 | 2 |',
+    ].join('\n');
+    const value = [
+      '::: 2cols',
+      '```markdown',
+      chart.replace('Real', 'Example'),
+      '```',
+      '::',
+      chart,
+      ':::',
+    ].join('\n');
+    const renderer = vi.fn(({ container }) => {
+      container.innerHTML = '<svg data-nested-table-chart="true"></svg>';
+    });
+    const engine = {
+      makeHtml: vi.fn(
+        () =>
+          '<div class="cherry-panel-cols cherry-panel-cols__2cols"><pre><code>example</code></pre><div class="cherry-table-wrapper"><table><thead><tr><th>Ordinary</th></tr></thead></table></div><div class="cherry-table-wrapper" data-chart-table><table><thead><tr><th>:line:{"title":"Real"}</th></tr></thead></table></div></div>',
+      ),
+    };
+    const instance = await cherryMilkdown({ el: element, value, engine, renderers: { tableChart: renderer } });
+    instances.push(instance);
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(1));
+
+    expect(renderer).toHaveBeenCalledWith(expect.objectContaining({ source: chart, syntax: 'line' }));
+    expect(element.querySelectorAll('[data-nested-table-chart]')).toHaveLength(1);
+    expect(element.querySelector('[data-chart-table] .cherry-table-figure')).not.toBeNull();
+    expect(element.querySelector('.cherry-table-wrapper:not([data-chart-table]) .cherry-table-figure')).toBeNull();
+    expect(element.querySelector('.cherry-panel-cols__2cols pre .cherry-table-figure')).toBeNull();
+  });
+
   it('mounts the complete Cherry manual once without an initial synchronization write', async () => {
     const element = root();
     const onChange = vi.fn();

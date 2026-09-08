@@ -36,6 +36,9 @@ function interaction(mode: CherryCompatibilityMode, markdown: string, expectedDo
   } as const;
 }
 
+const nestedTableChartMarkdown =
+  '::: 2cols\n```markdown\n| :line:{"title":"Example"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 9 | 9 |\n```\n::\n| :line:{"title":"Real"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 1 | 2 |\n:::';
+
 /** Shared acceptance matrix for Cherry's built-in syntax. */
 export const cherryCompatibilityCases: readonly CherryCompatibilityCase[] = [
   {
@@ -88,6 +91,18 @@ export const cherryCompatibilityCases: readonly CherryCompatibilityCase[] = [
       'native-source',
       '| :line:{"title":"Trend"} | Jan | Feb |\n| --- | ---: | ---: |\n| Sales | 1 | 2 |',
       '.cherry-echarts-wrapper',
+    ),
+  },
+  {
+    id: 'table-chart-in-columns',
+    label: 'Cherry table chart nested in native columns',
+    markdown: nestedTableChartMarkdown,
+    mode: 'native-source',
+    selector: '.cherry-panel-cols__2cols .cherry-echarts-wrapper',
+    interaction: interaction(
+      'native-source',
+      nestedTableChartMarkdown,
+      '.cherry-panel-cols__2cols .cherry-echarts-wrapper',
     ),
   },
   {

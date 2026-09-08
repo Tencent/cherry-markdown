@@ -1,4 +1,5 @@
 import type { CherryInlineMatch } from './types.js';
+import { tableChartType } from './table-chart.js';
 
 interface MarkdownPosition {
   start?: { offset?: number };
@@ -494,16 +495,6 @@ function replaceRootBlocks(
   }
   if (sourceCursor < source.length) next.push(...parseSegment(source.slice(sourceCursor), sourceCursor));
   tree.children = next;
-}
-
-function tableChartType(source: string) {
-  const firstLine = source.split(/\r?\n/, 1)[0]?.trim() ?? '';
-  const firstCell =
-    firstLine
-      .replace(/^\|/, '')
-      .split(/(?<!\\)\|/, 1)[0]
-      ?.trim() ?? '';
-  return /^:(\w+):(?:[ ]*\{[\s\S]*\}[ ]*)?$/.exec(firstCell)?.[1] ?? '';
 }
 
 function replaceTableCharts(node: MarkdownNode, source: string) {

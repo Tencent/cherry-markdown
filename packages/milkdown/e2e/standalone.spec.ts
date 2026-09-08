@@ -43,10 +43,10 @@ test('real text selection, Bubble formatting, undo, and no layout shift', async 
   await setMarkdown(page, 'Selected text');
   const paragraph = page.locator('.ProseMirror > p').first();
   const before = await paragraph.boundingBox();
-  await paragraph.click();
-  await page.keyboard.press('Home');
-  await page.keyboard.press('Shift+End');
-  await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe('Selected text');
+  // A real triple-click selects the paragraph without depending on the
+  // platform-specific Home/End behavior used by the Playwright browser host.
+  await paragraph.click({ clickCount: 3 });
+  await expect.poll(() => page.evaluate(() => window.getSelection()?.toString().trim())).toBe('Selected text');
   const bubble = page.getByRole('toolbar', { name: '文本格式' });
   await expect(bubble).toBeVisible();
   await expect(bubble).toHaveClass(/cherry-bubble--preview/);
@@ -176,6 +176,16 @@ test('manual ECharts example renders including its final semicolon', async ({ pa
   await page.getByRole('link', { name: 'echarts直接渲染', exact: true }).click();
   await expect(page.locator('.cherry-embed--cherry_diagram:not([data-type="mermaid"])').first().locator('svg')).toBeVisible();
   await expect(page.locator('[role="alert"], [data-render-error="true"]')).toHaveCount(0);
+});
+
+test('manual line table chart renders inside its Cherry-owned columns layout', async ({ page }) => {
+  await page.getByRole('link', { name: '折线图', exact: true }).click();
+  const heading = page.locator('h3#折线图');
+  const nativeBlock = heading.locator('+ .cherry-embed--cherry_native_block');
+  await expect(nativeBlock.locator('.cherry-panel-cols__2cols')).toBeVisible();
+  await expect(nativeBlock.locator('.cherry-echarts-wrapper svg')).toBeVisible();
+  await expect(nativeBlock.locator('.cherry-echarts-wrapper')).toHaveCount(1);
+  await expect(nativeBlock.locator('[role="alert"], [data-render-error="true"]')).toHaveCount(0);
 });
 
 test('typing after an external prepend keeps the caret at the original word', async ({ page }) => {
