@@ -114,6 +114,22 @@ export const cherryCompatibilityCases: readonly CherryCompatibilityCase[] = [
     interaction: interaction('structured', '$E=mc^2$', 'math-field'),
   },
   {
+    id: 'formula-block',
+    label: 'block formula',
+    markdown: '$$\ny=1\n$$',
+    mode: 'structured',
+    selector: 'math-field[aria-label="Block formula"]',
+    interaction: interaction('structured', '$$\ny=1\n$$', 'math-field'),
+  },
+  {
+    id: 'formula-with-label',
+    label: 'Cherry label-prefixed block formula',
+    markdown: 'Formula:$$\ny=1\n$$',
+    mode: 'native-source',
+    selector: '.cherry-embed',
+    interaction: interaction('native-source', 'Formula:$$\ny=1\n$$', '.cherry-embed'),
+  },
+  {
     id: 'toc',
     label: 'TOC',
     markdown: '# Heading\n\n[[toc]]',

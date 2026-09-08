@@ -102,10 +102,12 @@ test('real CRUD and navigation keep ordinary nodes stable', async ({ page }) => 
   await expect(page.locator('.ProseMirror > h1')).toHaveText('');
   await assertStable();
 
-  await setMarkdown(page, '# Target\n\n[Jump](#Destination)\n\n## Destination');
-  const anchor = page.locator('.ProseMirror a[href="#Destination"]').first();
+  await setMarkdown(page, '# Target\n\n[Jump](#destination)\n\n## Destination');
+  const anchor = page.locator('.ProseMirror a[href="#destination"]').first();
   await expect(anchor).toBeVisible();
   await anchor.click();
+  await expect.poll(() => new URL(page.url()).hash).toBe('#destination');
+  await expect(page.locator('h2#destination')).toBeInViewport();
   await assertStable();
 });
 

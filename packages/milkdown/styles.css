@@ -324,15 +324,19 @@
   line-height: var(--line-height-relaxed);
 }
 
-.cherry-milkdown .cherry-source-node,
-.cherry-milkdown .cherry-embed {
+.cherry-milkdown .cherry-source-node {
   position: relative;
   box-sizing: border-box;
   margin: 16px 0;
   padding: 10px 12px;
   border: 1px solid var(--cherry-milkdown-border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--base-previewer-bg, #fff);
+}
+
+.cherry-milkdown .cherry-embed {
+  position: relative;
+  box-sizing: border-box;
 }
 
 .cherry-milkdown .cherry-node-actions button.is-active,
@@ -359,7 +363,7 @@
   padding: 10px 12px;
   border-radius: 6px;
   outline: 0;
-  background: #f6f8fa;
+  background: var(--md-inline-code-bg, #f6f8fa);
   white-space: pre-wrap;
   overflow: auto;
   overflow-wrap: anywhere;
@@ -453,8 +457,6 @@
 
 .cherry-milkdown .milkdown-table-block {
   position: relative;
-  margin: 20px 0;
-  padding: 22px 0 0 22px;
   overflow: visible;
 }
 
@@ -485,7 +487,7 @@
 .cherry-milkdown .milkdown-table-block .cell-handle {
   border: 1px solid var(--cherry-milkdown-border);
   border-radius: 4px;
-  background: #fff;
+  background: var(--base-previewer-bg, #fff);
   box-shadow: 0 1px 4px rgb(31 35 41 / 10%);
   cursor: grab;
 }
@@ -510,7 +512,7 @@
   padding: 4px;
   border: 1px solid var(--cherry-milkdown-border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--base-previewer-bg, #fff);
   box-shadow: 0 6px 20px rgb(31 35 41 / 14%);
   white-space: nowrap;
 }
@@ -598,7 +600,7 @@
   height: 18px;
   border: 1px solid var(--cherry-milkdown-border);
   border-radius: 50%;
-  background: #fff;
+  background: var(--base-previewer-bg, #fff);
 }
 
 .cherry-milkdown .milkdown-table-block .line-handle[data-display-type="indicator"] .add-button {
@@ -607,6 +609,7 @@
 
 /* NodeViews retain the native Cherry DOM presentation contract. */
 .cherry-milkdown .cherry-compound.cherry-detail {
+  position: relative;
   margin: 0;
   padding: 0;
   border: 0;
@@ -614,7 +617,19 @@
 }
 
 .cherry-milkdown .cherry-detail > .cherry-compound__header {
-  display: none;
+  position: absolute;
+  z-index: 20;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+}
+
+/* Keep the parent-level add action beside, rather than on top of, the active
+ * item's move/delete actions. Both remain overlays and add no layout space. */
+.cherry-milkdown .cherry-detail > .cherry-compound__header .cherry-node-actions {
+  right: 86px;
 }
 
 .cherry-milkdown .cherry-detail > .cherry-compound__content {
@@ -709,13 +724,6 @@
    * exposes that margin outside the box, so add the same 6px remainder. */
   margin: 0 0 calc(var(--spacing-lg) + 16px);
   padding: 0;
-}
-
-/* TableBlock supplies Cherry-compatible row/column operations in embedded
- * mode. Its handles are pointer-revealed, so the unfocused preview keeps the
- * same layout as the native Cherry table. */
-.cherry-milkdown .milkdown-table-block {
-  padding-left: 0;
 }
 
 .cherry-milkdown .milkdown-table-block + .cherry-compound {

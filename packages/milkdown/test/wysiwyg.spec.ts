@@ -229,6 +229,26 @@ describe('Cherry WYSIWYG markdown transform', () => {
     expect(findCherryInlineMatches('Formula $E=mc^2$')).toEqual([]);
   });
 
+  it('keeps plain block math structured while preserving Cherry label-prefixed math as native', () => {
+    const plain = '$$\ny=1\n$$';
+    const plainTree = {
+      type: 'root',
+      children: [{ type: 'math', value: 'y=1', position: { start: { offset: 0 }, end: { offset: plain.length } } }],
+    };
+    transformCherryWysiwygTree(plainTree, plain);
+    expect(plainTree.children[0]?.type).toBe('math');
+
+    const labeled = 'Formula:$$\ny=1\n$$';
+    const labeledTree = {
+      type: 'root',
+      children: [
+        { type: 'paragraph', position: { start: { offset: 0 }, end: { offset: labeled.length } }, children: [] },
+      ],
+    };
+    transformCherryWysiwygTree(labeledTree, labeled);
+    expect(labeledTree.children[0]).toEqual(expect.objectContaining({ type: 'cherryNativeBlock', source: labeled }));
+  });
+
   it('does not transform Cherry-looking syntax inside inline code nodes', () => {
     const tree = {
       type: 'root',

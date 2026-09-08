@@ -33,7 +33,10 @@ const BLOCK_PATTERNS = [
   { syntax: 'comment-reference' as const, pattern: /^[ \t]*\[(?!\^)[^\]\n]+?\]:[^\S\n]*[^\n]+$/gm },
   {
     syntax: 'native' as const,
-    pattern: /^[^\n`]*\$\$[ \t]*\n[\s\S]*?^\$\$[ \t]*$/gm,
+    // Cherry also accepts "label:$$" blocks, which remark-math cannot model
+    // and must stay native. A plain $$ block is standard math and should use
+    // the structured MathLive NodeView instead of a source-only fallback.
+    pattern: /^[ \t]*[^\s`$][^\n`$]*\$\$[ \t]*\n[\s\S]*?^\$\$[ \t]*$/gm,
   },
   ...['mermaid', 'plantuml', 'echarts'].map((diagramType) => ({
     syntax: 'diagram' as const,

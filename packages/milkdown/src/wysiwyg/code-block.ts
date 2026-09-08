@@ -1,6 +1,6 @@
 import { codeBlockSchema } from '@milkdown/kit/preset/commonmark';
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
-import { Plugin, TextSelection } from '@milkdown/kit/prose/state';
+import { NodeSelection, Plugin, TextSelection } from '@milkdown/kit/prose/state';
 import { Decoration, DecorationSet } from '@milkdown/kit/prose/view';
 import type { EditorView, NodeView, ViewMutationRecord } from '@milkdown/kit/prose/view';
 import { $prose, $view } from '@milkdown/kit/utils';
@@ -163,6 +163,7 @@ class CherryCodeBlockView implements NodeView {
     this.contentDOM.addEventListener('click', this.activateContent);
     this.pre.append(this.gutter, this.contentDOM);
     this.dom.append(tools, this.pre);
+    this.dom.addEventListener('mousedown', this.selectBlockFromChrome, true);
     this.sync();
   }
 
@@ -196,6 +197,7 @@ class CherryCodeBlockView implements NodeView {
     this.language.removeEventListener('change', this.updateLanguage);
     this.copy.removeEventListener('click', this.copyCode);
     this.contentDOM.removeEventListener('click', this.activateContent);
+    this.dom.removeEventListener('mousedown', this.selectBlockFromChrome, true);
   }
 
   private sync() {
@@ -265,6 +267,22 @@ class CherryCodeBlockView implements NodeView {
     this.view.dispatch(
       this.view.state.tr.setSelection(TextSelection.create(this.view.state.doc, clamp(anchor), clamp(head))),
     );
+    this.view.focus();
+  };
+
+  private selectBlockFromChrome = (event: MouseEvent) => {
+    if (event.button !== 0) return;
+    const target = event.target as Node;
+    if (
+      this.contentDOM.contains(target) ||
+      (target instanceof Element && target.closest('.cherry-milkdown-code-block__tools'))
+    )
+      return;
+    const position = this.getPos();
+    if (typeof position !== 'number') return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.view.dispatch(this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, position)));
     this.view.focus();
   };
 

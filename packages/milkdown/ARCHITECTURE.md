@@ -20,16 +20,22 @@ interaction matrix passing.
 
 ## Remaining release gates
 
-- Full-manual DOM/visual comparison, not just serialized Markdown equivalence.
-  The manual includes non-GFM ordered lists, inline media, mixed HTML tables and
-  nested fenced examples that need explicit native-render handling.
+- Full-manual DOM/visual comparison for the remaining uncommon combinations,
+  not just serialized Markdown equivalence. The blocking Chromium suite already
+  covers ordinary text CRUD, Bubble selection, task toggles, heading/TOC links,
+  structured Panel/Detail controls, code, formulas, tables, images, native
+  source nodes, Mermaid and ECharts.
 - All advanced chart options and map data-provider behavior. The optional chart
   renderer is not yet a feature-for-feature replacement of Cherry's chart plugin.
-- Image drag-resizing and full decoration controls; currently width/alignment
-  property editing is available.
 - Bubble color/size/ruby controls and a full keyboard/touch accessibility audit.
 - Repeated mount/destroy resource accounting and long-running editing stress.
 - Browser runtime verification of the actual npm consumer, beyond its build.
+
+All adapter CSS selectors must remain scoped below `.cherry-milkdown`. Native
+content styling belongs to the imported Cherry stylesheet; this package may
+style only ProseMirror behavior, editable controls and documented DOM-shape
+compensation. The stylesheet ownership test blocks rules that could leak into a
+normal Cherry instance.
 
 Do not change Cherry to make these pass. Extend the package's schema, NodeViews,
 renderers and controls with failing regression cases first.

@@ -843,6 +843,7 @@ class CompoundView implements NodeView {
       this.contentDOM.style.removeProperty('--cols');
     }
     this.title.hidden = node.type.name === 'cherry_detail' || kind === 'cols';
+    this.kind.hidden = node.type.name === 'cherry_detail';
     this.kind.textContent = kind;
     this.add.hidden =
       this.readonly ||
@@ -1902,10 +1903,15 @@ export const cherryTocRefreshPlugin = $prose(
       props: {
         decorations(state) {
           const anchors: Decoration[] = [];
+          const usedIds = new Map<string, number>();
           state.doc.descendants((node, position) => {
             if (node.type.name !== 'heading') return;
-            const id = String(node.attrs.id ?? '');
+            const id = headingId(node, usedIds);
             if (!id) return;
+            // Milkdown's heading schema does not always serialize an id. Add
+            // the same stable runtime anchor contract as Cherry without
+            // mutating the document or its Markdown.
+            anchors.push(Decoration.node(position, position + node.nodeSize, { id }));
             anchors.push(
               Decoration.widget(
                 position + 1,
