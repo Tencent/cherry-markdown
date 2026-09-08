@@ -111,55 +111,6 @@ describe('Previewer rendering pipeline', () => {
     expect(previewer.getValue(false)).toBe('<p>content</p>');
   });
 
-  it('delegates visible rendering to one explicitly owned content renderer', () => {
-    const { previewer, previewerDom, cherry } = createPreviewer();
-    const renderer = { update: vi.fn() };
-    const otherRenderer = { update: vi.fn() };
-
-    previewer.setContentRenderer(renderer);
-    previewer.refresh('<p>external</p>');
-    previewer.update('<p data-sign="next">next</p>');
-
-    expect(renderer.update).toHaveBeenNthCalledWith(1, {
-      container: previewerDom,
-      markdown: cherry.getMarkdown(),
-      html: '<p>external</p>',
-    });
-    expect(renderer.update).toHaveBeenNthCalledWith(2, {
-      container: previewerDom,
-      markdown: cherry.getMarkdown(),
-      html: '<p data-sign="next">next</p>',
-    });
-    expect(previewerDom.children).toHaveLength(0);
-    expect(previewer.clearContentRenderer(otherRenderer)).toBe(false);
-    expect(previewer.clearContentRenderer(renderer)).toBe(true);
-  });
-
-  it('routes only commands owned by the registered preview editing Bubble', () => {
-    const { previewer } = createPreviewer();
-    const menu = {};
-    const bubble = {
-      menus: { hooks: { bold: menu } },
-      showAt: vi.fn(),
-      hideBubble: vi.fn(),
-      destroy: vi.fn(),
-    };
-    const bridge = { isActive: vi.fn(() => true), runCommand: vi.fn(() => true) };
-    vi.spyOn(previewer, 'ensureEditingBubble').mockImplementation(() => {
-      Reflect.set(previewer, 'editingBubble', bubble);
-      return bubble as never;
-    });
-
-    previewer.setEditingBridge(bridge);
-    expect(previewer.showEditingBubble({ top: 1, bottom: 2, left: 3, right: 4 })).toBe(true);
-    expect(bubble.showAt).toHaveBeenCalledWith({ top: 1, bottom: 2, left: 3, right: 4 });
-    expect(previewer.runEditingCommand({ name: 'bold', menu })).toBe(true);
-    expect(previewer.runEditingCommand({ name: 'bold', menu: {} })).toBe(false);
-    expect(bridge.runCommand).toHaveBeenCalledOnce();
-    expect(previewer.clearEditingBridge(bridge)).toBe(true);
-    expect(bubble.destroy).toHaveBeenCalledOnce();
-  });
-
   it('supports mobile preview containers and falls back when the wrapper is absent', () => {
     const { previewer, previewerDom } = createPreviewer();
     previewer.refresh('<p>mobile content</p>');

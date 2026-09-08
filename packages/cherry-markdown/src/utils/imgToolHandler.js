@@ -238,7 +238,7 @@ const imgToolHandler = {
     }, 120);
   },
   refreshTarget() {
-    if (!this.previewerDom) {
+    if (!this.isMermaid || !this.previewerDom) {
       return;
     }
     if (typeof this.resolveTarget === 'function') {

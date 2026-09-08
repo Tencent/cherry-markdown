@@ -98,7 +98,6 @@ const imgSizeHandler = {
     this.onInvalidTarget = options.onInvalidTarget || null;
     this.validateTarget = options.validateTarget || null;
     this.resolveTarget = options.resolveTarget || null;
-    this.deferChangeUntilResizeStop = options.deferChangeUntilResizeStop || false;
     this.previewerDom = previewerDom;
     this.container = container;
     this.buts = this.initBubbleButtons();
@@ -169,7 +168,7 @@ const imgSizeHandler = {
     }, 120);
   },
   refreshTarget() {
-    if (!this.previewerDom) {
+    if (!this.isMermaid || !this.previewerDom) {
       return;
     }
     if (typeof this.resolveTarget === 'function') {
@@ -210,7 +209,6 @@ const imgSizeHandler = {
     this.onInvalidTarget = null;
     this.validateTarget = null;
     this.resolveTarget = null;
-    this.deferChangeUntilResizeStop = false;
     this.onPositionUpdated = null;
   },
   updateBubbleButs() {
@@ -223,7 +221,7 @@ const imgSizeHandler = {
       this.butsPoints[`pints-${name}`].style.top = `${this.buts.points.arrInfo[name].top}px`;
       this.butsPoints[`pints-${name}`].style.left = `${this.buts.points.arrInfo[name].left}px`;
     });
-    if (this.isMermaid || this.deferChangeUntilResizeStop) {
+    if (this.isMermaid) {
       this.onPositionUpdated?.();
     }
   },
@@ -364,11 +362,11 @@ const imgSizeHandler = {
 
     this.updateBubbleButs();
     // mermaid figure 拖拽过程中实时更新元素尺寸，使缩放可见
-    if (this.isMermaid || this.deferChangeUntilResizeStop) {
+    if (this.isMermaid) {
       this.img.style.width = `${this.buts.style.width}px`;
       this.img.style.height = `${this.buts.style.height}px`;
     }
-    if (!this.isMermaid && !this.deferChangeUntilResizeStop) {
+    if (!this.isMermaid) {
       this.change();
     }
   },

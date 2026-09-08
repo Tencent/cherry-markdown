@@ -111,9 +111,31 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     previewer: { ...cherryOptions.previewer, enablePreviewerBubble: true },
   });
   const previewer = cherry.getPreviewer();
-  const inertRenderer = { update() {} };
-  previewer.setContentRenderer(inertRenderer);
   const root = previewer.getDom();
+  const destroyCherryShell = async () => {
+    // Cherry currently leaves Previewer destruction outside Cherry.destroy(),
+    // while its destroy methods null objects still referenced by pending layout
+    // callbacks. Detach the document listeners used by PreviewerBubble without
+    // mutating those objects, then let the normal Cherry destroy path own DOM
+    // and event-bus cleanup.
+    const ui = previewer.previewerBubble;
+    ui?.$removeAllPreviewerBubbles?.();
+    ui?.removeHoverBubble?.cancel?.();
+    if (ui?.previewerDom) {
+      ui.previewerDom.removeEventListener('click', ui.$bindedOnClick);
+      ui.previewerDom.removeEventListener('mouseover', ui.$bindedOnMouseOver);
+      ui.previewerDom.removeEventListener('scroll', ui.$bindedOnScroll, true);
+      ui.previewerDom.removeEventListener('change', ui.$bindedOnChange);
+    }
+    document.removeEventListener('mousedown', ui?.$bindedOnMouseDown);
+    document.removeEventListener('mouseup', ui?.$bindedOnMouseUp);
+    document.removeEventListener('mousemove', ui?.$bindedOnMouseMove);
+    document.removeEventListener('keyup', ui?.$bindedOnKeyUp);
+    // Flush Cherry's already queued preview mousedown/layout callbacks before
+    // Editor.destroy() clears the Previewer references they close over.
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    cherry.destroy();
+  };
   root.replaceChildren();
   root.classList.add('cherry-milkdown');
   cherry.editor?.options?.editorDom?.remove();
@@ -140,7 +162,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     // `makeHtml`, while this integration always calls its default string mode.
     engine = options.engine ?? (cherry.engine as unknown as CherryMilkdownInstance['engine']);
   } catch (error) {
-    cherry.destroy();
+    await destroyCherryShell();
     options.onError?.(error, 'create');
     throw error;
   }
@@ -286,7 +308,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     await editor.create();
   } catch (error) {
     await editor.destroy().catch(() => {});
-    cherry.destroy();
+    await destroyCherryShell();
     options.onError?.(error, 'create');
     throw error;
   }
@@ -344,8 +366,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
       try {
         await editor.destroy();
       } finally {
-        previewer.clearContentRenderer(inertRenderer);
-        cherry.destroy();
+        await destroyCherryShell();
       }
     },
   };

@@ -8,12 +8,10 @@ import type { CherryMilkdownInstance } from './types.js';
 type ElementKind = 'image' | 'mermaid';
 
 interface NativeCherryHost {
-  getPreviewer(): {
-    setEditingBridge(bridge: object): void;
-    clearEditingBridge(bridge?: object): boolean;
-    showEditingBubble(rect: { top: number; bottom: number; left: number; right: number }): boolean;
-    hideEditingBubble(): void;
-  };
+  bubble?: any;
+  toolbarBubbleContainer?: HTMLElement;
+  $event?: { off(name: string, listener: (...args: any[]) => void): void };
+  getPreviewer(): any;
 }
 
 export function supportsTextFormatting(state: EditorState) {
@@ -41,8 +39,34 @@ export function connectNativeCherryControls(
 ) {
   const previewer = cherry.getPreviewer();
   const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+  const bubble = cherry.bubble;
+  const bubbleDom = cherry.toolbarBubbleContainer ?? bubble?.getBubbleDom?.();
+  const previewerBubble = previewer.previewerBubble;
   let destroyed = false;
   let cancelBubbleRefresh: (() => void) | undefined;
+
+  if (!bubble || !(bubbleDom instanceof HTMLElement)) return () => {};
+
+  // Cherry already creates its configured Bubble while constructing the
+  // preview-only shell. Reuse that exact menu DOM and menu instances, but
+  // detach their CodeMirror selection ownership. This adapter deliberately
+  // lives in @cherry-markdown/milkdown so Cherry itself needs no plugin API.
+  const cherryBubbleEvents = [
+    ['afterChange', 'boundHandleAfterChange'],
+    ['layoutChange', 'boundHandleLayoutChange'],
+    ['onScroll', 'boundHandleScroll'],
+    ['beforeSelectionChange', 'boundHandleBeforeSelectionChange'],
+  ] as const;
+  for (const [eventName, property] of cherryBubbleEvents) {
+    const listener = bubble[property];
+    if (typeof listener === 'function') cherry.$event?.off(eventName, listener);
+  }
+  previewer.getDom().append(bubbleDom);
+  bubbleDom.classList.add('cherry-bubble--preview');
+  bubbleDom.setAttribute('role', 'toolbar');
+  bubbleDom.setAttribute('aria-label', '文本格式');
+  const preserveSelection = (event: PointerEvent) => event.preventDefault();
+  bubbleDom.addEventListener('pointerdown', preserveSelection);
 
   const call = (command: { key: unknown }) => {
     let handled = false;
@@ -199,23 +223,245 @@ export function connectNativeCherryControls(
     },
   };
 
+  const hideBubble = () => {
+    if (bubble.bubbleDom) bubble.visible = false;
+  };
+
+  const showBubbleAt = (rect: { top: number; bottom: number; left: number; right: number }) => {
+    if (!bubble.bubbleDom) return;
+    bubble.bubbleDom.style.position = 'fixed';
+    bubble.visible = true;
+    const gap = 6;
+    const height = bubble.bubbleDom.offsetHeight;
+    const above = rect.top - height >= 8;
+    const top = above ? rect.top - height - gap : rect.bottom + gap;
+    const center = (rect.left + rect.right) / 2;
+    const maxLeft = Math.max(8, document.documentElement.clientWidth - bubble.bubbleDom.offsetWidth - 8);
+    const left = Math.max(8, Math.min(maxLeft, center - bubble.bubbleDom.offsetWidth / 2));
+    bubble.bubbleDom.style.top = `${top}px`;
+    bubble.bubbleDom.style.left = `${left}px`;
+    if (bubble.bubbleTop) bubble.bubbleTop.style.display = above ? 'none' : 'block';
+    if (bubble.bubbleBottom) bubble.bubbleBottom.style.display = above ? 'block' : 'none';
+    bubble.$setBubbleCursorPosition?.(
+      `${Math.max(10, Math.min(bubble.bubbleDom.offsetWidth - 10, center - left))}px`,
+    );
+  };
+
+  const restoredMenuFire: Array<() => void> = [];
+  for (const [name, menu] of Object.entries<any>(bubble.menus?.hooks ?? {})) {
+    if (!menu || typeof menu.fire !== 'function') continue;
+    const original = menu.fire;
+    menu.fire = (event?: Event, shortKey = '') => {
+      event?.stopPropagation();
+      bridge.runCommand({ name, shortKey, menu });
+    };
+    restoredMenuFire.push(() => {
+      menu.fire = original;
+    });
+  }
+
+  const restorePreviewControls: Array<() => void> = [];
+  if (previewerBubble) {
+    let editingNativeNode = false;
+    let imageResize:
+      | {
+          target: HTMLImageElement;
+          handle: string;
+          startX: number;
+          startY: number;
+          width: number;
+          height: number;
+          nextWidth: number;
+          nextHeight: number;
+        }
+      | undefined;
+    const previewerDom = previewer.getDom() as HTMLElement;
+    const originalClick = previewerBubble.$bindedOnClick;
+    const originalEnableCheck = previewerBubble.$isEnableBubbleAndEditorShow;
+    const originalBeginImage = previewerBubble.beginChangeImgValue;
+    const originalImageValid = previewerBubble.$isImgHandlerValid;
+    const originalChangeImageSize = previewerBubble.changeImgSize;
+    const originalChangeImageStyle = previewerBubble.changeImgStyle;
+    const originalMermaid = previewerBubble.mermaidSession;
+    const mermaidMethods = originalMermaid
+      ? {
+          beginEdit: originalMermaid.beginEdit,
+          createHandlerOptions: originalMermaid.createHandlerOptions,
+          resolveFigure: originalMermaid.resolveFigure,
+          getEditorIndex: originalMermaid.getEditorIndex,
+          isValid: originalMermaid.isValid,
+          changeSize: originalMermaid.changeSize,
+          changeAlign: originalMermaid.changeAlign,
+        }
+      : undefined;
+
+    const resolveElement = (kind: ElementKind) => bridge.resolvePreviewElement(kind);
+    const isOwned = (target: Element, kind: ElementKind) => bridge.ownsPreviewElement(target, kind);
+    previewerBubble.$isEnableBubbleAndEditorShow = () => editingNativeNode;
+    previewerBubble.beginChangeImgValue = (target: HTMLImageElement) => {
+      if (!isOwned(target, 'image')) return false;
+      const position = view.posAtDOM(target, 0);
+      view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, position)));
+      return true;
+    };
+    previewerBubble.$isImgHandlerValid = () => {
+      const target = resolveElement('image');
+      return target instanceof HTMLImageElement && target.isConnected;
+    };
+    previewerBubble.changeImgSize = (target: HTMLImageElement, style: { width: number; height: number }) => {
+      // The native handler emits every drag frame. Replacing the ProseMirror
+      // node here would detach its target and truncate the gesture, so the
+      // capture handlers below own the visual preview and commit once on up.
+      if (!imageResize) {
+        target.style.width = `${style.width}px`;
+        target.style.height = `${style.height}px`;
+      }
+      return true;
+    };
+    previewerBubble.changeImgStyle = (target: HTMLImageElement, type: string) => updateImage(target, { type });
+
+    if (originalMermaid) {
+      originalMermaid.beginEdit = (target: HTMLElement) => {
+        if (!isOwned(target, 'mermaid')) return false;
+        const position = view.posAtDOM(target, 0);
+        view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, position)));
+        originalMermaid.previewIndex = [...previewerDom.querySelectorAll('figure[data-type="mermaid"]')].indexOf(target);
+        return true;
+      };
+      originalMermaid.resolveFigure = () => resolveElement('mermaid');
+      originalMermaid.getEditorIndex = () =>
+        view.state.selection instanceof NodeSelection && view.state.selection.node.type.name === 'cherry_diagram'
+          ? view.state.selection.from
+          : -1;
+      originalMermaid.isValid = () => {
+        const target = resolveElement('mermaid');
+        return target instanceof HTMLElement && target.isConnected;
+      };
+      originalMermaid.createHandlerOptions = (onInvalidTarget: () => void) => ({
+        onInvalidTarget,
+        resolveTarget: () => resolveElement('mermaid'),
+        validateTarget: () => originalMermaid.isValid(),
+      });
+      originalMermaid.changeSize = (style: { width: number; height: number }) => {
+        const target = resolveElement('mermaid');
+        return target instanceof HTMLElement && updateMermaid(target, style);
+      };
+      originalMermaid.changeAlign = (type: string) => {
+        const target = resolveElement('mermaid');
+        return target instanceof HTMLElement && updateMermaid(target, { type });
+      };
+    }
+
+    const onPreviewClick = (event: MouseEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      const image = target instanceof HTMLImageElement && isOwned(target, 'image');
+      const mermaid = target?.closest('figure[data-type="mermaid"]');
+      editingNativeNode = image || (mermaid instanceof HTMLElement && isOwned(mermaid, 'mermaid'));
+      try {
+        originalClick.call(previewerBubble, event);
+      } finally {
+        editingNativeNode = false;
+      }
+    };
+    const beginImageResize = (event: MouseEvent) => {
+      const point = event.target instanceof Element
+        ? event.target.closest<HTMLElement>('.cherry-previewer-img-size-handler__points')
+        : null;
+      const target = resolveElement('image');
+      if (!point || !(target instanceof HTMLImageElement)) return;
+      const rect = target.getBoundingClientRect();
+      imageResize = {
+        target,
+        handle: point.dataset.name ?? '',
+        startX: event.clientX,
+        startY: event.clientY,
+        width: rect.width,
+        height: rect.height,
+        nextWidth: rect.width,
+        nextHeight: rect.height,
+      };
+    };
+    const previewImageResize = (event: MouseEvent) => {
+      if (!imageResize) return;
+      const dx = event.clientX - imageResize.startX;
+      const dy = event.clientY - imageResize.startY;
+      const horizontal = imageResize.handle.startsWith('left')
+        ? -dx
+        : imageResize.handle.startsWith('right')
+          ? dx
+          : 0;
+      const vertical = imageResize.handle.endsWith('Top')
+        ? -dy
+        : imageResize.handle.endsWith('Bottom')
+          ? dy
+          : 0;
+      if (horizontal) {
+        imageResize.nextWidth = Math.max(1, imageResize.width + horizontal);
+        if (!imageResize.handle.endsWith('Middle')) {
+          imageResize.nextHeight = Math.max(1, imageResize.height * (imageResize.nextWidth / imageResize.width));
+        }
+      } else if (vertical) {
+        imageResize.nextHeight = Math.max(1, imageResize.height + vertical);
+        imageResize.nextWidth = Math.max(1, imageResize.width * (imageResize.nextHeight / imageResize.height));
+      }
+      imageResize.target.style.width = `${imageResize.nextWidth}px`;
+      imageResize.target.style.height = `${imageResize.nextHeight}px`;
+    };
+    const commitImageResize = () => {
+      if (!imageResize) return;
+      const finished = imageResize;
+      imageResize = undefined;
+      queueMicrotask(() => {
+        if (!destroyed) updateImage(finished.target, { width: finished.nextWidth, height: finished.nextHeight });
+      });
+    };
+    previewerDom.removeEventListener('click', originalClick);
+    previewerDom.addEventListener('click', onPreviewClick);
+    document.addEventListener('mousedown', beginImageResize, true);
+    document.addEventListener('mousemove', previewImageResize, true);
+    document.addEventListener('mouseup', commitImageResize, true);
+    restorePreviewControls.push(() => {
+      commitImageResize();
+      document.removeEventListener('mousedown', beginImageResize, true);
+      document.removeEventListener('mousemove', previewImageResize, true);
+      document.removeEventListener('mouseup', commitImageResize, true);
+      previewerDom.removeEventListener('click', onPreviewClick);
+      previewerDom.addEventListener('click', originalClick);
+      previewerBubble.$isEnableBubbleAndEditorShow = originalEnableCheck;
+      previewerBubble.beginChangeImgValue = originalBeginImage;
+      previewerBubble.$isImgHandlerValid = originalImageValid;
+      previewerBubble.changeImgSize = originalChangeImageSize;
+      previewerBubble.changeImgStyle = originalChangeImageStyle;
+      if (originalMermaid && mermaidMethods) Object.assign(originalMermaid, mermaidMethods);
+    });
+  }
+
   const refreshBubble = () => {
     if (cancelBubbleRefresh) return;
     const refresh = () => {
       cancelBubbleRefresh = undefined;
-      if (destroyed || !view.hasFocus() || !supportsTextFormatting(view.state)) {
-        previewer.hideEditingBubble();
+      const selection = view.dom.ownerDocument.getSelection();
+      const ownsSelection = Boolean(
+        selection &&
+        !selection.isCollapsed &&
+        selection.anchorNode &&
+        selection.focusNode &&
+        view.dom.contains(selection.anchorNode) &&
+        view.dom.contains(selection.focusNode),
+      );
+      if (destroyed || !ownsSelection || !supportsTextFormatting(view.state)) {
+        hideBubble();
         return;
       }
       try {
         const from = view.coordsAtPos(view.state.selection.from);
         const to = view.coordsAtPos(view.state.selection.to);
-        previewer.showEditingBubble({
+        showBubbleAt({
           top: Math.min(from.top, to.top), bottom: Math.max(from.bottom, to.bottom),
           left: Math.min(from.left, to.left), right: Math.max(from.right, to.right),
         });
       } catch {
-        previewer.hideEditingBubble();
+        hideBubble();
       }
     };
     // ProseMirror reconciles the DOM selection through its observer. A
@@ -230,13 +476,17 @@ export function connectNativeCherryControls(
       cancelBubbleRefresh = () => clearTimeout(timer);
     }
   };
-  const hideBubbleAtPointer = () => previewer.hideEditingBubble();
+  const hideBubbleAtPointer = hideBubble;
+  const hideBubbleOutside = (event: PointerEvent) => {
+    const target = event.target;
+    if (target instanceof Node && !view.dom.contains(target) && !bubbleDom.contains(target)) hideBubble();
+  };
   view.dom.ownerDocument.addEventListener('selectionchange', refreshBubble);
+  view.dom.ownerDocument.addEventListener('pointerdown', hideBubbleOutside, true);
   view.dom.addEventListener('mouseup', refreshBubble, true);
   view.dom.addEventListener('keyup', refreshBubble, true);
   view.dom.addEventListener('pointerdown', hideBubbleAtPointer, true);
   const unsubscribeSelectionChange = subscribeSelectionChange?.(refreshBubble);
-  previewer.setEditingBridge(bridge);
 
   return () => {
     if (destroyed) return;
@@ -244,10 +494,14 @@ export function connectNativeCherryControls(
     cancelBubbleRefresh?.();
     cancelBubbleRefresh = undefined;
     view.dom.ownerDocument.removeEventListener('selectionchange', refreshBubble);
+    view.dom.ownerDocument.removeEventListener('pointerdown', hideBubbleOutside, true);
     view.dom.removeEventListener('mouseup', refreshBubble, true);
     view.dom.removeEventListener('keyup', refreshBubble, true);
     view.dom.removeEventListener('pointerdown', hideBubbleAtPointer, true);
     unsubscribeSelectionChange?.();
-    previewer.clearEditingBridge(bridge);
+    hideBubble();
+    bubbleDom.removeEventListener('pointerdown', preserveSelection);
+    restoredMenuFire.forEach((restore) => restore());
+    restorePreviewControls.forEach((restore) => restore());
   };
 }
