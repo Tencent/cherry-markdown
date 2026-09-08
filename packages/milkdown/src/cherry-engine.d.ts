@@ -5,3 +5,8 @@ declare module 'cherry-markdown/dist/cherry-markdown.engine.core.esm.js' {
 
   export default CherryEngine;
 }
+
+declare module 'cherry-markdown/dist/cherry-markdown.esm.js' {
+  const Cherry: new (options: object) => any;
+  export default Cherry;
+}

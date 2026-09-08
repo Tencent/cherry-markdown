@@ -544,6 +544,19 @@ function editableSourceText(source: HTMLElement) {
   return source.innerText || source.textContent || '';
 }
 
+function selectAllEditableSource(event: KeyboardEvent) {
+  if (event.key.toLowerCase() !== 'a' || (!event.metaKey && !event.ctrlKey) || event.altKey) return;
+  const source = event.currentTarget;
+  if (!(source instanceof HTMLElement) || source.contentEditable !== 'true') return;
+  event.preventDefault();
+  event.stopPropagation();
+  const selection = source.ownerDocument.getSelection();
+  const range = source.ownerDocument.createRange();
+  range.selectNodeContents(source);
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+}
+
 class CompoundItemView implements NodeView {
   dom: HTMLElement;
   contentDOM: HTMLElement;
@@ -984,6 +997,7 @@ class SourceLeafView implements NodeView {
     this.source.textContent = String(node.attrs.source ?? '');
     this.source.hidden = node.type.name === 'cherry_frontmatter';
     this.source.addEventListener('input', this.commitSource);
+    this.source.addEventListener('keydown', selectAllEditableSource);
     if (node.type.name === 'cherry_frontmatter' && !readonly) {
       header.tabIndex = 0;
       header.setAttribute('role', 'button');
@@ -1030,6 +1044,8 @@ class SourceLeafView implements NodeView {
 
   destroy() {
     this.destroyed = true;
+    this.source?.removeEventListener('input', this.commitSource);
+    this.source?.removeEventListener('keydown', selectAllEditableSource);
     this.dom.removeEventListener('mousedown', this.prepareTocNavigation);
     this.dom.removeEventListener('click', this.navigateToc);
     if (this.tocRefreshFrame !== undefined) cancelAnimationFrame(this.tocRefreshFrame);
@@ -1094,7 +1110,7 @@ class EmbedView implements NodeView {
   private readonly view: EditorView;
   private readonly getPos: () => number | undefined;
   private preview: HTMLElement;
-  private controls?: HTMLElement;
+  private pendingPreview?: HTMLElement;
   private readonly sourcePanel: HTMLElement;
   private readonly source: HTMLElement;
   private timer?: ReturnType<typeof setTimeout>;
@@ -1107,7 +1123,6 @@ class EmbedView implements NodeView {
   private sourceEditing = false;
   private applyingSourceTransaction = false;
   private sourceToggle?: HTMLButtonElement;
-  private controlsResizeObserver?: ResizeObserver;
 
   constructor(
     node: ProseNode,
@@ -1125,15 +1140,11 @@ class EmbedView implements NodeView {
     this.preview.className = 'cherry-embed__preview';
     const controls = document.createElement(node.isInline ? 'span' : 'figcaption');
     controls.className = 'cherry-embed__controls';
-    this.controls = controls;
     controls.hidden = node.type.name === 'cherry_emoji';
-    const type = document.createElement('span');
-    type.className = 'cherry-embed__type';
-    type.textContent = node.type.name === 'cherry_diagram' ? String(node.attrs.diagramType) : 'HTML';
     const edit = iconButton('源码', '在节点内编辑源码', this.toggleSource, config.readonly);
     this.sourceToggle = edit;
     edit.setAttribute('aria-expanded', 'false');
-    controls.append(type, edit);
+    controls.append(edit);
     this.sourcePanel = document.createElement(node.isInline ? 'span' : 'pre');
     this.sourcePanel.className = 'cherry-embed__source';
     this.sourcePanel.hidden = true;
@@ -1142,27 +1153,27 @@ class EmbedView implements NodeView {
     this.source.spellcheck = false;
     this.source.addEventListener('input', this.updateSource);
     this.source.addEventListener('blur', this.handleSourceBlur);
+    this.source.addEventListener('keydown', selectAllEditableSource);
     this.sourcePanel.append(this.source);
     this.dom.append(this.preview, controls, this.sourcePanel);
-    this.syncControlsPlacement();
-    // NodeViews are constructed before ProseMirror has inserted them into the
-    // live document, so the first measurement can be zero. Re-measure on the
-    // next microtask once the figure has a real layout box.
-    queueMicrotask(() => this.syncControlsPlacement());
-    if (typeof ResizeObserver !== 'undefined' && node.type.name === 'cherry_diagram' && !node.isInline) {
-      this.controlsResizeObserver = new ResizeObserver(() => this.syncControlsPlacement());
-      this.controlsResizeObserver.observe(this.dom);
-    }
     this.scheduleRender();
     this.syncSource();
   }
 
   update(node: ProseNode) {
     if (node.type !== this.node.type) return false;
+    const contentChanged =
+      node.type.name === 'cherry_diagram'
+        ? node.attrs.value !== this.node.attrs.value || node.attrs.diagramType !== this.node.attrs.diagramType
+        : node.attrs.source !== this.node.attrs.source;
     this.node = node;
     this.syncDiagramPresentation();
     this.syncSource();
-    if ((this.renderActivated || node.type.name !== 'cherry_diagram') && document.activeElement !== this.source) {
+    if (
+      contentChanged &&
+      (this.renderActivated || node.type.name !== 'cherry_diagram') &&
+      document.activeElement !== this.source
+    ) {
       this.render();
     }
     return true;
@@ -1197,9 +1208,12 @@ class EmbedView implements NodeView {
     this.renderVersion += 1;
     this.closeSourceListener();
     this.visibilityObserver?.disconnect();
-    this.controlsResizeObserver?.disconnect();
     this.dom.removeEventListener('pointerdown', this.activateRender);
+    this.source.removeEventListener('input', this.updateSource);
+    this.source.removeEventListener('blur', this.handleSourceBlur);
+    this.source.removeEventListener('keydown', selectAllEditableSource);
     if (this.timer) clearTimeout(this.timer);
+    this.pendingPreview?.remove();
     this.cleanup?.();
   }
 
@@ -1284,28 +1298,6 @@ class EmbedView implements NodeView {
     if (layout.width) this.dom.style.width = layout.width;
     if (layout.height) this.dom.style.height = layout.height;
     if (layout.alignment) this.dom.classList.add(`cherry-mermaid-align-${layout.alignment}`);
-    this.syncControlsPlacement();
-  }
-
-  /**
-   * Mermaid SVGs can use the whole viewport, including the top-right corner.
-   * Keep the optional source action outside that viewport whenever the preview
-   * column has room. This is an overlay only (the figure dimensions and
-   * document scroll height are unchanged).
-   */
-  private syncControlsPlacement() {
-    if (!this.controls || this.node.isInline) return;
-    if (this.node.type.name !== 'cherry_diagram') return;
-    const figure = this.dom.getBoundingClientRect();
-    const parent = this.dom.parentElement?.getBoundingClientRect();
-    const controlsWidth = this.controls.getBoundingClientRect().width;
-    // Prefer the side overlay whenever the containing preview column has room
-    // for it. This is based on actual layout rather than a fixed Mermaid size,
-    // so resized/narrow preview panes use the same collision-free rule.
-    const controlsOutside = Boolean(
-      figure.width > 0 && parent && controlsWidth > 0 && figure.right + controlsWidth + 8 <= parent.right,
-    );
-    this.dom.classList.toggle('cherry-embed--controls-outside', controlsOutside);
   }
 
   private updateSource = () => {
@@ -1357,9 +1349,8 @@ class EmbedView implements NodeView {
   private render() {
     this.renderVersion += 1;
     const version = this.renderVersion;
-    this.syncControlsPlacement();
-    this.cleanup?.();
-    this.cleanup = undefined;
+    this.pendingPreview?.remove();
+    this.pendingPreview = undefined;
     if (this.node.type.name === 'cherry_emoji') {
       try {
         this.preview.innerHTML = this.config.engine.makeHtml(String(this.node.attrs.source));
@@ -1384,38 +1375,64 @@ class EmbedView implements NodeView {
       this.config.renderers?.[diagramType] ??
       (diagramType === 'mermaid' ? ({ source }: { source: string }) => renderMermaid(source) : undefined);
     if (!renderer) {
+      this.cleanup?.();
+      this.cleanup = undefined;
       this.preview.textContent = `${diagramType} · 请配置 renderers.${diagramType}`;
       return;
     }
-    // Renderers may mutate their container after an await. Give each revision
-    // its own live container so a late result cannot overwrite the new chart.
+    // Stage each revision outside the document flow, in the same theme and
+    // at the same width. Keep the last committed chart alive until success:
+    // clearing it before an async render collapses the page while users type.
     const container = this.preview.cloneNode(false) as HTMLElement;
     delete container.dataset.renderError;
     container.removeAttribute('role');
-    container.classList.add('is-loading');
-    this.preview.replaceWith(container);
-    this.preview = container;
+    // Put temporary positioning on a disposable host, never on the renderer's
+    // container: otherwise restoring our styles would erase consumer styles.
+    const staging = document.createElement('div');
+    staging.dataset.renderPending = '';
+    staging.setAttribute('aria-hidden', 'true');
+    staging.append(container);
+    this.pendingPreview = staging;
     const source = String(this.node.attrs.value);
     Promise.resolve()
       .then(() => {
         if (this.destroyed || version !== this.renderVersion) return;
+        Object.assign(staging.style, {
+          position: 'absolute',
+          visibility: 'hidden',
+          pointerEvents: 'none',
+          top: '0',
+          left: '0',
+          width: `${this.preview.getBoundingClientRect().width}px`,
+        });
+        (this.dom.closest('.cherry-milkdown') ?? this.dom).append(staging);
         return renderer({ container, engine: this.config.engine, syntax: diagramType, source });
       })
       .then((result: CherryVisualRendererResult) => {
         if (this.destroyed || version !== this.renderVersion) {
+          staging.remove();
           if (typeof result === 'function') result();
           return;
         }
-        this.preview.classList.remove('is-loading');
-        if (typeof result === 'string') this.preview.innerHTML = result;
+        if (typeof result === 'string') container.innerHTML = result;
+        this.cleanup?.();
+        this.cleanup = undefined;
+        this.preview.replaceWith(container);
+        staging.remove();
+        this.preview = container;
+        this.pendingPreview = undefined;
         if (typeof result === 'function') this.cleanup = result;
       })
       .catch((error: unknown) => {
+        staging.remove();
         if (this.destroyed || version !== this.renderVersion) return;
-        this.preview.classList.remove('is-loading');
+        this.pendingPreview = undefined;
         this.preview.dataset.renderError = 'true';
-        this.preview.setAttribute('role', 'alert');
-        this.preview.textContent = '图表暂时无法渲染，请检查源码。';
+        this.preview.querySelector('[role="alert"]')?.remove();
+        const status = document.createElement('p');
+        status.setAttribute('role', 'alert');
+        status.textContent = '图表暂时无法渲染，请检查源码。';
+        this.preview.append(status);
         this.config.onError?.(error, 'render');
       });
   }
@@ -1432,7 +1449,6 @@ class TableChartView implements NodeView {
   private sourceOpen = false;
   private editingSource = false;
   private sourceToggle?: HTMLButtonElement;
-  private readonly typeLabel: HTMLElement;
   private cleanup?: () => void;
   private renderVersion = 0;
 
@@ -1453,13 +1469,10 @@ class TableChartView implements NodeView {
     this.preview.style.minHeight = '300px';
     const controls = document.createElement('figcaption');
     controls.className = 'cherry-embed__controls';
-    const type = document.createElement('span');
-    this.typeLabel = type;
-    type.textContent = String(node.attrs.chartType);
     const edit = iconButton('源码', '在节点内编辑表格图表源码', this.openSource, config.readonly);
     this.sourceToggle = edit;
     edit.setAttribute('aria-expanded', 'false');
-    controls.append(type, edit);
+    controls.append(edit);
     this.sourcePanel = document.createElement('pre');
     this.sourcePanel.className = 'cherry-embed__source cherry-table-chart__source';
     this.sourcePanel.hidden = true;
@@ -1469,6 +1482,7 @@ class TableChartView implements NodeView {
     this.source.textContent = String(node.attrs.source ?? '');
     this.source.addEventListener('input', this.commitSource);
     this.source.addEventListener('blur', this.finishSourceEdit);
+    this.source.addEventListener('keydown', selectAllEditableSource);
     this.sourcePanel.append(this.source);
     this.dom.append(this.preview, controls, this.sourcePanel);
     this.dom.addEventListener('mousedown', this.selectFromEmptyArea, true);
@@ -1480,7 +1494,6 @@ class TableChartView implements NodeView {
     if (node.type !== this.node.type) return false;
     const sourceChanged = node.attrs.source !== this.node.attrs.source;
     this.node = node;
-    this.typeLabel.textContent = String(node.attrs.chartType);
     if (document.activeElement !== this.source) this.source.textContent = String(node.attrs.source ?? '');
     if (sourceChanged) this.render();
     return true;
@@ -1522,6 +1535,9 @@ class TableChartView implements NodeView {
     this.observer?.disconnect();
     this.dom.removeEventListener('mousedown', this.selectFromEmptyArea, true);
     this.dom.removeEventListener('click', this.selectFromEmptyArea, true);
+    this.source.removeEventListener('input', this.commitSource);
+    this.source.removeEventListener('blur', this.finishSourceEdit);
+    this.source.removeEventListener('keydown', selectAllEditableSource);
     destroyCherryRenderedContent(this.config.engine, this.preview);
   }
 

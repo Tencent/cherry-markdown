@@ -22,16 +22,21 @@ describe('Cherry compatibility manifest', () => {
 
   it('covers the native-source structures required by the browser gate', () => {
     const ids = new Set(cherryCompatibilityCases.map(({ id }) => id));
-    for (const required of ['table-chart', 'toc', 'html', 'mermaid', 'echarts-code']) {
+    for (const required of ['table-chart', 'toc', 'columns', 'tabs', 'timeline', 'html', 'mermaid', 'echarts-code']) {
       expect(ids.has(required)).toBe(true);
     }
   });
 
-  it('marks compound layouts as structurally editable', () => {
-    for (const id of ['panel', 'detail', 'tabs', 'timeline']) {
+  it('only marks one-to-one compound content as structurally editable', () => {
+    for (const id of ['panel', 'detail']) {
       const item = cherryCompatibilityCases.find((candidate) => candidate.id === id);
       expect(item?.mode, id).toBe('structured');
       expect(item?.interaction.structured, id).toBe(true);
+    }
+    for (const id of ['columns', 'tabs', 'timeline']) {
+      const item = cherryCompatibilityCases.find((candidate) => candidate.id === id);
+      expect(item?.mode, id).toBe('native-source');
+      expect(item?.interaction.sourceEditing, id).toBe(true);
     }
   });
 });

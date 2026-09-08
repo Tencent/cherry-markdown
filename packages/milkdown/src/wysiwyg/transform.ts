@@ -367,13 +367,13 @@ function createBlockNode(match: BlockMatch, parse: ParseMarkdown): MarkdownNode 
         ?.replace(/^\s*:::\s*/, '')
         .trim()
         .split(/\s+/, 1)[0] ?? '';
-    // Compound layouts stay structured in the preview editor. Unknown
-    // business directives must not be guessed as panels: their syntax and
-    // semantics belong to the application. Keep the complete source in the
-    // native Cherry shell until the caller supplies a Milkdown schema,
-    // parser, serializer and NodeView through `plugins`.
+    // A simple panel maps one-to-one to editable block content. Layout
+    // directives rearrange or decorate their children (columns, tab radios,
+    // timeline status/time/node markup), so rebuilding them as ProseMirror
+    // NodeViews can silently diverge from Cherry. Keep those engine-owned and
+    // edit their complete source inside the node instead.
     const structuredType = canonicalPanelKind(rawType);
-    const isStructured = /^(?:panel|primary|info|warning|danger|success|cols|tabs|timeline)$/i.test(structuredType);
+    const isStructured = /^(?:panel|primary|info|warning|danger|success)$/i.test(structuredType);
     if (!isStructured) {
       return { type: 'cherryNativeBlock', source: match.source };
     }

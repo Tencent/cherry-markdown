@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { editorViewCtx } from '@milkdown/kit/core';
 import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
 import { cherryMilkdown, type CherryMilkdownInstance } from '../src';
-import { supportsTextFormatting } from '../src/ui/bubble';
+import { supportsTextFormatting } from '../src/native-bridge';
 import { echarts } from '../src/renderers/echarts';
 
 vi.mock('mathlive', () => ({}));
@@ -20,6 +20,30 @@ async function create(value: string, options = {}) {
 }
 
 describe('standalone contracts', () => {
+  it('keeps Cherry layout directives engine-owned instead of rebuilding their DOM', async () => {
+    const source = ':::timeline History\n:: [done] 2025 First\nDescription\n:::';
+    const instance = await create(source);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    expect(view.state.doc.firstChild?.type.name).toBe('cherry_native_block');
+    expect(instance.getMarkdown()).toBe(source);
+  });
+
+  it('uses Cherry native preview structure without duplicating its layout styles', async () => {
+    await create('# Native preview');
+    const shell = document.querySelector<HTMLElement>('.cherry.cherry--no-toolbar');
+    const previewer = shell?.querySelector<HTMLElement>(
+      ':scope > .cherry-previewer.cherry-previewer--full.cherry-markdown.cherry-milkdown',
+    );
+    expect(previewer).not.toBeNull();
+    expect(previewer?.style.padding).toBe('');
+    expect(previewer?.style.backgroundColor).toBe('');
+  });
+
+  it('does not mount the removed imitation node controls', async () => {
+    await create('![first#100px](first.png)');
+    expect(document.querySelector('.cherry-milkdown-node-controls')).toBeNull();
+  });
+
   it('isolates synchronous renderer failures and clears the error after a valid update', async () => {
     const onError = vi.fn();
     const renderer = vi.fn(({ source }: { source: string }) => {
@@ -55,6 +79,37 @@ describe('standalone contracts', () => {
     completeOld?.();
     await vi.waitFor(() => expect(cleanup).toHaveBeenCalledTimes(1));
     expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('New chart');
+  });
+
+  it('keeps the previous diagram visible until an asynchronous redraw succeeds', async () => {
+    let complete: ((value: string) => void) | undefined;
+    const renderer = ({ source }: { source: string }) => source.includes('old')
+      ? '<span>Old chart</span>'
+      : new Promise<string>((resolve) => { complete = resolve; });
+    const instance = await create('```echarts\nold\n```', { renderers: { echarts: renderer } });
+    await vi.waitFor(() => expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('Old chart'));
+    instance.setMarkdown('```echarts\nnew\n```');
+    await vi.waitFor(() => expect(complete).toBeDefined());
+    expect(document.querySelector('.cherry-embed > .cherry-embed__preview')?.textContent).toBe('Old chart');
+    complete?.('<span>New chart</span>');
+    await vi.waitFor(() => expect(document.querySelector('.cherry-embed > .cherry-embed__preview')?.textContent).toBe('New chart'));
+    expect(document.querySelector('[data-render-pending]')).toBeNull();
+  });
+
+  it('preserves renderer-owned styles and avoids redrawing unchanged diagram content', async () => {
+    const renderer = vi.fn(({ container }: { container: HTMLElement }) => {
+      container.style.backgroundColor = 'rgb(1, 2, 3)';
+      return '<svg data-chart="styled"></svg>';
+    });
+    const instance = await create('```mermaid #100px\ngraph LR\n A-->B\n```', { renderers: { mermaid: renderer } });
+    await vi.waitFor(() => expect(document.querySelector('.cherry-embed [data-chart="styled"]')).not.toBeNull());
+    const preview = document.querySelector<HTMLElement>('.cherry-embed > .cherry-embed__preview')!;
+    expect(preview.style.backgroundColor).toBe('rgb(1, 2, 3)');
+    instance.setMarkdown('```mermaid #200px\ngraph LR\n A-->B\n```');
+    await Promise.resolve();
+    expect(renderer).toHaveBeenCalledTimes(1);
+    expect(document.querySelector<HTMLElement>('.cherry-embed')?.style.width).toBe('200px');
+    expect(document.querySelector('.cherry-embed > .cherry-embed__preview')).toBe(preview);
   });
 
   it('keeps a failed table chart local and clears its status when repaired', async () => {

@@ -1,9 +1,4 @@
+/* Neutralize the browser UA margin; all visual styling comes from Cherry/Milkdown. */
 body {
   margin: 0;
-}
-#markdown {
-  box-sizing: border-box;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
 }

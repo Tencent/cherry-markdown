@@ -141,7 +141,7 @@ describe('cherryMilkdown WYSIWYG', () => {
 
     expect(element.querySelectorAll('input')).not.toHaveLength(0);
     expect(element.querySelector('.ProseMirror select, .ProseMirror textarea')).toBeNull();
-    expect(element.querySelector('.cherry-milkdown-node-controls')?.hasAttribute('hidden')).toBe(true);
+    expect(element.querySelector('.cherry-milkdown-node-controls')).toBeNull();
     expect(element.querySelectorAll('[contenteditable="true"]')).not.toHaveLength(0);
   });
 
@@ -172,7 +172,7 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
 
-    const link = element.querySelector<HTMLAnchorElement>('a');
+    const link = element.querySelector<HTMLAnchorElement>('.ProseMirror a');
     expect(element.querySelector('.ProseMirror')?.textContent).toBe('Cherry');
     expect(link?.target).toBe('');
     const paragraphHtml = link?.parentElement?.innerHTML;
@@ -242,9 +242,9 @@ describe('cherryMilkdown WYSIWYG', () => {
       value: '| Name | Value |\n| --- | --- |\n| Milkdown | WYSIWYG |',
     });
     instances.push(instance);
-    expect(element.querySelector('table')).not.toBeNull();
-    expect(element.querySelectorAll('td')).toHaveLength(2);
-    expect(element.querySelector('table')?.closest('[data-cherry-visual]')).toBeNull();
+    expect(element.querySelector('.ProseMirror table')).not.toBeNull();
+    expect(element.querySelectorAll('.ProseMirror td')).toHaveLength(2);
+    expect(element.querySelector('.ProseMirror table')?.closest('[data-cherry-visual]')).toBeNull();
   });
 
   it('uses Cherry icon-font task markers instead of Unicode checkbox glyphs', async () => {
@@ -548,18 +548,19 @@ describe('cherryMilkdown WYSIWYG', () => {
     expect(instance.getMarkdown()).toContain('title: After');
   });
 
-  it('keeps Tabs structured and source-stable while editing a tab label', async () => {
+  it('keeps Tabs native and source-stable while editing inside the node', async () => {
     const element = root();
     const value = ':::tabs\n:: First\nOne\n:::\n';
     const instance = await cherryMilkdown({ el: element, value });
     instances.push(instance);
     expect(instance.getMarkdown().trim()).toBe(value.trim());
-    expect(element.querySelector('.cherry-compound--tabs')).not.toBeNull();
-    const label = element.querySelector<HTMLInputElement>('.cherry-compound-item__label');
-    expect(label).not.toBeNull();
-    if (label) {
-      label.value = 'Renamed';
-      label.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(element.querySelector('.cherry-embed--cherry_native_block .cherry-tabs')).not.toBeNull();
+    element.querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
+    const source = element.querySelector<HTMLElement>('.cherry-embed__source code');
+    expect(source).not.toBeNull();
+    if (source) {
+      source.textContent = source.textContent?.replace('First', 'Renamed') ?? '';
+      source.dispatchEvent(new Event('input', { bubbles: true }));
     }
     expect(instance.getMarkdown()).toContain(':: Renamed');
   });

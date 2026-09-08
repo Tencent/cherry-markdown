@@ -23,6 +23,7 @@ import Logger from './Logger';
 import { addEvent, removeEvent } from './utils/event';
 import { exportPDF, exportScreenShot, exportMarkdownFile, exportHTMLFile, exportWordFile } from './utils/export';
 import PreviewerBubble from './toolbars/PreviewerBubble';
+import Bubble from './toolbars/Bubble';
 import LazyLoadImg from '@/utils/lazyLoadImg';
 
 /**
@@ -32,6 +33,15 @@ import LazyLoadImg from '@/utils/lazyLoadImg';
  *  与左侧输入区域滚动同步
  */
 export default class Previewer {
+  /** @type {{update(context: {container: HTMLElement, markdown: string, html: string}): void|Promise<void>}|null} */
+  contentRenderer = null;
+
+  /** @type {object|null} */
+  editingBridge = null;
+
+  /** @type {Bubble|null} */
+  editingBubble = null;
+
   /**
    * @property
    * @private
@@ -812,12 +822,20 @@ export default class Previewer {
    */
   refresh(html) {
     const domContainer = this.getDomContainer();
+    if (this.contentRenderer) {
+      this.contentRenderer.update({ container: domContainer, markdown: this.$cherry.getMarkdown(), html });
+      return;
+    }
     domContainer.innerHTML = html;
   }
 
   update(html) {
     // 销毁后不执行更新
     if (this.isDestroyed) {
+      return;
+    }
+    if (this.contentRenderer && !this.isPreviewerHidden()) {
+      this.contentRenderer.update({ container: this.getDomContainer(), markdown: this.$cherry.getMarkdown(), html });
       return;
     }
     // 更新时保留图片懒加载逻辑
@@ -858,6 +876,80 @@ export default class Previewer {
       // 预览区隐藏时，先缓存起来，等到预览区打开再一次性更新
       this.doHtmlCache(newHtml);
     }
+  }
+
+  setContentRenderer(renderer) {
+    if (!renderer || typeof renderer.update !== 'function') {
+      throw new TypeError('Previewer.setContentRenderer: renderer.update must be a function.');
+    }
+    this.contentRenderer = renderer;
+  }
+
+  clearContentRenderer(renderer) {
+    if (!this.contentRenderer || (renderer && renderer !== this.contentRenderer)) return false;
+    this.contentRenderer = null;
+    return true;
+  }
+
+  setEditingBridge(bridge) {
+    if (!bridge || typeof bridge.isActive !== 'function') {
+      throw new TypeError('Previewer.setEditingBridge: bridge.isActive must be a function.');
+    }
+    this.editingBridge = bridge;
+    this.ensureEditingBubble();
+  }
+
+  clearEditingBridge(bridge) {
+    if (!this.editingBridge || (bridge && bridge !== this.editingBridge)) return false;
+    this.editingBridge = null;
+    this.editingBubble?.destroy?.();
+    this.editingBubble = null;
+    return true;
+  }
+
+  ensureEditingBubble() {
+    const container = this.getDomContainer();
+    if (this.editingBubble) {
+      const bubbleDom = this.editingBubble.getBubbleDom?.();
+      if (bubbleDom && bubbleDom.parentNode !== container) container.appendChild(bubbleDom);
+      return this.editingBubble;
+    }
+    const config = this.$cherry?.options?.toolbars?.bubble;
+    if (!Array.isArray(config) || config.length === 0) return null;
+    const dom = document.createElement('div');
+    dom.className = 'cherry-bubble cherry-bubble--preview';
+    dom.setAttribute('role', 'toolbar');
+    dom.setAttribute('aria-label', '文本格式');
+    this.editingBubble = new Bubble({
+      dom,
+      $cherry: this.$cherry,
+      buttonConfig: config,
+      customMenu: this.$cherry.options.toolbars.customMenu,
+      engine: this.$cherry.engine,
+      editorDom: container,
+      mountTarget: container,
+      observeSelection: false,
+      preserveSelectionOnPointerDown: true,
+    });
+    return this.editingBubble;
+  }
+
+  showEditingBubble(rect) {
+    if (!this.editingBridge?.isActive?.()) return false;
+    const bubble = this.ensureEditingBubble();
+    if (!bubble) return false;
+    bubble.showAt(rect);
+    return true;
+  }
+
+  hideEditingBubble() {
+    this.editingBubble?.hideBubble?.();
+  }
+
+  runEditingCommand(command) {
+    if (!this.editingBridge?.isActive?.()) return false;
+    if (!Object.values(this.editingBubble?.menus?.hooks ?? {}).includes(command?.menu)) return false;
+    return this.editingBridge.runCommand?.(command) === true;
   }
 
   $dealEditAndPreviewOnly(isEditOnly = true) {
@@ -1376,6 +1468,9 @@ export default class Previewer {
     }
 
     this.isDestroyed = true;
+
+    this.clearContentRenderer(this.contentRenderer);
+    this.clearEditingBridge(this.editingBridge);
 
     // 清理滚动事件监听
     this.removeScroll();

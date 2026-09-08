@@ -219,6 +219,32 @@ export default class PreviewerBubble {
     return !!(this.editor && this.editor.editor);
   }
 
+  $isPreviewEditingBridgeActive() {
+    return this.previewer.editingBridge?.isActive?.() === true;
+  }
+
+  $getPreviewElementAdapter(kind, target) {
+    const bridge = this.previewer.editingBridge;
+    if (
+      !target ||
+      bridge?.isActive?.() !== true ||
+      !bridge.ownsPreviewElement?.(target, kind) ||
+      typeof bridge.updatePreviewElement !== 'function' ||
+      typeof bridge.resolvePreviewElement !== 'function'
+    ) {
+      return null;
+    }
+    const resolve = () => bridge.resolvePreviewElement(kind);
+    return {
+      resolve,
+      validate: () => {
+        const current = resolve();
+        return !!current && document.contains(current) && this.previewerDom.contains(current);
+      },
+      update: (element, change) => bridge.updatePreviewElement(element, { kind, ...change }),
+    };
+  }
+
   /**
    * 是否开启了预览区操作 && 是否有编辑区
    * @returns {boolean}
@@ -248,7 +274,7 @@ export default class PreviewerBubble {
     switch (target.tagName) {
       case 'TD':
       case 'TH': {
-        if (!this.$isEnableBubbleAndEditorShow()) {
+        if (this.$isPreviewEditingBridgeActive() || !this.$isEnableBubbleAndEditorShow()) {
           return;
         }
         const table = this.isCherryTable(e.target);
@@ -367,7 +393,6 @@ export default class PreviewerBubble {
     if (this.previewer.$cherry.options.callback?.onClickPreview?.(e) === false) {
       return false;
     }
-
     const { target } = e;
     if (!(target instanceof Element)) {
       return;
@@ -496,12 +521,15 @@ export default class PreviewerBubble {
     // 需要同时满足两个条件：
     // 1. enablePreviewerBubble=true（开启预览区操作）
     // 2. 有编辑器可用（Stream 模式下没有编辑器，自动跳过）
-    if (!this.$isEnableBubbleAndEditorShow()) {
+    if (!this.$isEnableBubbleAndEditorShow() && !this.$isPreviewEditingBridgeActive()) {
       return;
     }
 
     // checkbox 所见即所得编辑操作
-    if (target.className === 'ch-icon ch-icon-square' || target.className === 'ch-icon ch-icon-check') {
+    if (
+      !this.$isPreviewEditingBridgeActive() &&
+      (target.className === 'ch-icon ch-icon-square' || target.className === 'ch-icon ch-icon-check')
+    ) {
       this.$dealCheckboxClick(e);
     }
 
@@ -519,6 +547,7 @@ export default class PreviewerBubble {
         break;
       case 'TD':
       case 'TH':
+        if (this.$isPreviewEditingBridgeActive()) return;
         // 表格编辑功能
         if (target instanceof HTMLElement) {
           const table = this.isCherryTable(target);
@@ -530,6 +559,7 @@ export default class PreviewerBubble {
         }
         break;
       case 'P':
+        if (this.$isPreviewEditingBridgeActive()) return;
         // 列表所见即所得编辑
         if (
           target instanceof HTMLParagraphElement &&
@@ -663,10 +693,15 @@ export default class PreviewerBubble {
       return true;
     }
 
+    imgSizeHandler.refreshTarget?.();
+    if (this.bubbleHandler.imgTool === imgToolHandler) imgToolHandler.refreshTarget?.();
     const target = imgSizeHandler.img;
     if (!target || !document.contains(target) || !this.previewerDom.contains(target)) {
       return false;
     }
+
+    const kind = imgSizeHandler.isMermaid ? 'mermaid' : 'image';
+    if (this.$getPreviewElementAdapter(kind, target)) return true;
 
     if (target.tagName !== 'IMG') {
       return false;
@@ -818,26 +853,37 @@ export default class PreviewerBubble {
    * @param {HTMLImageElement} htmlElement 用户点击的图片dom
    */
   $showImgPreviewerBubbles(htmlElement, event) {
-    // 图片编辑功能需要编辑器支持
-    if (!this.$hasEditor()) {
-      return;
-    }
+    const elementEditor = this.$getPreviewElementAdapter('image', htmlElement);
+    if (this.$isPreviewEditingBridgeActive() && !elementEditor) return;
+    if (!elementEditor && !this.$isEnableBubbleAndEditorShow()) return;
     this.$createPreviewerBubbles('click', 'img-handler');
-    const list = Array.from(this.previewerDom.querySelectorAll('img'));
+    const list = Array.from(this.previewerDom.querySelectorAll('img')).filter(
+      (image) => !elementEditor || !!this.$getPreviewElementAdapter('image', image),
+    );
     this.totalImgs = list.length;
     this.imgIndex = list.indexOf(htmlElement);
-    if (!this.beginChangeImgValue(htmlElement)) {
+    if (!elementEditor && !this.beginChangeImgValue(htmlElement)) {
       return { emit: () => {} };
     }
 
     const onInvalidTarget = () => this.$removeImgPreviewerBubbles();
     const validateTarget = () => this.$isImgHandlerValid();
+    const resolveTarget = elementEditor?.resolve ?? null;
 
     const imgSizeDiv = document.createElement('div');
     imgSizeDiv.className = 'cherry-previewer-img-size-handler';
     this.bubble.click.appendChild(imgSizeDiv);
-    imgSizeHandler.showBubble(htmlElement, imgSizeDiv, this.previewerDom, { onInvalidTarget, validateTarget });
-    imgSizeHandler.bindChange(this.changeImgSize.bind(this));
+    imgSizeHandler.showBubble(htmlElement, imgSizeDiv, this.previewerDom, {
+      onInvalidTarget,
+      validateTarget,
+      resolveTarget,
+      deferChangeUntilResizeStop: !!elementEditor,
+    });
+    imgSizeHandler.bindChange(
+      elementEditor
+        ? (target, style) => elementEditor.update(target, { width: style.width, height: style.height })
+        : this.changeImgSize.bind(this),
+    );
 
     const imgToolDiv = document.createElement('div');
     imgToolDiv.className = 'cherry-previewer-img-tool-handler';
@@ -845,8 +891,11 @@ export default class PreviewerBubble {
     imgToolHandler.showBubble(htmlElement, imgToolDiv, this.previewerDom, event, this.previewer.$cherry.getLocales(), {
       onInvalidTarget,
       validateTarget,
+      resolveTarget,
     });
-    imgToolHandler.bindChange(this.changeImgStyle.bind(this));
+    imgToolHandler.bindChange(
+      elementEditor ? (target, type) => elementEditor.update(target, { type }) : this.changeImgStyle.bind(this),
+    );
 
     // 订阅编辑器大小变化事件
     const updateHandler = imgSizeHandler.updatePosition.bind(imgSizeHandler);
@@ -1179,21 +1228,24 @@ export default class PreviewerBubble {
    * @param {HTMLElement} figureElement mermaid 图表的 figure DOM
    */
   $showMermaidPreviewerBubbles(figureElement, event) {
-    if (!this.$isEnableBubbleAndEditorShow()) {
-      return;
-    }
+    const elementEditor = this.$getPreviewElementAdapter('mermaid', figureElement);
+    if (this.$isPreviewEditingBridgeActive() && !elementEditor) return;
+    if (!elementEditor && !this.$isEnableBubbleAndEditorShow()) return;
     const sourceMode = figureElement.querySelector('.cherry-mermaid-source-toolbar-panel.active[data-mode="source"]');
-    if (sourceMode) {
+    const bridgeSource = elementEditor ? figureElement.querySelector('.cherry-embed__source:not([hidden])') : null;
+    if (sourceMode || bridgeSource) {
       return;
     }
     this.$createPreviewerBubbles('click', 'img-handler');
 
-    if (!this.mermaidSession.beginEdit(figureElement)) {
+    if (!elementEditor && !this.mermaidSession.beginEdit(figureElement)) {
       return;
     }
 
     const onInvalidTarget = () => this.$removeImgPreviewerBubbles();
-    const handlerOptions = this.mermaidSession.createHandlerOptions(onInvalidTarget);
+    const handlerOptions = elementEditor
+      ? { onInvalidTarget, resolveTarget: elementEditor.resolve, validateTarget: elementEditor.validate }
+      : this.mermaidSession.createHandlerOptions(onInvalidTarget);
 
     const imgSizeDiv = document.createElement('div');
     imgSizeDiv.className = 'cherry-previewer-img-size-handler';
@@ -1203,8 +1255,12 @@ export default class PreviewerBubble {
       targetIndex: this.mermaidSession.previewIndex,
       ...handlerOptions,
     });
-    imgSizeHandler.bindChange((htmlElement, style) => this.mermaidSession.changeSize(style));
-    this.mermaidSession.bindPositionFollow();
+    imgSizeHandler.bindChange(
+      elementEditor
+        ? (target, style) => elementEditor.update(target, { width: style.width, height: style.height })
+        : (_htmlElement, style) => this.mermaidSession.changeSize(style),
+    );
+    if (!elementEditor) this.mermaidSession.bindPositionFollow();
 
     // 添加对齐工具面板（仅对齐按钮，不含装饰按钮）
     const imgToolDiv = document.createElement('div');
@@ -1218,14 +1274,18 @@ export default class PreviewerBubble {
       this.previewer.$cherry.getLocales(),
       { isMermaid: true, targetIndex: this.mermaidSession.previewIndex, ...handlerOptions },
     );
-    imgToolHandler.bindChange((htmlElement, type) => this.mermaidSession.changeAlign(type));
+    imgToolHandler.bindChange(
+      elementEditor
+        ? (target, type) => elementEditor.update(target, { type })
+        : (_htmlElement, type) => this.mermaidSession.changeAlign(type),
+    );
 
     const updateHandler = imgSizeHandler.updatePosition.bind(imgSizeHandler);
     this.$cherry.$event.on('editor.size.change', updateHandler);
     const originalRemove = imgSizeHandler.remove;
     imgSizeHandler.remove = () => {
       this.$cherry.$event.off('editor.size.change', updateHandler);
-      this.mermaidSession.disposeHandlers();
+      if (!elementEditor) this.mermaidSession.disposeHandlers();
       return originalRemove.call(imgSizeHandler);
     };
     this.bubbleHandler.click = imgSizeHandler;

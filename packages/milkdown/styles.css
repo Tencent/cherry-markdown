@@ -22,35 +22,7 @@
   margin-bottom: 0;
 }
 
-.cherry-milkdown .cherry-milkdown-bubble {
-  position: fixed;
-  z-index: 1000;
-  display: flex;
-  padding: 4px;
-  border: 1px solid var(--base-border-color);
-  border-radius: 8px;
-  background: var(--base-editor-bg, white);
-  box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
-}
-.cherry-milkdown .cherry-milkdown-bubble[hidden] { display: none; }
-.cherry-milkdown-bubble button {
-  border: 0;
-  border-radius: 4px;
-  padding: 6px 10px;
-  background: transparent;
-  color: var(--base-font-color);
-  font: inherit;
-  cursor: pointer;
-}
-.cherry-milkdown-bubble button:hover,
-.cherry-milkdown-bubble button[aria-pressed="true"] {
-  color: var(--md-link-color);
-  background: var(--md-inline-code-bg);
-}
-
 .cherry-milkdown {
-  display: block;
-  height: auto;
   --cherry-milkdown-primary: var(--md-link-color, #366ef4);
   --cherry-milkdown-border: var(--base-border-color, #d8dce5);
   --cherry-milkdown-muted: var(--base-sub-font-color, #646a73);
@@ -422,6 +394,17 @@
   box-shadow: 0 0 0 2px rgb(54 110 244 / 14%);
 }
 
+/* Cherry-owned directives already contain their complete native layout.
+ * Keep the Milkdown NodeView transparent so it cannot change spacing,
+ * backgrounds or component geometry supplied by Cherry's renderer. */
+.cherry-milkdown .cherry-embed--cherry_native_block {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
 .cherry-milkdown .cherry-embed--cherry_emoji {
   display: inline-flex;
   margin: 0 2px;
@@ -570,7 +553,8 @@
 
 .cherry-milkdown .milkdown-table-block .line-handle {
   background: transparent;
-  cursor: pointer;
+  /* The insertion guide crosses cells; only its actual button owns clicks. */
+  pointer-events: none;
 }
 
 .cherry-milkdown .milkdown-table-block [data-role="x-line-drag-handle"] {
@@ -606,6 +590,8 @@
 }
 
 .cherry-milkdown .milkdown-table-block .line-handle .add-button {
+  pointer-events: auto;
+  cursor: pointer;
   position: relative;
   z-index: 1;
   width: 18px;
@@ -659,46 +645,31 @@
  * semantic variables when present, with the fallbacks kept for standalone
  * Milkdown consumers. */
 .cherry-milkdown .cherry-embed__controls {
-  gap: var(--spacing-xs, 4px);
-  min-height: var(--bubble-btn-height, 28px);
-  padding: var(--bubble-padding, 4px);
+  box-sizing: border-box;
+  height: 30px;
+  min-height: 30px;
+  padding: 2px;
   border: var(--border-width-1, 1px) solid var(--bubble-border, var(--cherry-milkdown-border));
   border-radius: var(--bubble-radius, 4px);
   background-color: var(--bubble-bg, var(--toolbar-bg, #fff));
   box-shadow: var(--bubble-shadow, 0 2px 8px rgb(0 0 0 / 10%));
 }
 
-/* A compact Mermaid SVG has no empty corner for an action bubble. Move the
- * optional control to the immediate right of the figure instead of covering
- * diagram nodes. It remains absolutely positioned, so it does not add a
- * line-height, layout height, or second scrollbar. */
-.cherry-milkdown .cherry-embed.cherry-embed--controls-outside {
-  overflow: visible;
-}
-
-.cherry-milkdown .cherry-embed--controls-outside > .cherry-embed__controls {
-  top: 0;
-  right: auto;
-  left: calc(100% + var(--spacing-xs, 4px));
-  width: max-content;
-  max-width: none;
-  flex-wrap: nowrap;
-  white-space: nowrap;
-}
-
 .cherry-milkdown .cherry-embed__controls button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: var(--bubble-btn-height, 28px);
-  min-height: var(--bubble-btn-height, 28px);
-  padding: 0 var(--bubble-padding, 4px);
+  width: auto;
+  min-width: 0;
+  height: 24px;
+  min-height: 24px;
+  padding: 0 6px;
   border: 0;
   border-radius: var(--bubble-radius, 4px);
   color: var(--toolbar-btn-color, var(--cherry-milkdown-muted));
   background: var(--toolbar-btn-bg, transparent);
   cursor: pointer;
-  font: inherit;
+  font: 12px/24px var(--font-family, sans-serif);
   transition: color 150ms, background-color 150ms;
 }
 

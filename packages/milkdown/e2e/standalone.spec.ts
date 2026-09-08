@@ -1,33 +1,9 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, markdown, setMarkdown } from './fixtures';
 import { cherryCompatibilityCases } from '../test/fixtures/compatibility';
-const runtimeErrors = new WeakMap<Page, string[]>();
-
-async function markdown(page: Page) {
-  return page.evaluate(() => window.milkdownEditor!.getMarkdown());
-}
-async function setMarkdown(page: Page, value: string) {
-  await page.evaluate((value) => window.milkdownEditor!.setMarkdown(value), value);
-}
 test.beforeEach(async ({ page }) => {
-  const errors: string[] = [];
-  runtimeErrors.set(page, errors);
-  page.on('pageerror', (error) => errors.push(String(error)));
-  page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(message.text());
-  });
   await page.goto('/');
   await expect(page.locator('.ProseMirror')).toHaveAttribute('contenteditable', 'true');
   await page.waitForFunction(() => Boolean(window.milkdownEditor));
-});
-test.afterEach(async ({ page }, info) => {
-  const errors = runtimeErrors.get(page) ?? [];
-  const renderErrors = await page.locator('[role="alert"], [data-render-error="true"]').allTextContents();
-  await info.attach('runtime-errors', { body: JSON.stringify(errors), contentType: 'application/json' });
-  await info.attach('renderer-errors', { body: JSON.stringify(renderErrors), contentType: 'application/json' });
-  const finalMarkdown = await page.evaluate(() => window.milkdownEditor?.getMarkdown()).catch(() => undefined);
-  if (finalMarkdown) await info.attach('final-markdown', { body: finalMarkdown, contentType: 'text/markdown' });
-  expect(errors).toEqual([]);
-  expect(renderErrors).toEqual([]);
 });
 
 test('standalone boot has no source editor, top toolbar or runtime errors', async ({ page }) => {
@@ -40,6 +16,13 @@ test('standalone boot has no source editor, top toolbar or runtime errors', asyn
   await expect(page.locator('.ProseMirror')).toHaveCount(1);
   await expect(page.locator('h1').filter({ hasText: 'Cherry Markdown' })).toBeVisible();
   await expect(page.locator('.cm-editor,.cherry-toolbar')).toHaveCount(0);
+  expect(await page.locator('body').evaluate((body) => getComputedStyle(body).margin)).toBe('0px');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
+    await page.evaluate(() => document.documentElement.clientWidth),
+  );
+  await expect(
+    page.locator('.cherry.cherry--no-toolbar > .cherry-previewer.cherry-previewer--full.cherry-markdown.cherry-milkdown'),
+  ).toHaveCount(1);
   await expect(page.locator('[role="alert"]')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
@@ -63,10 +46,13 @@ test('real text selection, Bubble formatting, undo, and no layout shift', async 
   await paragraph.click();
   await page.keyboard.press('Home');
   await page.keyboard.press('Shift+End');
+  await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe('Selected text');
   const bubble = page.getByRole('toolbar', { name: '文本格式' });
   await expect(bubble).toBeVisible();
+  await expect(bubble).toHaveClass(/cherry-bubble--preview/);
+  await expect(page.locator('.cherry-milkdown-bubble')).toHaveCount(0);
   expect(await paragraph.boundingBox()).toEqual(before);
-  await bubble.getByRole('button', { name: '粗体', exact: true }).click();
+  await bubble.locator('[title="加粗"]').click();
   await expect(paragraph.locator('strong')).toHaveText('Selected text');
   expect(await markdown(page)).toContain('**Selected text**');
   await page.keyboard.press('ControlOrMeta+z');
@@ -97,7 +83,22 @@ test('code typing is monotonic and cannot open text Bubble', async ({ page }) =>
 test('Mermaid renders and source editing stays open without text Bubble', async ({ page }) => {
   await setMarkdown(page, '```mermaid\ngraph LR\n A-->B\n```');
   await expect(page.locator('.cherry-embed__preview svg')).toBeVisible();
-  await page.getByRole('button', { name: '在节点内编辑源码', exact: true }).click();
+  const node = page.locator('.cherry-embed--cherry_diagram');
+  const toggle = page.getByRole('button', { name: '在节点内编辑源码', exact: true });
+  await expect(node.locator('.cherry-embed__controls')).toHaveText('源码');
+  await expect(node.locator('.cherry-embed__type')).toHaveCount(0);
+  const beforeHover = await node.boundingBox();
+  await node.hover();
+  const afterHover = await node.boundingBox();
+  expect(afterHover).toEqual(beforeHover);
+  await expect(node.locator('.cherry-embed__controls')).toHaveCSS('position', 'absolute');
+  const controlBox = await node.locator('.cherry-embed__controls').boundingBox();
+  expect(controlBox!.height).toBeLessThanOrEqual(30);
+  await node.locator('.cherry-embed__preview svg').click();
+  await expect(page.locator('.cherry-previewer-img-size-handler')).toBeVisible();
+  await expect(page.locator('.cherry-previewer-img-tool-handler')).toBeVisible();
+  await expect(page.locator('.cherry-milkdown-node-controls')).toHaveCount(0);
+  await toggle.click();
   const source = page.locator('.cherry-embed__source code');
   await expect(source).toBeVisible();
   await source.press('ControlOrMeta+a');
@@ -110,21 +111,70 @@ test('Mermaid renders and source editing stays open without text Bubble', async 
   );
 });
 
-test('image controls keep the selected node while native inputs take focus', async ({ page }) => {
+for (const directive of [
+  {
+    name: 'columns',
+    selector: '.cherry-panel-cols',
+    markdown: ':::cols\nLeft\n::\nRight\n:::',
+  },
+  {
+    name: 'tabs',
+    selector: '.cherry-tabs',
+    markdown: ':::tabs\n:: One\nFirst\n:: Two\nSecond\n:::',
+  },
+  {
+    name: 'timeline',
+    selector: '.cherry-timeline',
+    markdown:
+      ':::timeline Cherry Markdown 发展历程\n:: [milestone] 2021-07 项目开源\nDescription\n:: [done] 2024-05 支持流式\nDone\n:: [doing] 持续迭代\nWorking\n:: [error] VSCode\nError\n:: [todo] 拥抱社区\nTodo\n:::',
+  },
+]) {
+  test(`Cherry owns the complete native ${directive.name} structure`, async ({ page }) => {
+    await setMarkdown(page, directive.markdown);
+    const result = await page.evaluate(({ markdown, selector }) => {
+      const actual = document.querySelector(`.cherry-embed__preview ${selector}`);
+      const oracle = document.createElement('div');
+      oracle.innerHTML = window.milkdownEditor!.engine.makeHtml(markdown);
+      const expected = oracle.querySelector(selector);
+      const signature = (root: Element | null) =>
+        root
+          ? [root, ...root.querySelectorAll('*')].map((element) => ({
+              tag: element.tagName,
+              classes: [...element.classList].sort(),
+            }))
+          : [];
+      return {
+        actual: signature(actual),
+        expected: signature(expected),
+        actualText: actual?.textContent?.replace(/\s+/g, ' ').trim(),
+        expectedText: expected?.textContent?.replace(/\s+/g, ' ').trim(),
+      };
+    }, directive);
+    expect(result.actual).toEqual(result.expected);
+    expect(result.actualText).toBe(result.expectedText);
+    await expect(page.getByRole('button', { name: '在节点内编辑源码', exact: true })).toBeVisible();
+  });
+}
+
+test('image uses Cherry native resize and presentation controls', async ({ page }) => {
   await setMarkdown(page, '![dog#100px](assets/images/demo-dog.png)');
   const image = page.locator('.ProseMirror img').first();
   await image.click();
-  const width = page.getByLabel('节点宽度', { exact: true });
-  await expect(width).toBeVisible();
-  await width.fill('180');
-  await expect(image).toHaveAttribute('alt', 'dog#180px');
-  await expect(image).toHaveCSS('width', '180px');
-  expect(await markdown(page)).toContain('dog#180px');
+  await expect(page.locator('.cherry-previewer-img-size-handler')).toBeVisible();
+  await expect(page.locator('.cherry-previewer-img-tool-handler')).toBeVisible();
+  await expect(page.locator('.cherry-milkdown-node-controls')).toHaveCount(0);
+  const handle = page.locator('.cherry-previewer-img-size-handler__points-rightMiddle');
+  const box = await handle.boundingBox();
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box!.x + box!.width / 2 + 40, box!.y + box!.height / 2, { steps: 4 });
+  await page.mouse.up();
+  await expect.poll(() => markdown(page)).toMatch(/dog#1[3-9]\dpx/);
 });
 
 test('manual ECharts example renders including its final semicolon', async ({ page }) => {
   await page.getByRole('link', { name: 'echarts直接渲染', exact: true }).click();
-  await expect(page.locator('.cherry-embed--cherry_diagram').filter({ hasText: 'echarts' }).locator('svg')).toBeVisible();
+  await expect(page.locator('.cherry-embed--cherry_diagram:not([data-type="mermaid"])').first().locator('svg')).toBeVisible();
   await expect(page.locator('[role="alert"], [data-render-error="true"]')).toHaveCount(0);
 });
 
@@ -159,11 +209,12 @@ test('table chart source toggles and changing type updates the rendered chart', 
   const node = page.locator('.cherry-table-chart');
   await expect(node.locator('svg')).toBeVisible();
   const toggle = node.getByRole('button', { name: '在节点内编辑表格图表源码', exact: true });
+  await expect(node.locator('.cherry-embed__controls')).toHaveText('源码');
+  await expect(node.locator('.cherry-embed__type')).toHaveCount(0);
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
   await toggle.click();
   const source = node.locator('.cherry-embed__source code');
   await source.fill('| :bar:{"title":"Changed"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 3 | 4 |');
-  await expect(node.locator('.cherry-embed__controls span')).toHaveText('bar');
   await expect(node.locator('svg')).toContainText('Changed');
   expect(await markdown(page)).toContain('| Sales | 3 | 4 |');
   await toggle.click();
@@ -193,14 +244,36 @@ test('table chart owns its rendered resources and responds to API updates', asyn
   await expect(page.locator('.cherry-echarts-wrapper')).toHaveCount(0);
 });
 
+test('table insertion guides allow text clicks and their add buttons still create rows', async ({ page }) => {
+  await setMarkdown(page, '| A | B |\n| --- | --- |\n| 1 | 2 |');
+  const table = page.locator('.milkdown-table-block table.children');
+  const cell = table.locator('td').first();
+  await table.click();
+  await cell.locator('p').click();
+  await page.keyboard.press('End');
+  await page.keyboard.type(' edited');
+  await expect(cell).toContainText('1 edited');
+  const rect = await cell.boundingBox();
+  // Stay inside the cell's padding box, not the collapsed table border.
+  await cell.hover({ position: { x: rect!.width / 2, y: rect!.height - 4 } });
+  const addRow = page.locator('[data-role="x-line-drag-handle"] .add-button');
+  await expect(addRow).toBeVisible();
+  await addRow.click();
+  await expect(table.locator('tr')).toHaveCount(3);
+  expect(await markdown(page)).toContain('1 edited');
+});
+
 test('native heading computed styles match without copying styles', async ({ page }) => {
   await setMarkdown(page, '# Heading\n\n- [ ] Task');
   const result = await page.evaluate(() => {
     const editor = window.milkdownEditor!;
     const native = document.createElement('div');
-    native.className = 'cherry cherry-markdown';
+    native.className = 'cherry-markdown';
     native.innerHTML = editor.engine.makeHtml(editor.getMarkdown());
-    document.body.append(native);
+    const shell = document.createElement('div');
+    shell.className = document.querySelector<HTMLElement>('#markdown > .cherry')!.className;
+    shell.append(native);
+    document.body.append(shell);
     const properties = ['color', 'fontSize', 'fontWeight', 'lineHeight'];
     const read = (element: Element) =>
       properties.map((key) =>
@@ -208,7 +281,7 @@ test('native heading computed styles match without copying styles', async ({ pag
       );
     const actual = read(document.querySelector('.ProseMirror h1')!);
     const expected = read(native.querySelector('h1')!);
-    native.remove();
+    shell.remove();
     return { actual, expected };
   });
   expect(result.actual).toEqual(result.expected);
@@ -216,7 +289,7 @@ test('native heading computed styles match without copying styles', async ({ pag
 
 test('destroy removes the owned editor and controls', async ({ page }) => {
   await page.evaluate(() => window.milkdownEditor!.destroy());
-  await expect(page.locator('.ProseMirror,.cherry-milkdown-bubble,.cherry-milkdown')).toHaveCount(0);
+  await expect(page.locator('.ProseMirror,.cherry-bubble--preview,.cherry-milkdown')).toHaveCount(0);
 });
 
 test('columns use every grid column for content, never for editing chrome', async ({ page }) => {

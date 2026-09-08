@@ -16,10 +16,10 @@ import { commonmark } from '@milkdown/kit/preset/commonmark';
 import { gfm } from '@milkdown/kit/preset/gfm';
 import { Plugin, TextSelection } from '@milkdown/kit/prose/state';
 import { $prose, getMarkdown } from '@milkdown/kit/utils';
+import Cherry from 'cherry-markdown/dist/cherry-markdown.esm.js';
 import type { CherryMilkdownInstance, CherryMilkdownOptions } from './types.js';
+import { connectNativeCherryControls } from './native-bridge.js';
 import { createSelectionTracker } from './selection-tracker.js';
-import { selectionBubble } from './ui/bubble.js';
-import { nodeControls } from './ui/node-controls.js';
 import { loadCodeLanguages } from './wysiwyg/code-block.js';
 import { cherryWysiwyg, cherryWysiwygConfigCtx } from './wysiwyg/index.js';
 
@@ -100,11 +100,24 @@ function reconcileSerializedMarkdown(raw: string, previous: string, next: string
 export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<CherryMilkdownInstance> {
   const { el } = options;
   assertRoot(el);
-  const root = document.createElement('div');
-  root.className = 'cherry cherry-markdown cherry-milkdown';
-  if (options.theme && options.theme !== 'default')
-    root.classList.add(`theme__${options.theme.replace(/^theme__/, '')}`);
-  el.append(root);
+  const cherryOptions = options.cherryOptions ?? {};
+  const cherry = new Cherry({
+    ...cherryOptions,
+    el,
+    value: '',
+    isPreviewOnly: true,
+    editor: { ...cherryOptions.editor, defaultModel: 'previewOnly' },
+    toolbars: { ...cherryOptions.toolbars, showToolbar: false },
+    previewer: { ...cherryOptions.previewer, enablePreviewerBubble: true },
+  });
+  const previewer = cherry.getPreviewer();
+  const inertRenderer = { update() {} };
+  previewer.setContentRenderer(inertRenderer);
+  const root = previewer.getDom();
+  root.replaceChildren();
+  root.classList.add('cherry-milkdown');
+  cherry.editor?.options?.editorDom?.remove();
+  cherry.toolbar?.options?.dom?.remove();
   const debounce = Math.max(0, options.debounce ?? DEFAULT_DEBOUNCE);
   let notificationTimer: ReturnType<typeof setTimeout> | undefined;
   let changeMicrotaskQueued = false;
@@ -112,6 +125,8 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
   let suppressChanges = false;
   let acceptingChanges = false;
   let engine: CherryMilkdownInstance['engine'];
+  let disconnectNativeControls: (() => void) | undefined;
+  let refreshNativeSelection = () => {};
   let currentMarkdown = options.value ?? '';
   let serializedBaseline = '';
   const selectionTracker = createSelectionTracker();
@@ -123,14 +138,9 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     await loadCodeLanguages();
     // Cherry's generated declaration keeps the optional object return mode in
     // `makeHtml`, while this integration always calls its default string mode.
-    if (options.engine) {
-      engine = options.engine;
-    } else {
-      const { default: CherryEngine } = await import('cherry-markdown/dist/cherry-markdown.engine.core.esm.js');
-      engine = new CherryEngine(options.cherryOptions) as unknown as CherryMilkdownInstance['engine'];
-    }
+    engine = options.engine ?? (cherry.engine as unknown as CherryMilkdownInstance['engine']);
   } catch (error) {
-    root.remove();
+    cherry.destroy();
     options.onError?.(error, 'create');
     throw error;
   }
@@ -204,6 +214,17 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
       }),
   );
 
+  const nativeSelectionPlugin = $prose(
+    () =>
+      new Plugin({
+        view: () => ({
+          update: (view, previousState) => {
+            if (!view.state.selection.eq(previousState.selection)) refreshNativeSelection();
+          },
+        }),
+      }),
+  );
+
   const editor = Editor.make()
     .config((ctx) => {
       ctx.set(rootCtx, root);
@@ -254,12 +275,10 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     .use(selectionTracker.plugin)
     .use(immediateChangePlugin)
     .use(tablePointerSelectionPlugin)
+    .use(nativeSelectionPlugin)
     .use(cherryWysiwyg);
 
   editor.use(tableBlockComponent.tableBlock);
-
-  if (options.bubble !== false && !options.readonly) editor.use(selectionBubble(root));
-  if (!options.readonly) editor.use(nodeControls(root));
 
   for (const plugin of options.plugins ?? []) editor.use(plugin);
 
@@ -267,7 +286,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     await editor.create();
   } catch (error) {
     await editor.destroy().catch(() => {});
-    root.remove();
+    cherry.destroy();
     options.onError?.(error, 'create');
     throw error;
   }
@@ -281,9 +300,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
   serializedBaseline = editor.action(getMarkdown());
   acceptingChanges = true;
 
-  root.classList.add('cherry-milkdown');
-
-  return {
+  const instance: CherryMilkdownInstance = {
     editor,
     engine,
     trackSelection() {
@@ -299,8 +316,6 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     },
     setMarkdown(markdown, setOptions = {}) {
       if (destroyed) return;
-      // A newer API value supersedes queued local notifications, including a
-      // microtask scheduled before this call. Never emit a stale draft later.
       changeMicrotaskQueued = false;
       if (notificationTimer) clearTimeout(notificationTimer);
       notificationTimer = undefined;
@@ -314,9 +329,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
       } finally {
         suppressChanges = false;
       }
-      if (setOptions.emit !== false) {
-        scheduleNotification(currentMarkdown);
-      }
+      if (setOptions.emit !== false) scheduleNotification(currentMarkdown);
     },
     focus() {
       if (!destroyed) editor.action((ctx) => ctx.get(editorViewCtx).focus());
@@ -326,13 +339,30 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
       destroyed = true;
       if (notificationTimer) clearTimeout(notificationTimer);
       notificationTimer = undefined;
+      disconnectNativeControls?.();
+      disconnectNativeControls = undefined;
       try {
         await editor.destroy();
       } finally {
-        root.remove();
+        previewer.clearContentRenderer(inertRenderer);
+        cherry.destroy();
       }
     },
   };
+  if (options.bubble !== false && !options.readonly) {
+    disconnectNativeControls = connectNativeCherryControls(
+      cherry as unknown as Parameters<typeof connectNativeCherryControls>[0],
+      instance,
+      (listener) => {
+        refreshNativeSelection = listener;
+        return () => {
+          refreshNativeSelection = () => {};
+        };
+      },
+    );
+  }
+
+  return instance;
 }
 
 export type {
