@@ -121,6 +121,14 @@ for (const current of builds) {
       terserOptions: {
         compress: {
           pure_funcs: ['console.log', 'console.info'],
+          passes: 3,
+          toplevel: true,
+          pure_getters: true,
+          unsafe_comps: true,
+          unsafe_math: true,
+        },
+        mangle: {
+          toplevel: true,
         },
         format: {
           comments: false,
