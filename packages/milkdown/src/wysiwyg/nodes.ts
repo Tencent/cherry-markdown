@@ -596,6 +596,7 @@ class CompoundItemView implements NodeView {
       readonly,
     );
     this.disclosure.className = 'cherry-compound-item__disclosure';
+    this.disclosure.setAttribute('aria-expanded', String(Boolean(node.attrs.open)));
     this.disclosure.hidden = node.attrs.role !== 'detail-item';
     this.label = editableLabel(
       'cherry-compound-item__label',
@@ -642,6 +643,7 @@ class CompoundItemView implements NodeView {
     if (document.activeElement !== this.label) this.label.value = String(node.attrs.label ?? '');
     this.dom.dataset.role = String(node.attrs.role);
     this.disclosure.textContent = node.attrs.open ? '⌄' : '›';
+    this.disclosure.setAttribute('aria-expanded', String(Boolean(node.attrs.open)));
     this.dom.dataset.open = String(Boolean(node.attrs.open));
     return true;
   }
@@ -1837,6 +1839,7 @@ export const cherryLinkTargetClickPlugin = $prose(
             const origin = event.target;
             const link = origin instanceof Element ? origin.closest('a') : null;
             if (!(link instanceof HTMLAnchorElement) || link.closest('.cherry-source-node--cherry_toc')) return false;
+            const rawHref = link.getAttribute('href') ?? '';
             const marker = link?.nextElementSibling;
             const target = marker?.classList.contains('cherry-link-target')
               ? (marker.getAttribute('data-target') ?? '')
@@ -1850,13 +1853,24 @@ export const cherryLinkTargetClickPlugin = $prose(
               if (!target || target === '_self') return false;
               event.preventDefault();
               event.stopPropagation();
-              if (/^(?:https?:|mailto:|tel:)/i.test(link.href)) {
+              if (/^(?:https?:|mailto:|tel:)/i.test(rawHref)) {
                 window.open(link.href, target, target === '_blank' ? 'noopener' : undefined);
               }
               return true;
             }
 
             event.preventDefault();
+            if (!/^(?:https?:|mailto:|tel:)/i.test(rawHref)) {
+              if (event.metaKey || event.ctrlKey) return true;
+              const id = decodeURIComponent(link.hash.slice(1));
+              if (!id || !navigateToHeading(view, id)) return true;
+              try {
+                window.location.hash = encodeURIComponent(id);
+              } catch {
+                // Embedded opaque-origin previews can still scroll without a hash.
+              }
+              return true;
+            }
             if (!event.metaKey && !event.ctrlKey) return false;
 
             event.stopPropagation();

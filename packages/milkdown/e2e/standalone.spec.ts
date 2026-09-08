@@ -59,6 +59,56 @@ test('real text selection, Bubble formatting, undo, and no layout shift', async 
   await expect(paragraph.locator('strong')).toHaveCount(0);
 });
 
+test('real CRUD and navigation keep ordinary nodes stable', async ({ page }) => {
+  await setMarkdown(
+    page,
+    '# Heading\n\n- first\n- second\n\n:::warning Panel\nPanel body\n:::\n\n+++ Detail\nDetail body\n+++',
+  );
+  const assertStable = async () => {
+    await expect(page.locator('[role="alert"], [data-render-error="true"]')).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
+      await page.evaluate(() => document.documentElement.clientWidth),
+    );
+  };
+
+  const heading = page.locator('.ProseMirror > h1').first();
+  await heading.click();
+  await page.keyboard.press('End');
+  await page.keyboard.type(' updated');
+  await expect(heading).toHaveText('Heading updated');
+
+  const firstItem = page.locator('.ProseMirror li').first().locator('p');
+  await firstItem.click();
+  await page.keyboard.press('End');
+  await page.keyboard.type(' edited');
+  await expect(firstItem).toContainText('first edited');
+
+  const label = page.locator('.cherry-compound-item__label').last();
+  await label.click();
+  await page.keyboard.press('End');
+  await page.keyboard.type(' renamed');
+  await expect(label).toHaveValue('Detail renamed');
+
+  const disclosure = page.locator('.cherry-compound-item__disclosure').last();
+  const initiallyOpen = await disclosure.getAttribute('aria-expanded');
+  await disclosure.click();
+  await expect(disclosure).toHaveAttribute('aria-expanded', initiallyOpen === 'true' ? 'false' : 'true');
+  await disclosure.click();
+  await expect(disclosure).toHaveAttribute('aria-expanded', initiallyOpen ?? 'false');
+
+  await heading.click({ clickCount: 3 });
+  await page.keyboard.press('Backspace');
+  // ProseMirror keeps one empty heading block as a valid insertion point.
+  await expect(page.locator('.ProseMirror > h1')).toHaveText('');
+  await assertStable();
+
+  await setMarkdown(page, '# Target\n\n[Jump](#Destination)\n\n## Destination');
+  const anchor = page.locator('.ProseMirror a[href="#Destination"]').first();
+  await expect(anchor).toBeVisible();
+  await anchor.click();
+  await assertStable();
+});
+
 test('code typing is monotonic and cannot open text Bubble', async ({ page }) => {
   await setMarkdown(page, 'Use `x` here.');
   const code = page.locator('.ProseMirror p code');
