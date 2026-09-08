@@ -21,10 +21,13 @@ test.beforeEach(async ({ page }) => {
 });
 test.afterEach(async ({ page }, info) => {
   const errors = runtimeErrors.get(page) ?? [];
+  const renderErrors = await page.locator('[role="alert"], [data-render-error="true"]').allTextContents();
   await info.attach('runtime-errors', { body: JSON.stringify(errors), contentType: 'application/json' });
+  await info.attach('renderer-errors', { body: JSON.stringify(renderErrors), contentType: 'application/json' });
   const finalMarkdown = await page.evaluate(() => window.milkdownEditor?.getMarkdown()).catch(() => undefined);
   if (finalMarkdown) await info.attach('final-markdown', { body: finalMarkdown, contentType: 'text/markdown' });
   expect(errors).toEqual([]);
+  expect(renderErrors).toEqual([]);
 });
 
 test('standalone boot has no source editor, top toolbar or runtime errors', async ({ page }) => {
@@ -115,7 +118,72 @@ test('image controls keep the selected node while native inputs take focus', asy
   await expect(width).toBeVisible();
   await width.fill('180');
   await expect(image).toHaveAttribute('alt', 'dog#180px');
-  await expect(image).toHaveAttribute('style', /width: 180px/);
+  await expect(image).toHaveCSS('width', '180px');
+  expect(await markdown(page)).toContain('dog#180px');
+});
+
+test('manual ECharts example renders including its final semicolon', async ({ page }) => {
+  await page.getByRole('link', { name: 'echarts直接渲染', exact: true }).click();
+  await expect(page.locator('.cherry-embed--cherry_diagram').filter({ hasText: 'echarts' }).locator('svg')).toBeVisible();
+  await expect(page.locator('[role="alert"], [data-render-error="true"]')).toHaveCount(0);
+});
+
+test('typing after an external prepend keeps the caret at the original word', async ({ page }) => {
+  await setMarkdown(page, 'Original text');
+  const paragraph = page.locator('.ProseMirror > p').first();
+  await paragraph.click();
+  await page.keyboard.press('End');
+  await setMarkdown(page, 'Prepended paragraph\n\nOriginal text');
+  await page.keyboard.type('!');
+  expect(await markdown(page)).toContain('Original text!');
+  expect(await markdown(page)).not.toContain('Prepended par!');
+});
+
+test('Mermaid source edits preserve width and alignment and can be closed', async ({ page }) => {
+  await setMarkdown(page, '```mermaid #300px#center\ngraph LR\n A-->B\n```');
+  const node = page.locator('.cherry-embed--cherry_diagram');
+  await expect(node.locator('svg')).toBeVisible();
+  const toggle = node.getByRole('button', { name: '在节点内编辑源码', exact: true });
+  await toggle.click();
+  const source = node.locator('.cherry-embed__source code');
+  await source.fill('graph LR\n A-->C');
+  expect(await markdown(page)).toContain('mermaid #300px#center');
+  await expect(node).toHaveCSS('width', '300px');
+  await expect(node).toHaveClass(/cherry-mermaid-align-center/);
+  await toggle.click();
+  await expect(source).toBeHidden();
+});
+
+test('table chart source toggles and changing type updates the rendered chart', async ({ page }) => {
+  await setMarkdown(page, '| :line:{"title":"Trend"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 1 | 2 |');
+  const node = page.locator('.cherry-table-chart');
+  await expect(node.locator('svg')).toBeVisible();
+  const toggle = node.getByRole('button', { name: '在节点内编辑表格图表源码', exact: true });
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await toggle.click();
+  const source = node.locator('.cherry-embed__source code');
+  await source.fill('| :bar:{"title":"Changed"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 3 | 4 |');
+  await expect(node.locator('.cherry-embed__controls span')).toHaveText('bar');
+  await expect(node.locator('svg')).toContainText('Changed');
+  expect(await markdown(page)).toContain('| Sales | 3 | 4 |');
+  await toggle.click();
+  await expect(source).toBeHidden();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+});
+
+test('invalid Mermaid source recovers locally without leaving a stale global error', async ({ page }) => {
+  await setMarkdown(page, '```mermaid\ngraph LR\n A-->B\n```');
+  const node = page.locator('.cherry-embed--cherry_diagram');
+  await expect(node.locator('svg')).toBeVisible();
+  await node.getByRole('button', { name: '在节点内编辑源码', exact: true }).click();
+  const source = node.locator('.cherry-embed__source code');
+  await source.fill('invalid diagram');
+  await expect(node.getByRole('alert')).toBeVisible();
+  await source.fill('graph LR\n A-->C');
+  await expect(node.locator('svg')).toBeVisible();
+  await expect(page.locator('[role="alert"], [data-render-error="true"]')).toHaveCount(0);
+  await expect(source).toBeFocused();
+  expect(await markdown(page)).toContain('A-->C');
 });
 
 test('table chart owns its rendered resources and responds to API updates', async ({ page }) => {

@@ -20,8 +20,9 @@ export default function App() {
       el: root.current!,
       value: basicMd,
       renderers: { echarts, tableChart },
-      onError(error) {
-        if (!cancelled) setError(String(error));
+      onError(error, phase) {
+        // Diagram nodes display recoverable errors and clear them on success.
+        if (!cancelled && phase !== 'render') setError(String(error));
       },
     })
       .then(async (editor) => {

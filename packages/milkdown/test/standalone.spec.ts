@@ -20,6 +20,56 @@ async function create(value: string, options = {}) {
 }
 
 describe('standalone contracts', () => {
+  it('isolates synchronous renderer failures and clears the error after a valid update', async () => {
+    const onError = vi.fn();
+    const renderer = vi.fn(({ source }: { source: string }) => {
+      if (source.includes('invalid')) throw new Error('Invalid chart');
+      return '<div data-chart="valid">Valid chart</div>';
+    });
+    const instance = await create('```echarts\ninvalid\n```', { renderers: { echarts: renderer }, onError });
+    await vi.waitFor(() => expect(onError).toHaveBeenCalled());
+    instance.setMarkdown('```echarts\nvalid\n```');
+    await vi.waitFor(() => expect(document.querySelector('[data-chart="valid"]')).not.toBeNull());
+    expect(document.querySelector('[data-render-error]')).toBeNull();
+  });
+
+  it('prevents a late diagram renderer from overwriting a newer chart', async () => {
+    let completeOld: (() => void) | undefined;
+    const cleanup = vi.fn();
+    const renderer = vi.fn(({ source, container }: { source: string; container: HTMLElement }) => {
+      if (source.includes('old')) {
+        return new Promise<() => void>((resolve) => {
+          completeOld = () => {
+            container.textContent = 'Old chart';
+            resolve(cleanup);
+          };
+        });
+      }
+      container.textContent = 'New chart';
+      return undefined;
+    });
+    const instance = await create('```echarts\nold\n```', { renderers: { echarts: renderer } });
+    await vi.waitFor(() => expect(completeOld).toBeDefined());
+    instance.setMarkdown('```echarts\nnew\n```');
+    await vi.waitFor(() => expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('New chart'));
+    completeOld?.();
+    await vi.waitFor(() => expect(cleanup).toHaveBeenCalledTimes(1));
+    expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('New chart');
+  });
+
+  it('keeps a failed table chart local and clears its status when repaired', async () => {
+    const renderer = vi.fn(({ source }: { source: string }) => {
+      if (source.includes('Broken')) throw new Error('Invalid table chart');
+      return '<span data-chart="repaired">Repaired</span>';
+    });
+    const value = '| :line:{} | A |\n| --- | --- |\n| Broken | 1 |';
+    const instance = await create(value, { renderers: { tableChart: renderer } });
+    await vi.waitFor(() => expect(document.querySelector('.cherry-table-chart [role="alert"]')).not.toBeNull());
+    instance.setMarkdown(value.replace('Broken', 'Repaired'));
+    await vi.waitFor(() => expect(document.querySelector('[data-chart="repaired"]')).not.toBeNull());
+    expect(document.querySelector('[role="alert"], [data-render-error]')).toBeNull();
+  });
+
   it('rejects executable chart code before importing or mounting ECharts', async () => {
     const container = document.createElement('div');
     await expect(

@@ -14,7 +14,7 @@ import { indent } from '@milkdown/kit/plugin/indent';
 import { trailing } from '@milkdown/kit/plugin/trailing';
 import { commonmark } from '@milkdown/kit/preset/commonmark';
 import { gfm } from '@milkdown/kit/preset/gfm';
-import { NodeSelection, Plugin, TextSelection, type Selection } from '@milkdown/kit/prose/state';
+import { Plugin, TextSelection } from '@milkdown/kit/prose/state';
 import { $prose, getMarkdown } from '@milkdown/kit/utils';
 import type { CherryMilkdownInstance, CherryMilkdownOptions } from './types.js';
 import { createSelectionTracker } from './selection-tracker.js';
@@ -27,46 +27,6 @@ const DEFAULT_DEBOUNCE = 30;
 
 function assertRoot(root: HTMLElement): void {
   if (!(root instanceof HTMLElement)) throw new TypeError('cherryMilkdown: options.el must be an HTMLElement.');
-}
-
-function restoreSelection(editor: Editor, previous: Selection, selectedText: string): void {
-  editor.action((ctx) => {
-    const view = ctx.get(editorViewCtx);
-    const { doc } = view.state;
-    let next: Selection | undefined;
-
-    if (previous instanceof NodeSelection) {
-      let nearest: { distance: number; position: number } | undefined;
-      doc.descendants((node, position) => {
-        if (node.type.name !== previous.node.type.name) return;
-        const distance = Math.abs(position - previous.from);
-        if (!nearest || distance < nearest.distance) nearest = { distance, position };
-      });
-      if (nearest) next = NodeSelection.create(doc, nearest.position);
-    } else if (selectedText) {
-      let nearest: { distance: number; from: number; to: number } | undefined;
-      doc.descendants((node, position) => {
-        if (!node.isText || !node.text) return;
-        let offset = node.text.indexOf(selectedText);
-        while (offset >= 0) {
-          const from = position + offset;
-          const distance = Math.abs(from - previous.from);
-          if (!nearest || distance < nearest.distance) {
-            nearest = { distance, from, to: from + selectedText.length };
-          }
-          offset = node.text.indexOf(selectedText, offset + 1);
-        }
-      });
-      if (nearest) next = TextSelection.create(doc, nearest.from, nearest.to);
-    }
-
-    if (!next) {
-      const anchor = Math.min(Math.max(previous.anchor, 0), doc.content.size);
-      const head = Math.min(Math.max(previous.head, 0), doc.content.size);
-      next = TextSelection.between(doc.resolve(anchor), doc.resolve(head));
-    }
-    view.dispatch(view.state.tr.setSelection(next));
-  });
 }
 
 function replaceMarkdownWithMinimalTransaction(editor: Editor, markdown: string): void {
@@ -92,6 +52,8 @@ function replaceMarkdownWithMinimalTransaction(editor: Editor, markdown: string)
       to = from + (to - nextTo);
       nextTo = from;
     }
+    // The replace transaction maps both the live caret and saved selections.
+    // Restoring absolute offsets afterwards would undo that mapping.
     view.dispatch(view.state.tr.replace(from, to, nextDocument.slice(from, nextTo)).setMeta('addToHistory', false));
   });
 }
@@ -344,14 +306,8 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
       notificationTimer = undefined;
       try {
         suppressChanges = true;
-        currentMarkdown = markdown;
-        const previous = editor.action((ctx) => ctx.get(editorViewCtx).state.selection);
-        const selectedText = editor.action((ctx) => {
-          const { doc } = ctx.get(editorViewCtx).state;
-          return previous.empty ? '' : doc.textBetween(previous.from, previous.to, '\n', '\n');
-        });
         replaceMarkdownWithMinimalTransaction(editor, markdown);
-        restoreSelection(editor, previous, selectedText);
+        currentMarkdown = markdown;
         serializedBaseline = editor.action(getMarkdown());
       } catch (error) {
         options.onError?.(error, 'parse');

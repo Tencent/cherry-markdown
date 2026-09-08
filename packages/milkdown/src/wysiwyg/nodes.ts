@@ -1093,7 +1093,7 @@ class EmbedView implements NodeView {
   private node: ProseNode;
   private readonly view: EditorView;
   private readonly getPos: () => number | undefined;
-  private readonly preview: HTMLElement;
+  private preview: HTMLElement;
   private controls?: HTMLElement;
   private readonly sourcePanel: HTMLElement;
   private readonly source: HTMLElement;
@@ -1315,7 +1315,8 @@ class EmbedView implements NodeView {
     const attrs = { ...this.node.attrs };
     if (this.node.type.name === 'cherry_diagram') {
       attrs.value = value;
-      attrs.source = `\`\`\`${attrs.diagramType}\n${value}\n\`\`\``;
+      const lines = String(attrs.source).split(/\r?\n/);
+      attrs.source = `${lines[0]}\n${value}\n${lines.at(-1)}`;
     } else attrs.source = value;
     this.applyingSourceTransaction = true;
     this.view.dispatch(this.view.state.tr.setNodeMarkup(pos, undefined, attrs));
@@ -1386,15 +1387,20 @@ class EmbedView implements NodeView {
       this.preview.textContent = `${diagramType} · 请配置 renderers.${diagramType}`;
       return;
     }
-    this.preview.classList.add('is-loading');
-    Promise.resolve(
-      renderer({
-        container: this.preview,
-        engine: this.config.engine,
-        syntax: diagramType,
-        source: String(this.node.attrs.value),
-      }),
-    )
+    // Renderers may mutate their container after an await. Give each revision
+    // its own live container so a late result cannot overwrite the new chart.
+    const container = this.preview.cloneNode(false) as HTMLElement;
+    delete container.dataset.renderError;
+    container.removeAttribute('role');
+    container.classList.add('is-loading');
+    this.preview.replaceWith(container);
+    this.preview = container;
+    const source = String(this.node.attrs.value);
+    Promise.resolve()
+      .then(() => {
+        if (this.destroyed || version !== this.renderVersion) return;
+        return renderer({ container, engine: this.config.engine, syntax: diagramType, source });
+      })
       .then((result: CherryVisualRendererResult) => {
         if (this.destroyed || version !== this.renderVersion) {
           if (typeof result === 'function') result();
@@ -1408,6 +1414,8 @@ class EmbedView implements NodeView {
         if (this.destroyed || version !== this.renderVersion) return;
         this.preview.classList.remove('is-loading');
         this.preview.dataset.renderError = 'true';
+        this.preview.setAttribute('role', 'alert');
+        this.preview.textContent = '图表暂时无法渲染，请检查源码。';
         this.config.onError?.(error, 'render');
       });
   }
@@ -1424,6 +1432,7 @@ class TableChartView implements NodeView {
   private sourceOpen = false;
   private editingSource = false;
   private sourceToggle?: HTMLButtonElement;
+  private readonly typeLabel: HTMLElement;
   private cleanup?: () => void;
   private renderVersion = 0;
 
@@ -1445,6 +1454,7 @@ class TableChartView implements NodeView {
     const controls = document.createElement('figcaption');
     controls.className = 'cherry-embed__controls';
     const type = document.createElement('span');
+    this.typeLabel = type;
     type.textContent = String(node.attrs.chartType);
     const edit = iconButton('源码', '在节点内编辑表格图表源码', this.openSource, config.readonly);
     this.sourceToggle = edit;
@@ -1470,6 +1480,7 @@ class TableChartView implements NodeView {
     if (node.type !== this.node.type) return false;
     const sourceChanged = node.attrs.source !== this.node.attrs.source;
     this.node = node;
+    this.typeLabel.textContent = String(node.attrs.chartType);
     if (document.activeElement !== this.source) this.source.textContent = String(node.attrs.source ?? '');
     if (sourceChanged) this.render();
     return true;
@@ -1477,7 +1488,8 @@ class TableChartView implements NodeView {
 
   selectNode() {
     this.dom.classList.add('is-selected');
-    if (!this.config.readonly) this.setSourceOpen(true);
+    // Selection can be restored by API updates or initial document mounting.
+    // Only the source button opens the editor, as with other diagram nodes.
   }
 
   deselectNode() {
@@ -1550,6 +1562,12 @@ class TableChartView implements NodeView {
   };
 
   private openSource = () => {
+    if (this.sourceOpen) {
+      this.finishSourceEdit();
+      this.setSourceOpen(false);
+      this.view.focus();
+      return;
+    }
     this.editingSource = true;
     this.dom.classList.add('is-editing');
     this.setSourceOpen(true, true);
@@ -1599,7 +1617,7 @@ class TableChartView implements NodeView {
     if (typeof pos !== 'number') return;
     const source = editableSourceText(this.source);
     if (source === this.node.attrs.source) return;
-    const firstLine = source.split(/\r?\n/, 1)[0]?.trim().replace(/^\|/, '') ?? '';
+    const firstLine = source.split(/\r?\n/, 1)[0]?.trim().replace(/^\|/, '').trim() ?? '';
     const chartType = /^:(\w+):/.exec(firstLine)?.[1] ?? String(this.node.attrs.chartType ?? '');
     this.view.dispatch(
       this.view.state.tr.setNodeMarkup(pos, undefined, {
@@ -1675,14 +1693,22 @@ class TableChartView implements NodeView {
             else if (typeof result === 'string') container.replaceChildren(sanitizedEngineFragment(result));
           })
           .catch((error) => {
-            if (!this.destroyed && version === this.renderVersion) this.config.onError?.(error, 'render');
+            if (!this.destroyed && version === this.renderVersion) this.reportRenderError(error);
           });
       }
     } catch (error) {
       this.preview.textContent = String(this.node.attrs.source ?? '');
-      this.preview.dataset.renderError = 'true';
-      this.config.onError?.(error, 'render');
+      this.reportRenderError(error);
     }
+  }
+
+  private reportRenderError(error: unknown) {
+    this.preview.dataset.renderError = 'true';
+    const status = document.createElement('p');
+    status.setAttribute('role', 'alert');
+    status.textContent = '图表暂时无法渲染，请检查源码。';
+    this.preview.append(status);
+    this.config.onError?.(error, 'render');
   }
 }
 
