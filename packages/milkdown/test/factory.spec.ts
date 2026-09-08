@@ -688,9 +688,10 @@ describe('cherryMilkdown WYSIWYG', () => {
     const instance = await cherryMilkdown({ el: element, debounce: 0, onChange });
     instances.push(instance);
     instance.setMarkdown('# Updated\n\n$E=mc^2$');
-    await new Promise((resolve) => setTimeout(resolve, 10));
-    expect(element.querySelector('h1')?.textContent).toBe('Updated');
-    expect(onChange).toHaveBeenCalledWith({ markdown: expect.stringContaining('# Updated') });
+    await vi.waitFor(() => {
+      expect(element.querySelector('h1')?.textContent).toBe('Updated');
+      expect(onChange).toHaveBeenCalledWith({ markdown: expect.stringContaining('# Updated') });
+    });
   });
 
   it('preserves the active text selection across API/source Markdown synchronization', async () => {
