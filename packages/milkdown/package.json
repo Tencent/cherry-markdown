@@ -53,7 +53,8 @@
   },
   "scripts": {
     "build": "rimraf ./dist && tsc --project tsconfig.build.json",
-    "build:demo": "yarn workspace cherry-markdown build && yarn build && node ./scripts/build-demo.mjs",
+    "build:demo": "yarn workspace cherry-markdown build && yarn build:demo:prepared",
+    "build:demo:prepared": "yarn build && node ./scripts/build-demo.mjs",
     "build:types": "tsc --project tsconfig.build.json",
     "clean": "rimraf ./dist",
     "dev:demo": "vite --config vite.demo.config.mjs",

@@ -48,6 +48,10 @@ jobs:
 
       - name: Test Milkdown reliability in Chromium
         run: vp run -F @cherry-markdown/milkdown test:e2e
+        env:
+          # The preceding consumer check already built both workspace packages.
+          # Reuse them instead of rebuilding every Cherry bundle before Playwright.
+          MILKDOWN_E2E_PREBUILT: '1'
 
       - name: Upload Milkdown browser failure evidence
         if: failure()

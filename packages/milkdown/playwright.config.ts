@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 const port = Number(process.env.MILKDOWN_E2E_PORT ?? 4177);
 const packageRoot = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = resolve(packageRoot, '../..');
+const demoBuildScript = process.env.MILKDOWN_E2E_PREBUILT ? 'build:demo:prepared' : 'build:demo';
 const browserProjects = [
   {
     name: 'chromium',
@@ -44,11 +45,11 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   webServer: {
-    command: `yarn workspace @cherry-markdown/milkdown build:demo && ./node_modules/.bin/vite preview --config packages/milkdown/vite.demo.config.mjs --host 127.0.0.1 --port ${port}`,
+    command: `yarn workspace @cherry-markdown/milkdown ${demoBuildScript} && ./node_modules/.bin/vite preview --config packages/milkdown/vite.demo.config.mjs --host 127.0.0.1 --port ${port}`,
     cwd: workspaceRoot,
     url: `http://127.0.0.1:${port}/index.html`,
     reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
+    timeout: 360_000,
   },
   projects: browserProjects,
 });
