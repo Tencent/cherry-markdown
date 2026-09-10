@@ -105,6 +105,15 @@ describe('core/hooks/list', () => {
     expect(container.querySelector('ul > li > ol > li')?.textContent).toBe('ordered child');
   });
 
+  it('keeps an indented empty list item while the user is typing', () => {
+    const html = renderList('- Item 1\n    - Item 1.1\n- Item 2\n  - ', { indentSpace: 2 });
+    const container = document.createElement('div');
+    container.innerHTML = html;
+
+    expect(container.querySelectorAll(':scope > ul > li')).toHaveLength(2);
+    expect(container.querySelector('ul > li:last-child > ul > li > p')?.textContent).toBe('');
+  });
+
   it('returns no subtree HTML for a leaf and counts text without line endings', () => {
     const hook = createList({ indentSpace: 2 });
     hook.buildTree('- leaf', sentenceMake);

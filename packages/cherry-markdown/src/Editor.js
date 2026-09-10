@@ -2000,6 +2000,23 @@ export default class Editor {
       EditorState.changeFilter.of((tr) => {
         if (!tr.docChanged) return true;
 
+        // 某些浏览器/输入法组合会在 Tab 快捷键执行 indentMore 前，先向
+        // contenteditable 写入一个原生制表符。只过滤这类纯 Tab 的 input.type
+        // 事务，避免一次按键同时产生原生 Tab 和 CodeMirror 缩进。
+        if (tr.isUserEvent('input.type')) {
+          let hasInsertedTab = false;
+          let containsNonTabChange = false;
+          tr.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
+            const text = inserted.toString();
+            if (fromA !== toA || !/^\t+$/.test(text)) {
+              containsNonTabChange = true;
+            } else {
+              hasInsertedTab = true;
+            }
+          });
+          if (hasInsertedTab && !containsNonTabChange) return false;
+        }
+
         // 所有定义了atomic=true 的装饰器都被认为是原子装饰器，不允许局部修改和局部删除
         const marks = tr.startState.field(markField, false);
         if (marks && marks !== Decoration.none) {
