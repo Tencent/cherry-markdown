@@ -52,6 +52,7 @@ import { createElement } from './utils/dom';
 import { base64Reg, imgDrawioXmlReg, createUrlReg, getCodeBlockRule } from './utils/regexp';
 import { addEvent, removeEvent } from './utils/event';
 import { handleNewlineIndentList } from './utils/autoindent';
+import { allowListTabInput } from './utils/listTabInput';
 import diff from 'fast-diff';
 
 /**
@@ -2000,22 +2001,8 @@ export default class Editor {
       EditorState.changeFilter.of((tr) => {
         if (!tr.docChanged) return true;
 
-        // 某些浏览器/输入法组合会在 Tab 快捷键执行 indentMore 前，先向
-        // contenteditable 写入一个原生制表符。只过滤这类纯 Tab 的 input.type
-        // 事务，避免一次按键同时产生原生 Tab 和 CodeMirror 缩进。
-        if (tr.isUserEvent('input.type')) {
-          let hasInsertedTab = false;
-          let containsNonTabChange = false;
-          tr.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
-            const text = inserted.toString();
-            if (fromA !== toA || !/^\t+$/.test(text)) {
-              containsNonTabChange = true;
-            } else {
-              hasInsertedTab = true;
-            }
-          });
-          if (hasInsertedTab && !containsNonTabChange) return false;
-        }
+        // 仅在快捷键启用时过滤空列表前缀中的重复原生 Tab；保留代码和普通文本输入。
+        if (!this.shortcutDisabled && !allowListTabInput(tr)) return false;
 
         // 所有定义了atomic=true 的装饰器都被认为是原子装饰器，不允许局部修改和局部删除
         const marks = tr.startState.field(markField, false);

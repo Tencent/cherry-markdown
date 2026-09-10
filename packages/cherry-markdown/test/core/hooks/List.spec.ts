@@ -114,6 +114,39 @@ describe('core/hooks/list', () => {
     expect(container.querySelector('ul > li:last-child > ul > li > p')?.textContent).toBe('');
   });
 
+  it.each(['- ', '* ', '+ ', '1. '])(
+    'renders an empty marker %j without consuming the following paragraph',
+    (marker) => {
+      const container = document.createElement('div');
+      container.innerHTML = renderList(`${marker}\n\nparagraph`, { indentSpace: 2 });
+      expect(container.querySelectorAll('li')).toHaveLength(1);
+      expect(container.querySelector('li')?.textContent).not.toContain('paragraph');
+      expect(container.textContent).toContain('paragraph');
+    },
+  );
+
+  it.each([
+    '',
+    '\n\n',
+    'plain paragraph',
+    '- content',
+    '1. content',
+    '- parent\n  - child',
+    '- first\n\n- second',
+    '- content\n\nparagraph',
+    '- content\n\n# heading',
+    '- content\n\n> quote',
+    '- [ ] task',
+    '---',
+    '* * *',
+    '- parent\n  - child\n\nparagraph',
+  ])('preserves previous list matching for %j', (text) => {
+    const previous = createList({ indentSpace: 2 });
+    const rule = previous.rule();
+    previous.rule = () => ({ ...rule, reg: new RegExp(`${rule.begin}([^\\r]+?)${rule.end}`, 'gm') });
+    expect(renderList(text, { indentSpace: 2 })).toBe(previous.restoreCache(previous.makeHtml(text, sentenceMake)));
+  });
+
   it('returns no subtree HTML for a leaf and counts text without line endings', () => {
     const hook = createList({ indentSpace: 2 });
     hook.buildTree('- leaf', sentenceMake);
