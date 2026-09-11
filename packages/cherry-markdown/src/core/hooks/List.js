@@ -41,7 +41,8 @@ export function makeChecklist(text) {
 // 缩进处理
 function handleIndent(str, node) {
   const indentRegex = /^(\t|[ ])/;
-  let $str = str;
+  // mac下按tab键会同时插入空格+\t，这种情况下直接去掉空格
+  let $str = str.replace(/^[ ]+(\t+)/, '$1');
   while (indentRegex.test($str)) {
     node.space += $str[0] === '\t' ? TAB_SPACE_NUM : 1;
     $str = $str.replace(indentRegex, '');

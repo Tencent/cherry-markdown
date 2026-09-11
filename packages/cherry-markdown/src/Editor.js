@@ -42,7 +42,7 @@ import {
   selectLine,
 } from '@codemirror/commands';
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
-import { syntaxHighlighting, defaultHighlightStyle, foldGutter, indentOnInput } from '@codemirror/language';
+import { syntaxHighlighting, defaultHighlightStyle, foldGutter, indentOnInput, indentUnit } from '@codemirror/language';
 import htmlParser from '@/utils/htmlparser';
 import pasteHelper from '@/utils/pasteHelper';
 import Logger from '@/Logger';
@@ -2162,6 +2162,8 @@ export default class Editor {
           return false;
         },
       }),
+      // 设置缩进单位为2个空格
+      indentUnit.of('  '),
     ];
 
     const state = EditorState.create({
