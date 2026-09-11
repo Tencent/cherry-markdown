@@ -292,6 +292,15 @@ describe('Cherry Markdown final rendering', () => {
     expect(decodeURIComponent(blockMath?.getAttribute('data-content') ?? '')).toBe('y = x + 1');
   });
 
+  it('renders TeX inline and display formula delimiters', () => {
+    const container = render('Inline \\(x^2\\) formula.\n\n\\[\ny = x + 1\n\\]');
+    const inlineMath = container.querySelector('.Cherry-InlineMath');
+    const blockMath = container.querySelector('.Cherry-Math[data-type="mathBlock"]');
+
+    expect(decodeURIComponent(inlineMath?.getAttribute('data-formula-source') ?? '')).toBe('x^2');
+    expect(decodeURIComponent(blockMath?.getAttribute('data-formula-source') ?? '')).toBe('y = x + 1');
+  });
+
   it('renders repeated footnote references and one definition', () => {
     const container = render('First[^note], second[^note].\n\n[^note]: **Footnote** content');
     const references = container.querySelectorAll('sup.cherry-footnote-number a');

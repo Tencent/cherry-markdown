@@ -56,7 +56,7 @@ exports[`engine > CommonMark-11 1`] = `
 `;
 
 exports[`engine > CommonMark-12 1`] = `
-"<p data-sign="b88e7b1f827aa4d21" data-type="p" data-lines="1">!&quot;#$%\\&amp;&#x27;()*+,-./:;&lt;=&gt;?@[\\]^_\`{|}~</p>
+"<p data-sign="0349be234f780c2b1" data-type="p" data-lines="1">!&quot;#$%\\&amp;&#x27;()*+,-./:;&lt;=&gt;?@</p><div data-sign="03758bb2cc688b63" class="Cherry-Math cherry-mathjax-need-render" data-type="mathBlock" data-formula-source="%5C%5C" data-lines="0" data-content="%5C%5C"></div><p data-sign="f2b1d347ae9fdbe21" data-type="p" data-lines="1">^_\`{|}~</p>
 "
 `;
 

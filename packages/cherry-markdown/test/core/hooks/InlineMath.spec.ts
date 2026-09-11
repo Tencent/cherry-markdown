@@ -196,6 +196,36 @@ describe('core/hooks/InlineMath', () => {
     expect(hook.makeInlineMath('plain text')).toBe('plain text');
   });
 
+  it('renders TeX inline formula delimiters directly', () => {
+    const { hook } = createInlineMath('MathJax');
+    hook.engine = 'node';
+
+    const html = hook.restoreCache(hook.beforeMakeHtml('value \\(x^2\\)'));
+
+    expect(html).toContain('$x\\^2$');
+    expect(html).toContain('data-formula-source="x%5E2"');
+  });
+
+  it('keeps escaped, empty, and unclosed TeX inline delimiters unchanged', () => {
+    const { hook } = createInlineMath('MathJax');
+
+    expect(hook.beforeMakeHtml('\\\\(not math\\\\)')).toBe('\\\\(not math\\\\)');
+    expect(hook.beforeMakeHtml('\\( \\)')).toBe('\\( \\)');
+    expect(hook.beforeMakeHtml('before \\(unclosed')).toBe('before \\(unclosed');
+  });
+
+  it('preserves TeX delimiters in existing formulas and link destinations', () => {
+    const { hook } = createInlineMath('MathJax');
+    hook.engine = 'node';
+
+    const formulaHtml = hook.restoreCache(hook.beforeMakeHtml('~D\\(x\\)~D'));
+    const linkHtml = hook.restoreCache(hook.beforeMakeHtml('[\\(label\\)](\\(url\\) "title \\[text\\]")'));
+
+    expect(formulaHtml).toContain('data-formula-source="%5C(x%5C)"');
+    expect(linkHtml).toContain('data-formula-source="label"');
+    expect(linkHtml).toContain('(\\(url\\) "title \\[text\\]")');
+  });
+
   it('closes an unfinished inline formula in self-closing and flow modes', () => {
     const selfClosing = createInlineMath('MathJax', true).hook;
     const flow = createInlineMath('MathJax', false, true).hook;
@@ -209,6 +239,13 @@ describe('core/hooks/InlineMath', () => {
     expect(selfClosingHtml).toContain('data-formula-source="x%5E2"');
     expect(flowHtml).toContain('$x\\^2$');
     expect(flowHtml).toContain('CHERRYFLOWSESSIONCURSOR');
+
+    const texSelfClosingHtml = selfClosing.restoreCache(selfClosing.beforeMakeHtml('value \\(x^2'));
+    const texFlowHtml = flow.restoreCache(flow.beforeMakeHtml('value \\(x^2CHERRYFLOWSESSIONCURSOR'));
+
+    expect(texSelfClosingHtml).toContain('data-formula-source="x%5E2"');
+    expect(texFlowHtml).toContain('data-formula-source="x%5E2"');
+    expect(texFlowHtml).toContain('CHERRYFLOWSESSIONCURSOR');
   });
 
   it('turns block formulas inside table cells into inline formulas', () => {
@@ -233,5 +270,18 @@ describe('core/hooks/InlineMath', () => {
     expect(html.match(/class="Cherry-InlineMath"/g)).toHaveLength(2);
     expect(html).toContain('data-formula-source="x%2By"');
     expect(html).toContain('data-formula-source="z"');
+  });
+
+  it('keeps TeX inline formulas within a single Markdown table cell', () => {
+    const { hook } = createInlineMath('MathJax');
+    hook.engine = 'node';
+    const markdown = '| Left | Right |\n| --- | --- |\n| \\(x | y\\) |\n| \\(z\\) | plain |';
+
+    const html = hook.restoreCache(hook.beforeMakeHtml(markdown));
+
+    expect(html.match(/class="Cherry-InlineMath"/g)).toHaveLength(1);
+    expect(html).toContain('data-formula-source="z"');
+    expect(html).toContain('\\(x');
+    expect(html).toContain('y\\)');
   });
 });
