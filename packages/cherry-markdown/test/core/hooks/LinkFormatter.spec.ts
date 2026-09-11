@@ -110,7 +110,7 @@ describe('core/hooks/LinkFormatter', () => {
     expect(html).not.toContain('~1RB');
   });
 
-  it('protects link URL against math delimiter mis-detection in a math-heavy paragraph', () => {
+  it('protects link URL against math delimiter miss-detection in a math-heavy paragraph', () => {
     const formatter = createLinkFormatter();
     // 模拟经过 Engine.$encodeReservedKeywords 处理后的字符串：$ 已变 ~D
     // 完整段落里包含一个 URL 中含有 \[ 的链接，若不做保护，后续 MathBlock 会把 URL 里的 \[ 归一化成 ~D~D
