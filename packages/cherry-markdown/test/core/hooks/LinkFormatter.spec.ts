@@ -73,7 +73,7 @@ describe('core/hooks/LinkFormatter', () => {
     const formatter = createLinkFormatter();
 
     expect(formatter.beforeMakeHtml('')).toBe('');
-    // @ts-expect-error 明确传入 undefined 验证兜底
+    // 明确传入 undefined 验证兜底
     expect(formatter.beforeMakeHtml(undefined)).toBe(undefined);
     expect(formatter.afterMakeHtml('')).toBe('');
   });
