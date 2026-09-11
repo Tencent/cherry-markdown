@@ -433,6 +433,7 @@ export interface CherryEngineOptions {
           css?: string;
           plugins?: boolean; // 加载插件
           selfClosing?: boolean; // 自动闭合
+          TeXDelimiter?: true; // 是否支持 TeX 风格的界定符 \[ ... \]
         };
     inlineMath?:
       | false
@@ -440,6 +441,7 @@ export interface CherryEngineOptions {
           engine?: 'katex' | 'MathJax'; // katex或MathJax
           src?: string;
           selfClosing?: boolean; // 自动闭合
+          TeXDelimiter?: true; // 是否支持 TeX 风格的界定符 \( ... \)
         };
     toc?:
       | false

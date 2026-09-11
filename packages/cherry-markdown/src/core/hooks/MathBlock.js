@@ -19,7 +19,18 @@ import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
 import { isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
-import { normalizeMathDelimiters } from '@/utils/mathDelimiter';
+
+// 归一化 \[...\] → ~D~D...~D~D 的正则：
+// - `[\s\S]+?` 非贪婪匹配至少一个字符（`+` 保证匹配失败于 `\[\]` 这类零字符组合）
+// - `(?<!\\)` lookbehind 排除被反斜杠转义的 `\[` / `\]`
+const bracketBlockReg = isLookbehindSupported()
+  ? /(?<!\\)\\\[([\s\S]+?)(?<!\\)\\\]/g
+  : /(^|[^\\])\\\[([\s\S]+?)(?<!\\)\\\]/g;
+
+// selfClosing 场景下，匹配"未闭合的 \[ + 到 EOL 之间的内容"，用于补开定界符 ~D~D
+const bracketOpenOnlyReg = isLookbehindSupported()
+  ? /(?<!\\)\\\[([\s\S]+?)(CHERRYFLOWSESSIONCURSOR\n*)?$/
+  : /(^|[^\\])\\\[([\s\S]+?)(CHERRYFLOWSESSIONCURSOR\n*)?$/;
 
 export default class MathBlock extends ParagraphBase {
   static HOOK_NAME = 'mathBlock';
@@ -36,6 +47,9 @@ export default class MathBlock extends ParagraphBase {
     super({ needCache: true });
     // 非浏览器环境下配置为 node
     this.engine = isBrowser() ? (config.engine ?? 'MathJax') : 'node';
+    // 是否启用 TeX 风格定界符 \[ ... \]（默认开启）
+    // 关闭后，\[ ... \] 不会被归一化为 $$..$$，仅保留原生 $$..$$ 的渲染能力
+    this.TeXDelimiter = config.TeXDelimiter !== false;
     this.$cherry = cherry;
     this.lastCode = '';
   }
@@ -149,21 +163,72 @@ export default class MathBlock extends ParagraphBase {
     return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1);
   }
 
-  beforeMakeHtml(str) {
-    const normalizedStr = normalizeMathDelimiters(str, {
-      '\\[': { replacement: '~D~D', selfClosing: this.isSelfClosing() },
-    });
-    let $str = this.makeMath(normalizedStr);
-    if (this.isSelfClosing()) {
-      const $oldStr = $str;
-      $str = this.$dealUnclosingMath($str);
-      if ($oldStr !== $str) {
-        $str = this.makeMath($str);
-      }
+  /**
+   * 将 `\[...\]` 归一化为 `~D~D...~D~D`。空白内容不归一化，
+   */
+  rewriteBracketBlock(str) {
+    if (isLookbehindSupported()) {
+      return str.replace(bracketBlockReg, (whole, content) => (content.trim() ? `~D~D${content}~D~D` : whole));
     }
-    return $str;
+    return replaceLookbehind(
+      str,
+      bracketBlockReg,
+      (whole, _lead, content) => (content.trim() ? `~D~D${content}~D~D` : whole),
+      true,
+      1,
+    );
   }
 
+  /** selfClosing 场景下补开定界符：把"未闭合 \["补一个 ~D~D 前缀。 */
+  rewriteOpenOnlyBracket(str) {
+    if (isLookbehindSupported()) {
+      return str.replace(bracketOpenOnlyReg, (_whole, content, tail = '') => `~D~D${content}${tail}`);
+    }
+    return replaceLookbehind(
+      str,
+      bracketOpenOnlyReg,
+      (_whole, _lead, content, tail = '') => `~D~D${content}${tail}`,
+      true,
+      1,
+    );
+  }
+
+  /** selfClosing 兜底：把最尾的孤立 ~D~D 补齐成闭合的 ~D~D..~D~D，再走一次 makeMath。 */
+  makeMathWithSelfClosing(str) {
+    if (!this.isSelfClosing()) {
+      return str;
+    }
+    const $str = this.$dealUnclosingMath(str);
+    return $str === str ? str : this.makeMath($str);
+  }
+
+  /**
+   * 整体流程：
+   *   Step 1: 先跑一次 makeMath，把用户原生输入的 $$..$$（经 Engine 编码为 ~D~D..~D~D）
+   *           整段渲染并存入 cache，剩余字符串里的 ~D~D 段被替换为 cache 占位符，
+   *           从而形成天然"保护壳"——后续 \[..\] 归一化不会误伤 $$..$$ 内部的 \[。
+   *   Step 2: 归一化剩余（未被 $$..$$ 包住）的 \[..\] → ~D~D..~D~D，
+   *           再跑一次 makeMath 把新归一化的段落也吃到 cache 里，
+   *           避免下一步的 selfClosing 正则把已闭合公式误当成半开公式。
+   *   Step 3: selfClosing 场景下，把剩余的"未闭合 \["补一个开定界符 ~D~D。
+   *   Step 4: selfClosing 兜底——把最尾的孤立 ~D~D 补齐成闭合的 ~D~D..~D~D 并渲染。
+   *
+   * 当 TeXDelimiter 关闭时，跳过 Step 2 / Step 3，仅保留 Step 1 冻结 + Step 4 兜底。
+   */
+  beforeMakeHtml(str) {
+    let $str = this.makeMath(str);
+
+    if (this.TeXDelimiter) {
+      $str = this.rewriteBracketBlock($str);
+      $str = this.makeMath($str);
+
+      if (this.isSelfClosing()) {
+        $str = this.rewriteOpenOnlyBracket($str);
+      }
+    }
+
+    return this.makeMathWithSelfClosing($str);
+  }
   makeHtml(str) {
     return str;
   }

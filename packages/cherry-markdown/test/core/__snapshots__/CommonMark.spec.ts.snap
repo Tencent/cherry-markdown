@@ -56,7 +56,7 @@ exports[`engine > CommonMark-11 1`] = `
 `;
 
 exports[`engine > CommonMark-12 1`] = `
-"<p data-sign="0349be234f780c2b1" data-type="p" data-lines="1">!&quot;#$%\\&amp;&#x27;()*+,-./:;&lt;=&gt;?@</p><div data-sign="03758bb2cc688b63" class="Cherry-Math cherry-mathjax-need-render" data-type="mathBlock" data-formula-source="%5C%5C" data-lines="0" data-content="%5C%5C"></div><p data-sign="f2b1d347ae9fdbe21" data-type="p" data-lines="1">^_\`{|}~</p>
+"<p data-sign="b88e7b1f827aa4d21" data-type="p" data-lines="1">!&quot;#$%\\&amp;&#x27;()*+,-./:;&lt;=&gt;?@[\\]^_\`{|}~</p>
 "
 `;
 
@@ -2910,7 +2910,7 @@ exports[`engine > CommonMark-494 1`] = `
 `;
 
 exports[`engine > CommonMark-495 1`] = `
-"<p data-sign="f147cead63bad7d41" data-type="p" data-lines="1"><a href="%5C(foo%5C)">link</a></p>
+"<p data-sign="420fb180f8fa5f661" data-type="p" data-lines="1"><a href="(foo)">link</a></p>
 "
 `;
 
@@ -2925,7 +2925,7 @@ exports[`engine > CommonMark-497 1`] = `
 `;
 
 exports[`engine > CommonMark-498 1`] = `
-"<p data-sign="f823c47a85a5084f1" data-type="p" data-lines="1"><a href="foo%5C(and%5C(bar%5C">link</a>)</p>
+"<p data-sign="4f303eed881c3b511" data-type="p" data-lines="1"><a href="foo(and(bar)">link</a></p>
 "
 `;
 
@@ -2935,7 +2935,7 @@ exports[`engine > CommonMark-499 1`] = `
 `;
 
 exports[`engine > CommonMark-500 1`] = `
-"<p data-sign="d5046c2e63711d961" data-type="p" data-lines="1"><a href="foo%5C">link</a>:)</p>
+"<p data-sign="69e6ca1d6dc571051" data-type="p" data-lines="1"><a href="foo)%5C:">link</a></p>
 "
 `;
 
@@ -3010,7 +3010,7 @@ exports[`engine > CommonMark-514 1`] = `
 `;
 
 exports[`engine > CommonMark-515 1`] = `
-"<p data-sign="2d645894e8183d4e1" data-type="p" data-lines="1"><a href="/uri">link [bar</a></p>
+"<p data-sign="306ca718c4bf1aed1" data-type="p" data-lines="1"><a href="/uri">link [bar</a></p>
 "
 `;
 

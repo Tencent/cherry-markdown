@@ -373,11 +373,13 @@ const defaultConfig = {
         src: '',
         css: '', // 如果使用katex，则还需要引入css（如果是 MathJax，则不需要）
         plugins: true, // 默认加载插件
+        TeXDelimiter: true, // 是否支持 TeX 风格的界定符 \[ ... \]
       },
       inlineMath: {
         selfClosing: false,
         engine: 'MathJax', // katex或MathJax
         src: '',
+        TeXDelimiter: true, // 是否支持 TeX 风格的界定符 \( ... \)
       },
       toc: {
         /** 默认只渲染一个目录 */

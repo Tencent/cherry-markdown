@@ -25,6 +25,7 @@ import Sub from './hooks/Sub';
 import InlineCode from './hooks/InlineCode';
 import CodeBlock from './hooks/CodeBlock';
 import Link from './hooks/Link';
+import LinkFormatter from './hooks/LinkFormatter';
 import Emphasis from './hooks/Emphasis';
 import Paragraph from './hooks/Paragraph';
 import Header from './hooks/Header';
@@ -63,6 +64,12 @@ const hooksConfig = [
   FrontMatter,
   CodeBlock,
   InlineCode,
+  /**
+   * LinkFormatter 段落级 hook：把 `[text](url)` 语法整段内的 `~D`、`\[`、`\]`、`\(`、`\)`
+   * 转义为占位符，避免后续 InlineMath / MathBlock 等 hook 把链接内部的字符误当作公式定界符；
+   * 对应的 afterMakeHtml 阶段会把占位符还原为原字符，Link 行内 hook 依旧拿到原文
+   */
+  LinkFormatter,
   /**
    * 理论上行内公式（InlineMath）应该在段落公式（MathBlock）的后面，否则行内公式会破坏段落公式的渲染
    * 但实际交换顺序后，发现没啥问题，还顺带解决了[这个issue #1090](https://github.com/Tencent/cherry-markdown/issues/1090)的问题

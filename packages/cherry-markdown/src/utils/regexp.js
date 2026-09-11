@@ -270,6 +270,44 @@ export function getDetailRule() {
 // 匹配图片URL里的base64，[name](data:image/png;base64,xxx) 和 ![alt](data:image/png;base64,xxx) 这两种形式的都处理
 export const imgBase64Reg = /(\[[^\n]*?\]\(data:image\/[a-z]{1,10};base64,)([^)]+)\)/g;
 
+/**
+ * 超链接语法的识别规则
+ * 由 Link 与 LinkFormatter 共享，避免多处重复定义链接正则
+ * 分组：
+ *   1. leadingChar     链接前的字符（非反斜杠）
+ *   2. text            方括号内的链接文字
+ *   3. link            括号内的URL
+ *   4. title           可选的标题（含引号）
+ *   5. target          {target=...} 段
+ *   6. targetValue     target 具体值
+ */
+export function getLinkRule() {
+  const ret = {
+    // lookbehind启用分组是为了和不兼容lookbehind的场景共用一个回调
+    begin: isLookbehindSupported() ? '((?<!\\\\))' : '(^|[^\\\\])',
+    content: [
+      '\\[([^\\n]*?)\\]', // ?<text>
+      '[ \\t]*', // any spaces
+      '\\(',
+      /**
+       * allow double quotes
+       * e.g.
+       * [link](") ⭕️ valid
+       * [link]("") ⭕️ valid
+       * [link](()) ⭕️ valid
+       * [link](" ") ❌ invalid
+       */
+      '((?:[^\\s()]*\\([^\\s()]*\\)[^\\s()]*)+|[^\\s)]+)', // ?<link> url
+      '(?:[ \\t]((?:".*?")|(?:\'.*?\')))?', // ?<title> optional
+      '\\)',
+      '(\\{target\\s*=\\s*(_blank|parent|self|top)\\})?',
+    ].join(''),
+    end: '',
+  };
+  ret.reg = compileRegExp(ret, 'g');
+  return ret;
+}
+
 // 匹配base64数据
 export const base64Reg = /(data:image\/[a-z]{1,10};base64,)([0-9a-zA-Z+/=]+)/g;
 

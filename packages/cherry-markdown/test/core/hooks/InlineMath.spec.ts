@@ -11,7 +11,12 @@ interface MathExternals {
   };
 }
 
-function createInlineMath(engine: 'katex' | 'MathJax', selfClosing = false, flowSessionContext = false) {
+function createInlineMath(
+  engine: 'katex' | 'MathJax',
+  selfClosing = false,
+  flowSessionContext = false,
+  texDelimiter?: boolean,
+) {
   const cherry = {
     options: {
       engine: {
@@ -22,7 +27,11 @@ function createInlineMath(engine: 'katex' | 'MathJax', selfClosing = false, flow
       },
     },
   };
-  const hook = new InlineMath({ config: { engine }, cherry });
+  const config: { engine: 'katex' | 'MathJax'; TeXDelimiter?: boolean } = { engine };
+  if (texDelimiter !== undefined) {
+    config.TeXDelimiter = texDelimiter;
+  }
+  const hook = new InlineMath({ config, cherry });
   const add = vi.fn();
   Object.defineProperty(hook, '$engine', {
     value: {
@@ -214,16 +223,48 @@ describe('core/hooks/InlineMath', () => {
     expect(hook.beforeMakeHtml('before \\(unclosed')).toBe('before \\(unclosed');
   });
 
-  it('preserves TeX delimiters in existing formulas and link destinations', () => {
+  it('does not recognize TeX inline delimiters when TeXDelimiter is disabled', () => {
+    const { hook } = createInlineMath('MathJax', false, false, false);
+    hook.engine = 'node';
+
+    // \(..\) 不再被归一化为 $..$
+    expect(hook.beforeMakeHtml('value \\(x^2\\)')).toBe('value \\(x^2\\)');
+
+    // 原生 $..$（Engine 编码后的 ~D..~D）仍能正常渲染
+    const html = hook.restoreCache(hook.beforeMakeHtml('value ~Dx^2~D'));
+    expect(html).toContain('$x\\^2$');
+    expect(html).toContain('data-formula-source="x%5E2"');
+  });
+
+  it('does not close unfinished \\( when TeXDelimiter is disabled even in self-closing mode', () => {
+    const selfClosing = createInlineMath('MathJax', true, false, false).hook;
+    const flow = createInlineMath('MathJax', false, true, false).hook;
+    selfClosing.engine = 'node';
+    flow.engine = 'node';
+
+    // selfClosing / flow 场景下不再对 \( 做补开
+    expect(selfClosing.beforeMakeHtml('value \\(x^2')).toBe('value \\(x^2');
+    expect(flow.beforeMakeHtml('value \\(x^2CHERRYFLOWSESSIONCURSOR')).toContain('\\(x^2');
+
+    // 原生 ~D 半开公式的 selfClosing 兜底仍然生效
+    const nativeSelfClosing = selfClosing.restoreCache(selfClosing.beforeMakeHtml('value ~Dx^2'));
+    expect(nativeSelfClosing).toContain('$x\\^2$');
+  });
+
+  it('preserves TeX delimiters in existing formulas and normalizes bare \\(..\\)', () => {
     const { hook } = createInlineMath('MathJax');
     hook.engine = 'node';
 
+    // 原生 ~D..~D（Engine 编码后的 $..$）作为“保护壳”：内部的 \(x\) 不会被误当公式定界符
     const formulaHtml = hook.restoreCache(hook.beforeMakeHtml('~D\\(x\\)~D'));
-    const linkHtml = hook.restoreCache(hook.beforeMakeHtml('[\\(label\\)](\\(url\\) "title \\[text\\]")'));
-
     expect(formulaHtml).toContain('data-formula-source="%5C(x%5C)"');
+
+    // 单元测试直接调用 InlineMath.beforeMakeHtml 时不经过 LinkFormatter，
+    // 因此 [text](url) 里的 \(..\) 会像普通文本一样被 InlineMath 归一化——
+    // “链接内字符转义”的保护职责已迁移到 LinkFormatter（见 LinkFormatter.spec.ts）。
+    const linkHtml = hook.restoreCache(hook.beforeMakeHtml('[\\(label\\)](\\(url\\) "title \\[text\\]")'));
     expect(linkHtml).toContain('data-formula-source="label"');
-    expect(linkHtml).toContain('(\\(url\\) "title \\[text\\]")');
+    expect(linkHtml).toContain('data-formula-source="url"');
   });
 
   it('closes an unfinished inline formula in self-closing and flow modes', () => {

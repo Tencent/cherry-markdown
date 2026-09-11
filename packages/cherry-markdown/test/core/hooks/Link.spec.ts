@@ -143,7 +143,7 @@ describe('core/hooks/Link', () => {
     expect(renderLink(objectAttributes, '[text](https://example.com)')).not.toContain('ignored');
   });
 
-  it('restores protected math markers in link text and URL', () => {
+  it('passes math markers through link text and URL untouched (LinkFormatter now handles the protection)', () => {
     const urlProcessor = vi.fn((url: string) => url);
     const hook = createLinkHook({ urlProcessor });
     const html = renderLink(hook, '[price ~D5](https://example.com/~Dvalue)');
@@ -151,6 +151,7 @@ describe('core/hooks/Link', () => {
     expect(urlProcessor).toHaveBeenCalledWith('https://example.com/~Dvalue', 'link');
     expect(html).toContain('>price ~D5</a>');
     expect(html).toContain('href="https://example.com/~Dvalue"');
+    // Link 内部不再做 ~1D 相关的中间转义
     expect(html).not.toContain('~1D');
   });
 

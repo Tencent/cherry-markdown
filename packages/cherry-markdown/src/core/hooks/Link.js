@@ -15,7 +15,7 @@
  */
 import SyntaxBase from '@/core/SyntaxBase';
 import { escapeHTMLSpecialChar as e, isValidScheme, encodeURIOnce } from '@/utils/sanitize';
-import { compileRegExp, isLookbehindSupported } from '@/utils/regexp';
+import { getLinkRule, isLookbehindSupported } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import UrlCache from '@/UrlCache';
 
@@ -92,8 +92,10 @@ export default class Link extends SyntaxBase {
     } else if (this.target) {
       attrs += ` ${this.target}`;
     }
-    let processedURL = link.trim().replace(/~1D/g, '~D'); // 还原替换的$符号
-    const processedText = coreText.replace(/~1D/g, '~D'); // 还原替换的$符号
+    // 链接内的 ~D / \[ / \] / \( / \) 已由 LinkFormatter 在段落阶段做过预转义并会在 afterMakeHtml 还原，
+    // 因此此处 link 与 coreText 拿到的都是原始待渲染内容，直接使用即可。
+    let processedURL = link.trim();
+    const processedText = coreText;
     // text可能是html标签，依赖htmlBlock进行处理
     if (isValidScheme(processedURL)) {
       processedURL = this.$engine.urlProcessor(processedURL, 'link');
@@ -113,47 +115,13 @@ export default class Link extends SyntaxBase {
   }
 
   makeHtml(str) {
-    let $str = str.replace(this.RULE.reg, (match) => {
-      return match.replace(/~D/g, '~1D');
-    });
     if (isLookbehindSupported()) {
-      $str = $str.replace(this.RULE.reg, this.toHtml.bind(this));
-    } else {
-      $str = replaceLookbehind($str, this.RULE.reg, this.toHtml.bind(this), true, 1);
+      return str.replace(this.RULE.reg, this.toHtml.bind(this));
     }
-    $str = $str.replace(this.RULE.reg, (match) => {
-      return match.replace(/~1D/g, '~D');
-    });
-    return $str;
+    return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1);
   }
 
   rule() {
-    // (?<protocol>\\w+:)\\/\\/
-    const ret = {
-      // lookbehind启用分组是为了和不兼容lookbehind的场景共用一个回调
-      begin: isLookbehindSupported() ? '((?<!\\\\))' : '(^|[^\\\\])',
-      content: [
-        '\\[([^\\n]*?)\\]', // ?<text>
-        '[ \\t]*', // any spaces
-        '\\(',
-        /**
-         * allow double quotes
-         * e.g.
-         * [link](") ⭕️ valid
-         * [link]("") ⭕️ valid
-         * [link](()) ⭕️ valid
-         * [link](" ") ❌ invalid
-         */
-        '((?:[^\\s()]*\\([^\\s()]*\\)[^\\s()]*)+|[^\\s)]+)', // ?<link> url
-        '(?:[ \\t]((?:".*?")|(?:\'.*?\')))?', // ?<title> optional
-        '\\)',
-        '(\\{target\\s*=\\s*(_blank|parent|self|top)\\})?',
-      ].join(''),
-      end: '',
-    };
-    // let ret = {begin:'((^|[^\\\\])\\*\\*|([\\s]|^)__)',
-    // end:'(\\*\\*([\\s\\S]|$)|__([\\s]|$))', content:'([^\\n]+?)'};
-    ret.reg = compileRegExp(ret, 'g');
-    return ret;
+    return getLinkRule();
   }
 }

@@ -11,7 +11,12 @@ interface MathExternals {
   };
 }
 
-function createMathBlock(engine: 'katex' | 'MathJax', selfClosing = false, flowSessionContext = false) {
+function createMathBlock(
+  engine: 'katex' | 'MathJax',
+  selfClosing = false,
+  flowSessionContext = false,
+  texDelimiter?: boolean,
+) {
   const cherry = {
     options: {
       engine: {
@@ -22,7 +27,11 @@ function createMathBlock(engine: 'katex' | 'MathJax', selfClosing = false, flowS
       },
     },
   };
-  const hook = new MathBlock({ config: { engine }, cherry });
+  const config: { engine: 'katex' | 'MathJax'; TeXDelimiter?: boolean } = { engine };
+  if (texDelimiter !== undefined) {
+    config.TeXDelimiter = texDelimiter;
+  }
+  const hook = new MathBlock({ config, cherry });
   const add = vi.fn();
   Object.defineProperty(hook, '$engine', {
     value: {
@@ -206,6 +215,34 @@ describe('core/hooks/MathBlock', () => {
     expect(hook.beforeMakeHtml('\\\\[not math\\\\]')).toBe('\\\\[not math\\\\]');
     expect(hook.beforeMakeHtml('\\[\n\\]')).toBe('\\[\n\\]');
     expect(hook.beforeMakeHtml('before \\[unclosed')).toBe('before \\[unclosed');
+  });
+
+  it('does not recognize TeX block delimiters when TeXDelimiter is disabled', () => {
+    const { hook } = createMathBlock('MathJax', false, false, false);
+    hook.engine = 'node';
+
+    // \[..\] 不再被归一化为 $$..$$
+    expect(hook.beforeMakeHtml('\\[\nx^2\n\\]')).toBe('\\[\nx^2\n\\]');
+
+    // 原生 $$..$$（Engine 编码后的 ~D~D..~D~D）仍能正常渲染
+    const html = hook.restoreCache(hook.beforeMakeHtml('~D~Dx^2~D~D'));
+    expect(html).toContain('$$x\\^2$$');
+    expect(html).toContain('data-formula-source="x%5E2"');
+  });
+
+  it('does not close unfinished \\[ when TeXDelimiter is disabled even in self-closing mode', () => {
+    const selfClosing = createMathBlock('MathJax', true, false, false).hook;
+    const flow = createMathBlock('MathJax', false, true, false).hook;
+    selfClosing.engine = 'node';
+    flow.engine = 'node';
+
+    // selfClosing / flow 场景下不再对 \[ 做补开
+    expect(selfClosing.beforeMakeHtml('\\[x^2')).toBe('\\[x^2');
+    expect(flow.beforeMakeHtml('\\[x^2CHERRYFLOWSESSIONCURSOR')).toContain('\\[x^2');
+
+    // 原生 ~D~D 半开公式的 selfClosing 兜底仍然生效
+    const selfClosingNative = selfClosing.restoreCache(selfClosing.beforeMakeHtml('~D~Dx^2'));
+    expect(selfClosingNative).toContain('$$x\\^2$$');
   });
 
   it('closes unfinished block formulas in self-closing and flow modes', () => {
