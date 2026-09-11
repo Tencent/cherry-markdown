@@ -81,12 +81,14 @@ export default class CherryStream extends CherryStatic {
     this.options.toolbars.showToolbar = false;
 
     /** @type {Record<string, Record<string, string>>} */
-    this.locales = locales;
+    this.locales = { ...locales };
     if (this.options.locales) {
-      this.locales = {
-        ...this.options.locales,
-        ...this.locales,
-      };
+      Object.keys(this.options.locales).forEach((localeKey) => {
+        this.locales[localeKey] = {
+          ...(this.locales[localeKey] || {}),
+          ...this.options.locales[localeKey],
+        };
+      });
     }
 
     // loading the locale

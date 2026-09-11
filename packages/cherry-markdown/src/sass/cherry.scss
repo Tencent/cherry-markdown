@@ -26,6 +26,9 @@
   height: 100%;
   min-height: 60px;
   position: relative;
+  * {
+    box-sizing: content-box;
+  }
   // overflow: hidden;
 
   .cherry-editor,
