@@ -1,0 +1,186 @@
+import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core.esm.js';
+import { editorViewCtx } from '@milkdown/kit/core';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { cherryMilkdown, type CherryMilkdownInstance } from '../src';
+
+vi.mock('mathlive', () => ({}));
+vi.mock('mermaid', () => ({
+  default: { initialize: vi.fn(), render: vi.fn(async () => ({ svg: '<svg></svg>' })) },
+}));
+
+const instances: CherryMilkdownInstance[] = [];
+const fullManual = readFileSync(resolve(import.meta.dirname, '../../../examples/assets/markdown/index.md'), 'utf8');
+
+const normalizeHtml = (html: string) =>
+  html
+    .replace(/\sdata-sign="[^"]*"/g, '')
+    .replace(/\sid="cherry-[^"]*"/g, '')
+    .replace(/\sdata-lines="[^"]*"/g, '')
+    .replace(/-c\d+i[0-9a-f]+-l\d+/gi, '-cNimath-lN')
+    .replace(/<p data-type="br">&nbsp;<\/p>/g, '')
+    .replace(/>\s+</g, '><')
+    .trim();
+
+beforeAll(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
+  vi.stubGlobal(
+    'IntersectionObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
+});
+
+afterEach(async () => {
+  await Promise.all(instances.splice(0).map((instance) => instance.destroy()));
+  document.body.replaceChildren();
+});
+
+const fixtures = [
+  ['frontMatter', '---\ntitle: Cherry\n---\n\nBody'],
+  ['codeBlock', '```js\nconst value = 1;\n```'],
+  ['inlineCode', 'Use `const value = 1` here.'],
+  ['inlineMath', 'Formula $E=mc^2$.'],
+  ['mathBlock', '$$\na^2+b^2=c^2\n$$'],
+  ['htmlBlock', '<div>HTML</div>'],
+  ['footnote', 'Footnote[^one].\n\n[^one]: Definition'],
+  ['commentReference', '[Cherry][ref]\n\n[ref]: https://example.com'],
+  ['angleBracketCommentReference', '[Cherry][ref]\n\n[ref]: <https://example.com>'],
+  ['br', 'first  \nsecond'],
+  ['table', '| A | B |\n| --- | --- |\n| 1 | 2 |'],
+  ['toc', '# Heading\n\n[[toc]]'],
+  ['blockquote', '> Quote'],
+  ['header', '## Heading'],
+  ['hr', '---'],
+  ['list', '- one\n- two'],
+  ['detail', '+++ Detail\nBody\n+++'],
+  ['panel', ':::warning\nBody\n:::'],
+  ['emoji', 'Hello :smile:'],
+  ['image', '![alt](https://example.com/image.png)'],
+  ['link', '[Cherry](https://example.com)'],
+  ['autoLink', 'https://example.com'],
+  ['emphasis', '**bold** and *italic*'],
+  ['backgroundColor', '!!!#fff background!!!'],
+  ['color', '!!#f00 red!!'],
+  ['size', '!18 large!'],
+  ['sub', '^^sub^^'],
+  ['sup', '^sup^'],
+  ['ruby', '{字|zi}'],
+  ['strikethrough', '~~removed~~'],
+  ['underline', '/under/'],
+  ['highLight', '==marked=='],
+  ['suggester', '@Cherry'],
+  ['spaceTransfer', 'escaped \\* text &amp; space'],
+] as const;
+
+describe('Cherry built-in hook fixtures', () => {
+  it.each(fixtures)('%s loads, serializes, and renders with CherryEngine', async (_name, value) => {
+    const root = document.createElement('div');
+    document.body.append(root);
+    const instance = await cherryMilkdown({ el: root, value });
+    instances.push(instance);
+    const markdown = instance.getMarkdown();
+    expect(markdown.trim().length).toBeGreaterThan(0);
+    const directEngine = new CherryEngine();
+    expect(normalizeHtml(instance.engine.makeHtml(markdown))).toBe(normalizeHtml(directEngine.makeHtml(value)));
+
+    instance.setMarkdown(markdown, { emit: false });
+    expect(instance.getMarkdown()).toBe(markdown);
+  });
+
+  it('round-trips the complete Cherry manual with stable Markdown and equivalent rendering', async () => {
+    const root = document.createElement('div');
+    document.body.append(root);
+    const instance = await cherryMilkdown({ el: root, value: fullManual });
+    instances.push(instance);
+    const first = instance.getMarkdown();
+    const engine = new CherryEngine();
+    expect(first.length).toBeGreaterThan(fullManual.length * 0.9);
+    for (const marker of [
+      '## 时间线',
+      '## 语法高亮',
+      '## 表格配图',
+      '## 流程图[^不通用提醒]',
+      '# 编辑器操作能力',
+      '## 协议',
+    ]) {
+      expect(first).toContain(marker);
+    }
+    expect(normalizeHtml(new CherryEngine().makeHtml(first))).toBe(
+      normalizeHtml(new CherryEngine().makeHtml(fullManual)),
+    );
+    const rendered = document.createElement('div');
+    rendered.innerHTML = engine.makeHtml(first);
+    expect(rendered.querySelector('.cherry-timeline')).not.toBeNull();
+    expect(rendered.querySelector('.cherry-tabs')).not.toBeNull();
+    expect(rendered.querySelector('.cherry-table')).not.toBeNull();
+    expect(rendered.querySelector('[data-type="codeBlock"]')).not.toBeNull();
+    expect(rendered.textContent).toContain('编辑器操作能力');
+    expect(rendered.textContent).toContain('协议');
+
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let headingPosition = -1;
+    view.state.doc.descendants((node, position) => {
+      if (headingPosition < 0 && node.isText && node.text === '超链接') headingPosition = position;
+    });
+    expect(headingPosition).toBeGreaterThanOrEqual(0);
+    view.dispatch(view.state.tr.insertText('超链接已编辑', headingPosition, headingPosition + '超链接'.length));
+    const edited = instance.getMarkdown();
+    const expectedEdited = fullManual.replace(/^## 超链接$/m, '## 超链接已编辑');
+    expect(edited).toContain('## 超链接已编辑');
+    expect(edited).toContain('## 时间线');
+    expect(edited).toContain('## 协议');
+    expect(normalizeHtml(new CherryEngine().makeHtml(edited))).toBe(
+      normalizeHtml(new CherryEngine().makeHtml(expectedEdited)),
+    );
+
+    instance.setMarkdown(first, { emit: false });
+    expect(instance.getMarkdown()).toBe(first);
+    const flowHeading = [...root.querySelectorAll('h2')].find((element) => element.textContent?.includes('流程图'));
+    expect(flowHeading?.outerHTML).toContain('cherry-footnote-number');
+    expect(flowHeading?.textContent).not.toContain('^');
+  });
+
+  it('renders GFM footnote references as inline nodes instead of literal heading text', async () => {
+    const root = document.createElement('div');
+    document.body.append(root);
+    const instance = await cherryMilkdown({
+      el: root,
+      value: '## 流程图[^不通用提醒]\n\n[^不通用提醒]: 该语法不是通用语法\n\n脚注之后的正文',
+    });
+    instances.push(instance);
+    const heading = root.querySelector('h2');
+    expect(heading?.outerHTML).toContain('cherry-footnote-number');
+    expect(heading?.textContent).toBe('流程图[1]');
+    expect(heading?.querySelector('sup.cherry-footnote-number a[href="#fn:1"]')).not.toBeNull();
+    expect(heading?.textContent).not.toContain('^');
+    const scrollIntoView = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', { configurable: true, value: scrollIntoView });
+    heading
+      ?.querySelector<HTMLAnchorElement>('a.footnote')
+      ?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(scrollIntoView).toHaveBeenCalled();
+
+    const definition = root.querySelector<HTMLElement>('[data-type="footnote_definition"]');
+    const followingParagraph = [...root.querySelectorAll('p')].find(
+      (paragraph) => paragraph.textContent === '脚注之后的正文',
+    );
+    expect(definition).not.toBeNull();
+    expect(definition?.classList.contains('cherry-footnote-definition')).toBe(true);
+    expect(definition?.querySelector('.one-footnote > a.footnote-ref')?.textContent).toBe('[1]');
+    expect(followingParagraph).not.toBeUndefined();
+    if (!definition || !followingParagraph) throw new Error('Missing footnote definition ordering fixture');
+    expect(followingParagraph.compareDocumentPosition(definition) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});

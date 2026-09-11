@@ -36,5 +36,5 @@ jobs:
           cache: 'yarn'
       - uses: preactjs/compressed-size-action@v2
         with:
-          pattern: './packages/{cherry-markdown,miniProgram}/dist/**/*.{js,css,d.ts}'
+          pattern: './packages/{cherry-markdown,miniProgram,milkdown}/dist/**/*.{js,css,d.ts}'
           install-script: 'vp install'

@@ -1,0 +1,4 @@
+/* Neutralize the browser UA margin; all visual styling comes from Cherry/Milkdown. */
+body {
+  margin: 0;
+}
