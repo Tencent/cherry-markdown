@@ -19,7 +19,22 @@ import { getHTML } from '@/utils/dom';
 import { isBrowser } from '@/utils/env';
 import { getTableRule, isLookbehindSupported, mathBlockReg } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
-import { normalizeMathDelimiters } from '@/utils/mathDelimiter';
+
+// 归一化 \(...\) → ~D...~D（用于 InlineMath）；带反斜杠转义感知 + 空内容保护
+const parenInlineReg = isLookbehindSupported()
+  ? /(?<!\\)\\\(([\s\S]+?)(?<!\\)\\\)/g
+  : /(^|[^\\])\\\(([\s\S]+?)(?<!\\)\\\)/g;
+
+// selfClosing 场景下，匹配"未闭合的 \( + 到 EOL 之间的内容"，用于补开定界符 ~D
+// 调用前会先跑一次 makeInlineMath 把已闭合的 ~D..~D 全部冻结到 cache。
+const parenOpenOnlyReg = isLookbehindSupported()
+  ? /(?<!\\)\\\(([\s\S]+?)(CHERRYFLOWSESSIONCURSOR\n*)?$/
+  : /(^|[^\\])\\\(([\s\S]+?)(CHERRYFLOWSESSIONCURSOR\n*)?$/;
+
+// 表格 td 里归一化 \[...\] → ~D~D...~D~D（td 内部逻辑）
+const bracketBlockRegForTd = isLookbehindSupported()
+  ? /(?<!\\)\\\[([\s\S]+?)(?<!\\)\\\]/g
+  : /(^|[^\\])\\\[([\s\S]+?)(?<!\\)\\\]/g;
 
 /**
  * 行内公式的语法
@@ -36,6 +51,10 @@ export default class InlineMath extends ParagraphBase {
     super({ needCache: true });
     // 非浏览器环境下配置为 node
     this.engine = isBrowser() ? (config.engine ?? 'MathJax') : 'node';
+    // 是否启用 TeX 风格定界符 \( ... \)（默认开启）
+    // 关闭后，\( ... \)、表格 td 内的 \[ ... \] 都不会被归一化为 $..$ / $$..$$，
+    // 仅保留原生 $..$ 的行内公式渲染能力。
+    this.TeXDelimiter = config.TeXDelimiter !== false;
     this.$cherry = cherry;
     /**
      * 这里本意是用来存储「上一轮」成功渲染里的最后一个公式
@@ -138,14 +157,22 @@ export default class InlineMath extends ParagraphBase {
       const arr = whole.split('|');
       result += arr
         .map((oneTd, index) => {
-          const normalizedTd = normalizeMathDelimiters(oneTd, {
-            '\\(': { replacement: '~D', selfClosing: index === arr.length - 1 && this.isSelfClosing() },
-            '\\[': { replacement: '~D~D' },
-          });
+          const isLastTd = index === arr.length - 1;
+          // Step 1: 先跑一次 makeInlineMath 把原生 ~D..~D 段冻结到 cache
+          let tdContent = this.makeInlineMath(oneTd);
+          if (this.TeXDelimiter) {
+            // Step 2: 归一化 \[..\] → ~D..~D
+            tdContent = this.rewriteBracketBlockInTd(tdContent);
+            // Step 3: 归一化 \(..\) → ~D..~D
+            tdContent = this.rewriteParenInline(tdContent);
+            // Step 4: selfClosing 仅最后一个 td 生效——补开 \(
+            if (isLastTd && this.isSelfClosing()) {
+              tdContent = this.rewriteOpenOnlyParen(tdContent);
+            }
+          }
           // 单元格里的段落公式直接替换成行内公式
-          const tdContent = this.transformBlockMathToInlineMath(normalizedTd);
-          // 判断是否为最后一个td
-          if (index === arr.length - 1) {
+          tdContent = this.transformBlockMathToInlineMath(tdContent);
+          if (isLastTd) {
             return this.makeInlineMathWithSelfClosing(tdContent);
           }
           return this.makeInlineMath(tdContent);
@@ -160,10 +187,68 @@ export default class InlineMath extends ParagraphBase {
     return result;
   }
 
+  /**
+   * 归一化非表格路径下的 `\(...\)`。整体流程为：
+   *   Step 1: 先跑一次 makeInlineMath，把用户原生 ~D..~D 段冻结到 cache——形成保护壳，
+   *           避免下一步的 \(..\) 归一化误吞已闭合的 $..$ 内部的 \( 或 \)。
+   *   Step 2: 正则替换 \(...\) → ~D...~D（带反斜杠转义感知 + 空内容保护）。
+   *   Step 3: selfClosing 场景下补开定界符，让下游 $dealUnclosingMath 能识别半开公式。
+   * 归一化后的结果会由 makeInlineMathWithSelfClosing 再走一次 makeInlineMath 完成最终渲染。
+   *
+   * 当 TeXDelimiter 关闭时，仅保留 Step 1 的冻结能力，不对 \(..\) 做归一化。
+   */
   normalizeTexInlineMath(str) {
-    return normalizeMathDelimiters(str, {
-      '\\(': { replacement: '~D', selfClosing: this.isSelfClosing() },
-    });
+    let $str = this.makeInlineMath(str);
+    if (!this.TeXDelimiter) {
+      return $str;
+    }
+    $str = this.rewriteParenInline($str);
+    if (this.isSelfClosing()) {
+      $str = this.rewriteOpenOnlyParen($str);
+    }
+    return $str;
+  }
+
+  /** 将 `\(...\)` 归一化为 `~D...~D`。空白内容不归一化，等价于旧 mathDelimiter 的 content.trim() 判空。 */
+  rewriteParenInline(str) {
+    if (isLookbehindSupported()) {
+      return str.replace(parenInlineReg, (whole, content) => (content.trim() ? `~D${content}~D` : whole));
+    }
+    return replaceLookbehind(
+      str,
+      parenInlineReg,
+      (whole, _lead, content) => (content.trim() ? `~D${content}~D` : whole),
+      true,
+      1,
+    );
+  }
+
+  /** selfClosing 场景下补开定界符：把"未闭合 \("补一个 ~D 前缀。 */
+  rewriteOpenOnlyParen(str) {
+    if (isLookbehindSupported()) {
+      return str.replace(parenOpenOnlyReg, (_whole, content, tail = '') => `~D${content}${tail}`);
+    }
+    return replaceLookbehind(
+      str,
+      parenOpenOnlyReg,
+      (_whole, _lead, content, tail = '') => `~D${content}${tail}`,
+      true,
+      1,
+    );
+  }
+
+  /** 表格 td 里将 `\[...\]` 归一化为 `~D...~D`。空白内容不归一化。 */
+  rewriteBracketBlockInTd(str) {
+    if (isLookbehindSupported()) {
+      return str.replace(bracketBlockRegForTd, (whole, content) => (content.trim() ? `~D${content}~D` : whole));
+    }
+    return replaceLookbehind(
+      str,
+      bracketBlockRegForTd,
+      (whole, _lead, content) => (content.trim() ? `~D${content}~D` : whole),
+      true,
+      1,
+    );
   }
 
   makeInlineMathWithSelfClosing(str) {
