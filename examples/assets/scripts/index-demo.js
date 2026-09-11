@@ -442,6 +442,11 @@ const basicConfig = {
   themeSettings: {
     mainTheme: 'default',
   },
+  locales: {
+    zh_CN: {
+      bold: '加粗',
+    }
+  }
 };
 
 export { basicConfig };
