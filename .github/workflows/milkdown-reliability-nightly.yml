@@ -1,0 +1,56 @@
+# =============================================================================
+# Milkdown Reliability — nightly cross-browser interaction and lifecycle stress
+# =============================================================================
+
+name: 'Nightly: Milkdown Reliability'
+
+on:
+  schedule:
+    - cron: '23 18 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  browser-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      MILKDOWN_BROWSER_MATRIX: '1'
+      MILKDOWN_STRESS_ROUNDS: '20'
+      MILKDOWN_HEAP_GATE: '1'
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version-file: '.node-version'
+          cache: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+          cache: 'yarn'
+      - name: Install dependencies
+        run: vp install
+
+      - name: Install Chromium, Firefox and WebKit
+        run: yarn playwright install --with-deps chromium firefox webkit
+
+      - name: Run full Milkdown browser matrix
+        run: vp run -F @cherry-markdown/milkdown test:e2e
+
+      - name: Upload browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: milkdown-browser-matrix-failure-${{ github.run_attempt }}
+          path: |
+            packages/milkdown/test-results
+            packages/milkdown/playwright-report
+          if-no-files-found: ignore
+          retention-days: 14

@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "paths": {
+      "@cherry-markdown/milkdown": ["../../src/index.ts"],
+      "cherry-markdown": ["../../../cherry-markdown/src/index.js"],
+      "cherry-markdown/dist/cherry-markdown.engine.core.esm.js": [
+        "../../../cherry-markdown/src/index.engine.core.js"
+      ]
+    },
+    "types": ["node", "vite/client"]
+  },
+  "include": ["./**/*.ts", "./**/*.tsx", "../../src/prismjs.d.ts", "../../src/cherry-engine.d.ts"]
+}

@@ -714,7 +714,17 @@ class SuggesterPanel {
    * @returns
    */
   onCodeMirrorChange(codemirror, evt) {
-    const { text, from, to, origin } = evt;
+    const { text, from, to, origin, updateContext } = evt;
+
+    // setValue() updates carrying a source context mirror content from another
+    // editing surface (for example, a preview editor). They must not be
+    // interpreted as keyboard input in CodeMirror, otherwise a remote `` ` ``
+    // can open Cherry's suggester next to the inactive source editor.
+    if (updateContext) {
+      this.stopRelate();
+      return;
+    }
+
     const changeValue = text.length === 1 ? text[0] : '';
 
     // 首次输入命中关键词的时候开启联想

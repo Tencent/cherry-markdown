@@ -152,6 +152,8 @@ const callbacks = {
 
 /** @type {Partial<import('~types/cherry').CherryOptions>} */
 const defaultConfig = {
+  /** Instance-scoped integrations mounted after Cherry initializes. */
+  extensions: [],
   // 第三方包
   externals: {
     // externals

@@ -6,6 +6,12 @@ export interface CherryExternalsOptions {
   [key: string]: any;
 }
 
+/** Identifies a non-destructive editor update and its monotonic revision. */
+export interface CherryUpdateContext {
+  source?: string;
+  revision?: number;
+}
+
 /**
  * 自定义toolbar键名[key]
  */
@@ -61,9 +67,19 @@ export interface Cherry<T extends CherryCustomOptions = CherryCustomOptions> {
   options: CherryOptions<T>;
 }
 
+export type CherryExtensionCleanup = () => void | Promise<void>;
+
+/** An instance-scoped integration mounted after Cherry has initialized. */
+export interface CherryExtension<TCherry = unknown> {
+  name: string;
+  mount(cherry: TCherry): void | CherryExtensionCleanup | Promise<void | CherryExtensionCleanup>;
+}
+
 export type CherryOptions<T extends CherryCustomOptions = CherryCustomOptions> = Partial<CherryOptionsBase<T>>;
 
 export interface CherryOptionsBase<T extends CherryCustomOptions = CherryCustomOptions> {
+  /** Instance-scoped integrations such as the Milkdown preview editor. */
+  extensions: CherryExtension[];
   openai: any;
   /** 第三方依赖 */
   externals: CherryExternalsOptions;

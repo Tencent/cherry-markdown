@@ -195,6 +195,13 @@ export default class PreviewerBubble {
    * @returns {boolean|HTMLElement}
    */
   isCherryTable(element) {
+    // Milkdown owns the table surface when the preview editing extension is
+    // mounted. Its ProseMirror table controls must not be handed to Cherry's
+    // CodeMirror table bubble (the two DOM models have different source
+    // locations and the legacy handler cannot resolve Milkdown cells).
+    if (typeof Element !== 'undefined' && element instanceof Element && element.closest('.milkdown-table-block')) {
+      return false;
+    }
     // 获取最近的表格元素
     const table = this.$getClosestNode(element, 'TABLE');
     if (!table) {
@@ -823,10 +830,21 @@ export default class PreviewerBubble {
       return;
     }
     this.$createPreviewerBubbles('click', 'img-handler');
-    const list = Array.from(this.previewerDom.querySelectorAll('img'));
+    const editingBridge = this.previewer.editingBridge;
+    const bridgeCanOwnImage =
+      editingBridge?.isActive?.() &&
+      typeof editingBridge.ownsPreviewElement === 'function' &&
+      typeof editingBridge.updatePreviewElement === 'function';
+    const bridgeOwnsImage = bridgeCanOwnImage && editingBridge.ownsPreviewElement(htmlElement, 'image');
+    if (bridgeCanOwnImage && !bridgeOwnsImage) {
+      return { emit: () => {} };
+    }
+    const list = Array.from(this.previewerDom.querySelectorAll('img')).filter(
+      (image) => !bridgeCanOwnImage || editingBridge.ownsPreviewElement(image, 'image'),
+    );
     this.totalImgs = list.length;
     this.imgIndex = list.indexOf(htmlElement);
-    if (!this.beginChangeImgValue(htmlElement)) {
+    if (!bridgeOwnsImage && !this.beginChangeImgValue(htmlElement)) {
       return { emit: () => {} };
     }
 
@@ -837,7 +855,16 @@ export default class PreviewerBubble {
     imgSizeDiv.className = 'cherry-previewer-img-size-handler';
     this.bubble.click.appendChild(imgSizeDiv);
     imgSizeHandler.showBubble(htmlElement, imgSizeDiv, this.previewerDom, { onInvalidTarget, validateTarget });
-    imgSizeHandler.bindChange(this.changeImgSize.bind(this));
+    imgSizeHandler.bindChange(
+      bridgeOwnsImage
+        ? (target, style) =>
+            editingBridge.updatePreviewElement(target, {
+              kind: 'image',
+              width: style.width,
+              height: style.height,
+            })
+        : this.changeImgSize.bind(this),
+    );
 
     const imgToolDiv = document.createElement('div');
     imgToolDiv.className = 'cherry-previewer-img-tool-handler';
@@ -846,7 +873,11 @@ export default class PreviewerBubble {
       onInvalidTarget,
       validateTarget,
     });
-    imgToolHandler.bindChange(this.changeImgStyle.bind(this));
+    imgToolHandler.bindChange(
+      bridgeOwnsImage
+        ? (target, type) => editingBridge.updatePreviewElement(target, { kind: 'image', type })
+        : this.changeImgStyle.bind(this),
+    );
 
     // 订阅编辑器大小变化事件
     const updateHandler = imgSizeHandler.updatePosition.bind(imgSizeHandler);
@@ -1183,17 +1214,29 @@ export default class PreviewerBubble {
       return;
     }
     const sourceMode = figureElement.querySelector('.cherry-mermaid-source-toolbar-panel.active[data-mode="source"]');
-    if (sourceMode) {
+    const editingBridge = this.previewer.editingBridge;
+    const bridgeOwnsMermaid =
+      editingBridge?.isActive?.() &&
+      typeof editingBridge.ownsPreviewElement === 'function' &&
+      editingBridge.ownsPreviewElement(figureElement, 'mermaid') &&
+      typeof editingBridge.updatePreviewElement === 'function';
+    const bridgeSource = bridgeOwnsMermaid ? figureElement.querySelector('.cherry-embed__source:not([hidden])') : null;
+    if (sourceMode || bridgeSource) {
       return;
     }
     this.$createPreviewerBubbles('click', 'img-handler');
 
-    if (!this.mermaidSession.beginEdit(figureElement)) {
+    if (!bridgeOwnsMermaid && !this.mermaidSession.beginEdit(figureElement)) {
       return;
     }
 
     const onInvalidTarget = () => this.$removeImgPreviewerBubbles();
-    const handlerOptions = this.mermaidSession.createHandlerOptions(onInvalidTarget);
+    const handlerOptions = bridgeOwnsMermaid
+      ? {
+          onInvalidTarget,
+          validateTarget: () => document.contains(figureElement) && this.previewerDom.contains(figureElement),
+        }
+      : this.mermaidSession.createHandlerOptions(onInvalidTarget);
 
     const imgSizeDiv = document.createElement('div');
     imgSizeDiv.className = 'cherry-previewer-img-size-handler';
@@ -1203,8 +1246,17 @@ export default class PreviewerBubble {
       targetIndex: this.mermaidSession.previewIndex,
       ...handlerOptions,
     });
-    imgSizeHandler.bindChange((htmlElement, style) => this.mermaidSession.changeSize(style));
-    this.mermaidSession.bindPositionFollow();
+    imgSizeHandler.bindChange(
+      bridgeOwnsMermaid
+        ? (target, style) =>
+            editingBridge.updatePreviewElement(target, {
+              kind: 'mermaid',
+              width: style.width,
+              height: style.height,
+            })
+        : (_htmlElement, style) => this.mermaidSession.changeSize(style),
+    );
+    if (!bridgeOwnsMermaid) this.mermaidSession.bindPositionFollow();
 
     // 添加对齐工具面板（仅对齐按钮，不含装饰按钮）
     const imgToolDiv = document.createElement('div');
@@ -1218,14 +1270,18 @@ export default class PreviewerBubble {
       this.previewer.$cherry.getLocales(),
       { isMermaid: true, targetIndex: this.mermaidSession.previewIndex, ...handlerOptions },
     );
-    imgToolHandler.bindChange((htmlElement, type) => this.mermaidSession.changeAlign(type));
+    imgToolHandler.bindChange(
+      bridgeOwnsMermaid
+        ? (target, type) => editingBridge.updatePreviewElement(target, { kind: 'mermaid', type })
+        : (_htmlElement, type) => this.mermaidSession.changeAlign(type),
+    );
 
     const updateHandler = imgSizeHandler.updatePosition.bind(imgSizeHandler);
     this.$cherry.$event.on('editor.size.change', updateHandler);
     const originalRemove = imgSizeHandler.remove;
     imgSizeHandler.remove = () => {
       this.$cherry.$event.off('editor.size.change', updateHandler);
-      this.mermaidSession.disposeHandlers();
+      if (!bridgeOwnsMermaid) this.mermaidSession.disposeHandlers();
       return originalRemove.call(imgSizeHandler);
     };
     this.bubbleHandler.click = imgSizeHandler;

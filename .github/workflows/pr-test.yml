@@ -21,7 +21,7 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
 
     steps:
       - uses: actions/checkout@v6
@@ -39,3 +39,23 @@ jobs:
 
       - name: Test
         run: vp run test
+
+      - name: Verify Milkdown published-package consumer
+        run: vp run -F @cherry-markdown/milkdown test:consumer
+
+      - name: Install Chromium
+        run: yarn playwright install --with-deps chromium
+
+      - name: Test Milkdown reliability in Chromium
+        run: vp run -F @cherry-markdown/milkdown test:e2e
+
+      - name: Upload Milkdown browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: milkdown-chromium-failure-${{ github.run_attempt }}
+          path: |
+            packages/milkdown/test-results
+            packages/milkdown/playwright-report
+          if-no-files-found: ignore
+          retention-days: 7

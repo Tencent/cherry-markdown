@@ -16,9 +16,9 @@
 
 // 可选依赖的类型声明
 import { EditorView, ViewUpdate, Rect, BlockInfo } from '@codemirror/view';
-import { EditorState, SelectionRange, TransactionSpec } from '@codemirror/state';
+import { EditorState, SelectionRange, Transaction, TransactionSpec } from '@codemirror/state';
 import Cherry from '../src/Cherry.js';
-import { EditorMode, CherryToolbarsOptions } from './cherry.js';
+import { EditorMode, CherryToolbarsOptions, CherryUpdateContext } from './cherry.js';
 declare module '@replit/codemirror-vim' {
   import { Extension } from '@codemirror/state';
   export function vim(): Extension;
@@ -151,6 +151,8 @@ export interface CM6Adapter {
 
   // 选区操作（需要封装）
   getSelections(): string[];
+  /** 获取主选区文本（兼容旧版自定义菜单 API） */
+  getSelection(): string;
   replaceSelection(text: string, select?: 'around' | 'start'): void;
   replaceSelections(texts: string[], select?: 'around' | 'start'): void;
 
@@ -359,7 +361,7 @@ export type EditorConfiguration = {
   onFocus: EditorEventCallback<'onFocus'>;
   onBlur: EditorEventCallback<'onBlur'>;
   onPaste: EditorEventCallback<'onPaste'>;
-  onChange: (update: ViewUpdate | null, codemirror: CM6Adapter) => void;
+  onChange: (update: CherryEditorChangeEvent | null, codemirror: CM6Adapter) => void;
   onScroll: (editorView: EditorView) => void;
   handlePaste?: EditorPasteEventHandler;
   /** 预览区域跟随编辑器光标自动滚动 */
@@ -377,3 +379,12 @@ export type EditorConfiguration = {
   /** 大文档处理策略配置（阈值、降级策略等） */
   largeDocumentConfig?: LargeDocumentConfig;
 };
+
+export interface CherryEditorChangeEvent {
+  text: string[];
+  from: number;
+  to: number;
+  origin: string;
+  updateContext?: CherryUpdateContext;
+  _cm6: { transaction: Transaction; update: ViewUpdate };
+}

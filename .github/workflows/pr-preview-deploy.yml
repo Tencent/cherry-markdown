@@ -88,6 +88,7 @@ jobs:
             * [图片编辑](${{steps.deploy.outputs.url}}/img.html)
             * [完整版](${{steps.deploy.outputs.url}}/index.html)
             * [Mermaid 流程图](${{steps.deploy.outputs.url}}/mermaid.html)
+            * [Milkdown 即见即所得编辑](${{steps.deploy.outputs.url}}/milkdown/)
             * [多实例](${{steps.deploy.outputs.url}}/multiple.html)
             * [无工具栏](${{steps.deploy.outputs.url}}/notoolbar.html)
             * [纯预览模式](${{steps.deploy.outputs.url}}/preview_only.html)

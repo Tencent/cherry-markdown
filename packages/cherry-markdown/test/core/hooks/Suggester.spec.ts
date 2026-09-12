@@ -542,6 +542,30 @@ describe('core/hooks/Suggester', () => {
     });
 
     describe('onCodeMirrorChange', () => {
+      it('不应该为带更新来源的外部同步显示联想面板', () => {
+        const suggestList = vi.fn();
+        const config = {
+          suggester: [{ keyword: '`', suggestList }],
+        };
+        const customCherry = createMockCherry(config);
+        const suggester = createSuggesterInstance(config, customCherry);
+        suggester.suggesterPanel.editor = editorShell(customCherry);
+        suggester.suggesterPanel.setSuggester(suggester.suggester);
+        const stopRelate = vi.spyOn(suggester.suggesterPanel, 'stopRelate');
+
+        suggester.suggesterPanel.onCodeMirrorChange(customCherry.editor.editor, {
+          text: ['`'],
+          from: 0,
+          to: 0,
+          origin: '',
+          updateContext: { source: 'milkdown-preview', revision: 1 },
+        });
+
+        expect(stopRelate).toHaveBeenCalledOnce();
+        expect(suggestList).not.toHaveBeenCalled();
+        expect(suggester.suggesterPanel.searchCache).toBe(false);
+      });
+
       it('应该开始联想当输入关键字', async () => {
         const config = {
           suggester: [
