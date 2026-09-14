@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vite-plus/test';
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
 describe('CodeMirror line wrapping style contract', () => {
-  it('keeps break-spaces on editable content so Tab is handled only by CodeMirror', () => {
+  it('does not override CodeMirror line-wrapping behavior on editable content', () => {
     const { css } = sass.compile(resolve(projectRoot, 'src/sass/index.scss'));
     const whiteSpaceValues = [];
 
@@ -19,7 +19,6 @@ describe('CodeMirror line wrapping style contract', () => {
       }
     });
 
-    expect(whiteSpaceValues).toContain('break-spaces');
-    expect(whiteSpaceValues).not.toContain('pre-wrap');
+    expect(whiteSpaceValues).toEqual([]);
   });
 });
