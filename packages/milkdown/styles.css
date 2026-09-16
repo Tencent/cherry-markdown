@@ -39,6 +39,56 @@
   position: relative;
 }
 
+/* Block movement is opt-in from a small handle. Keeping it out of normal
+ * text hit-testing preserves native browser/ProseMirror drag selection. */
+.cherry-milkdown .cherry-milkdown-block {
+  position: relative;
+}
+
+.cherry-milkdown .cherry-milkdown-block__drag-handle {
+  position: absolute;
+  z-index: 2;
+  top: 0.15em;
+  right: calc(100% + 12px);
+  display: inline-flex;
+  width: 16px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  color: var(--base-sub-font-color, #646a73);
+  line-height: 1;
+  cursor: grab;
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+  user-select: none;
+}
+
+.cherry-milkdown .cherry-milkdown-block__drag-handle::before {
+  content: '⋮';
+}
+
+.cherry-milkdown .cherry-milkdown-block:hover .cherry-milkdown-block__drag-handle,
+.cherry-milkdown .cherry-milkdown-block:focus-within .cherry-milkdown-block__drag-handle,
+.cherry-milkdown .cherry-milkdown-block__drag-handle:hover {
+  opacity: 0.7;
+  pointer-events: auto;
+}
+
+.cherry-milkdown .cherry-milkdown-block__drag-handle:active {
+  cursor: grabbing;
+  opacity: 1;
+}
+
+.cherry-milkdown .cherry-dragging {
+  opacity: 0.55;
+}
+
+.cherry-milkdown .cherry-drag-over {
+  box-shadow: inset 0 2px 0 var(--md-link-color, #366ef4);
+}
+
 .cherry-milkdown .milkdown,
 .cherry-milkdown .ProseMirror {
   min-height: 100%;
@@ -697,6 +747,108 @@
   outline: none;
 }
 
+/* A link is a ProseMirror mark rather than a source-backed node. One shared
+ * overlay follows the end of the active link; it is not inserted into editor
+ * content and therefore cannot alter wrapping, selection or Markdown. */
+.cherry-milkdown-link-trigger {
+  position: fixed;
+  z-index: calc(var(--bubble-z-index, 1000) + 3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--md-link-color, #3582fb);
+  background: var(--bubble-bg, var(--toolbar-bg, #fff));
+  box-shadow: none;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.cherry-milkdown-link-trigger[hidden] {
+  display: none;
+}
+
+.cherry-milkdown-link-trigger:hover,
+.cherry-milkdown-link-trigger:focus-visible,
+.cherry-milkdown-link-trigger[aria-expanded='true'] {
+  color: var(--toolbar-btn-hover-color, var(--md-link-color, #366ef4));
+  background: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
+  box-shadow: 0 0 0 1px var(--bubble-border, var(--base-border-color, #d8dce5));
+  outline: none;
+}
+
+.cherry-milkdown-link-editor {
+  position: fixed;
+  z-index: calc(var(--bubble-z-index, 1000) + 3);
+  display: grid;
+  box-sizing: border-box;
+  gap: 8px;
+  padding: 12px;
+  border: var(--border-width-1, 1px) solid var(--bubble-border, var(--base-border-color, #d8dce5));
+  border-radius: var(--bubble-radius, 6px);
+  color: var(--base-font-color, #3f4654);
+  background: var(--bubble-bg, var(--toolbar-bg, #fff));
+  box-shadow: var(--bubble-shadow, 0 6px 20px rgb(0 0 0 / 14%));
+  font: 13px/1.4 var(--font-family, sans-serif);
+}
+
+.cherry-milkdown-link-editor[hidden] {
+  display: none;
+}
+
+.cherry-milkdown-link-editor label {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.cherry-milkdown-link-editor input {
+  box-sizing: border-box;
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  border: var(--border-width-1, 1px) solid var(--base-border-color, #d8dce5);
+  border-radius: 4px;
+  color: inherit;
+  background: var(--base-previewer-bg, #fff);
+  font: inherit;
+}
+
+.cherry-milkdown-link-editor input:focus {
+  border-color: var(--md-link-color, #366ef4);
+  outline: 1px solid var(--md-link-color, #366ef4);
+}
+
+.cherry-milkdown-link-editor__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.cherry-milkdown-link-editor button {
+  height: 28px;
+  padding: 0 10px;
+  border: var(--border-width-1, 1px) solid var(--base-border-color, #d8dce5);
+  border-radius: 4px;
+  color: var(--toolbar-btn-color, #3f4654);
+  background: var(--toolbar-btn-bg, #fff);
+  cursor: pointer;
+  font: inherit;
+}
+
+.cherry-milkdown-link-editor button[type='submit'] {
+  border-color: var(--md-link-color, #366ef4);
+  color: #fff;
+  background: var(--md-link-color, #366ef4);
+}
+
 .cherry-milkdown .cherry-compound__title:focus::placeholder,
 .cherry-milkdown .cherry-compound-item__label:focus::placeholder {
   color: var(--base-sub-font-color);
@@ -807,6 +959,43 @@
  * collapsed 16px above the wrapper. */
 .cherry-milkdown .cherry-table-chart .cherry-table-figure {
   margin-top: 0;
+}
+
+/* A table chart nested in a Cherry-owned Columns/Tabs block is not an
+ * independent ProseMirror node. Its compact action selects the exact rendered
+ * table source inside the parent block editor, rather than the fenced example
+ * that may appear beside it in documentation. */
+.cherry-milkdown .cherry-table-wrapper {
+  position: relative;
+}
+
+.cherry-milkdown .cherry-native-table-chart__controls {
+  position: absolute;
+  z-index: 20;
+  top: 6px;
+  right: 6px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.cherry-milkdown .cherry-table-wrapper:hover > .cherry-native-table-chart__controls,
+.cherry-milkdown .cherry-native-table-chart__controls:focus-within {
+  opacity: 1;
+}
+
+.cherry-milkdown .cherry-native-table-chart__controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  padding: 0 7px;
+  border: var(--border-width-1, 1px) solid var(--bubble-border, var(--cherry-milkdown-border));
+  border-radius: var(--bubble-radius, 4px);
+  color: var(--toolbar-btn-color, var(--cherry-milkdown-muted));
+  background: var(--bubble-bg, var(--toolbar-bg, #fff));
+  box-shadow: var(--bubble-shadow, 0 2px 8px rgb(0 0 0 / 10%));
+  cursor: pointer;
+  font: 12px/24px var(--font-family, sans-serif);
 }
 
 /* Inside Cherry's Columns/Panel layout the native renderer owns the outer

@@ -1,6 +1,6 @@
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
 import { footnoteDefinitionSchema } from '@milkdown/kit/preset/gfm';
-import { NodeSelection, Plugin, type Transaction } from '@milkdown/kit/prose/state';
+import { NodeSelection, Plugin, TextSelection, type Transaction } from '@milkdown/kit/prose/state';
 import { Decoration, DecorationSet } from '@milkdown/kit/prose/view';
 import type { EditorView, NodeView, ViewMutationRecord } from '@milkdown/kit/prose/view';
 import type { SerializerState } from '@milkdown/kit/transformer';
@@ -66,6 +66,7 @@ const SAFE_HTML_ATTRIBUTES = new Set([
   'class',
   'colspan',
   'height',
+  'href',
   'id',
   'rel',
   'role',
@@ -79,6 +80,15 @@ const SAFE_HTML_ATTRIBUTES = new Set([
 ]);
 const SAFE_HTML_CSS =
   /^(?:background(?:-color)?|border(?:-(?:bottom|left|radius|right|top)(?:-color|-style|-width)?)?|color|font(?:-size|-style|-weight)?|margin(?:-(?:bottom|left|right|top))?|padding(?:-(?:bottom|left|right|top))?|text-align|text-decoration|white-space|width|height)$/i;
+
+function unsafeHtmlUrl(value: string) {
+  const normalized = value.replace(/[\u0000-\u0020\u007f-\u009f]/g, '').toLowerCase();
+  return /^(?:javascript|vbscript|data:text\/html)/.test(normalized);
+}
+
+function unsafeInlineStyle(value: string) {
+  return /(?:expression\s*\(|(?:javascript|vbscript)\s*:|url\s*\(|@import|-moz-binding|behavior\s*:)/i.test(value);
+}
 
 function sanitizedEngineFragment(html: string, inline = false, restricted = false): DocumentFragment {
   const template = document.createElement('template');
@@ -98,9 +108,8 @@ function sanitizedEngineFragment(html: string, inline = false, restricted = fals
       }
       if (
         name.startsWith('on') ||
-        (['href', 'src', 'xlink:href', 'formaction', 'srcset'].includes(name) &&
-          /^(?:javascript|data:text\/html)/.test(value)) ||
-        (name === 'style' && /(?:expression\s*\(|javascript\s*:)/.test(value))
+        (['href', 'src', 'xlink:href', 'formaction', 'srcset'].includes(name) && unsafeHtmlUrl(value)) ||
+        (name === 'style' && unsafeInlineStyle(value))
       ) {
         element.removeAttribute(attribute.name);
         continue;
@@ -627,10 +636,10 @@ class CompoundItemView implements NodeView {
       role === 'detail-item'
         ? ' cherry-detail-body'
         : role === 'tab'
-            ? ' cherry-tabs-item__content'
-            : role === 'timeline-item'
-              ? ' cherry-timeline--desc'
-              : ''
+          ? ' cherry-tabs-item__content'
+          : role === 'timeline-item'
+            ? ' cherry-timeline--desc'
+            : ''
     }`;
     if (role === 'tab') this.dom.classList.add('cherry-tabs-item');
     if (role === 'timeline-item') this.dom.classList.add('cherry-timeline--item');
@@ -1145,7 +1154,8 @@ class EmbedView implements NodeView {
     const controls = document.createElement(node.isInline ? 'span' : 'figcaption');
     controls.className = 'cherry-embed__controls';
     controls.hidden = node.type.name === 'cherry_emoji';
-    const edit = iconButton('源码', '在节点内编辑源码', this.toggleSource, config.readonly);
+    const label = node.type.name === 'cherry_native_block' ? '区块源码' : '源码';
+    const edit = iconButton(label, '在节点内编辑源码', this.toggleSource, config.readonly);
     this.sourceToggle = edit;
     edit.setAttribute('aria-expanded', 'false');
     controls.append(edit);
@@ -1254,9 +1264,52 @@ class EmbedView implements NodeView {
         : String(this.node.attrs.source ?? '');
   }
 
+  private selectSourceRange(from: number, to: number) {
+    this.setSourceOpen(true, true);
+    const selection = this.source.ownerDocument.getSelection();
+    if (!selection) return;
+    const walker = this.source.ownerDocument.createTreeWalker(this.source, NodeFilter.SHOW_TEXT);
+    let offset = 0;
+    let startNode: Node | undefined;
+    let endNode: Node | undefined;
+    let startOffset = 0;
+    let endOffset = 0;
+    while (walker.nextNode()) {
+      const current = walker.currentNode;
+      const length = current.textContent?.length ?? 0;
+      if (!startNode && from <= offset + length) {
+        startNode = current;
+        startOffset = Math.max(0, from - offset);
+      }
+      if (to <= offset + length) {
+        endNode = current;
+        endOffset = Math.max(0, to - offset);
+        break;
+      }
+      offset += length;
+    }
+    if (!startNode || !endNode) return;
+    const range = this.source.ownerDocument.createRange();
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
   private toggleSource = () => {
-    this.setSourceOpen(!this.sourceOpen, true);
+    const open = !this.sourceOpen;
+    this.setSourceOpen(open, true);
+    if (!open) this.releaseNodeSelection();
   };
+
+  private releaseNodeSelection() {
+    const pos = this.getPos();
+    if (typeof pos !== 'number' || !(this.view.state.selection instanceof NodeSelection)) return;
+    if (this.view.state.selection.from !== pos) return;
+    const after = Math.min(pos + this.node.nodeSize, this.view.state.doc.content.size);
+    this.view.dispatch(this.view.state.tr.setSelection(TextSelection.near(this.view.state.doc.resolve(after), 1)));
+    this.view.focus();
+  }
 
   private setSourceOpen(open: boolean, focus = false) {
     this.sourceOpen = open;
@@ -1468,6 +1521,12 @@ class EmbedView implements NodeView {
       const container = document.createElement('figure');
       container.className = 'cherry-table-figure';
       wrapper.prepend(container);
+      if (!this.config.readonly) {
+        const controls = document.createElement('span');
+        controls.className = 'cherry-native-table-chart__controls';
+        controls.append(iconButton('源码', '编辑此表格图表源码', () => this.selectSourceRange(chart.from, chart.to)));
+        wrapper.append(controls);
+      }
       void Promise.resolve(
         renderer({
           container,
@@ -1506,6 +1565,7 @@ class TableChartView implements NodeView {
   private sourceToggle?: HTMLButtonElement;
   private cleanup?: () => void;
   private renderVersion = 0;
+  private renderTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
     node: ProseNode,
@@ -1550,7 +1610,13 @@ class TableChartView implements NodeView {
     const sourceChanged = node.attrs.source !== this.node.attrs.source;
     this.node = node;
     if (document.activeElement !== this.source) this.source.textContent = String(node.attrs.source ?? '');
-    if (sourceChanged) this.render();
+    if (sourceChanged) {
+      // Keep Markdown state synchronous, but coalesce expensive Cherry HTML
+      // and ECharts work while the node-local source editor is receiving a
+      // burst of input. External/API updates still render immediately.
+      if (this.editingSource || document.activeElement === this.source) this.scheduleSourceRender();
+      else this.render();
+    }
     return true;
   }
 
@@ -1585,6 +1651,8 @@ class TableChartView implements NodeView {
   destroy() {
     this.destroyed = true;
     this.renderVersion += 1;
+    if (this.renderTimer) clearTimeout(this.renderTimer);
+    this.renderTimer = undefined;
     this.cleanup?.();
     this.closeSourceListener();
     this.observer?.disconnect();
@@ -1653,6 +1721,7 @@ class TableChartView implements NodeView {
     this.commitSource();
     this.editingSource = false;
     this.dom.classList.remove('is-editing');
+    this.flushSourceRender();
   };
 
   private setSourceOpen(open: boolean, focus = false) {
@@ -1698,6 +1767,21 @@ class TableChartView implements NodeView {
       }),
     );
   };
+
+  private scheduleSourceRender() {
+    if (this.renderTimer) clearTimeout(this.renderTimer);
+    this.renderTimer = setTimeout(() => {
+      this.renderTimer = undefined;
+      this.render();
+    }, this.config.debounce);
+  }
+
+  private flushSourceRender() {
+    if (!this.renderTimer) return;
+    clearTimeout(this.renderTimer);
+    this.renderTimer = undefined;
+    this.render();
+  }
 
   private resolvePos() {
     try {

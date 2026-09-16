@@ -7,6 +7,7 @@ import { echarts, tableChart } from '@cherry-markdown/milkdown/echarts';
 
 declare global {
   interface Window {
+    cherry?: { getMarkdown(): string };
     milkdownEditor?: CherryMilkdownInstance;
   }
 }
@@ -19,22 +20,27 @@ export default function App() {
   const root = useRef<HTMLDivElement>(null);
   const [error, setError] = useState('');
   useEffect(() => {
+    const requestedMode = new URLSearchParams(window.location.search).get('mode');
+    const mode = requestedMode === 'edit&preview' || requestedMode === 'editOnly' ? requestedMode : 'previewOnly';
     const cherry = new Cherry({
       el: root.current!,
       value: basicMd,
-      isPreviewOnly: true,
-      editor: { defaultModel: 'previewOnly' },
-      toolbars: { showToolbar: false },
+      isPreviewOnly: mode === 'previewOnly',
+      editor: { defaultModel: mode },
+      toolbars: { showToolbar: mode !== 'previewOnly' },
     });
+    window.cherry = cherry;
     void cherry
       .whenPluginsReady()
       .then(() => {
-        window.milkdownEditor = cherry.getPlugin(MilkdownPlugin) as CherryMilkdownInstance;
+        const instance = cherry.getPlugin(MilkdownPlugin) as CherryMilkdownInstance | undefined;
+        if (instance) window.milkdownEditor = instance;
       })
       .catch((error: unknown) => {
         setError(String(error));
       });
     return () => {
+      delete window.cherry;
       delete window.milkdownEditor;
       cherry.destroy();
     };

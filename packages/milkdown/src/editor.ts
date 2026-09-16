@@ -16,11 +16,7 @@ import { commonmark } from '@milkdown/kit/preset/commonmark';
 import { gfm } from '@milkdown/kit/preset/gfm';
 import { Plugin, TextSelection } from '@milkdown/kit/prose/state';
 import { $prose, getMarkdown } from '@milkdown/kit/utils';
-import type {
-  CherryMilkdownHost,
-  CherryMilkdownInstance,
-  CherryMilkdownPluginOptions,
-} from './types.js';
+import type { CherryMilkdownHost, CherryMilkdownInstance, CherryMilkdownPluginOptions } from './types.js';
 import { connectNativeCherryControls } from './native-bridge.js';
 import { createSelectionTracker } from './selection-tracker.js';
 import { loadCodeLanguages } from './wysiwyg/code-block.js';
@@ -95,6 +91,30 @@ function reconcileSerializedMarkdown(raw: string, previous: string, next: string
     const index = raw.indexOf(changedBefore);
     if (index >= 0 && raw.indexOf(changedBefore, index + 1) < 0) {
       return `${raw.slice(0, index)}${changedAfter}${raw.slice(index + changedBefore.length)}`;
+    }
+
+    // Serializer-only differences (for example an original `*` list marker
+    // normalized to `-`) can make the surrounding context unavailable. Map
+    // the edited occurrence by ordinal instead of replacing the whole
+    // document and losing untouched Cherry/raw formatting. Ambiguous mappings
+    // still fall back to the canonical serializer below.
+    let occurrence = 0;
+    let cursor = 0;
+    while (cursor < from) {
+      const found = previous.indexOf(changedBefore, cursor);
+      if (found < 0 || found >= from) break;
+      occurrence += 1;
+      cursor = found + Math.max(1, changedBefore.length);
+    }
+    let rawIndex = -1;
+    cursor = 0;
+    for (let index = 0; index <= occurrence; index += 1) {
+      rawIndex = raw.indexOf(changedBefore, cursor);
+      if (rawIndex < 0) break;
+      cursor = rawIndex + Math.max(1, changedBefore.length);
+    }
+    if (rawIndex >= 0) {
+      return `${raw.slice(0, rawIndex)}${changedAfter}${raw.slice(rawIndex + changedBefore.length)}`;
     }
   }
   return next;

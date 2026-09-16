@@ -51,6 +51,31 @@ describe('MilkdownPlugin runtime integration', () => {
     cherry.destroy();
   });
 
+  it('mounts in edit&preview and keeps CodeMirror synchronized', async () => {
+    const root = document.createElement('div');
+    document.body.append(root);
+    const cherry = new Cherry({
+      el: root,
+      value: 'Before',
+      editor: { defaultModel: 'edit&preview' },
+    });
+    await cherry.whenPluginsReady();
+    const runtime = cherry.getPlugin(MilkdownPlugin) as CherryMilkdownInstance;
+
+    expect(runtime).toBeDefined();
+    expect(root.querySelector('.cm-editor')).not.toBeNull();
+    expect(root.querySelector('.ProseMirror')).not.toBeNull();
+
+    runtime.setMarkdown('From Milkdown');
+    await vi.waitFor(() => expect(cherry.getMarkdown()).toBe('From Milkdown'));
+    expect(root.querySelector('.cm-content')?.textContent).toContain('From Milkdown');
+
+    cherry.setValue('From CodeMirror', true);
+    await vi.waitFor(() => expect(runtime.getMarkdown()).toBe('From CodeMirror'));
+    expect(root.querySelector('.ProseMirror')?.textContent).toContain('From CodeMirror');
+    cherry.destroy();
+  });
+
   it('mounts inside Cherry mobile preview content without replacing its wrapper', async () => {
     const root = document.createElement('div');
     document.body.append(root);
@@ -82,5 +107,43 @@ describe('MilkdownPlugin runtime integration', () => {
     expect(root.querySelector('.ProseMirror')).toBeNull();
     expect(root.querySelector('h1')?.textContent).toBe('Native fallback');
     cherry.destroy();
+  });
+
+  it('resolves isolated per-instance overrides from one static registration', async () => {
+    let configured = 0;
+    const configure = vi.fn(() => ({ readonly: configured++ === 1 }));
+    class ConfiguredCherry extends Cherry {
+      static initialized = false;
+    }
+    ConfiguredCherry.usePlugin(MilkdownPlugin, { configure });
+
+    const editableRoot = document.createElement('div');
+    editableRoot.id = 'editable';
+    const readonlyRoot = document.createElement('div');
+    readonlyRoot.id = 'readonly';
+    document.body.append(editableRoot, readonlyRoot);
+    const editable = new ConfiguredCherry({ el: editableRoot, value: 'Editable', isPreviewOnly: true });
+    const readonly = new ConfiguredCherry({ el: readonlyRoot, value: 'Readonly', isPreviewOnly: true });
+    await Promise.all([editable.whenPluginsReady(), readonly.whenPluginsReady()]);
+
+    expect(configure).toHaveBeenCalledTimes(2);
+    expect(editableRoot.querySelector('.ProseMirror')?.getAttribute('contenteditable')).toBe('true');
+    expect(readonlyRoot.querySelector('.ProseMirror')?.getAttribute('contenteditable')).toBe('false');
+    editable.destroy();
+    readonly.destroy();
+  });
+
+  it('returns the DOM to baseline after repeated mount and destroy', async () => {
+    for (let index = 0; index < 10; index += 1) {
+      const root = document.createElement('div');
+      document.body.append(root);
+      const cherry = new Cherry({ el: root, value: `# Cycle ${index}`, isPreviewOnly: true });
+      await cherry.whenPluginsReady();
+      expect(root.querySelector('.ProseMirror')).not.toBeNull();
+      cherry.destroy();
+      await vi.waitFor(() => expect(root.childElementCount).toBe(0));
+      root.remove();
+    }
+    expect(document.querySelectorAll('.cherry, .cherry-bubble--preview, .ProseMirror')).toHaveLength(0);
   });
 });

@@ -1,18 +1,21 @@
 # Runtime plugin boundary
 
-- index.ts: previewOnly runtime mounted by `Cherry.usePlugin()`.
+- index.ts: edit&preview and previewOnly runtime mounted by `Cherry.usePlugin()`.
 - wysiwyg/: schema, Markdown transforms, native DOM presentation and NodeViews.
-- native-bridge.ts: delegates image, table and diagram controls to the current
+- native-bridge.ts: delegates Bubble, image and diagram controls to the current
   Cherry Previewer; no second Cherry is created.
+- native-layout.ts: pure translation between Cherry image/Mermaid layout
+  directives and native control changes.
 - ui/: editor-local controls; no Cherry top Toolbar imports.
 - renderers/: optional renderers with per-node cleanup.
-- examples/react/: one standard Cherry previewOnly integration.
+- examples/react/: one standard Cherry integration with query-selectable
+  edit&preview, previewOnly and editOnly modes.
 
 Cherry only owns the generic runtime-plugin registry, per-instance mount/destroy
 lifecycle and Previewer content-renderer slot. These APIs must contain no
 Milkdown-specific branch, parser, style or toolbar behavior. Milkdown owns all
-mode eligibility and editing logic. editOnly, edit&preview and CherryStream are
-not activated in this release.
+mode eligibility and editing logic. edit&preview and previewOnly share the same
+preview runtime; editOnly and CherryStream are deliberately not activated.
 
 ## Test migration
 

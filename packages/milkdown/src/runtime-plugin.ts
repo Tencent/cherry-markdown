@@ -1,4 +1,9 @@
-import type { CherryMilkdownHost, CherryMilkdownInstance, CherryMilkdownPluginOptions } from './types.js';
+import type {
+  CherryMilkdownHost,
+  CherryMilkdownInstance,
+  CherryMilkdownPluginOptions,
+  CherryMilkdownRuntimeOptions,
+} from './types.js';
 import { mountCherryMilkdown } from './editor.js';
 
 class CherryMilkdownRuntime implements CherryMilkdownInstance {
@@ -8,7 +13,7 @@ class CherryMilkdownRuntime implements CherryMilkdownInstance {
 
   constructor(
     private readonly cherry: CherryMilkdownHost,
-    private readonly options: CherryMilkdownPluginOptions,
+    private readonly options: CherryMilkdownRuntimeOptions,
   ) {}
 
   async mount(): Promise<void> {
@@ -118,9 +123,17 @@ export class MilkdownPlugin {
   static $cherry$runtime = true;
 
   static create(cherry: CherryMilkdownHost, options: CherryMilkdownPluginOptions = {}) {
-    const previewOnly = Boolean(cherry.options.isPreviewOnly || cherry.options.editor?.defaultModel === 'previewOnly');
-    if (!previewOnly || cherry.options.engine?.global?.flowSessionContext) return null;
-    return new CherryMilkdownRuntime(cherry, options);
+    const model = cherry.options.isPreviewOnly
+      ? 'previewOnly'
+      : (cherry.options.editor?.defaultModel ?? 'edit&preview');
+    // Milkdown owns Cherry's preview surface. It is useful when that surface
+    // is initially visible, and deliberately stays out of source-only and
+    // streaming sessions.
+    if (model === 'editOnly' || cherry.options.engine?.global?.flowSessionContext) return null;
+    const mode = model === 'previewOnly' ? 'previewOnly' : 'edit&preview';
+    const { configure, ...defaults } = options;
+    const overrides = configure?.({ cherry, instanceId: cherry.getInstanceId(), mode });
+    return new CherryMilkdownRuntime(cherry, { ...defaults, ...overrides });
   }
 }
 

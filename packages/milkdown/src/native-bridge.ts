@@ -1,18 +1,13 @@
 import { commandsCtx, editorViewCtx } from '@milkdown/kit/core';
 import { toggleMark } from '@milkdown/kit/prose/commands';
+import { Fragment } from '@milkdown/kit/prose/model';
 import { NodeSelection, TextSelection, type EditorState } from '@milkdown/kit/prose/state';
 import { toggleEmphasisCommand, toggleStrongCommand, wrapInBlockquoteCommand } from '@milkdown/kit/preset/commonmark';
 import { toggleStrikethroughCommand } from '@milkdown/kit/preset/gfm';
 import type { CherryMilkdownInstance } from './types.js';
-
-type ElementKind = 'image' | 'mermaid';
-
-interface NativeCherryHost {
-  bubble?: any;
-  toolbarBubbleContainer?: HTMLElement;
-  $event?: { off(name: string, listener: (...args: any[]) => void): void };
-  getPreviewer(): any;
-}
+import { updateImageLayout, updateMermaidLayout, type NativeLayoutChange } from './native-layout.js';
+import type { NativeCherryHost, NativePreviewElementKind } from './native-cherry.js';
+import { isEditorRectVisible, positionNativeBubble } from './native-bubble.js';
 
 export function supportsTextFormatting(state: EditorState) {
   const { selection, doc } = state;
@@ -42,38 +37,70 @@ export function connectNativeCherryControls(
   const bubble = cherry.bubble;
   const bubbleDom = cherry.toolbarBubbleContainer ?? bubble?.getBubbleDom?.();
   const previewerBubble = previewer.previewerBubble;
+  const previewOnly = Boolean(cherry.options.isPreviewOnly || cherry.options.editor?.defaultModel === 'previewOnly');
   let destroyed = false;
+  let linkUiOpen = false;
+  let previewOwnsBubble = previewOnly;
+  let bubbleSuppressed = false;
   let cancelBubbleRefresh: (() => void) | undefined;
 
   if (!bubble || !(bubbleDom instanceof HTMLElement)) return () => {};
 
-  // Cherry already creates its configured Bubble while constructing the
-  // preview-only shell. Reuse that exact menu DOM and menu instances, but
-  // detach their CodeMirror selection ownership. This adapter deliberately
-  // lives in @cherry-markdown/milkdown so Cherry itself needs no plugin API.
+  // Cherry already creates its configured Bubble. In previewOnly it has no
+  // visible source owner, so move it to the preview and detach CodeMirror's
+  // listeners. In edit&preview the same Bubble remains in CodeMirror and its
+  // menu calls are routed according to the editor that most recently owned an
+  // explicit selection. This avoids two competing menus and keeps the native
+  // source-editor behavior intact.
   const cherryBubbleEvents = [
     ['afterChange', 'boundHandleAfterChange'],
     ['layoutChange', 'boundHandleLayoutChange'],
     ['onScroll', 'boundHandleScroll'],
     ['beforeSelectionChange', 'boundHandleBeforeSelectionChange'],
   ] as const;
-  for (const [eventName, property] of cherryBubbleEvents) {
-    const listener = bubble[property];
-    if (typeof listener === 'function') cherry.$event?.off(eventName, listener);
+  if (previewOnly) {
+    for (const [eventName, property] of cherryBubbleEvents) {
+      const listener = bubble[property];
+      if (typeof listener === 'function') cherry.$event?.off(eventName, listener);
+    }
+    previewer.getDom().append(bubbleDom);
   }
-  previewer.getDom().append(bubbleDom);
   bubbleDom.classList.add('cherry-bubble--preview');
   bubbleDom.setAttribute('role', 'toolbar');
   bubbleDom.setAttribute('aria-label', '文本格式');
-  const preserveSelection = (event: PointerEvent) => event.preventDefault();
+  const preserveSelection = (event: PointerEvent) => {
+    if (previewOwnsBubble) event.preventDefault();
+  };
   bubbleDom.addEventListener('pointerdown', preserveSelection);
+
+  const sourceEditorDom = bubble.editorDom instanceof HTMLElement ? bubble.editorDom : undefined;
+  const takeSourceOwnership = (event?: Event) => {
+    // In dual-pane mode the shared Bubble remains physically inside the
+    // CodeMirror container. Clicking the Bubble must retain whichever editor
+    // opened it instead of being mistaken for a click in the source surface.
+    if (event?.target instanceof Node && bubbleDom.contains(event.target)) return;
+    previewOwnsBubble = false;
+    bubbleDom.style.position = '';
+  };
+  const takePreviewOwnership = () => {
+    previewOwnsBubble = true;
+  };
+  if (!previewOnly) sourceEditorDom?.addEventListener('pointerdown', takeSourceOwnership, true);
+
+  const hideNativeBubble = () => {
+    bubbleSuppressed = true;
+    if (bubble.bubbleDom) bubble.visible = false;
+  };
 
   const call = (command: { key: unknown }) => {
     let handled = false;
     instance.editor.action((ctx) => {
       handled = ctx.get(commandsCtx).call(command.key as never) !== false;
     });
-    if (handled) view.focus();
+    if (handled) {
+      view.focus();
+      hideNativeBubble();
+    }
     return handled;
   };
 
@@ -81,17 +108,95 @@ export function connectNativeCherryControls(
     const mark = view.state.schema.marks[name];
     if (!mark || !supportsTextFormatting(view.state)) return false;
     const handled = toggleMark(mark, attrs)(view.state, view.dispatch);
-    if (handled) view.focus();
+    if (handled) {
+      view.focus();
+      hideNativeBubble();
+    }
     return handled;
   };
 
-  const applyColor = (menu: any, shortKey: string) => {
+  const toggleBlockquote = () => {
+    const { state } = view;
+    const blockquote = state.schema.nodes.blockquote;
+    if (!blockquote) return false;
+
+    // Cherry's source Bubble prefixes the complete selected line. Inside a
+    // list that means `> - item`, i.e. the list block itself is quoted. The
+    // stock Milkdown command cannot wrap the leading paragraph of a list item
+    // because it must remain that item's first child, and therefore silently
+    // does nothing. Resolve the structural owner explicitly.
+    let quotePosition: number | undefined;
+    let quoteNode: typeof state.doc | undefined;
+    let listPosition: number | undefined;
+    let listNode: typeof state.doc | undefined;
+    let listDepth: number | undefined;
+    for (let depth = state.selection.$from.depth; depth > 0; depth -= 1) {
+      const node = state.selection.$from.node(depth);
+      const position = state.selection.$from.before(depth);
+      if (node.type === blockquote && quotePosition === undefined) {
+        quotePosition = position;
+        quoteNode = node;
+        break;
+      }
+      if ((node.type.name === 'bullet_list' || node.type.name === 'ordered_list') && listPosition === undefined) {
+        listPosition = position;
+        listNode = node;
+        listDepth = depth;
+      }
+    }
+
+    if (quotePosition !== undefined && quoteNode) {
+      view.dispatch(state.tr.replaceWith(quotePosition, quotePosition + quoteNode.nodeSize, quoteNode.content));
+      view.focus();
+      hideNativeBubble();
+      return true;
+    }
+
+    if (listPosition !== undefined && listNode && listDepth !== undefined) {
+      const selectedIndex = state.selection.$from.index(listDepth);
+      const items = Array.from({ length: listNode.childCount }, (_, index) => listNode.child(index));
+      const listAttrs = (offset: number) =>
+        listNode.type.name === 'ordered_list'
+          ? { ...listNode.attrs, order: Number(listNode.attrs.order ?? 1) + offset }
+          : listNode.attrs;
+      const replacement: (typeof listNode)[] = [];
+      if (selectedIndex > 0) {
+        replacement.push(listNode.type.create(listAttrs(0), Fragment.fromArray(items.slice(0, selectedIndex))));
+      }
+      const quotedList = listNode.type.create(listAttrs(selectedIndex), items[selectedIndex]);
+      const quoted = blockquote.create(null, quotedList);
+      const quotePosition = listPosition + (replacement[0]?.nodeSize ?? 0);
+      replacement.push(quoted);
+      if (selectedIndex + 1 < items.length) {
+        replacement.push(
+          listNode.type.create(listAttrs(selectedIndex + 1), Fragment.fromArray(items.slice(selectedIndex + 1))),
+        );
+      }
+      const transaction = state.tr.replaceWith(
+        listPosition,
+        listPosition + listNode.nodeSize,
+        Fragment.fromArray(replacement),
+      );
+      view.dispatch(transaction.setSelection(NodeSelection.create(transaction.doc, quotePosition)));
+      view.focus();
+      hideNativeBubble();
+      return true;
+    }
+
+    return call(wrapInBlockquoteCommand);
+  };
+
+  const applyColor = (menu: any, shortKey: string, event?: Event) => {
     if (!menu?.hasCacheOnce?.() && !/(?:background-)?color\s*:/.test(shortKey)) {
       const selection = view.state.doc.textBetween(view.state.selection.from, view.state.selection.to, '\n');
       const previous = menu.isSelections;
       menu.isSelections = true;
       try {
-        menu.onClick?.(selection, shortKey);
+        // Color's first click opens Cherry's native picker and uses the
+        // clicked element to calculate its position. Preserve that event
+        // instead of calling the menu with an undefined target.
+        const pickerEvent = event ?? { target: menu?.dom };
+        menu.onClick?.(selection, shortKey, pickerEvent);
       } finally {
         menu.isSelections = previous;
       }
@@ -115,7 +220,7 @@ export function connectNativeCherryControls(
     });
   };
 
-  const updateImage = (target: HTMLImageElement, change: any) => {
+  const updateImage = (target: HTMLImageElement, change: NativeLayoutChange) => {
     let position: number;
     try {
       position = view.posAtDOM(target, 0);
@@ -124,33 +229,13 @@ export function connectNativeCherryControls(
     }
     const node = view.state.doc.nodeAt(position);
     if (node?.type.name !== 'image') return false;
-    const extension = /#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|border|shadow|radius|B|S|R|center|right|left|float-right|float-left)/g;
-    const source = String(node.attrs.alt ?? '');
-    const tokens = source.match(extension) ?? [];
-    const base = source.replace(extension, '').trimEnd();
-    let sizes = tokens.filter((token) => /^#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)$/.test(token));
-    let decorations = tokens.filter((token) => /^#(?:border|shadow|radius|B|S|R)$/.test(token));
-    let alignment = tokens.find((token) => /^#(?:center|right|left|float-right|float-left)$/.test(token));
-    if (change.width !== undefined || change.height !== undefined) {
-      const width = Math.round(Number.parseFloat(String(change.width)));
-      const height = Math.round(Number.parseFloat(String(change.height)));
-      sizes = [Number.isFinite(width) ? `#${width}px` : '', Number.isFinite(height) ? `#${height}px` : ''].filter(Boolean);
-    }
-    const aliases: Record<string, string> = { border: '#B', shadow: '#S', radius: '#R' };
-    if (aliases[change.type]) {
-      const alias = new RegExp(`^#(?:${change.type}|${aliases[change.type].slice(1)})$`);
-      const active = decorations.some((token) => alias.test(token));
-      decorations = decorations.filter((token) => !alias.test(token));
-      if (!active) decorations.push(aliases[change.type]);
-    } else if (change.type === 'clear-align') alignment = undefined;
-    else if (/^(?:left|right|center|float-left|float-right)$/.test(change.type)) alignment = `#${change.type}`;
-    const alt = `${base}${[...sizes, ...decorations, ...(alignment ? [alignment] : [])].join('')}`;
+    const alt = updateImageLayout(String(node.attrs.alt ?? ''), change);
     const transaction = view.state.tr.setNodeMarkup(position, undefined, { ...node.attrs, alt });
     view.dispatch(transaction.setSelection(NodeSelection.create(transaction.doc, position)));
     return true;
   };
 
-  const updateMermaid = (target: HTMLElement, change: any) => {
+  const updateMermaid = (target: HTMLElement, change: NativeLayoutChange) => {
     let position: number;
     try {
       position = view.posAtDOM(target, 0);
@@ -159,44 +244,42 @@ export function connectNativeCherryControls(
     }
     const node = view.state.doc.nodeAt(position);
     if (node?.type.name !== 'cherry_diagram' || node.attrs.diagramType !== 'mermaid') return false;
-    const lines = String(node.attrs.source ?? '').split(/\r?\n/);
-    const layout = /#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto|center|right|left|float-right|float-left)/gi;
-    const opener = lines[0] ?? '```mermaid';
-    const tokens = opener.match(layout) ?? [];
-    let sizes = tokens.filter((token) => /^#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)$/i.test(token));
-    let alignment = tokens.find((token) => /^#(?:center|right|left|float-right|float-left)$/i.test(token));
-    if (change.width !== undefined || change.height !== undefined) {
-      const width = Math.round(Number.parseFloat(String(change.width)));
-      const height = Math.round(Number.parseFloat(String(change.height)));
-      sizes = [Number.isFinite(width) ? `#${width}px` : '', Number.isFinite(height) ? `#${height}px` : ''].filter(Boolean);
-    }
-    if (change.type === 'clear-align') alignment = undefined;
-    else if (/^(?:left|right|center|float-left|float-right)$/.test(change.type)) alignment = `#${change.type}`;
-    const suffix = [...sizes, ...(alignment ? [alignment] : [])].join(' ');
-    lines[0] = `${opener.replace(layout, '').trimEnd()}${suffix ? ` ${suffix}` : ''}`;
-    const transaction = view.state.tr.setNodeMarkup(position, undefined, { ...node.attrs, source: lines.join('\n') });
+    const source = updateMermaidLayout(String(node.attrs.source ?? ''), change);
+    const transaction = view.state.tr.setNodeMarkup(position, undefined, { ...node.attrs, source });
     view.dispatch(transaction.setSelection(NodeSelection.create(transaction.doc, position)));
     return true;
   };
 
   const bridge = {
     isActive: () => !destroyed && view.editable,
-    runCommand(command: { name: string; shortKey: string; menu?: any }) {
+    runCommand(command: { name: string; shortKey: string; menu?: any; event?: Event }) {
       if (!supportsTextFormatting(view.state) && command.name !== 'quote') return false;
       switch (command.name) {
-        case 'bold': return call(toggleStrongCommand);
-        case 'italic': return call(toggleEmphasisCommand);
-        case 'strikethrough': return call(toggleStrikethroughCommand);
-        case 'underline': return toggleCustomMark('cherry_underline');
-        case 'sub': return toggleCustomMark('cherry_subscript');
-        case 'sup': return toggleCustomMark('cherry_superscript');
-        case 'quote': return call(wrapInBlockquoteCommand);
-        case 'size': return toggleCustomMark('cherry_font_size', { size: /^\d+$/.test(command.shortKey) ? command.shortKey : '17' });
-        case 'color': return applyColor(command.menu, command.shortKey);
-        default: return false;
+        case 'bold':
+          return call(toggleStrongCommand);
+        case 'italic':
+          return call(toggleEmphasisCommand);
+        case 'strikethrough':
+          return call(toggleStrikethroughCommand);
+        case 'underline':
+          return toggleCustomMark('cherry_underline');
+        case 'sub':
+          return toggleCustomMark('cherry_subscript');
+        case 'sup':
+          return toggleCustomMark('cherry_superscript');
+        case 'quote':
+          return toggleBlockquote();
+        case 'size':
+          return toggleCustomMark('cherry_font_size', {
+            size: /^\d+$/.test(command.shortKey) ? command.shortKey : '17',
+          });
+        case 'color':
+          return applyColor(command.menu, command.shortKey, command.event);
+        default:
+          return false;
       }
     },
-    ownsPreviewElement(target: Element, kind: ElementKind) {
+    ownsPreviewElement(target: Element, kind: NativePreviewElementKind) {
       let position: number;
       try {
         position = view.posAtDOM(target, 0);
@@ -208,16 +291,20 @@ export function connectNativeCherryControls(
         ? target instanceof HTMLImageElement && node?.type.name === 'image'
         : node?.type.name === 'cherry_diagram' && node.attrs.diagramType === 'mermaid';
     },
-    updatePreviewElement(target: Element, change: any) {
+    updatePreviewElement(target: Element, change: NativeLayoutChange & { kind?: NativePreviewElementKind }) {
       return change.kind === 'image' && target instanceof HTMLImageElement
         ? updateImage(target, change)
         : target instanceof HTMLElement && updateMermaid(target, change);
     },
-    resolvePreviewElement(kind: ElementKind) {
+    resolvePreviewElement(kind: NativePreviewElementKind) {
       const selection = view.state.selection;
       if (!(selection instanceof NodeSelection)) return null;
       if (kind === 'image' && selection.node.type.name !== 'image') return null;
-      if (kind === 'mermaid' && (selection.node.type.name !== 'cherry_diagram' || selection.node.attrs.diagramType !== 'mermaid')) return null;
+      if (
+        kind === 'mermaid' &&
+        (selection.node.type.name !== 'cherry_diagram' || selection.node.attrs.diagramType !== 'mermaid')
+      )
+        return null;
       const dom = view.nodeDOM(selection.from);
       return dom instanceof Element ? dom : null;
     },
@@ -227,24 +314,9 @@ export function connectNativeCherryControls(
     if (bubble.bubbleDom) bubble.visible = false;
   };
 
-  const showBubbleAt = (rect: { top: number; bottom: number; left: number; right: number }) => {
-    if (!bubble.bubbleDom) return;
-    bubble.bubbleDom.style.position = 'fixed';
-    bubble.visible = true;
-    const gap = 6;
-    const height = bubble.bubbleDom.offsetHeight;
-    const above = rect.top - height >= 8;
-    const top = above ? rect.top - height - gap : rect.bottom + gap;
-    const center = (rect.left + rect.right) / 2;
-    const maxLeft = Math.max(8, document.documentElement.clientWidth - bubble.bubbleDom.offsetWidth - 8);
-    const left = Math.max(8, Math.min(maxLeft, center - bubble.bubbleDom.offsetWidth / 2));
-    bubble.bubbleDom.style.top = `${top}px`;
-    bubble.bubbleDom.style.left = `${left}px`;
-    if (bubble.bubbleTop) bubble.bubbleTop.style.display = above ? 'none' : 'block';
-    if (bubble.bubbleBottom) bubble.bubbleBottom.style.display = above ? 'block' : 'none';
-    bubble.$setBubbleCursorPosition?.(
-      `${Math.max(10, Math.min(bubble.bubbleDom.offsetWidth - 10, center - left))}px`,
-    );
+  const onLinkUiChange = (event: Event) => {
+    linkUiOpen = Boolean((event as CustomEvent<{ open?: boolean }>).detail?.open);
+    if (linkUiOpen) hideBubble();
   };
 
   const restoredMenuFire: Array<() => void> = [];
@@ -252,8 +324,12 @@ export function connectNativeCherryControls(
     if (!menu || typeof menu.fire !== 'function') continue;
     const original = menu.fire;
     menu.fire = (event?: Event, shortKey = '') => {
+      if (!previewOwnsBubble) {
+        original.call(menu, event, shortKey);
+        return;
+      }
       event?.stopPropagation();
-      bridge.runCommand({ name, shortKey, menu });
+      bridge.runCommand({ name, shortKey, menu, event });
     };
     restoredMenuFire.push(() => {
       menu.fire = original;
@@ -295,8 +371,8 @@ export function connectNativeCherryControls(
         }
       : undefined;
 
-    const resolveElement = (kind: ElementKind) => bridge.resolvePreviewElement(kind);
-    const isOwned = (target: Element, kind: ElementKind) => bridge.ownsPreviewElement(target, kind);
+    const resolveElement = (kind: NativePreviewElementKind) => bridge.resolvePreviewElement(kind);
+    const isOwned = (target: Element, kind: NativePreviewElementKind) => bridge.ownsPreviewElement(target, kind);
     previewerBubble.$isEnableBubbleAndEditorShow = () => editingNativeNode;
     previewerBubble.beginChangeImgValue = (target: HTMLImageElement) => {
       if (!isOwned(target, 'image')) return false;
@@ -325,7 +401,9 @@ export function connectNativeCherryControls(
         if (!isOwned(target, 'mermaid')) return false;
         const position = view.posAtDOM(target, 0);
         view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, position)));
-        originalMermaid.previewIndex = [...previewerDom.querySelectorAll('figure[data-type="mermaid"]')].indexOf(target);
+        originalMermaid.previewIndex = [...previewerDom.querySelectorAll('figure[data-type="mermaid"]')].indexOf(
+          target,
+        );
         return true;
       };
       originalMermaid.resolveFigure = () => resolveElement('mermaid');
@@ -354,6 +432,14 @@ export function connectNativeCherryControls(
 
     const onPreviewClick = (event: MouseEvent) => {
       const target = event.target instanceof Element ? event.target : null;
+      // A diagram source editor and Cherry's native size/alignment session are
+      // mutually exclusive.  Controls and the source surface live inside the
+      // same <figure>, so allowing this click to reach PreviewerBubble would
+      // immediately recreate the Mermaid handles above the caret.
+      if (target?.closest('.cherry-embed__controls, .cherry-embed__source')) {
+        previewerBubble.$removeImgPreviewerBubbles?.();
+        return;
+      }
       const image = target instanceof HTMLImageElement && isOwned(target, 'image');
       const mermaid = target?.closest('figure[data-type="mermaid"]');
       editingNativeNode = image || (mermaid instanceof HTMLElement && isOwned(mermaid, 'mermaid'));
@@ -364,9 +450,10 @@ export function connectNativeCherryControls(
       }
     };
     const beginImageResize = (event: MouseEvent) => {
-      const point = event.target instanceof Element
-        ? event.target.closest<HTMLElement>('.cherry-previewer-img-size-handler__points')
-        : null;
+      const point =
+        event.target instanceof Element
+          ? event.target.closest<HTMLElement>('.cherry-previewer-img-size-handler__points')
+          : null;
       const target = resolveElement('image');
       if (!point || !(target instanceof HTMLImageElement)) return;
       const rect = target.getBoundingClientRect();
@@ -385,16 +472,8 @@ export function connectNativeCherryControls(
       if (!imageResize) return;
       const dx = event.clientX - imageResize.startX;
       const dy = event.clientY - imageResize.startY;
-      const horizontal = imageResize.handle.startsWith('left')
-        ? -dx
-        : imageResize.handle.startsWith('right')
-          ? dx
-          : 0;
-      const vertical = imageResize.handle.endsWith('Top')
-        ? -dy
-        : imageResize.handle.endsWith('Bottom')
-          ? dy
-          : 0;
+      const horizontal = imageResize.handle.startsWith('left') ? -dx : imageResize.handle.startsWith('right') ? dx : 0;
+      const vertical = imageResize.handle.endsWith('Top') ? -dy : imageResize.handle.endsWith('Bottom') ? dy : 0;
       if (horizontal) {
         imageResize.nextWidth = Math.max(1, imageResize.width + horizontal);
         if (!imageResize.handle.endsWith('Middle')) {
@@ -449,17 +528,29 @@ export function connectNativeCherryControls(
         view.dom.contains(selection.anchorNode) &&
         view.dom.contains(selection.focusNode),
       );
-      if (destroyed || !ownsSelection || !supportsTextFormatting(view.state)) {
-        hideBubble();
+      if (destroyed || bubbleSuppressed || linkUiOpen || !ownsSelection || !supportsTextFormatting(view.state)) {
+        // In dual-pane mode CodeMirror has its own synthetic selection and
+        // Bubble lifecycle. Once source ownership is explicit, a DOM
+        // selectionchange outside ProseMirror must not immediately hide the
+        // native source Bubble that Cherry just opened.
+        if (previewOnly || previewOwnsBubble) hideBubble();
         return;
       }
+      takePreviewOwnership();
       try {
         const from = view.coordsAtPos(view.state.selection.from);
         const to = view.coordsAtPos(view.state.selection.to);
-        showBubbleAt({
-          top: Math.min(from.top, to.top), bottom: Math.max(from.bottom, to.bottom),
-          left: Math.min(from.left, to.left), right: Math.max(from.right, to.right),
-        });
+        const rect = {
+          top: Math.min(from.top, to.top),
+          bottom: Math.max(from.bottom, to.bottom),
+          left: Math.min(from.left, to.left),
+          right: Math.max(from.right, to.right),
+        };
+        if (!isEditorRectVisible(view.dom, rect)) {
+          hideBubble();
+          return;
+        }
+        positionNativeBubble(bubble, rect, view.dom.ownerDocument);
       } catch {
         hideBubble();
       }
@@ -476,15 +567,34 @@ export function connectNativeCherryControls(
       cancelBubbleRefresh = () => clearTimeout(timer);
     }
   };
-  const hideBubbleAtPointer = hideBubble;
+  const hideBubbleAtPointer = () => {
+    bubbleSuppressed = false;
+    hideBubble();
+  };
+  const refreshBubbleFromKeyboard = () => {
+    bubbleSuppressed = false;
+    refreshBubble();
+  };
   const hideBubbleOutside = (event: PointerEvent) => {
     const target = event.target;
-    if (target instanceof Node && !view.dom.contains(target) && !bubbleDom.contains(target)) hideBubble();
+    if (!(target instanceof Node)) return;
+    if (view.dom.contains(target)) {
+      takePreviewOwnership();
+      return;
+    }
+    if (!bubbleDom.contains(target) && !sourceEditorDom?.contains(target)) hideBubble();
   };
   view.dom.ownerDocument.addEventListener('selectionchange', refreshBubble);
+  // The native Cherry Bubble remains attached to its selection while the
+  // CodeMirror scroller moves. Milkdown positions the shared Bubble against
+  // the viewport, so every enclosing scroller (including window) must request
+  // the same position refresh. Capture observes non-bubbling element scrolls.
+  view.dom.ownerDocument.addEventListener('scroll', refreshBubble, true);
+  view.dom.ownerDocument.defaultView?.addEventListener('scroll', refreshBubble);
+  view.dom.addEventListener('cherry-milkdown:link-ui-change', onLinkUiChange);
   view.dom.ownerDocument.addEventListener('pointerdown', hideBubbleOutside, true);
   view.dom.addEventListener('mouseup', refreshBubble, true);
-  view.dom.addEventListener('keyup', refreshBubble, true);
+  view.dom.addEventListener('keyup', refreshBubbleFromKeyboard, true);
   view.dom.addEventListener('pointerdown', hideBubbleAtPointer, true);
   const unsubscribeSelectionChange = subscribeSelectionChange?.(refreshBubble);
 
@@ -494,14 +604,27 @@ export function connectNativeCherryControls(
     cancelBubbleRefresh?.();
     cancelBubbleRefresh = undefined;
     view.dom.ownerDocument.removeEventListener('selectionchange', refreshBubble);
+    view.dom.ownerDocument.removeEventListener('scroll', refreshBubble, true);
+    view.dom.ownerDocument.defaultView?.removeEventListener('scroll', refreshBubble);
+    view.dom.removeEventListener('cherry-milkdown:link-ui-change', onLinkUiChange);
     view.dom.ownerDocument.removeEventListener('pointerdown', hideBubbleOutside, true);
     view.dom.removeEventListener('mouseup', refreshBubble, true);
-    view.dom.removeEventListener('keyup', refreshBubble, true);
+    view.dom.removeEventListener('keyup', refreshBubbleFromKeyboard, true);
     view.dom.removeEventListener('pointerdown', hideBubbleAtPointer, true);
     unsubscribeSelectionChange?.();
     hideBubble();
     bubbleDom.removeEventListener('pointerdown', preserveSelection);
+    sourceEditorDom?.removeEventListener('pointerdown', takeSourceOwnership, true);
     restoredMenuFire.forEach((restore) => restore());
     restorePreviewControls.forEach((restore) => restore());
+    bubbleDom.classList.remove('cherry-bubble--preview');
+    bubbleDom.removeAttribute('role');
+    bubbleDom.removeAttribute('aria-label');
+    if (previewOnly) {
+      for (const [eventName, property] of cherryBubbleEvents) {
+        const listener = bubble[property];
+        if (typeof listener === 'function') cherry.$event?.on(eventName, listener);
+      }
+    }
   };
 }

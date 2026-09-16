@@ -20,11 +20,7 @@ export interface CherryMilkdownHost {
   getPreviewer(): {
     getDom(): HTMLElement;
     getDomContainer(): HTMLElement;
-    setContentRenderer?(renderer: {
-      update(html: string): void;
-      getValue?(): string;
-      destroy?(): void;
-    }): () => void;
+    setContentRenderer?(renderer: { update(html: string): void; getValue?(): string; destroy?(): void }): () => void;
   };
   setValue(markdown: string, keepCursor?: boolean): void;
   destroy(): void;
@@ -43,7 +39,7 @@ export interface CherryMilkdownMathliveOptions {
   virtualKeyboardMode?: 'auto' | 'manual' | 'onfocus' | 'off';
 }
 
-export interface CherryMilkdownPluginOptions {
+export interface CherryMilkdownRuntimeOptions {
   /** Selection formatting controls. No top toolbar is mounted. */
   bubble?: boolean;
   readonly?: boolean;
@@ -53,6 +49,20 @@ export interface CherryMilkdownPluginOptions {
   renderers?: Record<string, CherryVisualRenderer>;
   onChange?: (result: CherryMilkdownChange) => void;
   onError?: (error: unknown, phase: CherryMilkdownErrorPhase) => void;
+}
+
+export interface CherryMilkdownPluginContext {
+  cherry: CherryMilkdownHost;
+  instanceId: string;
+  mode: 'edit&preview' | 'previewOnly';
+}
+
+export interface CherryMilkdownPluginOptions extends CherryMilkdownRuntimeOptions {
+  /**
+   * Resolves optional per-Cherry overrides while keeping site-wide
+   * registration through `Cherry.usePlugin()`.
+   */
+  configure?: (context: CherryMilkdownPluginContext) => Partial<CherryMilkdownRuntimeOptions> | undefined;
 }
 
 export interface CherryMilkdownInstance {

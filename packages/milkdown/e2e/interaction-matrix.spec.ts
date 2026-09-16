@@ -35,7 +35,9 @@ for (const item of editableCases) {
     await expect.poll(() => markdown(page)).not.toContain('XYZ');
 
     await target.click({ clickCount: 3 });
-    await expect.poll(() => page.evaluate(() => window.getSelection()?.toString().trim().length ?? 0)).toBeGreaterThan(0);
+    await expect
+      .poll(() => page.evaluate(() => window.getSelection()?.toString().trim().length ?? 0))
+      .toBeGreaterThan(0);
     await expect(page.getByRole('toolbar', { name: '文本格式' })).toBeVisible();
     const selected = await target.boundingBox();
     // Bubble positioning may scroll the viewport a few pixels to keep the
@@ -48,6 +50,38 @@ for (const item of editableCases) {
     );
   });
 }
+
+test('Markdown input rules create headings, lists, quotes and code blocks without source suggestions', async ({
+  page,
+}) => {
+  await setMarkdown(page, '');
+  const editor = page.locator('.ProseMirror');
+  await editor.click();
+  await page.keyboard.type('# ');
+  await page.keyboard.type('Created heading');
+  await expect(editor.locator('h1')).toHaveText('Created heading');
+  await page.keyboard.press('ControlOrMeta+Alt+2');
+  await expect(editor.locator('h2')).toHaveText('Created heading');
+
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('- ');
+  await page.keyboard.type('Created item');
+  await expect(editor.locator('li')).toContainText('Created item');
+
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('> ');
+  await page.keyboard.type('Created quote');
+  await expect(editor.locator('blockquote')).toContainText('Created quote');
+
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('```javascript ');
+  await expect(editor.locator('.cherry-milkdown-code-block')).toBeVisible();
+  await page.keyboard.type('const created = true;');
+  await expect.poll(() => markdown(page)).toContain('const created = true;');
+  await expect(page.locator('.cherry-dropdown:visible,.cherry-suggest-list:visible')).toHaveCount(0);
+});
 
 test('task selection and toggle retain the native marker geometry', async ({ page }) => {
   await setMarkdown(page, '- [ ] Pending\n- [x] Done');
@@ -169,7 +203,12 @@ test('Milkdown interaction cannot restyle a native Cherry sibling', async ({ pag
   const heading = page.locator('.ProseMirror h1');
   await heading.click({ clickCount: 3 });
   await page.getByRole('toolbar', { name: '文本格式' }).locator('[title="加粗"]').click();
-  await page.locator('.ProseMirror li[data-item-type="task"] .cherry-task-checkbox,.ProseMirror li[data-item-type="task"] .ch-icon').first().click();
+  await page
+    .locator(
+      '.ProseMirror li[data-item-type="task"] .cherry-task-checkbox,.ProseMirror li[data-item-type="task"] .ch-icon',
+    )
+    .first()
+    .click();
 
   const after = await page.locator('[data-isolation-oracle]').evaluate((native) => {
     const heading = native.querySelector('h1')!;

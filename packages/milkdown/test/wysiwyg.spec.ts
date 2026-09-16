@@ -78,11 +78,7 @@ describe('Cherry WYSIWYG markdown transform', () => {
   });
 
   it('finds rendered table charts inside native layouts but ignores fenced examples', () => {
-    const rendered = [
-      '| :line:{"title":"Real"} | Jan | Feb |',
-      '| --- | --- | --- |',
-      '| Sales | 1 | 2 |',
-    ].join('\n');
+    const rendered = ['| :line:{"title":"Real"} | Jan | Feb |', '| --- | --- | --- |', '| Sales | 1 | 2 |'].join('\n');
     const source = [
       '::: 2cols',
       '**示例**',
@@ -97,7 +93,10 @@ describe('Cherry WYSIWYG markdown transform', () => {
       ':::',
     ].join('\n');
 
-    expect(findEmbeddedTableCharts(source)).toEqual([{ syntax: 'line', source: rendered }]);
+    const from = source.indexOf(rendered);
+    expect(findEmbeddedTableCharts(source)).toEqual([
+      { syntax: 'line', source: rendered, from, to: from + rendered.length },
+    ]);
   });
 
   it('keeps absolute table positions after native blocks split a full document', () => {

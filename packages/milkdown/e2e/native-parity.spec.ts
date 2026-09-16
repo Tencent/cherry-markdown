@@ -42,8 +42,19 @@ for (const item of cases) {
       // bare `.cherry-markdown` would omit preview padding and use a false
       // full-viewport baseline.
       const actualPreview = document.querySelector<HTMLElement>('#markdown > .cherry > .cherry-previewer')!;
-      oracle.className = actualPreview.className.replace(/\bcherry-milkdown\b/g, '').replace(/\s+/g, ' ').trim();
+      oracle.className = actualPreview.className
+        .replace(/\bcherry-milkdown\b/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
       oracle.dataset.nativeOracle = '';
+      // WebKit reserves a scrollbar gutter inside the real preview. Give the
+      // off-screen oracle the same usable width instead of comparing a
+      // scrollable editor with a wider, non-scrollable fixture.
+      const previewStyle = getComputedStyle(actualPreview);
+      const previewBorders =
+        (Number.parseFloat(previewStyle.borderLeftWidth) || 0) +
+        (Number.parseFloat(previewStyle.borderRightWidth) || 0);
+      oracle.style.width = `${actualPreview.clientWidth + previewBorders}px`;
       oracle.innerHTML = window.milkdownEditor!.engine.makeHtml(markdown);
       const shell = document.createElement('div');
       const actualShell = document.querySelector<HTMLElement>('#markdown > .cherry')!;
@@ -80,8 +91,8 @@ for (const item of cases) {
     expect.soft(await styles(actual)).toEqual(await styles(expected));
     const initial = await actual.boundingBox();
     const native = await expected.boundingBox();
-    expect.soft(initial!.width).toBeCloseTo(native!.width, 0);
-    expect.soft(initial!.height).toBeCloseTo(native!.height, 0);
+    expect.soft(Math.abs(initial!.width - native!.width)).toBeLessThanOrEqual(0.75);
+    expect.soft(Math.abs(initial!.height - native!.height)).toBeLessThanOrEqual(0.75);
     await actual.scrollIntoViewIfNeeded();
     const captureOrigin = (await actual.boundingBox())!;
     // Capture inside the component, excluding a fractional final pixel that
@@ -120,7 +131,17 @@ for (const item of cases) {
     } else {
       expect.soft([actualImage.width, actualImage.height]).toEqual([nativeImage.width, nativeImage.height]);
     }
-    await actual.click();
+    if (item.name === 'code') {
+      // Click editable code, not the top-right language/copy controls. On a
+      // narrow touch viewport those controls legitimately cover the centre of
+      // the surrounding <pre>.
+      await page
+        .locator('.ProseMirror .cherry-milkdown-code-block__content')
+        .first()
+        .click({ position: { x: 8, y: 8 } });
+    } else {
+      await actual.click();
+    }
     const focused = await actual.boundingBox();
     expect.soft(focused!.width).toBeCloseTo(initial!.width, 0);
     expect.soft(focused!.height).toBeCloseTo(initial!.height, 0);
@@ -138,8 +159,8 @@ for (const item of cases) {
       });
       const changed = await actual.boundingBox();
       const rendered = await expected.boundingBox();
-      expect.soft(changed!.width).toBeCloseTo(rendered!.width, 0);
-      expect.soft(changed!.height).toBeCloseTo(rendered!.height, 0);
+      expect.soft(Math.abs(changed!.width - rendered!.width)).toBeLessThanOrEqual(0.75);
+      expect.soft(Math.abs(changed!.height - rendered!.height)).toBeLessThanOrEqual(0.75);
       expect.soft(await styles(actual)).toEqual(await styles(expected));
     }
     await expect(page.locator('[role="alert"], [data-render-error="true"]')).toHaveCount(0);

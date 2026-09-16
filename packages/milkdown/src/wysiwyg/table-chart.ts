@@ -1,6 +1,8 @@
 export interface EmbeddedTableChart {
   source: string;
   syntax: string;
+  from: number;
+  to: number;
 }
 
 export function tableChartType(source: string) {
@@ -33,6 +35,14 @@ function isTableRow(line: string) {
  */
 export function findEmbeddedTableCharts(source: string): EmbeddedTableChart[] {
   const lines = source.split(/\r?\n/);
+  const lineOffsets: number[] = [];
+  let offset = 0;
+  lines.forEach((line) => {
+    lineOffsets.push(offset);
+    offset += line.length;
+    if (source.slice(offset, offset + 2) === '\r\n') offset += 2;
+    else if (source[offset] === '\n') offset += 1;
+  });
   const charts: EmbeddedTableChart[] = [];
   let fence: { marker: '`' | '~'; length: number } | undefined;
 
@@ -52,7 +62,9 @@ export function findEmbeddedTableCharts(source: string): EmbeddedTableChart[] {
     if (!syntax || !isTableDelimiter(lines[index + 1] ?? '')) continue;
     let end = index + 2;
     while (end < lines.length && isTableRow(lines[end] ?? '')) end += 1;
-    charts.push({ syntax, source: lines.slice(index, end).join('\n') });
+    const chartSource = lines.slice(index, end).join('\n');
+    const from = lineOffsets[index] ?? 0;
+    charts.push({ syntax, source: chartSource, from, to: from + chartSource.length });
     index = end - 1;
   }
   return charts;

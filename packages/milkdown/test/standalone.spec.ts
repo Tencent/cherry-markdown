@@ -84,16 +84,21 @@ describe('standalone contracts', () => {
 
   it('keeps the previous diagram visible until an asynchronous redraw succeeds', async () => {
     let complete: ((value: string) => void) | undefined;
-    const renderer = ({ source }: { source: string }) => source.includes('old')
-      ? '<span>Old chart</span>'
-      : new Promise<string>((resolve) => { complete = resolve; });
+    const renderer = ({ source }: { source: string }) =>
+      source.includes('old')
+        ? '<span>Old chart</span>'
+        : new Promise<string>((resolve) => {
+            complete = resolve;
+          });
     const instance = await create('```echarts\nold\n```', { renderers: { echarts: renderer } });
     await vi.waitFor(() => expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('Old chart'));
     instance.setMarkdown('```echarts\nnew\n```');
     await vi.waitFor(() => expect(complete).toBeDefined());
     expect(document.querySelector('.cherry-embed > .cherry-embed__preview')?.textContent).toBe('Old chart');
     complete?.('<span>New chart</span>');
-    await vi.waitFor(() => expect(document.querySelector('.cherry-embed > .cherry-embed__preview')?.textContent).toBe('New chart'));
+    await vi.waitFor(() =>
+      expect(document.querySelector('.cherry-embed > .cherry-embed__preview')?.textContent).toBe('New chart'),
+    );
     expect(document.querySelector('[data-render-pending]')).toBeNull();
   });
 
@@ -124,6 +129,22 @@ describe('standalone contracts', () => {
     instance.setMarkdown(value.replace('Broken', 'Repaired'));
     await vi.waitFor(() => expect(document.querySelector('[data-chart="repaired"]')).not.toBeNull());
     expect(document.querySelector('[role="alert"], [data-render-error]')).toBeNull();
+  });
+
+  it('synchronizes table chart source immediately while coalescing expensive redraws', async () => {
+    const renderer = vi.fn(() => '<span data-chart="coalesced">Chart</span>');
+    const value = '| :line:{"title":"Before"} | A |\n| --- | --- |\n| Row | 1 |';
+    const instance = await create(value, { renderers: { tableChart: renderer }, debounce: 20 });
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(1));
+    document.querySelector<HTMLButtonElement>('.cherry-table-chart .cherry-embed__controls button')?.click();
+    const source = document.querySelector<HTMLElement>('.cherry-table-chart__source code')!;
+    for (const title of ['One', 'Two', 'Final']) {
+      source.textContent = value.replace('Before', title);
+      source.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+    }
+    await vi.waitFor(() => expect(instance.getMarkdown()).toContain('Final'));
+    expect(renderer).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(2));
   });
 
   it('rejects executable chart code before importing or mounting ECharts', async () => {

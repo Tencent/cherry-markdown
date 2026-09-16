@@ -2,7 +2,7 @@ import { editorViewCtx } from '@milkdown/kit/core';
 import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { CherryMilkdownInstance } from '../src';
 import { createTestEditor as cherryMilkdown } from './helpers/create-editor';
 
@@ -267,6 +267,19 @@ describe('cherryMilkdown WYSIWYG', () => {
     ]);
   });
 
+  it('keeps task pointer handling isolated across multiple preview editors', async () => {
+    const firstRoot = root();
+    const secondRoot = root();
+    const first = await cherryMilkdown({ el: firstRoot, value: '- [ ] first', debounce: 0 });
+    const second = await cherryMilkdown({ el: secondRoot, value: '- [ ] second', debounce: 0 });
+    instances.push(first, second);
+    firstRoot
+      .querySelector<HTMLElement>('[data-cherry-task-checkbox]')
+      ?.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true, button: 0 }));
+    await vi.waitFor(() => expect(first.getMarkdown()).toContain('- [x] first'));
+    expect(second.getMarkdown()).toContain('- [ ] second');
+  });
+
   it('renders a table chart with Cherry HTML, preserves its exact source, and cleans rendered resources', async () => {
     const element = root();
     const value = ['| :line:{"title":"Trend"} | Jan | Feb |', '| --- | ---: | ---: |', '| Sales | 1 | 2 |'].join('\n');
@@ -328,20 +341,8 @@ describe('cherryMilkdown WYSIWYG', () => {
 
   it('enhances a table chart nested in Cherry-owned columns without rendering the fenced example', async () => {
     const element = root();
-    const chart = [
-      '| :line:{"title":"Real"} | Jan | Feb |',
-      '| --- | --- | --- |',
-      '| Sales | 1 | 2 |',
-    ].join('\n');
-    const value = [
-      '::: 2cols',
-      '```markdown',
-      chart.replace('Real', 'Example'),
-      '```',
-      '::',
-      chart,
-      ':::',
-    ].join('\n');
+    const chart = ['| :line:{"title":"Real"} | Jan | Feb |', '| --- | --- | --- |', '| Sales | 1 | 2 |'].join('\n');
+    const value = ['::: 2cols', '```markdown', chart.replace('Real', 'Example'), '```', '::', chart, ':::'].join('\n');
     const renderer = vi.fn(({ container }) => {
       container.innerHTML = '<svg data-nested-table-chart="true"></svg>';
     });
@@ -646,7 +647,8 @@ describe('cherryMilkdown WYSIWYG', () => {
     );
     const instance = await cherryMilkdown({
       el: element,
-      value: '<div>\nsafe\n<script>window.__bad = true</script>\n</div>',
+      value:
+        '<div>\nsafe\n<script>window.__bad = true</script>\n<a href="java&#x0A;script:alert(1)">bad</a>\n<a href="https://example.com">safe link</a>\n<span style="background:url(https://tracker.example/pixel)">styled</span>\n</div>',
       engine: { makeHtml },
     });
     instances.push(instance);
@@ -657,6 +659,10 @@ describe('cherryMilkdown WYSIWYG', () => {
     expect(shell?.hasAttribute('onclick')).toBe(false);
     expect(shell?.querySelector('script')).toBeNull();
     expect(element.querySelector('iframe')).toBeNull();
+    const links = shell?.querySelectorAll('a');
+    expect(links?.[0]?.hasAttribute('href')).toBe(false);
+    expect(links?.[1]?.getAttribute('href')).toBe('https://example.com');
+    expect(shell?.querySelector('span')?.hasAttribute('style')).toBe(false);
     element.querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
     expect(element.querySelector('.cherry-embed__source code')).not.toBeNull();
     expect(element.querySelector('.cherry-embed textarea')).toBeNull();
@@ -696,6 +702,20 @@ describe('cherryMilkdown WYSIWYG', () => {
         expect.objectContaining({ markdown: expect.stringContaining('# Updated') }),
       );
     });
+  });
+
+  it('preserves original list markers when editing repeated text', async () => {
+    const element = root();
+    const instance = await cherryMilkdown({ el: element, value: '* repeated\n* repeated', debounce: 0 });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    const positions: number[] = [];
+    view.state.doc.descendants((node, position) => {
+      if (node.isText && node.text === 'repeated') positions.push(position);
+    });
+    expect(positions).toHaveLength(2);
+    view.dispatch(view.state.tr.insertText('changed', positions[1], positions[1] + 'repeated'.length));
+    await vi.waitFor(() => expect(instance.getMarkdown()).toBe('* repeated\n* changed'));
   });
 
   it('preserves the active text selection across API/source Markdown synchronization', async () => {

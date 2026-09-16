@@ -317,6 +317,18 @@ export const cherryCodeBlockHighlightPlugin = $prose(
           transaction.docChanged ? buildHighlights(state.doc) : previous,
       },
       props: {
+        handleTextInput(view, from, to, text) {
+          if (!view.editable) return false;
+          const $from = view.state.doc.resolve(from);
+          const $to = view.state.doc.resolve(to);
+          if (!$from.parent.type.spec.code || $from.parent !== $to.parent) return false;
+          // The highlighted NodeView contains inline decoration spans. Some
+          // touch browsers report the correct logical selection but lose the
+          // first character while reconciling the browser's DOM mutation.
+          // Keep code input in ProseMirror's transaction model instead.
+          view.dispatch(view.state.tr.insertText(text, from, to).scrollIntoView());
+          return true;
+        },
         handleKeyDown(view, event) {
           const { selection } = view.state;
           if (

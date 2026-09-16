@@ -1,9 +1,9 @@
 # @cherry-markdown/milkdown
 
-A previewOnly WYSIWYG plugin for Cherry. Milkdown owns the preview document,
+A WYSIWYG preview plugin for Cherry's edit&preview and previewOnly modes. Milkdown owns the preview document,
 selection and history, while the current Cherry instance provides parsing,
 themes and native preview controls. The plugin creates no second Cherry and adds
-no top toolbar or source suggestion UI.
+no replacement top toolbar or source suggestion UI.
 
 ```sh
 npm install @cherry-markdown/milkdown @milkdown/kit cherry-markdown mathlive
@@ -17,7 +17,9 @@ import { MilkdownPlugin } from '@cherry-markdown/milkdown';
 import '@cherry-markdown/milkdown/style.css';
 
 Cherry.usePlugin(MilkdownPlugin, {
-  onChange({ cherry, instanceId, markdown }) { console.log(markdown); },
+  onChange({ cherry, instanceId, markdown }) {
+    console.log(markdown);
+  },
 });
 
 const cherry = new Cherry({
@@ -30,18 +32,25 @@ await cherry.whenPluginsReady();
 const editor = cherry.getPlugin(MilkdownPlugin);
 ```
 
-Register once before constructing Cherry. Every subsequent previewOnly Cherry
+Register once before constructing Cherry. Every subsequent edit&preview or previewOnly Cherry
 gets an isolated Milkdown runtime, and cherry.destroy() cleans it automatically.
-editOnly, edit&preview and CherryStream are intentionally not claimed yet.
+editOnly and CherryStream are intentionally not activated.
+Use `configure({ cherry, instanceId, mode })` to return per-instance overrides
+when one page mixes editable and readonly previews; static registration remains
+site-wide.
 
 Plugin options: readonly, bubble (default true), debounce (30ms), renderers,
-mathlive, native Milkdown plugins, onChange and onError.
+mathlive, native Milkdown plugins, configure, onChange and onError.
 Changes update the document immediately; debounce applies only to notifications.
 Destroy removes only the subtree owned by this instance.
 
-The selection Bubble operates directly on ProseMirror marks. Code blocks, atomic
+The native Cherry Bubble follows explicit focus ownership: source selections keep
+Cherry's CodeMirror behavior, while preview selections operate on ProseMirror and
+synchronize Markdown back to the source pane. Code blocks, atomic
 nodes, formula fields and embedded source selections do not qualify. Images and
-Mermaid expose width/alignment controls independently of the text Bubble.
+Links keep Cherry's normal click behavior. Hover or focus a link to reveal one shared trailing edit trigger for its visible text and href; it avoids following prose automatically and also opens with `Command/Ctrl + K`.
+Nested table charts select their rendered table source instead of a neighboring fenced example.
+Mermaid exposes width/alignment controls independently of the text Bubble; those controls are suspended while its source editor owns focus.
 
 Optional chart renderers:
 
@@ -65,6 +74,8 @@ yarn workspace @cherry-markdown/milkdown test:e2e
 yarn workspace @cherry-markdown/milkdown test:consumer
 ```
 
+The single React demo defaults to previewOnly and accepts
+`?mode=edit%26preview` or `?mode=editOnly` to exercise Cherry's standard modes.
 The consumer build installs packed Cherry and Milkdown artifacts from this
 change. This migration is not a claim of full production
 parity: advanced chart settings, full visual parity and image drag-resizing still

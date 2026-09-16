@@ -9,6 +9,8 @@ export type {
   CherryMilkdownInstance,
   CherryMilkdownMathliveOptions,
   CherryMilkdownPluginOptions,
+  CherryMilkdownPluginContext,
+  CherryMilkdownRuntimeOptions,
   CherryVisualRenderer,
   CherryVisualRenderContext,
   CherryVisualRendererResult,
