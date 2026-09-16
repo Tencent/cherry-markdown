@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await page.waitForFunction(() => Boolean(window.milkdownEditor));
 });
 
-test('standalone boot has no source editor, top toolbar or runtime errors', async ({ page }) => {
+test('previewOnly boot has no visible source editor, top toolbar or runtime errors', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(String(error)));
   page.on('console', (message) => {
@@ -15,7 +15,7 @@ test('standalone boot has no source editor, top toolbar or runtime errors', asyn
   await page.reload();
   await expect(page.locator('.ProseMirror')).toHaveCount(1);
   await expect(page.locator('h1').filter({ hasText: 'Cherry Markdown' })).toBeVisible();
-  await expect(page.locator('.cm-editor,.cherry-toolbar')).toHaveCount(0);
+  await expect(page.locator('.cm-editor:visible,.cherry-toolbar:visible')).toHaveCount(0);
   expect(await page.locator('body').evaluate((body) => getComputedStyle(body).margin)).toBe('0px');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
     await page.evaluate(() => document.documentElement.clientWidth),
@@ -55,6 +55,7 @@ test('real text selection, Bubble formatting, undo, and no layout shift', async 
   await bubble.locator('[title="加粗"]').click();
   await expect(paragraph.locator('strong')).toHaveText('Selected text');
   expect(await markdown(page)).toContain('**Selected text**');
+  await expect(page.locator('.ProseMirror')).toBeFocused();
   await page.keyboard.press('ControlOrMeta+z');
   await expect(paragraph.locator('strong')).toHaveCount(0);
 });

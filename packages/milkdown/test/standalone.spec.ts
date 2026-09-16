@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { editorViewCtx } from '@milkdown/kit/core';
 import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
-import { cherryMilkdown, type CherryMilkdownInstance } from '../src';
+import type { CherryMilkdownInstance } from '../src';
 import { supportsTextFormatting } from '../src/native-bridge';
 import { echarts } from '../src/renderers/echarts';
+import { createTestEditor as cherryMilkdown } from './helpers/create-editor';
 
 vi.mock('mathlive', () => ({}));
 const instances: CherryMilkdownInstance[] = [];

@@ -1,9 +1,9 @@
 # @cherry-markdown/milkdown
 
-A standalone Cherry-style WYSIWYG editor. Milkdown owns the document, selection,
-and undo history. The released CherryEngine renders extension syntax; Cherry CSS
-provides native themes. No Cherry editor, CodeMirror, top toolbar, or source
-suggestion UI is instantiated.
+A previewOnly WYSIWYG plugin for Cherry. Milkdown owns the preview document,
+selection and history, while the current Cherry instance provides parsing,
+themes and native preview controls. The plugin creates no second Cherry and adds
+no top toolbar or source suggestion UI.
 
 ```sh
 npm install @cherry-markdown/milkdown @milkdown/kit cherry-markdown mathlive
@@ -12,27 +12,30 @@ npm install mermaid echarts
 ```
 
 ```ts
-import { cherryMilkdown } from '@cherry-markdown/milkdown';
+import Cherry from 'cherry-markdown';
+import { MilkdownPlugin } from '@cherry-markdown/milkdown';
 import '@cherry-markdown/milkdown/style.css';
 
-const editor = await cherryMilkdown({
+Cherry.usePlugin(MilkdownPlugin, {
+  onChange({ cherry, instanceId, markdown }) { console.log(markdown); },
+});
+
+const cherry = new Cherry({
   el: document.getElementById('editor')!,
   value: '# Heading',
-  onChange({ markdown }) { console.log(markdown); },
+  isPreviewOnly: true,
 });
-editor.getMarkdown();
-editor.setMarkdown('# Updated');
-await editor.destroy();
+
+await cherry.whenPluginsReady();
+const editor = cherry.getPlugin(MilkdownPlugin);
 ```
 
-There is one instance and one lifecycle. React consumers create in an effect and
-destroy on cleanup, including instances whose asynchronous creation finishes
-after unmount. See the single React example in examples/react/App.tsx.
-The unpublished attach/usePlugin/mode bridge APIs have been removed.
+Register once before constructing Cherry. Every subsequent previewOnly Cherry
+gets an isolated Milkdown runtime, and cherry.destroy() cleans it automatically.
+editOnly, edit&preview and CherryStream are intentionally not claimed yet.
 
-Options: el, value, readonly, theme, bubble (default true), debounce (30ms),
-cherryOptions (engine options only), engine (optional makeHtml provider), renderers,
-mathlive, plugins (Milkdown plugins), onChange and onError.
+Plugin options: readonly, bubble (default true), debounce (30ms), renderers,
+mathlive, native Milkdown plugins, onChange and onError.
 Changes update the document immediately; debounce applies only to notifications.
 Destroy removes only the subtree owned by this instance.
 
@@ -44,7 +47,7 @@ Optional chart renderers:
 
 ```ts
 import { echarts, tableChart } from '@cherry-markdown/milkdown/echarts';
-const editor = await cherryMilkdown({ el, value, renderers: { echarts, tableChart } });
+Cherry.usePlugin(MilkdownPlugin, { renderers: { echarts, tableChart } });
 ```
 
 The public ECharts code renderer accepts JSON/JSON5 data, never executable JavaScript. Without a
@@ -62,7 +65,7 @@ yarn workspace @cherry-markdown/milkdown test:e2e
 yarn workspace @cherry-markdown/milkdown test:consumer
 ```
 
-The consumer build installs released cherry-markdown@0.11.10 rather than repacking
-the workspace's Cherry build. This migration is not a claim of full production
+The consumer build installs packed Cherry and Milkdown artifacts from this
+change. This migration is not a claim of full production
 parity: advanced chart settings, full visual parity and image drag-resizing still
 need acceptance. See [architecture and acceptance boundaries](./ARCHITECTURE.md).

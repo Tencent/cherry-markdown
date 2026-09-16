@@ -44,9 +44,20 @@ if (!isBrowser()) {
 const VERSION = `${process.env.BUILD_VERSION}`;
 
 /**
+ * Runtime plugins are stored per Cherry constructor. Keeping the registry out
+ * of the plugin class avoids leaking one registration between Cherry,
+ * CherryEngine, CherryStream, or user-created subclasses.
+ *
+ * @type {WeakMap<typeof CherryStatic, Map<object, any[]>>}
+ */
+const runtimePluginRegistry = new WeakMap();
+
+/**
  * @typedef {object} CherryPluginClass
  * @property {boolean} [$cherry$mounted]
- * @property {function(object, ...any[]): void} install
+ * @property {boolean} [$cherry$runtime]
+ * @property {function(object, ...any): void} [install]
+ * @property {function(any, ...any): any} [create]
  */
 
 export class CherryStatic {
@@ -70,12 +81,47 @@ export class CherryStatic {
     if (this.initialized) {
       throw new Error('The function `usePlugin` should be called before Cherry is instantiated.');
     }
+    if (PluginClass?.$cherry$runtime === true) {
+      if (typeof PluginClass.create !== 'function') {
+        throw new TypeError('A Cherry runtime plugin must provide a static `create(cherry, ...args)` function.');
+      }
+      let registry = runtimePluginRegistry.get(this);
+      if (!registry) {
+        registry = new Map();
+        runtimePluginRegistry.set(this, registry);
+      }
+      if (registry.has(PluginClass)) {
+        return;
+      }
+      if (typeof PluginClass.install === 'function') {
+        // Keep the established install(defaults, ...args) contract available
+        // for runtime plugins that also need to extend Cherry defaults.
+        // @ts-expect-error 子类静态 config 由 Cherry / CherryEngine 挂载
+        PluginClass.install.apply(PluginClass, [this.config.defaults, ...args]);
+      }
+      registry.set(PluginClass, args);
+      return;
+    }
     if (PluginClass.$cherry$mounted === true) {
       return;
+    }
+    if (typeof PluginClass.install !== 'function') {
+      throw new TypeError('A Cherry plugin must provide a static `install(defaults, ...args)` function.');
     }
     // @ts-expect-error 子类静态 config 由 Cherry / CherryEngine 挂载
     PluginClass.install.apply(PluginClass, [this.config.defaults, ...args]);
     PluginClass.$cherry$mounted = true;
+  }
+
+  /**
+   * Returns runtime plugin registrations owned by the current Cherry
+   * constructor. This is intentionally separate from config.defaults: static
+   * registration and per-instance lifecycle are different concerns.
+   *
+   * @returns {Array<{ PluginClass: any; args: any[] }>}
+   */
+  static getRuntimePlugins() {
+    return Array.from(runtimePluginRegistry.get(this) ?? [], ([PluginClass, args]) => ({ PluginClass, args }));
   }
 
   constructor(...args) {

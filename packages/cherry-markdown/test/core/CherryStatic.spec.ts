@@ -54,4 +54,36 @@ describe('core/CherryStatic', () => {
     expect(() => InitializedCherry.usePlugin(plugin)).toThrow('should be called before Cherry is instantiated');
     expect(plugin.install).not.toHaveBeenCalled();
   });
+
+  it('registers runtime plugins per Cherry constructor without mutating instance config', () => {
+    class FirstCherry extends CherryStatic {}
+    class SecondCherry extends CherryStatic {}
+    const firstDefaults = { marker: 'first' };
+    const secondDefaults = { marker: 'second' };
+    Object.defineProperty(FirstCherry, 'config', { value: { defaults: firstDefaults } });
+    Object.defineProperty(SecondCherry, 'config', { value: { defaults: secondDefaults } });
+    Object.defineProperty(FirstCherry, 'initialized', { configurable: true, writable: true, value: false });
+    Object.defineProperty(SecondCherry, 'initialized', { configurable: true, writable: true, value: false });
+    const plugin = { $cherry$runtime: true, create: vi.fn() };
+    const options = { enabled: true };
+
+    FirstCherry.usePlugin(plugin, options);
+    FirstCherry.usePlugin(plugin, { ignored: true });
+    SecondCherry.usePlugin(plugin, { enabled: false });
+
+    expect(FirstCherry.getRuntimePlugins()).toEqual([{ PluginClass: plugin, args: [options] }]);
+    expect(SecondCherry.getRuntimePlugins()).toEqual([
+      { PluginClass: plugin, args: [{ enabled: false }] },
+    ]);
+    expect(firstDefaults).toEqual({ marker: 'first' });
+    expect(secondDefaults).toEqual({ marker: 'second' });
+  });
+
+  it('rejects a runtime plugin without an instance factory', () => {
+    class TestCherry extends CherryStatic {}
+    Object.defineProperty(TestCherry, 'config', { value: { defaults: {} } });
+    Object.defineProperty(TestCherry, 'initialized', { configurable: true, writable: true, value: false });
+
+    expect(() => TestCherry.usePlugin({ $cherry$runtime: true })).toThrow('static `create');
+  });
 });

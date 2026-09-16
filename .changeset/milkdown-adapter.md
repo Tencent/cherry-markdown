@@ -1,5 +1,6 @@
 ---
 '@cherry-markdown/milkdown': minor
+'cherry-markdown': patch
 ---
 
-新增独立的 Cherry 风格即见即所得编辑器，通过 `cherryMilkdown({ el, value })` 创建。支持 Markdown、Cherry 扩展语法、原位编辑和选区格式菜单，无需创建 Cherry 或 CodeMirror 实例。
+新增通过 `Cherry.usePlugin(MilkdownPlugin, options)` 统一注册的 previewOnly 即见即所得插件，支持 Markdown、Cherry 扩展语法、原位编辑和选区格式菜单。Cherry 同时增加通用的实例级运行时插件生命周期与 Previewer 内容渲染接口。

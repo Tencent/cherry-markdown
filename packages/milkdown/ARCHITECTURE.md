@@ -1,19 +1,23 @@
-# Standalone editor boundary
+# Runtime plugin boundary
 
-- index.ts: one asynchronous lifecycle and public Markdown API.
+- index.ts: previewOnly runtime mounted by `Cherry.usePlugin()`.
 - wysiwyg/: schema, Markdown transforms, native DOM presentation and NodeViews.
-- ui/: editor-local controls; no Cherry Toolbar or Previewer imports.
+- native-bridge.ts: delegates image, table and diagram controls to the current
+  Cherry Previewer; no second Cherry is created.
+- ui/: editor-local controls; no Cherry top Toolbar imports.
 - renderers/: optional renderers with per-node cleanup.
-- examples/react/: one minimal integration; no Cherry mode switching.
+- examples/react/: one standard Cherry previewOnly integration.
 
-Cherry source, types, tests and styles must have zero diff against dev for this PR.
-The dependency is its released engine distribution and stylesheet, not src paths
-or newly introduced compatibility APIs. The package version stays unchanged.
+Cherry only owns the generic runtime-plugin registry, per-instance mount/destroy
+lifecycle and Previewer content-renderer slot. These APIs must contain no
+Milkdown-specific branch, parser, style or toolbar behavior. Milkdown owns all
+mode eligibility and editing logic. editOnly, edit&preview and CherryStream are
+not activated in this release.
 
 ## Test migration
 
 The former dual-editor tests exercised APIs removed by this redesign. They are
-replaced with standalone lifecycle, actual input, selection boundaries, source
+replaced with plugin lifecycle, actual input, selection boundaries, source
 editing, rendering and API update tests. Parser/serializer and full-manual unit
 cases remain. A smaller green suite must not be described as the former complete
 interaction matrix passing.
@@ -37,5 +41,6 @@ style only ProseMirror behavior, editable controls and documented DOM-shape
 compensation. The stylesheet ownership test blocks rules that could leak into a
 normal Cherry instance.
 
-Do not change Cherry to make these pass. Extend the package's schema, NodeViews,
-renderers and controls with failing regression cases first.
+Do not add Milkdown-specific behavior to Cherry to make these pass. Extend the
+package's schema, NodeViews, renderers and controls with failing regression cases
+first.

@@ -12,8 +12,30 @@ export interface CherryEngineLike {
   makeHtml(markdown: string): string;
 }
 
+export interface CherryMilkdownHost {
+  options: CherryOptions;
+  engine: CherryEngineLike;
+  getInstanceId(): string;
+  getMarkdown(): string;
+  getPreviewer(): {
+    getDom(): HTMLElement;
+    getDomContainer(): HTMLElement;
+    setContentRenderer?(renderer: {
+      update(html: string): void;
+      getValue?(): string;
+      destroy?(): void;
+    }): () => void;
+  };
+  setValue(markdown: string, keepCursor?: boolean): void;
+  destroy(): void;
+}
+
 export interface CherryMilkdownChange {
   markdown: string;
+  /** Present when the editor is mounted through Cherry.usePlugin(). */
+  cherry?: CherryMilkdownHost;
+  /** Present when the editor is mounted through Cherry.usePlugin(). */
+  instanceId?: string;
 }
 
 export interface CherryMilkdownMathliveOptions {
@@ -21,16 +43,9 @@ export interface CherryMilkdownMathliveOptions {
   virtualKeyboardMode?: 'auto' | 'manual' | 'onfocus' | 'off';
 }
 
-export interface CherryMilkdownOptions {
-  el: HTMLElement;
-  /** Native Cherry theme; does not change the document. */
-  theme?: string;
+export interface CherryMilkdownPluginOptions {
   /** Selection formatting controls. No top toolbar is mounted. */
   bubble?: boolean;
-  value?: string;
-  /** Optional renderer supplied by the consumer. No Cherry editor instance is required. */
-  engine?: CherryEngineLike;
-  cherryOptions?: Partial<CherryOptions>;
   readonly?: boolean;
   debounce?: number;
   mathlive?: CherryMilkdownMathliveOptions;
@@ -44,7 +59,7 @@ export interface CherryMilkdownInstance {
   editor: Editor;
   engine: CherryEngineLike;
   /** @internal Keeps an async picker anchored while transactions occur. */
-  trackSelection?(): { resolve(): Selection | null; release(): void };
+  trackSelection(): { resolve(): Selection | null; release(): void };
   getMarkdown(): string;
   setMarkdown(markdown: string, options?: { emit?: boolean }): void;
   focus(): void;

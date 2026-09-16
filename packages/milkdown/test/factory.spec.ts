@@ -3,7 +3,8 @@ import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cherryMilkdown, type CherryMilkdownInstance } from '../src';
+import type { CherryMilkdownInstance } from '../src';
+import { createTestEditor as cherryMilkdown } from './helpers/create-editor';
 
 vi.mock('mermaid', () => ({
   default: {
@@ -114,7 +115,8 @@ describe('cherryMilkdown WYSIWYG', () => {
     expect(element.querySelector('.cherry-wysiwyg-highlight')?.textContent).toBe('highlight');
     expect(element.querySelector('math-field')).not.toBeNull();
     expect(element.querySelector('[data-cherry-raw]')).toBeNull();
-    expect(element.querySelector('textarea')).toBeNull();
+    expect(element.querySelector('.cherry-editor--hidden')).not.toBeNull();
+    expect(element.querySelectorAll('.ProseMirror')).toHaveLength(1);
   });
 
   it('keeps native controls limited to compound labels', async () => {
@@ -690,7 +692,9 @@ describe('cherryMilkdown WYSIWYG', () => {
     instance.setMarkdown('# Updated\n\n$E=mc^2$');
     await vi.waitFor(() => {
       expect(element.querySelector('h1')?.textContent).toBe('Updated');
-      expect(onChange).toHaveBeenCalledWith({ markdown: expect.stringContaining('# Updated') });
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({ markdown: expect.stringContaining('# Updated') }),
+      );
     });
   });
 

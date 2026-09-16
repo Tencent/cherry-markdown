@@ -82,6 +82,20 @@ export default class Previewer {
   isDestroyed = false;
 
   /**
+   * Optional instance-level renderer installed by a runtime plugin. Native
+   * Cherry rendering remains the default when this is null.
+   *
+   * @type {{ update(html: string): void; getValue?: () => string; destroy?: () => void } | null}
+   */
+  contentRenderer = null;
+
+  /** Latest native HTML used when a runtime renderer is detached. */
+  contentRendererFallbackHtml = '';
+
+  /** @type {ReturnType<typeof setTimeout> | number} */
+  requestMeasureTimer = 0;
+
+  /**
    *
    * @param {Partial<import('~types/previewer').PreviewerOptions>} options 预览区域设置
    */
@@ -260,6 +274,8 @@ export default class Previewer {
     let html = '';
     if (this.isPreviewerHidden()) {
       html = this.options.previewerCache.html;
+    } else if (this.contentRenderer?.getValue) {
+      html = this.contentRenderer.getValue();
     } else {
       html = this.getDomContainer().innerHTML;
     }
@@ -811,6 +827,11 @@ export default class Previewer {
    * 强制重新渲染预览区域
    */
   refresh(html) {
+    if (this.contentRenderer) {
+      this.contentRendererFallbackHtml = html;
+      this.contentRenderer.update(html);
+      return;
+    }
     const domContainer = this.getDomContainer();
     domContainer.innerHTML = html;
   }
@@ -818,6 +839,12 @@ export default class Previewer {
   update(html) {
     // 销毁后不执行更新
     if (this.isDestroyed) {
+      return;
+    }
+    if (this.contentRenderer && !this.isPreviewerHidden()) {
+      this.contentRendererFallbackHtml = html;
+      this.contentRenderer.update(html);
+      this.afterUpdate();
       return;
     }
     // 更新时保留图片懒加载逻辑
@@ -903,7 +930,10 @@ export default class Previewer {
           .forEach((dom) => dom.remove());
       }
     }
-    setTimeout(() => {
+    clearTimeout(this.requestMeasureTimer);
+    this.requestMeasureTimer = setTimeout(() => {
+      this.requestMeasureTimer = 0;
+      if (this.isDestroyed) return;
       try {
         this.editor.editor.view.requestMeasure();
       } catch (e) {
@@ -964,7 +994,10 @@ export default class Previewer {
     this.$cherry.$event.emit('previewerOpen');
     this.$cherry.$event.emit('editorOpen');
 
-    setTimeout(() => {
+    clearTimeout(this.requestMeasureTimer);
+    this.requestMeasureTimer = setTimeout(() => {
+      this.requestMeasureTimer = 0;
+      if (this.isDestroyed) return;
       try {
         this.editor.editor.view.requestMeasure();
       } catch (e) {
@@ -1004,6 +1037,33 @@ export default class Previewer {
     } else {
       this.options.afterUpdateCallBack.push(fn);
     }
+  }
+
+  /**
+   * Lets one runtime plugin own the preview content without patching
+   * Previewer.update or accessing private DOM fields.
+   *
+   * @param {{ update(html: string): void; getValue?: () => string; destroy?: () => void }} renderer
+   * @returns {() => void} unregister function
+   */
+  setContentRenderer(renderer) {
+    if (!renderer || typeof renderer.update !== 'function') {
+      throw new TypeError('Previewer content renderer must provide an update(html) function.');
+    }
+    if (this.contentRenderer && this.contentRenderer !== renderer) {
+      throw new Error('A Previewer content renderer is already registered for this Cherry instance.');
+    }
+    this.contentRendererFallbackHtml = this.getDomContainer().innerHTML;
+    this.contentRenderer = renderer;
+    return () => {
+      if (this.contentRenderer === renderer) {
+        const fallbackHtml = this.contentRendererFallbackHtml;
+        this.contentRenderer = null;
+        this.contentRendererFallbackHtml = '';
+        this.getDomContainer().replaceChildren();
+        this.update(fallbackHtml);
+      }
+    };
   }
 
   /**
@@ -1328,7 +1388,7 @@ export default class Previewer {
   onMouseDown() {
     addEvent(this.getDomContainer(), 'mousedown', () => {
       setTimeout(() => {
-        this.$cherry.$event.emit('cleanAllSubMenus');
+        if (!this.isDestroyed) this.$cherry.$event.emit('cleanAllSubMenus');
       });
     });
   }
@@ -1377,6 +1437,15 @@ export default class Previewer {
 
     this.isDestroyed = true;
 
+    if (this.contentRenderer) {
+      try {
+        this.contentRenderer.destroy?.();
+      } finally {
+        this.contentRenderer = null;
+        this.contentRendererFallbackHtml = '';
+      }
+    }
+
     // 清理滚动事件监听
     this.removeScroll();
 
@@ -1409,6 +1478,11 @@ export default class Previewer {
     if (this.syncScrollLockTimer) {
       clearTimeout(this.syncScrollLockTimer);
       this.syncScrollLockTimer = 0;
+    }
+
+    if (this.requestMeasureTimer) {
+      clearTimeout(this.requestMeasureTimer);
+      this.requestMeasureTimer = 0;
     }
 
     // 清理动画定时器
