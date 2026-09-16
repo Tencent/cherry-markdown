@@ -1,46 +1,63 @@
 import CherryStream from '@cherry-markdown/miniprogram';
 import { createMockMarkdownChunks } from '../../utils/mock-stream.js';
 
-const DEMO_MARKDOWN = `# Cherry Markdown MiniProgram
+const MARKDOWN_LINE_BREAK = '  ';
 
-这是一个 **微信小程序原生渲染** 示例，支持 *基础语法*、\`inline code\` 和 [链接点击](/pages/index/index)。
+const DEMO_MARKDOWN = `# 一级标题（#）
 
-> 这里是 blockquote，可以继续渲染子块。
+这是普通段落。每一项支持的 Markdown 语法都在下方单独展示。
 
-- 无序列表
-- 图片预览
-- 代码复制
+## 二级标题（##）
 
-![Cherry logo](/assets/logo-square.png)
+### 三级标题（###）
+
+> 引用块（>）可以包含一段文本。
+
+无序列表（-）：
+
+- 第一项
+- 第二项
+
+有序列表（1.）：
+
+1. 第一项
+2. 第二项
+
+任务列表（- [x] / - [ ]）：
+
+- [x] 已完成任务
+- [ ] 待处理任务
+
+表格：
+
+| 能力 | 语法 | 交互 |
+| --- | --- | --- |
+| 链接 | [原生 text](/pages/index/index) | 点击处理 |
+| 图片 | ![logo](/assets/logo-square.png) | 点击预览 |
+| 代码块 | 原生 view/text | 点击复制 |
+
+链接：[站内链接](/pages/index/index)
+
+自动链接：https://example.com
+
+图片：![Cherry logo](/assets/logo-square.png)
+
+代码块：
 
 \`\`\`js
 const message = 'hello mini program';
 console.log(message);
 \`\`\`
 
-## 更多基础语法
+行内公式：$E=mc^2$
 
-1. 有序列表
-2. ~~删除线~~ 和 **加粗** 可以组合测试
-3. 任务列表和表格会转换为原生 view 渲染
-
-- [x] 已完成任务
-- [ ] 待处理任务
-
-| 能力 | 渲染方式 | 交互 |
-| --- | --- | --- |
-| 链接 | [原生 text](/pages/index/index) | 点击处理 |
-| 图片 | ![logo](/assets/logo-square.png) | 点击预览 |
-| 代码块 | 原生 view/text | 点击复制 |
-| 表格 | 原生 view | 单元格内链接/图片保留交互 |
-
-## 公式与图表源码 fallback
-
-行内公式：$E=mc^2$ 会转换为 math_inline run。
+公式块：
 
 $$
 a^2 + b^2 = c^2
 $$
+
+Mermaid 源码：
 
 \`\`\`mermaid
 graph TD;
@@ -48,9 +65,32 @@ graph TD;
   B --> C[MiniProgram AST];
   C --> D[Native View];
 \`\`\`
+
+加粗：**bold**
+
+斜体：*italic*
+
+行内代码：\`inline code\`
+
+下划线：/underline/
+
+删除线：~~strikethrough~~
+
+下标：^^subscript^^
+
+上标：^superscript^
+
+显式换行：第一行后保留两个空格${MARKDOWN_LINE_BREAK}
+第二行
+
+Emoji：:smile:
+
+脚注引用：这是脚注[^demo-footnote]
+
+[^demo-footnote]: 脚注正文会以普通段落输出。
 `;
 
-const DEMO_STREAM_INTERVAL = 60;
+const DEMO_STREAM_INTERVAL = 160;
 const MARKDOWN_CHUNKS = createMockMarkdownChunks(DEMO_MARKDOWN);
 
 Page({
@@ -62,7 +102,13 @@ Page({
   },
 
   onLoad() {
-    this.cherry = new CherryStream();
+    this.cherry = new CherryStream({
+      engine: {
+        global: {
+          flowSessionCursor: 'default',
+        },
+      },
+    });
     this.resetStreamPipeline();
     this.autoStartStream();
   },
@@ -75,7 +121,10 @@ Page({
   renderMarkdown(markdown, streaming, callback) {
     this.setData({
       markdown,
-      blocks: this.cherry.setMarkdown(markdown, { deferImages: !streaming }),
+      blocks: this.cherry.setMarkdown(markdown, {
+        deferImages: !streaming,
+        forceNoCursor: !streaming,
+      }),
       streaming,
       streamButtonText: streaming ? '流式渲染中' : '重新流式渲染',
     }, callback);

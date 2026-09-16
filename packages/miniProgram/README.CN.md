@@ -54,7 +54,7 @@ function onStreamComplete() {
 
 将完整累积的 Markdown 传给 `setMarkdown()`，与 Web `CherryStream.setMarkdown()` 一致。它会重新渲染当前完整内容，以保证未闭合语法也能得到正确的当前视图；包不处理 SSE 请求、字节解码、分帧或不同服务端的 JSON 协议。
 
-为了正确处理未闭合的 Markdown 语法，`setMarkdown()` 会重新渲染已累积的 Markdown。流式过程中传入 `deferImages: true` 会渲染图片占位；流完成后用 `deferImages: false` 再渲染一次真实图片。模型高频输出时，应由页面层合并 `setData` 更新（例如每 50-100 ms 一次），不要每个 chunk 都刷新。
+为了正确处理未闭合的 Markdown 语法，`setMarkdown()` 会重新渲染已累积的 Markdown。流式过程中传入 `deferImages: true` 会渲染图片占位；流完成后用 `deferImages: false` 再渲染一次真实图片。需要流光标时，配置 `engine.global.flowSessionCursor: 'default'`，并在流式过程中传入 `forceNoCursor: false`。模型高频输出时，应由页面层合并 `setData` 更新（例如每 50-100 ms 一次），不要每个 chunk 都刷新。
 
 ## 模块格式
 
@@ -81,13 +81,13 @@ function onStreamComplete() {
 | 加粗        | `**文字**`                      | `class="md-strong"`                 | ✅   |
 | 斜体        | `*文字*`                        | `class="md-em"`                     | ✅   |
 | 行内代码    | `` `代码` ``                    | `class="md-inline-code"`            | ✅   |
-| 下划线      | `++文字++`                      | `class="md-underline"`              | ✅   |
+| 下划线      | `/文字/`                        | `class="md-underline"`              | ✅   |
 | 删除线      | `~~文字~~`                      | `class="md-strike"`                 | ✅   |
-| 上标 / 下标 | `~上标~` / `^下标^`             | 行内 text 带 class                  | ✅   |
+| 下标 / 上标 | `^^文字^^` / `^文字^`           | 行内 text 带 class                  | ✅   |
 | 换行        | 行尾两空格                      | `\n` 文本                           | ✅   |
 | 自动链接    | `https://...`                   | 同链接处理                          | ✅   |
-| Emoji       | `:smile:`                       | Image 组件                          | ✅   |
-| 流光标      | （流模式专用）                  | `\|` 光标符                         | ✅   |
+| Emoji       | `:smile:`                       | Unicode 文本 run                    | ✅   |
+| 流光标      | （流模式专用）                  | `\|` 光标符，需显式配置             | ✅   |
 | 脚注引用    | `[^key]`                        | Sup/link 数据，模板负责跳转         | ✅   |
 | Panel       | `:::tip/warning/danger/success` | 普通段落，样式丢失                  | ❌   |
 | 脚注正文    | （自动生成）                    | 普通段落，样式丢失                  | ❌   |
