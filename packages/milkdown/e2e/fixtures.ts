@@ -18,7 +18,9 @@ export const test = base.extend<{ runtimeErrors: string[] }>({
         if (message.type() === 'error') errors.push(message.text());
       });
       await use(errors);
-      const renderErrors = await page.locator('[role="alert"], [data-render-error="true"]').allTextContents();
+      const renderErrors = await page
+        .locator('[role="alert"]:visible, [data-render-error="true"]:visible')
+        .allTextContents();
       await info.attach('runtime-errors', { body: JSON.stringify(errors), contentType: 'application/json' });
       await info.attach('renderer-errors', { body: JSON.stringify(renderErrors), contentType: 'application/json' });
       const finalMarkdown = await page.evaluate(() => window.milkdownEditor?.getMarkdown()).catch(() => undefined);

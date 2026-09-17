@@ -821,6 +821,17 @@
   font: inherit;
 }
 
+.cherry-milkdown-link-editor__error {
+  margin: -2px 0 0 72px;
+  color: var(--error-color, #d54941);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.cherry-milkdown-link-editor__error[hidden] {
+  display: none;
+}
+
 .cherry-milkdown-link-editor input:focus {
   border-color: var(--md-link-color, #366ef4);
   outline: 1px solid var(--md-link-color, #366ef4);

@@ -11,6 +11,12 @@ interface LinkRange {
   anchor?: HTMLAnchorElement;
 }
 
+function sameLinkMark(left: Mark, right: Mark) {
+  if (left.type !== right.type) return false;
+  const keys = new Set([...Object.keys(left.attrs), ...Object.keys(right.attrs)]);
+  return [...keys].every((key) => left.attrs[key] === right.attrs[key]);
+}
+
 function linkAtRange(view: EditorView, from: number, to = from): LinkRange | undefined {
   const linkType = view.state.schema.marks.link;
   if (!linkType) return undefined;
@@ -26,7 +32,8 @@ function linkAtRange(view: EditorView, from: number, to = from): LinkRange | und
     const resolved = view.state.doc.resolve(position);
     const parentStart = position - resolved.parentOffset;
     resolved.parent.forEach((sibling, offset) => {
-      if (!sibling.isText || !linkType.isInSet(sibling.marks)) return;
+      const siblingMark = sibling.isText ? linkType.isInSet(sibling.marks) : undefined;
+      if (!siblingMark || !sameLinkMark(mark, siblingMark)) return;
       const siblingFrom = parentStart + offset;
       const siblingTo = siblingFrom + sibling.nodeSize;
       if (siblingTo >= rangeFrom && siblingFrom <= rangeTo) {
@@ -129,6 +136,17 @@ export const cherryLinkEditor = $prose(
         hrefInput.setAttribute('aria-label', '链接地址');
         hrefLabel.append(hrefInput);
 
+        const error = document.createElement('div');
+        error.className = 'cherry-milkdown-link-editor__error';
+        error.hidden = true;
+        // This is a form validation status, not a renderer failure. Keeping it
+        // out of role=alert prevents Cherry's renderer-error gates from treating
+        // the hidden link form as a document rendering error.
+        error.setAttribute('role', 'status');
+        error.setAttribute('aria-live', 'polite');
+        error.id = 'cherry-milkdown-link-editor-error';
+        hrefInput.setAttribute('aria-describedby', error.id);
+
         const actions = document.createElement('div');
         actions.className = 'cherry-milkdown-link-editor__actions';
         const remove = document.createElement('button');
@@ -141,7 +159,7 @@ export const cherryLinkEditor = $prose(
         confirm.type = 'submit';
         confirm.textContent = '保存';
         actions.append(remove, cancel, confirm);
-        form.append(textLabel, hrefLabel, actions);
+        form.append(textLabel, hrefLabel, error, actions);
 
         // These are UI overlays owned by this plugin, not editor content. Keep
         // them below Cherry's root so theme variables continue to cascade.
@@ -248,6 +266,8 @@ export const cherryLinkEditor = $prose(
           if (!editorOpen) return;
           editorOpen = false;
           form.hidden = true;
+          error.hidden = true;
+          error.textContent = '';
           trigger.setAttribute('aria-expanded', 'false');
           notifyUi(false);
           if (restoreFocus) view.focus();
@@ -257,6 +277,8 @@ export const cherryLinkEditor = $prose(
           active = { ...range, anchor: range.anchor ?? anchorForRange(range) };
           textInput.value = view.state.doc.textBetween(range.from, range.to, '', '');
           hrefInput.value = String(range.mark?.attrs.href ?? range.anchor?.getAttribute('href') ?? '');
+          error.hidden = true;
+          error.textContent = '';
           remove.hidden = !range.mark;
           editorOpen = true;
           syncOverlayLayer();
@@ -335,8 +357,13 @@ export const cherryLinkEditor = $prose(
           event.preventDefault();
           if (!active) return;
           const href = sanitizeLinkHref(hrefInput.value.trim());
-          const text = textInput.value;
-          if (!href || !text) return;
+          const text = textInput.value.trim();
+          if (!href || !text) {
+            error.textContent = !href ? '请输入有效的链接地址。' : '链接显示文本不能为空。';
+            error.hidden = false;
+            (href ? textInput : hrefInput).focus({ preventScroll: true });
+            return;
+          }
           const linkType = view.state.schema.marks.link;
           if (!linkType) return;
           const attrs = { ...(active.mark?.attrs ?? {}), href };
@@ -384,6 +411,14 @@ export const cherryLinkEditor = $prose(
         document.defaultView?.addEventListener('scroll', reposition, true);
         document.defaultView?.addEventListener('resize', reposition);
         form.addEventListener('submit', onSubmit);
+        textInput.addEventListener('input', () => {
+          error.hidden = true;
+          error.textContent = '';
+        });
+        hrefInput.addEventListener('input', () => {
+          error.hidden = true;
+          error.textContent = '';
+        });
         form.addEventListener('keydown', onKeyDown);
         remove.addEventListener('click', removeLink);
         cancel.addEventListener('click', onCancel);

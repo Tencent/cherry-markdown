@@ -183,8 +183,13 @@ test('real CRUD and navigation keep ordinary nodes stable', async ({ page }) => 
   const initiallyOpen = await disclosure.getAttribute('aria-expanded');
   await disclosure.click();
   await expect(disclosure).toHaveAttribute('aria-expanded', initiallyOpen === 'true' ? 'false' : 'true');
-  await disclosure.click();
-  await expect(disclosure).toHaveAttribute('aria-expanded', initiallyOpen ?? 'false');
+  // The first transaction updates the NodeView in place. Re-resolve the
+  // control after that update so the second user click cannot target a stale
+  // button during a synchronous DOM replacement.
+  const refreshedDisclosure = page.locator('.cherry-compound-item__disclosure').last();
+  await expect(refreshedDisclosure).toHaveAttribute('aria-expanded', initiallyOpen === 'true' ? 'false' : 'true');
+  await refreshedDisclosure.click();
+  await expect(refreshedDisclosure).toHaveAttribute('aria-expanded', initiallyOpen ?? 'false');
 
   await heading.click({ clickCount: 3 });
   await page.keyboard.press('Backspace');
@@ -344,11 +349,38 @@ test('link inspector exposes and updates both visible text and href', async ({ p
   ).toBe(true);
 });
 
+test('link inspector keeps adjacent links isolated and reports invalid input', async ({ page }) => {
+  await setMarkdown(page, '[first](https://one.example) [second](https://two.example)');
+  const links = page.locator('.ProseMirror a');
+  await expect(links).toHaveCount(2);
+
+  const second = links.nth(1);
+  await second.selectText();
+  await second.hover();
+  const trigger = page.getByRole('button', { name: '编辑链接' });
+  await expect(trigger).toBeVisible();
+  await trigger.click();
+  const dialog = page.getByRole('dialog', { name: '编辑链接' });
+  await expect(dialog.getByLabel('链接地址')).toHaveValue('https://two.example');
+
+  await dialog.getByLabel('链接地址').fill('javascript:alert(1)');
+  await dialog.getByRole('button', { name: '保存' }).click();
+  await expect(dialog.locator('.cherry-milkdown-link-editor__error')).toHaveText('请输入有效的链接地址。');
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: '取消链接' }).click();
+  await expect(links).toHaveCount(1);
+  await expect(links.first()).toHaveAttribute('href', 'https://one.example');
+  expect(await markdown(page)).toContain('[first](https://one.example) second');
+});
+
 test('code typing is monotonic and cannot open text Bubble', async ({ page }, testInfo) => {
   await setMarkdown(page, 'Use `x` here.');
   const code = page.locator('.ProseMirror p code');
-  await code.click();
-  await page.keyboard.press('ArrowRight');
+  // Select the code token as a user would before replacing it.  A bare
+  // ArrowRight intentionally leaves an inline-code mark in ProseMirror, so it
+  // is not a valid assertion that subsequent text must remain code.
+  await code.selectText();
+  await page.keyboard.type('x');
   for (let index = 0; index < 50; index++) {
     await page.keyboard.type('a', { delay: 5 });
     expect(await markdown(page)).toContain(`x${'a'.repeat(index + 1)}`);
