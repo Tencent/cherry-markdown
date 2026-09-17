@@ -92,9 +92,6 @@ export default class Previewer {
   /** Latest native HTML used when a runtime renderer is detached. */
   contentRendererFallbackHtml = '';
 
-  /** @type {ReturnType<typeof setTimeout> | number} */
-  requestMeasureTimer = 0;
-
   /**
    *
    * @param {Partial<import('~types/previewer').PreviewerOptions>} options 预览区域设置
@@ -930,9 +927,7 @@ export default class Previewer {
           .forEach((dom) => dom.remove());
       }
     }
-    clearTimeout(this.requestMeasureTimer);
-    this.requestMeasureTimer = setTimeout(() => {
-      this.requestMeasureTimer = 0;
+    setTimeout(() => {
       if (this.isDestroyed) return;
       try {
         this.editor.editor.view.requestMeasure();
@@ -994,9 +989,7 @@ export default class Previewer {
     this.$cherry.$event.emit('previewerOpen');
     this.$cherry.$event.emit('editorOpen');
 
-    clearTimeout(this.requestMeasureTimer);
-    this.requestMeasureTimer = setTimeout(() => {
-      this.requestMeasureTimer = 0;
+    setTimeout(() => {
       if (this.isDestroyed) return;
       try {
         this.editor.editor.view.requestMeasure();
@@ -1478,11 +1471,6 @@ export default class Previewer {
     if (this.syncScrollLockTimer) {
       clearTimeout(this.syncScrollLockTimer);
       this.syncScrollLockTimer = 0;
-    }
-
-    if (this.requestMeasureTimer) {
-      clearTimeout(this.requestMeasureTimer);
-      this.requestMeasureTimer = 0;
     }
 
     // 清理动画定时器
