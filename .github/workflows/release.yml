@@ -34,6 +34,7 @@ jobs:
       publishedClientVersion: ${{ steps.extract_version.outputs.clientVersion }}
       publishedCoreVersion: ${{ steps.extract_version.outputs.coreVersion }}
       publishedMiniProgramVersion: ${{ steps.extract_version.outputs.miniProgramVersion }}
+      publishedMilkdownVersion: ${{ steps.extract_version.outputs.milkdownVersion }}
     steps:
       - uses: actions/checkout@v6
 
@@ -73,11 +74,15 @@ jobs:
           miniProgramVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/miniprogram") | .version')
           echo "miniProgramVersion=$miniProgramVersion" >> $GITHUB_OUTPUT
 
+          milkdownVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/milkdown") | .version')
+          echo "milkdownVersion=$milkdownVersion" >> $GITHUB_OUTPUT
+
           # Debugging output
           echo "publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}"
           echo "clientVersion=$clientVersion"
           echo "coreVersion=$coreVersion"
           echo "miniProgramVersion=$miniProgramVersion"
+          echo "milkdownVersion=$milkdownVersion"
 
   build-core-release:
     needs: release
@@ -101,6 +106,18 @@ jobs:
       package_version: ${{ needs.release.outputs.publishedMiniProgramVersion }}
       dist_asset_name: 'cherry-markdown-mini-program'
       release_tag: '@cherry-markdown/miniprogram@${{ needs.release.outputs.publishedMiniProgramVersion }}'
+    secrets: inherit
+
+  build-milkdown-release:
+    needs: release
+    if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/milkdown"') }}
+    uses: ./.github/workflows/reusable-npm-release.yml
+    with:
+      package_name: '@cherry-markdown/milkdown'
+      package_dir: './packages/milkdown'
+      package_version: ${{ needs.release.outputs.publishedMilkdownVersion }}
+      dist_asset_name: 'cherry-markdown-milkdown'
+      release_tag: '@cherry-markdown/milkdown@${{ needs.release.outputs.publishedMilkdownVersion }}'
     secrets: inherit
 
   build-client-release:

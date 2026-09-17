@@ -111,6 +111,30 @@ describe('Previewer rendering pipeline', () => {
     expect(previewer.getValue(false)).toBe('<p>content</p>');
   });
 
+  it('delegates visible content to one runtime renderer and restores native rendering after unregister', () => {
+    const { previewer, previewerDom } = createPreviewer();
+    previewerDom.innerHTML = '<p>runtime-owned</p>';
+    const afterUpdate = vi.fn();
+    previewer.registerAfterUpdate(afterUpdate);
+    const renderer = {
+      update: vi.fn(),
+      getValue: vi.fn(() => '<p>semantic output</p>'),
+    };
+    const unregister = previewer.setContentRenderer(renderer);
+
+    previewer.update('<p data-sign="native">native update</p>');
+    expect(renderer.update).toHaveBeenCalledWith('<p data-sign="native">native update</p>');
+    expect(previewerDom.innerHTML).toBe('<p>runtime-owned</p>');
+    expect(afterUpdate).toHaveBeenCalledOnce();
+    expect(previewer.getValue(false)).toBe('<p>semantic output</p>');
+    expect(() => previewer.setContentRenderer({ update: vi.fn() })).toThrow('already registered');
+
+    previewer.refresh('<p data-sign="forced">forced native</p>');
+    unregister();
+    expect(previewerDom.textContent).toBe('forced native');
+    expect(afterUpdate).toHaveBeenCalledTimes(2);
+  });
+
   it('supports mobile preview containers and falls back when the wrapper is absent', () => {
     const { previewer, previewerDom } = createPreviewer();
     previewer.refresh('<p>mobile content</p>');

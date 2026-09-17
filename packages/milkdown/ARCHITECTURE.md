@@ -1,0 +1,58 @@
+# Runtime plugin boundary
+
+- index.ts: edit&preview and previewOnly runtime mounted by `Cherry.usePlugin()`.
+- wysiwyg/: schema, Markdown transforms, native DOM presentation and NodeViews.
+- wysiwyg/syntax-policy.ts: the explicit structured/native-source boundary.
+- wysiwyg/html-sanitizer.ts: the only DOM boundary for Cherry renderer HTML.
+- wysiwyg/node-view-utils.ts: shared, editor-local NodeView controls.
+- native-bridge.ts: delegates Bubble, image and diagram controls to the current
+  Cherry Previewer; no second Cherry is created.
+- native-layout.ts: pure translation between Cherry image/Mermaid layout
+  directives and native control changes.
+- ui/: editor-local controls; no Cherry top Toolbar imports.
+- renderers/: optional renderers with per-node cleanup.
+- examples/react/: one standard Cherry integration with query-selectable
+  edit&preview, previewOnly and editOnly modes.
+
+Cherry only owns the generic runtime-plugin registry, per-instance mount/destroy
+lifecycle and Previewer content-renderer slot. These APIs must contain no
+Milkdown-specific branch, parser, style or toolbar behavior. Milkdown owns all
+mode eligibility and editing logic. edit&preview and previewOnly share the same
+preview runtime; editOnly and CherryStream are deliberately not activated.
+
+Cherry syntax is structured only when its Markdown maps one-to-one to a stable
+ProseMirror document. Layout directives and business-defined syntax use the
+same native-source fallback: Cherry renders the preview, Milkdown retains the
+complete source, and edits happen inside the node. Never partially parse an
+unknown directive or silently canonicalise its source.
+
+## Test migration
+
+The former dual-editor tests exercised APIs removed by this redesign. They are
+replaced with plugin lifecycle, actual input, selection boundaries, source
+editing, rendering and API update tests. Parser/serializer and full-manual unit
+cases remain. A smaller green suite must not be described as the former complete
+interaction matrix passing.
+
+## Remaining release gates
+
+- Full-manual DOM/visual comparison for the remaining uncommon combinations,
+  not just serialized Markdown equivalence. The blocking Chromium suite already
+  covers ordinary text CRUD, Bubble selection, task toggles, heading/TOC links,
+  structured Panel/Detail controls, code, formulas, tables, images, native
+  source nodes, Mermaid and ECharts.
+- All advanced chart options and map data-provider behavior. The optional chart
+  renderer is not yet a feature-for-feature replacement of Cherry's chart plugin.
+- Bubble color/size/ruby controls and a full keyboard/touch accessibility audit.
+- Repeated mount/destroy resource accounting and long-running editing stress.
+- Browser runtime verification of the actual npm consumer, beyond its build.
+
+All adapter CSS selectors must remain scoped below `.cherry-milkdown`. Native
+content styling belongs to the imported Cherry stylesheet; this package may
+style only ProseMirror behavior, editable controls and documented DOM-shape
+compensation. The stylesheet ownership test blocks rules that could leak into a
+normal Cherry instance.
+
+Do not add Milkdown-specific behavior to Cherry to make these pass. Extend the
+package's schema, NodeViews, renderers and controls with failing regression cases
+first.

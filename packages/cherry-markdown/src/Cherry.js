@@ -67,7 +67,7 @@ export default class Cherry extends CherryStatic {
    */
   constructor(options) {
     super();
-    Cherry.initialized = true;
+    /** @type {typeof Cherry} */ (this.constructor).initialized = true;
     const defaultConfigCopy = cloneDeep(Cherry.config.defaults);
     this.defaultToolbar = defaultConfigCopy.toolbars.toolbar;
     $expectTarget(options, Object);
@@ -125,6 +125,11 @@ export default class Cherry extends CherryStatic {
     this.options.instanceId = this.instanceId;
     this.lastMarkdownText = '';
     this.$event = new Event(this.instanceId);
+    /** @type {Map<any, any>} */
+    this.runtimePluginInstances = new Map();
+    /** @type {Promise<void>} */
+    this.runtimePluginsReady = Promise.resolve();
+    this.isDestroying = false;
 
     if (this.options.engine.global.flowSessionCursor === 'default') {
       this.options.engine.global.flowSessionCursor = '<span class="cherry-flow-session-cursor"></span>';
@@ -247,6 +252,91 @@ export default class Cherry extends CherryStatic {
     // this.editText(null, this.editor.editor);
     this.createToc();
     this.restoreDocumentScroll();
+    this.mountRuntimePlugins();
+  }
+
+  /**
+   * Creates the runtime plugins registered through Cherry.usePlugin(). Plugin
+   * setup is instance-local even though registration is static.
+   *
+   * @private
+   */
+  mountRuntimePlugins() {
+    const PluginHost = /** @type {typeof CherryStatic} */ (this.constructor);
+    const registrations = PluginHost.getRuntimePlugins?.() ?? [];
+    this.runtimePluginsReady = (async () => {
+      // Runtime plugins may own the same host resource (for example the
+      // Previewer content renderer), so mounting must be deterministic.
+      for (const { PluginClass, args } of registrations) {
+        let instance;
+        try {
+          instance = await PluginClass.create(this, ...args);
+          if (!instance) continue;
+          if (this.isDestroying) {
+            await instance.destroy?.();
+            continue;
+          }
+          this.runtimePluginInstances.set(PluginClass, instance);
+          await instance.mount?.();
+        } catch (error) {
+          if (instance && this.runtimePluginInstances.get(PluginClass) === instance) {
+            this.runtimePluginInstances.delete(PluginClass);
+          }
+          try {
+            await instance?.destroy?.();
+          } catch (destroyError) {
+            Logger.error('Failed to clean up Cherry runtime plugin after a mount error:', destroyError);
+          }
+          throw error;
+        }
+      }
+    })();
+    // Prevent an unhandled rejection when an application does not explicitly
+    // await plugin readiness. Consumers can still observe the original
+    // rejection through whenPluginsReady().
+    this.runtimePluginsReady.catch((error) => {
+      Logger.error('Failed to mount Cherry runtime plugin:', error);
+    });
+  }
+
+  /**
+   * Waits until all runtime plugins registered for this Cherry constructor have
+   * finished mounting.
+   *
+   * @returns {Promise<void>}
+   */
+  whenPluginsReady() {
+    return this.runtimePluginsReady;
+  }
+
+  /**
+   * Returns the instance created for a runtime plugin class.
+   *
+   * @param {any} PluginClass
+   * @returns {any}
+   */
+  getPlugin(PluginClass) {
+    return this.runtimePluginInstances.get(PluginClass);
+  }
+
+  /**
+   * Starts cleanup in reverse registration order. Cherry.destroy() remains a
+   * synchronous API; runtime plugins must detach their DOM and listeners before
+   * returning, even if their library-level disposal completes asynchronously.
+   *
+   * @private
+   */
+  destroyRuntimePlugins() {
+    const instances = Array.from(this.runtimePluginInstances.values()).reverse();
+    this.runtimePluginInstances.clear();
+    instances.forEach((instance) => {
+      try {
+        const result = instance?.destroy?.();
+        result?.catch?.((error) => Logger.error('Failed to destroy Cherry runtime plugin:', error));
+      } catch (error) {
+        Logger.error('Failed to destroy Cherry runtime plugin:', error);
+      }
+    });
   }
 
   /**
@@ -273,6 +363,9 @@ export default class Cherry extends CherryStatic {
   }
 
   destroy() {
+    this.isDestroying = true;
+    this.destroyRuntimePlugins();
+
     // 先销毁搜索面板桥接（解绑监听、清理面板 DOM）
     destroySearcherBridge(this);
 
