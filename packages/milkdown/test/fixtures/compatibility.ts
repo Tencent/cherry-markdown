@@ -1,4 +1,6 @@
-export type CherryCompatibilityMode = 'structured' | 'native-source' | 'passthrough';
+import type { CherrySyntaxHandling } from '../../src/wysiwyg/syntax-policy';
+
+export type CherryCompatibilityMode = CherrySyntaxHandling;
 
 export interface CherryCompatibilityCase {
   id: string;

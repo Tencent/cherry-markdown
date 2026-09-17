@@ -1,5 +1,6 @@
 import type { CherryInlineMatch } from './types.js';
 import { tableChartType } from './table-chart.js';
+import { canonicalPanelKind, panelSyntaxHandling } from './syntax-policy.js';
 
 interface MarkdownPosition {
   start?: { offset?: number };
@@ -303,36 +304,6 @@ function parsePanel(source: string, parse: ParseMarkdown): MarkdownNode {
   return node;
 }
 
-function canonicalPanelKind(rawType: string) {
-  switch (rawType.trim().toLowerCase()) {
-    case 'p':
-      return 'primary';
-    case 'i':
-      return 'info';
-    case 'w':
-      return 'warning';
-    case 'd':
-      return 'danger';
-    case 's':
-      return 'success';
-    case 'l':
-      return 'left';
-    case 'c':
-      return 'center';
-    case 'r':
-      return 'right';
-    case 'j':
-      return 'justify';
-    case 't':
-      return 'tabs';
-    case '2cols':
-    case '3cols':
-      return 'cols';
-    default:
-      return rawType.trim().toLowerCase();
-  }
-}
-
 function parseDetail(source: string, parse: ParseMarkdown): MarkdownNode {
   const lines = source.split(/\r?\n/);
   const header = (lines.shift() ?? '+++ Detail').trim();
@@ -376,9 +347,7 @@ function createBlockNode(match: BlockMatch, parse: ParseMarkdown): MarkdownNode 
     // timeline status/time/node markup), so rebuilding them as ProseMirror
     // NodeViews can silently diverge from Cherry. Keep those engine-owned and
     // edit their complete source inside the node instead.
-    const structuredType = canonicalPanelKind(rawType);
-    const isStructured = /^(?:panel|primary|info|warning|danger|success)$/i.test(structuredType);
-    if (!isStructured) {
+    if (panelSyntaxHandling(rawType) !== 'structured') {
       return { type: 'cherryNativeBlock', source: match.source };
     }
     return parsePanel(match.source, parse);
@@ -463,8 +432,7 @@ function replaceRootBlocks(
     if (!segment) return [];
     const omitSyntheticEmptyParagraphs = (nodes: MarkdownNode[]) =>
       nodes.filter(
-        (node) =>
-          node.type !== 'paragraph' || Boolean(node.value?.length) || Boolean(node.children?.length),
+        (node) => node.type !== 'paragraph' || Boolean(node.value?.length) || Boolean(node.children?.length),
       );
     const fallback = () =>
       originalChildren.filter((node) => {

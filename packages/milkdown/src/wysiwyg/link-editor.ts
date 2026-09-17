@@ -61,27 +61,10 @@ function lastClientRect(element: Element) {
   return rects.length ? rects[rects.length - 1] : element.getBoundingClientRect();
 }
 
-function hasVisibleFollowingContent(anchor: HTMLAnchorElement) {
-  let sibling = anchor.nextSibling;
-  while (sibling) {
-    if (sibling instanceof Text && sibling.data.trim()) return true;
-    if (sibling instanceof Element) {
-      if (!sibling.matches('.cherry-link-target, .ProseMirror-separator, br')) {
-        if (sibling.textContent?.trim()) return true;
-        const rect = sibling.getBoundingClientRect();
-        if (rect.width > 0 && rect.height > 0) return true;
-      }
-    }
-    sibling = sibling.nextSibling;
-  }
-  return false;
-}
-
 /**
- * Link text remains normal editable document content. The hidden href is
- * exposed through one shared, floating affordance positioned near the end
- * of the active link. Neither the trigger nor inspector enters ProseMirror's
- * DOM, so they do not alter wrapping, selection, clipboard content or Markdown.
+ * Link text remains normal editable document content. Placing a caret in a
+ * link opens one shared inspector outside ProseMirror's DOM, so exposing the
+ * hidden href never changes wrapping, clipboard content or Markdown.
  */
 export const cherryLinkEditor = $prose(
   () =>
@@ -99,17 +82,32 @@ export const cherryLinkEditor = $prose(
       },
       view: (view) => {
         const document = view.dom.ownerDocument;
-        const trigger = document.createElement('button');
-        trigger.type = 'button';
-        trigger.className = 'cherry-milkdown-link-trigger';
-        trigger.hidden = true;
-        trigger.title = '编辑链接';
-        trigger.setAttribute('aria-label', '编辑链接');
-        trigger.setAttribute('aria-haspopup', 'dialog');
-        const triggerIcon = document.createElement('span');
-        triggerIcon.className = 'ch-icon ch-icon-link';
-        triggerIcon.setAttribute('aria-hidden', 'true');
-        trigger.append(triggerIcon);
+        const inspector = document.createElement('div');
+        inspector.className = 'cherry-milkdown-link-bubble';
+        inspector.hidden = true;
+        inspector.setAttribute('role', 'toolbar');
+        inspector.setAttribute('aria-label', '链接');
+
+        const iconButton = (label: string, icon: string) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.title = label;
+          button.setAttribute('aria-label', label);
+          const span = document.createElement('span');
+          span.className = `ch-icon ${icon}`;
+          span.setAttribute('aria-hidden', 'true');
+          button.append(span);
+          return button;
+        };
+        const copy = iconButton('复制链接', 'ch-icon-copy');
+        const hrefPreview = document.createElement('a');
+        hrefPreview.className = 'cherry-milkdown-link-bubble__href';
+        hrefPreview.target = '_blank';
+        hrefPreview.rel = 'noopener noreferrer';
+        const edit = iconButton('编辑链接', 'ch-icon-edit');
+        edit.setAttribute('aria-haspopup', 'dialog');
+        const unlink = iconButton('取消链接', 'ch-icon-close');
+        inspector.append(copy, hrefPreview, edit, unlink);
 
         const form = document.createElement('form');
         form.className = 'cherry-milkdown-link-editor';
@@ -149,33 +147,23 @@ export const cherryLinkEditor = $prose(
 
         const actions = document.createElement('div');
         actions.className = 'cherry-milkdown-link-editor__actions';
-        const remove = document.createElement('button');
-        remove.type = 'button';
-        remove.textContent = '取消链接';
         const cancel = document.createElement('button');
         cancel.type = 'button';
         cancel.textContent = '取消';
         const confirm = document.createElement('button');
         confirm.type = 'submit';
         confirm.textContent = '保存';
-        actions.append(remove, cancel, confirm);
+        actions.append(cancel, confirm);
         form.append(textLabel, hrefLabel, error, actions);
 
         // These are UI overlays owned by this plugin, not editor content. Keep
         // them below Cherry's root so theme variables continue to cascade.
         const overlayHost = view.dom.closest('.cherry') ?? document.body;
-        overlayHost.append(trigger, form);
+        overlayHost.append(inspector, form);
 
         let active: LinkRange | undefined;
-        let hoveredAnchor: HTMLAnchorElement | undefined;
         let editorOpen = false;
-        let hideTriggerTimer: ReturnType<typeof setTimeout> | undefined;
-
-        const cancelScheduledHide = () => {
-          if (hideTriggerTimer === undefined) return;
-          clearTimeout(hideTriggerTimer);
-          hideTriggerTimer = undefined;
-        };
+        let uiVisible = false;
 
         const syncOverlayLayer = () => {
           const bubble = overlayHost.querySelector<HTMLElement>('.cherry-bubble--preview');
@@ -184,7 +172,7 @@ export const cherryLinkEditor = $prose(
             10,
           );
           if (!Number.isFinite(zIndex)) return;
-          trigger.style.zIndex = String(zIndex + 3);
+          inspector.style.zIndex = String(zIndex + 3);
           form.style.zIndex = String(zIndex + 3);
         };
 
@@ -211,41 +199,33 @@ export const cherryLinkEditor = $prose(
             return candidate?.from === range.from && candidate.to === range.to;
           });
         };
-        const placeTrigger = () => {
+        const placeInspector = () => {
           const current = active;
           const anchor = current && anchorForRange(current);
           if (!anchor) {
-            trigger.hidden = true;
+            inspector.hidden = true;
             return;
           }
           active = { ...current, anchor };
           syncOverlayLayer();
-          trigger.hidden = false;
+          inspector.hidden = false;
           const rect = lastClientRect(anchor);
-          const size = trigger.offsetWidth || 20;
-          const gap = 4;
+          const width = inspector.offsetWidth;
+          const height = inspector.offsetHeight;
+          const gap = 8;
           const viewportWidth = document.documentElement.clientWidth;
           const viewportHeight = document.documentElement.clientHeight;
-          // Cherry's target marker and ProseMirror's cursor separators are not
-          // visible content. A link followed only by those nodes can safely
-          // use its natural trailing position; real following prose uses the
-          // above/below fallback and is never covered.
-          const fitsAfter = !hasVisibleFollowingContent(anchor) && rect.right + gap + size <= viewportWidth - 8;
-          const fitsAbove = rect.top - size - gap >= 8;
-          const left = fitsAfter
-            ? rect.right + gap
-            : Math.max(8, Math.min(viewportWidth - size - 8, rect.right - size));
-          const top = fitsAfter
-            ? Math.max(8, Math.min(viewportHeight - size - 8, rect.top + (rect.height - size) / 2))
-            : fitsAbove
-              ? rect.top - size - gap
-              : Math.min(viewportHeight - size - 8, rect.bottom + gap);
-          trigger.style.left = `${left}px`;
-          trigger.style.top = `${top}px`;
+          const left = Math.max(8, Math.min(viewportWidth - width - 8, rect.left + rect.width / 2 - width / 2));
+          const top =
+            rect.top - height - gap >= 8
+              ? rect.top - height - gap
+              : Math.min(viewportHeight - height - 8, rect.bottom + gap);
+          inspector.style.left = `${left}px`;
+          inspector.style.top = `${top}px`;
         };
         const placeForm = () => {
           const anchor = active && anchorForRange(active);
-          const rect = anchor ? lastClientRect(anchor) : trigger.getBoundingClientRect();
+          const rect = anchor ? lastClientRect(anchor) : inspector.getBoundingClientRect();
           const width = Math.min(360, document.documentElement.clientWidth - 16);
           const left = Math.max(8, Math.min(rect.left, document.documentElement.clientWidth - width - 8));
           const below = rect.bottom + 8;
@@ -257,21 +237,35 @@ export const cherryLinkEditor = $prose(
           form.style.left = `${left}px`;
           form.style.top = `${top}px`;
         };
-        const hideTrigger = () => {
-          if (editorOpen || hoveredAnchor) return;
+        const setUiVisible = (visible: boolean) => {
+          if (uiVisible === visible) return;
+          uiVisible = visible;
+          notifyUi(visible);
+        };
+        const hideInspector = () => {
+          if (editorOpen) return;
           active = undefined;
-          trigger.hidden = true;
+          inspector.hidden = true;
         };
         const close = ({ restoreFocus = false } = {}) => {
           if (!editorOpen) return;
+          const previous = active;
           editorOpen = false;
           form.hidden = true;
           error.hidden = true;
           error.textContent = '';
-          trigger.setAttribute('aria-expanded', 'false');
-          notifyUi(false);
-          if (restoreFocus) view.focus();
-          hideTrigger();
+          edit.setAttribute('aria-expanded', 'false');
+          inspector.hidden = true;
+          setUiVisible(false);
+          active = undefined;
+          if (restoreFocus) {
+            if (previous) {
+              const caret = Math.min(previous.to, previous.from + 1);
+              view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, caret)));
+            }
+            view.focus();
+            requestAnimationFrame(showForSelection);
+          }
         };
         const open = (range: LinkRange) => {
           active = { ...range, anchor: range.anchor ?? anchorForRange(range) };
@@ -279,62 +273,49 @@ export const cherryLinkEditor = $prose(
           hrefInput.value = String(range.mark?.attrs.href ?? range.anchor?.getAttribute('href') ?? '');
           error.hidden = true;
           error.textContent = '';
-          remove.hidden = !range.mark;
           editorOpen = true;
           syncOverlayLayer();
-          trigger.setAttribute('aria-expanded', 'true');
+          edit.setAttribute('aria-expanded', 'true');
           form.hidden = false;
-          trigger.hidden = true;
+          inspector.hidden = true;
           placeForm();
-          notifyUi(true);
+          setUiVisible(true);
           requestAnimationFrame(() => hrefInput.focus({ preventScroll: true }));
         };
-        const showForAnchor = (anchor: HTMLAnchorElement) => {
-          const range = rangeFromAnchor(anchor);
-          if (!range) return;
-          cancelScheduledHide();
-          hoveredAnchor = anchor;
-          if (!editorOpen) active = range;
-          placeTrigger();
-        };
         const showForSelection = () => {
-          if (editorOpen || hoveredAnchor) return;
+          if (editorOpen) return;
           const { from, to } = view.state.selection;
+          const domSelection = document.getSelection();
+          const hasDocumentRange = Boolean(
+            domSelection &&
+              !domSelection.isCollapsed &&
+              domSelection.anchorNode &&
+              domSelection.focusNode &&
+              view.dom.contains(domSelection.anchorNode) &&
+              view.dom.contains(domSelection.focusNode),
+          );
+          // A range selection belongs to Cherry's text-formatting Bubble.
+          // Link inspection only owns a collapsed caret inside the link;
+          // Cmd/Ctrl+K remains the explicit editing path for selected text.
+          if (from !== to || hasDocumentRange) return hideInspector();
           const range = linkAtRange(view, from, to);
-          if (!range) return hideTrigger();
+          if (!range) return hideInspector();
           active = range;
-          placeTrigger();
+          const href = String(range.mark?.attrs.href ?? range.anchor?.getAttribute('href') ?? '');
+          hrefPreview.href = href;
+          hrefPreview.textContent = href;
+          inspector.hidden = false;
+          requestAnimationFrame(placeInspector);
         };
-        const scheduleTriggerHide = () => {
-          cancelScheduledHide();
-          hideTriggerTimer = setTimeout(() => {
-            hideTriggerTimer = undefined;
-            hoveredAnchor = undefined;
-            if (!editorOpen) showForSelection();
-          }, 160);
-        };
-        const onPointerMove = (event: PointerEvent) => {
-          if (event.target instanceof Node && (form.contains(event.target) || trigger.contains(event.target))) return;
-          const anchor = event.target instanceof Element ? event.target.closest('a[href]') : null;
-          if (anchor instanceof HTMLAnchorElement && view.dom.contains(anchor)) {
-            showForAnchor(anchor);
-            return;
-          }
-          if (!editorOpen) scheduleTriggerHide();
-        };
-        const onTriggerPointerEnter = () => cancelScheduledHide();
-        const onTriggerPointerLeave = () => scheduleTriggerHide();
-        const onTriggerPointerDown = (event: PointerEvent) => {
+        const preserveSelection = (event: PointerEvent) => {
           // Moving focus to the overlay must not collapse the document selection.
-          cancelScheduledHide();
           event.preventDefault();
           event.stopPropagation();
         };
-        const onTriggerClick = (event: MouseEvent) => {
+        const onEdit = (event: MouseEvent) => {
           event.preventDefault();
           event.stopPropagation();
           if (!active) return;
-          view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, active.from)));
           open(active);
         };
         const onEditRequest = (event: Event) => {
@@ -342,16 +323,27 @@ export const cherryLinkEditor = $prose(
           if (range) open(range);
         };
         const onOutsidePointer = (event: PointerEvent) => {
-          if (!(event.target instanceof Node) || form.contains(event.target) || trigger.contains(event.target)) return;
-          cancelScheduledHide();
-          hoveredAnchor = undefined;
+          if (!(event.target instanceof Node) || form.contains(event.target) || inspector.contains(event.target)) return;
           if (editorOpen) close();
           queueMicrotask(() => {
             if (!view.hasFocus()) {
               active = undefined;
-              trigger.hidden = true;
+              inspector.hidden = true;
             }
           });
+        };
+        const copyLink = async () => {
+          const href = String(active?.mark?.attrs.href ?? active?.anchor?.getAttribute('href') ?? '');
+          if (!href) return;
+          try {
+            await document.defaultView?.navigator.clipboard?.writeText(href);
+            copy.title = '已复制';
+          } catch {
+            copy.title = '复制失败';
+          }
+          setTimeout(() => {
+            copy.title = '复制链接';
+          }, 1200);
         };
         const onSubmit = (event: SubmitEvent) => {
           event.preventDefault();
@@ -397,16 +389,15 @@ export const cherryLinkEditor = $prose(
         };
         const onCancel = () => close({ restoreFocus: true });
         const reposition = () => {
-          if (!trigger.hidden) placeTrigger();
+          if (!inspector.hidden) placeInspector();
           if (editorOpen) placeForm();
         };
 
-        view.dom.addEventListener('pointermove', onPointerMove);
         view.dom.addEventListener('cherry-milkdown:edit-link', onEditRequest);
-        trigger.addEventListener('pointerdown', onTriggerPointerDown);
-        trigger.addEventListener('pointerenter', onTriggerPointerEnter);
-        trigger.addEventListener('pointerleave', onTriggerPointerLeave);
-        trigger.addEventListener('click', onTriggerClick);
+        inspector.addEventListener('pointerdown', preserveSelection);
+        copy.addEventListener('click', copyLink);
+        edit.addEventListener('click', onEdit);
+        unlink.addEventListener('click', removeLink);
         document.addEventListener('pointerdown', onOutsidePointer, true);
         document.defaultView?.addEventListener('scroll', reposition, true);
         document.defaultView?.addEventListener('resize', reposition);
@@ -420,7 +411,6 @@ export const cherryLinkEditor = $prose(
           error.textContent = '';
         });
         form.addEventListener('keydown', onKeyDown);
-        remove.addEventListener('click', removeLink);
         cancel.addEventListener('click', onCancel);
 
         return {
@@ -429,22 +419,19 @@ export const cherryLinkEditor = $prose(
             showForSelection();
           },
           destroy: () => {
-            if (editorOpen) notifyUi(false);
-            cancelScheduledHide();
-            view.dom.removeEventListener('pointermove', onPointerMove);
+            if (uiVisible) notifyUi(false);
             view.dom.removeEventListener('cherry-milkdown:edit-link', onEditRequest);
-            trigger.removeEventListener('pointerdown', onTriggerPointerDown);
-            trigger.removeEventListener('pointerenter', onTriggerPointerEnter);
-            trigger.removeEventListener('pointerleave', onTriggerPointerLeave);
-            trigger.removeEventListener('click', onTriggerClick);
+            inspector.removeEventListener('pointerdown', preserveSelection);
+            copy.removeEventListener('click', copyLink);
+            edit.removeEventListener('click', onEdit);
+            unlink.removeEventListener('click', removeLink);
             document.removeEventListener('pointerdown', onOutsidePointer, true);
             document.defaultView?.removeEventListener('scroll', reposition, true);
             document.defaultView?.removeEventListener('resize', reposition);
             form.removeEventListener('submit', onSubmit);
             form.removeEventListener('keydown', onKeyDown);
-            remove.removeEventListener('click', removeLink);
             cancel.removeEventListener('click', onCancel);
-            trigger.remove();
+            inspector.remove();
             form.remove();
           },
         };

@@ -747,40 +747,62 @@
   outline: none;
 }
 
-/* A link is a ProseMirror mark rather than a source-backed node. One shared
- * overlay follows the end of the active link; it is not inserted into editor
- * content and therefore cannot alter wrapping, selection or Markdown. */
-.cherry-milkdown-link-trigger {
+/* A link is a ProseMirror mark rather than a source-backed node. The shared
+ * inspector stays outside editor content, so it cannot alter line wrapping,
+ * selection, clipboard content or serialized Markdown. */
+.cherry-milkdown-link-bubble {
   position: fixed;
   z-index: calc(var(--bubble-z-index, 1000) + 3);
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  justify-content: center;
   box-sizing: border-box;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  color: var(--md-link-color, #3582fb);
+  max-width: min(420px, calc(100vw - 16px));
+  min-height: 38px;
+  padding: 4px;
+  border: var(--border-width-1, 1px) solid var(--bubble-border, var(--base-border-color, #d8dce5));
+  border-radius: var(--bubble-radius, 6px);
+  color: var(--base-font-color, #3f4654);
   background: var(--bubble-bg, var(--toolbar-bg, #fff));
-  box-shadow: none;
-  cursor: pointer;
-  font-size: 12px;
-  line-height: 1;
+  box-shadow: var(--bubble-shadow, 0 6px 20px rgb(0 0 0 / 14%));
+  font: 13px/1.4 var(--font-family, sans-serif);
 }
 
-.cherry-milkdown-link-trigger[hidden] {
+.cherry-milkdown-link-bubble[hidden] {
   display: none;
 }
 
-.cherry-milkdown-link-trigger:hover,
-.cherry-milkdown-link-trigger:focus-visible,
-.cherry-milkdown-link-trigger[aria-expanded='true'] {
+.cherry-milkdown-link-bubble button {
+  display: inline-flex;
+  flex: 0 0 30px;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  color: var(--toolbar-btn-color, #3f4654);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.cherry-milkdown-link-bubble button:hover,
+.cherry-milkdown-link-bubble button:focus-visible,
+.cherry-milkdown-link-bubble button[aria-expanded='true'] {
   color: var(--toolbar-btn-hover-color, var(--md-link-color, #366ef4));
   background: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
-  box-shadow: 0 0 0 1px var(--bubble-border, var(--base-border-color, #d8dce5));
   outline: none;
+}
+
+.cherry-milkdown-link-bubble__href {
+  min-width: 0;
+  max-width: 280px;
+  padding: 0 8px;
+  overflow: hidden;
+  color: var(--base-font-color, #3f4654);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cherry-milkdown-link-editor {

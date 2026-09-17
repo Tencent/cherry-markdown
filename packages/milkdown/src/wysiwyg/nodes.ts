@@ -15,122 +15,12 @@ import {
 } from './diagram-runtime.js';
 import type { CherryVisualRendererResult } from './types.js';
 import { findEmbeddedTableCharts, tableChartType } from './table-chart.js';
+import { sanitizedEngineFragment } from './html-sanitizer.js';
+import { createEditableLabel, createNodeAction, readEditableSource, selectEditableSource } from './node-view-utils.js';
 const headingNavigationTasks = new WeakMap<
   EditorView,
   { frames: number[]; timers: Array<ReturnType<typeof setTimeout>> }
 >();
-
-const SAFE_HTML_TAGS = new Set([
-  'A',
-  'B',
-  'BLOCKQUOTE',
-  'BR',
-  'CODE',
-  'DEL',
-  'DIV',
-  'EM',
-  'FIGCAPTION',
-  'FIGURE',
-  'H1',
-  'H2',
-  'H3',
-  'H4',
-  'H5',
-  'H6',
-  'HR',
-  'I',
-  'IMG',
-  'LI',
-  'MARK',
-  'OL',
-  'P',
-  'PRE',
-  'SECTION',
-  'SMALL',
-  'SPAN',
-  'STRONG',
-  'SUB',
-  'SUP',
-  'TABLE',
-  'TBODY',
-  'TD',
-  'TH',
-  'THEAD',
-  'TR',
-  'UL',
-  'U',
-]);
-const SAFE_HTML_ATTRIBUTES = new Set([
-  'alt',
-  'aria-label',
-  'class',
-  'colspan',
-  'height',
-  'href',
-  'id',
-  'rel',
-  'role',
-  'rowspan',
-  'src',
-  'style',
-  'tabindex',
-  'target',
-  'title',
-  'width',
-]);
-const SAFE_HTML_CSS =
-  /^(?:background(?:-color)?|border(?:-(?:bottom|left|radius|right|top)(?:-color|-style|-width)?)?|color|font(?:-size|-style|-weight)?|margin(?:-(?:bottom|left|right|top))?|padding(?:-(?:bottom|left|right|top))?|text-align|text-decoration|white-space|width|height)$/i;
-
-function unsafeHtmlUrl(value: string) {
-  const normalized = value.replace(/[\u0000-\u0020\u007f-\u009f]/g, '').toLowerCase();
-  return /^(?:javascript|vbscript|data:text\/html)/.test(normalized);
-}
-
-function unsafeInlineStyle(value: string) {
-  return /(?:expression\s*\(|(?:javascript|vbscript)\s*:|url\s*\(|@import|-moz-binding|behavior\s*:)/i.test(value);
-}
-
-function sanitizedEngineFragment(html: string, inline = false, restricted = false): DocumentFragment {
-  const template = document.createElement('template');
-  template.innerHTML = html;
-  template.content.querySelectorAll('script, iframe, object, embed, base, meta, form').forEach((node) => node.remove());
-  template.content.querySelectorAll<HTMLElement>('*').forEach((element) => {
-    if (restricted && !SAFE_HTML_TAGS.has(element.tagName)) {
-      element.replaceWith(...Array.from(element.childNodes));
-      return;
-    }
-    for (const attribute of Array.from(element.attributes)) {
-      const name = attribute.name.toLowerCase();
-      const value = attribute.value.trim().toLowerCase();
-      if (restricted && !SAFE_HTML_ATTRIBUTES.has(name)) {
-        element.removeAttribute(attribute.name);
-        continue;
-      }
-      if (
-        name.startsWith('on') ||
-        (['href', 'src', 'xlink:href', 'formaction', 'srcset'].includes(name) && unsafeHtmlUrl(value)) ||
-        (name === 'style' && unsafeInlineStyle(value))
-      ) {
-        element.removeAttribute(attribute.name);
-        continue;
-      }
-      if (restricted && name === 'style') {
-        const safeStyle = Array.from(element.style)
-          .filter((property) => SAFE_HTML_CSS.test(property))
-          .map((property) => `${property}:${element.style.getPropertyValue(property)}`)
-          .join(';');
-        if (safeStyle) element.setAttribute('style', safeStyle);
-        else element.removeAttribute('style');
-      }
-    }
-  });
-  if (inline && template.content.childElementCount === 1 && template.content.firstElementChild?.tagName === 'P') {
-    const fragment = document.createDocumentFragment();
-    fragment.append(...Array.from(template.content.firstElementChild.childNodes));
-    return fragment;
-  }
-  return template.content;
-}
 
 function sourceAttr() {
   return { default: '', validate: 'string' as const };
@@ -512,61 +402,6 @@ class LinkTargetView implements NodeView {
   }
 }
 
-function iconButton(label: string, title: string, action: () => void, readonly = false) {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.textContent = label;
-  button.title = title;
-  button.setAttribute('aria-label', title);
-  button.hidden = readonly;
-  button.addEventListener('mousedown', (event) => event.preventDefault());
-  button.addEventListener('click', action);
-  return button;
-}
-
-function editableLabel(className: string, value: string, placeholder: string, readonly: boolean, commit: () => void) {
-  const label = document.createElement('input');
-  label.type = 'text';
-  label.value = value;
-  label.placeholder = placeholder;
-  label.className = className;
-  label.dataset.placeholder = placeholder;
-  label.readOnly = readonly;
-  label.spellcheck = false;
-  // Keep the browser's native caret/selection behavior.  ProseMirror must not
-  // interpret a click inside an editable compound label as a node selection.
-  label.addEventListener('pointerdown', (event) => {
-    event.stopImmediatePropagation();
-    if (!readonly && event.button === 0) label.focus();
-  });
-  label.addEventListener('mousedown', (event) => event.stopImmediatePropagation());
-  label.addEventListener('input', commit);
-  label.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      label.blur();
-    }
-  });
-  return label;
-}
-
-function editableSourceText(source: HTMLElement) {
-  return source.innerText || source.textContent || '';
-}
-
-function selectAllEditableSource(event: KeyboardEvent) {
-  if (event.key.toLowerCase() !== 'a' || (!event.metaKey && !event.ctrlKey) || event.altKey) return;
-  const source = event.currentTarget;
-  if (!(source instanceof HTMLElement) || source.contentEditable !== 'true') return;
-  event.preventDefault();
-  event.stopPropagation();
-  const selection = source.ownerDocument.getSelection();
-  const range = source.ownerDocument.createRange();
-  range.selectNodeContents(source);
-  selection?.removeAllRanges();
-  selection?.addRange(range);
-}
-
 class CompoundItemView implements NodeView {
   dom: HTMLElement;
   contentDOM: HTMLElement;
@@ -596,7 +431,7 @@ class CompoundItemView implements NodeView {
     // an explicit control so the title remains directly editable.
     const header = document.createElement('header');
     header.className = 'cherry-compound-item__header';
-    this.disclosure = iconButton(
+    this.disclosure = createNodeAction(
       node.attrs.open ? '⌄' : '›',
       '切换默认展开状态',
       () => {
@@ -607,7 +442,7 @@ class CompoundItemView implements NodeView {
     this.disclosure.className = 'cherry-compound-item__disclosure';
     this.disclosure.setAttribute('aria-expanded', String(Boolean(node.attrs.open)));
     this.disclosure.hidden = node.attrs.role !== 'detail-item';
-    this.label = editableLabel(
+    this.label = createEditableLabel(
       'cherry-compound-item__label',
       String(node.attrs.label ?? ''),
       node.attrs.role === 'column' ? '' : '直接输入标题',
@@ -618,9 +453,9 @@ class CompoundItemView implements NodeView {
     const actions = document.createElement('span');
     actions.className = 'cherry-node-actions';
     actions.append(
-      iconButton('←', '向前移动', () => this.move(-1), readonly),
-      iconButton('→', '向后移动', () => this.move(1), readonly),
-      iconButton('×', '删除项目', this.remove, readonly),
+      createNodeAction('←', '向前移动', () => this.move(-1), readonly),
+      createNodeAction('→', '向后移动', () => this.move(1), readonly),
+      createNodeAction('×', '删除项目', this.remove, readonly),
     );
     header.append(this.disclosure, this.label, actions);
     header.addEventListener('mousedown', (event) => {
@@ -773,9 +608,9 @@ class CompoundView implements NodeView {
     this.dom.dataset.cherryCompound = node.type.name;
     const header = document.createElement('header');
     header.className = 'cherry-compound__header';
-    this.kind = iconButton(String(node.attrs.kind), '切换块类型', this.cycleKind, readonly);
+    this.kind = createNodeAction(String(node.attrs.kind), '切换块类型', this.cycleKind, readonly);
     this.kind.className = 'cherry-compound__kind';
-    this.title = editableLabel(
+    this.title = createEditableLabel(
       'cherry-compound__title',
       String(node.attrs.title ?? ''),
       '直接输入标题',
@@ -785,7 +620,7 @@ class CompoundView implements NodeView {
     this.title.hidden = node.type.name === 'cherry_detail';
     const actions = document.createElement('span');
     actions.className = 'cherry-node-actions';
-    this.add = iconButton('＋', '增加项目', this.addItem, readonly);
+    this.add = createNodeAction('＋', '增加项目', this.addItem, readonly);
     actions.append(this.kind, this.add);
     header.append(this.title, actions);
     this.contentDOM = document.createElement('div');
@@ -1010,7 +845,7 @@ class SourceLeafView implements NodeView {
     this.source.textContent = String(node.attrs.source ?? '');
     this.source.hidden = node.type.name === 'cherry_frontmatter';
     this.source.addEventListener('input', this.commitSource);
-    this.source.addEventListener('keydown', selectAllEditableSource);
+    this.source.addEventListener('keydown', selectEditableSource);
     if (node.type.name === 'cherry_frontmatter' && !readonly) {
       header.tabIndex = 0;
       header.setAttribute('role', 'button');
@@ -1058,7 +893,7 @@ class SourceLeafView implements NodeView {
   destroy() {
     this.destroyed = true;
     this.source?.removeEventListener('input', this.commitSource);
-    this.source?.removeEventListener('keydown', selectAllEditableSource);
+    this.source?.removeEventListener('keydown', selectEditableSource);
     this.dom.removeEventListener('mousedown', this.prepareTocNavigation);
     this.dom.removeEventListener('click', this.navigateToc);
     if (this.tocRefreshFrame !== undefined) cancelAnimationFrame(this.tocRefreshFrame);
@@ -1105,7 +940,7 @@ class SourceLeafView implements NodeView {
     if (!this.source) return;
     const pos = this.getPos();
     if (typeof pos !== 'number') return;
-    const source = editableSourceText(this.source);
+    const source = readEditableSource(this.source);
     const attrs: Record<string, unknown> = { ...this.node.attrs, source };
     if (this.node.type.name === 'cherry_comment_definition') {
       const parsed = /^\s*\[([^\]]+)\]:\s*(\S+)(?:\s+["'(](.*?)["')])?\s*$/.exec(source);
@@ -1155,7 +990,7 @@ class EmbedView implements NodeView {
     controls.className = 'cherry-embed__controls';
     controls.hidden = node.type.name === 'cherry_emoji';
     const label = node.type.name === 'cherry_native_block' ? '区块源码' : '源码';
-    const edit = iconButton(label, '在节点内编辑源码', this.toggleSource, config.readonly);
+    const edit = createNodeAction(label, '在节点内编辑源码', this.toggleSource, config.readonly);
     this.sourceToggle = edit;
     edit.setAttribute('aria-expanded', 'false');
     controls.append(edit);
@@ -1167,7 +1002,7 @@ class EmbedView implements NodeView {
     this.source.spellcheck = false;
     this.source.addEventListener('input', this.updateSource);
     this.source.addEventListener('blur', this.handleSourceBlur);
-    this.source.addEventListener('keydown', selectAllEditableSource);
+    this.source.addEventListener('keydown', selectEditableSource);
     this.sourcePanel.append(this.source);
     this.dom.append(this.preview, controls, this.sourcePanel);
     this.scheduleRender();
@@ -1225,7 +1060,7 @@ class EmbedView implements NodeView {
     this.dom.removeEventListener('pointerdown', this.activateRender);
     this.source.removeEventListener('input', this.updateSource);
     this.source.removeEventListener('blur', this.handleSourceBlur);
-    this.source.removeEventListener('keydown', selectAllEditableSource);
+    this.source.removeEventListener('keydown', selectEditableSource);
     if (this.timer) clearTimeout(this.timer);
     this.pendingPreview?.remove();
     this.cleanup?.();
@@ -1361,7 +1196,7 @@ class EmbedView implements NodeView {
   private updateSource = () => {
     const pos = this.getPos();
     if (typeof pos !== 'number') return;
-    const value = editableSourceText(this.source);
+    const value = readEditableSource(this.source);
     const attrs = { ...this.node.attrs };
     if (this.node.type.name === 'cherry_diagram') {
       attrs.value = value;
@@ -1524,7 +1359,9 @@ class EmbedView implements NodeView {
       if (!this.config.readonly) {
         const controls = document.createElement('span');
         controls.className = 'cherry-native-table-chart__controls';
-        controls.append(iconButton('源码', '编辑此表格图表源码', () => this.selectSourceRange(chart.from, chart.to)));
+        controls.append(
+          createNodeAction('源码', '编辑此表格图表源码', () => this.selectSourceRange(chart.from, chart.to)),
+        );
         wrapper.append(controls);
       }
       void Promise.resolve(
@@ -1584,7 +1421,7 @@ class TableChartView implements NodeView {
     this.preview.style.minHeight = '300px';
     const controls = document.createElement('figcaption');
     controls.className = 'cherry-embed__controls';
-    const edit = iconButton('源码', '在节点内编辑表格图表源码', this.openSource, config.readonly);
+    const edit = createNodeAction('源码', '在节点内编辑表格图表源码', this.openSource, config.readonly);
     this.sourceToggle = edit;
     edit.setAttribute('aria-expanded', 'false');
     controls.append(edit);
@@ -1597,7 +1434,7 @@ class TableChartView implements NodeView {
     this.source.textContent = String(node.attrs.source ?? '');
     this.source.addEventListener('input', this.commitSource);
     this.source.addEventListener('blur', this.finishSourceEdit);
-    this.source.addEventListener('keydown', selectAllEditableSource);
+    this.source.addEventListener('keydown', selectEditableSource);
     this.sourcePanel.append(this.source);
     this.dom.append(this.preview, controls, this.sourcePanel);
     this.dom.addEventListener('mousedown', this.selectFromEmptyArea, true);
@@ -1660,7 +1497,7 @@ class TableChartView implements NodeView {
     this.dom.removeEventListener('click', this.selectFromEmptyArea, true);
     this.source.removeEventListener('input', this.commitSource);
     this.source.removeEventListener('blur', this.finishSourceEdit);
-    this.source.removeEventListener('keydown', selectAllEditableSource);
+    this.source.removeEventListener('keydown', selectEditableSource);
     destroyCherryRenderedContent(this.config.engine, this.preview);
   }
 
@@ -1755,7 +1592,7 @@ class TableChartView implements NodeView {
     if (this.config.readonly) return;
     const pos = this.resolvePos();
     if (typeof pos !== 'number') return;
-    const source = editableSourceText(this.source);
+    const source = readEditableSource(this.source);
     if (source === this.node.attrs.source) return;
     const firstLine = source.split(/\r?\n/, 1)[0]?.trim().replace(/^\|/, '').trim() ?? '';
     const chartType = /^:(\w+):/.exec(firstLine)?.[1] ?? String(this.node.attrs.chartType ?? '');

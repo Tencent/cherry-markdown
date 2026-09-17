@@ -130,6 +130,7 @@ test('edit&preview routes Bubble commands to the focused editor and synchronizes
   await page.mouse.down();
   await page.mouse.move(linkBox!.x + linkBox!.width - 2, linkBox!.y + linkBox!.height / 2, { steps: 5 });
   await page.mouse.up();
+  await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe('注入');
   const bubble = page.locator('.cherry-bubble--preview:visible');
   await expect(bubble).toBeVisible();
   await bubble.getByTitle('引用').click();
@@ -268,43 +269,32 @@ test('ordinary pointer selection stays text selection and block movement require
 });
 
 test('link inspector exposes and updates both visible text and href', async ({ page }) => {
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
   await setMarkdown(page, '- [Mermaid 讲解](https://old.example/path){target=_blank}');
   const link = page.locator('.ProseMirror a').first();
   const dialog = page.getByRole('dialog', { name: '编辑链接' });
-  const trigger = page.getByRole('button', { name: '编辑链接' });
+  const inspector = page.getByRole('toolbar', { name: '链接' });
   await expect(dialog).toBeHidden();
   const linkBefore = await link.boundingBox();
 
-  // A normal link is not hijacked. Its single shared trailing affordance only
-  // appears on hover/focus and stays outside the ProseMirror document flow.
+  // Hover alone does not add an icon or mutate the document layout.
   await link.hover();
-  await expect(trigger).toBeVisible();
-  await expect(trigger).toHaveCSS('position', 'fixed');
-  await expect(page.locator('.cherry-milkdown-link-trigger')).toHaveCount(1);
+  await expect(inspector).toBeHidden();
   const linkAfter = await link.boundingBox();
-  const triggerBox = await trigger.boundingBox();
   expect(linkAfter).toEqual(linkBefore);
-  expect(
-    triggerBox &&
-      linkAfter &&
-      (triggerBox.x >= linkAfter.x + linkAfter.width + 3 ||
-        triggerBox.x + triggerBox.width <= linkAfter.x - 3 ||
-        triggerBox.y + triggerBox.height <= linkAfter.y ||
-        triggerBox.y >= linkAfter.y + linkAfter.height),
-  ).toBe(true);
-  expect(triggerBox && linkAfter && triggerBox.x >= linkAfter.x + linkAfter.width + 3).toBe(true);
-  // Crossing the small visual gap between the link and its overlay must not
-  // tear down the trigger before the pointer can reach it.
-  await trigger.hover();
-  await expect(trigger).toBeVisible();
 
-  await link.selectText();
-  await expect(page.getByRole('toolbar', { name: '文本格式' })).toBeVisible();
-  await trigger.hover();
-  await expect(trigger).toBeVisible();
-  await trigger.click();
+  // A collapsed caret inside the link opens its inspector without requiring
+  // an extra inline icon.
+  await link.click({ position: { x: 8, y: 8 } });
+  await expect(inspector).toBeVisible();
+  await expect(inspector).toHaveCSS('position', 'fixed');
+  await expect(inspector.getByRole('link')).toHaveText('https://old.example/path');
+  await expect(page.getByRole('toolbar', { name: '文本格式' })).toBeHidden();
+  await inspector.getByRole('button', { name: '复制链接' }).click();
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('https://old.example/path');
+  await inspector.getByRole('button', { name: '编辑链接' }).click();
   await expect(dialog).toBeVisible();
-  await expect(trigger).toBeHidden();
+  await expect(inspector).toBeHidden();
   await expect(page.getByRole('toolbar', { name: '文本格式' })).toBeHidden();
   await expect(dialog.getByLabel('链接显示文本')).toHaveValue('Mermaid 讲解');
   await expect(dialog.getByLabel('链接地址')).toHaveValue('https://old.example/path');
@@ -323,12 +313,14 @@ test('link inspector exposes and updates both visible text and href', async ({ p
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
 
-  // When visible prose follows the link, the trigger must leave the text line
-  // unobstructed instead of occupying the link's natural trailing position.
+  // The inspector remains an overlay and cannot move adjacent prose.
   await setMarkdown(page, 'Before [inline link](https://example.com) following prose.');
-  await link.hover();
-  await expect(trigger).toBeVisible();
-  const inlineTriggerBox = await trigger.boundingBox();
+  const paragraphBefore = await page.locator('.ProseMirror p').boundingBox();
+  await link.click({ position: { x: 8, y: 8 } });
+  await expect(inspector).toBeVisible();
+  const paragraphAfter = await page.locator('.ProseMirror p').boundingBox();
+  expect(paragraphAfter).toEqual(paragraphBefore);
+  const inspectorBox = await inspector.boundingBox();
   const followingTextBox = await page.locator('.ProseMirror p').evaluate((paragraph) => {
     const text = [...paragraph.childNodes].find(
       (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.includes('following prose'),
@@ -340,12 +332,12 @@ test('link inspector exposes and updates both visible text and href', async ({ p
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
   });
   expect(
-    inlineTriggerBox &&
+    inspectorBox &&
       followingTextBox &&
-      (inlineTriggerBox.x + inlineTriggerBox.width <= followingTextBox.x ||
-        inlineTriggerBox.x >= followingTextBox.x + followingTextBox.width ||
-        inlineTriggerBox.y + inlineTriggerBox.height <= followingTextBox.y ||
-        inlineTriggerBox.y >= followingTextBox.y + followingTextBox.height),
+      (inspectorBox.x + inspectorBox.width <= followingTextBox.x ||
+        inspectorBox.x >= followingTextBox.x + followingTextBox.width ||
+        inspectorBox.y + inspectorBox.height <= followingTextBox.y ||
+        inspectorBox.y >= followingTextBox.y + followingTextBox.height),
   ).toBe(true);
 });
 
@@ -355,11 +347,10 @@ test('link inspector keeps adjacent links isolated and reports invalid input', a
   await expect(links).toHaveCount(2);
 
   const second = links.nth(1);
-  await second.selectText();
-  await second.hover();
-  const trigger = page.getByRole('button', { name: '编辑链接' });
-  await expect(trigger).toBeVisible();
-  await trigger.click();
+  await second.click({ position: { x: 8, y: 8 } });
+  const inspector = page.getByRole('toolbar', { name: '链接' });
+  await expect(inspector).toBeVisible();
+  await inspector.getByRole('button', { name: '编辑链接' }).click();
   const dialog = page.getByRole('dialog', { name: '编辑链接' });
   await expect(dialog.getByLabel('链接地址')).toHaveValue('https://two.example');
 
@@ -367,7 +358,14 @@ test('link inspector keeps adjacent links isolated and reports invalid input', a
   await dialog.getByRole('button', { name: '保存' }).click();
   await expect(dialog.locator('.cherry-milkdown-link-editor__error')).toHaveText('请输入有效的链接地址。');
   await expect(dialog).toBeVisible();
-  await dialog.getByRole('button', { name: '取消链接' }).click();
+  await dialog.getByRole('button', { name: '取消' }).click();
+  // A normal caret focus, rather than a text selection, is sufficient to
+  // reopen the link Bubble. Move through the adjacent link so the assertion
+  // also covers ownership transfer between two link marks.
+  await links.first().click({ position: { x: 8, y: 8 } });
+  await second.click({ position: { x: 8, y: 8 } });
+  await expect(inspector).toBeVisible();
+  await inspector.getByRole('button', { name: '取消链接' }).click();
   await expect(links).toHaveCount(1);
   await expect(links.first()).toHaveAttribute('href', 'https://one.example');
   expect(await markdown(page)).toContain('[first](https://one.example) second');

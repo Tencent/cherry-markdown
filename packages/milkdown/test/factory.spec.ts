@@ -690,6 +690,29 @@ describe('cherryMilkdown WYSIWYG', () => {
     await vi.waitFor(() => expect(instance.getMarkdown()).toContain('Updated source'));
   });
 
+  it('preserves an opaque business directive while adjacent standard Markdown is edited', async () => {
+    const element = root();
+    const opaqueSource = ':::business-card custom=value  \n  Opaque source  \n:::';
+    const instance = await cherryMilkdown({
+      el: element,
+      value: `# Before\n\n${opaqueSource}\n\nAfter`,
+      engine: { makeHtml: (value) => value },
+    });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let headingTextPosition = -1;
+    let nativeSource = '';
+    view.state.doc.descendants((node, position) => {
+      if (node.type.name === 'heading') headingTextPosition = position + 1;
+      if (node.type.name === 'cherry_native_block') nativeSource = String(node.attrs.source);
+    });
+
+    expect(nativeSource).toBe(opaqueSource);
+    view.dispatch(view.state.tr.insertText('After', headingTextPosition, headingTextPosition + 'Before'.length));
+    await vi.waitFor(() => expect(instance.getMarkdown()).toContain('# After'));
+    expect(instance.getMarkdown()).toContain(opaqueSource);
+  });
+
   it('updates Markdown and emits debounced changes without rendering a second pane', async () => {
     const element = root();
     const onChange = vi.fn();

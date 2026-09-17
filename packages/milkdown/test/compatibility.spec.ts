@@ -39,4 +39,12 @@ describe('Cherry compatibility manifest', () => {
       expect(item?.interaction.sourceEditing, id).toBe(true);
     }
   });
+
+  it('keeps business-defined syntax on the same native-source fallback used by complex Cherry syntax', () => {
+    const custom = cherryCompatibilityCases.find(({ id }) => id === 'custom-hook');
+    expect(custom?.mode).toBe('native-source');
+    expect(custom?.interaction.sourceEditing).toBe(true);
+    expect(custom?.interaction.structured).toBe(false);
+    expect(custom?.interaction.expectedMarkdown).toBe(custom?.markdown);
+  });
 });

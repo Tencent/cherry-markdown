@@ -2,6 +2,9 @@
 
 - index.ts: edit&preview and previewOnly runtime mounted by `Cherry.usePlugin()`.
 - wysiwyg/: schema, Markdown transforms, native DOM presentation and NodeViews.
+- wysiwyg/syntax-policy.ts: the explicit structured/native-source boundary.
+- wysiwyg/html-sanitizer.ts: the only DOM boundary for Cherry renderer HTML.
+- wysiwyg/node-view-utils.ts: shared, editor-local NodeView controls.
 - native-bridge.ts: delegates Bubble, image and diagram controls to the current
   Cherry Previewer; no second Cherry is created.
 - native-layout.ts: pure translation between Cherry image/Mermaid layout
@@ -16,6 +19,12 @@ lifecycle and Previewer content-renderer slot. These APIs must contain no
 Milkdown-specific branch, parser, style or toolbar behavior. Milkdown owns all
 mode eligibility and editing logic. edit&preview and previewOnly share the same
 preview runtime; editOnly and CherryStream are deliberately not activated.
+
+Cherry syntax is structured only when its Markdown maps one-to-one to a stable
+ProseMirror document. Layout directives and business-defined syntax use the
+same native-source fallback: Cherry renders the preview, Milkdown retains the
+complete source, and edits happen inside the node. Never partially parse an
+unknown directive or silently canonicalise its source.
 
 ## Test migration
 

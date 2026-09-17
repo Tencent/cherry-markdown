@@ -51,6 +51,23 @@ describe('MilkdownPlugin runtime integration', () => {
     cherry.destroy();
   });
 
+  it('does not activate during Cherry stream sessions', async () => {
+    const root = document.createElement('div');
+    document.body.append(root);
+    const cherry = new Cherry({
+      el: root,
+      value: '# Streaming',
+      isPreviewOnly: true,
+      engine: { global: { flowSessionContext: true } },
+    });
+    await cherry.whenPluginsReady();
+
+    expect(cherry.getPlugin(MilkdownPlugin)).toBeUndefined();
+    expect(root.querySelector('.ProseMirror')).toBeNull();
+    expect(root.querySelector('.cherry-previewer')).not.toBeNull();
+    cherry.destroy();
+  });
+
   it('mounts in edit&preview and keeps CodeMirror synchronized', async () => {
     const root = document.createElement('div');
     document.body.append(root);
