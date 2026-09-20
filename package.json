@@ -11,7 +11,8 @@
   "workspaces": [
     "packages/*",
     "examples/react_demo",
-    "examples/miniProgram"
+    "examples/miniProgram",
+    "examples/config_helper"
   ],
   "scripts": {
     "postinstall": "vp run -F cherry-markdown iconfont",
@@ -20,13 +21,15 @@
     "changeset-version": "npx @changesets/cli version",
     "dev": "vp run dev:core",
     "dev:core": "vp dev --config packages/cherry-markdown/vite.config.ts",
-    "build": "vp run -F cherry-markdown build && vp run -F @cherry-markdown/miniprogram build && vp run -F @cherry-markdown/mini-program-demo build && vp run -F @cherry-markdown/react_demo build && vp run -F @cherry-markdown/client build && vp run -F cherry-markdown-vscode-plugin build",
+    "build": "vp run -F cherry-markdown build && vp run -F @cherry-markdown/miniprogram build && vp run -F @cherry-markdown/mini-program-demo build && vp run -F @cherry-markdown/react_demo build && vp run -F @cherry-markdown/config_helper build && vp run -F @cherry-markdown/client build && vp run -F cherry-markdown-vscode-plugin build",
     "build:core": "vp run -F cherry-markdown build",
+    "build:configHelper": "vp run -F @cherry-markdown/config_helper build",
     "build:miniProgram": "vp run -F @cherry-markdown/miniprogram build",
     "dev:client": "vp run -F @cherry-markdown/client tauri:dev",
     "build:client": "vp run -F @cherry-markdown/client build",
     "build:vscodePlugin": "vp run -F cherry-markdown build && vp run -F cherry-markdown-vscode-plugin build",
     "example:react": "vp run -F @cherry-markdown/react_demo dev",
+    "example:configHelper": "vp run -F @cherry-markdown/config_helper dev",
     "test": "vp run -F cherry-markdown test && vp run -F @cherry-markdown/miniprogram test",
     "test:core": "vp run -F cherry-markdown test",
     "test:miniProgram": "vp run -F @cherry-markdown/miniprogram test",

@@ -42,8 +42,13 @@ jobs:
           cp -r packages/cherry-markdown/dist playground/packages/cherry-markdown
           cp -r examples/assets playground
           cp examples/*.html playground
-          [ -d examples/config_helper ] && cp -r examples/config_helper playground
-          find playground -type f -name "*.html" -exec sed -i 's|\.\./packages|./packages|g' {} +
+          # 可视化配置生成器（React 工程）：复制 Vite 构建产物到 playground/config_helper
+          test -f examples/config_helper/dist/index.html || { echo "::error::config_helper 构建产物不存在"; exit 1; }
+          mkdir -p playground/config_helper
+          cp -r examples/config_helper/dist/. playground/config_helper/
+          # 纯 HTML 示例引用的是 ../packages/...，playground 扁平化后需改为 ./packages/...
+          # （config_helper 的产物已自带 cherry-markdown，且使用相对路径，不受影响）
+          find playground -maxdepth 1 -type f -name "*.html" -exec sed -i 's|\.\./packages|./packages|g' {} +
 
       - uses: actions/upload-artifact@v4
         with:

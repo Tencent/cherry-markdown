@@ -1,5 +1,30 @@
 /* Cherry Markdown 配置生成器 - 自定义样式 */
 
+/* Tailwind v4（通过 @tailwindcss/postcss 处理，替代原先的 Play CDN） */
+@import 'tailwindcss';
+
+/*
+ * Tailwind v4 的 preflight 不再给 button 默认 cursor: pointer，
+ * 这里补回来以保持与旧版页面一致的交互体验。
+ */
+@layer base {
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* 整页布局：Header / Main / Footer 纵向排列并撑满视口，主区域内部各自滚动 */
+html,
+body {
+  height: 100%;
+}
+#root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 /* 滚动条美化 */
 ::-webkit-scrollbar {
   width: 6px;
@@ -16,9 +41,20 @@
   background: #9ca3af;
 }
 
-/* 配置面板滚动条 */
-#config-panel::-webkit-scrollbar {
+/* 配置分类列表滚动条 */
+.config-list::-webkit-scrollbar {
   width: 4px;
+}
+
+/* 搜索框：聚焦时使用浅红边框 + 柔和光晕，与配置值输入框保持一致 */
+.search-input:hover {
+  border-color: #d1d5db;
+}
+.search-input:focus,
+.search-input:focus-visible {
+  outline: none;
+  border-color: #fca5a5;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
 }
 
 /* 标签页样式 */
@@ -35,6 +71,7 @@
   border-bottom-color: #ef4444;
   background-color: #fef2f2;
 }
+
 
 /* 配置分类卡片 */
 .config-category {
@@ -445,16 +482,9 @@
   transform: scale(0.97);
 }
 
-/* 响应式 */
-@media (max-width: 1024px) {
-  #config-panel {
-    max-height: none !important;
-    overflow-y: visible !important;
-  }
-}
-
-/* Cherry 编辑器容器 */
+/* Cherry 编辑器容器：撑满预览面板 */
 #cherry-editor .cherry {
+  height: 100%;
   border: none !important;
   border-radius: 0 !important;
 }
