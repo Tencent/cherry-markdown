@@ -1,0 +1,1218 @@
+@import "cherry-markdown/dist/cherry-markdown.css";
+@import "@milkdown/kit/prose/view/style/prosemirror.css";
+@import "mathlive/fonts.css";
+
+/* Editing controls are outside the native columns' grid. Only content items
+ * participate in layout; the NodeView wrapper must not become a spare column. */
+.cherry-milkdown .cherry-compound--cols,
+.cherry-milkdown .cherry-compound-item[data-role="column"] {
+  position: relative;
+}
+.cherry-milkdown .cherry-compound--cols > .cherry-compound__header,
+.cherry-milkdown .cherry-compound-item[data-role="column"] > .cherry-compound-item__header {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1;
+}
+.cherry-milkdown .cherry-panel--col > .cherry-compound-item__content > :first-child {
+  margin-top: 0;
+}
+.cherry-milkdown .cherry-panel--col > .cherry-compound-item__content > :last-child {
+  margin-bottom: 0;
+}
+
+.cherry-milkdown {
+  --cherry-milkdown-primary: var(--md-link-color, #366ef4);
+  --cherry-milkdown-border: var(--base-border-color, #d8dce5);
+  --cherry-milkdown-muted: var(--base-sub-font-color, #646a73);
+  --cherry-milkdown-soft: var(--md-inline-code-bg, #f5f7fa);
+  --cherry-milkdown-panel: var(--panel-primary-bg, #eef3ff);
+  --cherry-milkdown-context-control-height: var(--bubble-btn-height, 40px);
+  --cherry-milkdown-context-gap: var(--spacing-sm, 8px);
+  --cherry-milkdown-context-padding: var(--spacing-sm, 8px);
+  --cherry-milkdown-context-radius: var(--bubble-radius, 6px);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cherry-milkdown .milkdown,
+.cherry-milkdown .ProseMirror {
+  min-height: inherit;
+}
+
+.cherry-milkdown .milkdown {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+/* Milkdown owns both contextual toolbars. Cherry classes and variables provide
+ * their visual contract, while fixed positioning keeps them out of document
+ * flow and prevents selection from changing line layout. */
+.cherry-milkdown-text-bubble,
+.cherry-milkdown .cherry-milkdown-image-controls {
+  position: fixed;
+  z-index: calc(var(--bubble-z-index, 1000) + 2);
+  box-sizing: border-box;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+/* Keep every Milkdown contextual toolbar on Cherry's button-height grid. The
+ * width remains content-driven because text, link and image actions expose
+ * different controls; their height and vertical alignment must not vary. */
+.cherry-milkdown-text-bubble,
+.cherry-milkdown-image-controls,
+.cherry-milkdown-link-bubble {
+  min-height: var(--bubble-btn-height, 40px);
+}
+
+.cherry-milkdown-text-bubble[hidden],
+.cherry-milkdown-image-controls[hidden] {
+  display: none;
+}
+
+.cherry-milkdown-text-bubble .cherry-toolbar-button,
+.cherry-milkdown-image-controls .cherry-toolbar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: var(--bubble-btn-height, 40px);
+  min-height: var(--bubble-btn-height, 40px);
+  border: 0;
+  border-radius: var(--bubble-radius, 4px);
+  font: inherit;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.cherry-milkdown-image-controls .img-tool-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cherry-milkdown-image-controls .img-tool-divider {
+  width: 100%;
+  height: var(--border-width-1, 1px);
+  margin: var(--border-width-4, 4px) 0;
+  border-bottom: var(--border-width-1, 1px) dashed var(--base-border-color, #d8dce5);
+}
+
+.cherry-milkdown-image-controls .img-tool-icon {
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.cherry-milkdown-text-bubble .cherry-toolbar-button.is-active,
+.cherry-milkdown-image-controls .cherry-toolbar-button.is-active {
+  color: var(--toolbar-btn-hover-color, var(--md-link-color, #366ef4));
+  background: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
+}
+
+.cherry-milkdown .cherry-milkdown-image-frame {
+  position: fixed;
+  z-index: calc(var(--bubble-z-index, 1000) + 1);
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.cherry-milkdown-image-frame[hidden] {
+  display: none;
+}
+
+.cherry-milkdown-image-frame__handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--md-link-color, #366ef4);
+  box-shadow: 0 0 0 1px var(--md-link-color, #366ef4);
+  pointer-events: auto;
+}
+
+.cherry-milkdown-image-frame__handle.is-leftTop { left: -6px; top: -6px; cursor: nwse-resize; }
+.cherry-milkdown-image-frame__handle.is-middleTop { left: 50%; top: -6px; transform: translateX(-50%); cursor: ns-resize; }
+.cherry-milkdown-image-frame__handle.is-rightTop { right: -6px; top: -6px; cursor: nesw-resize; }
+.cherry-milkdown-image-frame__handle.is-leftMiddle { left: -6px; top: 50%; transform: translateY(-50%); cursor: ew-resize; }
+.cherry-milkdown-image-frame__handle.is-rightMiddle { right: -6px; top: 50%; transform: translateY(-50%); cursor: ew-resize; }
+.cherry-milkdown-image-frame__handle.is-leftBottom { left: -6px; bottom: -6px; cursor: nesw-resize; }
+.cherry-milkdown-image-frame__handle.is-middleBottom { left: 50%; bottom: -6px; transform: translateX(-50%); cursor: ns-resize; }
+.cherry-milkdown-image-frame__handle.is-rightBottom { right: -6px; bottom: -6px; cursor: nwse-resize; }
+
+.cherry-milkdown-context-form {
+  position: fixed;
+  z-index: calc(var(--bubble-z-index, 1000) + 3);
+  display: grid;
+  gap: var(--cherry-milkdown-context-gap);
+  box-sizing: border-box;
+  padding: var(--cherry-milkdown-context-padding);
+  border: var(--border-width-1, 1px) solid var(--bubble-border, var(--base-border-color, #d8dce5));
+  border-radius: var(--cherry-milkdown-context-radius);
+  color: var(--base-font-color, #3f4654);
+  background: var(--bubble-bg, var(--toolbar-bg, #fff));
+  box-shadow: var(--bubble-shadow, 0 6px 20px rgb(0 0 0 / 14%));
+  font: 13px/1.4 var(--font-family, sans-serif);
+}
+
+.cherry-milkdown-context-form[hidden] {
+  display: none;
+}
+
+.cherry-milkdown-context-form__input {
+  min-width: 0;
+  height: var(--cherry-milkdown-context-control-height);
+  box-sizing: border-box;
+  padding: var(--bubble-padding, 0 8px);
+  border: var(--border-width-1, 1px) solid var(--base-border-color, #d8dce5);
+  border-radius: var(--cherry-milkdown-context-radius);
+  color: inherit;
+  background: var(--base-previewer-bg, #fff);
+  font: inherit;
+  line-height: 1;
+}
+
+.cherry-milkdown-context-form__input:focus {
+  border-color: var(--toolbar-border, var(--md-link-color, #366ef4));
+  outline: 1px solid var(--toolbar-border, var(--md-link-color, #366ef4));
+}
+
+.cherry-milkdown-context-form .cherry-toolbar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  float: none;
+  box-sizing: border-box;
+  width: auto;
+  min-width: var(--cherry-milkdown-context-control-height);
+  height: var(--cherry-milkdown-context-control-height);
+  min-height: var(--cherry-milkdown-context-control-height);
+  margin: 0;
+  padding: var(--bubble-padding, 0 10px);
+  border: var(--border-width-1, 1px) solid var(--base-border-color, #d8dce5);
+  border-radius: var(--cherry-milkdown-context-radius);
+  color: var(--toolbar-btn-color, #3f4654);
+  background: var(--toolbar-btn-bg, var(--bubble-bg, #fff));
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+}
+
+.cherry-milkdown-context-form .cherry-toolbar-button:hover,
+.cherry-milkdown-context-form .cherry-toolbar-button:focus-visible {
+  color: var(--toolbar-btn-hover-color, var(--md-link-color, #366ef4));
+  background: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
+  outline: none;
+}
+
+.cherry-milkdown-context-form .cherry-toolbar-button.is-primary {
+  border-color: var(--toolbar-border, var(--md-link-color, #366ef4));
+  color: var(--oc-white, #fff);
+  background: var(--toolbar-border, var(--md-link-color, #366ef4));
+}
+
+.cherry-milkdown-image-source {
+  grid-template-columns: minmax(0, 1fr);
+  padding: calc(var(--cherry-milkdown-context-padding) * 1.5);
+}
+
+.cherry-milkdown-image-source label {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--cherry-milkdown-context-gap);
+}
+
+.cherry-milkdown-image-source__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cherry-milkdown-context-gap);
+}
+
+.cherry-milkdown-image-source__row .cherry-toolbar-button[hidden] {
+  display: none;
+}
+
+.cherry-milkdown-image-source__status {
+  margin-left: 72px;
+  color: var(--base-sub-font-color, #646a73);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.cherry-milkdown-image-source__status[hidden] {
+  display: none;
+}
+
+.cherry-milkdown-image-source__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--cherry-milkdown-context-gap);
+}
+
+/* Block movement is opt-in from a small handle. Keeping it out of normal
+ * text hit-testing preserves native browser/ProseMirror drag selection. */
+.cherry-milkdown .cherry-milkdown-block {
+  position: relative;
+}
+
+.cherry-milkdown .cherry-milkdown-block__drag-handle {
+  position: absolute;
+  z-index: 2;
+  top: 0.15em;
+  right: calc(100% + 2px);
+  display: inline-flex;
+  width: 16px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  color: var(--base-sub-font-color, #646a73);
+  line-height: 1;
+  cursor: grab;
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+  user-select: none;
+}
+
+.cherry-milkdown .cherry-milkdown-block__drag-handle::before {
+  content: '⋮';
+}
+
+.cherry-milkdown .cherry-milkdown-block:hover .cherry-milkdown-block__drag-handle,
+.cherry-milkdown .cherry-milkdown-block:focus-within .cherry-milkdown-block__drag-handle,
+.cherry-milkdown .cherry-milkdown-block__drag-handle:hover {
+  opacity: 0.7;
+  pointer-events: auto;
+}
+
+.cherry-milkdown .cherry-milkdown-block__drag-handle:active {
+  cursor: grabbing;
+  opacity: 1;
+}
+
+.cherry-milkdown .cherry-dragging {
+  opacity: 0.55;
+}
+
+.cherry-milkdown .cherry-drag-over {
+  box-shadow: inset 0 2px 0 var(--md-link-color, #366ef4);
+}
+
+.cherry-milkdown .milkdown,
+.cherry-milkdown .ProseMirror {
+  min-height: 100%;
+}
+
+.cherry-milkdown .cherry-link-target {
+  display: none;
+}
+
+.cherry-milkdown .cherry-source-node--cherry_frontmatter {
+  display: none;
+}
+
+.cherry-milkdown .cherry-source-node--cherry_toc {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.cherry-milkdown .ProseMirror {
+  box-sizing: border-box;
+  outline: none;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+}
+
+.cherry-milkdown .cherry-node-actions button,
+.cherry-milkdown .cherry-compound__kind,
+.cherry-milkdown .cherry-compound-item__disclosure,
+.cherry-milkdown .cherry-embed__controls button {
+  box-sizing: border-box;
+  min-height: 24px;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--cherry-milkdown-muted);
+  background: transparent;
+  font: inherit;
+}
+
+.cherry-milkdown .cherry-node-actions button:hover,
+.cherry-milkdown .cherry-compound__kind:hover,
+.cherry-milkdown .cherry-compound-item__disclosure:hover,
+.cherry-milkdown .cherry-embed__controls button:hover {
+  color: var(--cherry-milkdown-primary);
+  background: rgb(54 110 244 / 8%);
+}
+
+.cherry-milkdown .cherry-milkdown-code-block {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: var(--spacing-lg);
+  overflow: hidden;
+  border: 0;
+  border-radius: 2px;
+  font-size: var(--font-size-sm);
+}
+
+.cherry-milkdown .cherry-milkdown-code-block:focus-within,
+.cherry-milkdown .cherry-milkdown-code-block.is-selected {
+  outline: 1px solid var(--cherry-milkdown-primary);
+  outline-offset: -1px;
+  box-shadow: 0 0 0 2px rgb(54 110 244 / 10%);
+}
+
+.cherry-milkdown .cherry-milkdown-code-block > pre {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 53px;
+  margin: 0.5em 0;
+  overflow: auto;
+}
+
+.cherry-milkdown .cherry-milkdown-code-block__content {
+  position: relative;
+  top: 4px;
+  display: block;
+  width: calc(100% - 42px);
+  min-height: 1.45em;
+  margin-left: 42px;
+  outline: none;
+  font-size: 14px;
+  line-height: 21px;
+  white-space: pre;
+  tab-size: 2;
+}
+
+[data-code-wrap='wrap'] .cherry-milkdown-code-block__content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.cherry-milkdown .cherry-milkdown-code-block__gutter {
+  position: absolute;
+  top: 18px;
+  left: 14px;
+  display: grid;
+  width: 28px;
+  color: currentcolor;
+  font-size: 14px;
+  line-height: 21px;
+  text-align: left;
+  opacity: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.cherry-milkdown .cherry-milkdown-code-block__gutter > span {
+  display: block;
+  padding: 0;
+}
+
+.cherry-milkdown .cherry-milkdown-code-block__tools {
+  position: absolute;
+  z-index: 4;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.cherry-milkdown .cherry-milkdown-code-block:hover .cherry-milkdown-code-block__tools,
+.cherry-milkdown .cherry-milkdown-code-block:focus-within .cherry-milkdown-code-block__tools,
+.cherry-milkdown .cherry-milkdown-code-block.is-selected .cherry-milkdown-code-block__tools {
+  opacity: 1;
+}
+
+.cherry-milkdown .cherry-milkdown-code-block__language,
+.cherry-milkdown .cherry-milkdown-code-block__copy {
+  box-sizing: border-box;
+  height: 27px;
+  padding: 3px 8px;
+  border: 1px solid var(--cherry-milkdown-border);
+  border-radius: 4px;
+  color: var(--toolbar-btn-color, var(--cherry-milkdown-muted));
+  background: var(--toolbar-bg, #fff);
+  font: inherit;
+}
+
+.cherry-milkdown .cherry-milkdown-code-block__copy:hover,
+.cherry-milkdown .cherry-milkdown-code-block__language:hover {
+  color: var(--toolbar-btn-hover-color, var(--cherry-milkdown-primary));
+  background: var(--toolbar-btn-hover-bg, #f5f7fa);
+}
+
+.cherry-milkdown .cherry-wysiwyg-color,
+.cherry-milkdown .cherry-wysiwyg-bg,
+.cherry-milkdown .cherry-wysiwyg-size,
+.cherry-milkdown .cherry-wysiwyg-sub,
+.cherry-milkdown .cherry-wysiwyg-sup,
+.cherry-milkdown .cherry-wysiwyg-underline {
+  border-radius: 2px;
+}
+
+.cherry-milkdown .cherry-wysiwyg-underline {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cherry-milkdown .cherry-math {
+  border-radius: 5px;
+}
+
+.cherry-milkdown .cherry-math--inline {
+  display: inline-flex;
+  margin: 0 2px;
+  vertical-align: middle;
+}
+
+.cherry-milkdown .cherry-math--block {
+  display: block;
+  margin: 16px 0;
+  padding: 12px;
+  text-align: center;
+}
+
+.cherry-milkdown .cherry-math.is-selected {
+  box-shadow: 0 0 0 2px rgb(54 110 244 / 20%);
+}
+
+.cherry-milkdown .cherry-math__field {
+  min-width: 1.6em;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 1.08em;
+}
+
+.cherry-milkdown .cherry-compound__title,
+.cherry-milkdown .cherry-compound-item__label {
+  flex: 1;
+  min-width: 3em;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+}
+
+.cherry-milkdown .cherry-compound__title::placeholder,
+.cherry-milkdown .cherry-compound-item__label::placeholder {
+  color: var(--cherry-milkdown-muted);
+}
+
+.cherry-milkdown .cherry-node-actions {
+  display: inline-flex;
+  width: max-content;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.cherry-milkdown .cherry-compound--cols > .cherry-compound__header {
+  top: -24px;
+}
+
+.cherry-milkdown .cherry-compound:hover > .cherry-compound__header .cherry-node-actions,
+.cherry-milkdown .cherry-compound.is-selected > .cherry-compound__header .cherry-node-actions,
+.cherry-milkdown .cherry-compound:focus-within > .cherry-compound__header .cherry-node-actions,
+.cherry-milkdown .cherry-compound-item:hover > .cherry-compound-item__header .cherry-node-actions,
+.cherry-milkdown .cherry-compound-item.is-selected > .cherry-compound-item__header .cherry-node-actions,
+.cherry-milkdown .cherry-compound-item:focus-within > .cherry-compound-item__header .cherry-node-actions {
+  opacity: 1;
+}
+
+.cherry-milkdown .cherry-compound-item--detail[data-open='false'] > .cherry-compound-item__content {
+  display: none;
+}
+
+/* Keep the structured Detail node visually identical to Cherry's native
+ * details/summary renderer while leaving the title as a real editable input. */
+.cherry-milkdown .cherry-detail .cherry-compound-item--detail {
+  margin-bottom: var(--spacing-md);
+  overflow: hidden;
+  border: 1px solid var(--accordion-border);
+  border-radius: calc(var(--accordion-radius) + 1px);
+  background: var(--accordion-bg);
+  box-shadow: var(--accordion-shadow);
+}
+
+.cherry-milkdown .cherry-detail .cherry-compound-item--detail > .cherry-compound-item__header {
+  position: relative;
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) calc(var(--spacing-lg) + var(--spacing-xl));
+  cursor: pointer;
+  user-select: none;
+  color: var(--accordion-summary-color);
+  background: var(--accordion-summary-bg);
+}
+
+.cherry-milkdown .cherry-detail .cherry-compound-item--detail > .cherry-compound-item__header::before {
+  position: absolute;
+  top: 50%;
+  left: var(--spacing-md);
+  content: '▼';
+  transform: translateY(-50%);
+  transition: transform 0.2s ease;
+}
+
+.cherry-milkdown .cherry-detail .cherry-compound-item--detail[data-open='true'] > .cherry-compound-item__header::before {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.cherry-milkdown .cherry-detail .cherry-compound-item--detail[data-open='false'] > .cherry-compound-item__header {
+  border-radius: var(--accordion-radius);
+}
+
+.cherry-milkdown .cherry-detail .cherry-compound-item--detail > .cherry-detail-body {
+  padding: var(--spacing-lg);
+  color: var(--accordion-body-color);
+  background: var(--accordion-body-bg);
+  border-top: 1px solid var(--accordion-body-border);
+  line-height: var(--line-height-relaxed);
+}
+
+.cherry-milkdown .cherry-source-node {
+  position: relative;
+  box-sizing: border-box;
+  margin: 16px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--cherry-milkdown-border);
+  border-radius: 8px;
+  background: var(--base-previewer-bg, #fff);
+}
+
+.cherry-milkdown .cherry-embed {
+  position: relative;
+  box-sizing: border-box;
+}
+
+.cherry-milkdown .cherry-node-actions button.is-active,
+.cherry-milkdown .cherry-embed__controls button.is-active,
+.cherry-milkdown .cherry-embed__controls button[aria-expanded='true'] {
+  color: var(--cherry-milkdown-primary);
+  background: rgb(54 110 244 / 10%);
+}
+
+.cherry-milkdown .cherry-source-node__header {
+  display: flex;
+  justify-content: space-between;
+  color: var(--cherry-milkdown-muted);
+  font-size: 12px;
+}
+
+.cherry-milkdown .cherry-source-node__source,
+.cherry-milkdown .cherry-embed__source {
+  display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: min(40vh, 360px);
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  outline: 0;
+  background: var(--md-inline-code-bg, #f6f8fa);
+  white-space: pre-wrap;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  font: 13px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+/* The source editor is a single code surface. Keeping the editable code
+ * element block-level prevents Chromium from painting a focus outline around
+ * every inline line box. The focus ring belongs to the complete source panel,
+ * just like Cherry's native code block. */
+.cherry-milkdown .cherry-embed__source > code {
+  display: block;
+  min-height: 1.6em;
+  outline: none;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+}
+
+/* Structured source editors use a native textarea so line breaks, IME and
+ * selection do not depend on browser-specific contenteditable DOM shapes. */
+.cherry-milkdown .cherry-embed__source-editor {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 7.2em;
+  margin: 0;
+  padding: 0;
+  resize: vertical;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: transparent;
+  white-space: pre;
+  overflow: auto;
+  font: inherit;
+}
+
+.cherry-milkdown .cherry-embed__source:focus-within {
+  outline: 1px solid var(--cherry-milkdown-primary);
+  outline-offset: -1px;
+}
+
+.cherry-milkdown .cherry-source-node__source[hidden],
+.cherry-milkdown .cherry-embed__source[hidden] {
+  display: none;
+}
+
+.cherry-milkdown .cherry-embed.is-selected {
+  border-color: var(--cherry-milkdown-primary);
+  box-shadow: 0 0 0 2px rgb(54 110 244 / 14%);
+}
+
+/* Cherry-owned directives already contain their complete native layout.
+ * Keep the Milkdown NodeView transparent so it cannot change spacing,
+ * backgrounds or component geometry supplied by Cherry's renderer. */
+.cherry-milkdown .cherry-embed--cherry_native_block {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.cherry-milkdown .cherry-embed--cherry_emoji {
+  display: inline-flex;
+  margin: 0 2px;
+  padding: 0;
+  border: 0;
+  vertical-align: middle;
+}
+
+.cherry-milkdown .cherry-embed__preview.is-loading::before {
+  color: var(--cherry-milkdown-muted);
+  content: "正在渲染…";
+}
+
+.cherry-milkdown .cherry-embed__preview svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* ProseMirror uses pre-wrap on the editable document. Native Cherry HTML
+ * contains formatting whitespace between elements, which must collapse just
+ * as it does in the original previewer or it creates phantom blank lines. */
+.cherry-milkdown .cherry-embed__preview {
+  white-space: normal;
+}
+
+.cherry-milkdown .cherry-embed__controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 24px;
+  margin-top: 6px;
+  color: var(--cherry-milkdown-muted);
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.cherry-milkdown .cherry-embed:hover > .cherry-embed__controls,
+.cherry-milkdown .cherry-embed.is-selected > .cherry-embed__controls,
+.cherry-milkdown .cherry-embed:focus-within > .cherry-embed__controls,
+.cherry-milkdown .cherry-embed__controls:hover {
+  opacity: 1;
+}
+
+.cherry-milkdown .milkdown-table-block {
+  position: relative;
+  overflow: visible;
+}
+
+.cherry-milkdown .table-wrapper {
+  position: relative;
+  overflow: visible;
+}
+
+.cherry-milkdown .milkdown-table-block .handle {
+  position: absolute;
+  z-index: 3;
+  display: none;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  color: var(--cherry-milkdown-primary);
+  user-select: none;
+}
+
+.cherry-milkdown .milkdown-table-block .handle[data-show="true"] {
+  display: flex;
+}
+
+.cherry-milkdown .milkdown-table-block .drag-preview[data-show="false"] {
+  display: none;
+}
+
+.cherry-milkdown .milkdown-table-block .cell-handle {
+  border: 1px solid var(--cherry-milkdown-border);
+  border-radius: 4px;
+  background: var(--base-previewer-bg, #fff);
+  box-shadow: 0 1px 4px rgb(31 35 41 / 10%);
+  cursor: grab;
+}
+
+.cherry-milkdown .milkdown-table-block [data-role="col-drag-handle"] {
+  width: 24px;
+  height: 16px;
+  margin-top: 7px;
+}
+
+.cherry-milkdown .milkdown-table-block [data-role="row-drag-handle"] {
+  width: 16px;
+  height: 24px;
+  margin-left: 7px;
+}
+
+.cherry-milkdown .milkdown-table-block .button-group {
+  position: absolute;
+  z-index: 4;
+  display: none;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--cherry-milkdown-border);
+  border-radius: 6px;
+  background: var(--base-previewer-bg, #fff);
+  box-shadow: 0 6px 20px rgb(31 35 41 / 14%);
+  white-space: nowrap;
+}
+
+.cherry-milkdown .milkdown-table-block .button-group[data-show="true"] {
+  display: flex;
+}
+
+.cherry-milkdown .milkdown-table-block [data-role="col-drag-handle"] .button-group {
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, 6px);
+}
+
+.cherry-milkdown .milkdown-table-block [data-role="row-drag-handle"] .button-group {
+  top: 50%;
+  left: 100%;
+  transform: translate(6px, -50%);
+}
+
+.cherry-milkdown .milkdown-table-block .button-group button,
+.cherry-milkdown .milkdown-table-block .add-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  color: inherit;
+  background: transparent;
+}
+
+.cherry-milkdown .milkdown-table-block .button-group button:hover,
+.cherry-milkdown .milkdown-table-block .add-button:hover {
+  color: #fff;
+  background: var(--cherry-milkdown-primary);
+}
+
+.cherry-milkdown .milkdown-table-block .line-handle {
+  background: transparent;
+  /* The insertion guide crosses cells; only its actual button owns clicks. */
+  pointer-events: none;
+}
+
+.cherry-milkdown .milkdown-table-block [data-role="x-line-drag-handle"] {
+  left: 0;
+  height: 20px;
+  margin-top: -10px;
+}
+
+.cherry-milkdown .milkdown-table-block [data-role="y-line-drag-handle"] {
+  top: 0;
+  width: 20px;
+  margin-left: -10px;
+}
+
+.cherry-milkdown .milkdown-table-block .line-handle::before {
+  position: absolute;
+  border-radius: 2px;
+  background: var(--cherry-milkdown-primary);
+  opacity: 0.35;
+  content: "";
+}
+
+.cherry-milkdown .milkdown-table-block [data-role="x-line-drag-handle"]::before {
+  right: 0;
+  left: 0;
+  height: 3px;
+}
+
+.cherry-milkdown .milkdown-table-block [data-role="y-line-drag-handle"]::before {
+  top: 0;
+  bottom: 0;
+  width: 3px;
+}
+
+.cherry-milkdown .milkdown-table-block .line-handle .add-button {
+  pointer-events: auto;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--cherry-milkdown-border);
+  border-radius: 50%;
+  background: var(--base-previewer-bg, #fff);
+}
+
+.cherry-milkdown .milkdown-table-block .line-handle[data-display-type="indicator"] .add-button {
+  display: none;
+}
+
+/* NodeViews retain the native Cherry DOM presentation contract. */
+.cherry-milkdown .cherry-compound.cherry-detail {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.cherry-milkdown .cherry-detail > .cherry-compound__header {
+  position: absolute;
+  z-index: 20;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+}
+
+/* Keep the parent-level add action beside, rather than on top of, the active
+ * item's move/delete actions. Both remain overlays and add no layout space. */
+.cherry-milkdown .cherry-detail > .cherry-compound__header .cherry-node-actions {
+  right: 86px;
+}
+
+.cherry-milkdown .cherry-detail > .cherry-compound__content {
+  padding: 0;
+}
+
+.cherry-milkdown .cherry-compound__header,
+.cherry-milkdown .cherry-compound-item__header,
+.cherry-milkdown .cherry-embed {
+  position: relative;
+}
+
+.cherry-milkdown .cherry-node-actions,
+.cherry-milkdown .cherry-embed__controls {
+  position: absolute;
+  z-index: 20;
+  /* Controls are an overlay, like Cherry's native preview actions: they do
+   * not add a block to the document or create a second scrollbar.  The solid
+   * background keeps the small action target legible without changing the
+   * rendered node's dimensions. */
+  top: 6px;
+  right: 6px;
+  margin: 0;
+}
+
+.cherry-milkdown .cherry-embed__controls[hidden] {
+  display: none;
+}
+
+/* Match Cherry's bubble/toolbar contract instead of inventing a second
+ * button theme for embedded nodes.  All values resolve through Cherry's
+ * semantic variables when present, with the fallbacks kept for standalone
+ * Milkdown consumers. */
+.cherry-milkdown .cherry-embed__controls {
+  box-sizing: border-box;
+  height: 30px;
+  min-height: 30px;
+  padding: 2px;
+  border: var(--border-width-1, 1px) solid var(--bubble-border, var(--cherry-milkdown-border));
+  border-radius: var(--bubble-radius, 4px);
+  background-color: var(--bubble-bg, var(--toolbar-bg, #fff));
+  box-shadow: var(--bubble-shadow, 0 2px 8px rgb(0 0 0 / 10%));
+}
+
+.cherry-milkdown .cherry-embed__controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 0;
+  height: 24px;
+  min-height: 24px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: var(--bubble-radius, 4px);
+  color: var(--toolbar-btn-color, var(--cherry-milkdown-muted));
+  background: var(--toolbar-btn-bg, transparent);
+  cursor: pointer;
+  font: 12px/24px var(--font-family, sans-serif);
+  transition: color 150ms, background-color 150ms;
+}
+
+.cherry-milkdown .cherry-embed__controls button:hover,
+.cherry-milkdown .cherry-embed__controls button:focus-visible,
+.cherry-milkdown .cherry-embed__controls button.is-active,
+.cherry-milkdown .cherry-embed__controls button[aria-expanded='true'] {
+  color: var(--toolbar-btn-hover-color, var(--cherry-milkdown-primary));
+  background-color: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
+  outline: none;
+}
+
+/* A link is a ProseMirror mark rather than a source-backed node. The shared
+ * inspector stays outside editor content, so it cannot alter line wrapping,
+ * selection, clipboard content or serialized Markdown. */
+.cherry-milkdown-link-bubble {
+  position: fixed;
+  z-index: calc(var(--bubble-z-index, 1000) + 3);
+  box-sizing: border-box;
+  flex-wrap: nowrap;
+  max-width: min(420px, calc(100vw - 16px));
+}
+
+.cherry-milkdown-link-bubble[hidden] {
+  display: none;
+}
+
+.cherry-milkdown-link-bubble .cherry-toolbar-button {
+  flex: 0 0 auto;
+  float: none;
+  box-sizing: border-box;
+  min-width: var(--bubble-btn-height, 40px);
+  border: 0;
+}
+
+.cherry-milkdown-link-bubble .cherry-toolbar-button:focus-visible {
+  outline: none;
+}
+
+.cherry-milkdown-link-bubble__href {
+  display: inline-flex;
+  flex: 1 1 160px;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 280px;
+  height: var(--bubble-btn-height, 40px);
+  padding: var(--bubble-padding, 0 8px);
+  overflow: hidden;
+  color: var(--toolbar-btn-color, #3f4654);
+  text-overflow: ellipsis;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.cherry-milkdown-link-bubble__href:hover,
+.cherry-milkdown-link-bubble__href:focus-visible {
+  color: var(--toolbar-btn-hover-color, var(--md-link-color, #366ef4));
+  outline: none;
+}
+
+.cherry-milkdown-link-editor {
+  padding: calc(var(--cherry-milkdown-context-padding) * 1.5);
+}
+
+.cherry-milkdown-link-editor[hidden] {
+  display: none;
+}
+
+.cherry-milkdown-link-editor label {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--cherry-milkdown-context-gap);
+}
+
+.cherry-milkdown-link-editor__error {
+  margin: -2px 0 0 72px;
+  color: var(--error-color, #d54941);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.cherry-milkdown-link-editor__error[hidden] {
+  display: none;
+}
+
+.cherry-milkdown-link-editor__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--cherry-milkdown-context-gap);
+}
+
+.cherry-milkdown .cherry-compound__title:focus::placeholder,
+.cherry-milkdown .cherry-compound-item__label:focus::placeholder {
+  color: var(--base-sub-font-color);
+}
+
+.cherry-milkdown .cherry-compound-item__label {
+  user-select: text;
+}
+
+.cherry-milkdown .cherry-compound-item__disclosure {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--spacing-lg) + var(--spacing-xl));
+  min-height: 0;
+  padding: 0;
+  opacity: 0;
+}
+
+.cherry-milkdown .milkdown-table-block {
+  /* Native Cherry's table wrapper includes the table's 16px trailing
+   * margin in its own box before the next block. The editable TableBlock
+   * exposes that margin outside the box, so add the same 6px remainder. */
+  margin: 0 0 calc(var(--spacing-lg) + 16px);
+  padding: 0;
+}
+
+.cherry-milkdown .milkdown-table-block + .cherry-compound {
+  margin-top: 0;
+}
+
+/* Milkdown's ProseMirror base stylesheet removes the bottom margin from the
+ * first list in a document. Cherry keeps a 16px separation before the next
+ * block, so restore that spacing only inside the embedded preview. */
+.cherry-milkdown .ProseMirror > ul,
+.cherry-milkdown .ProseMirror > ol {
+  margin-bottom: 16px;
+}
+
+.cherry-milkdown th > p,
+.cherry-milkdown td > p {
+  margin: 0;
+}
+
+.cherry-milkdown .cherry-footnote-definition .one-footnote {
+  display: flex;
+  align-items: flex-start;
+}
+
+.cherry-milkdown .cherry-footnote-definition__content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Milkdown's GFM schema normalizes an omitted alignment to inline `left`.
+ * Cherry centers an unaligned header while keeping body cells left aligned. */
+.cherry-milkdown th[style*="text-align: left"] {
+  text-align: center !important;
+}
+
+/* Task markers are injected as the same Cherry icon-font spans used by the
+ * native renderer.  Keep only the interaction affordance here; the native
+ * `.check-list-item .ch-icon` margin, font and baseline come from
+ * cherry-markdown.css. */
+.cherry-milkdown .ProseMirror li[data-item-type='task'] .cherry-task-checkbox,
+.cherry-milkdown .ProseMirror li[data-item-type='task'] .ch-icon {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Cherry wraps tables in `.cherry-table-container`, so its table bottom
+ * margin and the following panel top margin do not collapse. Milkdown keeps
+ * the editable table as a direct ProseMirror child; restore the same gap. */
+.cherry-milkdown .ProseMirror > table + .cherry-panel {
+  margin-top: calc(var(--spacing-lg) + 10px);
+}
+
+.cherry-milkdown .cherry-embed {
+  margin: var(--spacing-lg) 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* The Cherry table hook already owns the spacing through its inner
+ * `.cherry-table-figure` (margin: 16px 0).  The NodeView shell must not add a
+ * second outer margin, otherwise charts in columns are shifted vertically
+ * and no longer line up with the native preview. */
+.cherry-milkdown .cherry-table-chart {
+  /* The native panel follows a chart by 10px; keep the NodeView's controls
+   * out of the unfocused flow while matching that exact block gap. */
+  margin: 16px 0 10px;
+}
+
+/* The preview and chart mount point are owned by this NodeView. Keep their
+ * responsive contract independent from Cherry's generated table wrappers. */
+.cherry-milkdown .cherry-table-chart__preview.is-rendered {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* The generated native wrapper already includes the table figure's bottom
+ * margin.  Its top margin is the outer block spacing in Cherry's renderer;
+ * move that spacing to the NodeView shell so the shell does not add a second
+ * collapsed 16px above the wrapper. */
+.cherry-milkdown .cherry-table-chart .cherry-table-figure {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin-top: 0;
+}
+
+.cherry-milkdown .cherry-table-chart .cherry-echarts-wrapper {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Inside Cherry's Columns/Panel layout the native renderer owns the outer
+ * block margin (`.cherry-panel--col > :last-child { margin-bottom: 0 }`) and
+ * leaves the figure's 16px top margin intact. Mirror that nested contract so
+ * the chart does not inherit the top-level NodeView spacing. */
+.cherry-milkdown .cherry-panel-cols .cherry-table-chart {
+  margin: 0;
+}
+
+.cherry-milkdown .cherry-panel-cols .cherry-table-chart .cherry-table-figure {
+  margin-top: 16px;
+}
+
+.cherry-milkdown .cherry-embed--cherry_native_block {
+  margin: 0;
+}
+
+.cherry-milkdown math-field::part(menu-toggle),
+.cherry-milkdown math-field::part(virtual-keyboard-toggle) {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.cherry-milkdown math-field:hover::part(menu-toggle),
+.cherry-milkdown math-field:hover::part(virtual-keyboard-toggle),
+.cherry-milkdown math-field:focus-within::part(menu-toggle),
+.cherry-milkdown math-field:focus-within::part(virtual-keyboard-toggle) {
+  opacity: 1;
+}
