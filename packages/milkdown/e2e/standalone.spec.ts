@@ -272,18 +272,28 @@ test('link inspector exposes and updates both visible text and href', async ({ p
       return { height: rect.height, center: rect.top + rect.height / 2 };
     }),
   );
-  expect(buttonBoxes.map(({ height }) => height)).toEqual([38, 38, 38]);
+  expect(buttonBoxes.map(({ height }) => height)).toEqual([38, 38]);
   expect(
     Math.max(...buttonBoxes.map(({ center }) => center)) - Math.min(...buttonBoxes.map(({ center }) => center)),
   ).toBeLessThanOrEqual(0.5);
   await expect(inspector.getByRole('link')).toHaveText('https://old.example/path');
   await expect(page.getByRole('toolbar', { name: '文本格式' })).toBeHidden();
   await inspector.getByRole('button', { name: '复制链接' }).click();
+  await expect(inspector.getByRole('button', { name: '已复制' })).toBeVisible();
+  await expect(inspector.getByRole('button', { name: '已复制' })).toHaveClass(/is-success/);
+  await expect(inspector.locator('.ch-icon-ok')).toBeVisible();
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('https://old.example/path');
   await inspector.getByRole('button', { name: '编辑链接' }).click();
   await expect(dialog).toBeVisible();
   await expect(dialog).toHaveClass(/cherry-milkdown-context-form/);
   await expect(inspector).toBeHidden();
+  await expect(dialog.getByRole('button', { name: '取消链接' })).toBeVisible();
+  await dialog.getByRole('button', { name: '取消链接' }).click();
+  await expect(dialog.getByRole('button', { name: '保留链接' })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: '确认取消链接' })).toBeVisible();
+  await dialog.getByRole('button', { name: '保留链接' }).click();
+  await expect(dialog.getByRole('button', { name: '取消链接' })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: '保存' })).toBeVisible();
   await expect(page.getByRole('toolbar', { name: '文本格式' })).toBeHidden();
   await expect(dialog.getByLabel('链接显示文本')).toHaveValue('Mermaid 讲解');
   await expect(dialog.getByLabel('链接地址')).toHaveValue('https://old.example/path');
@@ -370,14 +380,17 @@ test('link inspector keeps adjacent links isolated and reports invalid input', a
   await dialog.getByRole('button', { name: '保存' }).click();
   await expect(dialog.locator('.cherry-milkdown-link-editor__error')).toHaveText('请输入有效的链接地址。');
   await expect(dialog).toBeVisible();
-  await dialog.getByRole('button', { name: '取消' }).click();
+  await dialog.getByRole('button', { name: '取消', exact: true }).click();
   // A normal caret focus, rather than a text selection, is sufficient to
   // reopen the link Bubble. Move through the adjacent link so the assertion
   // also covers ownership transfer between two link marks.
   await links.first().click({ position: { x: 8, y: 8 } });
   await second.click({ position: { x: 8, y: 8 } });
   await expect(inspector).toBeVisible();
-  await inspector.getByRole('button', { name: '取消链接' }).click();
+  await inspector.getByRole('button', { name: '编辑链接' }).click();
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: '取消链接' }).click();
+  await dialog.getByRole('button', { name: '确认取消链接' }).click();
   await expect(links).toHaveCount(1);
   await expect(links.first()).toHaveAttribute('href', 'https://one.example');
   expect(await markdown(page)).toContain('[first](https://one.example) second');

@@ -216,6 +216,12 @@
   background: var(--toolbar-border, var(--md-link-color, #366ef4));
 }
 
+.cherry-milkdown-context-form .cherry-toolbar-button.is-danger {
+  border-color: var(--error-color, #d54941);
+  color: var(--oc-white, #fff);
+  background: var(--error-color, #d54941);
+}
+
 .cherry-milkdown-image-source {
   grid-template-columns: minmax(0, 1fr);
   padding: calc(var(--cherry-milkdown-context-padding) * 1.5);
@@ -1010,6 +1016,16 @@
 
 .cherry-milkdown-link-bubble .cherry-toolbar-button:focus-visible {
   outline: none;
+}
+
+.cherry-milkdown-link-bubble .cherry-toolbar-button.is-success {
+  color: var(--success-color, #2ba471);
+  background-color: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
+}
+
+.cherry-milkdown-link-bubble .cherry-toolbar-button.is-error {
+  color: var(--error-color, #d54941);
+  background-color: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
 }
 
 .cherry-milkdown-link-bubble__href {

@@ -109,16 +109,25 @@ export const cherryLinkEditor = $prose((ctx) => {
         return button;
       };
       const copy = iconButton('复制链接', 'ch-icon-copy');
+      const copyIcon = copy.querySelector<HTMLElement>('.ch-icon');
       const hrefPreview = document.createElement('a');
       hrefPreview.className = 'cherry-milkdown-link-bubble__href';
       hrefPreview.target = '_blank';
       hrefPreview.rel = 'noopener noreferrer';
       const edit = iconButton('编辑链接', 'ch-icon-edit');
       edit.setAttribute('aria-haspopup', 'dialog');
-      const unlink = iconButton('取消链接', 'ch-icon-close');
+      const unlink = document.createElement('button');
+      unlink.type = 'button';
+      unlink.className = 'cherry-toolbar-button cherry-milkdown-link-editor__unlink';
+      unlink.textContent = '取消链接';
+      unlink.title = '取消链接';
+      unlink.setAttribute('aria-label', '取消链接');
       const arrow = document.createElement('span');
       arrow.className = 'cherry-bubble-bottom';
-      inspector.append(arrow, hrefPreview, copy, edit, unlink);
+      // Keep destructive link actions in the editor panel. The compact
+      // inspector remains read-only (URL/copy/edit), matching Cherry's
+      // native link Bubble interaction and avoiding accidental unlinking.
+      inspector.append(arrow, hrefPreview, copy, edit);
 
       const form = document.createElement('form');
       form.className = 'cherry-milkdown-context-form cherry-milkdown-link-editor';
@@ -186,7 +195,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       confirm.type = 'submit';
       confirm.className = 'cherry-toolbar-button is-primary';
       confirm.textContent = '保存';
-      actions.append(cancel, confirm);
+      actions.append(unlink, cancel, confirm);
       form.append(textLabel, hrefLabel, targetLabel, error, actions);
 
       // These are UI overlays owned by this plugin, not editor content. Keep
@@ -197,6 +206,8 @@ export const cherryLinkEditor = $prose((ctx) => {
       let active: LinkRange | undefined;
       let editorOpen = false;
       let uiVisible = false;
+      let unlinkPending = false;
+      let copyFeedbackTimer: number | undefined;
 
       const notifyUi = (open: boolean) => {
         view.dom.dispatchEvent(new CustomEvent('cherry-milkdown:link-ui-change', { bubbles: true, detail: { open } }));
@@ -261,6 +272,17 @@ export const cherryLinkEditor = $prose((ctx) => {
         uiVisible = visible;
         notifyUi(visible);
       };
+      const setUnlinkPending = (pending: boolean) => {
+        unlinkPending = pending;
+        unlink.textContent = pending ? '保留链接' : '取消链接';
+        unlink.title = pending ? '保留链接' : '取消链接';
+        unlink.setAttribute('aria-label', pending ? '保留链接' : '取消链接');
+        confirm.textContent = pending ? '确认取消链接' : '保存';
+        confirm.classList.toggle('is-danger', pending);
+        textInput.disabled = pending;
+        hrefInput.disabled = pending;
+        targetSelect.disabled = pending;
+      };
       const hideInspector = () => {
         if (editorOpen) return;
         active = undefined;
@@ -271,6 +293,7 @@ export const cherryLinkEditor = $prose((ctx) => {
         const previous = active;
         editorOpen = false;
         form.hidden = true;
+        setUnlinkPending(false);
         error.hidden = true;
         error.textContent = '';
         edit.setAttribute('aria-expanded', 'false');
@@ -288,6 +311,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       };
       const open = (range: LinkRange) => {
         active = { ...range, anchor: range.anchor ?? anchorForRange(range) };
+        setUnlinkPending(false);
         textInput.value = view.state.doc.textBetween(range.from, range.to, '', '');
         hrefInput.value = String(range.mark?.attrs.href ?? range.anchor?.getAttribute('href') ?? '');
         const currentTarget = String(linkTargetAfter(view.state.doc, range.to)?.node.attrs.target ?? '');
@@ -364,19 +388,37 @@ export const cherryLinkEditor = $prose((ctx) => {
       const copyLink = async () => {
         const href = String(active?.mark?.attrs.href ?? active?.anchor?.getAttribute('href') ?? '');
         if (!href) return;
+        const setCopyFeedback = (state: 'success' | 'error' | 'idle') => {
+          copy.classList.toggle('is-success', state === 'success');
+          copy.classList.toggle('is-error', state === 'error');
+          copyIcon?.classList.toggle('ch-icon-copy', state === 'idle');
+          copyIcon?.classList.toggle('ch-icon-ok', state === 'success');
+          copyIcon?.classList.toggle('ch-icon-warning', state === 'error');
+          const label = state === 'success' ? '已复制' : state === 'error' ? '复制失败' : '复制链接';
+          copy.title = label;
+          copy.setAttribute('aria-label', label);
+        };
+        if (copyFeedbackTimer !== undefined) window.clearTimeout(copyFeedbackTimer);
         try {
-          await document.defaultView?.navigator.clipboard?.writeText(href);
-          copy.title = '已复制';
+          const clipboard = document.defaultView?.navigator.clipboard;
+          if (!clipboard) throw new Error('Clipboard API is unavailable');
+          await clipboard.writeText(href);
+          setCopyFeedback('success');
         } catch {
-          copy.title = '复制失败';
+          setCopyFeedback('error');
         }
-        setTimeout(() => {
-          copy.title = '复制链接';
+        copyFeedbackTimer = window.setTimeout(() => {
+          setCopyFeedback('idle');
+          copyFeedbackTimer = undefined;
         }, 1200);
       };
       const onSubmit = (event: SubmitEvent) => {
         event.preventDefault();
         if (!active) return;
+        if (unlinkPending) {
+          removeLink();
+          return;
+        }
         const href = sanitizeLinkHref(hrefInput.value.trim());
         const text = textInput.value.trim();
         if (!href || !text) {
@@ -442,6 +484,10 @@ export const cherryLinkEditor = $prose((ctx) => {
         close({ restoreFocus: true });
       };
       const onCancel = () => close({ restoreFocus: true });
+      const onUnlink = () => {
+        setUnlinkPending(!unlinkPending);
+        confirm.focus({ preventScroll: true });
+      };
       const hideForViewportChange = () => {
         if (editorOpen) close();
         active = undefined;
@@ -455,7 +501,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       };
       copy.addEventListener('click', onCopy);
       edit.addEventListener('click', onEdit);
-      unlink.addEventListener('click', removeLink);
+      unlink.addEventListener('click', onUnlink);
       document.addEventListener('pointerdown', onOutsidePointer, true);
       document.defaultView?.addEventListener('scroll', hideForViewportChange, true);
       document.defaultView?.addEventListener('resize', hideForViewportChange);
@@ -482,7 +528,8 @@ export const cherryLinkEditor = $prose((ctx) => {
           inspector.removeEventListener('pointerdown', preserveSelection);
           copy.removeEventListener('click', onCopy);
           edit.removeEventListener('click', onEdit);
-          unlink.removeEventListener('click', removeLink);
+          unlink.removeEventListener('click', onUnlink);
+          if (copyFeedbackTimer !== undefined) window.clearTimeout(copyFeedbackTimer);
           document.removeEventListener('pointerdown', onOutsidePointer, true);
           document.defaultView?.removeEventListener('scroll', hideForViewportChange, true);
           document.defaultView?.removeEventListener('resize', hideForViewportChange);
