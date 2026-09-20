@@ -69,6 +69,11 @@ export interface CherryMilkdownOptions {
   /** Optional Cherry-compatible uploader used by the image editor. */
   fileUpload?: CherryMilkdownFileUpload;
   plugins?: MilkdownPlugin[];
+  /**
+   * Visual renderers keyed by fenced-code language. A configured language is
+   * automatically exposed as a live source block; `tableChart` is reserved
+   * for Cherry table-chart previews.
+   */
   renderers?: Record<string, CherryVisualRenderer>;
   onChange?: (result: CherryMilkdownChange) => void;
   onError?: (error: unknown, phase: CherryMilkdownErrorPhase) => void;

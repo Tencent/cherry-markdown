@@ -23,7 +23,14 @@ test('standalone editor boots without Cherry editor, Previewer or top toolbar', 
   await expect(
     page.locator('#markdown > .cherry.cherry-milkdown .cherry-previewer.cherry-markdown.ProseMirror'),
   ).toHaveCount(1);
-  await expect(page.locator('#markdown > .cherry.cherry-milkdown')).toHaveClass(/theme__default/);
+  const root = page.locator('#markdown > .cherry.cherry-milkdown');
+  const editor = page.locator('.ProseMirror.cherry-previewer');
+  await expect(root).toHaveClass(/theme__default/);
+  await expect(root).toHaveClass(/cherry--no-toolbar/);
+  await expect(editor).toHaveClass(/cherry-previewer--full/);
+  expect(await editor.evaluate((element) => element.getBoundingClientRect().width)).toBe(
+    await root.evaluate((element) => element.getBoundingClientRect().width),
+  );
   await expect(page.locator('[role="alert"]')).toHaveCount(0);
   expect(errors).toEqual([]);
 });
@@ -65,6 +72,32 @@ test('real text selection, Bubble formatting, undo, and no layout shift', async 
   await expect(bubble).toHaveClass(/cherry-milkdown-text-bubble/);
   await expect(bubble).toHaveCSS('border-color', 'rgb(51, 154, 240)');
   await expect(bubble.locator('[title="加粗"]')).toHaveCSS('height', '38px');
+  const buttonWidths = await bubble
+    .locator('button')
+    .evaluateAll((buttons) => buttons.map((button) => Math.round(button.getBoundingClientRect().width)));
+  expect(new Set(buttonWidths)).toEqual(new Set([38]));
+  const glyphSizes = await bubble.locator('.cherry-milkdown-text-bubble__glyph').evaluateAll((glyphs) =>
+    glyphs.map((glyph) => {
+      const rect = glyph.getBoundingClientRect();
+      return [Math.round(rect.width), Math.round(rect.height)];
+    }),
+  );
+  expect(glyphSizes).toEqual([
+    [32, 32],
+    [32, 32],
+    [32, 32],
+    [32, 32],
+  ]);
+  await expect(bubble.locator('[title="加粗"] .cherry-milkdown-text-bubble__glyph')).toHaveCSS('font-weight', '700');
+  await expect(bubble.locator('[title="斜体"] .cherry-milkdown-text-bubble__glyph')).toHaveCSS('font-style', 'italic');
+  await expect(bubble.locator('[title="下划线"] .cherry-milkdown-text-bubble__glyph')).toHaveCSS(
+    'text-decoration-line',
+    'underline',
+  );
+  await expect(bubble.locator('[title="删除线"] .cherry-milkdown-text-bubble__glyph')).toHaveCSS(
+    'text-decoration-line',
+    'line-through',
+  );
   const paragraphBox = await paragraph.boundingBox();
   expect(paragraphBox).not.toBeNull();
   await page.mouse.move(paragraphBox!.x + paragraphBox!.width - 4, paragraphBox!.y + paragraphBox!.height / 2);
@@ -102,6 +135,34 @@ test('Bubble hides on scroll and never becomes detached from its selection', asy
 
   expect(await scrollEditor(80)).toBeGreaterThan(0);
   await expect(bubble).toBeHidden();
+});
+
+test('Bubble active marks use an inset visual state without changing hit targets', async ({ page }) => {
+  await setMarkdown(page, '***Selected text***');
+  const text = page.locator('.ProseMirror > p').first();
+  await text.click({ clickCount: 3 });
+  const bubble = page.getByRole('toolbar', { name: '文本格式' });
+  await expect(bubble).toBeVisible();
+
+  for (const title of ['加粗', '斜体']) {
+    const button = bubble.locator(`[title="${title}"]`);
+    await expect(button).toHaveAttribute('aria-pressed', 'true');
+    await expect(button).toHaveCSS('width', '38px');
+    await expect(button).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    await expect
+      .poll(() =>
+        button
+          .locator('.cherry-milkdown-text-bubble__glyph')
+          .evaluate((glyph) => getComputedStyle(glyph).backgroundColor),
+      )
+      .not.toBe('rgba(0, 0, 0, 0)');
+  }
+  await expect(bubble.locator('[title="下划线"]')).toHaveAttribute('aria-pressed', 'false');
+  await expect(bubble.locator('[title="删除线"]')).toHaveAttribute('aria-pressed', 'false');
+  await expect(bubble.locator('[title="下划线"] .cherry-milkdown-text-bubble__glyph')).toHaveCSS(
+    'background-color',
+    'rgba(0, 0, 0, 0)',
+  );
 });
 
 for (const item of [
@@ -261,6 +322,7 @@ test('link inspector exposes and updates both visible text and href', async ({ p
   // an extra inline icon.
   await link.click({ position: { x: 8, y: 8 } });
   await expect(inspector).toBeVisible();
+  await expect(inspector).toHaveClass(/cherry-milkdown-context-bubble/);
   await expect(inspector).toHaveCSS('position', 'fixed');
   await expect(inspector).toHaveCSS('border-color', 'rgb(51, 154, 240)');
   await expect(inspector.locator('.cherry-bubble-bottom,.cherry-bubble-top')).toBeVisible();
@@ -269,10 +331,23 @@ test('link inspector exposes and updates both visible text and href', async ({ p
   const buttonBoxes = await inspector.getByRole('button').evaluateAll((buttons) =>
     buttons.map((button) => {
       const rect = button.getBoundingClientRect();
-      return { height: rect.height, center: rect.top + rect.height / 2 };
+      return { width: rect.width, height: rect.height, center: rect.top + rect.height / 2 };
     }),
   );
+  expect(buttonBoxes.map(({ width }) => width)).toEqual([38, 38]);
   expect(buttonBoxes.map(({ height }) => height)).toEqual([38, 38]);
+  await expect(inspector.locator('.cherry-milkdown-context-button__content')).toHaveCount(2);
+  expect(
+    await inspector.locator('.cherry-milkdown-context-button__content').evaluateAll((contents) =>
+      contents.map((content) => {
+        const rect = content.getBoundingClientRect();
+        return [Math.round(rect.width), Math.round(rect.height)];
+      }),
+    ),
+  ).toEqual([
+    [32, 32],
+    [32, 32],
+  ]);
   expect(
     Math.max(...buttonBoxes.map(({ center }) => center)) - Math.min(...buttonBoxes.map(({ center }) => center)),
   ).toBeLessThanOrEqual(0.5);
@@ -458,6 +533,24 @@ test('Mermaid renders and source editing stays open without text Bubble', async 
   await expect(node).not.toHaveClass(/is-selected/);
 });
 
+test('configured custom fenced renderers hot-update from their local source editor', async ({ page }) => {
+  await setMarkdown(page, '```custom-preview\nold\n```');
+  const node = page.locator('.cherry-embed--cherry_diagram');
+  await expect(node.locator('[data-custom-preview]')).toHaveText('old');
+
+  await node.getByRole('button', { name: '在节点内编辑源码', exact: true }).click();
+  const source = node.locator('.cherry-embed__source code');
+  await source.press('ControlOrMeta+a');
+  await source.pressSequentially('new value');
+
+  await expect(node.locator('[data-custom-preview]')).toHaveText('new value');
+  await expect.poll(async () => (await markdown(page)).trimEnd()).toBe('```custom-preview\nnew value\n```');
+  await expect(node.getByRole('button', { name: '在节点内编辑源码', exact: true })).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+});
+
 for (const directive of [
   {
     name: 'columns',
@@ -510,11 +603,26 @@ test('image controls update Cherry-compatible layout directives without Cherry U
   const toolbar = page.getByRole('toolbar', { name: '图片设置' });
   const frame = page.locator('.cherry-milkdown-image-frame');
   await expect(toolbar).toBeVisible();
+  await expect(toolbar).toHaveClass(/cherry-milkdown-context-bubble/);
   await expect(toolbar).toHaveCSS('position', 'fixed');
   expect((await toolbar.boundingBox())?.y).toBeGreaterThanOrEqual(0);
   await expect(frame).toBeVisible();
   await expect(toolbar.getByRole('button', { name: '浮动左对齐' })).toBeVisible();
   await expect(toolbar.getByRole('button', { name: '浮动右对齐' })).toBeVisible();
+  expect(
+    await toolbar.getByRole('button').evaluateAll((buttons) =>
+      buttons.map((button) => {
+        const rect = button.getBoundingClientRect();
+        const contentRect = button.firstElementChild?.getBoundingClientRect();
+        return [
+          Math.round(rect.width),
+          Math.round(rect.height),
+          Math.round(contentRect?.width ?? 0),
+          Math.round(contentRect?.height ?? 0),
+        ];
+      }),
+    ),
+  ).toEqual(Array.from({ length: 9 }, () => [38, 38, 32, 32]));
   await toolbar.getByRole('button', { name: '边框' }).click();
   await expect(toolbar.getByRole('button', { name: '边框' })).toHaveAttribute('aria-pressed', 'true');
   expect(await markdown(page)).toContain('#B');
@@ -583,11 +691,12 @@ test('manual ECharts example renders including its final semicolon', async ({ pa
   await expect(page.locator('[role="alert"], [data-render-error="true"]')).toHaveCount(0);
 });
 
-test('manual line table chart keeps Cherry-owned columns free of injected controls', async ({ page }) => {
+test('manual line table chart renders inside Cherry-owned columns without injected controls', async ({ page }) => {
   await page.getByRole('link', { name: '折线图', exact: true }).click();
   const heading = page.locator('h3#折线图');
   const nativeBlock = heading.locator('+ .cherry-embed--cherry_native_block');
   await expect(nativeBlock.locator('.cherry-panel-cols__2cols')).toBeVisible();
+  await expect(nativeBlock.locator('.cherry-echarts-wrapper svg')).toBeVisible();
   await expect(nativeBlock.locator('.cherry-table-wrapper').first()).toBeVisible();
   await expect(nativeBlock.getByRole('button', { name: '编辑当前表格图表源码', exact: true })).toHaveCount(0);
   await expect(nativeBlock.getByRole('button', { name: '编辑整个区块源码', exact: true })).toBeVisible();
@@ -607,6 +716,7 @@ test('table chart nested in Cherry columns edits through the owned block source'
   const updated = `${value.slice(0, chartOffset)}${updatedChart}${value.slice(chartOffset + chart.length)}`;
   await source.fill(updated);
 
+  await expect(node.locator('.cherry-echarts-wrapper svg')).toBeVisible();
   await expect(node.locator('.cherry-table')).toContainText('13');
   await expect.poll(() => markdown(page)).toContain('After');
   expect((await markdown(page)).match(/Before/g)).toHaveLength(1);
@@ -640,58 +750,140 @@ test('Mermaid source edits preserve width and alignment and can be closed', asyn
   await expect(source).toBeHidden();
 });
 
-test('table chart source toggles and changing type updates the rendered chart', async ({ page }) => {
+test('table chart uses the native table editor and redraws without a blank frame', async ({ page }) => {
   await setMarkdown(page, '| :line:{"title":"Trend"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 1 | 2 |');
   const node = page.locator('.cherry-table-chart');
   await expect(node.locator('svg')).toBeVisible();
-  const toggle = node.getByRole('button', { name: '编辑表格图表源码', exact: true });
-  await expect(node.locator('.cherry-embed__controls')).toHaveText('编辑图表');
-  await expect(node.locator('.cherry-embed__type')).toHaveCount(0);
-  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-  await toggle.click();
-  const source = node.getByRole('textbox', { name: '表格图表源码' });
-  await source.fill('| :bar:{"title":"Changed"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 3 | 4 |');
+  const table = page.locator('.milkdown-table-block').first();
+  const descriptor = table.locator('th p').first();
+  const sales = table.locator('td p').first();
+  await expect(descriptor).toContainText(':line:');
+  await page.evaluate(() => {
+    const chart = document.querySelector<HTMLElement>('.cherry-table-chart');
+    if (!chart) throw new Error('Missing table chart');
+    const result = { blankSnapshots: 0, minHeight: Number.POSITIVE_INFINITY, maxHeight: 0 };
+    const inspect = () => {
+      if (!chart.querySelector('.cherry-table-chart__preview svg')) result.blankSnapshots += 1;
+      const height = chart.getBoundingClientRect().height;
+      result.minHeight = Math.min(result.minHeight, height);
+      result.maxHeight = Math.max(result.maxHeight, height);
+    };
+    inspect();
+    const observer = new MutationObserver(inspect);
+    observer.observe(chart, { childList: true, subtree: true });
+    let running = true;
+    const inspectFrame = () => {
+      if (!running) return;
+      inspect();
+      requestAnimationFrame(inspectFrame);
+    };
+    requestAnimationFrame(inspectFrame);
+    (window as typeof window & { stopChartStabilityProbe?: () => typeof result }).stopChartStabilityProbe = () => {
+      running = false;
+      observer.disconnect();
+      inspect();
+      return result;
+    };
+  });
+  await descriptor.fill(':bar:{"title":"Changed"}');
+  await sales.fill('Revenue');
+  await table.locator('td p').nth(1).fill('3');
+  await table.locator('td p').nth(2).fill('4');
   await expect(node.locator('svg')).toContainText('Changed');
-  expect(await markdown(page)).toContain('| Sales | 3 | 4 |');
-  await page.mouse.wheel(0, 240);
-  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-  await source.press('Escape');
-  await expect(source).toBeHidden();
-  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-  await expect(page.locator('.ProseMirror')).toBeFocused();
+  const stability = await page.evaluate(() =>
+    (window as typeof window & { stopChartStabilityProbe?: () => Record<string, number> }).stopChartStabilityProbe?.(),
+  );
+  expect(stability?.blankSnapshots).toBe(0);
+  expect(stability!.maxHeight - stability!.minHeight).toBeLessThan(2);
+  const updatedMarkdown = await markdown(page);
+  expect(updatedMarkdown).toContain('Revenue');
+  expect(updatedMarkdown).toContain('| 3   | 4   |');
+  await expect(table).toBeVisible();
+  await expect(page.getByRole('button', { name: '编辑表格图表源码' })).toHaveCount(0);
 });
 
-test('table chart source history, IME and external revisions stay deterministic', async ({ page }) => {
+test('map table chart reuses Cherry map semantics and mounts fetched GeoJSON', async ({ page }) => {
+  await page.route('https://maps.example/china.json', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: { name: '北京市' },
+            geometry: {
+              type: 'Polygon',
+              coordinates: [
+                [
+                  [116, 39],
+                  [117, 39],
+                  [117, 40],
+                  [116, 40],
+                  [116, 39],
+                ],
+              ],
+            },
+          },
+        ],
+      }),
+    });
+  });
+  await setMarkdown(
+    page,
+    '| :map:{"title":"China","mapDataSource":"https://maps.example/china.json"} | Value |\n' +
+      '| --- | --- |\n' +
+      '| 北京 | 100 |',
+  );
+
+  const chart = page.locator('.cherry-table-chart .cherry-echarts-wrapper');
+  await expect(chart).toHaveAttribute('data-map-status', 'success');
+  await expect(chart.locator('svg')).toBeVisible();
+  await expect(page.locator('[role="alert"], [data-render-error="true"]')).toHaveCount(0);
+});
+
+test('all documented non-map table chart types mount through Cherry semantics', async ({ page }) => {
+  const cases = [
+    ['line', '| :line:{"title":"line"} | Q1 | Q2 |\n| --- | --- | --- |\n| Sales | 1 | 2 |'],
+    ['bar', '| :bar:{"title":"bar"} | Q1 | Q2 |\n| --- | --- | --- |\n| Sales | 1 | 2 |'],
+    ['pie', '| :pie:{"title":"pie"} | Value |\n| --- | --- |\n| Apples | 4 |\n| Pears | 2 |'],
+    ['radar', '| :radar:{"title":"radar"} | A | B |\n| --- | --- | --- |\n| User | 4 | 2 |'],
+    ['heatmap', '| :heatmap:{"title":"heatmap"} | A | B |\n| --- | --- | --- |\n| AM | 4 | 2 |'],
+    [
+      'scatter',
+      '| :scatter:{"title":"scatter"} | X | Y | Size | Series |\n' +
+        '| --- | --- | --- | --- | --- |\n' +
+        '| A | 1 | 2 | 3 | Group |',
+    ],
+    ['sankey', '| :sankey:{"title":"sankey"} | Target | Value |\n| --- | --- | --- |\n| A | B | 3 |'],
+  ] as const;
+
+  for (const [type, source] of cases) {
+    await setMarkdown(page, source);
+    const node = page.locator('.cherry-table-chart');
+    await expect(node.locator('.cherry-echarts-wrapper svg'), type).toBeVisible();
+    await expect(node.locator('svg'), type).toContainText(type);
+    await expect(page.locator('[role="alert"], [data-render-error="true"]')).toHaveCount(0);
+  }
+});
+
+test('table chart cell undo and external revisions stay deterministic', async ({ page }) => {
   const before = '| :line:{"title":"Before"} | Jan |\n| --- | --- |\n| Sales | 1 |';
-  const composing = before.replace('Before', '输入中');
   const external = before.replace('Before', 'External');
   await setMarkdown(page, before);
   const node = page.locator('.cherry-table-chart');
   await expect(node.locator('svg')).toContainText('Before');
-  await node.getByRole('button', { name: '编辑表格图表源码', exact: true }).click();
-  const source = node.getByRole('textbox', { name: '表格图表源码' });
-
-  await source.evaluate((element, value) => {
-    const textarea = element as HTMLTextAreaElement;
-    textarea.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
-    textarea.value = value;
-    textarea.dispatchEvent(new InputEvent('input', { bubbles: true, data: '中', inputType: 'insertCompositionText' }));
-  }, composing);
+  const descriptor = page.locator('.milkdown-table-block th p').first();
+  await descriptor.fill(':line:{"title":"输入中"}');
   expect(await markdown(page)).toContain('输入中');
-  await page.waitForTimeout(100);
-  await expect(node.locator('svg')).toContainText('Before');
-  await source.evaluate((element) => element.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true })));
   await expect(node.locator('svg')).toContainText('输入中');
 
-  await source.press('ControlOrMeta+z');
+  await descriptor.press('ControlOrMeta+z');
   await expect.poll(() => markdown(page)).toContain('Before');
-  await expect(source).toHaveValue(before);
-  await source.press('Shift+ControlOrMeta+z');
-  await expect.poll(() => markdown(page)).toContain('输入中');
 
   await setMarkdown(page, external);
-  await expect(source).toHaveValue(external);
-  await source.press('Escape');
+  await expect(page.locator('.milkdown-table-block th p').first()).toContainText('External');
+  await expect(page.locator('.cherry-table-chart svg')).toContainText('External');
   expect(await markdown(page)).toBe(external);
 });
 

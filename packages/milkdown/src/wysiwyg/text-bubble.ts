@@ -3,6 +3,7 @@ import type { MarkType } from '@milkdown/kit/prose/model';
 import { Plugin, TextSelection, type EditorState } from '@milkdown/kit/prose/state';
 import { $prose } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
+import { createContextBubble, createContextButton } from './contextual-ui.js';
 
 export function supportsTextFormatting(state: EditorState) {
   const { selection, doc } = state;
@@ -46,27 +47,22 @@ export const cherryTextBubble = $prose((ctx) => {
     view: (view) => {
       if (config.readonly || !config.bubble) return {};
       const document = view.dom.ownerDocument;
-      const bubble = document.createElement('div');
-      bubble.className = 'cherry-bubble cherry-milkdown-text-bubble';
-      bubble.hidden = true;
-      bubble.setAttribute('role', 'toolbar');
-      bubble.setAttribute('aria-label', '文本格式');
+      const bubble = createContextBubble(document, 'cherry-milkdown-text-bubble', '文本格式');
       const arrow = document.createElement('span');
       arrow.className = 'cherry-bubble-bottom';
       bubble.append(arrow);
 
       const actions = [
-        { label: '加粗', text: 'B', names: ['strong'] },
-        { label: '斜体', text: 'I', names: ['emphasis', 'em'] },
-        { label: '下划线', text: 'U', names: ['cherry_underline'] },
-        { label: '删除线', text: 'S', names: ['strike_through', 'strike'] },
+        { label: '加粗', text: 'B', style: 'bold', names: ['strong'] },
+        { label: '斜体', text: 'I', style: 'italic', names: ['emphasis', 'em'] },
+        { label: '下划线', text: 'U', style: 'underline', names: ['cherry_underline'] },
+        { label: '删除线', text: 'S', style: 'strike', names: ['strike_through', 'strike'] },
       ].map((definition) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'cherry-toolbar-button';
-        button.textContent = definition.text;
-        button.title = definition.label;
-        button.setAttribute('aria-label', definition.label);
+        const { button } = createContextButton(document, {
+          label: definition.label,
+          text: definition.text,
+          contentClassName: `cherry-milkdown-text-bubble__glyph cherry-milkdown-text-bubble__glyph--${definition.style}`,
+        });
         bubble.append(button);
         return { ...definition, button };
       });

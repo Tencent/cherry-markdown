@@ -5,6 +5,8 @@ export interface CherryVisualRenderContext {
   engine: CherryEngineLike;
   source: string;
   syntax: string;
+  /** Aborted when this revision is replaced or its NodeView is destroyed. */
+  signal?: AbortSignal;
 }
 
 export type CherryDiagramRenderContext = CherryVisualRenderContext;

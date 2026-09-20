@@ -3,6 +3,7 @@ import { $prose } from '@milkdown/kit/utils';
 import type { CherryMilkdownFileUploadParams } from '../types.js';
 import { imageAltText, imageLayoutState, replaceImageAltText, updateImageLayout } from '../native-layout.js';
 import { cherryWysiwygConfigCtx } from './config.js';
+import { createContextButton, setupContextBubble } from './contextual-ui.js';
 
 interface ResizeSession {
   position: number;
@@ -22,16 +23,13 @@ interface ImageAction {
 }
 
 function action(document: Document, label: string, value: string, icon: string): ImageAction {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'cherry-toolbar-button img-tool-button';
-  button.title = label;
+  const { button } = createContextButton(document, {
+    label,
+    icon,
+    className: 'img-tool-button',
+    contentClassName: 'img-tool-icon',
+  });
   button.dataset.imageAction = value;
-  button.setAttribute('aria-label', label);
-  const glyph = document.createElement('span');
-  glyph.className = `img-tool-icon ch-icon ${icon}`;
-  glyph.setAttribute('aria-hidden', 'true');
-  button.append(glyph);
   return { button, value };
 }
 
@@ -66,9 +64,7 @@ export const cherryImageControls = $prose((ctx) => {
 
       const toolbar = document.createElement('div');
       toolbar.className = 'cherry-bubble cherry-previewer-img-tool-handler cherry-milkdown-image-controls';
-      toolbar.hidden = true;
-      toolbar.setAttribute('role', 'toolbar');
-      toolbar.setAttribute('aria-label', '图片设置');
+      setupContextBubble(toolbar, '图片设置');
       const decorationActions = [
         action(document, '边框', 'border', 'ch-icon-imgDecoBorder'),
         action(document, '阴影', 'shadow', 'ch-icon-imgDecoShadow'),

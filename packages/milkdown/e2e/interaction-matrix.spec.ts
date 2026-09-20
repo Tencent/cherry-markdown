@@ -115,6 +115,22 @@ test('TOC links and ordinary hash links navigate to stable heading ids', async (
   await expect(page.locator('h2#destination')).toBeInViewport();
 });
 
+test('H1-H6 native heading anchors stay clickable and do not receive drag handles', async ({ page }) => {
+  await setMarkdown(
+    page,
+    Array.from({ length: 6 }, (_, index) => `${'#'.repeat(index + 1)} Heading ${index + 1}`).join('\n\n'),
+  );
+
+  for (let level = 1; level <= 6; level += 1) {
+    const heading = page.locator(`h${level}#heading-${level}`);
+    await expect(heading).toBeVisible();
+    await expect(heading.locator('[data-cherry-block-drag-handle]')).toHaveCount(0);
+    await heading.getByRole('link', { name: `定位到 Heading ${level}` }).click();
+    await expect.poll(() => new URL(page.url()).hash).toBe(`#heading-${level}`);
+    await expect(heading).toBeInViewport();
+  }
+});
+
 test('Panel and Detail controls update structure without replacing native layout', async ({ page }) => {
   await setMarkdown(page, ':::warning Notice\nBody\n:::\n\n+++ More\nContent\n+++');
   const panel = page.locator('.cherry-compound.cherry-panel');

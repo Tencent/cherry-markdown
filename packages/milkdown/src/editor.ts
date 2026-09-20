@@ -27,6 +27,7 @@ import type {
 import { createSelectionTracker } from './selection-tracker.js';
 import { loadCodeLanguages } from './wysiwyg/code-block.js';
 import { cherryWysiwyg, cherryWysiwygConfigCtx } from './wysiwyg/index.js';
+import { TableChartDescriptorEngine } from './wysiwyg/table-chart-render-engine.js';
 
 const DEFAULT_DEBOUNCE = 30;
 const CHERRY_THEMES = ['default', 'dark', 'abyss', 'green', 'red', 'gray', 'violet', 'blue'] as const;
@@ -73,8 +74,16 @@ function replaceMarkdownWithMinimalTransaction(editor: Editor, markdown: string)
       nextTo = from;
     }
     // The replace transaction maps both the live caret and saved selections.
-    // Restoring absolute offsets afterwards would undo that mapping.
-    view.dispatch(view.state.tr.replace(from, to, nextDocument.slice(from, nextTo)).setMeta('addToHistory', false));
+    // Restoring absolute offsets afterwards would undo that mapping. A text
+    // diff can, however, cross table-cell boundaries while still describing a
+    // valid string edit. ProseMirror repairs that slice into multiple tables.
+    // Accept the minimal transaction only when it produces the exact parsed
+    // document; otherwise use one structure-safe full-content replacement.
+    let transaction = view.state.tr.replace(from, to, nextDocument.slice(from, nextTo));
+    if (!transaction.doc.eq(nextDocument)) {
+      transaction = view.state.tr.replaceWith(0, view.state.doc.content.size, nextDocument.content);
+    }
+    view.dispatch(transaction.setMeta('addToHistory', false));
   });
 }
 
@@ -149,7 +158,11 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
   // Cherry's published Bubble and Markdown tokens are scoped by a theme
   // class. Keep the same scope on the standalone host so contextual
   // Milkdown controls inherit the exact Cherry theme without demo CSS.
-  mountRoot.classList.add('cherry', `theme__${currentTheme}`, 'cherry-milkdown');
+  // Mirror Cherry's toolbar-free preview layout state. In particular,
+  // `.cherry-previewer` defaults to the 50% split-view width, while the
+  // native `--full` modifier below makes this standalone editor occupy the
+  // complete host without introducing a Milkdown-only width override.
+  mountRoot.classList.add('cherry', 'cherry--no-toolbar', `theme__${currentTheme}`, 'cherry-milkdown');
   const debounce = Math.max(0, options.debounce ?? DEFAULT_DEBOUNCE);
   let notificationTimer: ReturnType<typeof setTimeout> | undefined;
   let changeMicrotaskQueued = false;
@@ -157,6 +170,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
   let suppressChanges = false;
   let acceptingChanges = false;
   let engine: CherryMilkdownInstance['engine'];
+  let nativeEngine: CherryMilkdownInstance['engine'] | undefined;
   let currentMarkdown = options.value ?? '';
   let serializedBaseline = '';
   const selectionTracker = createSelectionTracker();
@@ -170,6 +184,27 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     // It contributes Markdown semantics and HTML presentation, not an editor,
     // Previewer, Bubble or mode lifecycle.
     engine = requireCherryEngine(options.engine ?? new CherryEngine(options.engineOptions ?? {}));
+    if (!options.engine && options.renderers?.tableChart) {
+      const configuredEngine = (options.engineOptions?.engine ?? {}) as Record<string, unknown>;
+      const configuredSyntax = (configuredEngine.syntax ?? {}) as Record<string, unknown>;
+      const configuredTable = (configuredSyntax.table ?? {}) as Record<string, unknown>;
+      nativeEngine = requireCherryEngine(
+        new CherryEngine({
+          ...options.engineOptions,
+          engine: {
+            ...configuredEngine,
+            syntax: {
+              ...configuredSyntax,
+              table: {
+                ...configuredTable,
+                enableChart: true,
+                chartRenderEngine: TableChartDescriptorEngine,
+              },
+            },
+          },
+        }),
+      );
+    }
   } catch (error) {
     options.onError?.(error, 'create');
     throw error;
@@ -257,6 +292,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
       }));
       ctx.set(cherryWysiwygConfigCtx.key, {
         engine,
+        nativeEngine,
         readonly: Boolean(options.readonly),
         bubble: options.bubble !== false,
         debounce,
@@ -285,7 +321,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
         ...previous,
         editable: () => !options.readonly,
         attributes: {
-          class: `cherry-previewer cherry-markdown theme__${currentTheme} cherry-milkdown__editor`,
+          class: `cherry-previewer cherry-previewer--full cherry-markdown theme__${currentTheme} cherry-milkdown__editor`,
         },
       }));
     })

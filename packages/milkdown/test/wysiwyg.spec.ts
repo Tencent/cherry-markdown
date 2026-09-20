@@ -53,7 +53,40 @@ describe('Cherry WYSIWYG markdown transform', () => {
     expect((tree.children[2] as { diagramType?: string } | undefined)?.diagramType).toBe('mermaid');
   });
 
-  it('turns a Cherry table chart into one source-preserving native visual node', () => {
+  it('promotes only configured custom fenced renderers into live source blocks', () => {
+    const source = ['```custom-chart', 'one', '```', '', '```js', 'const value = 1;', '```'].join('\n');
+    const customEnd = source.indexOf('\n\n');
+    const tree = {
+      type: 'root',
+      children: [
+        {
+          type: 'code',
+          lang: 'custom-chart',
+          value: 'one',
+          position: { start: { offset: 0 }, end: { offset: customEnd } },
+        },
+        {
+          type: 'code',
+          lang: 'js',
+          value: 'const value = 1;',
+          position: { start: { offset: customEnd + 2 }, end: { offset: source.length } },
+        },
+      ],
+    };
+
+    transformCherryWysiwygTree(tree, source, () => [], { sourceBlockTypes: ['custom-chart'] });
+
+    expect(tree.children).toEqual([
+      expect.objectContaining({
+        type: 'cherryDiagram',
+        diagramType: 'custom-chart',
+        source: '```custom-chart\none\n```',
+      }),
+      expect.objectContaining({ type: 'code', lang: 'js' }),
+    ]);
+  });
+
+  it('keeps a Cherry table chart as an editable GFM table', () => {
     const source = ['| :line:{"title":"Trend"} | Jan | Feb |', '| --- | ---: | ---: |', '| Sales | 1 | 2 |'].join('\n');
     const tree = {
       type: 'root',
@@ -68,13 +101,7 @@ describe('Cherry WYSIWYG markdown transform', () => {
 
     transformCherryWysiwygTree(tree, source);
 
-    expect(tree.children).toEqual([
-      expect.objectContaining({
-        type: 'cherryTableChart',
-        chartType: 'line',
-        source,
-      }),
-    ]);
+    expect(tree.children).toEqual([expect.objectContaining({ type: 'table' })]);
   });
 
   it('parses chart data from Markdown without depending on Cherry HTML', () => {
@@ -120,8 +147,8 @@ describe('Cherry WYSIWYG markdown transform', () => {
 
     transformCherryWysiwygTree(tree, source, parse);
 
-    expect(tree.children.map(({ type }) => type)).toEqual(['cherryToc', 'cherryTableChart']);
-    expect(tree.children[1]).toEqual(expect.objectContaining({ chartType: 'line', source: chart }));
+    expect(tree.children.map(({ type }) => type)).toEqual(['cherryToc', 'table']);
+    expect(tree.children[1]).toEqual(expect.objectContaining({ type: 'table' }));
   });
 
   it('turns nested foreground and background syntax into nested editable marks', () => {

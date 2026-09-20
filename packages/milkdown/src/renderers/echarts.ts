@@ -1,19 +1,21 @@
 import type { CherryVisualRenderer } from '../types.js';
 import { parseTableChart } from '../wysiwyg/table-chart.js';
+import EChartsTableEngine from 'cherry-markdown/dist/addons/advance/cherry-table-echarts-plugin.esm.js';
 import JSON5 from 'json5';
 
 /** Optional ECharts renderer. Import this entry only when charts are needed. */
-export const echarts: CherryVisualRenderer = async ({ container, source }) => {
+export const echarts: CherryVisualRenderer = async ({ container, source, signal }) => {
   // Accept object-literal data used in the Cherry manual, never executable JS.
   // Cherry's native ECharts code-block examples are object literals followed by
   // a JavaScript statement terminator. JSON5 accepts the object literal but not
   // that trailing semicolon, so remove only a final terminator before parsing.
   const option = JSON5.parse(source.trim().replace(/;\s*$/, ''));
-  return mountChart(container, option);
+  return mountChart(container, option, signal);
 };
 
-async function mountChart(container: HTMLElement, option: Record<string, unknown>) {
+async function mountChart(container: HTMLElement, option: Record<string, unknown>, signal?: AbortSignal) {
   const library = await import('echarts');
+  if (signal?.aborted) return;
   const chartRoot = document.createElement('div');
   chartRoot.className = 'cherry-echarts-wrapper';
   chartRoot.style.cssText = 'width:100%;height:300px';
@@ -29,66 +31,43 @@ async function mountChart(container: HTMLElement, option: Record<string, unknown
     chartRoot.remove();
     throw error;
   }
-  return () => {
+  const cleanup = () => {
     observer?.disconnect();
-    chart.dispose();
+    if (!chart.isDisposed()) chart.dispose();
     chartRoot.remove();
   };
+  return cleanup;
 }
 
 /** Render from the documented chart-table source, never from Cherry's private DOM. */
-export const tableChart: CherryVisualRenderer = async ({ container, source, syntax }) => {
+export const tableChart: CherryVisualRenderer = async ({ container, source, syntax, signal }) => {
   const parsed = parseTableChart(source);
   if (!parsed) throw new TypeError('Invalid Cherry table-chart Markdown.');
   const settings = parsed.optionsSource ? JSON5.parse(parsed.optionsSource) : {};
-  const categories = parsed.header;
-  const names = parsed.rows.map((row) => row[0]);
-  const data = parsed.rows.map((row) => row.slice(1).map((value) => Number(value) || 0));
-  const option: Record<string, unknown> = { title: { text: settings.title ?? '' }, tooltip: {}, legend: {} };
-  if (syntax === 'line' || syntax === 'bar') {
-    Object.assign(option, {
-      xAxis: { type: 'category', data: categories },
-      yAxis: { type: 'value' },
-      series: parsed.rows.map((_, index) => ({ name: names[index], type: syntax, data: data[index] })),
-    });
-  } else if (syntax === 'pie') {
-    option.series = [{ type: 'pie', data: names.map((name, index) => ({ name, value: data[index]?.[0] })) }];
-  } else if (syntax === 'radar') {
-    option.radar = {
-      indicator: categories.map((name, index) => ({
-        name,
-        max: Math.max(1, ...data.map((row) => row[index] ?? 0)) * 1.1,
-      })),
-    };
-    option.series = [{ type: 'radar', data: names.map((name, index) => ({ name, value: data[index] })) }];
-  } else if (syntax === 'heatmap') {
-    const values = data.flatMap((row, y) => row.map((value, x) => [x, y, value]));
-    Object.assign(option, {
-      xAxis: { type: 'category', data: categories },
-      yAxis: { type: 'category', data: names },
-      visualMap: { min: 0, max: Math.max(1, ...data.flat()), calculable: true },
-      series: [{ type: 'heatmap', data: values }],
-    });
-  } else if (syntax === 'scatter') {
-    Object.assign(option, {
-      xAxis: {},
-      yAxis: {},
-      series: [{ type: 'scatter', data: data.map((row) => row.slice(0, 2)) }],
-    });
-  } else if (syntax === 'sankey') {
-    const nodes = [...new Set(parsed.rows.flatMap((row) => row.slice(0, 2)))];
-    option.series = [
-      {
-        type: 'sankey',
-        data: nodes.map((name) => ({ name })),
-        links: parsed.rows.map((row) => ({ source: row[0], target: row[1], value: Number(row[2]) || 0 })),
-      },
-    ];
-  } else {
-    // Map charts need consumer-owned geographic data. Preserve the native
-    // table instead of fetching a third-party URL without a configured source.
-    container.remove();
-    return;
-  }
-  return mountChart(container, option);
+  const library = await import('echarts');
+  if (signal?.aborted) return;
+  const chartEngine = new EChartsTableEngine({
+    echarts: library,
+    cherryOptions: {},
+    renderer: 'svg',
+  });
+  const mount = container.matches('[data-cherry-milkdown-table-chart]')
+    ? container
+    : container.appendChild(document.createElement('div'));
+  const cleanup = chartEngine.renderInto(
+    mount,
+    syntax,
+    settings,
+    {
+      header: ['', ...parsed.header],
+      rows: parsed.rows,
+      colLength: parsed.header.length + 1,
+      rowLength: parsed.rows.length,
+    },
+    signal,
+  );
+  return () => {
+    cleanup();
+    if (mount !== container) mount.remove();
+  };
 };

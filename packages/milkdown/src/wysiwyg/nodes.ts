@@ -1,5 +1,4 @@
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
-import { closeHistory, redo, undo } from '@milkdown/kit/prose/history';
 import { footnoteDefinitionSchema } from '@milkdown/kit/preset/gfm';
 import { NodeSelection, Plugin, TextSelection, type Transaction } from '@milkdown/kit/prose/state';
 import { Decoration, DecorationSet } from '@milkdown/kit/prose/view';
@@ -17,6 +16,7 @@ import {
 import type { CherryVisualRendererResult } from './types.js';
 import { sanitizedEngineFragment } from './html-sanitizer.js';
 import { createEditableLabel, createNodeAction, readEditableSource, selectEditableSource } from './node-view-utils.js';
+import { readTableChartDescriptor, tableChartDescriptorSource } from './table-chart-render-engine.js';
 const headingNavigationTasks = new WeakMap<
   EditorView,
   { frames: number[]; timers: Array<ReturnType<typeof setTimeout>> }
@@ -204,9 +204,6 @@ export const cherryCommentDefinitionSchema = leafSchema('cherry_comment_definiti
 export const cherryDiagramSchema = leafSchema('cherry_diagram', 'cherryDiagram', false, {
   diagramType: sourceAttr(),
   value: sourceAttr(),
-});
-export const cherryTableChartSchema = leafSchema('cherry_table_chart', 'cherryTableChart', false, {
-  chartType: sourceAttr(),
 });
 export const cherryNativeBlockSchema = leafSchema('cherry_native_block', 'cherryNativeBlock');
 export const cherryHtmlBlockSchema = leafSchema('cherry_html_block', 'cherryHtmlBlock');
@@ -975,6 +972,8 @@ class EmbedView implements NodeView {
   private timer?: ReturnType<typeof setTimeout>;
   private renderVersion = 0;
   private cleanup?: () => void;
+  private renderController?: AbortController;
+  private activeRenderController?: AbortController;
   private visibilityObserver?: IntersectionObserver;
   private renderActivated = false;
   private destroyed = false;
@@ -1075,6 +1074,10 @@ class EmbedView implements NodeView {
   destroy() {
     this.destroyed = true;
     this.renderVersion += 1;
+    this.renderController?.abort();
+    this.renderController = undefined;
+    this.activeRenderController?.abort();
+    this.activeRenderController = undefined;
     this.closeSourceListener();
     this.visibilityObserver?.disconnect();
     this.dom.removeEventListener('pointerdown', this.activateRender);
@@ -1230,9 +1233,18 @@ class EmbedView implements NodeView {
   private render() {
     this.renderVersion += 1;
     const version = this.renderVersion;
+    this.renderController?.abort();
+    const controller = new AbortController();
+    this.renderController = controller;
     this.pendingPreview?.remove();
     this.pendingPreview = undefined;
     if (this.node.type.name === 'cherry_emoji') {
+      controller.abort();
+      this.renderController = undefined;
+      this.activeRenderController?.abort();
+      this.activeRenderController = undefined;
+      this.cleanup?.();
+      this.cleanup = undefined;
       try {
         this.preview.innerHTML = this.config.engine.makeHtml(String(this.node.attrs.source));
       } catch {
@@ -1240,8 +1252,12 @@ class EmbedView implements NodeView {
       }
       return;
     }
-    if (this.node.type.name.startsWith('cherry_html') || this.node.type.name === 'cherry_native_block') {
+    if (this.node.type.name.startsWith('cherry_html')) {
       try {
+        controller.abort();
+        this.renderController = undefined;
+        this.activeRenderController?.abort();
+        this.activeRenderController = undefined;
         this.cleanup?.();
         this.cleanup = undefined;
         destroyCherryRenderedContent(this.config.engine, this.preview);
@@ -1254,11 +1270,19 @@ class EmbedView implements NodeView {
       }
       return;
     }
+    if (this.node.type.name === 'cherry_native_block') {
+      this.renderNativeBlock(version, controller);
+      return;
+    }
     const diagramType = String(this.node.attrs.diagramType);
     const renderer =
       this.config.renderers?.[diagramType] ??
       (diagramType === 'mermaid' ? ({ source }: { source: string }) => renderMermaid(source) : undefined);
     if (!renderer) {
+      controller.abort();
+      this.renderController = undefined;
+      this.activeRenderController?.abort();
+      this.activeRenderController = undefined;
       this.cleanup?.();
       this.cleanup = undefined;
       this.preview.textContent = `${diagramType} · 请配置 renderers.${diagramType}`;
@@ -1290,7 +1314,13 @@ class EmbedView implements NodeView {
           width: `${this.preview.getBoundingClientRect().width}px`,
         });
         (this.dom.closest('.cherry-milkdown') ?? this.dom).append(staging);
-        return renderer({ container, engine: this.config.engine, syntax: diagramType, source });
+        return renderer({
+          container,
+          engine: this.config.engine,
+          syntax: diagramType,
+          source,
+          signal: controller.signal,
+        });
       })
       .then((result: CherryVisualRendererResult) => {
         if (this.destroyed || version !== this.renderVersion) {
@@ -1299,17 +1329,24 @@ class EmbedView implements NodeView {
           return;
         }
         if (typeof result === 'string') container.innerHTML = result;
+        this.activeRenderController?.abort();
         this.cleanup?.();
         this.cleanup = undefined;
         this.preview.replaceWith(container);
         staging.remove();
         this.preview = container;
         this.pendingPreview = undefined;
-        if (typeof result === 'function') this.cleanup = result;
+        if (typeof result === 'function') {
+          this.cleanup = result;
+          this.activeRenderController = controller;
+        } else controller.abort();
+        if (this.renderController === controller) this.renderController = undefined;
       })
       .catch((error: unknown) => {
         staging.remove();
         if (this.destroyed || version !== this.renderVersion) return;
+        controller.abort();
+        if (this.renderController === controller) this.renderController = undefined;
         this.pendingPreview = undefined;
         this.preview.dataset.renderError = 'true';
         this.preview.querySelector('[role="alert"]')?.remove();
@@ -1320,413 +1357,86 @@ class EmbedView implements NodeView {
         this.config.onError?.(error, 'render');
       });
   }
-}
 
-class TableChartView implements NodeView {
-  dom: HTMLElement;
-  private node: ProseNode;
-  private readonly preview: HTMLElement;
-  private readonly source: HTMLTextAreaElement;
-  private readonly sourcePanel: HTMLElement;
-  private observer?: IntersectionObserver;
-  private destroyed = false;
-  private sourceOpen = false;
-  private editingSource = false;
-  private applyingSourceTransaction = false;
-  private composing = false;
-  private externalRevision = 0;
-  private compositionRevision = 0;
-  private sourceToggle?: HTMLButtonElement;
-  private cleanup?: () => void;
-  private renderVersion = 0;
-  private renderTimer?: ReturnType<typeof setTimeout>;
-
-  constructor(
-    node: ProseNode,
-    private readonly view: EditorView,
-    private readonly getPos: () => number | undefined,
-    private readonly config: CherryWysiwygConfig,
-  ) {
-    this.node = node;
-    this.dom = document.createElement('figure');
-    this.dom.className = 'cherry-embed cherry-table-chart';
-    this.preview = document.createElement('div');
-    this.preview.className = 'cherry-embed__preview cherry-table-chart__preview';
-    // An empty, lazy NodeView has a zero-area intersection rectangle and can
-    // therefore never enter the viewport. Reserve the same minimum height as
-    // Cherry's native ECharts wrapper until the first native render completes.
-    this.preview.style.minHeight = '300px';
-    const controls = document.createElement('figcaption');
-    controls.className = 'cherry-embed__controls';
-    const edit = createNodeAction('编辑图表', '编辑表格图表源码', this.openSource, config.readonly);
-    this.sourceToggle = edit;
-    edit.setAttribute('aria-expanded', 'false');
-    controls.append(edit);
-    this.sourcePanel = document.createElement('pre');
-    this.sourcePanel.className = 'cherry-embed__source cherry-table-chart__source';
-    this.sourcePanel.hidden = true;
-    this.source = document.createElement('textarea');
-    this.source.className = 'cherry-embed__source-editor';
-    this.source.readOnly = config.readonly;
-    this.source.spellcheck = false;
-    this.source.value = String(node.attrs.source ?? '');
-    this.source.setAttribute('aria-label', '表格图表源码');
-    this.source.addEventListener('input', this.commitSource);
-    this.source.addEventListener('blur', this.finishSourceEdit);
-    this.source.addEventListener('keydown', this.handleSourceKeydown);
-    this.source.addEventListener('compositionstart', this.handleCompositionStart);
-    this.source.addEventListener('compositionend', this.handleCompositionEnd);
-    this.sourcePanel.append(this.source);
-    this.dom.append(this.preview, controls, this.sourcePanel);
-    this.dom.addEventListener('mousedown', this.selectFromEmptyArea, true);
-    this.dom.addEventListener('click', this.selectFromEmptyArea, true);
-    this.scheduleRender();
-  }
-
-  update(node: ProseNode) {
-    if (node.type !== this.node.type) return false;
-    const sourceChanged = node.attrs.source !== this.node.attrs.source;
-    const localSourceUpdate = this.applyingSourceTransaction;
-    this.node = node;
-    if (!sourceChanged) {
-      if (document.activeElement !== this.source) this.source.value = String(node.attrs.source ?? '');
-      return true;
-    }
-
-    if (!localSourceUpdate) {
-      // setMarkdown(), undo and redo are authoritative. Refresh the native
-      // editor even while it owns focus so a stale blur/composition event can
-      // never overwrite a newer document revision.
-      this.externalRevision += 1;
-      const { selectionStart, selectionEnd } = this.source;
-      this.source.value = String(node.attrs.source ?? '');
-      const { length } = this.source.value;
-      this.source.setSelectionRange(Math.min(selectionStart, length), Math.min(selectionEnd, length));
-      if (this.renderTimer) clearTimeout(this.renderTimer);
-      this.renderTimer = undefined;
-      this.render();
-      return true;
-    }
-
-    if (sourceChanged) {
-      // Keep Markdown state synchronous, but coalesce expensive Cherry HTML
-      // and ECharts work while the node-local source editor is receiving a
-      // burst of input. IME intermediate states never reach the renderer.
-      if (this.composing) return true;
-      if (this.editingSource || document.activeElement === this.source) this.scheduleSourceRender();
-      else this.render();
-    }
-    return true;
-  }
-
-  selectNode() {
-    this.dom.classList.add('is-selected');
-    // Selection can be restored by API updates or initial document mounting.
-    // Only the source button opens the editor, as with other diagram nodes.
-  }
-
-  deselectNode() {
-    this.dom.classList.remove('is-selected');
-    // Selection changes caused by a sibling transaction must not close an
-    // already-open source editor.  Explicit outside pointer input is handled
-    // by setSourceOpen() and is the only close path.
-  }
-
-  stopEvent(event: Event) {
-    return (
-      // The rendered chart/table belongs to Cherry's preview layer. Let text
-      // selection and native table interaction pass through without turning
-      // the whole chart NodeView into a ProseMirror NodeSelection.
-      this.preview.contains(event.target as Node) ||
-      this.sourcePanel.contains(event.target as Node) ||
-      Boolean((event.target as HTMLElement).closest('.cherry-embed__controls'))
-    );
-  }
-
-  ignoreMutation() {
-    // This is a leaf NodeView: source edits are committed explicitly and the
-    // preview is owned by Cherry/ECharts. ECharts mutates its SVG every frame
-    // while animating; letting ProseMirror observe those mutations reparses
-    // and recreates the whole NodeView, causing flicker and repeated charts.
-    return true;
-  }
-
-  destroy() {
-    this.destroyed = true;
-    this.renderVersion += 1;
-    if (this.renderTimer) clearTimeout(this.renderTimer);
-    this.renderTimer = undefined;
-    this.cleanup?.();
-    this.closeSourceListener();
-    this.observer?.disconnect();
-    this.dom.removeEventListener('mousedown', this.selectFromEmptyArea, true);
-    this.dom.removeEventListener('click', this.selectFromEmptyArea, true);
-    this.source.removeEventListener('input', this.commitSource);
-    this.source.removeEventListener('blur', this.finishSourceEdit);
-    this.source.removeEventListener('keydown', this.handleSourceKeydown);
-    this.source.removeEventListener('compositionstart', this.handleCompositionStart);
-    this.source.removeEventListener('compositionend', this.handleCompositionEnd);
-    destroyCherryRenderedContent(this.config.engine, this.preview);
-  }
-
-  private scheduleRender() {
-    if (typeof IntersectionObserver === 'undefined') {
-      this.render();
-      return;
-    }
-    this.observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        this.observer?.disconnect();
-        this.observer = undefined;
-        this.render();
-      },
-      { rootMargin: '500px 0px' },
-    );
-    this.observer.observe(this.dom);
-  }
-
-  private selectFromEmptyArea = (event: MouseEvent) => {
-    if (
-      this.sourcePanel.contains(event.target as Node) ||
-      (event.target as HTMLElement).closest('.cherry-embed__controls')
-    ) {
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    // Native chart children (canvas/SVG) may own their pointer interaction.
-    // Reflect selection immediately, then let the real NodeSelection keep it
-    // in sync with subsequent keyboard and blur behavior.
-    this.selectNode();
-    const pos = this.resolvePos();
-    if (typeof pos !== 'number') return;
-    this.view.dispatch(this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos)));
-    this.view.focus();
-  };
-
-  private openSource = () => {
-    if (this.sourceOpen) {
-      this.finishSourceEdit();
-      this.setSourceOpen(false);
-      this.view.focus();
-      return;
-    }
-    this.editingSource = true;
-    this.dom.classList.add('is-editing');
-    this.selectNode();
-    const pos = this.resolvePos();
-    if (typeof pos === 'number') {
-      this.view.dispatch(closeHistory(this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos))));
-    }
-    this.setSourceOpen(true, true);
-  };
-
-  private finishSourceEdit = () => {
-    if (!this.composing || this.compositionRevision === this.externalRevision) this.commitSource();
-    else this.source.value = String(this.node.attrs.source ?? '');
-    this.composing = false;
-    this.editingSource = false;
-    this.dom.classList.remove('is-editing');
-    this.flushSourceRender();
-  };
-
-  private setSourceOpen(open: boolean, focus = false) {
-    this.sourceOpen = open;
-    this.sourcePanel.hidden = !open;
-    this.dom.classList.toggle('is-source-open', open);
-    this.sourceToggle?.classList.toggle('is-active', open);
-    this.sourceToggle?.setAttribute('aria-expanded', String(open));
-    if (open) {
-      document.addEventListener('pointerdown', this.closeSourceOnOutsidePointer, true);
-      if (focus) this.source.focus({ preventScroll: true });
-    } else {
-      this.closeSourceListener();
-      if (!this.destroyed) this.view.dispatch(closeHistory(this.view.state.tr));
-    }
-  }
-
-  private closeSourceOnOutsidePointer = (event: PointerEvent) => {
-    const target = event.target instanceof Element ? event.target : null;
-    if (this.dom.contains(event.target as Node)) return;
-    if (target?.closest('.cherry-compound-item__disclosure, .cherry-compound__kind, .cherry-node-actions')) {
-      return;
-    }
-    this.finishSourceEdit();
-    this.setSourceOpen(false);
-  };
-
-  private closeSourceListener() {
-    document.removeEventListener('pointerdown', this.closeSourceOnOutsidePointer, true);
-  }
-
-  private commitSource = () => {
-    if (this.config.readonly) return;
-    const pos = this.resolvePos();
-    if (typeof pos !== 'number') return;
-    const source = this.source.value;
-    if (source === this.node.attrs.source) return;
-    const firstLine = source.split(/\r?\n/, 1)[0]?.trim().replace(/^\|/, '').trim() ?? '';
-    const chartType = /^:(\w+):/.exec(firstLine)?.[1] ?? String(this.node.attrs.chartType ?? '');
-    this.applyingSourceTransaction = true;
+  private renderNativeBlock(version: number, controller: AbortController) {
+    const renderer = this.config.renderers?.tableChart;
+    const container = this.preview.cloneNode(false) as HTMLElement;
     try {
-      this.view.dispatch(
-        this.view.state.tr.setNodeMarkup(pos, undefined, {
-          ...this.node.attrs,
-          source,
-          chartType,
-        }),
-      );
-    } finally {
-      this.applyingSourceTransaction = false;
-    }
-  };
-
-  private handleCompositionStart = () => {
-    this.composing = true;
-    this.compositionRevision = this.externalRevision;
-  };
-
-  private handleCompositionEnd = () => {
-    const stale = this.compositionRevision !== this.externalRevision;
-    this.composing = false;
-    if (stale) {
-      this.source.value = String(this.node.attrs.source ?? '');
-      return;
-    }
-    this.commitSource();
-    this.scheduleSourceRender();
-  };
-
-  private handleSourceKeydown = (event: KeyboardEvent) => {
-    const key = event.key.toLowerCase();
-    const mod = (event.metaKey || event.ctrlKey) && !event.altKey;
-    if (mod && key === 'a') {
-      // Keep the browser's native textarea selection, but do not let the
-      // ProseMirror keymap turn it into a document-wide selection.
-      event.stopPropagation();
-      return;
-    }
-    if (mod && (key === 'z' || key === 'y')) {
-      event.preventDefault();
-      event.stopPropagation();
-      const command = key === 'y' || event.shiftKey ? redo : undo;
-      command(this.view.state, this.view.dispatch);
-      this.source.focus({ preventScroll: true });
-      return;
-    }
-    if (event.key !== 'Escape') return;
-    event.preventDefault();
-    event.stopPropagation();
-    this.finishSourceEdit();
-    this.setSourceOpen(false);
-    const pos = this.resolvePos();
-    if (typeof pos === 'number') {
-      this.view.dispatch(this.view.state.tr.setSelection(NodeSelection.create(this.view.state.doc, pos)));
-    }
-    this.view.focus();
-  };
-
-  private scheduleSourceRender() {
-    if (this.renderTimer) clearTimeout(this.renderTimer);
-    this.renderTimer = setTimeout(() => {
-      this.renderTimer = undefined;
-      this.render();
-    }, this.config.debounce);
-  }
-
-  private flushSourceRender() {
-    if (!this.renderTimer) return;
-    clearTimeout(this.renderTimer);
-    this.renderTimer = undefined;
-    this.render();
-  }
-
-  private resolvePos() {
-    try {
-      const direct = this.getPos();
-      if (typeof direct === 'number') return direct;
+      const html = (this.config.nativeEngine ?? this.config.engine).makeHtml(String(this.node.attrs.source));
+      container.replaceChildren(sanitizedEngineFragment(html));
     } catch {
-      // Fall through while this NodeView is between ProseMirror mappings.
+      container.textContent = String(this.node.attrs.source);
     }
-    try {
-      const domPosition = this.view.posAtDOM(this.dom, 0);
-      for (const candidate of [domPosition, domPosition - 1]) {
-        if (candidate >= 0 && this.view.state.doc.nodeAt(candidate)?.type === this.node.type) return candidate;
-      }
-    } catch {
-      // The DOM may temporarily be detached during an external update.
+    const mounts = Array.from(container.querySelectorAll<HTMLElement>('[data-cherry-milkdown-table-chart]'));
+    if (!renderer || mounts.length === 0) {
+      controller.abort();
+      if (this.renderController === controller) this.renderController = undefined;
+      this.activeRenderController?.abort();
+      this.activeRenderController = undefined;
+      this.cleanup?.();
+      this.cleanup = undefined;
+      destroyCherryRenderedContent(this.config.engine, this.preview);
+      this.preview.replaceWith(container);
+      this.preview = container;
+      return;
     }
-    let matched: number | undefined;
-    this.view.state.doc.descendants((node, position) => {
-      if (
-        matched === undefined &&
-        node.type === this.node.type &&
-        node.attrs.source === this.node.attrs.source &&
-        node.attrs.chartType === this.node.attrs.chartType
-      ) {
-        matched = position;
-      }
+
+    const staging = document.createElement('div');
+    staging.dataset.renderPending = '';
+    staging.setAttribute('aria-hidden', 'true');
+    Object.assign(staging.style, {
+      position: 'absolute',
+      visibility: 'hidden',
+      pointerEvents: 'none',
+      top: '0',
+      left: '0',
+      width: `${this.preview.getBoundingClientRect().width}px`,
     });
-    return matched;
-  }
-
-  private render() {
-    if (this.destroyed) return;
-    this.renderVersion += 1;
-    const version = this.renderVersion;
-    this.cleanup?.();
-    this.cleanup = undefined;
-    destroyCherryRenderedContent(this.config.engine, this.preview);
-    this.preview.classList.remove('is-rendered');
-    try {
-      const html = this.config.engine.makeHtml(String(this.node.attrs.source ?? ''));
-      this.preview.replaceChildren(sanitizedEngineFragment(html));
-      this.preview.style.removeProperty('min-height');
-      this.preview.classList.add('is-rendered');
-      delete this.preview.dataset.renderError;
-      const renderer = this.config.renderers?.tableChart;
-      if (renderer) {
-        const container = document.createElement('figure');
-        container.className = 'cherry-table-figure';
-        // This mount point belongs to the Milkdown NodeView. Do not inject it
-        // into Cherry's generated table wrappers: those classes and nesting
-        // are presentation details and may change between Cherry releases.
-        this.preview.prepend(container);
-        void Promise.resolve()
-          .then(() =>
-            renderer({
-              container,
-              engine: this.config.engine,
-              source: String(this.node.attrs.source ?? ''),
-              syntax: String(this.node.attrs.chartType ?? ''),
-            }),
-          )
-          .then((result) => {
-            if (this.destroyed || version !== this.renderVersion) {
-              if (typeof result === 'function') result();
-              return;
-            }
-            if (typeof result === 'function') this.cleanup = result;
-            else if (typeof result === 'string') container.replaceChildren(sanitizedEngineFragment(result));
-          })
-          .catch((error) => {
-            if (!this.destroyed && version === this.renderVersion) this.reportRenderError(error);
-          });
-      }
-    } catch (error) {
-      this.preview.textContent = String(this.node.attrs.source ?? '');
-      this.reportRenderError(error);
-    }
-  }
-
-  private reportRenderError(error: unknown) {
-    this.preview.dataset.renderError = 'true';
-    const status = document.createElement('p');
-    status.setAttribute('role', 'alert');
-    status.textContent = '图表暂时无法渲染，请检查源码。';
-    this.preview.append(status);
-    this.config.onError?.(error, 'render');
+    staging.append(container);
+    (this.dom.closest('.cherry-milkdown') ?? this.dom).append(staging);
+    this.pendingPreview = staging;
+    const completedCleanups: Array<() => void> = [];
+    const renders = mounts.map(async (mount) => {
+      const descriptor = readTableChartDescriptor(mount);
+      if (!descriptor) throw new TypeError('Invalid Cherry table-chart descriptor.');
+      const result = await renderer({
+        container: mount,
+        engine: this.config.engine,
+        source: tableChartDescriptorSource(descriptor),
+        syntax: descriptor.type,
+        signal: controller.signal,
+      });
+      if (typeof result === 'string') mount.replaceChildren(sanitizedEngineFragment(result));
+      if (typeof result === 'function') completedCleanups.push(result);
+    });
+    void Promise.all(renders)
+      .then(() => {
+        if (this.destroyed || version !== this.renderVersion) {
+          staging.remove();
+          completedCleanups.forEach((cleanup) => cleanup());
+          return;
+        }
+        this.activeRenderController?.abort();
+        this.cleanup?.();
+        this.cleanup = () => completedCleanups.forEach((cleanup) => cleanup());
+        this.activeRenderController = controller;
+        if (this.renderController === controller) this.renderController = undefined;
+        destroyCherryRenderedContent(this.config.engine, this.preview);
+        this.preview.replaceWith(container);
+        this.preview = container;
+        staging.remove();
+        this.pendingPreview = undefined;
+      })
+      .catch((error: unknown) => {
+        completedCleanups.forEach((cleanup) => cleanup());
+        staging.remove();
+        if (this.destroyed || version !== this.renderVersion) return;
+        controller.abort();
+        if (this.renderController === controller) this.renderController = undefined;
+        this.pendingPreview = undefined;
+        this.preview.dataset.renderError = 'true';
+        this.config.onError?.(error, 'render');
+      });
   }
 }
 
@@ -1764,10 +1474,6 @@ function embedView(schema: ReturnType<typeof leafSchema>) {
 }
 
 export const cherryDiagramView = embedView(cherryDiagramSchema);
-export const cherryTableChartView = $view(
-  cherryTableChartSchema.node,
-  (ctx) => (node, view, getPos) => new TableChartView(node, view, getPos, ctx.get(cherryWysiwygConfigCtx.key)),
-);
 export const cherryHtmlBlockView = embedView(cherryHtmlBlockSchema);
 export const cherryNativeBlockView = embedView(cherryNativeBlockSchema);
 export const cherryHtmlInlineView = embedView(cherryHtmlInlineSchema);
@@ -1910,7 +1616,6 @@ export const cherryStructureSchemas = [
   cherryFrontmatterSchema,
   cherryCommentDefinitionSchema,
   cherryDiagramSchema,
-  cherryTableChartSchema,
   cherryNativeBlockSchema,
   cherryHtmlBlockSchema,
   cherryHtmlInlineSchema,
@@ -1927,7 +1632,6 @@ export const cherryStructureViews = [
   cherryFrontmatterView,
   cherryCommentDefinitionView,
   cherryDiagramView,
-  cherryTableChartView,
   cherryNativeBlockView,
   cherryHtmlBlockView,
   cherryHtmlInlineView,

@@ -4,6 +4,7 @@ import type { EditorView } from '@milkdown/kit/prose/view';
 import { sanitizeLinkHref } from '@milkdown/kit/preset/commonmark';
 import { $prose } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
+import { createContextBubble, createContextButton } from './contextual-ui.js';
 
 interface LinkRange {
   from: number;
@@ -90,23 +91,10 @@ export const cherryLinkEditor = $prose((ctx) => {
     view: (view) => {
       if (config.readonly) return {};
       const document = view.dom.ownerDocument;
-      const inspector = document.createElement('div');
-      inspector.className = 'cherry-bubble cherry-milkdown-link-bubble';
-      inspector.hidden = true;
-      inspector.setAttribute('role', 'toolbar');
-      inspector.setAttribute('aria-label', '链接');
+      const inspector = createContextBubble(document, 'cherry-milkdown-link-bubble', '链接');
 
       const iconButton = (label: string, icon: string) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'cherry-toolbar-button';
-        button.title = label;
-        button.setAttribute('aria-label', label);
-        const span = document.createElement('span');
-        span.className = `ch-icon ${icon}`;
-        span.setAttribute('aria-hidden', 'true');
-        button.append(span);
-        return button;
+        return createContextButton(document, { label, icon }).button;
       };
       const copy = iconButton('复制链接', 'ch-icon-copy');
       const copyIcon = copy.querySelector<HTMLElement>('.ch-icon');

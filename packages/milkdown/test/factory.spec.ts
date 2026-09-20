@@ -49,6 +49,18 @@ function selectNode(instance: CherryMilkdownInstance, typeName: string) {
   return view;
 }
 
+function replaceText(instance: CherryMilkdownInstance, before: string, after: string) {
+  const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+  let from = -1;
+  view.state.doc.descendants((node, position) => {
+    const offset = node.isText ? node.text?.indexOf(before) ?? -1 : -1;
+    if (from < 0 && offset >= 0) from = position + offset;
+  });
+  if (from < 0) throw new Error(`Missing document text: ${before}`);
+  view.dispatch(view.state.tr.insertText(after, from, from + before.length));
+  return view;
+}
+
 describe('cherryMilkdown WYSIWYG', () => {
   it('does not emit an old draft after a silent API update', async () => {
     const onChange = vi.fn();
@@ -280,39 +292,29 @@ describe('cherryMilkdown WYSIWYG', () => {
     expect(second.getMarkdown()).toContain('- [ ] second');
   });
 
-  it('renders a table chart with Cherry HTML, preserves its exact source, and cleans rendered resources', async () => {
+  it('renders a table chart from the native editable table and cleans rendered resources', async () => {
     const element = root();
     const value = ['| :line:{"title":"Trend"} | Jan | Feb |', '| --- | ---: | ---: |', '| Sales | 1 | 2 |'].join('\n');
-    const destroyChart = vi.fn();
-    const engine = {
-      makeHtml: vi.fn(
-        () =>
-          '<div class="cherry-table-wrapper"><table class="cherry-table"><tbody><tr><td>Sales</td></tr></tbody></table></div><figure class="cherry-table-figure"><div class="cherry-echarts-wrapper"></div></figure>',
-      ),
-      destroyRenderedContent: destroyChart,
-    };
-    const instance = await cherryMilkdown({ el: element, value, engine, debounce: 0 });
+    const cleanup = vi.fn();
+    const renderer = vi.fn(({ container }: { container: HTMLElement }) => {
+      container.innerHTML = '<svg data-table-chart="true"></svg>';
+      return cleanup;
+    });
+    const instance = await cherryMilkdown({ el: element, value, renderers: { tableChart: renderer }, debounce: 0 });
     instances.push(instance);
 
     expect(instance.getMarkdown().trim()).toBe(value);
-    expect(element.querySelector('.cherry-echarts-wrapper')).not.toBeNull();
-    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
-    element.querySelector<HTMLButtonElement>('[aria-label="编辑表格图表源码"]')?.click();
-    expect(element.querySelector('.cherry-table-chart')?.classList.contains('is-editing')).toBe(true);
-    expect(view.state.selection).toBeInstanceOf(NodeSelection);
-    const source = element.querySelector<HTMLTextAreaElement>('.cherry-table-chart__source textarea');
-    expect(source?.value).toBe(value);
-    if (source) {
-      source.value = value.replace('Trend', 'Updated').replace('| Sales | 1 | 2 |', '| Sales | 3 | 5 |');
-      source.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    await vi.waitFor(() => expect(element.querySelector('[data-table-chart]')).not.toBeNull());
+    expect(element.querySelector('.milkdown-table-block')).not.toBeNull();
+    replaceText(instance, 'Trend', 'Updated');
+    replaceText(instance, 'Sales', 'Revenue');
 
     expect(instance.getMarkdown()).toContain('"title":"Updated"');
-    expect(instance.getMarkdown()).toContain('| Sales | 3 | 5 |');
-    expect(view.state.selection).toBeInstanceOf(NodeSelection);
+    expect(instance.getMarkdown()).toContain('Revenue');
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(2));
     await instance.destroy();
     instances.splice(instances.indexOf(instance), 1);
-    expect(destroyChart).toHaveBeenCalled();
+    expect(cleanup).toHaveBeenCalled();
   });
 
   it('does not insert a synthetic paragraph between a table chart and the following Cherry block', async () => {
@@ -326,17 +328,18 @@ describe('cherryMilkdown WYSIWYG', () => {
       'Panel body.',
       ':::',
     ].join('\n');
-    const engine = {
-      makeHtml: () =>
-        '<div class="cherry-table-wrapper"><figure class="cherry-table-figure"><div class="cherry-echarts-wrapper"></div></figure><table><tbody><tr><td>Sales</td></tr></tbody></table></div>',
-    };
-    const instance = await cherryMilkdown({ el: element, value, engine });
+    const instance = await cherryMilkdown({
+      el: element,
+      value,
+      renderers: { tableChart: () => '<svg data-table-chart="true"></svg>' },
+    });
     instances.push(instance);
 
     const chart = element.querySelector('.cherry-table-chart');
     expect(chart).not.toBeNull();
-    expect(chart?.nextElementSibling?.classList.contains('cherry-panel')).toBe(true);
-    expect(element.querySelector('.cherry-table-chart + p:empty + .cherry-panel')).toBeNull();
+    expect(chart?.nextElementSibling?.classList.contains('milkdown-table-block')).toBe(true);
+    expect(chart?.nextElementSibling?.nextElementSibling?.classList.contains('cherry-panel')).toBe(true);
+    expect(element.querySelector('.milkdown-table-block + p:empty + .cherry-panel')).toBeNull();
   });
 
   it('does not patch Cherry-owned column DOM to mount or edit a nested table chart', async () => {
@@ -380,7 +383,7 @@ describe('cherryMilkdown WYSIWYG', () => {
 
     expect(frontmatterCount).toBe(0);
     expect(onChange.mock.calls.length).toBe(0);
-    expect(element.querySelectorAll('.milkdown-table-block')).toHaveLength(2);
+    expect(element.querySelectorAll('.milkdown-table-block')).toHaveLength(11);
 
     await instance.destroy();
     instances.splice(instances.indexOf(instance), 1);

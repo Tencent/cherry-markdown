@@ -1,5 +1,4 @@
 import type { CherryInlineMatch } from './types.js';
-import { tableChartType } from './table-chart.js';
 import { canonicalPanelKind, panelSyntaxHandling } from './syntax-policy.js';
 
 interface MarkdownPosition {
@@ -17,6 +16,8 @@ export interface MarkdownNode {
 
 interface ParseMarkdownOptions {
   supplementalDefinitions?: boolean;
+  /** Fenced languages promoted from ordinary code into live visual blocks. */
+  sourceBlockTypes?: readonly string[];
 }
 
 export type ParseMarkdown = (source: string, options?: ParseMarkdownOptions) => MarkdownNode[];
@@ -39,15 +40,9 @@ const BLOCK_PATTERNS = [
     // the structured MathLive NodeView instead of a source-only fallback.
     pattern: /^[ \t]*[^\s`$][^\n`$]*\$\$[ \t]*\n[\s\S]*?^\$\$[ \t]*$/gm,
   },
-  ...['mermaid', 'plantuml', 'echarts'].map((diagramType) => ({
-    syntax: 'diagram' as const,
-    diagramType,
-    pattern: new RegExp(
-      `^( {0,3})(\u0060{3,}|~{3,})[ \\t]*${diagramType}(?:[ \\t][^\\n]*)?\\n[\\s\\S]*?^\\1\\2[ \\t]*$`,
-      'gim',
-    ),
-  })),
 ];
+
+const DEFAULT_SOURCE_BLOCK_TYPES = ['mermaid', 'plantuml', 'echarts'] as const;
 
 // YAML frontmatter is only valid at the start of a Markdown document. Treating
 // every pair of horizontal rules as frontmatter can swallow most of a long
@@ -140,7 +135,7 @@ const INLINE_MATCHERS = [
   { type: 'cherry_emoji', pattern: /:[+\w-]+:/, attrs: () => ({}) },
 ];
 
-function collectBlocks(source: string): BlockMatch[] {
+function collectBlocks(source: string, sourceBlockTypes: readonly string[] = []) {
   const matches: BlockMatch[] = [];
   const fencedRanges: Array<{ from: number; to: number; source: string }> = [];
   FENCED_BLOCK_PATTERN.lastIndex = 0;
@@ -148,6 +143,25 @@ function collectBlocks(source: string): BlockMatch[] {
   while ((fenced = FENCED_BLOCK_PATTERN.exec(source))) {
     fencedRanges.push({ from: fenced.index, to: fenced.index + fenced[0].length, source: fenced[0] });
   }
+  const visualTypes = new Map<string, string>();
+  [...DEFAULT_SOURCE_BLOCK_TYPES, ...sourceBlockTypes].forEach((type) => {
+    const normalized = type.trim();
+    if (normalized && normalized.toLowerCase() !== 'tablechart') {
+      visualTypes.set(normalized.toLowerCase(), normalized);
+    }
+  });
+  fencedRanges.forEach((range) => {
+    const language = /^(?: {0,3})(?:`{3,}|~{3,})[ \t]*([^\s`~]+)/.exec(range.source)?.[1];
+    const diagramType = language ? visualTypes.get(language.toLowerCase()) : undefined;
+    if (!diagramType) return;
+    matches.push({
+      from: range.from,
+      to: range.to,
+      syntax: 'diagram',
+      source: range.source,
+      diagramType,
+    });
+  });
   matches.push(
     ...collectDelimitedBlocks(
       source,
@@ -177,14 +191,11 @@ function collectBlocks(source: string): BlockMatch[] {
     descriptor.pattern.lastIndex = 0;
     let match: RegExpExecArray | null;
     while ((match = descriptor.pattern.exec(source))) {
-      if (descriptor.syntax !== 'diagram' && containsOffset(fencedRanges, match.index)) {
-        continue;
-      }
+      if (containsOffset(fencedRanges, match.index)) continue;
       matches.push({
         from: match.index,
         to: match.index + match[0].length,
         syntax: descriptor.syntax,
-        diagramType: 'diagramType' in descriptor ? descriptor.diagramType : undefined,
         source: match[0],
       });
     }
@@ -388,10 +399,11 @@ function replaceRootBlocks(
   source: string,
   parse: ParseMarkdown,
   supplementalDefinitionsEnabled = true,
+  sourceBlockTypes: readonly string[] = [],
 ) {
   if (!tree.children) return;
   const originalChildren = tree.children;
-  const blocks = collectBlocks(source);
+  const blocks = collectBlocks(source, sourceBlockTypes);
   if (!blocks.length) return;
   const next: MarkdownNode[] = [];
   const supplementalDefinitions = supplementalDefinitionsEnabled
@@ -468,27 +480,6 @@ function replaceRootBlocks(
   tree.children = next;
 }
 
-function replaceTableCharts(node: MarkdownNode, source: string) {
-  if (!node.children) return;
-  node.children = node.children.map((child) => {
-    if (child.type === 'table') {
-      const range = nodeRange(child);
-      const raw = range ? source.slice(range.from, range.to) : '';
-      const chartType = tableChartType(raw);
-      if (chartType) {
-        return {
-          type: 'cherryTableChart',
-          chartType,
-          source: raw,
-          position: child.position,
-        };
-      }
-    }
-    replaceTableCharts(child, source);
-    return child;
-  });
-}
-
 function splitText(node: MarkdownNode): MarkdownNode[] {
   const value = node.value ?? '';
   const matches = findCherryInlineMatches(value);
@@ -513,6 +504,27 @@ function splitText(node: MarkdownNode): MarkdownNode[] {
 }
 
 function transformInline(node: MarkdownNode, source: string, root = false) {
+  if (node.type === 'table') {
+    const firstCell = node.children?.[0]?.children?.[0];
+    const text = (child: MarkdownNode): string => child.value ?? child.children?.map(text).join('') ?? '';
+    const descriptor = firstCell?.children?.map(text).join('').trim() ?? '';
+    if (/^:\w+:(?:\s*\{[\s\S]*\})?\s*$/.test(descriptor)) {
+      // GFM autolink can otherwise turn a URL inside the JSON options into a
+      // link mark, and `:map:` itself overlaps Cherry's emoji syntax. The
+      // descriptor is control data, so keep it as one literal editable text
+      // node while leaving every other table cell fully structured.
+      if (firstCell) firstCell.children = [{ type: 'text', value: descriptor }];
+      node.children?.forEach((row, rowIndex) =>
+        row.children?.forEach((cell, cellIndex) => {
+          // `:line:` and the other chart descriptors look like Cherry emoji
+          // syntax. Keep the descriptor literal so the standard table remains
+          // both editable and recognizable by the derived chart preview.
+          if (rowIndex !== 0 || cellIndex !== 0) transformInline(cell, source);
+        }),
+      );
+      return;
+    }
+  }
   if (!node.children) return;
   if (
     node.type === 'paragraph' &&
@@ -593,7 +605,6 @@ function normalizeFootnoteReferences(tree: MarkdownNode, source: string) {
     'cherryNativeBlock',
     'cherryHtmlBlock',
     'cherryHtmlInline',
-    'cherryTableChart',
   ]);
   const expandText = (node: MarkdownNode): MarkdownNode[] => {
     const value = String(node.value ?? '');
@@ -668,8 +679,7 @@ export function transformCherryWysiwygTree(
   parse: ParseMarkdown = () => [],
   options: ParseMarkdownOptions = {},
 ) {
-  replaceRootBlocks(tree, source, parse, options.supplementalDefinitions ?? true);
-  replaceTableCharts(tree, source);
+  replaceRootBlocks(tree, source, parse, options.supplementalDefinitions ?? true, options.sourceBlockTypes ?? []);
   normalizeFootnoteReferences(tree, source);
   relocateFootnoteDefinitions(tree);
   transformInline(tree, source, true);

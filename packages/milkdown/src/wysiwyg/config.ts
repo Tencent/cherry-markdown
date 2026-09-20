@@ -9,6 +9,8 @@ import type { CherryVisualRenderer } from './types.js';
 
 export interface CherryWysiwygConfig {
   engine: CherryEngineLike;
+  /** Engine configured to emit package-owned mount markers inside native layouts. */
+  nativeEngine?: CherryEngineLike;
   readonly: boolean;
   bubble: boolean;
   debounce: number;

@@ -17,6 +17,7 @@ import mergeWith from '@/utils/toolkit/mergeWith';
 import Logger from '@/Logger';
 import { getExternal } from '@/utils/external';
 import { isBrowser } from '@/utils/env';
+import defaultLocale from '@/locales/zh_CN';
 
 // 主题与常量集中管理
 const THEME = {
@@ -87,7 +88,7 @@ export default class EChartsTableEngine {
     // 保存Cherry配置，用于获取地图数据源URL
     this.cherryOptions = cherryOptions;
     // 保存Cherry实例，用于事件监听及i18n
-    this.cherry = cherry;
+    this.cherry = cherry || { locale: defaultLocale };
     // 统一管理实例
     this.instances = new Set();
     // 主题监听器
@@ -805,6 +806,50 @@ export default class EChartsTableEngine {
     return htmlContent;
   }
 
+  /**
+   * Mount a table chart into a caller-owned container.
+   *
+   * Unlike render(), this entry does not depend on Cherry Previewer's DOM or
+   * delayed global lookup. It lets integrations reuse Cherry's complete chart
+   * semantics while retaining ownership of their own node lifecycle.
+   */
+  renderInto(container, type, options, tableObject, signal) {
+    if (!container || !this.echartsRef) return () => {};
+    const lifecycleController = new AbortController();
+    const abortLifecycle = () => lifecycleController.abort();
+    signal?.addEventListener('abort', abortLifecycle, { once: true });
+    const chartId = container.id || `chart-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+    const chartOptions = { ...(options || {}), chartId, signal: lifecycleController.signal };
+    const serializableOptions = { ...(options || {}), chartId };
+    container.id = chartId;
+    container.classList.add('cherry-echarts-wrapper');
+    container.dataset.chartType = type;
+    container.dataset.tableData = JSON.stringify(tableObject);
+    container.dataset.chartOptions = JSON.stringify(serializableOptions);
+    if (!container.style.width) container.style.width = '100%';
+    if (!container.style.height) container.style.height = `${this.options.height}px`;
+    this.$buildEchartsThemeFromCss(container);
+    const chart = this.createChart(container, this.$generateChartOptions(type, tableObject, chartOptions), type);
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => chart?.resize?.());
+    observer?.observe(container);
+    let disposed = false;
+    const cleanup = () => {
+      if (disposed) return;
+      disposed = true;
+      signal?.removeEventListener('abort', abortLifecycle);
+      lifecycleController.abort();
+      observer?.disconnect();
+      this.destroyChart(chart);
+      if (this.instances.size === 0) {
+        this.themeObservers.forEach((themeObserver) => themeObserver.disconnect());
+        this.themeObservers.clear();
+        this.exportObservers.forEach((handler) => window.removeEventListener('cherry:export:done', handler));
+        this.exportObservers.clear();
+      }
+    };
+    return cleanup;
+  }
+
   // 添加点击高亮效果
   addClickHighlightEffect(chartInstance, chartType) {
     let selectedDataIndex = null;
@@ -1496,7 +1541,7 @@ const MapChartLoadingOptionsHandler = {
     const { engine } = options;
     // console.log('Rendering map chart:', tableObject);
 
-    return !getExternal('echarts')
+    return !engine.echartsRef
       ? {
           title: {
             text: `${engine.cherry.locale.chartRenderError} : ${engine.cherry.locale.chartLibraryNotLoadedTip}`,
@@ -1634,7 +1679,7 @@ const MapChartOptionsHandler = {
 
     // 用户指定了新的地图数据源，检查是否与已注册的地图源匹配
     if (userMapSource) {
-      if (getExternal('echarts')?.getMap?.(userMapSource)) {
+      if (options.engine.echartsRef?.getMap?.(userMapSource)) {
         // 用户指定数据源已注册，直接使用
         return generateOptions(MapChartCompleteOptionsHandler, tableObject, options);
       }
@@ -1648,7 +1693,7 @@ const MapChartOptionsHandler = {
     let registeredMapSource = null;
 
     for (const source of possibleMapSources) {
-      if (getExternal('echarts')?.getMap?.(source)) {
+      if (options.engine.echartsRef?.getMap?.(source)) {
         isMapRegistered = true;
         registeredMapSource = source;
         break;
@@ -1702,14 +1747,16 @@ const MapChartOptionsHandler = {
     const url = paths[index];
     // console.log(`尝试加载地图数据: ${url}`);
 
-    this.$fetchMapData(url)
+    this.$fetchMapData(url, options.signal)
       .then((geoJson) => {
-        getExternal('echarts')?.registerMap?.(url, geoJson);
+        if (options.signal?.aborted) return geoJson;
+        options.engine.echartsRef?.registerMap?.(url, geoJson);
         // console.log(`地图数据加载成功！来源: ${url}`);
         this.$refreshMapChart(options.chartId, url, options.engine);
         return geoJson;
       })
       .catch((error) => {
+        if (error?.name === 'AbortError' || options.signal?.aborted) return;
         Logger.warn(`Map data loading failed (${url}):`, error.message);
         this.$handleMapLoadFailure(options);
       });
@@ -1742,8 +1789,8 @@ const MapChartOptionsHandler = {
       }
     }
   },
-  async $fetchMapData(url) {
-    const response = await fetch(url, { referrerPolicy: 'no-referrer' });
+  async $fetchMapData(url, signal) {
+    const response = await fetch(url, { referrerPolicy: 'no-referrer', signal });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status} for ${url}`);
     }

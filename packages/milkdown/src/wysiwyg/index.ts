@@ -12,7 +12,6 @@ export {
   cherryCompoundItemSchema,
   cherryDetailSchema,
   cherryDiagramSchema,
-  cherryTableChartSchema,
   cherryNativeBlockSchema,
   cherryEmojiSchema,
   cherryFrontmatterSchema,
@@ -30,6 +29,7 @@ export {
 export { cherryWysiwyg } from './plugin.js';
 export { findCherryInlineMatches, transformCherryWysiwygTree } from './transform.js';
 export { parseTableChart, tableChartType } from './table-chart.js';
+export { cherryTableChartPreview, tableChartRevision } from './table-chart-plugin.js';
 export type {
   CherryDiagramRenderContext,
   CherryInlineMatch,

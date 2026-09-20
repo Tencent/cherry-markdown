@@ -21,3 +21,24 @@ declare module 'cherry-markdown/dist/cherry-markdown.esm.js' {
   };
   export default Cherry;
 }
+
+declare module 'cherry-markdown/dist/addons/advance/cherry-table-echarts-plugin.esm.js' {
+  interface TableChartData {
+    header: string[];
+    rows: string[][];
+    colLength: number;
+    rowLength: number;
+  }
+
+  const EChartsTableEngine: new (options: Record<string, unknown>) => {
+    renderInto(
+      container: HTMLElement,
+      type: string,
+      options: Record<string, unknown>,
+      table: TableChartData,
+      signal?: AbortSignal,
+    ): () => void;
+  };
+
+  export default EChartsTableEngine;
+}

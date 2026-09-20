@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { editorViewCtx } from '@milkdown/kit/core';
+import { redo, undo } from '@milkdown/kit/prose/history';
 import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
 import type { CherryMilkdownInstance } from '../src';
 import { supportsTextFormatting } from '../src';
@@ -20,6 +21,18 @@ async function create(value: string, options = {}) {
   return instance;
 }
 
+function replaceText(instance: CherryMilkdownInstance, before: string, after: string) {
+  const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+  let from = -1;
+  view.state.doc.descendants((node, position) => {
+    const offset = node.isText ? (node.text?.indexOf(before) ?? -1) : -1;
+    if (from < 0 && offset >= 0) from = position + offset;
+  });
+  if (from < 0) throw new Error(`Missing document text: ${before}`);
+  view.dispatch(view.state.tr.insertText(after, from, from + before.length));
+  return view;
+}
+
 describe('standalone contracts', () => {
   it('keeps Cherry layout directives engine-owned instead of rebuilding their DOM', async () => {
     const source = ':::timeline History\n:: [done] 2025 First\nDescription\n:::';
@@ -27,6 +40,42 @@ describe('standalone contracts', () => {
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     expect(view.state.doc.firstChild?.type.name).toBe('cherry_native_block');
     expect(instance.getMarkdown()).toBe(source);
+  });
+
+  it('mounts nested table charts through package-owned descriptors', async () => {
+    const chart = ['| :line:{"title":"Nested"} | Jan | Feb |', '| --- | --- | --- |', '| Sales | 1 | 2 |'].join('\n');
+    const renderer = vi.fn(({ container }: { container: HTMLElement }) => {
+      container.innerHTML = '<svg data-nested-table-chart="true"></svg>';
+    });
+    await create(['::: 2cols', 'Example', '::', chart, ':::'].join('\n'), { renderers: { tableChart: renderer } });
+
+    await vi.waitFor(() => expect(document.querySelector('[data-nested-table-chart]')).not.toBeNull());
+    expect(renderer).toHaveBeenCalledTimes(1);
+    expect(renderer.mock.calls[0]?.[0]).toEqual(
+      expect.objectContaining({ syntax: 'line', source: expect.stringContaining(':line:{"title":"Nested"}') }),
+    );
+    expect(document.querySelector('.cherry-panel-cols__2cols')).not.toBeNull();
+  });
+
+  it('cleans completed nested renderers when a sibling chart fails', async () => {
+    const cleanup = vi.fn();
+    const onError = vi.fn();
+    let call = 0;
+    const renderer = vi.fn(() => {
+      call += 1;
+      if (call === 1) return cleanup;
+      return new Promise<never>((_resolve, reject) => setTimeout(() => reject(new Error('Nested failure')), 0));
+    });
+    const chart = (title: string) =>
+      [`| :line:{"title":"${title}"} | Jan |`, '| --- | --- |', '| Sales | 1 |'].join('\n');
+    await create(['::: 2cols', chart('First'), '::', chart('Second'), ':::'].join('\n'), {
+      renderers: { tableChart: renderer },
+      onError,
+    });
+
+    await vi.waitFor(() => expect(onError).toHaveBeenCalled());
+    expect(cleanup).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('[data-render-pending]')).toBeNull();
   });
 
   it('uses Cherry native preview structure without duplicating its layout styles', async () => {
@@ -80,6 +129,46 @@ describe('standalone contracts', () => {
     expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('New chart');
   });
 
+  it('aborts replaced and destroyed renderer revisions', async () => {
+    const signals: AbortSignal[] = [];
+    const renderer = vi.fn(({ signal }: { signal?: AbortSignal }) => {
+      signals.push(signal!);
+      return () => undefined;
+    });
+    const instance = await create('```echarts\nold\n```', { renderers: { echarts: renderer } });
+    await vi.waitFor(() => expect(signals).toHaveLength(1));
+    expect(signals[0]?.aborted).toBe(false);
+
+    instance.setMarkdown('```echarts\nnew\n```');
+    await vi.waitFor(() => expect(signals).toHaveLength(2));
+    expect(signals[0]?.aborted).toBe(true);
+    expect(signals[1]?.aborted).toBe(false);
+
+    await instance.destroy();
+    instances.splice(instances.indexOf(instance), 1);
+    expect(signals[1]?.aborted).toBe(true);
+  });
+
+  it('hot edits a configured custom fenced renderer and preserves its markdown', async () => {
+    const renderer = vi.fn(({ source, container }: { source: string; container: HTMLElement }) => {
+      container.textContent = `Custom: ${source.trim()}`;
+    });
+    const instance = await create('```custom-chart\nold\n```', {
+      debounce: 0,
+      renderers: { 'custom-chart': renderer },
+    });
+    await vi.waitFor(() => expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('Custom: old'));
+
+    document.querySelector<HTMLButtonElement>('[aria-label="在节点内编辑源码"]')?.click();
+    const source = document.querySelector<HTMLElement>('.cherry-embed__source code')!;
+    source.textContent = 'new';
+    source.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: 'new' }));
+
+    await vi.waitFor(() => expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('Custom: new'));
+    expect(renderer).toHaveBeenLastCalledWith(expect.objectContaining({ syntax: 'custom-chart', source: 'new' }));
+    expect(instance.getMarkdown()).toBe('```custom-chart\nnew\n```');
+  });
+
   it('keeps the previous diagram visible until an asynchronous redraw succeeds', async () => {
     let complete: ((value: string) => void) | undefined;
     const renderer = ({ source }: { source: string }) =>
@@ -129,73 +218,76 @@ describe('standalone contracts', () => {
     expect(document.querySelector('[role="alert"], [data-render-error]')).toBeNull();
   });
 
+  it('recognizes table chart options containing an external URL', async () => {
+    const renderer = vi.fn(() => '<span data-map-chart="true">Map</span>');
+    await create(
+      '| :map:{"title":"China","mapDataSource":"https://maps.example/china.json"} | Value |\n' +
+        '| --- | --- |\n' +
+        '| 北京 | 100 |',
+      { renderers: { tableChart: renderer } },
+    );
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(1));
+    expect(renderer).toHaveBeenCalledWith(expect.objectContaining({ syntax: 'map' }));
+  });
+
   it('synchronizes table chart source immediately while coalescing expensive redraws', async () => {
     const renderer = vi.fn(() => '<span data-chart="coalesced">Chart</span>');
     const value = '| :line:{"title":"Before"} | A |\n| --- | --- |\n| Row | 1 |';
     const instance = await create(value, { renderers: { tableChart: renderer }, debounce: 20 });
     await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(1));
-    document.querySelector<HTMLButtonElement>('.cherry-table-chart .cherry-embed__controls button')?.click();
-    const source = document.querySelector<HTMLTextAreaElement>('.cherry-table-chart__source textarea')!;
     for (const title of ['One', 'Two', 'Final']) {
-      source.value = value.replace('Before', title);
-      source.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+      const current = title === 'One' ? 'Before' : title === 'Two' ? 'One' : 'Two';
+      replaceText(instance, current, title);
     }
     await vi.waitFor(() => expect(instance.getMarkdown()).toContain('Final'));
     expect(renderer).toHaveBeenCalledTimes(1);
     await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(2));
   });
 
-  it('routes table chart source undo and redo through Milkdown history', async () => {
+  it('routes table cell edits through Milkdown history', async () => {
     const value = '| :line:{"title":"Before"} | A |\n| --- | --- |\n| Row | 1 |';
     const instance = await create(value, { renderers: { tableChart: () => '<span>Chart</span>' }, debounce: 0 });
-    document.querySelector<HTMLButtonElement>('.cherry-table-chart .cherry-embed__controls button')?.click();
-    const source = document.querySelector<HTMLTextAreaElement>('.cherry-table-chart__source textarea')!;
-    source.value = value.replace('Before', 'After');
-    source.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+    const view = replaceText(instance, 'Before', 'After');
     expect(instance.getMarkdown()).toContain('After');
 
-    source.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'z', ctrlKey: true }));
+    undo(view.state, view.dispatch);
     await vi.waitFor(() => expect(instance.getMarkdown()).toContain('Before'));
-    expect(source.value).toContain('Before');
 
-    source.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'z', ctrlKey: true, shiftKey: true }));
+    redo(view.state, view.dispatch);
     await vi.waitFor(() => expect(instance.getMarkdown()).toContain('After'));
-    expect(source.value).toContain('After');
   });
 
-  it('defers table chart rendering during IME composition', async () => {
+  it('keeps the native table mounted while chart data redraws', async () => {
     const renderer = vi.fn(() => '<span>Chart</span>');
     const value = '| :line:{"title":"Before"} | A |\n| --- | --- |\n| Row | 1 |';
     const instance = await create(value, { renderers: { tableChart: renderer }, debounce: 10 });
     await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(1));
-    document.querySelector<HTMLButtonElement>('.cherry-table-chart .cherry-embed__controls button')?.click();
-    const source = document.querySelector<HTMLTextAreaElement>('.cherry-table-chart__source textarea')!;
-    source.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
-    source.value = value.replace('Before', '输入中');
-    source.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertCompositionText' }));
+    const table = document.querySelector('.milkdown-table-block');
+    replaceText(instance, 'Before', '输入中');
     expect(instance.getMarkdown()).toContain('输入中');
-    await new Promise((resolve) => setTimeout(resolve, 25));
-    expect(renderer).toHaveBeenCalledTimes(1);
-    source.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
     await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(2));
+    expect(document.querySelector('.milkdown-table-block')).toBe(table);
   });
 
-  it('keeps an external table chart revision authoritative during composition', async () => {
+  it('keeps an external table chart revision authoritative', async () => {
+    const renderer = vi.fn(() => '<span>Chart</span>');
     const value = '| :line:{"title":"Before"} | A |\n| --- | --- |\n| Row | 1 |';
     const external = value.replace('Before', 'External');
-    const instance = await create(value, { renderers: { tableChart: () => '<span>Chart</span>' }, debounce: 0 });
-    document.querySelector<HTMLButtonElement>('.cherry-table-chart .cherry-embed__controls button')?.click();
-    const source = document.querySelector<HTMLTextAreaElement>('.cherry-table-chart__source textarea')!;
-    source.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
-    source.value = value.replace('Before', 'Local');
-    source.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertCompositionText' }));
+    const instance = await create(value, { renderers: { tableChart: renderer }, debounce: 0 });
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(1));
+    replaceText(instance, 'Before', 'Local');
     instance.setMarkdown(external);
-    source.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
-    source.dispatchEvent(new FocusEvent('blur'));
 
     expect(instance.getMarkdown()).toContain('External');
     expect(instance.getMarkdown()).not.toContain('Local');
-    expect(source.value).toContain('External');
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    expect(view.state.doc.textContent).toContain('External');
+    expect(document.querySelectorAll('[data-cherry-milkdown-table-chart-widget]')).toHaveLength(1);
+    await vi.waitFor(() =>
+      expect(renderer).toHaveBeenLastCalledWith(
+        expect.objectContaining({ source: expect.stringContaining('External') }),
+      ),
+    );
   });
 
   it('rejects executable chart code before importing or mounting ECharts', async () => {

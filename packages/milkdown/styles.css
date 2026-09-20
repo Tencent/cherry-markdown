@@ -29,6 +29,7 @@
   --cherry-milkdown-soft: var(--md-inline-code-bg, #f5f7fa);
   --cherry-milkdown-panel: var(--panel-primary-bg, #eef3ff);
   --cherry-milkdown-context-control-height: var(--bubble-btn-height, 40px);
+  --cherry-milkdown-context-visual-size: 32px;
   --cherry-milkdown-context-gap: var(--spacing-sm, 8px);
   --cherry-milkdown-context-padding: var(--spacing-sm, 8px);
   --cherry-milkdown-context-radius: var(--bubble-radius, 6px);
@@ -52,42 +53,90 @@
 /* Milkdown owns both contextual toolbars. Cherry classes and variables provide
  * their visual contract, while fixed positioning keeps them out of document
  * flow and prevents selection from changing line layout. */
-.cherry-milkdown-text-bubble,
-.cherry-milkdown .cherry-milkdown-image-controls {
+.cherry-milkdown .cherry-milkdown-context-bubble {
   position: fixed;
   z-index: calc(var(--bubble-z-index, 1000) + 2);
   box-sizing: border-box;
   align-items: center;
   flex-wrap: nowrap;
-}
-
-/* Keep every Milkdown contextual toolbar on Cherry's button-height grid. The
- * width remains content-driven because text, link and image actions expose
- * different controls; their height and vertical alignment must not vary. */
-.cherry-milkdown-text-bubble,
-.cherry-milkdown-image-controls,
-.cherry-milkdown-link-bubble {
   min-height: var(--bubble-btn-height, 40px);
 }
 
-.cherry-milkdown-text-bubble[hidden],
-.cherry-milkdown-image-controls[hidden] {
+.cherry-milkdown .cherry-milkdown-context-bubble[hidden] {
   display: none;
 }
 
-.cherry-milkdown-text-bubble .cherry-toolbar-button,
-.cherry-milkdown-image-controls .cherry-toolbar-button {
+.cherry-milkdown .cherry-milkdown-context-button {
   display: inline-flex;
+  flex: 0 0 var(--bubble-btn-height, 40px);
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  width: var(--bubble-btn-height, 40px);
   height: var(--bubble-btn-height, 40px);
   min-height: var(--bubble-btn-height, 40px);
+  padding: 0;
   border: 0;
   border-radius: var(--bubble-radius, 4px);
+  background: transparent;
   font: inherit;
   line-height: 1;
   white-space: nowrap;
+}
+
+.cherry-milkdown .cherry-milkdown-context-button__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--cherry-milkdown-context-visual-size);
+  height: var(--cherry-milkdown-context-visual-size);
+  border-radius: var(--toolbar-btn-radius, 6px);
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.cherry-milkdown-text-bubble__glyph--bold {
+  font-weight: var(--font-weight-bold, 700);
+}
+
+.cherry-milkdown-text-bubble__glyph--italic {
+  font-style: italic;
+}
+
+.cherry-milkdown-text-bubble__glyph--underline {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cherry-milkdown-text-bubble__glyph--strike {
+  text-decoration: line-through;
+}
+
+.cherry-milkdown .cherry-milkdown-context-button:hover,
+.cherry-milkdown .cherry-milkdown-context-button:focus-visible,
+.cherry-milkdown .cherry-milkdown-context-button.is-active,
+.cherry-milkdown .cherry-milkdown-context-button.is-success,
+.cherry-milkdown .cherry-milkdown-context-button.is-error {
+  background: transparent;
+  outline: none;
+}
+
+.cherry-milkdown .cherry-milkdown-context-button:hover .cherry-milkdown-context-button__content,
+.cherry-milkdown .cherry-milkdown-context-button:focus-visible .cherry-milkdown-context-button__content,
+.cherry-milkdown .cherry-milkdown-context-button.is-active .cherry-milkdown-context-button__content {
+  color: var(--toolbar-btn-hover-color, var(--md-link-color, #366ef4));
+  background: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
+}
+
+.cherry-milkdown .cherry-milkdown-context-button.is-success .cherry-milkdown-context-button__content {
+  color: var(--success-color, #2ba471);
+  background: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
+}
+
+.cherry-milkdown .cherry-milkdown-context-button.is-error .cherry-milkdown-context-button__content {
+  color: var(--error-color, #d54941);
+  background: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
 }
 
 .cherry-milkdown-image-controls .img-tool-group {
@@ -106,12 +155,6 @@
 .cherry-milkdown-image-controls .img-tool-icon {
   font-size: 18px;
   pointer-events: none;
-}
-
-.cherry-milkdown-text-bubble .cherry-toolbar-button.is-active,
-.cherry-milkdown-image-controls .cherry-toolbar-button.is-active {
-  color: var(--toolbar-btn-hover-color, var(--md-link-color, #366ef4));
-  background: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
 }
 
 .cherry-milkdown .cherry-milkdown-image-frame {
@@ -265,6 +308,19 @@
  * text hit-testing preserves native browser/ProseMirror drag selection. */
 .cherry-milkdown .cherry-milkdown-block {
   position: relative;
+}
+
+/* Cherry draws heading anchors with a 15px pseudo-element. ProseMirror's
+ * empty widget anchor otherwise has no hit box even though the sign is
+ * visible, so expose that same visual area as the actual link target. */
+.cherry-milkdown a.anchor {
+  display: inline-block;
+  width: 15px;
+  margin-left: -15px;
+}
+
+.cherry-milkdown a.anchor::before {
+  margin-left: 0;
 }
 
 .cherry-milkdown .cherry-milkdown-block__drag-handle {
@@ -995,37 +1051,12 @@
  * inspector stays outside editor content, so it cannot alter line wrapping,
  * selection, clipboard content or serialized Markdown. */
 .cherry-milkdown-link-bubble {
-  position: fixed;
   z-index: calc(var(--bubble-z-index, 1000) + 3);
-  box-sizing: border-box;
-  flex-wrap: nowrap;
   max-width: min(420px, calc(100vw - 16px));
 }
 
-.cherry-milkdown-link-bubble[hidden] {
-  display: none;
-}
-
-.cherry-milkdown-link-bubble .cherry-toolbar-button {
-  flex: 0 0 auto;
+.cherry-milkdown-link-bubble .cherry-milkdown-context-button {
   float: none;
-  box-sizing: border-box;
-  min-width: var(--bubble-btn-height, 40px);
-  border: 0;
-}
-
-.cherry-milkdown-link-bubble .cherry-toolbar-button:focus-visible {
-  outline: none;
-}
-
-.cherry-milkdown-link-bubble .cherry-toolbar-button.is-success {
-  color: var(--success-color, #2ba471);
-  background-color: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
-}
-
-.cherry-milkdown-link-bubble .cherry-toolbar-button.is-error {
-  color: var(--error-color, #d54941);
-  background-color: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
 }
 
 .cherry-milkdown-link-bubble__href {
@@ -1173,23 +1204,41 @@
  * second outer margin, otherwise charts in columns are shifted vertically
  * and no longer line up with the native preview. */
 .cherry-milkdown .cherry-table-chart {
-  /* The native panel follows a chart by 10px; keep the NodeView's controls
-   * out of the unfocused flow while matching that exact block gap. */
+  /* Match the native preview's chart-to-next-block gap without changing the
+   * editable table that follows this derived preview. */
   margin: 16px 0 10px;
 }
 
-/* The preview and chart mount point are owned by this NodeView. Keep their
+/* The preview and chart mount point are owned by this decoration. Keep their
  * responsive contract independent from Cherry's generated table wrappers. */
-.cherry-milkdown .cherry-table-chart__preview.is-rendered {
+.cherry-milkdown .cherry-table-chart__preview {
   display: block;
   width: 100%;
   min-width: 0;
   max-width: 100%;
 }
 
+.cherry-milkdown .cherry-table-chart__staging {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* The chart is a derived preview of the following native Milkdown table.
+ * Keeping both as sibling blocks lets Milkdown retain ownership of every
+ * cell, row/column action and Markdown serialization path. */
+.cherry-milkdown .cherry-table-chart--derived {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
 /* The generated native wrapper already includes the table figure's bottom
- * margin.  Its top margin is the outer block spacing in Cherry's renderer;
- * move that spacing to the NodeView shell so the shell does not add a second
+ * margin. Its top margin is the outer block spacing in Cherry's renderer;
+ * move that spacing to the decoration shell so it does not add a second
  * collapsed 16px above the wrapper. */
 .cherry-milkdown .cherry-table-chart .cherry-table-figure {
   width: 100%;

@@ -67,6 +67,22 @@ function sharedDemoAssets() {
 export default defineConfig({
   root: examplesRoot,
   base: './',
+  resolve: {
+    // The workspace package exports compiled files for consumers. During local
+    // development the demo must exercise the current source instead of a stale
+    // dist build, otherwise a successful Vite start can still show an old or
+    // completely blank application.
+    alias: [
+      {
+        find: /^@cherry-markdown\/milkdown\/echarts$/,
+        replacement: resolve(packageRoot, 'src/renderers/echarts.ts'),
+      },
+      {
+        find: /^@cherry-markdown\/milkdown$/,
+        replacement: resolve(packageRoot, 'src/index.ts'),
+      },
+    ],
+  },
   server: {
     fs: {
       // The workspace demo links dependencies from the shared node_modules
