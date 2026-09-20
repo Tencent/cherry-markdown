@@ -53,8 +53,13 @@ jobs:
           cp --parents -r packages/cherry-markdown/dist gh-pages-out/
           cp --parents examples/*.html gh-pages-out/
           cp --parents -r examples/assets gh-pages-out/
-          # 可视化配置生成器（目录可能尚未存在，条件复制）
-          [ -d examples/config_helper ] && cp --parents -r examples/config_helper gh-pages-out/ || true
+          # 可视化配置生成器（React 工程）：只发布 Vite 构建产物，而不是源码
+          # 产物由上一步 `vp run build` 生成于 examples/config_helper/dist，
+          # 复制到同名目录后线上 URL 保持不变：
+          #   https://tencent.github.io/cherry-markdown/examples/config_helper/
+          test -f examples/config_helper/dist/index.html || { echo "::error::config_helper 构建产物不存在"; exit 1; }
+          mkdir -p gh-pages-out/examples/config_helper
+          cp -r examples/config_helper/dist/. gh-pages-out/examples/config_helper/
           # logo 资源也复制到 gh-pages-out 根目录
           cp -r logo gh-pages-out/
 

@@ -3,9 +3,10 @@
  * 基于 Cherry.config.js 源码整理的所有可配置项
  * @see https://github.com/Tencent/cherry-markdown/blob/dev/packages/cherry-markdown/src/Cherry.config.js
  */
+import type { ConfigCategoryDef, PresetDef, PresetName } from '../types';
 
 // 所有可用的工具栏按钮（'|' 为分割线，可多次使用）
-export const TOOLBAR_BUTTONS = [
+export const TOOLBAR_BUTTONS: string[] = [
   'bold', 'italic', 'strikethrough', 'sub', 'sup',
   'header', 'list', 'ol', 'ul', 'checklist',
   'graph', 'size', 'color', 'quote', 'quickTable',
@@ -19,7 +20,7 @@ export const TOOLBAR_BUTTONS = [
 ];
 
 // 顶部右对齐工具栏按钮（'|' 为分割线，可多次使用）
-export const TOOLBAR_RIGHT_BUTTONS = [
+export const TOOLBAR_RIGHT_BUTTONS: string[] = [
   'bold', 'italic', 'strikethrough', 'sub', 'sup',
   'header', 'list', 'ol', 'ul', 'checklist',
   'graph', 'size', 'color', 'quote', 'quickTable',
@@ -34,7 +35,7 @@ export const TOOLBAR_RIGHT_BUTTONS = [
 ];
 
 // 气泡工具栏按钮（'|' 为分割线，可多次使用）
-export const BUBBLE_BUTTONS = [
+export const BUBBLE_BUTTONS: string[] = [
   'bold', 'italic', 'strikethrough', 'sub', 'sup',
   'header', 'list', 'ol', 'ul', 'checklist',
   'size', 'color', 'quote', 'code', 'inlineCode','underline','link', 'table',
@@ -42,7 +43,7 @@ export const BUBBLE_BUTTONS = [
 ];
 
 // 浮动工具栏按钮（'|' 为分割线，可多次使用）
-export const FLOAT_BUTTONS = [
+export const FLOAT_BUTTONS: string[] = [
   'header', 'list', 'ol', 'ul', 'checklist',
   'graph', 'quote', 'quickTable', 'code', 
   'image', 'audio', 'video', 'br',
@@ -53,12 +54,12 @@ export const FLOAT_BUTTONS = [
 ];
 
 // 侧边栏按钮（'|' 为分割线，可多次使用）
-export const SIDEBAR_BUTTONS = [
+export const SIDEBAR_BUTTONS: string[] = [
   'togglePreview', 'export', 'settings', 'fullScreen', 'switchModel', 'mobilePreview', 'copy', 'theme', 'wordCount', 'changeLocale', 'shortcutKey', 'search', '|'
 ];
 
 // 配置项源码映射
-export const SOURCE_CODE_MAP = {
+export const SOURCE_CODE_MAP: Record<string, string> = {
   id: `// 编辑器挂载的DOM节点ID
 id: 'cherry-markdown',`,
 
@@ -556,8 +557,9 @@ autoScrollByHashAfterInit: false,`,
 },`,
 };
 
+
 // 配置分类定义
-export const CONFIG_CATEGORIES = [
+export const CONFIG_CATEGORIES: ConfigCategoryDef[] = [
   {
     id: 'basic',
     name: '基础配置',
@@ -1377,7 +1379,7 @@ export const CONFIG_CATEGORIES = [
 ];
 
 // 预设配置
-export const PRESETS = {
+export const PRESETS: Record<PresetName, PresetDef> = {
   default: {
     name: '默认配置',
     description: '标准编辑器配置',
@@ -1421,7 +1423,7 @@ export const PRESETS = {
 };
 
 // Cherry.config.js 完整源码（用于展示）
-export const CHERRY_CONFIG_SOURCE = `/**
+export const CHERRY_CONFIG_SOURCE: string = `/**
  * @typedef {import('~types/cherry').CherryOptions} CherryOptions
  */
 
