@@ -28,8 +28,16 @@ import {
   rectangularSelection,
   dropCursor,
 } from '@codemirror/view';
-import { EditorState, StateEffect, StateField, EditorSelection, Transaction, Compartment } from '@codemirror/state';
-import { markdown } from '@codemirror/lang-markdown';
+import {
+  EditorState,
+  StateEffect,
+  StateField,
+  EditorSelection,
+  Transaction,
+  Compartment,
+  Prec,
+} from '@codemirror/state';
+import { markdown, deleteMarkupBackward } from '@codemirror/lang-markdown';
 import { search, searchKeymap, SearchQuery } from '@codemirror/search';
 import {
   history,
@@ -51,7 +59,7 @@ import { tagHighlighter, tags } from '@lezer/highlight';
 import { createElement } from './utils/dom';
 import { base64Reg, imgDrawioXmlReg, createUrlReg, getCodeBlockRule } from './utils/regexp';
 import { addEvent, removeEvent } from './utils/event';
-import { handleNewlineIndentList } from './utils/autoindent';
+import { handleNewlineIndentList, cherryInsertNewlineContinueMarkup } from './utils/autoindent';
 import diff from 'fast-diff';
 
 /**
@@ -1961,7 +1969,18 @@ export default class Editor {
 
     const extensions = [
       cachedCherryHighlighting,
-      markdown(),
+      // 关闭 lang-markdown 内置的 markdownKeymap（其 Enter 绑定 insertNewlineContinueMarkup），
+      // 换用下面的 Cherry 版本；须保持与内置一致的 Prec.high 优先级，
+      // 以免打乱与 vim / Suggester / Sublime 快捷键的相对顺序
+      markdown({ addKeymap: false }),
+      Prec.high(
+        keymap.of([
+          // 回车续写 Markdown 标记，并应用 Cherry 的列表准则（详见 utils/autoindent.js）
+          { key: 'Enter', run: cherryInsertNewlineContinueMarkup },
+          // 退格删除 Markdown 标记，沿用 CodeMirror 内置实现
+          { key: 'Backspace', run: deleteMarkupBackward },
+        ]),
+      ),
       this.historyCompartment.of(history()),
       search(),
       closeBrackets(),
