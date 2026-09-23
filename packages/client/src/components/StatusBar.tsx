@@ -3,11 +3,26 @@ import { stat } from '@tauri-apps/plugin-fs';
 import { computed, defineComponent, h, onMounted, onUnmounted, ref, watch } from 'vue';
 import { MESSAGES } from '../constants/i18n';
 import { useFileStore, usePreferencesStore } from '../store';
+import type { EditorMode } from '../store';
 import { notifyError, notifyInfo } from '../utils/notifications';
 import type { CherryEditorInstance } from './editorTypes';
 import { getEditorInstance } from './composables/useEditor';
 import { AutoWidthIcon, FixedWidthIcon, FocusIcon } from './icons';
 import './status-bar.css';
+
+/**
+ * 分段控件的 4 种视图模式：
+ * - editOnly / edit&preview / previewOnly：Cherry 引擎内部 3 种 model
+ * - wysiwyg：切换到 Milkdown 所见即所得引擎
+ */
+type ViewMode = 'editOnly' | 'edit&preview' | 'previewOnly' | 'wysiwyg';
+
+const VIEW_MODE_OPTIONS: Array<{ value: ViewMode; label: string; title: string }> = [
+  { value: 'editOnly', label: '源码', title: '仅显示源码编辑区（Cherry · editOnly）' },
+  { value: 'edit&preview', label: '双栏', title: '源码与预览双栏（Cherry · edit&preview）' },
+  { value: 'previewOnly', label: '预览', title: '仅显示预览（Cherry · previewOnly）' },
+  { value: 'wysiwyg', label: 'WYSIWYG', title: '所见即所得编辑（Milkdown）' },
+];
 
 const pad2 = (n: number): string => String(n).padStart(2, '0');
 
@@ -83,13 +98,106 @@ export default defineComponent({
       },
       { immediate: true },
     );
-    // 当前编辑器引擎（cherry / milkdown），点击按钮时写回持久化
+    // 当前编辑器引擎（cherry / milkdown），点击分段控件时写回持久化
     const engine = ref<'cherry' | 'milkdown'>(preferences.engine);
-    const toggleEngine = (): void => {
-      const next = engine.value === 'cherry' ? 'milkdown' : 'cherry';
-      engine.value = next;
-      preferences.setEngine(next);
+    // 当前 Cherry 内部 model（editOnly / edit&preview / previewOnly），用于计算分段控件激活项
+    const editorMode = ref<EditorMode>(preferences.editorMode);
+
+    // 当前分段控件激活项：milkdown 引擎恒为 wysiwyg；cherry 引擎则映射到具体 model
+    const activeViewMode = computed<ViewMode>(() => {
+      if (engine.value === 'milkdown') return 'wysiwyg';
+      return editorMode.value;
+    });
+
+    // 从 milkdown 切回 cherry 时，记录需要恢复到的目标 model；
+    // 由 watch(preferences.engine) 消费。为空表示 "仅切引擎，不强制 model"。
+    let pendingCherryModel: EditorMode | null = null;
+
+    /**
+     * 同步 Cherry 侧栏「编辑笔」按钮的图标与 customMenuChangeModule 中的逻辑保持一致：
+     *  - previewOnly：显示笔图标（暗示 "点我进入编辑"）
+     *  - 其他 model（editOnly / edit&preview）：显示预览图标（暗示 "点我预览"）
+     *
+     * 该函数在任何 model 变更入口都会被调用，避免用户通过底部分段控件 / Cherry 内置
+     * togglePreview / 快捷键 切换后，侧栏编辑笔的图标状态与实际 model 不一致。
+     */
+    const syncSidebarPenIcon = (mode: EditorMode): void => {
+      const iconEl = document.querySelector('.cherry-sidebar .cherry-toolbar-button.cherry-toolbar-pen i');
+      if (!iconEl) return;
+      iconEl.setAttribute('class', mode === 'previewOnly' ? 'ch-icon ch-icon-pen' : 'ch-icon ch-icon-preview');
     };
+
+    /**
+     * 点击分段控件：视图模式与专注模式是正交的，本函数只负责
+     * 切换 "引擎 + Cherry model"，不改动专注模式（侧栏隐藏 / 宽度类 / focus 持久化）。
+     *
+     *  - 目标为 wysiwyg：切换到 milkdown 引擎（Cherry 实例由上层根据 engine 变化销毁/挂载）
+     *  - 目标为 cherry 三态之一：
+     *      1) 若当前是 milkdown，先切回 cherry；等 Cherry 实例就绪后再 switchModel
+     *      2) 调用 Cherry 的 switchModel 并写回 preferences.editorMode
+     *      3) 若正处于专注模式，同步 enteredInPreviewOnly，避免后续退专注时又反向切模式
+     */
+    const applyViewMode = (mode: ViewMode): void => {
+      if (mode === activeViewMode.value) return;
+
+      if (mode === 'wysiwyg') {
+        // 切到 milkdown：不强制目标 model，watch(engine) 里读到 null 即维持现状
+        pendingCherryModel = null;
+        engine.value = 'milkdown';
+        preferences.setEngine('milkdown');
+        return;
+      }
+
+      // 目标是 Cherry 三态之一
+      const switchToCherryModel = (): void => {
+        const editor = getEditorInstance();
+        if (!editor) {
+          // Cherry 尚未就绪时，写回持久化偏好，等下次实例化时通过 defaultModel 生效
+          editorMode.value = mode;
+          preferences.setEditorMode(mode);
+          return;
+        }
+        try {
+          editor.switchModel(mode);
+          editorMode.value = mode;
+          preferences.setEditorMode(mode);
+          // 若正处于专注模式，同步 enteredInPreviewOnly 标记，避免后续 exitFocusMode
+          // 时把 previewOnly 强切回 edit&preview（或反向）
+          if (focusMode.value) {
+            enteredInPreviewOnly.value = mode === 'previewOnly';
+          }
+          // 同步侧栏编辑笔图标（customMenuChangeModule）
+          syncSidebarPenIcon(mode);
+          // model 切换涉及 CodeMirror 显隐，需要刷新一次布局
+          setTimeout(() => editor.editor?.refresh?.(), 50);
+        } catch {
+          // 切换失败仅忽略，不影响持久化偏好
+        }
+      };
+
+      if (engine.value === 'milkdown') {
+        // 从 milkdown 切回 cherry：先切引擎，Cherry 实例挂载完成后由 watch(engine) 走 switchToCherryModel
+        pendingCherryModel = mode;
+        engine.value = 'cherry';
+        preferences.setEngine('cherry');
+        return;
+      }
+
+      // 已在 Cherry 引擎，直接切 model
+      switchToCherryModel();
+    };
+
+    // 其他入口（例如 Cherry 内置的 togglePreview 按钮、快捷键）可能修改 editorMode，
+    // 同步本地状态并刷新侧栏编辑笔图标，确保各入口视觉一致
+    watch(
+      () => preferences.editorMode,
+      (v) => {
+        editorMode.value = v;
+        if (engine.value === 'cherry') {
+          syncSidebarPenIcon(v);
+        }
+      },
+    );
     // 从持久化存储初始化专注模式与宽度模式
     const focusMode = ref<boolean>(preferences.focusMode);
     // 记录进入专注模式时 cherry 是否处于纯预览模式（此时不切换编辑器 model）
@@ -360,36 +468,65 @@ export default defineComponent({
       }
     };
 
-    // 引擎切换时同步专注模式副作用：
+    // 引擎切换时的联动：
     //  1. 保持本地 engine.value 与持久化一致（其他入口可能修改 preferences.engine）
     //  2. 若正处于专注模式，将宽度类从旧容器迁移到新容器（applyWidthModeToDom 内部会先清理再应用）
-    //  3. 切回 Cherry 时，若专注模式仍开且 Cherry 已就绪，需要重新走一次 model 切换到 editOnly
+    //  3. 从 milkdown 切回 cherry 时：
+    //     - 若 pendingCherryModel 有值（用户通过分段控件点击了具体 cherry 视图），
+    //       等 Cherry 就绪后切到该 model；
+    //     - 若为 null（用户只是切了引擎），保持 Cherry 自身按 defaultModel 走。
+    //     - 若同时处于专注模式，专注副作用（editor.focusMode、editor model 强制）仅在
+    //       用户没有显式指定 model 时才应用，避免覆盖用户选择。
     watch(
       () => preferences.engine,
       (next, prev) => {
         engine.value = next;
-        if (!focusMode.value) return;
-        // 宽度类迁移到新容器
-        // 新容器可能在下一帧才渲染完成（引擎 mount 是异步），因此延迟一次
-        setTimeout(() => applyWidthModeToDom(widthMode.value), 0);
 
-        // 从 milkdown 切回 cherry：等 Cherry 就绪后，把 model 切到 editOnly
+        // 宽度类迁移到新容器（专注模式下才有宽度类需要迁移）
+        // 新容器可能在下一帧才渲染完成（引擎 mount 是异步），因此延迟一次
+        if (focusMode.value) {
+          setTimeout(() => applyWidthModeToDom(widthMode.value), 0);
+        }
+
+        // 从 milkdown 切回 cherry：等 Cherry 就绪后，按 pendingCherryModel 与 focusMode 组合处理
         if (prev === 'milkdown' && next === 'cherry') {
+          const targetModel = pendingCherryModel;
+          pendingCherryModel = null;
           const trySync = (): void => {
             const editor = getEditorInstance();
             if (!editor) {
               window.setTimeout(trySync, 100);
               return;
             }
-            editor.focusMode = true;
-            const isPreviewOnly = editor.status?.editor !== 'show';
-            enteredInPreviewOnly.value = isPreviewOnly;
-            if (!isPreviewOnly) {
+            // 情况 A：用户点了分段控件指定了 cherry 三态之一
+            if (targetModel) {
               try {
-                editor.switchModel('editOnly', false);
+                editor.switchModel(targetModel);
+                editorMode.value = targetModel;
+                preferences.setEditorMode(targetModel);
+                if (focusMode.value) {
+                  editor.focusMode = true;
+                  enteredInPreviewOnly.value = targetModel === 'previewOnly';
+                }
                 setTimeout(() => editor.editor?.refresh?.(), 200);
               } catch {
                 // ignore
+              }
+              return;
+            }
+            // 情况 B：仅切引擎（用户之前从 cherry 切到 milkdown，现又切回来，
+            // 但没通过分段控件指定 model）；若处于专注模式，恢复专注副作用
+            if (focusMode.value) {
+              editor.focusMode = true;
+              const isPreviewOnly = editor.status?.editor !== 'show';
+              enteredInPreviewOnly.value = isPreviewOnly;
+              if (!isPreviewOnly) {
+                try {
+                  editor.switchModel('editOnly', false);
+                  setTimeout(() => editor.editor?.refresh?.(), 200);
+                } catch {
+                  // ignore
+                }
               }
             }
           };
@@ -462,23 +599,26 @@ export default defineComponent({
               )
             : null,
           h(
-            'button',
+            'div',
             {
-              type: 'button',
-              class: ['status-action', 'status-action-engine', { active: engine.value === 'milkdown' }],
-              title:
-                engine.value === 'cherry'
-                  ? '当前：源码/分屏模式（Cherry），点击切换为所见即所得（Milkdown）'
-                  : '当前：所见即所得（Milkdown），点击切换回源码/分屏模式（Cherry）',
-              onClick: toggleEngine,
+              class: 'status-view-segment',
+              role: 'group',
+              'aria-label': '视图模式',
             },
-            [
+            VIEW_MODE_OPTIONS.map((opt) =>
               h(
-                'span',
-                { class: 'status-action-label' },
-                engine.value === 'cherry' ? 'Cherry 双栏编辑' : 'Milkdown 所见即所得编辑',
+                'button',
+                {
+                  key: opt.value,
+                  type: 'button',
+                  class: ['status-view-segment-item', { active: activeViewMode.value === opt.value }],
+                  title: opt.title,
+                  'aria-pressed': activeViewMode.value === opt.value,
+                  onClick: () => applyViewMode(opt.value),
+                },
+                opt.label,
               ),
-            ],
+            ),
           ),
         ]),
         h('div', { class: 'status-right' }, [
