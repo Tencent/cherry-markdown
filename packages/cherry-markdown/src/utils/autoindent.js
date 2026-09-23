@@ -17,45 +17,11 @@
 import { ChangeSet, EditorSelection, Transaction } from '@codemirror/state';
 import { insertNewlineContinueMarkupCommand } from '@codemirror/lang-markdown';
 
-/**
- * ============================================================================
- * 编辑区回车键的列表书写准则
- * ============================================================================
- * Cherry 在 CodeMirror 内置的 CommonMark 行为之上定制了两条列表准则，二者都只影响
- * 编辑区产出的文本，渲染引擎（Engine / core/hooks/List）不参与、也未做任何改动：
- *
- *   准则一：在紧凑列表（tight list，列表项之间没有空行）的空列表项上按回车时，
- *          移除该空列表项的列表标记（顶层列表退出列表，嵌套列表回退一层），
- *          顶层退出时仅保留隔开后续普通段落所必需的空行，不把列表本身改写成 loose list。
- *   准则二：在已经是 loose list 的列表里按回车新建列表项时，不再自动补一个空行
- *          来维持松散风格，直接紧跟着上一项插入新的列表标记。
- *
- * 实现策略：复用上游命令 `insertNewlineContinueMarkup`，仅在其结果上做最小干预，
- * 而不自行重写列表续写逻辑。因此序号重排、任务框重置、缩进归一化、多光标、
- * 引用嵌套等行为全部继承上游，升级依赖时无需同步维护这些细节。
- *   - 准则一：启用上游 `nonTightLists: false`，再为文档末尾的顶层退出保留块级分隔
- *   - 准则二：上游无配置项，故在其产出的事务上叠加一次「删除多余空行」
- *
- * 入口是 `cherryInsertNewlineContinueMarkup`，由 Editor.js 绑定到 Enter 键。
- * ============================================================================
- */
-
-/**
- * 启用了准则一的上游命令：`nonTightLists: false` 让空列表项回车走「删除一级标记」
- * 分支，而不是「插入空行改成 loose list」分支。
- * @type {import('@codemirror/state').StateCommand}
- */
+/** @type {import('@codemirror/state').StateCommand} */
 const continueMarkupKeepTightList = insertNewlineContinueMarkupCommand({ nonTightLists: false });
 
-/**
- * 匹配「为维持 loose list 而多插入的空行」，即 CodeMirror 在已是 loose list 的列表里
- * 新建列表项时插入的 `换行 + 空行 + 换行 + 列表标记`：
- * - 捕获组 1 为换行符，并以反向引用要求两处换行一致（兼容 \n 与 \r\n）
- * - 捕获组 2 为空行内容（只允许缩进与引用标记）
- * - 末尾要求恰好只剩一个列表标记（`-`/`*`/`+`，可带任务框；或 `1.`/`1)`），
- *   借此与「列表项内的段落续写」区分开——后者的空行是段落分隔所必需的。
- */
 const LOOSE_LIST_BLANK_LINE_RE = /^(\r\n|[\n\r])([ \t>]*)\1[ \t>]*(?:[-*+](?:[ \t]{1,4}\[[ xX]\])?|\d+[.)])[ \t]+$/;
+const TOP_LEVEL_EMPTY_LIST_MARKER_RE = /^[ \t]{0,3}(?:[-*+](?:[ \t]{1,4}\[[ xX]\])?|\d+[.)])[ \t]+$/;
 
 /**
  * 准则二的实现：删掉上游为维持 loose list 而多插入的空行。
@@ -63,7 +29,6 @@ const LOOSE_LIST_BLANK_LINE_RE = /^(\r\n|[\n\r])([ \t>]*)\1[ \t>]*(?:[-*+](?:[ \
  * @returns {Array<{ from: number, to: number }>} 新文档中需要删除的范围
  */
 function stripLooseListBlankLine(tr) {
-  /** @type {Array<{ from: number, to: number }>} 新文档中多余空行的范围 */
   const deletions = [];
 
   tr.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
@@ -76,19 +41,25 @@ function stripLooseListBlankLine(tr) {
 }
 
 /**
- * 顶层空列表项退出后，确保列表与随后输入的普通段落之间存在块级分隔。
- *
- * CodeMirror 的 `nonTightLists: false` 会把 `- a\n- ` 改成 `- a\n`。这对编辑区看似已经
- * 退出列表，但 Markdown 会把随后输入的普通文本当作上一列表项的 lazy continuation。
- * 这里只处理文档末尾、且退出后当前行只剩空白的情形：
- * - 顶层列表：补一个换行，得到 `- a\n\n`；
- * - 嵌套列表：当前行仍有父级 marker，不命中；
- * - 引用内列表：当前行仍有 `>`，不命中；
- * - 文档中部：删除 marker 后本来就留下空行，不命中。
+ * 顶层空列表项在文档末尾退出时补足块级分隔，避免后续文本成为 lazy continuation。
  * @param {import('@codemirror/state').Transaction} tr 上游命令产生的事务
  * @returns {Array<{ from: number, to: number, insert?: string }>} 需要追加的变更
  */
 function preserveExitedListBoundary(tr) {
+  let exitedTopLevelList = false;
+  tr.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
+    const line = tr.startState.doc.lineAt(fromA);
+    if (
+      inserted.length === 0 &&
+      fromA === line.from &&
+      toA === line.to &&
+      TOP_LEVEL_EMPTY_LIST_MARKER_RE.test(tr.startState.doc.sliceString(fromA, toA))
+    ) {
+      exitedTopLevelList = true;
+    }
+  });
+  if (!exitedTopLevelList) return [];
+
   const { newDoc, newSelection } = tr;
   const endRange = newSelection.ranges.find((range) => range.empty && range.head === newDoc.length);
   if (!endRange) return [];
@@ -100,7 +71,6 @@ function preserveExitedListBoundary(tr) {
   const text = newDoc.toString();
   if (!/\S/.test(text) || /(?:\n[ \t]*){2}$/.test(text)) return [];
 
-  // ChangeSet 使用内部统一的 `\n` 表示换行；序列化时再由 EditorState.lineSeparator 转换
   return [{ from: cursor, to: cursor, insert: '\n' }];
 }
 
@@ -134,9 +104,7 @@ function finalizeContinueMarkupTransaction(tr) {
 }
 
 /**
- * 上游命令通过 `state.update()` 构造事务。这里让规划事务跳过 filters，避免 Cherry 的
- * `beforeChange` 在规划阶段看到一次“尚未删除 loose 空行”的中间结果；最终事务仍由真实
- * state 正常派发并只经过一次 filters。
+ * 捕获上游命令生成的未过滤事务；组合完成后再由真实 state 统一执行 filters。
  * @param {import('@codemirror/state').EditorState} state
  * @returns {import('@codemirror/state').EditorState}
  */
@@ -152,13 +120,7 @@ function createPlanningState(state) {
   });
 }
 
-/**
- * Cherry 定制版的 `insertNewlineContinueMarkup`（见本文件顶部的准则说明）。
- * 由 Editor.js 绑定到 Enter 键，替代 lang-markdown 内置 markdownKeymap 的同名命令。
- * 返回 false 时（非 Markdown 上下文、代码块内、有选区、只读）交回后续按键处理。
- * @param {{ state: import('@codemirror/state').EditorState, dispatch: (tr: any) => void }} target 编辑器或适配器实例
- * @returns {boolean} 是否处理了该事件
- */
+/** Cherry 定制的 Markdown Enter 命令。 */
 export function cherryInsertNewlineContinueMarkup(target) {
   const { state } = target;
   // 只读状态下不修改文档（上游命令未做该检查）

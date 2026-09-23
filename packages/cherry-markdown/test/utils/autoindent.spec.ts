@@ -69,16 +69,8 @@ describe('utils/autoindent', () => {
   });
 });
 
-// ------------------------------------------------------------------
-// Cherry 自定义列表准则：紧凑列表的空列表项按回车时移除列表标记，
-// 不改写成 loose list（无序列表 / 有序列表均生效）
-// ------------------------------------------------------------------
+const CURSOR = '|';
 
-/**
- * 解析用 `|` 标记光标位置的文档模板，返回真实文档与光标偏移。
- * 例如 `'- a\n- |'` 表示光标位于第二行的行尾；写多个 `|` 即多光标。
- * 这样测试用例无需手算偏移量，改动文档时也不必同步维护数字。
- */
 const parseCursors = (template: string): { doc: string; cursors: number[] } => {
   const cursors: number[] = [];
   let doc = '';
@@ -92,13 +84,6 @@ const parseCursors = (template: string): { doc: string; cursors: number[] } => {
   return { doc, cursors: cursors.length > 0 ? cursors : [doc.length] };
 };
 
-/** 光标标记符，取一个不会出现在 Markdown 列表语法里的字符 */
-const CURSOR = '|';
-
-/**
- * 创建带 markdown 语言支持的命令目标
- * @param template 文档模板，用 `|` 标记光标位置；不含 `|` 时光标位于文档末尾
- */
 const createMarkdownTarget = (template: string, options: { readOnly?: boolean; extensions?: Extension[] } = {}) => {
   const { doc, cursors } = parseCursors(template);
   let state = EditorState.create({
@@ -111,7 +96,6 @@ const createMarkdownTarget = (template: string, options: { readOnly?: boolean; e
       ...(options.extensions ?? []),
     ],
   });
-  // 与 EditorView.dispatch 一致：既接受 Transaction，也接受 TransactionSpec
   const dispatch = vi.fn((tr: Transaction | Parameters<typeof state.update>[0]) => {
     state = tr instanceof Transaction ? tr.state : state.update(tr).state;
   });
@@ -126,28 +110,19 @@ const createMarkdownTarget = (template: string, options: { readOnly?: boolean; e
   return {
     target,
     dispatch,
-    /** 按回车，返回命令是否处理了该事件 */
     pressEnter: () => cherryInsertNewlineContinueMarkup(target as never),
-    /** 当前文档内容，并把光标位置还原成 `|` 标记，便于直接与模板字符串比对 */
     getDocWithCursors: () => {
       const doc = state.doc.toString();
       const heads = [...state.selection.ranges].map((range) => range.head).sort((a, b) => b - a);
       return heads.reduce((text, pos) => text.slice(0, pos) + CURSOR + text.slice(pos), doc);
     },
-    getDoc: () => state.doc.toString(),
   };
 };
 
-/**
- * 表驱动断言：按回车后，文档与光标应与 `after` 模板一致
- * @param before 回车前的文档模板（`|` 为光标）
- * @param after 回车后的预期文档模板（`|` 为光标）
- */
 const expectEnter = (before: string, after: string, options?: { extensions?: Extension[] }) => {
   const context = createMarkdownTarget(before, options);
   expect(context.pressEnter()).toBe(true);
   expect(context.getDocWithCursors()).toBe(after);
-  // 始终只派发一个事务，保证撤销一步即可回退
   expect(context.dispatch).toHaveBeenCalledOnce();
 };
 
@@ -157,9 +132,9 @@ describe('utils/autoindent - 准则一：紧凑列表的空列表项退出列表
     ['有序列表', '1. 123\n2. |', '1. 123\n\n|'],
     ['任务列表', '- [ ] a\n- [ ] |', '- [ ] a\n\n|'],
     ['嵌套列表回退一层', '- a\n  - b\n  - |', '- a\n  - b\n- |'],
+    ['引用内列表退出', '> - a\n> - |', '> - a\n> |'],
     ['有序列表后续序号重排', '1. a\n2. |\n3. c', '1. a\n|\n2. c'],
   ])('%s', (_name, before, after) => {
-    // 默认 CommonMark 行为会在空项上方插入空行改成 loose list，这里应直接移除列表标记
     expectEnter(before, after);
   });
 });
@@ -176,12 +151,10 @@ describe('utils/autoindent - 准则二：loose 列表新建列表项不补空行
     ['嵌套列表保留缩进', '- a\n\n  - b\n\n  - c|', '- a\n\n  - b\n\n  - c\n  - |'],
     ['引用内的列表保留引用标记', '> - a\n>\n> - b|', '> - a\n>\n> - b\n> - |'],
   ])('%s', (_name, before, after) => {
-    // 默认 CommonMark 行为会在新项前补一个空行以维持松散风格，这里不再补
     expectEnter(before, after);
   });
 
   it('tab 缩进的嵌套列表同样生效', () => {
-    // indentUnit 为 tab 时 CodeMirror 会把缩进归一化成 tab，需确保仍能识别
     expectEnter('- a\n\n\t- b\n\n\t- c|', '- a\n\n\t- b\n\n\t- c\n\t- |', { extensions: [indentUnit.of('\t')] });
   });
 
@@ -190,7 +163,6 @@ describe('utils/autoindent - 准则二：loose 列表新建列表项不补空行
   });
 
   it('多光标：两条准则同时命中时，各光标位置均正确', () => {
-    // 第一个光标在 tight 列表的空项（准则一），第二个在 loose 列表项末（准则二）
     expectEnter('- a\n- |\n\n# h\n\n- b\n\n- c|', '- a\n|\n\n# h\n\n- b\n\n- c\n- |');
   });
 
@@ -201,10 +173,8 @@ describe('utils/autoindent - 准则二：loose 列表新建列表项不补空行
   it('连续回车不会反复产生空行', () => {
     const context = createMarkdownTarget('- a\n\n- b|');
 
-    // 第一次：新建列表项，不补空行
     expect(context.pressEnter()).toBe(true);
     expect(context.getDocWithCursors()).toBe('- a\n\n- b\n- |');
-    // 第二次：空列表项退出列表（准则一）
     expect(context.pressEnter()).toBe(true);
     expect(context.getDocWithCursors()).toBe('- a\n\n- b\n\n|');
   });
@@ -246,7 +216,7 @@ describe('utils/autoindent - 不应受影响的书写规则', () => {
     ['有序列表续写', '1. 123|', '1. 123\n2. |'],
     ['引用续写', '> 123|', '> 123\n> |'],
     ['引用内段落续写', '> a\n>\n> b|', '> a\n>\n> b\n> |'],
-    // 段落之间的空行是渲染所必需的，必须保留
+    ['退出引用保持上游行为', '> a\n> \n> |', '> a\n\n|'],
     ['列表项内段落续写保留空行', '- a\n\n- b\n  c|', '- a\n\n- b\n  c\n\n  |'],
     ['列表项内多段落续写保留空行', '- a\n\n- b\n\n  c|', '- a\n\n- b\n\n  c\n\n  |'],
   ])('%s', (_name, before, after) => {

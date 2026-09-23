@@ -28,7 +28,7 @@
 import { describe, it, expect, afterEach } from 'vite-plus/test';
 import { EditorView, keymap } from '@codemirror/view';
 import { EditorState, EditorSelection, Prec } from '@codemirror/state';
-import { markdown, deleteMarkupBackward } from '@codemirror/lang-markdown';
+import { markdown, markdownKeymap } from '@codemirror/lang-markdown';
 import { defaultKeymap, history, undo } from '@codemirror/commands';
 import { cherryInsertNewlineContinueMarkup } from '../../src/utils/autoindent';
 import CherryEngine from '../../src/index.engine.core';
@@ -45,10 +45,11 @@ const createEditor = (doc: string, pos = doc.length): EditorView => {
       extensions: [
         markdown({ addKeymap: false }),
         Prec.high(
-          keymap.of([
-            { key: 'Enter', run: cherryInsertNewlineContinueMarkup },
-            { key: 'Backspace', run: deleteMarkupBackward },
-          ]),
+          keymap.of(
+            markdownKeymap.map((binding) =>
+              binding.key === 'Enter' ? { ...binding, run: cherryInsertNewlineContinueMarkup } : binding,
+            ),
+          ),
         ),
         history(),
         keymap.of(defaultKeymap),
@@ -72,72 +73,6 @@ afterEach(() => {
 });
 
 describe('编辑区回车键：紧凑列表不转 loose list', () => {
-  it('无序列表空列表项按回车应移除列表标记', () => {
-    view = createEditor('- 123\n- ');
-
-    pressEnter(view);
-
-    expect(view.state.doc.toString()).toBe('- 123\n\n');
-    expect(view.state.selection.main.head).toBe(7);
-  });
-
-  it('有序列表空列表项按回车应移除列表标记', () => {
-    view = createEditor('1. 123\n2. ');
-
-    pressEnter(view);
-
-    expect(view.state.doc.toString()).toBe('1. 123\n\n');
-    expect(view.state.selection.main.head).toBe(8);
-  });
-
-  it('列表续写行为保持不变', () => {
-    view = createEditor('- 123');
-
-    pressEnter(view);
-
-    expect(view.state.doc.toString()).toBe('- 123\n- ');
-  });
-
-  it('普通段落按回车仍插入换行', () => {
-    view = createEditor('ordinary text');
-
-    pressEnter(view);
-
-    expect(view.state.doc.toString()).toBe('ordinary text\n');
-  });
-
-  it('列表里已存在空行时，新建列表项不再自动补空行', () => {
-    view = createEditor('- 123\n\n- 456');
-
-    pressEnter(view);
-
-    // 默认 CommonMark 行为会变成 "- 123\n\n- 456\n\n- "
-    expect(view.state.doc.toString()).toBe('- 123\n\n- 456\n- ');
-  });
-
-  it('复现「空行后继续编辑」的完整按键序列，不再反复产生空行', () => {
-    // 1. "- 123" 回车 -> 续写
-    view = createEditor('- 123');
-    pressEnter(view);
-    expect(view.state.doc.toString()).toBe('- 123\n- ');
-
-    // 2. 空列表项回车 -> 移除标记，光标停在空行
-    pressEnter(view);
-    expect(view.state.doc.toString()).toBe('- 123\n\n');
-
-    // 3. 用户直接输入新的列表项（退出时已经保留必要的块级分隔）
-    view.dispatch(view.state.replaceSelection('- 456'));
-    expect(view.state.doc.toString()).toBe('- 123\n\n- 456');
-
-    // 4. 继续回车续写：不应再自动插入空行
-    pressEnter(view);
-    expect(view.state.doc.toString()).toBe('- 123\n\n- 456\n- ');
-
-    // 5. 空列表项回车：移除标记
-    pressEnter(view);
-    expect(view.state.doc.toString()).toBe('- 123\n\n- 456\n\n');
-  });
-
   it('退出列表后输入普通文本应渲染为列表外段落', () => {
     view = createEditor('- 123\n- ');
 

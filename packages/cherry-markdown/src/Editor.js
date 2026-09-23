@@ -37,7 +37,7 @@ import {
   Compartment,
   Prec,
 } from '@codemirror/state';
-import { markdown, deleteMarkupBackward } from '@codemirror/lang-markdown';
+import { markdown, markdownKeymap } from '@codemirror/lang-markdown';
 import { search, searchKeymap, SearchQuery } from '@codemirror/search';
 import {
   history,
@@ -1969,17 +1969,13 @@ export default class Editor {
 
     const extensions = [
       cachedCherryHighlighting,
-      // 关闭 lang-markdown 内置的 markdownKeymap（其 Enter 绑定 insertNewlineContinueMarkup），
-      // 换用下面的 Cherry 版本；须保持与内置一致的 Prec.high 优先级，
-      // 以免打乱与 vim / Suggester / Sublime 快捷键的相对顺序
       markdown({ addKeymap: false }),
       Prec.high(
-        keymap.of([
-          // 回车续写 Markdown 标记，并应用 Cherry 的列表准则（详见 utils/autoindent.js）
-          { key: 'Enter', run: cherryInsertNewlineContinueMarkup },
-          // 退格删除 Markdown 标记，沿用 CodeMirror 内置实现
-          { key: 'Backspace', run: deleteMarkupBackward },
-        ]),
+        keymap.of(
+          markdownKeymap.map((binding) =>
+            binding.key === 'Enter' ? { ...binding, run: cherryInsertNewlineContinueMarkup } : binding,
+          ),
+        ),
       ),
       this.historyCompartment.of(history()),
       search(),
