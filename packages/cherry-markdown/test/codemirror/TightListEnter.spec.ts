@@ -22,15 +22,16 @@
  * - Prec.high(keymap.of(cherryMarkdownKeymap))：以相同优先级注册 Cherry 自定义准则
  * - 其后是 defaultKeymap（Enter -> insertNewlineAndIndent）作为兜底
  *
- * 验证紧凑列表的空列表项按回车时移除列表标记，而不是插入空行变成 loose list。
+ * 验证紧凑列表的空列表项按回车时移除列表标记，并保留结束列表所需的块级分隔。
  */
 
 import { describe, it, expect, afterEach } from 'vite-plus/test';
 import { EditorView, keymap } from '@codemirror/view';
 import { EditorState, EditorSelection, Prec } from '@codemirror/state';
 import { markdown, deleteMarkupBackward } from '@codemirror/lang-markdown';
-import { defaultKeymap } from '@codemirror/commands';
+import { defaultKeymap, history, undo } from '@codemirror/commands';
 import { cherryInsertNewlineContinueMarkup } from '../../src/utils/autoindent';
+import CherryEngine from '../../src/index.engine.core';
 import { createCm6View } from '../helpers/cM6View';
 
 const createEditor = (doc: string, pos = doc.length): EditorView => {
@@ -49,6 +50,7 @@ const createEditor = (doc: string, pos = doc.length): EditorView => {
             { key: 'Backspace', run: deleteMarkupBackward },
           ]),
         ),
+        history(),
         keymap.of(defaultKeymap),
       ],
     }),
@@ -75,8 +77,8 @@ describe('编辑区回车键：紧凑列表不转 loose list', () => {
 
     pressEnter(view);
 
-    expect(view.state.doc.toString()).toBe('- 123\n');
-    expect(view.state.selection.main.head).toBe(6);
+    expect(view.state.doc.toString()).toBe('- 123\n\n');
+    expect(view.state.selection.main.head).toBe(7);
   });
 
   it('有序列表空列表项按回车应移除列表标记', () => {
@@ -84,8 +86,8 @@ describe('编辑区回车键：紧凑列表不转 loose list', () => {
 
     pressEnter(view);
 
-    expect(view.state.doc.toString()).toBe('1. 123\n');
-    expect(view.state.selection.main.head).toBe(7);
+    expect(view.state.doc.toString()).toBe('1. 123\n\n');
+    expect(view.state.selection.main.head).toBe(8);
   });
 
   it('列表续写行为保持不变', () => {
@@ -121,10 +123,9 @@ describe('编辑区回车键：紧凑列表不转 loose list', () => {
 
     // 2. 空列表项回车 -> 移除标记，光标停在空行
     pressEnter(view);
-    expect(view.state.doc.toString()).toBe('- 123\n');
+    expect(view.state.doc.toString()).toBe('- 123\n\n');
 
-    // 3. 用户在空行再敲一次回车，然后输入新的列表项（此时列表已含空行）
-    pressEnter(view);
+    // 3. 用户直接输入新的列表项（退出时已经保留必要的块级分隔）
     view.dispatch(view.state.replaceSelection('- 456'));
     expect(view.state.doc.toString()).toBe('- 123\n\n- 456');
 
@@ -134,6 +135,31 @@ describe('编辑区回车键：紧凑列表不转 loose list', () => {
 
     // 5. 空列表项回车：移除标记
     pressEnter(view);
-    expect(view.state.doc.toString()).toBe('- 123\n\n- 456\n');
+    expect(view.state.doc.toString()).toBe('- 123\n\n- 456\n\n');
+  });
+
+  it('退出列表后输入普通文本应渲染为列表外段落', () => {
+    view = createEditor('- 123\n- ');
+
+    pressEnter(view);
+    view.dispatch(view.state.replaceSelection('ordinary text'));
+
+    expect(view.state.doc.toString()).toBe('- 123\n\nordinary text');
+    const engine: any = new CherryEngine({});
+    const container = document.createElement('div');
+    container.innerHTML = engine.makeHtml(view.state.doc.toString());
+    expect(container.querySelector('ul')?.textContent).toBe('123');
+    expect(container.querySelector(':scope > p')?.textContent).toBe('ordinary text');
+    expect(container.querySelector('li br')).toBeNull();
+  });
+
+  it('退出列表仍可通过一次撤销恢复空列表项', () => {
+    view = createEditor('- 123\n- ');
+
+    pressEnter(view);
+    expect(view.state.doc.toString()).toBe('- 123\n\n');
+
+    expect(undo(view)).toBe(true);
+    expect(view.state.doc.toString()).toBe('- 123\n- ');
   });
 });

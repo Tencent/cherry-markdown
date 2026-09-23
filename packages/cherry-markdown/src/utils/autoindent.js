@@ -26,14 +26,14 @@ import { insertNewlineContinueMarkupCommand } from '@codemirror/lang-markdown';
  *
  *   准则一：在紧凑列表（tight list，列表项之间没有空行）的空列表项上按回车时，
  *          移除该空列表项的列表标记（顶层列表退出列表，嵌套列表回退一层），
- *          而不是在其上方插入空行、把列表改写成 loose list。
+ *          顶层退出时仅保留隔开后续普通段落所必需的空行，不把列表本身改写成 loose list。
  *   准则二：在已经是 loose list 的列表里按回车新建列表项时，不再自动补一个空行
  *          来维持松散风格，直接紧跟着上一项插入新的列表标记。
  *
  * 实现策略：复用上游命令 `insertNewlineContinueMarkup`，仅在其结果上做最小干预，
  * 而不自行重写列表续写逻辑。因此序号重排、任务框重置、缩进归一化、多光标、
  * 引用嵌套等行为全部继承上游，升级依赖时无需同步维护这些细节。
- *   - 准则一：上游提供了 `nonTightLists: false` 配置，直接启用即可
+ *   - 准则一：启用上游 `nonTightLists: false`，再为文档末尾的顶层退出保留块级分隔
  *   - 准则二：上游无配置项，故在其产出的事务上叠加一次「删除多余空行」
  *
  * 入口是 `cherryInsertNewlineContinueMarkup`，由 Editor.js 绑定到 Enter 键。
@@ -60,7 +60,7 @@ const LOOSE_LIST_BLANK_LINE_RE = /^(\r\n|[\n\r])([ \t>]*)\1[ \t>]*(?:[-*+](?:[ \
 /**
  * 准则二的实现：删掉上游为维持 loose list 而多插入的空行。
  * @param {import('@codemirror/state').Transaction} tr 上游命令产生的事务
- * @returns {import('@codemirror/state').TransactionSpec | null} 改写后的事务描述，无需改写时返回 null
+ * @returns {Array<{ from: number, to: number }>} 新文档中需要删除的范围
  */
 function stripLooseListBlankLine(tr) {
   /** @type {Array<{ from: number, to: number }>} 新文档中多余空行的范围 */
@@ -72,19 +72,84 @@ function stripLooseListBlankLine(tr) {
     if (match) deletions.push({ from: fromB, to: fromB + match[1].length + match[2].length });
   });
 
-  // 没有多余空行（例如空列表项退出列表、段落续写、序号重排等），沿用原事务
-  if (deletions.length === 0) return null;
+  return deletions;
+}
 
-  const strip = ChangeSet.of(deletions, tr.newDoc.length);
+/**
+ * 顶层空列表项退出后，确保列表与随后输入的普通段落之间存在块级分隔。
+ *
+ * CodeMirror 的 `nonTightLists: false` 会把 `- a\n- ` 改成 `- a\n`。这对编辑区看似已经
+ * 退出列表，但 Markdown 会把随后输入的普通文本当作上一列表项的 lazy continuation。
+ * 这里只处理文档末尾、且退出后当前行只剩空白的情形：
+ * - 顶层列表：补一个换行，得到 `- a\n\n`；
+ * - 嵌套列表：当前行仍有父级 marker，不命中；
+ * - 引用内列表：当前行仍有 `>`，不命中；
+ * - 文档中部：删除 marker 后本来就留下空行，不命中。
+ * @param {import('@codemirror/state').Transaction} tr 上游命令产生的事务
+ * @returns {Array<{ from: number, to: number, insert?: string }>} 需要追加的变更
+ */
+function preserveExitedListBoundary(tr) {
+  const { newDoc, newSelection } = tr;
+  const endRange = newSelection.ranges.find((range) => range.empty && range.head === newDoc.length);
+  if (!endRange) return [];
+
+  const cursor = endRange.head;
+  const line = newDoc.lineAt(cursor);
+  if (!/^[ \t]*$/.test(line.text)) return [];
+
+  const text = newDoc.toString();
+  if (!/\S/.test(text) || /(?:\n[ \t]*){2}$/.test(text)) return [];
+
+  // ChangeSet 使用内部统一的 `\n` 表示换行；序列化时再由 EditorState.lineSeparator 转换
+  return [{ from: cursor, to: cursor, insert: '\n' }];
+}
+
+/**
+ * 把上游事务改写成最终只派发一次的事务描述。
+ * @param {import('@codemirror/state').Transaction} tr 上游命令产生的事务
+ * @returns {import('@codemirror/state').TransactionSpec}
+ */
+function finalizeContinueMarkupTransaction(tr) {
+  const rewrites = [...stripLooseListBlankLine(tr), ...preserveExitedListBoundary(tr)];
+
+  if (rewrites.length === 0) {
+    return {
+      changes: tr.changes,
+      selection: tr.newSelection,
+      scrollIntoView: tr.scrollIntoView,
+      userEvent: tr.annotation(Transaction.userEvent) || 'input',
+    };
+  }
+
+  const postProcess = ChangeSet.of(rewrites, tr.newDoc.length);
   return {
-    // 在原事务的变更之上叠加删除，合成单个变更集（撤销仍为一步）
-    changes: tr.changes.compose(strip),
-    // 交由 CodeMirror 映射选区，多光标与 anchor/head 方向均自动保持
-    selection: tr.newSelection.map(strip),
-    scrollIntoView: true,
+    // 在原事务的变更之上叠加改写，合成单个变更集（撤销仍为一步）
+    changes: tr.changes.compose(postProcess),
+    // 插入列表边界时光标应落在新空行；删除 loose 空行时其余选区也能正确映射
+    selection: tr.newSelection.map(postProcess, 1),
+    scrollIntoView: tr.scrollIntoView,
     // 与默认命令保持一致，Cherry 依赖 userEvent 推导 change 事件的 origin
     userEvent: tr.annotation(Transaction.userEvent) || 'input',
   };
+}
+
+/**
+ * 上游命令通过 `state.update()` 构造事务。这里让规划事务跳过 filters，避免 Cherry 的
+ * `beforeChange` 在规划阶段看到一次“尚未删除 loose 空行”的中间结果；最终事务仍由真实
+ * state 正常派发并只经过一次 filters。
+ * @param {import('@codemirror/state').EditorState} state
+ * @returns {import('@codemirror/state').EditorState}
+ */
+function createPlanningState(state) {
+  return new Proxy(state, {
+    get(target, property) {
+      if (property === 'update') {
+        return (...specs) => target.update(...specs, { filter: false });
+      }
+      const value = Reflect.get(target, property, target);
+      return typeof value === 'function' ? value.bind(target) : value;
+    },
+  });
 }
 
 /**
@@ -101,16 +166,16 @@ export function cherryInsertNewlineContinueMarkup(target) {
 
   /** @type {import('@codemirror/state').Transaction | null} */
   let transaction = null;
-  // 拦下上游命令生成的事务（不直接派发），以便按准则二改写后只派发一个事务（撤销仍为一步）
+  // 在跳过 filters 的 state 上规划事务，避免 beforeChange 等过滤器观察到中间结果
   const handled = continueMarkupKeepTightList({
-    state,
+    state: createPlanningState(state),
     dispatch: (tr) => {
       transaction = tr;
     },
   });
   if (!handled || !transaction) return false;
 
-  target.dispatch(stripLooseListBlankLine(transaction) || transaction);
+  target.dispatch(finalizeContinueMarkupTransaction(transaction));
   return true;
 }
 

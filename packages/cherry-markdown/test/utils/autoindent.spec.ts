@@ -153,9 +153,9 @@ const expectEnter = (before: string, after: string, options?: { extensions?: Ext
 
 describe('utils/autoindent - 准则一：紧凑列表的空列表项退出列表', () => {
   it.each([
-    ['无序列表', '- 123\n- |', '- 123\n|'],
-    ['有序列表', '1. 123\n2. |', '1. 123\n|'],
-    ['任务列表', '- [ ] a\n- [ ] |', '- [ ] a\n|'],
+    ['无序列表', '- 123\n- |', '- 123\n\n|'],
+    ['有序列表', '1. 123\n2. |', '1. 123\n\n|'],
+    ['任务列表', '- [ ] a\n- [ ] |', '- [ ] a\n\n|'],
     ['嵌套列表回退一层', '- a\n  - b\n  - |', '- a\n  - b\n- |'],
     ['有序列表后续序号重排', '1. a\n2. |\n3. c', '1. a\n|\n2. c'],
   ])('%s', (_name, before, after) => {
@@ -194,6 +194,10 @@ describe('utils/autoindent - 准则二：loose 列表新建列表项不补空行
     expectEnter('- a\n- |\n\n# h\n\n- b\n\n- c|', '- a\n|\n\n# h\n\n- b\n\n- c\n- |');
   });
 
+  it('多光标：文档末尾退出列表时仍保留块级分隔', () => {
+    expectEnter('- a\n- |\n\n# h\n\n- b\n- |', '- a\n|\n\n# h\n\n- b\n\n|');
+  });
+
   it('连续回车不会反复产生空行', () => {
     const context = createMarkdownTarget('- a\n\n- b|');
 
@@ -202,7 +206,28 @@ describe('utils/autoindent - 准则二：loose 列表新建列表项不补空行
     expect(context.getDocWithCursors()).toBe('- a\n\n- b\n- |');
     // 第二次：空列表项退出列表（准则一）
     expect(context.pressEnter()).toBe(true);
-    expect(context.getDocWithCursors()).toBe('- a\n\n- b\n|');
+    expect(context.getDocWithCursors()).toBe('- a\n\n- b\n\n|');
+  });
+
+  it('事务过滤器只观察一次最终结果', () => {
+    const observedDocs: string[] = [];
+    let transactionFilterCalls = 0;
+    const context = createMarkdownTarget('- a\n\n- b|', {
+      extensions: [
+        EditorState.changeFilter.of((tr) => {
+          observedDocs.push(tr.newDoc.toString());
+          return true;
+        }),
+        EditorState.transactionFilter.of((tr) => {
+          transactionFilterCalls += 1;
+          return tr;
+        }),
+      ],
+    });
+
+    expect(context.pressEnter()).toBe(true);
+    expect(observedDocs).toEqual(['- a\n\n- b\n- ']);
+    expect(transactionFilterCalls).toBe(1);
   });
 
   it('保留 input 的 userEvent 与 scrollIntoView', () => {
