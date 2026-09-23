@@ -272,3 +272,76 @@ body[data-cherry-theme='dark'] .status-action-width:hover {
 body[data-cherry-theme='dark'] .auto-saved-hint {
   background: rgba(82, 196, 26, 0.15);
 }
+
+/* 视图模式分段控件：源码 | 双栏 | 预览 | WYSIWYG
+ * 位于状态栏中央 status-center，与 .status-action-primary（专注）并排。
+ * 视觉：胶囊容器 + 内嵌 4 个等宽按钮，通过 .active 高亮当前模式。
+ */
+.status-view-segment {
+  display: inline-flex;
+  align-items: stretch;
+  height: 22px;
+  padding: 2px;
+  border: 1px solid var(--color-border-strong, rgba(127, 127, 127, 0.3));
+  border-radius: 6px;
+  background: var(--color-bg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  gap: 2px;
+}
+
+.status-view-segment-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.status-view-segment-item:hover {
+  color: var(--color-accent-strong);
+  background: var(--color-accent-soft);
+}
+
+.status-view-segment-item:focus-visible {
+  outline: 1px solid var(--color-accent-strong);
+  outline-offset: 1px;
+}
+
+.status-view-segment-item.active {
+  color: var(--color-accent-contrast, #ffffff);
+  background: var(--color-accent-strong);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.status-view-segment-item.active:hover {
+  color: var(--color-accent-contrast, #ffffff);
+  background: var(--color-accent-strong);
+}
+
+/* 暗色主题：容器底色换成面板色，避免"白色胶囊"过于突兀 */
+body[data-cherry-theme='dark'] .status-view-segment {
+  background: var(--color-surface);
+  border-color: var(--color-border-strong);
+}
+
+body[data-cherry-theme='dark'] .status-view-segment-item:hover {
+  color: var(--color-accent-strong);
+  background: var(--color-accent-soft);
+}
+
+body[data-cherry-theme='dark'] .status-view-segment-item.active {
+  color: #ffffff;
+  background: var(--color-accent);
+}

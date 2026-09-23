@@ -953,9 +953,25 @@ export default class Previewer {
     this.options.previewerDom.classList.remove('cherry-previewer--hidden', 'cherry-previewer--full');
     this.options.virtualDragLineDom.classList.remove('cherry-drag--hidden');
     this.editor.options.editorDom.classList.remove('cherry-editor--full', 'cherry-editor--hidden');
-    // 恢复现场
+    // 恢复现场：从缓存读取用户此前拖动过的比例。
+    // 但该缓存在 $dealEditAndPreviewOnly() 里写入时，使用的是当时 editor 的 boundingRect.width，
+    // 当上一状态为 previewOnly（editor 宽度为 0）或 editOnly（previewer 宽度为 0）时，
+    // calculateRealLayout 会被 minBlockPercentage(0.2) 夹到 20%/80% 或 80%/20%，
+    // 从而导致 recover 后双栏比例失衡。这里加一层脏数据检测：
+    // 只要任一维度落到 minBlockPercentage 边界（含）之内，就判定缓存不可信，
+    // 直接回退到 50/50（edit&preview 的官方默认态）。
     const { layout } = this.options.previewerCache;
-    this.setRealLayout(layout.editorPercentage, layout.previewerPercentage);
+    const parsePercent = (v) => (typeof v === 'string' ? parseFloat(v) : NaN);
+    const editorPct = parsePercent(layout && layout.editorPercentage);
+    const previewerPct = parsePercent(layout && layout.previewerPercentage);
+    const minPct = this.options.minBlockPercentage * 100;
+    const isLayoutPolluted =
+      !Number.isFinite(editorPct) || !Number.isFinite(previewerPct) || editorPct <= minPct || editorPct >= 100 - minPct;
+    if (isLayoutPolluted) {
+      this.setRealLayout('50%', '50%');
+    } else {
+      this.setRealLayout(layout.editorPercentage, layout.previewerPercentage);
+    }
     if (this.options.previewerCache.htmlChanged) {
       this.update(this.options.previewerCache.html);
     }

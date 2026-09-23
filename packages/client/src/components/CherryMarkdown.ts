@@ -56,27 +56,30 @@ type CustomConfig = {
 
 // Cherry upstream types do not include custom menu ids in toolbarRight,
 // but runtime supports them through customMenu registration.
-const toolbarRight = ['customSave', '|', 'togglePreview'] as unknown as ToolbarRightConfig;
+const toolbarRight = [] as unknown as ToolbarRightConfig;
 
 const customMenuChangeModule = Cherry.createMenuHook('编辑', {
   iconName: 'pen' as const,
   onClick(this: ToolbarMenuHookContext) {
     const { editor } = this.$cherry.getStatus();
     let nextMode: EditorMode;
-    this.$cherry.wrapperDom
-      ?.querySelector('.cherry-sidebar .cherry-toolbar-button.cherry-toolbar-pen')
-      ?.classList.add('active');
     if (editor === 'show') {
       nextMode = 'previewOnly';
       this.$cherry.wrapperDom
-        ?.querySelector('.cherry-sidebar .cherry-toolbar-button.cherry-toolbar-pen')
-        ?.classList.remove('active');
+        ?.querySelector('.cherry-sidebar .cherry-toolbar-button.cherry-toolbar-pen i')
+        ?.setAttribute('class', 'ch-icon ch-icon-pen');
       this.$cherry.switchModel('previewOnly');
     } else if (this.$cherry.focusMode) {
       nextMode = 'editOnly';
+      this.$cherry.wrapperDom
+        ?.querySelector('.cherry-sidebar .cherry-toolbar-button.cherry-toolbar-pen i')
+        ?.setAttribute('class', 'ch-icon ch-icon-preview');
       this.$cherry.switchModel('editOnly', false);
     } else {
       nextMode = 'edit&preview';
+      this.$cherry.wrapperDom
+        ?.querySelector('.cherry-sidebar .cherry-toolbar-button.cherry-toolbar-pen i')
+        ?.setAttribute('class', 'ch-icon ch-icon-preview');
       this.$cherry.switchModel('edit&preview');
     }
     try {

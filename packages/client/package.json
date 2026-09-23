@@ -3,9 +3,9 @@
   "version": "0.5.1",
   "type": "module",
   "scripts": {
-    "dev": "npx node ./scripts/sync-version.js && vp dev",
-    "tauri:dev": "npx node ./scripts/sync-version.js && tauri dev",
-    "build": "npx node ./scripts/sync-version.js && vue-tsc --noEmit && vp build",
+    "dev": "node ./scripts/sync-version.js && vp dev",
+    "tauri:dev": "node ./scripts/sync-version.js && tauri dev",
+    "build": "node ./scripts/sync-version.js && vue-tsc --noEmit && vp build",
     "tauri:build": "tauri build",
     "preview": "vp preview",
     "version:sync": "node ./scripts/sync-version.js"
