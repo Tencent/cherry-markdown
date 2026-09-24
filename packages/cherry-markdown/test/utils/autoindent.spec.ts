@@ -127,10 +127,19 @@ const expectEnter = (before: string, after: string, options?: { extensions?: Ext
 };
 
 describe('utils/autoindent - 准则一：紧凑列表的空列表项退出列表', () => {
+  it('连续两次回车：先续出空项，再只删除空项标记', () => {
+    const context = createMarkdownTarget('- 123|');
+
+    expect(context.pressEnter()).toBe(true);
+    expect(context.getDocWithCursors()).toBe('- 123\n- |');
+    expect(context.pressEnter()).toBe(true);
+    expect(context.getDocWithCursors()).toBe('- 123\n|');
+  });
+
   it.each([
-    ['无序列表', '- 123\n- |', '- 123\n\n|'],
-    ['有序列表', '1. 123\n2. |', '1. 123\n\n|'],
-    ['任务列表', '- [ ] a\n- [ ] |', '- [ ] a\n\n|'],
+    ['无序列表', '- 123\n- |', '- 123\n|'],
+    ['有序列表', '1. 123\n2. |', '1. 123\n|'],
+    ['任务列表', '- [ ] a\n- [ ] |', '- [ ] a\n|'],
     ['嵌套列表回退一层', '- a\n  - b\n  - |', '- a\n  - b\n- |'],
     ['引用内列表退出', '> - a\n> - |', '> - a\n> |'],
     ['有序列表后续序号重排', '1. a\n2. |\n3. c', '1. a\n|\n2. c'],
@@ -166,8 +175,8 @@ describe('utils/autoindent - 准则二：loose 列表新建列表项不补空行
     expectEnter('- a\n- |\n\n# h\n\n- b\n\n- c|', '- a\n|\n\n# h\n\n- b\n\n- c\n- |');
   });
 
-  it('多光标：文档末尾退出列表时仍保留块级分隔', () => {
-    expectEnter('- a\n- |\n\n# h\n\n- b\n- |', '- a\n|\n\n# h\n\n- b\n\n|');
+  it('多光标：文档末尾退出列表时只删除空列表项', () => {
+    expectEnter('- a\n- |\n\n# h\n\n- b\n- |', '- a\n|\n\n# h\n\n- b\n|');
   });
 
   it('连续回车不会反复产生空行', () => {
@@ -176,7 +185,7 @@ describe('utils/autoindent - 准则二：loose 列表新建列表项不补空行
     expect(context.pressEnter()).toBe(true);
     expect(context.getDocWithCursors()).toBe('- a\n\n- b\n- |');
     expect(context.pressEnter()).toBe(true);
-    expect(context.getDocWithCursors()).toBe('- a\n\n- b\n\n|');
+    expect(context.getDocWithCursors()).toBe('- a\n\n- b\n|');
   });
 
   it('事务过滤器只观察一次最终结果', () => {
@@ -204,9 +213,9 @@ describe('utils/autoindent - 准则二：loose 列表新建列表项不补空行
     const context = createMarkdownTarget('- a\n\n- b|');
 
     expect(context.pressEnter()).toBe(true);
-    const spec = context.dispatch.mock.calls[0][0] as { userEvent?: string; scrollIntoView?: boolean };
-    expect(spec.userEvent).toBe('input');
-    expect(spec.scrollIntoView).toBe(true);
+    const transaction = context.dispatch.mock.calls[0][0] as Transaction;
+    expect(transaction.annotation(Transaction.userEvent)).toBe('input');
+    expect(transaction.scrollIntoView).toBe(true);
   });
 });
 

@@ -22,7 +22,7 @@
  * - Prec.high(keymap.of(cherryMarkdownKeymap))：以相同优先级注册 Cherry 自定义准则
  * - 其后是 defaultKeymap（Enter -> insertNewlineAndIndent）作为兜底
  *
- * 验证紧凑列表的空列表项按回车时移除列表标记，并保留结束列表所需的块级分隔。
+ * 验证紧凑列表的空列表项按回车时只移除列表标记。
  */
 
 import { describe, it, expect, afterEach } from 'vite-plus/test';
@@ -73,26 +73,25 @@ afterEach(() => {
 });
 
 describe('编辑区回车键：紧凑列表不转 loose list', () => {
-  it('退出列表后输入普通文本应渲染为列表外段落', () => {
+  it('退出列表后不由 Enter 命令补写块级分隔', () => {
     view = createEditor('- 123\n- ');
 
     pressEnter(view);
     view.dispatch(view.state.replaceSelection('ordinary text'));
 
-    expect(view.state.doc.toString()).toBe('- 123\n\nordinary text');
+    expect(view.state.doc.toString()).toBe('- 123\nordinary text');
     const engine: any = new CherryEngine({});
     const container = document.createElement('div');
     container.innerHTML = engine.makeHtml(view.state.doc.toString());
-    expect(container.querySelector('ul')?.textContent).toBe('123');
-    expect(container.querySelector(':scope > p')?.textContent).toBe('ordinary text');
-    expect(container.querySelector('li br')).toBeNull();
+    expect(container.querySelector('ul')?.textContent).toContain('ordinary text');
+    expect(container.querySelector(':scope > p')).toBeNull();
   });
 
   it('退出列表仍可通过一次撤销恢复空列表项', () => {
     view = createEditor('- 123\n- ');
 
     pressEnter(view);
-    expect(view.state.doc.toString()).toBe('- 123\n\n');
+    expect(view.state.doc.toString()).toBe('- 123\n');
 
     expect(undo(view)).toBe(true);
     expect(view.state.doc.toString()).toBe('- 123\n- ');

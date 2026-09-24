@@ -14,130 +14,198 @@
  * limitations under the License.
  */
 
-import { ChangeSet, EditorSelection, Transaction } from '@codemirror/state';
-import { insertNewlineContinueMarkupCommand } from '@codemirror/lang-markdown';
+import { EditorSelection, countColumn } from '@codemirror/state';
+import { indentUnit, syntaxTree } from '@codemirror/language';
+import { markdownLanguage } from '@codemirror/lang-markdown';
 
-/** @type {import('@codemirror/state').StateCommand} */
-const continueMarkupKeepTightList = insertNewlineContinueMarkupCommand({ nonTightLists: false });
-
-const LOOSE_LIST_BLANK_LINE_RE = /^(\r\n|[\n\r])([ \t>]*)\1[ \t>]*(?:[-*+](?:[ \t]{1,4}\[[ xX]\])?|\d+[.)])[ \t]+$/;
-const TOP_LEVEL_EMPTY_LIST_MARKER_RE = /^[ \t]{0,3}(?:[-*+](?:[ \t]{1,4}\[[ xX]\])?|\d+[.)])[ \t]+$/;
-
-/**
- * 准则二的实现：删掉上游为维持 loose list 而多插入的空行。
- * @param {import('@codemirror/state').Transaction} tr 上游命令产生的事务
- * @returns {Array<{ from: number, to: number }>} 新文档中需要删除的范围
- */
-function stripLooseListBlankLine(tr) {
-  const deletions = [];
-
-  tr.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
-    const match = LOOSE_LIST_BLANK_LINE_RE.exec(inserted.toString());
-    // 剥离「换行 + 空行」，保留其后的「换行 + 列表标记」
-    if (match) deletions.push({ from: fromB, to: fromB + match[1].length + match[2].length });
-  });
-
-  return deletions;
+// Markdown Enter follows CodeMirror's context rules, but directly creates a tight next item.
+// Based on @codemirror/lang-markdown 6.5.0's MIT-licensed insertNewlineContinueMarkup.
+function itemNumber(item, doc) {
+  return /^(\s*)(\d+)(?=[.)])/.exec(doc.sliceString(item.from, item.from + 10));
 }
 
-/**
- * 顶层空列表项在文档末尾退出时补足块级分隔，避免后续文本成为 lazy continuation。
- * @param {import('@codemirror/state').Transaction} tr 上游命令产生的事务
- * @returns {Array<{ from: number, to: number, insert?: string }>} 需要追加的变更
- */
-function preserveExitedListBoundary(tr) {
-  let exitedTopLevelList = false;
-  tr.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
-    const line = tr.startState.doc.lineAt(fromA);
-    if (
-      inserted.length === 0 &&
-      fromA === line.from &&
-      toA === line.to &&
-      TOP_LEVEL_EMPTY_LIST_MARKER_RE.test(tr.startState.doc.sliceString(fromA, toA))
-    ) {
-      exitedTopLevelList = true;
-    }
-  });
-  if (!exitedTopLevelList) return [];
-
-  const { newDoc, newSelection } = tr;
-  const endRange = newSelection.ranges.find((range) => range.empty && range.head === newDoc.length);
-  if (!endRange) return [];
-
-  const cursor = endRange.head;
-  const line = newDoc.lineAt(cursor);
-  if (!/^[ \t]*$/.test(line.text)) return [];
-
-  const text = newDoc.toString();
-  if (!/\S/.test(text) || /(?:\n[ \t]*){2}$/.test(text)) return [];
-
-  return [{ from: cursor, to: cursor, insert: '\n' }];
-}
-
-/**
- * 把上游事务改写成最终只派发一次的事务描述。
- * @param {import('@codemirror/state').Transaction} tr 上游命令产生的事务
- * @returns {import('@codemirror/state').TransactionSpec}
- */
-function finalizeContinueMarkupTransaction(tr) {
-  const rewrites = [...stripLooseListBlankLine(tr), ...preserveExitedListBoundary(tr)];
-
-  if (rewrites.length === 0) {
-    return {
-      changes: tr.changes,
-      selection: tr.newSelection,
-      scrollIntoView: tr.scrollIntoView,
-      userEvent: tr.annotation(Transaction.userEvent) || 'input',
-    };
+class MarkupContext {
+  constructor(node, from, to, spaceBefore, spaceAfter, type, item) {
+    this.node = node;
+    this.from = from;
+    this.to = to;
+    this.spaceBefore = spaceBefore;
+    this.spaceAfter = spaceAfter;
+    this.type = type;
+    this.item = item;
   }
 
-  const postProcess = ChangeSet.of(rewrites, tr.newDoc.length);
-  return {
-    // 在原事务的变更之上叠加改写，合成单个变更集（撤销仍为一步）
-    changes: tr.changes.compose(postProcess),
-    // 插入列表边界时光标应落在新空行；删除 loose 空行时其余选区也能正确映射
-    selection: tr.newSelection.map(postProcess, 1),
-    scrollIntoView: tr.scrollIntoView,
-    // 与默认命令保持一致，Cherry 依赖 userEvent 推导 change 事件的 origin
-    userEvent: tr.annotation(Transaction.userEvent) || 'input',
-  };
+  blank(maxWidth, trailing = true) {
+    let result = this.spaceBefore + (this.node.name === 'Blockquote' ? '>' : '');
+    if (maxWidth != null) {
+      while (result.length < maxWidth) result += ' ';
+      return result;
+    }
+    for (let i = this.to - this.from - result.length - this.spaceAfter.length; i > 0; i--) result += ' ';
+    return result + (trailing ? this.spaceAfter : '');
+  }
+
+  marker(doc, add) {
+    const number = this.node.name === 'OrderedList' ? String(+itemNumber(this.item, doc)[2] + add) : '';
+    return this.spaceBefore + number + this.type + this.spaceAfter;
+  }
 }
 
-/**
- * 捕获上游命令生成的未过滤事务；组合完成后再由真实 state 统一执行 filters。
- * @param {import('@codemirror/state').EditorState} state
- * @returns {import('@codemirror/state').EditorState}
- */
-function createPlanningState(state) {
-  return new Proxy(state, {
-    get(target, property) {
-      if (property === 'update') {
-        return (...specs) => target.update(...specs, { filter: false });
+function getMarkupContext(node, doc) {
+  const nodes = [];
+  const context = [];
+  for (let current = node; current; current = current.parent) {
+    if (current.name === 'FencedCode') return context;
+    if (current.name === 'ListItem' || current.name === 'Blockquote') nodes.push(current);
+  }
+  for (let i = nodes.length - 1; i >= 0; i--) {
+    const current = nodes[i];
+    const line = doc.lineAt(current.from);
+    const start = current.from - line.from;
+    let match;
+    if (current.name === 'Blockquote' && (match = /^ *>( ?)/.exec(line.text.slice(start)))) {
+      context.push(new MarkupContext(current, start, start + match[0].length, '', match[1], '>', null));
+    } else if (current.name === 'ListItem' && current.parent.name === 'OrderedList' &&
+      (match = /^( *)\d+([.)])( *)/.exec(line.text.slice(start)))) {
+      let after = match[3];
+      let length = match[0].length;
+      if (after.length >= 4) {
+        after = after.slice(0, -4);
+        length -= 4;
       }
-      const value = Reflect.get(target, property, target);
-      return typeof value === 'function' ? value.bind(target) : value;
-    },
-  });
+      context.push(new MarkupContext(current.parent, start, start + length, match[1], after, match[2], current));
+    } else if (current.name === 'ListItem' && current.parent.name === 'BulletList' &&
+      (match = /^( *)([-+*])( {1,4}\[[ xX]\])?( +)/.exec(line.text.slice(start)))) {
+      let after = match[4];
+      let length = match[0].length;
+      if (after.length > 4) {
+        after = after.slice(0, -4);
+        length -= 4;
+      }
+      const type = match[2] + (match[3] ? match[3].replace(/[xX]/, ' ') : '');
+      context.push(new MarkupContext(current.parent, start, start + length, match[1], after, type, current));
+    }
+  }
+  return context;
 }
 
-/** Cherry 定制的 Markdown Enter 命令。 */
-export function cherryInsertNewlineContinueMarkup(target) {
-  const { state } = target;
-  // 只读状态下不修改文档（上游命令未做该检查）
+function renumberList(after, doc, changes, offset = 0) {
+  for (let previous = -1, node = after;;) {
+    if (node.name === 'ListItem') {
+      const match = itemNumber(node, doc);
+      const number = +match[2];
+      if (previous >= 0) {
+        if (number !== previous + 1) return;
+        changes.push({ from: node.from + match[1].length, to: node.from + match[0].length, insert: String(previous + 2 + offset) });
+      }
+      previous = number;
+    }
+    if (!node.nextSibling) break;
+    node = node.nextSibling;
+  }
+}
+
+function normalizeIndent(content, state) {
+  const blank = /^[ \t]*/.exec(content)[0].length;
+  if (!blank || state.facet(indentUnit) !== '\t') return content;
+  let columns = countColumn(content, 4, blank);
+  let result = '';
+  while (columns > 0) {
+    if (columns >= 4) {
+      result += '\t';
+      columns -= 4;
+    } else {
+      result += ' ';
+      columns--;
+    }
+  }
+  return result + content.slice(blank);
+}
+
+function isLooseList(node, doc) {
+  if (node.name !== 'OrderedList' && node.name !== 'BulletList') return false;
+  const first = node.firstChild;
+  const second = node.getChild('ListItem', 'ListItem');
+  if (!second) return false;
+  const firstLine = doc.lineAt(first.to);
+  const secondLine = doc.lineAt(second.from);
+  return firstLine.number + (/^[\s>]*$/.test(firstLine.text) ? 0 : 1) < secondLine.number;
+}
+
+function blankLine(context, state, line) {
+  let insert = '';
+  for (let i = 0; i <= context.length - 2; i++) {
+    insert += context[i].blank(i < context.length - 2
+      ? countColumn(line.text, 4, context[i + 1].from) - insert.length : null, i < context.length - 2);
+  }
+  return normalizeIndent(insert, state);
+}
+
+/** CodeMirror Markdown Enter with Cherry's two-Enter list exit and tight item continuation. */
+export function cherryInsertNewlineContinueMarkup({ state, dispatch }) {
   if (state.readOnly) return false;
-
-  /** @type {import('@codemirror/state').Transaction | null} */
-  let transaction = null;
-  // 在跳过 filters 的 state 上规划事务，避免 beforeChange 等过滤器观察到中间结果
-  const handled = continueMarkupKeepTightList({
-    state: createPlanningState(state),
-    dispatch: (tr) => {
-      transaction = tr;
-    },
+  const tree = syntaxTree(state);
+  const { doc } = state;
+  let unsupported = false;
+  const changes = state.changeByRange((range) => {
+    if (!range.empty || !markdownLanguage.isActiveAt(state, range.from, -1) &&
+      !markdownLanguage.isActiveAt(state, range.from, 1)) {
+      unsupported = true;
+      return { range };
+    }
+    const pos = range.from;
+    const line = doc.lineAt(pos);
+    const context = getMarkupContext(tree.resolveInner(pos, -1), doc);
+    while (context.length && context[context.length - 1].from > pos - line.from) context.pop();
+    if (!context.length) {
+      unsupported = true;
+      return { range };
+    }
+    const inner = context[context.length - 1];
+    if (inner.to - inner.spaceAfter.length > pos - line.from) {
+      unsupported = true;
+      return { range };
+    }
+    const emptyLine = pos >= inner.to - inner.spaceAfter.length && !/\S/.test(line.text.slice(inner.to));
+    if (inner.item && emptyLine) {
+      const next = context.length > 1 ? context[context.length - 2] : null;
+      const delTo = next && next.item ? line.from + next.from : line.from + (next ? next.to : 0);
+      const insert = next && next.item ? next.marker(doc, 1) : '';
+      const edits = [{ from: delTo, to: pos, insert }];
+      if (inner.node.name === 'OrderedList') renumberList(inner.item, doc, edits, -2);
+      if (next && next.node.name === 'OrderedList') renumberList(next.item, doc, edits);
+      return { range: EditorSelection.cursor(delTo + insert.length), changes: edits };
+    }
+    if (inner.node.name === 'Blockquote' && emptyLine && line.from) {
+      const previous = doc.lineAt(line.from - 1);
+      const quoted = />\s*$/.exec(previous.text);
+      if (quoted && quoted.index === inner.from) {
+        const edits = state.changes([{ from: previous.from + quoted.index, to: previous.to },
+          { from: line.from + inner.from, to: line.to }]);
+        return { range: range.map(edits), changes: edits };
+      }
+    }
+    const edits = [];
+    if (inner.node.name === 'OrderedList') renumberList(inner.item, doc, edits);
+    const continued = inner.item && inner.item.from < line.from;
+    let insert = '';
+    if (!continued || /^[\s\d.)\-+*>]*/.exec(line.text)[0].length >= inner.to) {
+      for (let i = 0; i < context.length; i++) {
+        insert += i === context.length - 1 && !continued ? context[i].marker(doc, 1)
+          : context[i].blank(i < context.length - 1
+            ? countColumn(line.text, 4, context[i + 1].from) - insert.length : null);
+      }
+    }
+    let from = pos;
+    while (from > line.from && /\s/.test(line.text.charAt(from - line.from - 1))) from--;
+    insert = normalizeIndent(insert, state);
+    // A new list item is always written directly. Paragraphs inside loose lists keep their separator.
+    if (isLooseList(inner.node, doc) && continued) insert = blankLine(context, state, line) + state.lineBreak + insert;
+    edits.push({ from, to: pos, insert: state.lineBreak + insert });
+    return { range: EditorSelection.cursor(from + insert.length + state.lineBreak.length), changes: edits };
   });
-  if (!handled || !transaction) return false;
-
-  target.dispatch(finalizeContinueMarkupTransaction(transaction));
+  if (unsupported) return false;
+  dispatch(state.update(changes, { scrollIntoView: true, userEvent: 'input' }));
   return true;
 }
 
