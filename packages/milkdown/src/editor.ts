@@ -24,7 +24,6 @@ import type {
   CherryMilkdownOptions,
   CherryMilkdownTheme,
 } from './types.js';
-import { createSelectionTracker } from './selection-tracker.js';
 import { loadCodeLanguages } from './wysiwyg/code-block.js';
 import { cherryWysiwyg, cherryWysiwygConfigCtx } from './wysiwyg/index.js';
 import { TableChartDescriptorEngine } from './wysiwyg/table-chart-render-engine.js';
@@ -32,6 +31,14 @@ import { TableChartDescriptorEngine } from './wysiwyg/table-chart-render-engine.
 const DEFAULT_DEBOUNCE = 30;
 const CHERRY_THEMES = ['default', 'dark', 'abyss', 'green', 'red', 'gray', 'violet', 'blue'] as const;
 const CHERRY_THEME_CLASSES = CHERRY_THEMES.map((theme) => `theme__${theme}`);
+const internalEditors = new WeakMap<CherryMilkdownInstance, Editor>();
+
+/** @internal Test support; intentionally excluded from the package entrypoint. */
+export function getInternalEditor(instance: CherryMilkdownInstance): Editor {
+  const editor = internalEditors.get(instance);
+  if (!editor) throw new Error('The Cherry Milkdown instance is not active.');
+  return editor;
+}
 
 function normalizeTheme(theme: unknown): CherryMilkdownTheme {
   return CHERRY_THEMES.includes(theme as CherryMilkdownTheme) ? (theme as CherryMilkdownTheme) : 'default';
@@ -169,11 +176,10 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
   let destroyed = false;
   let suppressChanges = false;
   let acceptingChanges = false;
-  let engine: CherryMilkdownInstance['engine'];
-  let nativeEngine: CherryMilkdownInstance['engine'] | undefined;
+  let engine: CherryEngineLike;
+  let nativeEngine: CherryEngineLike | undefined;
   let currentMarkdown = options.value ?? '';
   let serializedBaseline = '';
-  const selectionTracker = createSelectionTracker();
 
   let tableBlockComponent: typeof import('@milkdown/kit/component/table-block');
 
@@ -332,7 +338,6 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     .use(cursor)
     .use(indent)
     .use(trailing)
-    .use(selectionTracker.plugin)
     .use(immediateChangePlugin)
     .use(tablePointerSelectionPlugin)
     .use(cherryWysiwyg);
@@ -361,11 +366,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
   root.append(mountRoot);
 
   const instance: CherryMilkdownInstance = {
-    editor,
     engine,
-    trackSelection() {
-      return selectionTracker.track(editor.action((ctx) => ctx.get(editorViewCtx).state.selection));
-    },
     getMarkdown() {
       if (changeMicrotaskQueued && !suppressChanges && !destroyed) {
         const serialized = editor.action(getMarkdown());
@@ -412,9 +413,11 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
       try {
         await editor.destroy();
       } finally {
+        internalEditors.delete(instance);
         mountRoot.remove();
       }
     },
   };
+  internalEditors.set(instance, editor);
   return instance;
 }

@@ -1,5 +1,4 @@
 export { cherryMilkdown, cherryMilkdown as default } from './editor.js';
-export { supportsTextFormatting } from './wysiwyg/text-bubble.js';
 
 export type {
   CherryEngineLike,

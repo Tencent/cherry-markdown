@@ -3,7 +3,6 @@ import { resolve } from 'node:path';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import defaultExport, {
   cherryMilkdown,
-  supportsTextFormatting,
   type CherryDiagramRenderContext,
   type CherryEngineInput,
   type CherryEngineLike,
@@ -39,7 +38,6 @@ describe('public API compatibility contract', () => {
   it('keeps the documented runtime entry points available', () => {
     expect(defaultExport).toBe(cherryMilkdown);
     expect(cherryMilkdown).toBeTypeOf('function');
-    expect(supportsTextFormatting).toBeTypeOf('function');
     expect(echarts).toBeTypeOf('function');
     expect(tableChart).toBeTypeOf('function');
   });
@@ -71,5 +69,20 @@ describe('public API compatibility contract', () => {
     expectTypeOf<StablePublicTypes>().toBeObject();
     expectTypeOf(theme).toMatchTypeOf<CherryMilkdownTheme>();
     expect(options.fileUpload).toBe(uploadWithLegacyArity);
+  });
+
+  it('keeps the exploratory instance surface compact', async () => {
+    const root = document.createElement('div');
+    document.body.append(root);
+    const instance = await cherryMilkdown({ root, value: '# Compact' });
+
+    expect(Object.keys(instance).sort()).toEqual(
+      ['destroy', 'engine', 'focus', 'getMarkdown', 'setMarkdown', 'setTheme'].sort(),
+    );
+    expect(instance).not.toHaveProperty('editor');
+    expect(instance).not.toHaveProperty('trackSelection');
+
+    await instance.destroy();
+    root.remove();
   });
 });

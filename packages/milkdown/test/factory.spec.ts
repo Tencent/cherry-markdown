@@ -3,8 +3,10 @@ import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import type { CherryMilkdownInstance } from '../src';
-import { createTestEditor as cherryMilkdown } from './helpers/create-editor';
+import {
+  createTestEditor as cherryMilkdown,
+  type TestCherryMilkdownInstance as CherryMilkdownInstance,
+} from './helpers/create-editor';
 
 vi.mock('mermaid', () => ({
   default: {
@@ -758,31 +760,6 @@ describe('cherryMilkdown WYSIWYG', () => {
 
     const { selection } = view.state;
     expect(view.state.doc.textBetween(selection.from, selection.to)).toBe('selected text');
-  });
-
-  it('maps a saved async-menu selection through intervening document changes', async () => {
-    const element = root();
-    const instance = await cherryMilkdown({
-      el: element,
-      value: 'Before and after\n\nSecond paragraph.',
-      engine: { makeHtml: (value: string) => value },
-    });
-    instances.push(instance);
-    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
-    let start = -1;
-    view.state.doc.descendants((node, position) => {
-      if (start < 0 && node.isText && node.text?.startsWith('Before')) start = position;
-    });
-    view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, start, start + 6)));
-    const tracked = instance.trackSelection?.();
-
-    const end = view.state.doc.content.size - 1;
-    view.dispatch(view.state.tr.insertText(' updated', end));
-    const mapped = tracked?.resolve();
-
-    expect(mapped).not.toBeNull();
-    expect(view.state.doc.textBetween(mapped!.from, mapped!.to)).toBe('Before');
-    tracked?.release();
   });
 
   it('applies external Markdown as a minimal ProseMirror transaction', async () => {

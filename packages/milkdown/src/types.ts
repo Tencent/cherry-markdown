@@ -1,6 +1,4 @@
-import type { Editor } from '@milkdown/kit/core';
 import type { MilkdownPlugin } from '@milkdown/kit/ctx';
-import type { Selection } from '@milkdown/kit/prose/state';
 import type CherryEngineConstructor from 'cherry-markdown/dist/cherry-markdown.engine.core.esm.js';
 import type { CherryVisualRenderer } from './wysiwyg/index.js';
 
@@ -80,10 +78,8 @@ export interface CherryMilkdownOptions {
 }
 
 export interface CherryMilkdownInstance {
-  editor: Editor;
+  /** Cherry rendering boundary used by this instance. */
   engine: CherryEngineLike;
-  /** @internal Keeps an async picker anchored while transactions occur. */
-  trackSelection(): { resolve(): Selection | null; release(): void };
   getMarkdown(): string;
   setMarkdown(markdown: string, options?: { emit?: boolean }): void;
   setTheme(theme: CherryMilkdownTheme): void;

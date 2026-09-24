@@ -3,8 +3,10 @@ import { editorViewCtx } from '@milkdown/kit/core';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import type { CherryMilkdownInstance } from '../src';
-import { createTestEditor as cherryMilkdown } from './helpers/create-editor';
+import {
+  createTestEditor as cherryMilkdown,
+  type TestCherryMilkdownInstance as CherryMilkdownInstance,
+} from './helpers/create-editor';
 
 vi.mock('mathlive', () => ({}));
 vi.mock('mermaid', () => ({
