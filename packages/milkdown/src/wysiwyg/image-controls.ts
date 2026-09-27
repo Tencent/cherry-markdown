@@ -151,6 +151,8 @@ export const cherryImageControls = $prose((ctx) => {
       let sourceOpen = false;
       let resize: ResizeSession | undefined;
       let positionFrame: number | undefined;
+      let transitionFrame: number | undefined;
+      let layoutTransitionPending = false;
       let uploadSession = 0;
       let uploadController: AbortController | undefined;
       let pendingUploadParams: CherryMilkdownFileUploadParams | undefined;
@@ -171,7 +173,14 @@ export const cherryImageControls = $prose((ctx) => {
         });
       };
       const releaseTarget = () => {
-        if (activeTarget) activeTarget.removeEventListener('transitionend', schedulePlace);
+        if (transitionFrame !== undefined) cancelAnimationFrame(transitionFrame);
+        transitionFrame = undefined;
+        layoutTransitionPending = false;
+        if (activeTarget) {
+          activeTarget.removeEventListener('transitionrun', trackTransitionPosition);
+          activeTarget.removeEventListener('transitionend', schedulePlace);
+          activeTarget.removeEventListener('transitioncancel', schedulePlace);
+        }
         targetObserver?.disconnect();
       };
       const setActiveTarget = (target: HTMLImageElement | undefined) => {
@@ -179,7 +188,9 @@ export const cherryImageControls = $prose((ctx) => {
         releaseTarget();
         activeTarget = target;
         if (!target) return;
+        target.addEventListener('transitionrun', trackTransitionPosition);
         target.addEventListener('transitionend', schedulePlace);
+        target.addEventListener('transitioncancel', schedulePlace);
         if (typeof ResizeObserver !== 'undefined') {
           targetObserver ??= new ResizeObserver(schedulePlace);
           targetObserver.observe(target);
@@ -203,7 +214,12 @@ export const cherryImageControls = $prose((ctx) => {
       };
       const place = () => {
         positionFrame = undefined;
-        if (!activeTarget?.isConnected || sourceOpen) return;
+        if (!activeTarget?.isConnected || sourceOpen || layoutTransitionPending) return;
+        if (!resize && activeTarget.getAnimations().some((animation) => animation.playState === 'running')) {
+          frame.hidden = true;
+          toolbar.hidden = true;
+          return;
+        }
         const rect = activeTarget.getBoundingClientRect();
         const viewportWidth = document.documentElement.clientWidth;
         const viewportHeight = document.documentElement.clientHeight;
@@ -228,6 +244,37 @@ export const cherryImageControls = $prose((ctx) => {
       function schedulePlace() {
         if (positionFrame !== undefined) cancelAnimationFrame(positionFrame);
         positionFrame = requestAnimationFrame(place);
+      }
+      function trackTransitionPosition() {
+        if (!activeTarget) return;
+        // Cherry transitions image layout changes. Keep stale fixed controls
+        // non-interactive until the image reaches its final viewport position.
+        layoutTransitionPending = true;
+        frame.hidden = true;
+        toolbar.hidden = true;
+        if (transitionFrame !== undefined) return;
+        const target = activeTarget;
+        let stableFrames = 0;
+        const sync = () => {
+          transitionFrame = undefined;
+          if (activeTarget !== target || !target.isConnected) {
+            layoutTransitionPending = false;
+            place();
+            return;
+          }
+          if (target.getAnimations().some((animation) => animation.playState === 'running')) {
+            stableFrames = 0;
+            transitionFrame = requestAnimationFrame(sync);
+          } else if (++stableFrames < 2) {
+            // Give the browser a frame to materialize transitions scheduled by
+            // the just-dispatched Milkdown transaction before exposing handles.
+            transitionFrame = requestAnimationFrame(sync);
+          } else {
+            layoutTransitionPending = false;
+            place();
+          }
+        };
+        transitionFrame = requestAnimationFrame(sync);
       }
       const update = () => {
         if (!(view.state.selection instanceof NodeSelection) || view.state.selection.node.type.name !== 'image') {
@@ -298,6 +345,9 @@ export const cherryImageControls = $prose((ctx) => {
         else if (value) {
           const state = imageLayoutState(String(activeNode()?.attrs.alt ?? ''));
           const type = state.alignment === value ? 'clear-align' : value;
+          if (['left', 'center', 'right', 'float-left', 'float-right', 'clear-align'].includes(type)) {
+            trackTransitionPosition();
+          }
           commitLayout({ type });
         }
       };
@@ -395,6 +445,7 @@ export const cherryImageControls = $prose((ctx) => {
           nextWidth: rect.width,
           nextHeight: rect.height,
         };
+        target.setPointerCapture(event.pointerId);
       };
       const moveResize = (event: PointerEvent) => {
         if (!resize) return;
