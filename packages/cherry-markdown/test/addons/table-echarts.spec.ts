@@ -95,6 +95,31 @@ describe('addons/EChartsTableEngine', () => {
     expect(renderer.instances.size).toBe(0);
   });
 
+  it('mounts into a caller-owned container and releases all retained resources', () => {
+    const environment = createEnvironment();
+    const renderer = new EChartsTableEngine({ echarts: environment.echarts, cherry: environment.cherry });
+    const container = document.createElement('div');
+    environment.root.appendChild(container);
+    const controller = new AbortController();
+
+    const cleanup = renderer.renderInto(
+      container,
+      'line',
+      { title: 'Mounted' },
+      { header: ['', 'Q1'], rows: [['Sales', '1']] },
+      controller.signal,
+    );
+
+    expect(environment.echarts.init).toHaveBeenCalledWith(container, null, renderer.options);
+    expect(container.dataset.chartType).toBe('line');
+    expect(container.dataset.tableData).toContain('Sales');
+    expect(renderer.instances.size).toBe(1);
+    cleanup();
+    cleanup();
+    expect(environment.chart.dispose).toHaveBeenCalledOnce();
+    expect(renderer.instances.size).toBe(0);
+  });
+
   it('provides chart palettes, axes, zoom controls, and numeric normalization', () => {
     const environment = createEnvironment();
     const renderer = new EChartsTableEngine({ echarts: environment.echarts, cherry: environment.cherry });
@@ -605,6 +630,7 @@ describe('addons/EChartsTableEngine', () => {
   it('renders a library error while map support is unavailable', () => {
     const environment = createEnvironment();
     const renderer = new EChartsTableEngine({ echarts: environment.echarts, cherry: environment.cherry });
+    renderer.echartsRef = false;
     renderer.$buildEchartsThemeFromCss(environment.root);
     vi.stubGlobal(
       'fetch',

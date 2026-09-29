@@ -2,6 +2,9 @@
 node_modules
 dist
 coverage
+packages/milkdown/preview/
+packages/milkdown/test-results/
+packages/milkdown/playwright-report/
 
 # local env files
 .env.local

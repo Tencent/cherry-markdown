@@ -53,6 +53,7 @@ const packageRoots = {
   cherryMarkdownTest: path.join(ROOT, 'packages/cherry-markdown/test'),
   client: path.join(ROOT, 'packages/client'),
   vscodePlugin: path.join(ROOT, 'packages/vscodePlugin'),
+  milkdown: path.join(ROOT, 'packages/milkdown'),
 };
 
 /**
@@ -144,6 +145,15 @@ export default [
   ),
   // vscode plugin
   ...createTencentTsConfigs(packageRoots.vscodePlugin, ['packages/vscodePlugin/**/*.{ts,mts}']),
+  // milkdown adapter
+  ...createTencentTsConfigs(packageRoots.milkdown, ['packages/milkdown/**/*.{ts,tsx}']),
+  {
+    files: ['packages/milkdown/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/naming-convention': 'off',
+      'no-param-reassign': 'off',
+    },
+  },
   // cherry-markdown：types / 构建配置
   ...createTencentTsConfigs(
     packageRoots.cherryMarkdown,
