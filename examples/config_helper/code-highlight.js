@@ -26,43 +26,51 @@ export function findChangedRange(before, after) {
   return changedText.length <= 160 && !changedText.includes('\n') ? { start, end: afterEnd } : null;
 }
 
-export function highlightCode(el, focusLine = -1, focusRange = null) {
-  let code = el.textContent;
-  if (focusRange) {
-    code = `${code.slice(0, focusRange.start)}\uE000${code.slice(focusRange.start, focusRange.end)}\uE001${code.slice(focusRange.end)}`;
-  } else if (focusLine >= 0) {
-    const lines = code.split('\n');
-    const line = lines[focusLine];
-    const separator = line.indexOf(':');
-    if (separator !== -1) {
-      const valueStart = separator + 1 + (line.slice(separator + 1).match(/^\s*/) || [''])[0].length;
-      const valueEnd = line.endsWith(',') ? line.length - 1 : line.length;
-      const isContainer = /^[\[{]$/.test(line.slice(valueStart, valueEnd));
-      const start = isContainer ? line.search(/\S/) : valueStart;
-      lines[focusLine] = `${line.slice(0, start)}\uE000${line.slice(start, valueEnd)}\uE001${line.slice(valueEnd)}`;
-    }
-    code = lines.join('\n');
-  }
-  let html = escapeHtml(code);
-  // 关键字
-  html = html.replace(/\b(const|let|var|new|true|false|function|return|if|else|export|import|default)\b/g,
-    '<span class="source-keyword">$1</span>');
-  // 字符串
-  html = html.replace(/'([^']*)'/g, '<span class="source-string">\'$1\'</span>');
-  // 数字
-  html = html.replace(/\b(\d+)\b/g, '<span class="source-number">$1</span>');
-  // 注释
-  html = html.replace(/(\/\/.*)/g, '<span class="source-comment">$1</span>');
-  html = html.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="source-comment">$1</span>');
-  // 属性名
-  html = html.replace(/(\w+)(?=\s*:)/g, '<span class="source-property">$1</span>');
+const CODE_TOKEN = /(\/\*[\s\S]*?\*\/|\/\/[^\n]*)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`)|([A-Za-z_$][\w$]*(?=\s*:))|\b(const|let|var|new|true|false|function|return|if|else|export|import|default)\b|\b(\d+(?:\.\d+)?)\b/g;
 
-  html = html.replace('\uE000', '<span class="code-focus-token">').replace('\uE001', '</span>');
-  el.innerHTML = html;
+function highlightText(code) {
+  let html = '';
+  let offset = 0;
+  CODE_TOKEN.lastIndex = 0;
+  for (const match of code.matchAll(CODE_TOKEN)) {
+    html += escapeHtml(code.slice(offset, match.index));
+    const className = match[1] ? 'source-comment' : match[2] ? 'source-string'
+      : match[3] ? 'source-property' : match[4] ? 'source-keyword' : 'source-number';
+    html += `<span class="${className}">${escapeHtml(match[0])}</span>`;
+    offset = match.index + match[0].length;
+  }
+  return html + escapeHtml(code.slice(offset));
+}
+
+function findLineValueRange(code, lineIndex) {
+  if (lineIndex < 0) return null;
+  const lines = code.split('\n');
+  const line = lines[lineIndex];
+  if (!line) return null;
+  const separator = line.indexOf(':');
+  if (separator === -1) return null;
+  const valueStart = separator + 1 + (line.slice(separator + 1).match(/^\s*/) || [''])[0].length;
+  const valueEnd = line.endsWith(',') ? line.length - 1 : line.length;
+  const isContainer = /^[\[{]$/.test(line.slice(valueStart, valueEnd));
+  const start = isContainer ? line.search(/\S/) : valueStart;
+  const lineOffset = lines.slice(0, lineIndex).reduce((length, previous) => length + previous.length + 1, 0);
+  return { start: lineOffset + start, end: lineOffset + valueEnd };
+}
+
+export function highlightCode(el, focusLine = -1, focusRange = null) {
+  const code = el.textContent;
+  const range = focusRange || findLineValueRange(code, focusLine);
+  if (!range) {
+    el.innerHTML = highlightText(code);
+    return;
+  }
+  el.innerHTML = highlightText(code.slice(0, range.start))
+    + `<span class="code-focus-token">${highlightText(code.slice(range.start, range.end))}</span>`
+    + highlightText(code.slice(range.end));
 }
 
 export function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+  return str.replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[char]);
 }
