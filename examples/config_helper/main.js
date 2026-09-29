@@ -9,19 +9,13 @@ import {
 import { createConfigPanel } from './config-panel.js';
 import { escapeHtml, findChangedRange, findConfigLine, highlightCode } from './code-highlight.js';
 
-// 页面状态；完整配置始终以 Cherry.config.defaults 为基础生成。
+// 完整配置始终以 Cherry.config.defaults 为基础生成。
+const DEFAULT_CONFIG = Cherry.config.defaults;
+let configState = createConfigState(DEFAULT_CONFIG);
 let cherryInstance = null;
-let configState = {};
-let focusedConfigPath = null;
-let recentCodeChange = null;
+let codeFocus = null;
 let fullSourceText = null;
 let previewUpdateTimer = null;
-
-const DEFAULT_CONFIG = Cherry.config.defaults;
-
-function initConfigState() {
-  configState = createConfigState(DEFAULT_CONFIG);
-}
 
 function refreshPreview(delay = 0) {
   clearTimeout(previewUpdateTimer);
@@ -40,19 +34,10 @@ const configPanel = createConfigPanel({
     updateCodeOutput(path, { changed: true, wholeValue, transient });
   },
   onLocate: (path) => {
-    recentCodeChange = null;
-    focusedConfigPath = path;
+    codeFocus = { path };
     switchTab('code');
   },
 });
-
-function renderConfigPanel() {
-  configPanel.render();
-}
-
-function generateConfig(forPreview = false) {
-  return buildConfig(DEFAULT_CONFIG, configState, forPreview);
-}
 
 function buildExportCode() {
   return serializeConfig(DEFAULT_CONFIG, configState);
@@ -73,10 +58,9 @@ function updatePreview() {
   const editorEl = document.getElementById('cherry-editor');
   editorEl.innerHTML = '';
 
-  const config = generateConfig(true);
+  const config = buildConfig(DEFAULT_CONFIG, configState, true);
   // 覆盖必要的配置
   config.id = 'cherry-editor';
-  config.value = configState.value?.value ?? '# Hello Cherry Markdown!';
   config.editor.codemirror = { ...config.editor.codemirror, autofocus: false };
 
   try {
@@ -94,33 +78,30 @@ function updatePreview() {
   }
 }
 
-function updateCodeOutput(path = focusedConfigPath, { changed = false, wholeValue = false, transient = false } = {}) {
-  focusedConfigPath = path;
+function updateCodeOutput(path = codeFocus?.path ?? null, { changed = false, wholeValue = false, transient = false } = {}) {
   const codeEl = document.getElementById('code-output');
   if (codeEl) {
     const previousCode = codeEl.textContent;
     const code = buildExportCode();
     if (changed) {
-      recentCodeChange = { path, code, range: wholeValue ? null : findChangedRange(previousCode, code), transient };
+      codeFocus = { path, code, range: wholeValue ? null : findChangedRange(previousCode, code), transient };
     } else if (path === null) {
-      recentCodeChange = null;
+      codeFocus = null;
     }
     codeEl.textContent = code;
     const lineIndex = findConfigLine(code, path);
-    const range = recentCodeChange?.path === path && recentCodeChange.code === code
-      ? recentCodeChange.range : null;
+    const range = codeFocus?.path === path && codeFocus.code === code ? codeFocus.range : null;
     highlightCode(codeEl, lineIndex, range);
     if (lineIndex >= 0 && !document.getElementById('panel-code').classList.contains('hidden')) {
       const target = codeEl.querySelector('.code-focus-token');
       const codeRect = codeEl.getBoundingClientRect();
       const targetRect = target.getBoundingClientRect();
       codeEl.scrollTop += targetRect.top - codeRect.top - codeEl.clientHeight / 2;
-      if (recentCodeChange?.transient && recentCodeChange.code === code) {
-        const change = recentCodeChange;
+      if (codeFocus?.transient && codeFocus.code === code) {
+        const change = codeFocus;
         target.addEventListener('animationend', () => {
-          if (recentCodeChange !== change || !target.isConnected) return;
-          recentCodeChange = null;
-          if (focusedConfigPath === path) focusedConfigPath = null;
+          if (codeFocus !== change || !target.isConnected) return;
+          codeFocus = null;
           const scrollTop = codeEl.scrollTop;
           const scrollLeft = codeEl.scrollLeft;
           highlightCode(codeEl);
@@ -156,21 +137,18 @@ async function renderFullSource() {
     return;
   }
   sourceContent.textContent = '正在加载 Cherry.config.js…';
-  for (const url of [
-    '../../packages/cherry-markdown/src/Cherry.config.js',
-    'https://raw.githubusercontent.com/Tencent/cherry-markdown/dev/packages/cherry-markdown/src/Cherry.config.js',
-  ]) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) continue;
+  try {
+    if (import.meta.env?.DEV) {
+      fullSourceText = (await import('../../packages/cherry-markdown/src/Cherry.config.js?raw')).default;
+    } else {
+      const response = await fetch('../../packages/cherry-markdown/src/Cherry.config.js', { cache: 'no-store' });
+      if (!response.ok) throw new Error('HTTP ' + response.status);
       fullSourceText = await response.text();
-      sourceContent.textContent = fullSourceText;
-      return;
-    } catch (error) {
-      // 当前部署未包含源码时继续尝试仓库原文件。
     }
+    sourceContent.textContent = fullSourceText;
+  } catch (error) {
+    sourceContent.textContent = '配置参考加载失败（' + error.message + '）。请检查站点是否包含 Cherry.config.js，或使用右上角的 GitHub 链接查看。';
   }
-  sourceContent.textContent = '配置源文件加载失败，请使用右上角的 GitHub 链接查看。';
 }
 
 // ==================== 搜索功能 ====================
@@ -210,7 +188,7 @@ function initSearch() {
 }
 
 function refreshFromConfigState() {
-  renderConfigPanel();
+  configPanel.render();
   applySearch(document.getElementById('search-input').value);
   refreshPreview();
   updateCodeOutput(null);
@@ -222,7 +200,7 @@ function applyPreset(presetName) {
   if (!preset) return;
 
   // 先重置
-  initConfigState();
+  configState = createConfigState(DEFAULT_CONFIG);
 
   // 应用预设覆盖
   Object.entries(preset.overrides).forEach(([key, value]) => {
@@ -292,11 +270,9 @@ function showToast(message) {
   setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-// ==================== 工具函数 ====================
 // ==================== 初始化 ====================
 function init() {
-  initConfigState();
-  renderConfigPanel();
+  configPanel.render();
   initSearch();
 
   // 标签页切换
@@ -312,7 +288,7 @@ function init() {
 
   // 重置按钮
   document.getElementById('btn-reset').addEventListener('click', () => {
-    initConfigState();
+    configState = createConfigState(DEFAULT_CONFIG);
     refreshFromConfigState();
     showToast('配置已重置为默认值');
   });

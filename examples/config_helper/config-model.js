@@ -31,17 +31,17 @@ export function createConfigState(defaultConfig) {
   CONFIG_CATEGORIES.forEach(cat => {
     cat.items.forEach(item => {
       const defaultValue = getDefaultValue(defaultConfig, item.path);
-      const isEnabled = item.inputType === 'toggle' && item.type !== 'boolean'
-        ? defaultValue !== undefined && defaultValue !== false
-        : item.enabled;
+      if (defaultValue === undefined && item.initialValue === undefined && !EXTERNAL_GLOBALS[item.key]) {
+        throw new Error(`Cherry.config.defaults 中缺少 ${item.path}`);
+      }
+      // initialValue 只用于示例专属字段，以及默认关闭的工具栏重新启用时的候选按钮。
       configState[item.key] = {
-        enabled: defaultValue === undefined ? item.enabled : isEnabled,
+        enabled: defaultValue !== undefined && defaultValue !== false,
         value: cloneConfigValue(item.inputType === 'toolbar-select' && !Array.isArray(defaultValue)
-          ? item.value : defaultValue ?? item.value),
+          ? item.initialValue : defaultValue ?? item.initialValue ?? false),
         subItems: item.subItems ? item.subItems.map(sub => ({
           ...sub,
-          value: cloneConfigValue(defaultValue && typeof defaultValue === 'object'
-            ? defaultValue[sub.key] ?? sub.value : sub.value),
+          value: cloneConfigValue(defaultValue?.[sub.key]),
         })) : null,
         canDisable: !!item.canDisable,
         disabled: !!item.canDisable && defaultValue === false,
@@ -115,7 +115,7 @@ const FUNCTION_SOURCE_OVERRIDES = {
   // UMD 构建产物中的这个函数引用了私有迭代器助手，不能直接使用 toString() 导出。
   'config.callback.fileUploadMulti': `function fileUploadMulti(files, callback) {
     const fileType = files[0].type;
-    const promises = Array.from(files, file => new Promise(resolve => {
+    const promises = Array.prototype.map.call(files, file => new Promise(resolve => {
       if (/video/i.test(fileType)) {
         resolve({ url: 'images/demo-dog.png', params: {
           name: file.name.replace(/\\.[^.]+$/, ''), poster: 'images/demo-dog.png?poster=true',
@@ -151,7 +151,6 @@ function formatConfigValue(value, indent, defaultPath) {
   if (value instanceof Date) return `new Date(${JSON.stringify(value.toISOString())})`;
   if (value instanceof RegExp) return value.toString();
   if (value.rawCode) return value.rawCode;
-  if (defaultPath.endsWith('.engine.syntax.codeBlock.customRenderer')) return defaultPath;
   if (Array.isArray(value)) {
     if (value.length === 0) return '[]';
     const entries = value.map((entry, index) => formatConfigValue(entry, indent + 1, `${defaultPath}[${index}]`));
