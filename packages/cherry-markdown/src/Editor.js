@@ -28,8 +28,16 @@ import {
   rectangularSelection,
   dropCursor,
 } from '@codemirror/view';
-import { EditorState, StateEffect, StateField, EditorSelection, Transaction, Compartment } from '@codemirror/state';
-import { markdown } from '@codemirror/lang-markdown';
+import {
+  EditorState,
+  StateEffect,
+  StateField,
+  EditorSelection,
+  Transaction,
+  Compartment,
+  Prec,
+} from '@codemirror/state';
+import { markdown, markdownKeymap } from '@codemirror/lang-markdown';
 import { search, searchKeymap, SearchQuery } from '@codemirror/search';
 import {
   history,
@@ -51,7 +59,7 @@ import { tagHighlighter, tags } from '@lezer/highlight';
 import { createElement } from './utils/dom';
 import { base64Reg, imgDrawioXmlReg, createUrlReg, getCodeBlockRule } from './utils/regexp';
 import { addEvent, removeEvent } from './utils/event';
-import { handleNewlineIndentList } from './utils/autoindent';
+import { handleNewlineIndentList, cherryInsertNewlineContinueMarkup } from './utils/autoindent';
 import diff from 'fast-diff';
 
 /**
@@ -1961,7 +1969,14 @@ export default class Editor {
 
     const extensions = [
       cachedCherryHighlighting,
-      markdown(),
+      markdown({ addKeymap: false }),
+      Prec.high(
+        keymap.of(
+          markdownKeymap.map((binding) =>
+            binding.key === 'Enter' ? { ...binding, run: cherryInsertNewlineContinueMarkup } : binding,
+          ),
+        ),
+      ),
       this.historyCompartment.of(history()),
       search(),
       closeBrackets(),
