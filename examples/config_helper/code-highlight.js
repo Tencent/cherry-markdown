@@ -22,24 +22,53 @@ export function findChangedRange(before, after) {
     beforeEnd--;
     afterEnd--;
   }
-  const changedText = after.slice(start, afterEnd);
-  return changedText.length <= 160 && !changedText.includes('\n') ? { start, end: afterEnd } : null;
+  return { start, end: afterEnd };
 }
 
 const CODE_TOKEN = /(\/\*[\s\S]*?\*\/|\/\/[^\n]*)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`)|([A-Za-z_$][\w$]*(?=\s*:))|\b(const|let|var|new|true|false|function|return|if|else|export|import|default)\b|\b(\d+(?:\.\d+)?)\b/g;
 
-function highlightText(code) {
+function highlightText(code, focusRange = null) {
   let html = '';
   let offset = 0;
+  let focusStarted = false;
+  let focusOpen = false;
+  const syncFocus = position => {
+    if (!focusRange) return;
+    if (!focusStarted && position === focusRange.start) {
+      html += '<span class="code-focus-token">';
+      focusStarted = true;
+      focusOpen = true;
+    }
+    if (focusOpen && position === focusRange.end) {
+      html += '</span>';
+      focusOpen = false;
+    }
+  };
+  const appendSegment = (text, start, className) => {
+    const end = start + text.length;
+    const boundaries = [start, end];
+    if (focusRange?.start > start && focusRange.start < end) boundaries.push(focusRange.start);
+    if (focusRange?.end > start && focusRange.end < end) boundaries.push(focusRange.end);
+    boundaries.sort((a, b) => a - b);
+    for (let i = 0; i < boundaries.length - 1; i++) {
+      const from = boundaries[i];
+      const to = boundaries[i + 1];
+      syncFocus(from);
+      const escaped = escapeHtml(text.slice(from - start, to - start));
+      html += className ? `<span class="${className}">${escaped}</span>` : escaped;
+    }
+  };
   CODE_TOKEN.lastIndex = 0;
   for (const match of code.matchAll(CODE_TOKEN)) {
-    html += escapeHtml(code.slice(offset, match.index));
+    appendSegment(code.slice(offset, match.index), offset);
     const className = match[1] ? 'source-comment' : match[2] ? 'source-string'
       : match[3] ? 'source-property' : match[4] ? 'source-keyword' : 'source-number';
-    html += `<span class="${className}">${escapeHtml(match[0])}</span>`;
+    appendSegment(match[0], match.index, className);
     offset = match.index + match[0].length;
   }
-  return html + escapeHtml(code.slice(offset));
+  appendSegment(code.slice(offset), offset);
+  syncFocus(code.length);
+  return html;
 }
 
 function findLineValueRange(code, lineIndex) {
@@ -60,13 +89,7 @@ function findLineValueRange(code, lineIndex) {
 export function highlightCode(el, focusLine = -1, focusRange = null) {
   const code = el.textContent;
   const range = focusRange || findLineValueRange(code, focusLine);
-  if (!range) {
-    el.innerHTML = highlightText(code);
-    return;
-  }
-  el.innerHTML = highlightText(code.slice(0, range.start))
-    + `<span class="code-focus-token">${highlightText(code.slice(range.start, range.end))}</span>`
-    + highlightText(code.slice(range.end));
+  el.innerHTML = highlightText(code, range);
 }
 
 export function escapeHtml(str) {
