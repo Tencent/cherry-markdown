@@ -186,7 +186,8 @@
     width: calc(100% - 8px);
     padding: var(--dropdown-item-padding);
     text-align: left;
-    display: block;
+    display: flex;
+    align-items: center;
     min-height: var(--dropdown-item-height);
     line-height: var(--line-height-relaxed);
     font-size: var(--font-size-sm);
@@ -211,10 +212,8 @@
       color: var(--dropdown-item-active-color);
     }
 
-    // 二级菜单里图标与文字的垂直对齐：
-    // 1. <i.ch-icon> 使用固定盒（宽高 = 图标视觉尺寸），并按视觉中线对齐周围文字；
-    // 2. ::before 承载字形，用 vertical-align: middle 让字形按视觉中线而非字体基线对齐，
-    //    消除图标字体自身"偏上"的字形度量，从根本上解决"图标比文字高一些"的问题。
+    // 使用盒模型中心对齐图标与文字，避免 inline baseline 和系统字体 x-height
+    // 在不同浏览器、操作系统下产生相反方向的垂直偏移。
     .ch-icon {
       display: inline-block;
       width: var(--toolbar-icon-size);
@@ -222,14 +221,19 @@
       line-height: var(--toolbar-icon-size);
       font-size: var(--toolbar-icon-size);
       text-align: center;
-      vertical-align: middle;
+      flex-shrink: 0;
       margin-right: 8px;
       overflow: visible;
 
       &::before {
-        vertical-align: middle;
         line-height: var(--toolbar-icon-size);
       }
+    }
+
+    i.ch-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
   }
 
