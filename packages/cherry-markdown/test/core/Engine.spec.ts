@@ -231,4 +231,71 @@ describe('core/Engine', () => {
     expect(fire).toHaveBeenCalledWith('', 'paragraph', 'mounted');
     expect(clear).toHaveBeenCalledOnce();
   });
+
+  it('preserves a table that begins with an invalid front matter fence', () => {
+    const engine = createEngine();
+    const markdown = `---#
+| 适用产品 | WorkBuddy AI 助手（Skill 技能体系） |
+|:--|--:|
+| **适用版本** | **prompt-optimizer v2.1** |
+| 技能类型 | Prompt 优化 · 需求澄清 · 结构化输出 |
+| 前置条件 | WorkBuddy 已安装并登录；Skill 已放入 skills 目录 |
+| 阅读时长 | 约 15 分钟 |
+
+------
+
+## 📥 快速开始 — 下载并安装技能
+`;
+    const container = document.createElement('div');
+    container.innerHTML = engine.makeHtml(markdown);
+    const table = container.querySelector('table');
+    const cells = Array.from(table?.querySelectorAll('th, td') ?? [], (cell) => cell.textContent?.trim());
+
+    expect(container.querySelector('[data-type="frontMatter"]')).toBeNull();
+    expect(table).not.toBeNull();
+    expect(table?.querySelector('th')?.getAttribute('align')).toBe('left');
+    expect(table?.querySelector('th:last-child')?.getAttribute('align')).toBe('right');
+    expect(cells).toEqual([
+      '适用产品',
+      'WorkBuddy AI 助手（Skill 技能体系）',
+      '适用版本',
+      'prompt-optimizer v2.1',
+      '技能类型',
+      'Prompt 优化 · 需求澄清 · 结构化输出',
+      '前置条件',
+      'WorkBuddy 已安装并登录；Skill 已放入 skills 目录',
+      '阅读时长',
+      '约 15 分钟',
+    ]);
+    expect(container.querySelector('hr')).not.toBeNull();
+    expect(container.querySelector('h2')?.textContent).toContain('快速开始');
+    expect(container.querySelector('h2')?.textContent).toContain('下载并安装技能');
+  });
+
+  it('recognizes front matter after normalizing CRLF without a final newline', () => {
+    const engine = createEngine();
+    const html = engine.makeHtml('---\r\ntitle: Cherry\r\n---');
+
+    expect(html).toContain('data-type="frontMatter"');
+    expect(html).toContain('&quot;title&quot;:&quot;Cherry&quot;');
+    expect(html).not.toContain('title: Cherry');
+  });
+
+  it('renders a missing closing front matter fence as ordinary markdown', () => {
+    const engine = createEngine();
+    const html = engine.makeHtml('---\ntitle: Cherry\n\n# Still visible');
+
+    expect(html).not.toContain('data-type="frontMatter"');
+    expect(html).toContain('Cherry');
+    expect(html).toContain('Still visible');
+  });
+
+  it('still renders ordinary content when front matter is disabled', () => {
+    const engine = createEngine({ engine: { syntax: { frontMatter: false } } });
+    const html = engine.makeHtml('---\ntitle: Cherry\n---\n\nVisible paragraph');
+
+    expect(html).not.toContain('data-type="frontMatter"');
+    expect(html).toContain('Cherry');
+    expect(html).toContain('Visible paragraph');
+  });
 });
