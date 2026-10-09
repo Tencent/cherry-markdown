@@ -132,20 +132,19 @@ function switchTab(tabName) {
 
 async function renderFullSource() {
   const sourceContent = document.getElementById('source-content');
-  if (fullSourceText !== null) {
-    sourceContent.textContent = fullSourceText;
-    return;
-  }
-  sourceContent.textContent = '正在加载 Cherry.config.js…';
   try {
-    if (import.meta.env?.DEV) {
-      fullSourceText = (await import('../../packages/cherry-markdown/src/Cherry.config.js?raw')).default;
-    } else {
-      const response = await fetch('../../packages/cherry-markdown/src/Cherry.config.js', { cache: 'no-store' });
-      if (!response.ok) throw new Error('HTTP ' + response.status);
-      fullSourceText = await response.text();
+    if (fullSourceText === null) {
+      sourceContent.textContent = '正在加载 Cherry.config.js…';
+      if (import.meta.env?.DEV) {
+        fullSourceText = (await import('../../packages/cherry-markdown/src/Cherry.config.js?raw')).default;
+      } else {
+        const response = await fetch('../../packages/cherry-markdown/src/Cherry.config.js', { cache: 'no-store' });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        fullSourceText = await response.text();
+      }
     }
     sourceContent.textContent = fullSourceText;
+    highlightCode(sourceContent);
   } catch (error) {
     sourceContent.textContent = '配置参考加载失败（' + error.message + '）。请检查站点是否包含 Cherry.config.js，或使用右上角的 GitHub 链接查看。';
   }
