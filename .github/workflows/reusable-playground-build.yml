@@ -37,9 +37,11 @@ jobs:
 
       - run: vp run build
 
-      - run: |
-          mkdir -p playground/packages/cherry-markdown
+      - name: Prepare playground
+        run: |
+          mkdir -p playground/packages/cherry-markdown/src
           cp -r packages/cherry-markdown/dist playground/packages/cherry-markdown
+          cp packages/cherry-markdown/src/Cherry.config.js playground/packages/cherry-markdown/src/
           cp -r examples/assets playground
           cp examples/*.html playground
           [ -d examples/config_helper ] && cp -r examples/config_helper playground
