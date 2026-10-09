@@ -4,6 +4,20 @@ import { escapeHtml } from './code-highlight.js';
 
 const TEXT_PREVIEW_DELAY_MS = 150;
 
+function readNumberInput(input, definition) {
+  input.setCustomValidity('');
+  const value = input.valueAsNumber;
+  const valid = Number.isInteger(value) && input.validity.valid
+    && (!definition.validate || definition.validate(value));
+  const message = valid ? '' : (definition.validationMessage || `请输入 ${definition.min} 及以上的整数`);
+  input.setCustomValidity(message);
+  input.setAttribute('aria-invalid', String(!valid));
+  const error = input.nextElementSibling;
+  error.textContent = message ? `${message}；未应用，保留上一次有效值。` : '';
+  error.hidden = valid;
+  return valid ? value : null;
+}
+
 export function createConfigPanel({ getState, defaultConfig, onChange, onLocate }) {
   function renderConfigPanel() {
     const container = document.getElementById('config-categories');
@@ -79,7 +93,9 @@ export function createConfigPanel({ getState, defaultConfig, onChange, onLocate 
       ).join('');
       valueHtml = `<select class="config-select value-input" data-key="${item.key}">${opts}</select>`;
     } else if (item.inputType === 'text') {
-      valueHtml = `<input type="${item.type === 'number' ? 'number' : 'text'}" class="config-value-input value-input" data-key="${item.key}" value="${escapeHtml(String(state.value))}">`;
+      const numberAttributes = item.type === 'number' ? `step="1" min="${item.min}"` : '';
+      valueHtml = `<input type="${item.type === 'number' ? 'number' : 'text'}" ${numberAttributes} class="config-value-input value-input" data-key="${item.key}" value="${escapeHtml(String(state.value))}">`;
+      if (item.type === 'number') valueHtml += '<span class="config-input-error" role="status" hidden></span>';
     } else if (item.inputType === 'textarea') {
       valueHtml = `<textarea class="config-value-input config-textarea value-input" data-key="${item.key}" rows="5">${escapeHtml(String(state.value))}</textarea>`;
     } else if (item.inputType === 'toolbar-select') {
@@ -219,8 +235,8 @@ export function createConfigPanel({ getState, defaultConfig, onChange, onLocate 
     if (valueInput) {
       const eventType = valueInput.tagName === 'SELECT' ? 'change' : 'input';
       valueInput.addEventListener(eventType, (e) => {
-        const value = item.type === 'number' ? e.target.valueAsNumber : e.target.value;
-        if (item.type === 'number' && !Number.isFinite(value)) return;
+        const value = item.type === 'number' ? readNumberInput(e.target, item) : e.target.value;
+        if (value === null) return;
         configState[item.key].value = value;
         commitConfigChange(item, div, {
           transient: item.type === 'string',
@@ -241,7 +257,9 @@ export function createConfigPanel({ getState, defaultConfig, onChange, onLocate 
           if (input.type === 'checkbox') {
             subItems[subIdx].value = e.target.checked;
           } else if (input.type === 'number') {
-            subItems[subIdx].value = parseInt(e.target.value) || 0;
+            const value = readNumberInput(input, subItems[subIdx]);
+            if (value === null) return;
+            subItems[subIdx].value = value;
           } else {
             subItems[subIdx].value = e.target.value;
           }
@@ -314,12 +332,15 @@ export function createConfigPanel({ getState, defaultConfig, onChange, onLocate 
           <div class="w-7 h-4 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-red-400"></div>
         </label>`;
     } else if (sub.type === 'number') {
-      inputHtml = `<input type="number" class="config-value-input sub-input" style="max-width:80px" data-parent-key="${parentKey}" data-sub-idx="${idx}" value="${sub.value}">`;
+      inputHtml = `<div class="number-field">
+        <input type="number" step="1" min="${sub.min}" class="config-value-input sub-input" style="max-width:80px" data-parent-key="${parentKey}" data-sub-idx="${idx}" value="${sub.value}">
+        <span class="config-input-error" role="status" hidden></span>
+      </div>`;
     } else if (sub.type === 'string') {
       inputHtml = `<input type="text" class="config-value-input sub-input" data-parent-key="${parentKey}" data-sub-idx="${idx}" value="${escapeHtml(String(sub.value))}">`;
     } else if (sub.type === 'select') {
       const opts = sub.options.map(o =>
-        `<option value="${o}" ${sub.value === o ? 'selected' : ''}>${o}</option>`
+        `<option value="${o}" ${sub.value === o ? 'selected' : ''}>${o === '' ? '默认（不设置 target）' : o}</option>`
       ).join('');
       inputHtml = `<select class="config-select sub-input" data-parent-key="${parentKey}" data-sub-idx="${idx}">${opts}</select>`;
     }

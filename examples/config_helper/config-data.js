@@ -205,11 +205,14 @@ export const CONFIG_CATEGORIES = [
       },
       {
         key: 'editor.maxUrlLength',
-        name: 'URL 最大长度',
+        name: 'URL 缩略门槛',
         path: 'editor.maxUrlLength',
         type: 'number',
-        description: 'URL 的最大长度，-1 表示不限制，超过该长度的 URL 会显示省略号',
+        description: '编辑器中 URL 的缩略门槛；-1 关闭缩略，启用时填写 11 及以上的整数，原始 URL 保持完整',
         inputType: 'text',
+        min: -1,
+        validate: value => value === -1 || value >= 11,
+        validationMessage: '请输入 -1 或 11 及以上的整数',
       },
     ],
   },
@@ -349,7 +352,7 @@ export const CONFIG_CATEGORIES = [
         inputType: 'toggle',
         subItems: [
           { key: 'enableShortLink', name: '启用短链接', type: 'boolean' },
-          { key: 'shortLinkLength', name: '短链接长度', type: 'number' },
+          { key: 'shortLinkLength', name: '短链接长度', type: 'number', min: 1 },
         ],
       },
       {
@@ -361,7 +364,7 @@ export const CONFIG_CATEGORIES = [
         inputType: 'toggle',
         subItems: [
           { key: 'listNested', name: '同级列表类型转换', type: 'boolean' },
-          { key: 'indentSpace', name: '缩进空格数', type: 'number' },
+          { key: 'indentSpace', name: '缩进空格数', type: 'number', min: 2 },
         ],
       },
       {
@@ -515,7 +518,7 @@ export const CONFIG_CATEGORIES = [
         description: '链接渲染配置',
         inputType: 'toggle',
         subItems: [
-          { key: 'target', name: '打开方式', type: 'select', options: ['_blank', '_self', '_parent', '_top'] },
+          { key: 'target', name: '打开方式', type: 'select', options: ['', '_blank', '_self', '_parent', '_top'] },
           { key: 'selfClosing', name: '自动闭合', type: 'boolean' },
         ],
       },

@@ -103,49 +103,39 @@ export function generateConfig(defaultConfig, configState, forPreview = false) {
   return config;
 }
 
-export function buildExportCode(defaultConfig, configState) {
-  const config = generateConfig(defaultConfig, configState);
-  // 插件运行时注入的实现由 Cherry 自动合并，不属于用户需要维护的配置。
-  delete config.engine.syntax.table.chartRenderEngine;
-  delete config.engine.syntax.codeBlock.customRenderer;
-  return 'const config = ' + formatConfigValue(config, 0, 'config') + ';';
+export function createExportSerializer(defaultConfig, sourceText) {
+  // 原始文件中的 callbacks 是顶层声明。保留整段源码，避免导出构建产物的私有助手。
+  const callbackDeclaration = sourceText.match(/^const callbacks = \{[\s\S]*?^\};/m)?.[0];
+  if (!callbackDeclaration) throw new Error('Cherry.config.js 中缺少 callbacks 声明');
+  const callbackReferences = new Map(
+    Array.from(sourceText.matchAll(/\b(\w+):\s*callbacks\.(\w+)/g), match => [match[1], match[2]]),
+  );
+  return configState => {
+    const config = generateConfig(defaultConfig, configState);
+    // 插件运行时注入的实现由 Cherry 自动合并，不属于用户需要维护的配置。
+    delete config.engine.syntax.table.chartRenderEngine;
+    delete config.engine.syntax.codeBlock.customRenderer;
+    return callbackDeclaration + '\n\nconst config = ' + formatConfigValue(config, 0, 'config', callbackReferences) + ';';
+  };
 }
 
-const FUNCTION_SOURCE_OVERRIDES = {
-  // UMD 构建产物中的这个函数引用了私有迭代器助手，不能直接使用 toString() 导出。
-  'config.callback.fileUploadMulti': `function fileUploadMulti(files, callback) {
-    const fileType = files[0].type;
-    const promises = Array.prototype.map.call(files, file => new Promise(resolve => {
-      if (/video/i.test(fileType)) {
-        resolve({ url: 'images/demo-dog.png', params: {
-          name: file.name.replace(/\\.[^.]+$/, ''), poster: 'images/demo-dog.png?poster=true',
-          isBorder: true, isShadow: true, isRadius: true,
-        } });
-      } else if (/image/i.test(fileType)) {
-        const reader = new FileReader();
-        reader.onload = event => resolve({ url: event.target.result, params: {
-          name: file.name.replace(/\\.[^.]+$/, ''), isShadow: true, width: '60%', height: 'auto',
-        } });
-        reader.readAsDataURL(file);
-      } else if (/audio/i.test(fileType)) {
-        resolve({ url: 'images/demo-dog.png', params: {
-          name: file.name.replace(/\\.[^.]+$/, ''), poster: 'images/demo-dog.png?poster=true',
-          isBorder: true, isShadow: true, isRadius: true,
-        } });
-      } else {
-        resolve({ url: 'images/demo-dog.png', params: file });
-      }
-    }));
-    Promise.all(promises).then(callback);
-  }`,
-};
+function formatFunction(value) {
+  const source = value.toString();
+  // 方法简写不能直接放在 key: 后，转换为函数表达式；箭头和普通函数保持原样。
+  return /^(?:async\s+)?\*?[\w$]+\s*\([\s\S]*?\)\s*\{/.test(source)
+    ? source.replace(/^(async\s+)?(\*)?/, '$1function $2') : source;
+}
 
-function formatConfigValue(value, indent, defaultPath) {
+function formatConfigValue(value, indent, defaultPath, callbackReferences) {
   const spaces = '  '.repeat(indent);
   const innerSpaces = '  '.repeat(indent + 1);
   if (value === null) return 'null';
   if (value === undefined) return 'undefined';
-  if (typeof value === 'function') return FUNCTION_SOURCE_OVERRIDES[defaultPath] || value.toString();
+  if (typeof value === 'function') {
+    const callbackKey = defaultPath.match(/^config\.(?:callback|event)\.(\w+)$/)?.[1];
+    const reference = callbackReferences.get(callbackKey);
+    return reference ? `callbacks.${reference}` : formatFunction(value);
+  }
   if (typeof value === 'string') return JSON.stringify(value);
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
   if (value instanceof Date) return `new Date(${JSON.stringify(value.toISOString())})`;
@@ -153,7 +143,7 @@ function formatConfigValue(value, indent, defaultPath) {
   if (value.rawCode) return value.rawCode;
   if (Array.isArray(value)) {
     if (value.length === 0) return '[]';
-    const entries = value.map((entry, index) => formatConfigValue(entry, indent + 1, `${defaultPath}[${index}]`));
+    const entries = value.map((entry, index) => formatConfigValue(entry, indent + 1, `${defaultPath}[${index}]`, callbackReferences));
     if (entries.every(entry => !entry.includes('\n')) && entries.join(', ').length <= 80) {
       return `[${entries.join(', ')}]`;
     }
@@ -164,7 +154,7 @@ function formatConfigValue(value, indent, defaultPath) {
   const lines = entries.map(([key, entry]) => {
     const property = /^[A-Za-z_$][\w$]*$/.test(key) ? key : JSON.stringify(key);
     const path = /^[A-Za-z_$][\w$]*$/.test(key) ? `${defaultPath}.${key}` : `${defaultPath}[${JSON.stringify(key)}]`;
-    return `${innerSpaces}${property}: ${formatConfigValue(entry, indent + 1, path)}`;
+    return `${innerSpaces}${property}: ${formatConfigValue(entry, indent + 1, path, callbackReferences)}`;
   });
   return `{\n${lines.join(',\n')}\n${spaces}}`;
 }
