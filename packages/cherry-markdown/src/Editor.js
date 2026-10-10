@@ -660,7 +660,8 @@ class CM6Adapter {
       try {
         const vimMod = await loadVimModule();
         this.view.dispatch({
-          effects: this.vimCompartment.reconfigure(vimMod.vim()),
+          // Vim handles normal-mode keys before Markdown; unhandled insert-mode keys fall through.
+          effects: this.vimCompartment.reconfigure(Prec.highest(vimMod.vim())),
         });
         this.currentKeyMap = 'vim';
       } catch (e) {

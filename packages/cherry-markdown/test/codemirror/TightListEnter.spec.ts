@@ -303,6 +303,72 @@ describe('真实 Editor 的 Enter 装配', () => {
     expect(actualView.state.doc.toString()).toBe(source);
   });
 
+  const pressKey = (actualView: EditorView, key: string, keyCode: number) => {
+    actualView.contentDOM.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key,
+        keyCode,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+  };
+
+  it.each(['- a\n- b', '1. a\n2. b', '- [ ] a\n- [ ] b', '> a\n> b', '一. a\n二. b'])(
+    'Vim 普通模式 Enter 只移动光标：%s',
+    async (source) => {
+      const actualView = createActualEditor(source);
+      await editor!.editor!.setKeyMap('vim');
+      actualView.dispatch({ selection: { anchor: actualView.state.doc.line(1).to } });
+      const accept = vi.fn(() => true);
+      editor!.arrowKeyInterceptor = accept;
+      pressEnter(actualView);
+      expect(actualView.state.doc.toString()).toBe(source);
+      expect(actualView.state.selection.main.head).toBe(actualView.state.doc.line(2).from);
+      expect(accept).not.toHaveBeenCalled();
+    },
+  );
+
+  it('Vim 普通模式 Backspace 不删除列表标记', async () => {
+    const actualView = createActualEditor('- a');
+    await editor!.editor!.setKeyMap('vim');
+    actualView.dispatch({ selection: { anchor: 2 } });
+    pressKey(actualView, 'Backspace', 8);
+    expect(actualView.state.doc.toString()).toBe('- a');
+    expect(actualView.state.selection.main.head).toBe(1);
+  });
+
+  it('Vim 插入模式保留建议框的 Enter 拦截', async () => {
+    const actualView = createActualEditor('- a');
+    await editor!.editor!.setKeyMap('vim');
+    pressKey(actualView, 'i', 73);
+    actualView.dispatch({ selection: { anchor: actualView.state.doc.length } });
+    const accept = vi.fn(() => true);
+    editor!.arrowKeyInterceptor = accept;
+    pressEnter(actualView);
+    expect(accept).toHaveBeenCalledExactlyOnceWith('Enter');
+    expect(actualView.state.doc.toString()).toBe('- a');
+    editor!.arrowKeyInterceptor = null;
+    pressEnter(actualView);
+    expect(actualView.state.doc.toString()).toBe('- a\n- ');
+  });
+
+  it('Vim 插入模式保留 Tab、Enter 退级和 Backspace 删除标记', async () => {
+    const actualView = createActualEditor('- a');
+    await editor!.editor!.setKeyMap('vim');
+    pressKey(actualView, 'i', 73);
+    actualView.dispatch({ selection: { anchor: actualView.state.doc.length } });
+    pressEnter(actualView);
+    pressKey(actualView, 'Tab', 9);
+    expect(actualView.state.doc.toString()).toBe('- a\n  - ');
+    pressEnter(actualView);
+    expect(actualView.state.doc.toString()).toBe('- a\n- ');
+    pressKey(actualView, 'Backspace', 8);
+    expect(actualView.state.doc.toString()).toBe('- a\n  ');
+    pressKey(actualView, 'Backspace', 8);
+    expect(actualView.state.doc.toString()).toBe('- a\n');
+  });
+
   it('Vim 插入模式和默认模式切换保留列表 Enter', async () => {
     const actualView = createActualEditor('- a');
     await editor!.editor!.setKeyMap('vim');
