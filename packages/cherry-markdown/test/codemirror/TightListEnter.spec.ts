@@ -29,7 +29,7 @@ import { describe, it, expect, afterEach, vi } from 'vite-plus/test';
 import { EditorView, keymap } from '@codemirror/view';
 import { EditorState, EditorSelection, Prec } from '@codemirror/state';
 import { markdown } from '@codemirror/lang-markdown';
-import { defaultKeymap, history, undo } from '@codemirror/commands';
+import { defaultKeymap, history, undo, redo } from '@codemirror/commands';
 import { createMarkdownKeymap } from '../../src/utils/markdownKeymap';
 import Editor from '../../src/Editor';
 import type Cherry from '../../src/index';
@@ -240,5 +240,89 @@ describe('真实 Editor 的 Enter 装配', () => {
     pressEnter(actualView);
     expect(observed).toEqual(['- a\n\n']);
     expect(actualView.state.doc.toString()).toBe('- a\n- ');
+  });
+
+  it.each(['- a', '一. a', '> quote'])('只读切换阻止 %s 的 Enter，恢复编辑后继续处理', (source) => {
+    const actualView = createActualEditor(source);
+    editor!.setReadOnly(true);
+    pressEnter(actualView);
+    expect(actualView.state.doc.toString()).toBe(source);
+    editor!.setReadOnly(false);
+    pressEnter(actualView);
+    expect(actualView.state.doc.lines).toBe(2);
+  });
+
+  it('退出列表与真实 Editor 的撤销、重做组合', () => {
+    const source = '- a\n- ';
+    const actualView = createActualEditor(source);
+    pressEnter(actualView);
+    expect(actualView.state.doc.toString()).toBe('- a\n\n');
+    expect(undo(actualView)).toBe(true);
+    expect(actualView.state.doc.toString()).toBe(source);
+    expect(redo(actualView)).toBe(true);
+    expect(actualView.state.doc.toString()).toBe('- a\n\n');
+  });
+
+  it('列表续写后 Tab 缩进，再按 Enter 退回父级', () => {
+    const actualView = createActualEditor('- a');
+    pressEnter(actualView);
+    actualView.contentDOM.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'Tab',
+        code: 'Tab',
+        keyCode: 9,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    expect(actualView.state.doc.toString()).toBe('- a\n  - ');
+    pressEnter(actualView);
+    expect(actualView.state.doc.toString()).toBe('- a\n- ');
+  });
+
+  it('列表中选中文字时 Enter 交给默认选区替换', () => {
+    const actualView = createActualEditor('- abc');
+    actualView.dispatch({ selection: { anchor: 2, head: 5 } });
+    pressEnter(actualView);
+    expect(actualView.state.doc.toString()).toBe('- \n');
+  });
+
+  it('列表前有 Front Matter 和表格时，退出不改动其他块', () => {
+    const prefix = '---\ntitle: test\n---\n\n| a | b |\n| --- | --- |\n| 1 | 2 |\n\n';
+    const actualView = createActualEditor(`${prefix}- a\n- `);
+    pressEnter(actualView);
+    expect(actualView.state.doc.toString()).toBe(`${prefix}- a\n\n`);
+  });
+
+  it('原子标记拦截列表退出时没有部分删除', () => {
+    const source = '- a\n- ';
+    const actualView = createActualEditor(source);
+    editor!.editor!.markText(4, 6, { atomic: true });
+    actualView.dispatch({ selection: { anchor: 5 } });
+    pressEnter(actualView);
+    expect(actualView.state.doc.toString()).toBe(source);
+  });
+
+  it('Vim 插入模式和默认模式切换保留列表 Enter', async () => {
+    const actualView = createActualEditor('- a');
+    await editor!.editor!.setKeyMap('vim');
+    const { getCM } = await import('@replit/codemirror-vim');
+    expect(getCM(actualView)?.state.vim?.insertMode).toBe(false);
+    actualView.contentDOM.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'i',
+        code: 'KeyI',
+        keyCode: 73,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    expect(getCM(actualView)?.state.vim?.insertMode).toBe(true);
+    actualView.dispatch({ selection: { anchor: actualView.state.doc.length } });
+    pressEnter(actualView);
+    expect(actualView.state.doc.toString()).toBe('- a\n- ');
+    await editor!.editor!.setKeyMap('sublime');
+    pressEnter(actualView);
+    expect(actualView.state.doc.toString()).toBe('- a\n\n');
   });
 });
