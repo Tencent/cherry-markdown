@@ -179,7 +179,9 @@ export default class List extends ParagraphBase {
       const itemAttr = {
         class: 'cherry-list-item',
       };
-      const str = `<p>${child.strs.join('<br>')}</p>`;
+      // Source blank lines carry line mapping and block boundaries, but do not
+      // turn one list into a visually loose list. Keep actual content line breaks.
+      const str = `<p>${child.strs.filter((line) => line.trim()).join('<br>')}</p>`;
       child.lines += this.getLineCount(child.strs.join('\n'));
       const children = child.children.length ? this.renderTree(item) : '';
       node.lines += child.lines;

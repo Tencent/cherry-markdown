@@ -39,7 +39,7 @@ export default class Blockquote extends ParagraphBase {
       if (htmlDomTest.length > 1) {
         after = `\n<${htmlDomTest.slice(1).join('\n<')}`;
       }
-      const $content = htmlDomTest[0].replace(/^([ \t]*>)/gm, '');
+      const $content = htmlDomTest[0].replace(/^([ \t]*> ?)/gm, '');
       handledHtml += this.cacheAndGetData(
         $content,
         ($content) => {

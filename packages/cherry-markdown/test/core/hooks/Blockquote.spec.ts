@@ -39,7 +39,7 @@ describe('core/hooks/Blockquote', () => {
     const quote = container.querySelector('blockquote');
 
     expect(makeHtmlForBlockquote).toHaveBeenCalledOnce();
-    expect(makeHtmlForBlockquote).toHaveBeenCalledWith(' # Heading\n **quoted**');
+    expect(makeHtmlForBlockquote).toHaveBeenCalledWith('# Heading\n**quoted**');
     expect(quote?.getAttribute('data-sign')).toBe(`${hashHex(markdown)}_2`);
     expect(quote?.getAttribute('data-lines')).toBe('2');
     expect(quote?.querySelectorAll('[data-in-blockquote="true"]')).toHaveLength(2);
@@ -54,7 +54,13 @@ describe('core/hooks/Blockquote', () => {
 
     expect(second).toBe(first);
     expect(makeHtmlForBlockquote).toHaveBeenCalledOnce();
-    expect(hook.restoreCache(second)).toContain('<p> cached quote</p>');
+    expect(hook.restoreCache(second)).toContain('<p>cached quote</p>');
+  });
+
+  it('removes only the optional marker space and preserves content indentation', () => {
+    const { hook, makeHtmlForBlockquote } = createBlockquote();
+    hook.makeHtml('>   indented\n> > nested', sentenceMake);
+    expect(makeHtmlForBlockquote).toHaveBeenCalledWith('  indented\n> nested');
   });
 
   it('keeps raw block HTML following quote content outside the blockquote', () => {
@@ -64,7 +70,7 @@ describe('core/hooks/Blockquote', () => {
     const container = document.createElement('div');
     container.innerHTML = html;
 
-    expect(makeHtmlForBlockquote).toHaveBeenCalledWith(' quoted');
+    expect(makeHtmlForBlockquote).toHaveBeenCalledWith('quoted');
     expect(container.querySelector('blockquote .outside')).toBeNull();
     expect(container.querySelector(':scope > .outside')?.textContent).toBe('after');
     expect(container.querySelector('blockquote')?.getAttribute('data-lines')).toBe('2');

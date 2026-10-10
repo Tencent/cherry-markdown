@@ -127,22 +127,22 @@ const expectEnter = (before: string, after: string, options?: { extensions?: Ext
 };
 
 describe('utils/autoindent - 准则一：紧凑列表的空列表项退出列表', () => {
-  it('连续两次回车：先续出空项，再只删除空项标记', () => {
+  it('连续两次回车：先续出空项，再补足独立段落边界', () => {
     const context = createMarkdownTarget('- 123|');
 
     expect(context.pressEnter()).toBe(true);
     expect(context.getDocWithCursors()).toBe('- 123\n- |');
     expect(context.pressEnter()).toBe(true);
-    expect(context.getDocWithCursors()).toBe('- 123\n|');
+    expect(context.getDocWithCursors()).toBe('- 123\n\n|');
   });
 
   it.each([
-    ['无序列表', '- 123\n- |', '- 123\n|'],
-    ['有序列表', '1. 123\n2. |', '1. 123\n|'],
-    ['任务列表', '- [ ] a\n- [ ] |', '- [ ] a\n|'],
+    ['无序列表', '- 123\n- |', '- 123\n\n|'],
+    ['有序列表', '1. 123\n2. |', '1. 123\n\n|'],
+    ['任务列表', '- [ ] a\n- [ ] |', '- [ ] a\n\n|'],
     ['嵌套列表回退一层', '- a\n  - b\n  - |', '- a\n  - b\n- |'],
-    ['引用内列表退出', '> - a\n> - |', '> - a\n> |'],
-    ['有序列表后续序号重排', '1. a\n2. |\n3. c', '1. a\n|\n2. c'],
+    ['引用内列表退出', '> - a\n> - |', '> - a\n>\n> |'],
+    ['有序列表后续序号重排', '1. a\n2. |\n3. c', '1. a\n\n|\n\n2. c'],
   ])('%s', (_name, before, after) => {
     expectEnter(before, after);
   });
@@ -172,11 +172,11 @@ describe('utils/autoindent - 准则二：loose 列表新建列表项不补空行
   });
 
   it('多光标：两条准则同时命中时，各光标位置均正确', () => {
-    expectEnter('- a\n- |\n\n# h\n\n- b\n\n- c|', '- a\n|\n\n# h\n\n- b\n\n- c\n- |');
+    expectEnter('- a\n- |\n\n# h\n\n- b\n\n- c|', '- a\n\n|\n\n# h\n\n- b\n\n- c\n- |');
   });
 
-  it('多光标：文档末尾退出列表时只删除空列表项', () => {
-    expectEnter('- a\n- |\n\n# h\n\n- b\n- |', '- a\n|\n\n# h\n\n- b\n|');
+  it('多光标：退出列表时各自补足段落边界', () => {
+    expectEnter('- a\n- |\n\n# h\n\n- b\n- |', '- a\n\n|\n\n# h\n\n- b\n\n|');
   });
 
   it('连续回车不会反复产生空行', () => {
@@ -185,7 +185,7 @@ describe('utils/autoindent - 准则二：loose 列表新建列表项不补空行
     expect(context.pressEnter()).toBe(true);
     expect(context.getDocWithCursors()).toBe('- a\n\n- b\n- |');
     expect(context.pressEnter()).toBe(true);
-    expect(context.getDocWithCursors()).toBe('- a\n\n- b\n|');
+    expect(context.getDocWithCursors()).toBe('- a\n\n- b\n\n|');
   });
 
   it('事务过滤器只观察一次最终结果', () => {
@@ -226,8 +226,8 @@ describe('utils/autoindent - 不应受影响的书写规则', () => {
     ['引用续写', '> 123|', '> 123\n> |'],
     ['引用内段落续写', '> a\n>\n> b|', '> a\n>\n> b\n> |'],
     ['退出引用保持上游行为', '> a\n> \n> |', '> a\n\n|'],
-    ['列表项内段落续写保留空行', '- a\n\n- b\n  c|', '- a\n\n- b\n  c\n\n  |'],
-    ['列表项内多段落续写保留空行', '- a\n\n- b\n\n  c|', '- a\n\n- b\n\n  c\n\n  |'],
+    ['列表项内段落续写不自动补空行', '- a\n\n- b\n  c|', '- a\n\n- b\n  c\n  |'],
+    ['已有多段落的列表项续写不自动补空行', '- a\n\n- b\n\n  c|', '- a\n\n- b\n\n  c\n  |'],
   ])('%s', (_name, before, after) => {
     expectEnter(before, after);
   });
@@ -236,6 +236,7 @@ describe('utils/autoindent - 不应受影响的书写规则', () => {
 describe('utils/autoindent - 交回 CodeMirror 默认按键处理的情形', () => {
   it.each([
     ['非列表上下文', 'ordinary text|'],
+    ['不在语法树内的缩进空行', '- a\n  |'],
     ['代码块内', '```\n- a\n\n- b|\n```'],
   ])('%s', (_name, before) => {
     const context = createMarkdownTarget(before);
@@ -267,5 +268,71 @@ describe('utils/autoindent - 交回 CodeMirror 默认按键处理的情形', () 
 
     expect(cherryInsertNewlineContinueMarkup(target as never)).toBe(false);
     expect(dispatch).not.toHaveBeenCalled();
+  });
+});
+
+describe('utils/autoindent - 独立段落与列表边界', () => {
+  it.each([
+    ['首个空项不补前置空行', '- |', '|'],
+    ['已有前置分隔不重复补写', '- a\n\n- |', '- a\n\n|'],
+    ['中部退出保留前后段落分隔', '- a\n- |\n- c', '- a\n\n|\n\n- c'],
+    ['已有后置分隔不重复补写', '- a\n- |\n\n- c', '- a\n\n|\n\n- c'],
+    ['退出后跟随普通文本', '- a\n- |\ntext', '- a\n\n|\n\ntext'],
+    ['多层引用内退出', '> > - a\n> > - |', '> > - a\n> >\n> > |'],
+    ['引用中部退出', '> - a\n> - |\n> - c', '> - a\n>\n> |\n>\n> - c'],
+    ['引用内已有分隔', '> - a\n>\n> - |\n>\n> - c', '> - a\n>\n> |\n>\n> - c'],
+    ['有序父级退回继续父级列表', '1. a\n   - b\n   - |\n2. c', '1. a\n   - b\n2. |\n3. c'],
+    ['空项末尾空格', '- a\n- |  ', '- a\n\n|  '],
+  ])('%s', (_name, before, after) => expectEnter(before, after));
+
+  it('CRLF 文档使用同一种换行并保持正确光标', () => {
+    let state = EditorState.create({
+      doc: '- a\r\n- ',
+      extensions: [markdown(), EditorState.lineSeparator.of('\r\n')],
+      selection: EditorSelection.single(6),
+    });
+    expect(
+      cherryInsertNewlineContinueMarkup({
+        state,
+        dispatch: (tr: Transaction) => {
+          state = tr.state;
+        },
+      }),
+    ).toBe(true);
+    expect(state.sliceDoc()).toBe('- a\r\n\r\n');
+    expect(state.selection.main.head).toBe(state.doc.length);
+  });
+});
+
+describe('退出列表的最终事务', () => {
+  it('过滤器只收到包含前后段落边界的一次最终变更', () => {
+    const observed: string[] = [];
+    const context = createMarkdownTarget('- a\n- |\n- c', {
+      extensions: [
+        EditorState.changeFilter.of((tr) => {
+          observed.push(tr.newDoc.toString());
+          return true;
+        }),
+      ],
+    });
+    expect(context.pressEnter()).toBe(true);
+    expect(observed).toEqual(['- a\n\n\n\n- c']);
+    expect(context.getDocWithCursors()).toBe('- a\n\n|\n\n- c');
+    expect(context.dispatch).toHaveBeenCalledOnce();
+  });
+
+  it('过滤器取消时不泄漏部分标记删除或分隔符', () => {
+    const context = createMarkdownTarget('- a\n- |', {
+      extensions: [EditorState.changeFilter.of(() => false)],
+    });
+    expect(context.pressEnter()).toBe(true);
+    expect(context.target.state.doc.toString()).toBe('- a\n- ');
+    expect(context.dispatch).toHaveBeenCalledOnce();
+  });
+
+  it('混合列表与普通段落光标交给默认命令，避免部分更新', () => {
+    const context = createMarkdownTarget('- a|\n\ntext|');
+    expect(context.pressEnter()).toBe(false);
+    expect(context.dispatch).not.toHaveBeenCalled();
   });
 });

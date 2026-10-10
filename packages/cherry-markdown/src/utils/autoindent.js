@@ -37,7 +37,7 @@ class MarkupContext {
 
   blank(maxWidth, trailing = true) {
     let result = this.spaceBefore + (this.node.name === 'Blockquote' ? '>' : '');
-    if (maxWidth != null) {
+    if (maxWidth !== null && maxWidth !== undefined) {
       while (result.length < maxWidth) result += ' ';
       return result;
     }
@@ -65,19 +65,25 @@ function getMarkupContext(node, doc) {
     let match;
     if (current.name === 'Blockquote' && (match = /^ *>( ?)/.exec(line.text.slice(start)))) {
       context.push(new MarkupContext(current, start, start + match[0].length, '', match[1], '>', null));
-    } else if (current.name === 'ListItem' && current.parent.name === 'OrderedList' &&
-      (match = /^( *)\d+([.)])( *)/.exec(line.text.slice(start)))) {
-      let after = match[3];
-      let length = match[0].length;
+    } else if (
+      current.name === 'ListItem' &&
+      current.parent.name === 'OrderedList' &&
+      (match = /^( *)\d+([.)])( *)/.exec(line.text.slice(start)))
+    ) {
+      let [, , , after] = match;
+      let { length } = match[0];
       if (after.length >= 4) {
         after = after.slice(0, -4);
         length -= 4;
       }
       context.push(new MarkupContext(current.parent, start, start + length, match[1], after, match[2], current));
-    } else if (current.name === 'ListItem' && current.parent.name === 'BulletList' &&
-      (match = /^( *)([-+*])( {1,4}\[[ xX]\])?( +)/.exec(line.text.slice(start)))) {
-      let after = match[4];
-      let length = match[0].length;
+    } else if (
+      current.name === 'ListItem' &&
+      current.parent.name === 'BulletList' &&
+      (match = /^( *)([-+*])( {1,4}\[[ xX]\])?( +)/.exec(line.text.slice(start)))
+    ) {
+      let [, , , , after] = match;
+      let { length } = match[0];
       if (after.length > 4) {
         after = after.slice(0, -4);
         length -= 4;
@@ -90,13 +96,17 @@ function getMarkupContext(node, doc) {
 }
 
 function renumberList(after, doc, changes, offset = 0) {
-  for (let previous = -1, node = after;;) {
+  for (let previous = -1, node = after; ;) {
     if (node.name === 'ListItem') {
       const match = itemNumber(node, doc);
       const number = +match[2];
       if (previous >= 0) {
         if (number !== previous + 1) return;
-        changes.push({ from: node.from + match[1].length, to: node.from + match[0].length, insert: String(previous + 2 + offset) });
+        changes.push({
+          from: node.from + match[1].length,
+          to: node.from + match[0].length,
+          insert: String(previous + 2 + offset),
+        });
       }
       previous = number;
     }
@@ -116,27 +126,19 @@ function normalizeIndent(content, state) {
       columns -= 4;
     } else {
       result += ' ';
-      columns--;
+      columns -= 1;
     }
   }
   return result + content.slice(blank);
 }
 
-function isLooseList(node, doc) {
-  if (node.name !== 'OrderedList' && node.name !== 'BulletList') return false;
-  const first = node.firstChild;
-  const second = node.getChild('ListItem', 'ListItem');
-  if (!second) return false;
-  const firstLine = doc.lineAt(first.to);
-  const secondLine = doc.lineAt(second.from);
-  return firstLine.number + (/^[\s>]*$/.test(firstLine.text) ? 0 : 1) < secondLine.number;
-}
-
 function blankLine(context, state, line) {
   let insert = '';
   for (let i = 0; i <= context.length - 2; i++) {
-    insert += context[i].blank(i < context.length - 2
-      ? countColumn(line.text, 4, context[i + 1].from) - insert.length : null, i < context.length - 2);
+    insert += context[i].blank(
+      i < context.length - 2 ? countColumn(line.text, 4, context[i + 1].from) - insert.length : null,
+      i < context.length - 2,
+    );
   }
   return normalizeIndent(insert, state);
 }
@@ -148,8 +150,10 @@ export function cherryInsertNewlineContinueMarkup({ state, dispatch }) {
   const { doc } = state;
   let unsupported = false;
   const changes = state.changeByRange((range) => {
-    if (!range.empty || !markdownLanguage.isActiveAt(state, range.from, -1) &&
-      !markdownLanguage.isActiveAt(state, range.from, 1)) {
+    if (
+      !range.empty ||
+      (!markdownLanguage.isActiveAt(state, range.from, -1) && !markdownLanguage.isActiveAt(state, range.from, 1))
+    ) {
       unsupported = true;
       return { range };
     }
@@ -170,18 +174,37 @@ export function cherryInsertNewlineContinueMarkup({ state, dispatch }) {
     if (inner.item && emptyLine) {
       const next = context.length > 1 ? context[context.length - 2] : null;
       const delTo = next && next.item ? line.from + next.from : line.from + (next ? next.to : 0);
-      const insert = next && next.item ? next.marker(doc, 1) : '';
-      const edits = [{ from: delTo, to: pos, insert }];
+      let from = delTo;
+      let insert = next && next.item ? next.marker(doc, 1) : '';
+      let cursor = from + state.toText(insert).length;
+      if (!next || !next.item) {
+        // Exiting a list needs a block boundary, including inside quotes. Outdenting
+        // to a parent list item above deliberately keeps the same list instead.
+        const prefix = line.text.slice(0, delTo - line.from);
+        const separator = blankLine(context, state, line);
+        from = line.from;
+        insert = prefix;
+        if (inner.node.from < line.from && doc.lineAt(line.from - 1).text.trim() !== separator.trim()) {
+          insert = separator + state.lineBreak + prefix;
+        }
+        cursor = from + state.toText(insert).length;
+        if (line.to < doc.length && doc.lineAt(line.to + 1).text.trim() !== separator.trim()) {
+          insert += state.lineBreak + separator;
+        }
+      }
+      const edits = [{ from, to: pos, insert }];
       if (inner.node.name === 'OrderedList') renumberList(inner.item, doc, edits, -2);
       if (next && next.node.name === 'OrderedList') renumberList(next.item, doc, edits);
-      return { range: EditorSelection.cursor(delTo + insert.length), changes: edits };
+      return { range: EditorSelection.cursor(cursor), changes: edits };
     }
     if (inner.node.name === 'Blockquote' && emptyLine && line.from) {
       const previous = doc.lineAt(line.from - 1);
       const quoted = />\s*$/.exec(previous.text);
       if (quoted && quoted.index === inner.from) {
-        const edits = state.changes([{ from: previous.from + quoted.index, to: previous.to },
-          { from: line.from + inner.from, to: line.to }]);
+        const edits = state.changes([
+          { from: previous.from + quoted.index, to: previous.to },
+          { from: line.from + inner.from, to: line.to },
+        ]);
         return { range: range.map(edits), changes: edits };
       }
     }
@@ -191,18 +214,19 @@ export function cherryInsertNewlineContinueMarkup({ state, dispatch }) {
     let insert = '';
     if (!continued || /^[\s\d.)\-+*>]*/.exec(line.text)[0].length >= inner.to) {
       for (let i = 0; i < context.length; i++) {
-        insert += i === context.length - 1 && !continued ? context[i].marker(doc, 1)
-          : context[i].blank(i < context.length - 1
-            ? countColumn(line.text, 4, context[i + 1].from) - insert.length : null);
+        insert +=
+          i === context.length - 1 && !continued
+            ? context[i].marker(doc, 1)
+            : context[i].blank(
+                i < context.length - 1 ? countColumn(line.text, 4, context[i + 1].from) - insert.length : null,
+              );
       }
     }
     let from = pos;
-    while (from > line.from && /\s/.test(line.text.charAt(from - line.from - 1))) from--;
+    while (from > line.from && /\s/.test(line.text.charAt(from - line.from - 1))) from -= 1;
     insert = normalizeIndent(insert, state);
-    // A new list item is always written directly. Paragraphs inside loose lists keep their separator.
-    if (isLooseList(inner.node, doc) && continued) insert = blankLine(context, state, line) + state.lineBreak + insert;
     edits.push({ from, to: pos, insert: state.lineBreak + insert });
-    return { range: EditorSelection.cursor(from + insert.length + state.lineBreak.length), changes: edits };
+    return { range: EditorSelection.cursor(from + state.toText(state.lineBreak + insert).length), changes: edits };
   });
   if (unsupported) return false;
   dispatch(state.update(changes, { scrollIntoView: true, userEvent: 'input' }));
