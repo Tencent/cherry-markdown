@@ -19,18 +19,20 @@
  *
  * 复现 Editor.js 中的按键装配方式：
  * - markdown({ addKeymap: false })：关闭 lang-markdown 内置的 markdownKeymap
- * - Prec.high(keymap.of(cherryMarkdownKeymap))：以相同优先级注册 Cherry 自定义准则
+ * - 复用生产 createMarkdownKeymap()，并通过真实 Editor.init() 验证完整拦截链路
  * - 其后是 defaultKeymap（Enter -> insertNewlineAndIndent）作为兜底
  *
  * 验证列表项续写和退出后的独立段落边界。
  */
 
-import { describe, it, expect, afterEach } from 'vite-plus/test';
+import { describe, it, expect, afterEach, vi } from 'vite-plus/test';
 import { EditorView, keymap } from '@codemirror/view';
 import { EditorState, EditorSelection, Prec } from '@codemirror/state';
-import { markdown, markdownKeymap } from '@codemirror/lang-markdown';
+import { markdown } from '@codemirror/lang-markdown';
 import { defaultKeymap, history, undo } from '@codemirror/commands';
-import { cherryInsertNewlineContinueMarkup } from '../../src/utils/autoindent';
+import { createMarkdownKeymap } from '../../src/utils/markdownKeymap';
+import Editor from '../../src/Editor';
+import type Cherry from '../../src/index';
 import CherryEngine from '../../src/index.engine.core';
 import { createCm6View } from '../helpers/cM6View';
 
@@ -44,13 +46,7 @@ const createEditor = (doc: string, pos = doc.length): EditorView => {
       selection: EditorSelection.single(pos),
       extensions: [
         markdown({ addKeymap: false }),
-        Prec.high(
-          keymap.of(
-            markdownKeymap.map((binding) =>
-              binding.key === 'Enter' ? { ...binding, run: cherryInsertNewlineContinueMarkup } : binding,
-            ),
-          ),
-        ),
+        Prec.high(keymap.of(createMarkdownKeymap())),
         history(),
         keymap.of(defaultKeymap),
       ],
@@ -150,5 +146,99 @@ describe('列表按键链路边界', () => {
       }),
     );
     expect(view.state.doc.toString()).toBe('');
+  });
+});
+
+describe('真实 Editor 的 Enter 装配', () => {
+  let editor: Editor | null = null;
+  let host: HTMLDivElement;
+  const createActualEditor = (source: string) => {
+    createCm6View('').destroy();
+    host = document.createElement('div');
+    const textarea = document.createElement('textarea');
+    textarea.id = 'enter-integration';
+    textarea.value = source;
+    host.appendChild(textarea);
+    document.body.appendChild(host);
+    const cherry = { status: { editor: 'hide' }, $event: { emit: vi.fn() } };
+    editor = new Editor({
+      id: textarea.id,
+      editorDom: host,
+      writingStyle: 'normal',
+      autoScrollByCursor: false,
+      $cherry: cherry as unknown as Cherry,
+    });
+    editor.init({ highlightLine: vi.fn(), scrollToLineNum: vi.fn() });
+    const actualView = editor.editor!.view;
+    actualView.dispatch({ selection: { anchor: source.length } });
+    return actualView;
+  };
+
+  afterEach(() => {
+    editor?.destroy();
+    editor = null;
+    host?.remove();
+  });
+
+  it.each(['- a', '一. a', 'ordinary text'])('建议框接受 Enter 时优先于 %s 的续写', (source) => {
+    const actualView = createActualEditor(source);
+    const accept = vi.fn(() => true);
+    editor!.arrowKeyInterceptor = accept;
+    pressEnter(actualView);
+    expect(accept).toHaveBeenCalledExactlyOnceWith('Enter');
+    expect(actualView.state.doc.toString()).toBe(source);
+  });
+
+  it('建议框未处理时仅调用一次拦截，然后续写 Markdown 列表', () => {
+    const actualView = createActualEditor('- a');
+    const accept = vi.fn(() => false);
+    editor!.arrowKeyInterceptor = accept;
+    pressEnter(actualView);
+    expect(accept).toHaveBeenCalledExactlyOnceWith('Enter');
+    expect(actualView.state.doc.toString()).toBe('- a\n- ');
+  });
+
+  it('建议框关闭后重新使用当前的 Enter 链路', () => {
+    const actualView = createActualEditor('- a');
+    editor!.arrowKeyInterceptor = () => true;
+    pressEnter(actualView);
+    editor!.arrowKeyInterceptor = null;
+    pressEnter(actualView);
+    expect(actualView.state.doc.toString()).toBe('- a\n- ');
+  });
+
+  it.each(['一.', 'I.'])('中文列表 %s 续写和退出保留独立段落', (marker) => {
+    const actualView = createActualEditor(`${marker} a`);
+    pressEnter(actualView);
+    expect(actualView.state.doc.toString()).toBe(`${marker} a\nI. `);
+    pressEnter(actualView);
+    actualView.dispatch(actualView.state.replaceSelection('text'));
+    expect(actualView.state.doc.toString()).toBe(`${marker} a\n\ntext`);
+    const engine: any = new CherryEngine({});
+    const container = document.createElement('div');
+    container.innerHTML = engine.makeHtml(actualView.state.doc.toString());
+    expect(container.querySelector('ol')?.textContent).toBe('a');
+    expect(container.querySelector(':scope > p')?.textContent).toBe('text');
+  });
+
+  it('普通文本最终交给默认 Enter，拦截器不会重复调用', () => {
+    const actualView = createActualEditor('ordinary text');
+    const accept = vi.fn(() => false);
+    editor!.arrowKeyInterceptor = accept;
+    pressEnter(actualView);
+    expect(accept).toHaveBeenCalledExactlyOnceWith('Enter');
+    expect(actualView.state.doc.toString()).toBe('ordinary text\n');
+  });
+
+  it('真实 beforeChange 只观察一次最终退出变更，并可以整体取消', () => {
+    const actualView = createActualEditor('- a\n- ');
+    const observed: string[] = [];
+    editor!.editor!.on('beforeChange', (_cm, event: any) => {
+      observed.push(event.transaction.newDoc.toString());
+      event.cancel();
+    });
+    pressEnter(actualView);
+    expect(observed).toEqual(['- a\n\n']);
+    expect(actualView.state.doc.toString()).toBe('- a\n- ');
   });
 });

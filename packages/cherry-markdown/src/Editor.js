@@ -37,7 +37,7 @@ import {
   Compartment,
   Prec,
 } from '@codemirror/state';
-import { markdown, markdownKeymap } from '@codemirror/lang-markdown';
+import { markdown } from '@codemirror/lang-markdown';
 import { search, searchKeymap, SearchQuery } from '@codemirror/search';
 import {
   history,
@@ -59,7 +59,8 @@ import { tagHighlighter, tags } from '@lezer/highlight';
 import { createElement } from './utils/dom';
 import { base64Reg, imgDrawioXmlReg, createUrlReg, getCodeBlockRule } from './utils/regexp';
 import { addEvent, removeEvent } from './utils/event';
-import { handleNewlineIndentList, cherryInsertNewlineContinueMarkup } from './utils/autoindent';
+import { handleNewlineIndentList } from './utils/autoindent';
+import { createMarkdownKeymap } from './utils/markdownKeymap';
 import diff from 'fast-diff';
 
 /**
@@ -1917,14 +1918,6 @@ export default class Editor {
       { key: 'ArrowUp', run: () => self.arrowKeyInterceptor?.('ArrowUp') || false },
       { key: 'ArrowDown', run: () => self.arrowKeyInterceptor?.('ArrowDown') || false },
       { key: 'Escape', run: () => self.arrowKeyInterceptor?.('Escape') || false },
-      {
-        key: 'Enter',
-        run: (view) => {
-          if (self.arrowKeyInterceptor?.('Enter')) return true;
-          const adapter = self.editor || new CM6Adapter(view, self.vimCompartment, self.readOnlyCompartment);
-          return handleNewlineIndentList(adapter);
-        },
-      },
       // Sublime Text style keybindings
       // Ctrl-Shift-L / Cmd-Shift-L: 将选区拆分为多个光标，在每行末尾各放一个光标（Sublime split into lines）
       {
@@ -1972,9 +1965,13 @@ export default class Editor {
       markdown({ addKeymap: false }),
       Prec.high(
         keymap.of(
-          markdownKeymap.map((binding) =>
-            binding.key === 'Enter' ? { ...binding, run: cherryInsertNewlineContinueMarkup } : binding,
-          ),
+          createMarkdownKeymap({
+            interceptEnter: () => self.arrowKeyInterceptor?.('Enter') || false,
+            continueCustomList: (view) => {
+              const adapter = self.editor || new CM6Adapter(view, self.vimCompartment, self.readOnlyCompartment);
+              return handleNewlineIndentList(adapter);
+            },
+          }),
         ),
       ),
       this.historyCompartment.of(history()),
