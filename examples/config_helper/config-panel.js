@@ -4,6 +4,20 @@ import { escapeHtml } from './code-highlight.js';
 
 const TEXT_PREVIEW_DELAY_MS = 150;
 
+function readNumberInput(input, definition) {
+  input.setCustomValidity('');
+  const value = input.valueAsNumber;
+  const valid = Number.isInteger(value) && input.validity.valid
+    && (!definition.validate || definition.validate(value));
+  const message = valid ? '' : (definition.validationMessage || `请输入 ${definition.min} 及以上的整数`);
+  input.setCustomValidity(message);
+  input.setAttribute('aria-invalid', String(!valid));
+  const error = input.nextElementSibling;
+  error.textContent = message ? `${message}；未应用，保留上一次有效值。` : '';
+  error.hidden = valid;
+  return valid ? value : null;
+}
+
 export function createConfigPanel({ getState, defaultConfig, onChange, onLocate }) {
   function renderConfigPanel() {
     const container = document.getElementById('config-categories');
@@ -63,14 +77,7 @@ export function createConfigPanel({ getState, defaultConfig, onChange, onLocate 
     onChange(path, { wholeValue, transient, previewDelay });
   }
 
-  function renderConfigItem(item) {
-    const configState = getState();
-    const state = configState[item.key];
-    const div = document.createElement('div');
-    div.className = 'config-item';
-    div.dataset.key = item.key;
-    div.dataset.searchText = `${item.name} ${item.path} ${item.description}`.toLowerCase();
-
+  function renderValueInput(item, state) {
     let valueHtml = '';
     if (item.inputType === 'toggle') {
       const checked = (item.type === 'boolean' ? state.value : state.enabled) ? 'checked' : '';
@@ -86,7 +93,9 @@ export function createConfigPanel({ getState, defaultConfig, onChange, onLocate 
       ).join('');
       valueHtml = `<select class="config-select value-input" data-key="${item.key}">${opts}</select>`;
     } else if (item.inputType === 'text') {
-      valueHtml = `<input type="${item.type === 'number' ? 'number' : 'text'}" class="config-value-input value-input" data-key="${item.key}" value="${escapeHtml(String(state.value))}">`;
+      const numberAttributes = item.type === 'number' ? `step="1" min="${item.min}"` : '';
+      valueHtml = `<input type="${item.type === 'number' ? 'number' : 'text'}" ${numberAttributes} class="config-value-input value-input" data-key="${item.key}" value="${escapeHtml(String(state.value))}">`;
+      if (item.type === 'number') valueHtml += '<span class="config-input-error" role="status" hidden></span>';
     } else if (item.inputType === 'textarea') {
       valueHtml = `<textarea class="config-value-input config-textarea value-input" data-key="${item.key}" rows="5">${escapeHtml(String(state.value))}</textarea>`;
     } else if (item.inputType === 'toolbar-select') {
@@ -112,6 +121,173 @@ export function createConfigPanel({ getState, defaultConfig, onChange, onLocate 
         valueHtml = renderToolbarChips(item.key, item.options, state.value);
       }
     }
+
+    return valueHtml;
+  }
+
+  function bindToolbarEvents(item, div, configState) {
+    // 工具栏芯片（普通按钮toggle）
+    div.querySelectorAll('.toolbar-chip:not(.separator-add-btn)').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const key = chip.dataset.parentKey;
+        if (configState[key] && configState[key].disabled) return;
+        const val = chip.dataset.value;
+        const arr = configState[key].value;
+        // 普通按钮：toggle（移除所有该值的实例，或添加一个）
+        const idx = arr.findIndex(entry => getToolbarItemKey(entry) === val);
+        if (idx > -1) {
+          // 移除所有该值的实例
+          configState[key].value = arr.filter(entry => getToolbarItemKey(entry) !== val);
+        } else {
+          const defaultItem = defaultConfig.toolbars.toolbar.find(entry => getToolbarItemKey(entry) === val);
+          arr.push(defaultItem && typeof defaultItem === 'object' ? cloneConfigValue(defaultItem) : val);
+        }
+        commitConfigChange(item, div, { rerender: true });
+      });
+    });
+
+    // 分割线添加按钮
+    div.querySelectorAll('.separator-add-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.parentKey;
+        if (configState[key] && configState[key].disabled) return;
+        configState[key].value.push('|');
+        commitConfigChange(item, div, { rerender: true });
+      });
+    });
+
+    // 排序区：分割线删除按钮
+    div.querySelectorAll('.sort-remove').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const key = btn.dataset.parentKey;
+        const idx = parseInt(btn.dataset.sortIdx);
+        configState[key].value.splice(idx, 1);
+        commitConfigChange(item, div, { rerender: true });
+      });
+    });
+
+    // 排序区：拖拽排序
+    const sortArea = div.querySelector('.toolbar-sort-area');
+    if (sortArea) {
+      let dragSrcIdx = null;
+      sortArea.querySelectorAll('.sort-item').forEach(sortItem => {
+        sortItem.addEventListener('dragstart', (e) => {
+          dragSrcIdx = parseInt(sortItem.dataset.sortIdx);
+          sortItem.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', dragSrcIdx);
+        });
+        sortItem.addEventListener('dragend', () => {
+          sortItem.classList.remove('dragging');
+          sortArea.querySelectorAll('.sort-item').forEach(si => si.classList.remove('drag-over'));
+        });
+        sortItem.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          sortArea.querySelectorAll('.sort-item').forEach(si => si.classList.remove('drag-over'));
+          sortItem.classList.add('drag-over');
+        });
+        sortItem.addEventListener('dragleave', () => {
+          sortItem.classList.remove('drag-over');
+        });
+        sortItem.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const targetIdx = parseInt(sortItem.dataset.sortIdx);
+          const key = sortItem.dataset.parentKey;
+          if (dragSrcIdx !== null && dragSrcIdx !== targetIdx) {
+            const arr = configState[key].value;
+            const [moved] = arr.splice(dragSrcIdx, 1);
+            arr.splice(targetIdx, 0, moved);
+            commitConfigChange(item, div, { rerender: true });
+          }
+          dragSrcIdx = null;
+        });
+      });
+    }
+
+  }
+
+  function bindConfigItemEvents(item, div, configState) {
+    // canDisable 关闭开关
+    const disableToggle = div.querySelector('.disable-toggle');
+    if (disableToggle) {
+      disableToggle.addEventListener('change', (e) => {
+        configState[item.key].disabled = !e.target.checked;
+        commitConfigChange(item, div, { rerender: true, wholeValue: true });
+      });
+    }
+
+    // Toggle 开关
+    const toggle = div.querySelector('.toggle-input');
+    if (toggle) {
+      toggle.addEventListener('change', (e) => {
+        configState[item.key].enabled = e.target.checked;
+        if (item.type === 'boolean') {
+          configState[item.key].value = e.target.checked;
+        }
+        commitConfigChange(item, div, { rerender: true, wholeValue: true });
+      });
+    }
+
+    // 值输入
+    const valueInput = div.querySelector('.value-input');
+    if (valueInput) {
+      const eventType = valueInput.tagName === 'SELECT' ? 'change' : 'input';
+      valueInput.addEventListener(eventType, (e) => {
+        const value = item.type === 'number' ? readNumberInput(e.target, item) : e.target.value;
+        if (value === null) return;
+        configState[item.key].value = value;
+        commitConfigChange(item, div, {
+          transient: item.type === 'string',
+          previewDelay: e.type === 'input' ? TEXT_PREVIEW_DELAY_MS : 0,
+        });
+      });
+    }
+
+    bindToolbarEvents(item, div, configState);
+
+    // 子项事件
+    div.querySelectorAll('.sub-input').forEach(input => {
+      const subIdx = parseInt(input.dataset.subIdx);
+      const eventType = input.tagName === 'SELECT' || input.type === 'checkbox' ? 'change' : 'input';
+      input.addEventListener(eventType, (e) => {
+        const subItems = configState[item.key].subItems;
+        if (subItems && subItems[subIdx]) {
+          if (input.type === 'checkbox') {
+            subItems[subIdx].value = e.target.checked;
+          } else if (input.type === 'number') {
+            const value = readNumberInput(input, subItems[subIdx]);
+            if (value === null) return;
+            subItems[subIdx].value = value;
+          } else {
+            subItems[subIdx].value = e.target.value;
+          }
+          commitConfigChange(item, div, {
+            path: [item.path, subItems[subIdx].key].join('.'),
+            wholeValue: input.type === 'checkbox',
+            transient: subItems[subIdx].type === 'string',
+            previewDelay: e.type === 'input' ? TEXT_PREVIEW_DELAY_MS : 0,
+          });
+        }
+      });
+    });
+
+    // 在完整配置代码中定位当前配置项
+    div.querySelector('.source-btn').addEventListener('click', () => {
+      onLocate(item.path);
+    });
+  }
+
+  function renderConfigItem(item) {
+    const configState = getState();
+    const state = configState[item.key];
+    const div = document.createElement('div');
+    div.className = 'config-item';
+    div.dataset.key = item.key;
+    div.dataset.searchText = `${item.name} ${item.path} ${item.description}`.toLowerCase();
+
+    const valueHtml = renderValueInput(item, state);
 
     // 子配置项
     let subHtml = '';
@@ -142,153 +318,7 @@ export function createConfigPanel({ getState, defaultConfig, onChange, onLocate 
     `;
 
     // 绑定事件
-    function bindEvents() {
-      // canDisable 关闭开关
-      const disableToggle = div.querySelector('.disable-toggle');
-      if (disableToggle) {
-        disableToggle.addEventListener('change', (e) => {
-          configState[item.key].disabled = !e.target.checked;
-          commitConfigChange(item, div, { rerender: true, wholeValue: true });
-        });
-      }
-
-      // Toggle 开关
-      const toggle = div.querySelector('.toggle-input');
-      if (toggle) {
-        toggle.addEventListener('change', (e) => {
-          configState[item.key].enabled = e.target.checked;
-          if (item.type === 'boolean') {
-            configState[item.key].value = e.target.checked;
-          }
-          commitConfigChange(item, div, { rerender: true, wholeValue: true });
-        });
-      }
-
-      // 值输入
-      const valueInput = div.querySelector('.value-input');
-      if (valueInput) {
-        const eventType = valueInput.tagName === 'SELECT' ? 'change' : 'input';
-        valueInput.addEventListener(eventType, (e) => {
-          const value = item.type === 'number' ? e.target.valueAsNumber : e.target.value;
-          if (item.type === 'number' && !Number.isFinite(value)) return;
-          configState[item.key].value = value;
-          commitConfigChange(item, div, {
-            transient: item.type === 'string',
-            previewDelay: e.type === 'input' ? TEXT_PREVIEW_DELAY_MS : 0,
-          });
-        });
-      }
-
-      // 工具栏芯片（普通按钮toggle）
-      div.querySelectorAll('.toolbar-chip:not(.separator-add-btn)').forEach(chip => {
-        chip.addEventListener('click', () => {
-          const key = chip.dataset.parentKey;
-          if (configState[key] && configState[key].disabled) return;
-          const val = chip.dataset.value;
-          const arr = configState[key].value;
-          // 普通按钮：toggle（移除所有该值的实例，或添加一个）
-          const idx = arr.findIndex(entry => getToolbarItemKey(entry) === val);
-          if (idx > -1) {
-            // 移除所有该值的实例
-            configState[key].value = arr.filter(entry => getToolbarItemKey(entry) !== val);
-          } else {
-            const defaultItem = defaultConfig.toolbars.toolbar.find(entry => getToolbarItemKey(entry) === val);
-            arr.push(defaultItem && typeof defaultItem === 'object' ? cloneConfigValue(defaultItem) : val);
-          }
-          commitConfigChange(item, div, { rerender: true });
-        });
-      });
-
-      // 分割线添加按钮
-      div.querySelectorAll('.separator-add-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const key = btn.dataset.parentKey;
-          if (configState[key] && configState[key].disabled) return;
-          configState[key].value.push('|');
-          commitConfigChange(item, div, { rerender: true });
-        });
-      });
-
-      // 排序区：分割线删除按钮
-      div.querySelectorAll('.sort-remove').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const key = btn.dataset.parentKey;
-          const idx = parseInt(btn.dataset.sortIdx);
-          configState[key].value.splice(idx, 1);
-          commitConfigChange(item, div, { rerender: true });
-        });
-      });
-
-      // 排序区：拖拽排序
-      const sortArea = div.querySelector('.toolbar-sort-area');
-      if (sortArea) {
-        let dragSrcIdx = null;
-        sortArea.querySelectorAll('.sort-item').forEach(sortItem => {
-          sortItem.addEventListener('dragstart', (e) => {
-            dragSrcIdx = parseInt(sortItem.dataset.sortIdx);
-            sortItem.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', dragSrcIdx);
-          });
-          sortItem.addEventListener('dragend', () => {
-            sortItem.classList.remove('dragging');
-            sortArea.querySelectorAll('.sort-item').forEach(si => si.classList.remove('drag-over'));
-          });
-          sortItem.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            sortArea.querySelectorAll('.sort-item').forEach(si => si.classList.remove('drag-over'));
-            sortItem.classList.add('drag-over');
-          });
-          sortItem.addEventListener('dragleave', () => {
-            sortItem.classList.remove('drag-over');
-          });
-          sortItem.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const targetIdx = parseInt(sortItem.dataset.sortIdx);
-            const key = sortItem.dataset.parentKey;
-            if (dragSrcIdx !== null && dragSrcIdx !== targetIdx) {
-              const arr = configState[key].value;
-              const [moved] = arr.splice(dragSrcIdx, 1);
-              arr.splice(targetIdx, 0, moved);
-              commitConfigChange(item, div, { rerender: true });
-            }
-            dragSrcIdx = null;
-          });
-        });
-      }
-
-      // 子项事件
-      div.querySelectorAll('.sub-input').forEach(input => {
-        const subIdx = parseInt(input.dataset.subIdx);
-        const eventType = input.tagName === 'SELECT' || input.type === 'checkbox' ? 'change' : 'input';
-        input.addEventListener(eventType, (e) => {
-          const subItems = configState[item.key].subItems;
-          if (subItems && subItems[subIdx]) {
-            if (input.type === 'checkbox') {
-              subItems[subIdx].value = e.target.checked;
-            } else if (input.type === 'number') {
-              subItems[subIdx].value = parseInt(e.target.value) || 0;
-            } else {
-              subItems[subIdx].value = e.target.value;
-            }
-            commitConfigChange(item, div, {
-              path: [item.path, subItems[subIdx].key].join('.'),
-              wholeValue: input.type === 'checkbox',
-              transient: subItems[subIdx].type === 'string',
-              previewDelay: e.type === 'input' ? TEXT_PREVIEW_DELAY_MS : 0,
-            });
-          }
-        });
-      });
-
-      // 在完整配置代码中定位当前配置项
-      div.querySelector('.source-btn').addEventListener('click', () => {
-        onLocate(item.path);
-      });
-    }
-    bindEvents();
+    bindConfigItemEvents(item, div, configState);
 
     return div;
   }
@@ -302,12 +332,15 @@ export function createConfigPanel({ getState, defaultConfig, onChange, onLocate 
           <div class="w-7 h-4 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-red-400"></div>
         </label>`;
     } else if (sub.type === 'number') {
-      inputHtml = `<input type="number" class="config-value-input sub-input" style="max-width:80px" data-parent-key="${parentKey}" data-sub-idx="${idx}" value="${sub.value}">`;
+      inputHtml = `<div class="number-field">
+        <input type="number" step="1" min="${sub.min}" class="config-value-input sub-input" style="max-width:80px" data-parent-key="${parentKey}" data-sub-idx="${idx}" value="${sub.value}">
+        <span class="config-input-error" role="status" hidden></span>
+      </div>`;
     } else if (sub.type === 'string') {
       inputHtml = `<input type="text" class="config-value-input sub-input" data-parent-key="${parentKey}" data-sub-idx="${idx}" value="${escapeHtml(String(sub.value))}">`;
     } else if (sub.type === 'select') {
       const opts = sub.options.map(o =>
-        `<option value="${o}" ${sub.value === o ? 'selected' : ''}>${o}</option>`
+        `<option value="${o}" ${sub.value === o ? 'selected' : ''}>${o === '' ? '默认（不设置 target）' : o}</option>`
       ).join('');
       inputHtml = `<select class="config-select sub-input" data-parent-key="${parentKey}" data-sub-idx="${idx}">${opts}</select>`;
     }
