@@ -1,0 +1,140 @@
+diff --git a/node_modules/@codemirror/lang-markdown/dist/index.js b/node_modules/@codemirror/lang-markdown/dist/index.js
+--- a/node_modules/@codemirror/lang-markdown/dist/index.js
++++ b/node_modules/@codemirror/lang-markdown/dist/index.js
+@@ -202,6 +202,7 @@
+ allowing further configuration.
+ */
+ const insertNewlineContinueMarkupCommand = (config = {}) => ({ state, dispatch }) => {
++    if (state.readOnly) return false;
+     let tree = syntaxTree(state), { doc } = state;
+     let dont = null, changes = state.changeByRange(range => {
+         if (!range.empty || !markdownLanguage.isActiveAt(state, range.from, -1) && !markdownLanguage.isActiveAt(state, range.from, 1))
+@@ -232,12 +233,23 @@
+                 else {
+                     delTo = line.from + (next ? next.to : 0);
+                 }
+-                let changes = [{ from: delTo, to: pos, insert }];
++                let from = delTo, cursor = from + state.toText(insert).length;
++                if (config.exitParagraphBoundary && !(next && next.item)) {
++                    const prefix = line.text.slice(0, delTo - line.from);
++                    const separator = blankLine(context, state, line);
++                    const before = inner.node.from < line.from && doc.lineAt(line.from - 1).text.trim() !== separator.trim();
++                    const after = line.to < doc.length && doc.lineAt(line.to + 1).text.trim() !== separator.trim();
++                    from = line.from;
++                    insert = (before ? separator + state.lineBreak : '') + prefix;
++                    cursor = from + state.toText(insert).length;
++                    if (after) insert += state.lineBreak + separator;
++                }
++                let changes = [{ from, to: pos, insert }];
+                 if (inner.node.name == "OrderedList")
+                     renumberList(inner.item, doc, changes, -2);
+                 if (next && next.node.name == "OrderedList")
+                     renumberList(next.item, doc, changes);
+-                return { range: EditorSelection.cursor(delTo + insert.length), changes };
++                return { range: EditorSelection.cursor(cursor), changes };
+             }
+             else { // Move second item down, making tight two-item list non-tight
+                 let insert = blankLine(context, state, line);
+@@ -270,10 +282,10 @@
+         while (from > line.from && /\s/.test(line.text.charAt(from - line.from - 1)))
+             from--;
+         insert = normalizeIndent(insert, state);
+-        if (nonTightList(inner.node, state.doc))
++        if (config.continueLooseLists !== false && nonTightList(inner.node, state.doc))
+             insert = blankLine(context, state, line) + state.lineBreak + insert;
+         changes.push({ from, to: pos, insert: state.lineBreak + insert });
+-        return { range: EditorSelection.cursor(from + insert.length + 1), changes };
++        return { range: EditorSelection.cursor(from + state.toText(state.lineBreak + insert).length), changes };
+     });
+     if (dont)
+         return false;
+diff --git a/node_modules/@codemirror/lang-markdown/dist/index.cjs b/node_modules/@codemirror/lang-markdown/dist/index.cjs
+--- a/node_modules/@codemirror/lang-markdown/dist/index.cjs
++++ b/node_modules/@codemirror/lang-markdown/dist/index.cjs
+@@ -204,6 +204,7 @@
+ allowing further configuration.
+ */
+ const insertNewlineContinueMarkupCommand = (config = {}) => ({ state: state$1, dispatch }) => {
++    if (state$1.readOnly) return false;
+     let tree = language.syntaxTree(state$1), { doc } = state$1;
+     let dont = null, changes = state$1.changeByRange(range => {
+         if (!range.empty || !markdownLanguage.isActiveAt(state$1, range.from, -1) && !markdownLanguage.isActiveAt(state$1, range.from, 1))
+@@ -234,12 +235,23 @@
+                 else {
+                     delTo = line.from + (next ? next.to : 0);
+                 }
+-                let changes = [{ from: delTo, to: pos, insert }];
++                let from = delTo, cursor = from + state$1.toText(insert).length;
++                if (config.exitParagraphBoundary && !(next && next.item)) {
++                    const prefix = line.text.slice(0, delTo - line.from);
++                    const separator = blankLine(context, state$1, line);
++                    const before = inner.node.from < line.from && doc.lineAt(line.from - 1).text.trim() !== separator.trim();
++                    const after = line.to < doc.length && doc.lineAt(line.to + 1).text.trim() !== separator.trim();
++                    from = line.from;
++                    insert = (before ? separator + state$1.lineBreak : '') + prefix;
++                    cursor = from + state$1.toText(insert).length;
++                    if (after) insert += state$1.lineBreak + separator;
++                }
++                let changes = [{ from, to: pos, insert }];
+                 if (inner.node.name == "OrderedList")
+                     renumberList(inner.item, doc, changes, -2);
+                 if (next && next.node.name == "OrderedList")
+                     renumberList(next.item, doc, changes);
+-                return { range: state.EditorSelection.cursor(delTo + insert.length), changes };
++                return { range: state.EditorSelection.cursor(cursor), changes };
+             }
+             else { // Move second item down, making tight two-item list non-tight
+                 let insert = blankLine(context, state$1, line);
+@@ -272,10 +284,10 @@
+         while (from > line.from && /\s/.test(line.text.charAt(from - line.from - 1)))
+             from--;
+         insert = normalizeIndent(insert, state$1);
+-        if (nonTightList(inner.node, state$1.doc))
++        if (config.continueLooseLists !== false && nonTightList(inner.node, state$1.doc))
+             insert = blankLine(context, state$1, line) + state$1.lineBreak + insert;
+         changes.push({ from, to: pos, insert: state$1.lineBreak + insert });
+-        return { range: state.EditorSelection.cursor(from + insert.length + 1), changes };
++        return { range: state.EditorSelection.cursor(from + state$1.toText(state$1.lineBreak + insert).length), changes };
+     });
+     if (dont)
+         return false;
+diff --git a/node_modules/@codemirror/lang-markdown/dist/index.d.ts b/node_modules/@codemirror/lang-markdown/dist/index.d.ts
+--- a/node_modules/@codemirror/lang-markdown/dist/index.d.ts
++++ b/node_modules/@codemirror/lang-markdown/dist/index.d.ts
+@@ -27,6 +27,16 @@
+     Set this to false to disable this behavior.
+     */
+     nonTightLists?: boolean;
++    /**
++    Set to false to omit blank lines when continuing a non-tight list.
++    Defaults to true.
++    */
++    continueLooseLists?: boolean;
++    /**
++    Preserve paragraph boundaries when exiting the outermost list item,
++    including within blockquotes. Defaults to false.
++    */
++    exitParagraphBoundary?: boolean;
+ }) => StateCommand;
+ /**
+ This command, when invoked in Markdown context with cursor
+diff --git a/node_modules/@codemirror/lang-markdown/dist/index.d.cts b/node_modules/@codemirror/lang-markdown/dist/index.d.cts
+--- a/node_modules/@codemirror/lang-markdown/dist/index.d.cts
++++ b/node_modules/@codemirror/lang-markdown/dist/index.d.cts
+@@ -27,6 +27,16 @@
+     Set this to false to disable this behavior.
+     */
+     nonTightLists?: boolean;
++    /**
++    Set to false to omit blank lines when continuing a non-tight list.
++    Defaults to true.
++    */
++    continueLooseLists?: boolean;
++    /**
++    Preserve paragraph boundaries when exiting the outermost list item,
++    including within blockquotes. Defaults to false.
++    */
++    exitParagraphBoundary?: boolean;
+ }) => StateCommand;
+ /**
+ This command, when invoked in Markdown context with cursor
