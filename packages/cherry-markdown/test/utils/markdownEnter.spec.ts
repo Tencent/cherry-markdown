@@ -1,8 +1,14 @@
 import { EditorSelection, EditorState, Transaction, type Extension } from '@codemirror/state';
 import { indentUnit } from '@codemirror/language';
-import { markdown, insertNewlineContinueMarkupCommand } from '@codemirror/lang-markdown';
+import { markdown, insertNewlineContinueMarkup, insertNewlineContinueMarkupCommand } from '@codemirror/lang-markdown';
 import { describe, expect, it, vi } from 'vite-plus/test';
 import { cherryInsertNewlineContinueMarkup } from '../../src/utils/markdownEnter';
+
+// Observe delegation while executing the real upstream command.
+vi.mock('@codemirror/lang-markdown', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@codemirror/lang-markdown')>();
+  return { ...actual, insertNewlineContinueMarkup: vi.fn(actual.insertNewlineContinueMarkup) };
+});
 
 const CURSOR = '|';
 
@@ -283,6 +289,16 @@ describe('普通 Markdown 行为与上游命令保持一致', () => {
     '- a\n  - b|',
     '- a\n  - b\n  - |',
     '> quoted|',
+    '> > quoted|',
+    '> >\n> > |',
+    '> quoted|\n\n> other|',
+    '> quoted\n>\n> paragraph|',
+    '- a\n  continuation|',
+    '- a\n  > quoted|',
+    '- a\n  >\n  > |',
+    '- a\n\t- b|',
+    '> - [X] task|',
+    '1) a|\n2) b',
     '>\n> |',
     'text|',
     '```\n- code|\n```',
@@ -295,5 +311,84 @@ describe('普通 Markdown 行为与上游命令保持一致', () => {
     expect(cherry.pressEnter()).toBe(runUpstream(upstream.target as never));
     expect(cherry.getDocWithCursors()).toBe(upstream.getDocWithCursors());
     expect(cherry.dispatch.mock.calls.length).toBe(upstream.dispatch.mock.calls.length);
+  });
+});
+
+describe('引用委托边界与上游兼容性', () => {
+  it.each(['> quoted|', '> > quoted|', '> a\n> \n> |', '> first|\n\n> second|'])('%s', (source) => {
+    vi.mocked(insertNewlineContinueMarkup).mockClear();
+    const context = createMarkdownTarget(source);
+    expect(context.pressEnter()).toBe(true);
+    expect(insertNewlineContinueMarkup).toHaveBeenCalledOnce();
+    expect(context.dispatch).toHaveBeenCalledOnce();
+  });
+
+  it('列表与引用光标在同一最终事务内处理', () => {
+    vi.mocked(insertNewlineContinueMarkup).mockClear();
+    const observed: string[] = [];
+    const context = createMarkdownTarget('- a\n\n- b|\n\n> quoted|', {
+      extensions: [
+        EditorState.changeFilter.of((tr) => {
+          observed.push(tr.newDoc.toString());
+          return true;
+        }),
+      ],
+    });
+    expect(context.pressEnter()).toBe(true);
+    expect(context.getDocWithCursors()).toBe('- a\n\n- b\n- |\n\n> quoted\n> |');
+    expect(insertNewlineContinueMarkup).not.toHaveBeenCalled();
+    expect(context.dispatch).toHaveBeenCalledOnce();
+    expect(observed).toEqual(['- a\n\n- b\n- \n\n> quoted\n> ']);
+  });
+
+  it.each(['> - a|', '- a\n  > quote|'])('列表上下文 %s 不委托上游', (source) => {
+    vi.mocked(insertNewlineContinueMarkup).mockClear();
+    const context = createMarkdownTarget(source);
+    expect(context.pressEnter()).toBe(true);
+    expect(insertNewlineContinueMarkup).not.toHaveBeenCalled();
+    expect(context.dispatch).toHaveBeenCalledOnce();
+  });
+
+  it('过滤器取消混合列表与引用光标时没有部分变更', () => {
+    const source = '- a\n\n- b|\n\n> quoted|';
+    const context = createMarkdownTarget(source, {
+      extensions: [EditorState.changeFilter.of(() => false)],
+    });
+    expect(context.pressEnter()).toBe(true);
+    expect(context.getDocWithCursors()).toBe(source);
+    expect(context.dispatch).toHaveBeenCalledOnce();
+  });
+
+  it.each(['- a\n\t- b|', '- a\n\t> quote|'])('Tab 缩进 %s 与上游行为保持一致', (source) => {
+    const extensions = [indentUnit.of('\t')];
+    const cherry = createMarkdownTarget(source, { extensions });
+    const upstream = createMarkdownTarget(source, { extensions });
+    expect(cherry.pressEnter()).toBe(
+      insertNewlineContinueMarkupCommand({ nonTightLists: false })(upstream.target as never),
+    );
+    expect(cherry.getDocWithCursors()).toBe(upstream.getDocWithCursors());
+    expect(cherry.dispatch).toHaveBeenCalledOnce();
+  });
+
+  it('混合光标的引用退出与列表续写仍保持上游普通行为', () => {
+    const source = '- a|\n\n> quote\n> \n> |';
+    const cherry = createMarkdownTarget(source);
+    const upstream = createMarkdownTarget(source);
+    expect(cherry.pressEnter()).toBe(
+      insertNewlineContinueMarkupCommand({ nonTightLists: false })(upstream.target as never),
+    );
+    expect(cherry.getDocWithCursors()).toBe(upstream.getDocWithCursors());
+    expect(cherry.dispatch).toHaveBeenCalledOnce();
+  });
+
+  it.each(['- a', '> > quote'])('CRLF %s 与上游行为保持一致', (source) => {
+    const extensions = [EditorState.lineSeparator.of('\r\n')];
+    const cherry = createMarkdownTarget(`${source}|`, { extensions });
+    const upstream = createMarkdownTarget(`${source}|`, { extensions });
+    expect(cherry.pressEnter()).toBe(
+      insertNewlineContinueMarkupCommand({ nonTightLists: false })(upstream.target as never),
+    );
+    expect(cherry.target.state.sliceDoc()).toBe(upstream.target.state.sliceDoc());
+    expect(cherry.target.state.selection.eq(upstream.target.state.selection)).toBe(true);
   });
 });

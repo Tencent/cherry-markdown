@@ -16,14 +16,15 @@
 
 import { EditorSelection, countColumn } from '@codemirror/state';
 import { indentUnit, syntaxTree } from '@codemirror/language';
-import { markdownLanguage } from '@codemirror/lang-markdown';
+import { insertNewlineContinueMarkup, markdownLanguage } from '@codemirror/lang-markdown';
 
 // Context parsing, indentation and ordered numbering derive from CodeMirror
 // @codemirror/lang-markdown 6.5.0 src/commands.ts (MIT).
 // https://github.com/codemirror/lang-markdown/blob/6.5.0/src/commands.ts
 // Cherry differences: no loose-list blank insertion; empty items exit immediately;
 // exiting establishes paragraph boundaries on both sides; CRLF cursor offsets use Text.
-// Keep ordinary continuation, quote exit, nested outdent and numbering aligned with upstream.
+// Delegate selections without list context to upstream. Quote planning below is
+// only needed inside lists or alongside list cursors in the same transaction.
 /*
 MIT License
 
@@ -325,17 +326,22 @@ function planContinuation(state, { pos, line, context, inner }) {
 export const cherryInsertNewlineContinueMarkup = ({ state, dispatch }) => {
   if (state.readOnly) return false;
   const tree = syntaxTree(state);
-  let unsupported = false;
+  const contexts = state.selection.ranges.map((range) => readEnterContext(state, range, tree));
+  // Quote-only selections need no Cherry list policy. Keep the upstream command
+  // responsible for their continuation and exit, including multiple cursors.
+  if (!contexts.some((current) => current?.context.some((markup) => markup.item))) {
+    return insertNewlineContinueMarkup({ state, dispatch });
+  }
+  // Mixed list/quote cursors are planned together so filters and undo see one
+  // final transaction. Unsupported cursors leave the whole selection to fallback.
+  if (contexts.some((current) => !current)) return false;
+  let index = 0;
   const changes = state.changeByRange((range) => {
-    const current = readEnterContext(state, range, tree);
-    if (!current) {
-      unsupported = true;
-      return { range };
-    }
+    const current = contexts[index];
+    index += 1;
     if (current.inner.item && current.emptyLine) return planListExit(state, current);
     return planQuoteExit(state, range, current) || planContinuation(state, current);
   });
-  if (unsupported) return false;
   dispatch(state.update(changes, { scrollIntoView: true, userEvent: 'input' }));
   return true;
 };
