@@ -14,7 +14,7 @@
     "examples/miniProgram"
   ],
   "scripts": {
-    "postinstall": "patch-package --error-on-fail && vp run -F cherry-markdown iconfont",
+    "postinstall": "vp run -F cherry-markdown iconfont",
     "prepare": "husky",
     "changeset": "npx @changesets/cli",
     "changeset-version": "npx @changesets/cli version",
@@ -61,8 +61,6 @@
     "eslint-plugin-prettier": "^5.5.6",
     "globals": "^17.7.0",
     "husky": "~9.1.7",
-    "patch-package": "8.0.1",
-    "postinstall-postinstall": "2.1.0",
     "prettier": "^3.9.3",
     "typescript": "^6.0.2",
     "vite": "^8.2.1",

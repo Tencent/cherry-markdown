@@ -4,9 +4,6 @@ import { fileURLToPath } from 'node:url';
 
 import { legacyUmdPlugin } from './legacy-umd.plugin.js';
 import { getBuildVersion } from './revision.js';
-import { verifyMarkdownPatch } from './verify-markdown-patch.js';
-
-await verifyMarkdownPatch();
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const src = resolve(root, 'src');

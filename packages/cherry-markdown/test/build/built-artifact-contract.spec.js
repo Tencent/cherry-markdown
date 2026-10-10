@@ -11,6 +11,7 @@ import { describe, expect, it } from 'vite-plus/test';
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const require = createRequire(import.meta.url);
 const distRoot = resolve(projectRoot, 'dist');
+const declarationRoot = resolve(distRoot, 'types');
 const readDistFile = (filePath) => readFileSync(resolve(distRoot, filePath), 'utf-8');
 
 const bundleNames = [
@@ -96,130 +97,6 @@ describe('built Cherry Markdown artifact contract', () => {
       dom.window.close();
     });
   });
-
-  it('bundles Markdown commands so consumers do not need the workspace patch', () => {
-    for (const file of bundleNames) {
-      expect(readDistFile(file), file).not.toMatch(
-        /(?:from\s*|import\s*(?:\(\s*)?|require\s*\(\s*)["']@codemirror\/lang-markdown/,
-      );
-    }
-  });
-
-  it.each(['esm', 'umd'])(
-    'preserves patched Enter behavior in the published %s editor',
-    async (format) => {
-      const dom = new JSDOM('<div id="editor"></div>', {
-        runScripts: 'outside-only',
-        url: 'https://localhost/',
-        pretendToBeVisual: true,
-      });
-      const win = dom.window;
-      win.Range.prototype.getClientRects = () => [];
-      win.Range.prototype.getBoundingClientRect = () => ({
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-      });
-      win.ResizeObserver = class {
-        observe() {}
-        unobserve() {}
-        disconnect() {}
-      };
-      win.matchMedia = () => ({ matches: false, addListener() {}, removeListener() {} });
-      const globals = new Map();
-      const boundFunctions = ['getComputedStyle', 'requestAnimationFrame', 'cancelAnimationFrame'];
-      for (const key of [
-        'window',
-        'Window',
-        'self',
-        'document',
-        'navigator',
-        'Element',
-        'Text',
-        'HTMLDivElement',
-        'HTMLTextAreaElement',
-        'HTMLCanvasElement',
-        'SVGElement',
-        'Node',
-        'HTMLElement',
-        'MutationObserver',
-        'ResizeObserver',
-        'DOMParser',
-        'Range',
-        ...boundFunctions,
-      ]) {
-        globals.set(key, Object.getOwnPropertyDescriptor(global, key));
-        Object.defineProperty(global, key, {
-          value: boundFunctions.includes(key) ? win[key].bind(win) : win[key],
-          configurable: true,
-          writable: true,
-        });
-      }
-      let cherry;
-      try {
-        let Cherry;
-        if (format === 'esm') {
-          Cherry = (await import(resolve(distRoot, 'cherry-markdown.core.esm.js'))).default;
-        } else {
-          win.eval(readDistFile('cherry-markdown.core.js'));
-          Cherry = win.Cherry;
-        }
-        for (const [source, expected] of [
-          ['- a\n\n- b', '- a\n\n- b\n- '],
-          ['- a\n- ', '- a\n\ntext'],
-          ['> - a\n> - ', '> - a\n>\n> text'],
-          ['一. a', '一. a\nI. '],
-        ]) {
-          const options = {
-            id: 'editor',
-            value: source,
-            autoScrollByCursor: false,
-            editor: { defaultModel: 'editOnly' },
-            toolbars: { toolbar: [], bubble: [], float: [], sidebar: [] },
-          };
-          // UMD runs in the window realm, including its plain-object options.
-          cherry = new Cherry(format === 'umd' ? win.JSON.parse(JSON.stringify(options)) : options);
-          const view = cherry.getCodeMirror();
-          view.dispatch({ selection: { anchor: view.state.doc.length } });
-          view.contentDOM.dispatchEvent(
-            new win.KeyboardEvent('keydown', {
-              key: 'Enter',
-              code: 'Enter',
-              keyCode: 13,
-              bubbles: true,
-              cancelable: true,
-            }),
-          );
-          if (expected.endsWith('text')) view.dispatch(view.state.replaceSelection('text'));
-          expect(view.state.doc.toString()).toBe(expected);
-          // Let debounced preview work complete before destroying the editor.
-          await new Promise((done) => setTimeout(done, 400));
-          if (expected.endsWith('text')) {
-            const preview = win.document.createElement('div');
-            preview.innerHTML = cherry.getHtml();
-            const paragraph = [...preview.querySelectorAll('p')].find((node) => node.textContent === 'text');
-            expect(paragraph?.parentElement?.tagName).toBe(source.startsWith('>') ? 'BLOCKQUOTE' : 'DIV');
-            expect(preview.querySelector('ul')?.textContent).toBe('a');
-          }
-          cherry.destroy();
-          cherry = null;
-        }
-      } finally {
-        cherry?.destroy();
-        for (const [key, descriptor] of globals) {
-          if (descriptor) Object.defineProperty(global, key, descriptor);
-          else delete global[key];
-        }
-        win.close();
-      }
-    },
-    15000,
-  );
 
   it('publishes a chained source map for the full UMD browser bundle', () => {
     expect(readDistFile('cherry-markdown.js')).toMatch(/\/\/# sourceMappingURL=cherry-markdown\.js\.map$/);

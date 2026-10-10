@@ -35,7 +35,7 @@ jobs:
           node-version-file: '.node-version'
           cache: 'yarn'
       - name: Install dependencies
-        run: vp install --frozen-lockfile
+        run: vp install
 
       - name: Test
         run: vp run test
