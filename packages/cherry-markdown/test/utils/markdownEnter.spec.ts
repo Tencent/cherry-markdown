@@ -287,7 +287,7 @@ describe('普通 Markdown 行为与上游命令保持一致', () => {
     'text|',
     '```\n- code|\n```',
     '<div>code|</div>',
-    '- selec|ted|',
+    '- first| last|',
   ])('%s', (source) => {
     const cherry = createMarkdownTarget(source);
     const upstream = createMarkdownTarget(source);
