@@ -34,13 +34,13 @@
     "dev": "vp dev",
     "dev:vite": "vp dev",
     "build": "vp run clean && vp run build:all",
-    "build:all": "vp run iconfont && vp run build:styles && vp run build:types && vp run build:addons && vp run build:full",
+    "build:all": "vp run verify:markdown-patch && vp run iconfont && vp run build:styles && vp run build:types && vp run build:addons && vp run build:full",
     "build:full": "NODE_ENV=production node build/vite.build.js",
     "build:core": "NODE_ENV=production node build/vite.build.js",
     "build:engine": "NODE_ENV=production node build/vite.build.js",
     "build:stream": "NODE_ENV=production node build/vite.build.js",
     "build:addons": "node build/addons.build.js",
-    "build:types": "tsc --project tsconfig.json && node build/replacePaths.js",
+    "build:types": "vp run verify:markdown-patch && tsc --project tsconfig.json && node build/replacePaths.js",
     "build:styles": "NODE_ENV=production node build/styles.build.js",
     "clean": "rimraf ./dist",
     "check-bundle": "es-check es5 dist/cherry-markdown.js",
@@ -49,7 +49,9 @@
     "test:coverage": "COVERAGE_THRESHOLDS=true vp test run --coverage --exclude test/build/built-artifact-contract.spec.js",
     "test:update": "vp test -u --exclude test/build/built-artifact-contract.spec.js",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project test/tsconfig.json --noEmit",
-    "examples": "serve -p 3000 ."
+    "examples": "serve -p 3000 .",
+    "verify:markdown-patch": "node build/verify-markdown-patch.js",
+    "test:markdown-patch": "vp run verify:markdown-patch && vp test run test/utils/markdownDependencyPatch.spec.ts test/utils/markdownEnter.spec.ts test/utils/autoindent.spec.ts test/codemirror/TightListEnter.spec.ts test/build/markdown-patch-preflight.spec.js --coverage.enabled=false && tsc --project test/types/markdown-patch/tsconfig.json"
   },
   "keywords": [
     "markdown"

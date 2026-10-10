@@ -44,7 +44,10 @@ jobs:
           cache: 'yarn'
 
       - name: Install dependencies
-        run: vp install
+        run: vp install --frozen-lockfile
+
+      - name: Verify Markdown dependency patch and ESM/CJS contracts
+        run: vp run -F cherry-markdown test:markdown-patch
 
       - name: Lint
         run: vp run lint
