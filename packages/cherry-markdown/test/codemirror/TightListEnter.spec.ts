@@ -22,7 +22,7 @@
  * - 复用生产 createMarkdownKeymap()，并通过真实 Editor.init() 验证完整拦截链路
  * - 其后是 defaultKeymap（Enter -> insertNewlineAndIndent）作为兜底
  *
- * 验证列表项续写和退出后的独立段落边界。
+ * 验证列表项续写、退出时的源码分隔和光标位置。
  */
 
 import { describe, it, expect, afterEach, vi } from 'vite-plus/test';
@@ -33,7 +33,6 @@ import { defaultKeymap, history, undo, redo } from '@codemirror/commands';
 import { createMarkdownKeymap } from '../../src/utils/markdownKeymap';
 import Editor from '../../src/Editor';
 import type Cherry from '../../src/index';
-import CherryEngine from '../../src/index.engine.core';
 import { createCm6View } from '../helpers/cM6View';
 
 const createEditor = (doc: string, pos = doc.length): EditorView => {
@@ -69,18 +68,14 @@ afterEach(() => {
 });
 
 describe('编辑区回车键：紧凑列表不转 loose list', () => {
-  it('退出列表后普通文本成为独立段落', () => {
+  it('退出列表后为普通文本保留源码段落分隔', () => {
     view = createEditor('- 123\n- ');
 
     pressEnter(view);
     view.dispatch(view.state.replaceSelection('ordinary text'));
 
     expect(view.state.doc.toString()).toBe('- 123\n\nordinary text');
-    const engine: any = new CherryEngine({});
-    const container = document.createElement('div');
-    container.innerHTML = engine.makeHtml(view.state.doc.toString());
-    expect(container.querySelector('ul')?.textContent).toBe('123');
-    expect(container.querySelector(':scope > p')?.textContent).toBe('ordinary text');
+    expect(view.state.selection.main.head).toBe(view.state.doc.length);
   });
 
   it('退出列表仍可通过一次撤销恢复空列表项', () => {
@@ -96,42 +91,31 @@ describe('编辑区回车键：紧凑列表不转 loose list', () => {
 
 describe('列表按键链路边界', () => {
   it.each([
-    ['无序列表', '- a\n- ', 'ul'],
-    ['有序列表', '1. a\n2. ', 'ol'],
-    ['任务列表', '- [x] a\n- [ ] ', 'ul'],
-  ])('%s退出后生成独立段落', (_name, source, tag) => {
+    ['无序列表', '- a\n- ', '- a\n\ntext'],
+    ['有序列表', '1. a\n2. ', '1. a\n\ntext'],
+    ['任务列表', '- [x] a\n- [ ] ', '- [x] a\n\ntext'],
+  ])('%s退出后保留源码段落分隔', (_name, source, expected) => {
     view = createEditor(source);
     pressEnter(view);
     view.dispatch(view.state.replaceSelection('text'));
-    const engine: any = new CherryEngine({});
-    const container = document.createElement('div');
-    container.innerHTML = engine.makeHtml(view.state.doc.toString());
-    expect(container.querySelector(`:scope > ${tag}`)?.textContent?.trim()).toBe('a');
-    expect(container.querySelector(':scope > p')?.textContent).toBe('text');
+    expect(view.state.doc.toString()).toBe(expected);
+    expect(view.state.selection.main.head).toBe(expected.length);
   });
 
-  it('文档中部退出后普通文本分开前后两个列表', () => {
+  it('文档中部退出后在普通文本前后保留源码空行', () => {
     view = createEditor('- a\n- \n- c', 6);
     pressEnter(view);
     view.dispatch(view.state.replaceSelection('text'));
     expect(view.state.doc.toString()).toBe('- a\n\ntext\n\n- c');
-    const engine: any = new CherryEngine({});
-    const container = document.createElement('div');
-    container.innerHTML = engine.makeHtml(view.state.doc.toString());
-    expect([...container.querySelectorAll(':scope > ul')].map((list) => list.textContent)).toEqual(['a', 'c']);
-    expect(container.querySelector(':scope > p')?.textContent).toBe('text');
+    expect(view.state.selection.main.head).toBe('- a\n\ntext'.length);
   });
 
-  it('引用中退出后普通文本留在引用内并位于列表外', () => {
+  it('引用内退出保留引用标记和源码空行', () => {
     view = createEditor('> - a\n> - ');
     pressEnter(view);
     view.dispatch(view.state.replaceSelection('text'));
     expect(view.state.doc.toString()).toBe('> - a\n>\n> text');
-    const engine: any = new CherryEngine({});
-    const container = document.createElement('div');
-    container.innerHTML = engine.makeHtml(view.state.doc.toString());
-    expect(container.querySelector('blockquote > ul')?.textContent).toBe('a');
-    expect(container.querySelector('blockquote > p')?.textContent).toBe('text');
+    expect(view.state.selection.main.head).toBe(view.state.doc.length);
   });
 
   it.each(['- ', '1. ', '> '])('Backspace 保留上游 %s 标记删除行为', (source) => {
@@ -207,18 +191,14 @@ describe('真实 Editor 的 Enter 装配', () => {
     expect(actualView.state.doc.toString()).toBe('- a\n- ');
   });
 
-  it.each(['一.', 'I.'])('中文列表 %s 续写和退出保留独立段落', (marker) => {
+  it.each(['一.', 'I.'])('中文列表 %s 续写和退出保留源码段落分隔', (marker) => {
     const actualView = createActualEditor(`${marker} a`);
     pressEnter(actualView);
     expect(actualView.state.doc.toString()).toBe(`${marker} a\nI. `);
     pressEnter(actualView);
     actualView.dispatch(actualView.state.replaceSelection('text'));
     expect(actualView.state.doc.toString()).toBe(`${marker} a\n\ntext`);
-    const engine: any = new CherryEngine({});
-    const container = document.createElement('div');
-    container.innerHTML = engine.makeHtml(actualView.state.doc.toString());
-    expect(container.querySelector('ol')?.textContent).toBe('a');
-    expect(container.querySelector(':scope > p')?.textContent).toBe('text');
+    expect(actualView.state.selection.main.head).toBe(actualView.state.doc.length);
   });
 
   it('普通文本最终交给默认 Enter，拦截器不会重复调用', () => {

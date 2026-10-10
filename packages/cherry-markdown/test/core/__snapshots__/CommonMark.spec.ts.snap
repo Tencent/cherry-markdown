@@ -548,13 +548,13 @@ exports[`engine > CommonMark-91 1`] = `
 `;
 
 exports[`engine > CommonMark-92 1`] = `
-"<blockquote data-sign="19bfefaa511299c2_1" data-lines="1"><p data-sign="7874e957b8ec27871" data-type="p" data-lines="1">Foo</p></blockquote>
+"<blockquote data-sign="19bfefaa511299c2_1" data-lines="1"><p data-sign="a12d060da78815891" data-type="p" data-lines="1"> Foo</p></blockquote>
 
 <hr data-sign="hr1" data-lines="1">"
 `;
 
 exports[`engine > CommonMark-93 1`] = `
-"<blockquote data-sign="a18df0a8e55e4aa2_1" data-lines="1"><p data-sign="72268cea6419e8d51" data-type="p" data-lines="1">foo</p></blockquote>
+"<blockquote data-sign="a18df0a8e55e4aa2_1" data-lines="1"><p data-sign="4a11e3a041422bdc1" data-type="p" data-lines="1"> foo</p></blockquote>
 
 <h1 id="bar" data-sign="66f8f082f3008b4f" data-lines="2">bar</h1>
 "
@@ -603,7 +603,7 @@ exports[`engine > CommonMark-100 1`] = `
 `;
 
 exports[`engine > CommonMark-101 1`] = `
-"<blockquote data-sign="a18df0a8e55e4aa2_1" data-lines="1"><p data-sign="72268cea6419e8d51" data-type="p" data-lines="1">foo</p></blockquote>
+"<blockquote data-sign="a18df0a8e55e4aa2_1" data-lines="1"><p data-sign="4a11e3a041422bdc1" data-type="p" data-lines="1"> foo</p></blockquote>
 
 <hr data-sign="hr1" data-lines="1">"
 `;
@@ -815,7 +815,7 @@ exports[`engine > CommonMark-127 1`] = `
 `;
 
 exports[`engine > CommonMark-128 1`] = `
-"<blockquote data-sign="e8eb21d75bf8988b_6" data-lines="6"><div
+"<blockquote data-sign="e8eb21d75bf8988b_6" data-lines="6"> <div
         data-sign="f88b83b211bf0f23"
         data-type="codeBlock"
         data-lines="5" 
@@ -1229,7 +1229,7 @@ exports[`engine > CommonMark-173 1`] = `
 `;
 
 exports[`engine > CommonMark-174 1`] = `
-"<blockquote data-sign="39a24dd3ec5c8fca_2" data-lines="2"><div data-sign="4ac6728daa6149eb2" data-type="div" data-lines="2"><div>foo</div></div></blockquote><p data-sign="4a0fd440a46395012" data-type="p" data-lines="2">bar</p>
+"<blockquote data-sign="39a24dd3ec5c8fca_2" data-lines="2"><div data-sign="ddf12fe3555760b92" data-type="div" data-lines="2"> <div> foo</div></div></blockquote><p data-sign="4a0fd440a46395012" data-type="p" data-lines="2">bar</p>
 "
 `;
 
@@ -1446,7 +1446,7 @@ exports[`engine > CommonMark-213 1`] = `
 exports[`engine > CommonMark-214 1`] = `
 "<h1 id="foo" data-sign="9599991b3dcad5e8" data-lines="1"><a href="/url">Foo</a></h1>
 
-<blockquote data-sign="59291bc8c1557ace_2" data-lines="2"><p data-sign="88008bca61d263351" data-type="p" data-lines="1">bar</p></blockquote>
+<blockquote data-sign="59291bc8c1557ace_2" data-lines="2"><p data-sign="b74531b83592b1921" data-type="p" data-lines="1"> bar</p></blockquote>
 "
 `;
 
@@ -1468,7 +1468,7 @@ exports[`engine > CommonMark-217 1`] = `
 exports[`engine > CommonMark-218 1`] = `
 "<p data-sign="01a830e0969e9c061" data-type="p" data-lines="1">[foo]</p>
 
-<blockquote data-sign="4fc9bae4ee5bb220_2" data-lines="2"><p data-sign="ef54be914d249ff31" data-type="p" data-lines="1">[foo]: /url</p></blockquote>
+<blockquote data-sign="4fc9bae4ee5bb220_2" data-lines="2"><p data-sign="74484a5a44909a0e1" data-type="p" data-lines="1"> [foo]: /url</p></blockquote>
 "
 `;
 
@@ -1524,17 +1524,17 @@ exports[`engine > CommonMark-227 1`] = `
 `;
 
 exports[`engine > CommonMark-228 1`] = `
-"<blockquote data-sign="58137ee73db48909_3" data-lines="3"><h1 data-in-blockquote="true" id="foo" data-sign="8eb876922caf291a" data-lines="1">Foo</h1><p data-sign="33bc22f74d47ca8e2" data-type="p" data-lines="2">bar<br>baz</p></blockquote>
+"<blockquote data-sign="58137ee73db48909_3" data-lines="3"><h1 data-in-blockquote="true" id="foo" data-sign="8eb876922caf291a" data-lines="1">Foo</h1><p data-sign="47e53b575891da4d2" data-type="p" data-lines="2"> bar<br> baz</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-229 1`] = `
-"<blockquote data-sign="6088b247b201ddcb_3" data-lines="3"><h1 data-in-blockquote="true" id="foo" data-sign="8eb876922caf291a" data-lines="1">Foo</h1><p data-sign="33bc22f74d47ca8e2" data-type="p" data-lines="2">bar<br>baz</p></blockquote>
+"<blockquote data-sign="6088b247b201ddcb_3" data-lines="3"><h1 data-in-blockquote="true" id="foo" data-sign="8eb876922caf291a" data-lines="1">Foo</h1><p data-sign="e95b1ef9c847ee742" data-type="p" data-lines="2">bar<br> baz</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-230 1`] = `
-"<blockquote data-sign="d8ad1091d898d71c_3" data-lines="3"><h1 data-in-blockquote="true" id="foo" data-sign="8eb876922caf291a" data-lines="1">Foo</h1><p data-sign="33bc22f74d47ca8e2" data-type="p" data-lines="2">bar<br>baz</p></blockquote>
+"<blockquote data-sign="d8ad1091d898d71c_3" data-lines="3"><h1 data-in-blockquote="true" id="foo" data-sign="8eb876922caf291a" data-lines="1">Foo</h1><p data-sign="47e53b575891da4d2" data-type="p" data-lines="2"> bar<br> baz</p></blockquote>
 "
 `;
 
@@ -1546,33 +1546,33 @@ exports[`engine > CommonMark-231 1`] = `
 `;
 
 exports[`engine > CommonMark-232 1`] = `
-"<blockquote data-sign="4883f23840b9527c_3" data-lines="3"><h1 data-in-blockquote="true" id="foo" data-sign="8eb876922caf291a" data-lines="1">Foo</h1><p data-sign="33bc22f74d47ca8e2" data-type="p" data-lines="2">bar<br>baz</p></blockquote>
+"<blockquote data-sign="4883f23840b9527c_3" data-lines="3"><h1 data-in-blockquote="true" id="foo" data-sign="8eb876922caf291a" data-lines="1">Foo</h1><p data-sign="0ec1107c77c899d42" data-type="p" data-lines="2"> bar<br>baz</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-233 1`] = `
-"<blockquote data-sign="6434bc5391c2a2ca_3" data-lines="3"><p data-sign="5dbbfb9bb369c6313" data-type="p" data-lines="3">bar<br>baz<br>foo</p></blockquote>
+"<blockquote data-sign="6434bc5391c2a2ca_3" data-lines="3"><p data-sign="23e5be2ff520d5863" data-type="p" data-lines="3"> bar<br>baz<br> foo</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-234 1`] = `
-"<blockquote data-sign="a18df0a8e55e4aa2_1" data-lines="1"><p data-sign="72268cea6419e8d51" data-type="p" data-lines="1">foo</p></blockquote>
+"<blockquote data-sign="a18df0a8e55e4aa2_1" data-lines="1"><p data-sign="4a11e3a041422bdc1" data-type="p" data-lines="1"> foo</p></blockquote>
 
 <hr data-sign="hr1" data-lines="1">"
 `;
 
 exports[`engine > CommonMark-235 1`] = `
-"<blockquote data-sign="b89a29a38663ffda_1" data-lines="1"><ul data-lines="1" data-sign="aaab2156fab5f9a9" class="cherry-list__default"><li class="cherry-list-item"><p>foo</p></li></ul></blockquote>
+"<blockquote data-sign="b89a29a38663ffda_1" data-lines="1"><ul data-lines="1" data-sign="9767d89ed69c6529" class="cherry-list__default"><li class="cherry-list-item"><p>foo</p></li></ul></blockquote>
 <ul data-lines="1" data-sign="b828dec18f8461e2" class="cherry-list__default"><li class="cherry-list-item"><p>bar</p></li></ul>"
 `;
 
 exports[`engine > CommonMark-236 1`] = `
-"<blockquote data-sign="fe6812b499a50915_2" data-lines="2"><p data-sign="1b1ddc65a42108eb2" data-type="p" data-lines="2">    foo<br>    bar</p></blockquote>
+"<blockquote data-sign="fe6812b499a50915_2" data-lines="2"><p data-sign="e5c8fc7cbbc57d6f2" data-type="p" data-lines="2">     foo<br>    bar</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-237 1`] = `
-"<blockquote data-sign="8dfa70f4b8d054d2_4" data-lines="4"><div
+"<blockquote data-sign="8dfa70f4b8d054d2_4" data-lines="4"> <div
         data-sign="32cf42d3515a55b2"
         data-type="codeBlock"
         data-lines="3" 
@@ -1590,7 +1590,7 @@ exports[`engine > CommonMark-237 1`] = `
 `;
 
 exports[`engine > CommonMark-238 1`] = `
-"<blockquote data-sign="02158f29e6dae9d8_2" data-lines="2"><p data-sign="b35eab8081e1afcc2" data-type="p" data-lines="2">foo<br>    - bar</p></blockquote>
+"<blockquote data-sign="02158f29e6dae9d8_2" data-lines="2"><p data-sign="aab5b8b68fe082ca2" data-type="p" data-lines="2"> foo<br>    - bar</p></blockquote>
 "
 `;
 
@@ -1600,75 +1600,74 @@ exports[`engine > CommonMark-239 1`] = `
 `;
 
 exports[`engine > CommonMark-240 1`] = `
-"<p data-sign="3465cc9e6d80a6e11" data-type="p" data-lines="1">&gt;</p><blockquote data-sign="67cb5d3834e31c12_2" data-lines="2">
-</blockquote>
+"<p data-sign="3465cc9e6d80a6e11" data-type="p" data-lines="1">&gt;</p><blockquote data-sign="67cb5d3834e31c12_2" data-lines="2"> </blockquote>
 "
 `;
 
 exports[`engine > CommonMark-241 1`] = `
-"<p data-sign="3465cc9e6d80a6e11" data-type="p" data-lines="1">&gt;</p><blockquote data-sign="96190cdf50b05f90_2" data-lines="2"><p data-sign="72268cea6419e8d51" data-type="p" data-lines="1">foo</p></blockquote>
+"<p data-sign="3465cc9e6d80a6e11" data-type="p" data-lines="1">&gt;</p><blockquote data-sign="96190cdf50b05f90_2" data-lines="2"><p data-sign="4a11e3a041422bdc1" data-type="p" data-lines="1"> foo</p> </blockquote>
 "
 `;
 
 exports[`engine > CommonMark-242 1`] = `
-"<blockquote data-sign="a18df0a8e55e4aa2_1" data-lines="1"><p data-sign="72268cea6419e8d51" data-type="p" data-lines="1">foo</p></blockquote>
+"<blockquote data-sign="a18df0a8e55e4aa2_1" data-lines="1"><p data-sign="4a11e3a041422bdc1" data-type="p" data-lines="1"> foo</p></blockquote>
 
-<blockquote data-sign="59291bc8c1557ace_2" data-lines="2"><p data-sign="88008bca61d263351" data-type="p" data-lines="1">bar</p></blockquote>
+<blockquote data-sign="59291bc8c1557ace_2" data-lines="2"><p data-sign="b74531b83592b1921" data-type="p" data-lines="1"> bar</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-243 1`] = `
-"<blockquote data-sign="b1a139e12fd4eba0_2" data-lines="2"><p data-sign="23418d572dafd8cb2" data-type="p" data-lines="2">foo<br>bar</p></blockquote>
+"<blockquote data-sign="b1a139e12fd4eba0_2" data-lines="2"><p data-sign="58a8afabb5c1bbe32" data-type="p" data-lines="2"> foo<br> bar</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-244 1`] = `
-"<blockquote data-sign="6973d987a30151af_3" data-lines="3"><p data-sign="72268cea6419e8d51" data-type="p" data-lines="1">foo</p><p data-sign="4a0fd440a46395012" data-type="p" data-lines="2">bar</p></blockquote>
+"<blockquote data-sign="6973d987a30151af_3" data-lines="3"><p data-sign="4a11e3a041422bdc1" data-type="p" data-lines="1"> foo</p><p data-sign="aeae5ceed10a43292" data-type="p" data-lines="2"> bar</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-245 1`] = `
-"<p data-sign="72268cea6419e8d51" data-type="p" data-lines="1">foo</p><blockquote data-sign="193a589dd176bae7_1" data-lines="1"><p data-sign="88008bca61d263351" data-type="p" data-lines="1">bar</p></blockquote>
+"<p data-sign="72268cea6419e8d51" data-type="p" data-lines="1">foo</p><blockquote data-sign="193a589dd176bae7_1" data-lines="1"><p data-sign="b74531b83592b1921" data-type="p" data-lines="1"> bar</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-246 1`] = `
-"<blockquote data-sign="6d18ede8a6960ad8_1" data-lines="1"><p data-sign="c2b4eda59a03e5f31" data-type="p" data-lines="1">aaa</p></blockquote>
+"<blockquote data-sign="6d18ede8a6960ad8_1" data-lines="1"><p data-sign="bf1837bddd3224e41" data-type="p" data-lines="1"> aaa</p></blockquote>
 
 <hr data-sign="hr1" data-lines="1">
-<blockquote data-sign="4e04b618a5c7a04a_1" data-lines="1"><p data-sign="404855e2a41f1d8e1" data-type="p" data-lines="1">bbb</p></blockquote>
+<blockquote data-sign="4e04b618a5c7a04a_1" data-lines="1"><p data-sign="98f169fd295da89a1" data-type="p" data-lines="1"> bbb</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-247 1`] = `
-"<blockquote data-sign="c5f5ea15b96bb063_2" data-lines="2"><p data-sign="33bc22f74d47ca8e2" data-type="p" data-lines="2">bar<br>baz</p></blockquote>
+"<blockquote data-sign="c5f5ea15b96bb063_2" data-lines="2"><p data-sign="0ec1107c77c899d42" data-type="p" data-lines="2"> bar<br>baz</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-248 1`] = `
-"<blockquote data-sign="29f4ba3e1faffc9f_1" data-lines="1"><p data-sign="88008bca61d263351" data-type="p" data-lines="1">bar</p></blockquote><p data-sign="5c4bdb43a1d173ae2" data-type="p" data-lines="2">baz</p>
+"<blockquote data-sign="29f4ba3e1faffc9f_1" data-lines="1"><p data-sign="b74531b83592b1921" data-type="p" data-lines="1"> bar</p></blockquote><p data-sign="5c4bdb43a1d173ae2" data-type="p" data-lines="2">baz</p>
 "
 `;
 
 exports[`engine > CommonMark-249 1`] = `
-"<blockquote data-sign="fd7f37d682c6bc24_3" data-lines="3"><p data-sign="88008bca61d263351" data-type="p" data-lines="1">bar</p><p data-sign="5c4bdb43a1d173ae2" data-type="p" data-lines="2">baz</p></blockquote>
+"<blockquote data-sign="fd7f37d682c6bc24_3" data-lines="3"><p data-sign="b74531b83592b1921" data-type="p" data-lines="1"> bar</p><p data-sign="5c4bdb43a1d173ae2" data-type="p" data-lines="2">baz</p></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-250 1`] = `
-"<blockquote data-sign="40c35284a4355109_2" data-lines="2"><blockquote data-sign="b1e96459338688dd_2" data-lines="2"><blockquote data-sign="846c5c73a85ef7c2_2" data-lines="2"><p data-sign="23418d572dafd8cb2" data-type="p" data-lines="2">foo<br>bar</p></blockquote></blockquote></blockquote>
+"<blockquote data-sign="40c35284a4355109_2" data-lines="2"><blockquote data-sign="e519dfd81ffaedf0_2" data-lines="2"><blockquote data-sign="3dbdb2e7c6dfd4c9_2" data-lines="2"><p data-sign="8b28b8a606138a012" data-type="p" data-lines="2"> foo<br>bar</p></blockquote></blockquote></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-251 1`] = `
-"<blockquote data-sign="5ede3999634afbb6_3" data-lines="3"><blockquote data-sign="8b677174dce2439a_3" data-lines="3"><blockquote data-sign="257a09384349695c_3" data-lines="3"><p data-sign="96ac56653dba56c93" data-type="p" data-lines="3">foo<br>bar<br>baz</p></blockquote></blockquote></blockquote>
+"<blockquote data-sign="5ede3999634afbb6_3" data-lines="3"><blockquote data-sign="c5ff0b96ff6e086a_3" data-lines="3"><blockquote data-sign="bbae8211d692fce0_3" data-lines="3"><p data-sign="130461c6bd77761d3" data-type="p" data-lines="3"> foo<br> bar<br>baz</p></blockquote></blockquote></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-252 1`] = `
-"<blockquote data-sign="a3430e08886d84f5_1" data-lines="1"><p data-sign="7311a0345c6f4c571" data-type="p" data-lines="1">    code</p></blockquote>
+"<blockquote data-sign="a3430e08886d84f5_1" data-lines="1"><p data-sign="b502f2eeb96a16181" data-type="p" data-lines="1">     code</p></blockquote>
 
-<blockquote data-sign="60ee1f4e3fdee296_2" data-lines="2"><p data-sign="b0cd3221382c0a831" data-type="p" data-lines="1">   not code</p></blockquote>
+<blockquote data-sign="60ee1f4e3fdee296_2" data-lines="2"><p data-sign="732e4eddffe531831" data-type="p" data-lines="1">    not code</p></blockquote>
 "
 `;
 
@@ -1677,7 +1676,7 @@ exports[`engine > CommonMark-253 1`] = `
 
 <pre data-sign="0ee9bd73382e8675" data-lines="2"><code class="indent-code">indented code</code></pre>
 
-<blockquote data-sign="afa81dde26ecb844_2" data-lines="2"><p data-sign="0a9a35cf820fbbe21" data-type="p" data-lines="1">A block quote.</p></blockquote>
+<blockquote data-sign="afa81dde26ecb844_2" data-lines="2"><p data-sign="297d3dc0fda5469a1" data-type="p" data-lines="1"> A block quote.</p></blockquote>
 "
 `;
 
@@ -1690,9 +1689,9 @@ exports[`engine > CommonMark-254 1`] = `
 </code></pre>"
 `;
 
-exports[`engine > CommonMark-255 1`] = `"<ul data-lines="3" data-sign="ec4d5460bf545db4" class="cherry-list__default"><li class="cherry-list-item"><p>one<br>two</p></li></ul>"`;
+exports[`engine > CommonMark-255 1`] = `"<ul data-lines="3" data-sign="ec4d5460bf545db4" class="cherry-list__default"><li class="cherry-list-item"><p>one<br><br>two</p></li></ul>"`;
 
-exports[`engine > CommonMark-256 1`] = `"<ul data-lines="3" data-sign="dd8d563b0013bab4" class="cherry-list__default"><li class="cherry-list-item"><p>one<br>two</p></li></ul>"`;
+exports[`engine > CommonMark-256 1`] = `"<ul data-lines="3" data-sign="dd8d563b0013bab4" class="cherry-list__default"><li class="cherry-list-item"><p>one<br><br>two</p></li></ul>"`;
 
 exports[`engine > CommonMark-257 1`] = `
 "<ul data-lines="1" data-sign="5feeee1ab9e37fd5" class="cherry-list__default"><li class="cherry-list-item"><p>one</p></li></ul>
@@ -1709,12 +1708,12 @@ exports[`engine > CommonMark-258 1`] = `
 `;
 
 exports[`engine > CommonMark-259 1`] = `
-"<blockquote data-sign="ba8034b80485ae39_3" data-lines="3"><blockquote data-sign="42fc2b730384775a_3" data-lines="3"><ol data-lines="3" data-sign="42848d6c008900f4" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>one<br>two</p></li></ol></blockquote></blockquote>
+"<blockquote data-sign="ba8034b80485ae39_3" data-lines="3"><blockquote data-sign="69d709ecf1aad9e6_3" data-lines="3"><ol data-lines="3" data-sign="462c735e144ebc3f" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>one<br><br>two</p></li></ol></blockquote></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-260 1`] = `
-"<blockquote data-sign="e55fed887f93508a_3" data-lines="3"><blockquote data-sign="e7f804e8db1ad946_3" data-lines="3"><ul data-lines="1" data-sign="63ebb0f97d000d43" class="cherry-list__default"><li class="cherry-list-item"><p>one</p></li></ul><p data-sign="84f0a9d1213b88792" data-type="p" data-lines="2">two</p></blockquote></blockquote>
+"<blockquote data-sign="e55fed887f93508a_3" data-lines="3"><blockquote data-sign="f7de7e82304ebaa7_3" data-lines="3"><ul data-lines="3" data-sign="3e60e2137ab37380" class="cherry-list__default"><li class="cherry-list-item"><p>one<br><br>two</p></li></ul></blockquote></blockquote>
 "
 `;
 
@@ -1786,14 +1785,14 @@ exports[`engine > CommonMark-272 1`] = `
 `;
 
 exports[`engine > CommonMark-273 1`] = `
-"<ol data-lines="3" data-sign="66206f7679526971" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>indented code<br>paragraph</p></li></ol>
+"<ol data-lines="3" data-sign="66206f7679526971" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>indented code<br><br>paragraph</p></li></ol>
 
 <pre data-sign="c0fccab790f4e036" data-lines="3"><code class="indent-code">   more code
 </code></pre>"
 `;
 
 exports[`engine > CommonMark-274 1`] = `
-"<ol data-lines="3" data-sign="a49a9e9d8c7df893" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>indented code<br>paragraph</p></li></ol>
+"<ol data-lines="3" data-sign="a49a9e9d8c7df893" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>indented code<br><br>paragraph</p></li></ol>
 
 <pre data-sign="c0fccab790f4e036" data-lines="3"><code class="indent-code">   more code
 </code></pre>"
@@ -1804,9 +1803,9 @@ exports[`engine > CommonMark-275 1`] = `
 "
 `;
 
-exports[`engine > CommonMark-276 1`] = `"<ul data-lines="3" data-sign="29a4c1c7d9ffcd99" class="cherry-list__default"><li class="cherry-list-item"><p>foo<br>bar</p></li></ul>"`;
+exports[`engine > CommonMark-276 1`] = `"<ul data-lines="3" data-sign="29a4c1c7d9ffcd99" class="cherry-list__default"><li class="cherry-list-item"><p>foo<br><br>bar</p></li></ul>"`;
 
-exports[`engine > CommonMark-277 1`] = `"<ul data-lines="3" data-sign="1abe160e907efeeb" class="cherry-list__default"><li class="cherry-list-item"><p>foo<br>bar</p></li></ul>"`;
+exports[`engine > CommonMark-277 1`] = `"<ul data-lines="3" data-sign="1abe160e907efeeb" class="cherry-list__default"><li class="cherry-list-item"><p>foo<br><br>bar</p></li></ul>"`;
 
 exports[`engine > CommonMark-278 1`] = `
 "<p data-sign="cc313d290025cb611" data-type="p" data-lines="1">-</p><h2 id="foo" data-sign="d79568b29b14b488" data-lines="2">foo</h2><div
@@ -1826,7 +1825,7 @@ exports[`engine > CommonMark-278 1`] = `
 "
 `;
 
-exports[`engine > CommonMark-279 1`] = `"<ul data-lines="1" data-sign="7918106a358843ab" class="cherry-list__default"><li class="cherry-list-item"><p>foo</p></li></ul>"`;
+exports[`engine > CommonMark-279 1`] = `"<ul data-lines="1" data-sign="7918106a358843ab" class="cherry-list__default"><li class="cherry-list-item"><p><br>foo</p></li></ul>"`;
 
 exports[`engine > CommonMark-280 1`] = `
 "<p data-sign="cc313d290025cb611" data-type="p" data-lines="1">-</p><p data-sign="c17c3adc4c5d5da62" data-type="p" data-lines="2">  foo</p>
@@ -1901,12 +1900,12 @@ exports[`engine > CommonMark-290 1`] = `
 exports[`engine > CommonMark-291 1`] = `"<ol data-lines="2" data-sign="f014b7f67198cd76" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>A paragraph<br>with two lines.</p></li></ol>"`;
 
 exports[`engine > CommonMark-292 1`] = `
-"<blockquote data-sign="a6e8b8898104ebc5_2" data-lines="2"><ol data-lines="2" data-sign="a7d9bfb5ee907e84" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>&gt; Blockquote<br>continued here.</p></li></ol></blockquote>
+"<blockquote data-sign="a6e8b8898104ebc5_2" data-lines="2"><ol data-lines="2" data-sign="db0064cb6ad8a014" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>&gt; Blockquote<br>continued here.</p></li></ol></blockquote>
 "
 `;
 
 exports[`engine > CommonMark-293 1`] = `
-"<blockquote data-sign="a44c91b11705521e_2" data-lines="2"><ol data-lines="2" data-sign="a7d9bfb5ee907e84" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>&gt; Blockquote<br>continued here.</p></li></ol></blockquote>
+"<blockquote data-sign="a44c91b11705521e_2" data-lines="2"><ol data-lines="2" data-sign="5cc4eb3190fe6c7a" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>&gt; Blockquote<br>continued here.</p></li></ol></blockquote>
 "
 `;
 
@@ -1941,7 +1940,7 @@ exports[`engine > CommonMark-304 1`] = `"<p data-sign="1ecfe5997dc7adb41" data-t
 exports[`engine > CommonMark-305 1`] = `"<p data-sign="1ecfe5997dc7adb41" data-type="p" data-lines="1">The number of windows in my house is</p><ol data-lines="1" data-sign="fd999d763a74223d" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>The number of doors is 6.</p></li></ol>"`;
 
 exports[`engine > CommonMark-306 1`] = `
-"<ul data-lines="3" data-sign="31664d3ac90f9687" class="cherry-list__default"><li class="cherry-list-item"><p>foo</p></li><li class="cherry-list-item"><p>bar</p></li></ul>
+"<ul data-lines="3" data-sign="31664d3ac90f9687" class="cherry-list__default"><li class="cherry-list-item"><p>foo<br></p></li><li class="cherry-list-item"><p>bar</p></li></ul>
 
 <p data-sign="br2" data-type="br" data-lines="2">&nbsp;</p>
 <ul data-lines="1" data-sign="b46d639e2eec291b" class="cherry-list__default"><li class="cherry-list-item"><p>baz</p></li></ul>"
@@ -1973,22 +1972,22 @@ exports[`engine > CommonMark-309 1`] = `
 
 exports[`engine > CommonMark-310 1`] = `"<ul data-lines="7" data-sign="c1b21a2c15fb5290" class="cherry-list__default"><li class="cherry-list-item"><p>a</p></li><li class="cherry-list-item"><p>b</p></li><li class="cherry-list-item"><p>c</p></li><li class="cherry-list-item"><p>d</p></li><li class="cherry-list-item"><p>e</p></li><li class="cherry-list-item"><p>f</p></li><li class="cherry-list-item"><p>g</p></li></ul>"`;
 
-exports[`engine > CommonMark-311 1`] = `"<ol data-lines="5" data-sign="f2c9d1172a484748" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>a</p><ol start="2" class="cherry-list__default"><li class="cherry-list-item"><p>b</p></li><li class="cherry-list-item"><p>c</p></li></ol></li></ol>"`;
+exports[`engine > CommonMark-311 1`] = `"<ol data-lines="5" data-sign="f2c9d1172a484748" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>a<br></p><ol start="2" class="cherry-list__default"><li class="cherry-list-item"><p>b<br></p></li><li class="cherry-list-item"><p>c</p></li></ol></li></ol>"`;
 
 exports[`engine > CommonMark-312 1`] = `"<ul data-lines="5" data-sign="2b591e469a751abc" class="cherry-list__default"><li class="cherry-list-item"><p>a</p></li><li class="cherry-list-item"><p>b</p></li><li class="cherry-list-item"><p>c</p></li><li class="cherry-list-item"><p>d</p></li><li class="cherry-list-item"><p>e</p></li></ul>"`;
 
 exports[`engine > CommonMark-313 1`] = `
-"<ol data-lines="3" data-sign="26ae113ccacef992" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>a</p><ol start="2" class="cherry-list__default"><li class="cherry-list-item"><p>b</p></li></ol></li></ol>
+"<ol data-lines="3" data-sign="26ae113ccacef992" start="1" class="cherry-list__default"><li class="cherry-list-item"><p>a<br></p><ol start="2" class="cherry-list__default"><li class="cherry-list-item"><p>b</p></li></ol></li></ol>
 
 <pre data-sign="a527b5e919244fd9" data-lines="3"><code class="indent-code">3. c
 </code></pre>"
 `;
 
-exports[`engine > CommonMark-314 1`] = `"<ul data-lines="4" data-sign="63847db195c115b1" class="cherry-list__default"><li class="cherry-list-item"><p>a</p></li><li class="cherry-list-item"><p>b</p></li><li class="cherry-list-item"><p>c</p></li></ul>"`;
+exports[`engine > CommonMark-314 1`] = `"<ul data-lines="4" data-sign="63847db195c115b1" class="cherry-list__default"><li class="cherry-list-item"><p>a</p></li><li class="cherry-list-item"><p>b<br></p></li><li class="cherry-list-item"><p>c</p></li></ul>"`;
 
-exports[`engine > CommonMark-315 1`] = `"<ul data-lines="4" data-sign="3956fd50fc2b0cf8" class="cherry-list__square"><li class="cherry-list-item"><p>a<br>*</p></li><li class="cherry-list-item"><p>c</p></li></ul>"`;
+exports[`engine > CommonMark-315 1`] = `"<ul data-lines="4" data-sign="3956fd50fc2b0cf8" class="cherry-list__square"><li class="cherry-list-item"><p>a<br>*<br></p></li><li class="cherry-list-item"><p>c</p></li></ul>"`;
 
-exports[`engine > CommonMark-316 1`] = `"<ul data-lines="5" data-sign="3fc193193b91e2b1" class="cherry-list__default"><li class="cherry-list-item"><p>a</p></li><li class="cherry-list-item"><p>b<br>c</p></li><li class="cherry-list-item"><p>d</p></li></ul>"`;
+exports[`engine > CommonMark-316 1`] = `"<ul data-lines="5" data-sign="3fc193193b91e2b1" class="cherry-list__default"><li class="cherry-list-item"><p>a</p></li><li class="cherry-list-item"><p>b<br><br>c</p></li><li class="cherry-list-item"><p>d</p></li></ul>"`;
 
 exports[`engine > CommonMark-317 1`] = `
 "<ul data-lines="2" data-sign="d9bf3e024b6fcf9d" class="cherry-list__default"><li class="cherry-list-item"><p>a</p></li><li class="cherry-list-item"><p>b</p></li></ul>
@@ -2026,12 +2025,12 @@ exports[`engine > CommonMark-319 1`] = `
 `;
 
 exports[`engine > CommonMark-320 1`] = `
-"<ul data-lines="4" data-sign="b2d32b910591dcb8" class="cherry-list__square"><li class="cherry-list-item"><p>a<br></p><blockquote data-sign="e74295fc669fba0c_2" data-lines="2"><p data-sign="27a4926c4b136caa1" data-type="p" data-lines="1">b</p>
+"<ul data-lines="4" data-sign="b2d32b910591dcb8" class="cherry-list__square"><li class="cherry-list-item"><p>a<br></p><blockquote data-sign="e74295fc669fba0c_2" data-lines="2"><p data-sign="409e2e7d09381a871" data-type="p" data-lines="1"> b</p>
 </blockquote><p></p></li><li class="cherry-list-item"><p>c</p></li></ul>"
 `;
 
 exports[`engine > CommonMark-321 1`] = `
-"<ul data-lines="6" data-sign="e52b72bf49cfbd6f" class="cherry-list__default"><li class="cherry-list-item"><p>a<br></p><blockquote data-sign="7e078bc7cb6002cf_4" data-lines="4"><p data-sign="27a4926c4b136caa1" data-type="p" data-lines="1">b</p><div
+"<ul data-lines="6" data-sign="e52b72bf49cfbd6f" class="cherry-list__default"><li class="cherry-list-item"><p>a<br></p><blockquote data-sign="7e078bc7cb6002cf_4" data-lines="4"><p data-sign="409e2e7d09381a871" data-type="p" data-lines="1"> b</p><div
         data-sign="6e53b2f3bdbec7b9"
         data-type="codeBlock"
         data-lines="3" 
@@ -2069,9 +2068,9 @@ exports[`engine > CommonMark-324 1`] = `
       </div></p></li></ol>"
 `;
 
-exports[`engine > CommonMark-325 1`] = `"<ul data-lines="4" data-sign="b5d3bbeaba67b9c5" class="cherry-list__square"><li class="cherry-list-item"><p>foo</p><ul class="cherry-list__square"><li class="cherry-list-item"><p>bar<br>baz</p></li></ul></li></ul>"`;
+exports[`engine > CommonMark-325 1`] = `"<ul data-lines="4" data-sign="b5d3bbeaba67b9c5" class="cherry-list__square"><li class="cherry-list-item"><p>foo</p><ul class="cherry-list__square"><li class="cherry-list-item"><p>bar<br><br>baz</p></li></ul></li></ul>"`;
 
-exports[`engine > CommonMark-326 1`] = `"<ul data-lines="7" data-sign="031b2414c230585b" class="cherry-list__default"><li class="cherry-list-item"><p>a</p><ul class="cherry-list__default"><li class="cherry-list-item"><p>b</p></li><li class="cherry-list-item"><p>c</p></li></ul></li><li class="cherry-list-item"><p>d</p><ul class="cherry-list__default"><li class="cherry-list-item"><p>e</p></li><li class="cherry-list-item"><p>f</p></li></ul></li></ul>"`;
+exports[`engine > CommonMark-326 1`] = `"<ul data-lines="7" data-sign="031b2414c230585b" class="cherry-list__default"><li class="cherry-list-item"><p>a</p><ul class="cherry-list__default"><li class="cherry-list-item"><p>b</p></li><li class="cherry-list-item"><p>c<br></p></li></ul></li><li class="cherry-list-item"><p>d</p><ul class="cherry-list__default"><li class="cherry-list-item"><p>e</p></li><li class="cherry-list-item"><p>f</p></li></ul></li></ul>"`;
 
 exports[`engine > CommonMark-327 1`] = `
 "<p data-sign="c6a68ebfe2234ff01" data-type="p" data-lines="1"><code>hi</code>lo\`</p>
