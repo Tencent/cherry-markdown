@@ -28,7 +28,15 @@ import {
   rectangularSelection,
   dropCursor,
 } from '@codemirror/view';
-import { EditorState, StateEffect, StateField, EditorSelection, Transaction, Compartment } from '@codemirror/state';
+import {
+  EditorState,
+  StateEffect,
+  StateField,
+  EditorSelection,
+  Transaction,
+  Compartment,
+  Prec,
+} from '@codemirror/state';
 import { markdown } from '@codemirror/lang-markdown';
 import { search, searchKeymap, SearchQuery } from '@codemirror/search';
 import {
@@ -52,6 +60,7 @@ import { createElement } from './utils/dom';
 import { base64Reg, imgDrawioXmlReg, createUrlReg, getCodeBlockRule } from './utils/regexp';
 import { addEvent, removeEvent } from './utils/event';
 import { handleNewlineIndentList } from './utils/autoindent';
+import { createMarkdownKeymap } from './utils/markdownKeymap';
 import diff from 'fast-diff';
 
 /**
@@ -651,7 +660,8 @@ class CM6Adapter {
       try {
         const vimMod = await loadVimModule();
         this.view.dispatch({
-          effects: this.vimCompartment.reconfigure(vimMod.vim()),
+          // Vim handles normal-mode keys before Markdown; unhandled insert-mode keys fall through.
+          effects: this.vimCompartment.reconfigure(Prec.highest(vimMod.vim())),
         });
         this.currentKeyMap = 'vim';
       } catch (e) {
@@ -1909,14 +1919,6 @@ export default class Editor {
       { key: 'ArrowUp', run: () => self.arrowKeyInterceptor?.('ArrowUp') || false },
       { key: 'ArrowDown', run: () => self.arrowKeyInterceptor?.('ArrowDown') || false },
       { key: 'Escape', run: () => self.arrowKeyInterceptor?.('Escape') || false },
-      {
-        key: 'Enter',
-        run: (view) => {
-          if (self.arrowKeyInterceptor?.('Enter')) return true;
-          const adapter = self.editor || new CM6Adapter(view, self.vimCompartment, self.readOnlyCompartment);
-          return handleNewlineIndentList(adapter);
-        },
-      },
       // Sublime Text style keybindings
       // Ctrl-Shift-L / Cmd-Shift-L: 将选区拆分为多个光标，在每行末尾各放一个光标（Sublime split into lines）
       {
@@ -1961,7 +1963,18 @@ export default class Editor {
 
     const extensions = [
       cachedCherryHighlighting,
-      markdown(),
+      markdown({ addKeymap: false }),
+      Prec.high(
+        keymap.of(
+          createMarkdownKeymap({
+            interceptEnter: () => self.arrowKeyInterceptor?.('Enter') || false,
+            continueCustomList: (view) => {
+              const adapter = self.editor || new CM6Adapter(view, self.vimCompartment, self.readOnlyCompartment);
+              return handleNewlineIndentList(adapter);
+            },
+          }),
+        ),
+      ),
       this.historyCompartment.of(history()),
       search(),
       closeBrackets(),
