@@ -72,4 +72,38 @@ describe('core/hooks/FrontMatter', () => {
     expect(hook.beforeMakeHtml('# Heading')).toBe('# Heading');
     expect(hook.makeHtml('already processed', () => ({ html: '' }))).toBe('already processed');
   });
+
+  it.each(['---#', '---text', '----', '------'])('leaves an invalid opening fence %s untouched', (fence) => {
+    const { hook } = createFrontMatter();
+    const markdown = `${fence}\ntitle: Cherry\n---\nbody`;
+
+    expect(hook.beforeMakeHtml(markdown)).toBe(markdown);
+  });
+
+  it.each(['---#', '---text', '----', '------'])(
+    'leaves a valid opener followed only by an invalid closing fence %s untouched',
+    (fence) => {
+      const { hook } = createFrontMatter();
+      const markdown = `---\ntitle: Cherry\n${fence}\nbody`;
+
+      expect(hook.beforeMakeHtml(markdown)).toBe(markdown);
+    },
+  );
+
+  it('accepts horizontal whitespace around standalone delimiter lines', () => {
+    const { hook } = createFrontMatter();
+    const markdown = '\u00a0---\t\ntitle: Cherry\n \t--- \u00a0\nbody';
+    const html = hook.restoreCache(hook.beforeMakeHtml(markdown));
+
+    expect(html).toContain('data-type="frontMatter"');
+    expect(html).toContain('&quot;title&quot;:&quot;Cherry&quot;');
+    expect(html).toContain('\nbody');
+  });
+
+  it('leaves a missing closing fence untouched', () => {
+    const { hook } = createFrontMatter();
+    const markdown = '---\ntitle: Cherry\nstill markdown';
+
+    expect(hook.beforeMakeHtml(markdown)).toBe(markdown);
+  });
 });
