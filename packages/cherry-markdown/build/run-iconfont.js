@@ -247,6 +247,14 @@ async function main() {
   fontObject.name.fontSubFamily = 'Regular';
   fontObject.name.fullName = fontName;
   fontObject.name.postScriptName = fontName;
+  // SVG glyphs use the hhea baseline. Keep OS/2 metrics consistent so browsers
+  // using that table do not center a different line box around the same glyph.
+  const metrics = fontObject['OS/2'];
+  metrics.sTypoAscender = fontObject.hhea.ascent;
+  metrics.sTypoDescender = fontObject.hhea.descent;
+  metrics.sTypoLineGap = fontObject.hhea.lineGap;
+  metrics.usWinAscent = fontObject.hhea.ascent;
+  metrics.usWinDescent = Math.abs(fontObject.hhea.descent);
   font.set(fontObject);
 
   await fs.promises.mkdir(fontsDir, { recursive: true });
