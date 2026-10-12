@@ -390,6 +390,19 @@
   color: #ef4444;
 }
 
+.config-value-input[aria-invalid="true"] {
+  border-color: #dc2626;
+}
+.config-input-error {
+  display: block;
+  margin-top: 0.25rem;
+  color: #dc2626;
+  font-size: 0.75rem;
+}
+.config-input-error[hidden] { display: none; }
+.number-field { text-align: right; max-width: 12rem; }
+button:disabled { opacity: 0.5; cursor: wait; }
+
 /* 源码高亮 */
 .source-keyword { color: #c792ea; }
 .source-string { color: #c3e88d; }
