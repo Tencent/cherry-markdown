@@ -185,6 +185,60 @@ describe('真实 Editor 的 Enter 装配', () => {
     expect(actualView.state.doc.toString()).toBe(source);
   });
 
+  it.each([
+    ['1. a|\n2. b|\n3. c', '1. a\n2. |\n3. b\n4. |\n5. c'],
+    ['1. a\n   body|\n2. b|\n3. c', '1. a\n   body\n   |\n2. b\n3. |\n4. c'],
+    ['1. a|\n2. |\n3. c', '1. a\n2. |\n|\n3. c'],
+    ['1. parent\n   1. child\n   2. |\n   3. |\n2. after', '1. parent\n   1. child\n2. |\n3. |\n4. after'],
+    ['9. a|\n10. b|\n11. c\n\n> quote|', '9. a\n10. |\n11. b\n12. |\n13. c\n\n> quote\n> |'],
+  ])('真实 Editor 编号协调只有一次 beforeChange，支持取消及撤销：%s', (source, expected) => {
+    const parse = (template: string) => {
+      const cursors: number[] = [];
+      const doc = template.replace(/\|/g, (_match, offset: number) => {
+        cursors.push(offset - cursors.length);
+        return '';
+      });
+      return {
+        doc,
+        selection: EditorSelection.create(
+          cursors.map((pos) => EditorSelection.cursor(pos)),
+          1,
+        ),
+      };
+    };
+    const before = parse(source);
+    const after = parse(expected);
+    const actualView = createActualEditor(before.doc);
+    actualView.dispatch({ selection: before.selection });
+    const observed: string[] = [];
+    let cancel = true;
+    editor!.editor!.on('beforeChange', (_cm, event: any) => {
+      observed.push(event.transaction.newDoc.toString());
+      if (cancel) event.cancel();
+    });
+    pressEnter(actualView);
+    expect(observed).toEqual([after.doc]);
+    expect(actualView.state.doc.toString()).toBe(before.doc);
+    // changeFilter cancellation retains upstream's marker-start mapping for an exited item.
+    const cancelled = source === '1. a|\n2. |\n3. c' ? parse('1. a|\n|2. \n3. c').selection : before.selection;
+    expect(actualView.state.selection.eq(cancelled)).toBe(true);
+    actualView.dispatch({ selection: before.selection });
+    cancel = false;
+    observed.length = 0;
+    pressEnter(actualView);
+    expect(observed).toEqual([after.doc]);
+    expect(actualView.state.doc.toString()).toBe(after.doc);
+    expect(actualView.state.selection.eq(after.selection)).toBe(true);
+    expect(undo(actualView)).toBe(true);
+    expect(actualView.state.doc.toString()).toBe(before.doc);
+    expect(actualView.state.selection.eq(before.selection)).toBe(true);
+    expect(redo(actualView)).toBe(true);
+    expect(actualView.state.doc.toString()).toBe(after.doc);
+    expect(actualView.state.selection.eq(after.selection)).toBe(true);
+    actualView.dispatch(actualView.state.replaceSelection('X'));
+    expect(actualView.state.doc.toString()).toBe(expected.replace(/\|/g, 'X'));
+  });
+
   it('建议框未处理时仅调用一次拦截，然后续写 Markdown 列表', () => {
     const actualView = createActualEditor('- a');
     const accept = vi.fn(() => false);

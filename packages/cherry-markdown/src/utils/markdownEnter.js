@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { EditorSelection, countColumn } from '@codemirror/state';
+import { ChangeSet, EditorSelection, countColumn } from '@codemirror/state';
 import { indentUnit, syntaxTree } from '@codemirror/language';
 import { insertNewlineContinueMarkupCommand, markdownLanguage } from '@codemirror/lang-markdown';
 
 // Context, marker, indentation and numbering helpers derive from CodeMirror
 // @codemirror/lang-markdown 6.5.0 src/commands.ts (MIT).
 // https://github.com/codemirror/lang-markdown/blob/6.5.0/src/commands.ts
-// Only intercept selections where upstream would add a loose-list blank line.
+// Intercept loose continuation and interacting ordered-list numbering operations.
 // Everything else uses the configured upstream command. Mixed markup cursors
 // require per-range planning here: upstream exposes no per-range planner.
 // Exit/quote planners preserve upstream behavior in that combined transaction;
@@ -97,8 +97,8 @@ class MarkupContext {
     return result + ' '.repeat(padding) + this.spaceAfter;
   }
 
-  marker(doc) {
-    const number = this.node.name === 'OrderedList' ? String(+itemNumber(this.item, doc)[2] + 1) : '';
+  marker(doc, plannedNumber = null) {
+    const number = this.node.name === 'OrderedList' ? String(plannedNumber ?? +itemNumber(this.item, doc)[2] + 1) : '';
     return this.spaceBefore + number + this.type + this.spaceAfter;
   }
 }
@@ -135,24 +135,100 @@ function getMarkupContext(node, doc) {
   return context;
 }
 
-function renumberList(after, doc, changes, offset = 0) {
-  for (let previous = -1, node = after; ;) {
-    if (node.name === 'ListItem') {
-      const match = itemNumber(node, doc);
+/**
+ * Each ordered list owns its numbering once per Enter. Requests retain upstream's
+ * stop-at-a-numbering-gap rule, but accumulate instead of emitting overlapping edits.
+ * @param {EditorState} state
+ * @param {EnterContext[]} contexts
+ * @param {boolean} looseContinuation
+ */
+function planNumbering(state, contexts, looseContinuation) {
+  const groups = new Map();
+  for (const current of contexts) {
+    if (!current) continue;
+    const { inner, context, emptyLine } = current;
+    const parent = context.length > 1 ? context[context.length - 2] : null;
+    const requests = [
+      {
+        markup: inner,
+        delta: inner.item && emptyLine ? -1 : 1,
+        continued: inner.item && inner.item.from < current.line.from,
+      },
+    ];
+    if (inner.item && emptyLine && parent?.item) requests.push({ markup: parent, delta: 1, continued: false });
+    for (const { markup, delta, continued } of requests) {
+      if (markup.node.name !== 'OrderedList') continue;
+      const key = markup.node.from;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push({ markup, delta, continued });
+    }
+  }
+  const interacts = [...groups.values()].some((requests) => requests.length > 1);
+  if (!groups.size || (!interacts && !looseContinuation)) return null;
+  const markers = new Map();
+  const changes = [];
+  for (const requests of groups.values()) {
+    const byItem = new Map();
+    // Contexts are in selection order, including promotions from the same parent item.
+    for (const request of requests) {
+      // Continuation lines neither insert nor remove an item marker. Preserve the
+      // upstream single-operation behavior outside coordinated multi-cursor edits.
+      if (interacts && request.continued) request.delta = 0;
+      const key = request.markup.item.from;
+      if (!byItem.has(key)) byItem.set(key, []);
+      byItem.get(key).push(request);
+    }
+    let previous = -1;
+    let shift = 0;
+    const { item: firstItem } = requests[0].markup;
+    for (let item = firstItem; item; item = item.nextSibling) {
+      if (item.name !== 'ListItem') continue;
+      const match = itemNumber(item, state.doc);
       const number = +match[2];
-      if (previous >= 0) {
-        if (number !== previous + 1) return;
+      if (previous >= 0 && number !== previous + 1) shift = 0;
+      if (shift) {
         changes.push({
-          from: node.from + match[1].length,
-          to: node.from + match[0].length,
-          insert: String(previous + 2 + offset),
+          from: item.from + match[1].length,
+          to: item.from + match[0].length,
+          insert: String(number + shift),
         });
       }
+      let localShift = 0;
+      for (const { markup, delta } of byItem.get(item.from) ?? []) {
+        if (delta > 0) markers.set(markup, number + shift + localShift + 1);
+        localShift += delta;
+      }
+      byItem.delete(item.from);
+      shift += localShift;
       previous = number;
+      if (!shift && !byItem.size) break;
     }
-    if (!node.nextSibling) break;
-    node = node.nextSibling;
   }
+  return { markers, changes };
+}
+
+/**
+ * Compose numbering into the planned structural edits, before creating any transaction.
+ * Deleted item markers must not be reintroduced by another cursor's numbering request.
+ */
+function mergeNumbering(state, structural, numbering) {
+  const removed = [];
+  structural.changes.iterChanges((from, to) => {
+    if (to > from) removed.push({ from, to });
+  });
+  const edits = numbering.changes
+    .filter((edit) => !removed.some(({ from, to }) => edit.from < to && edit.to > from))
+    .map((edit) => ({
+      ...edit,
+      from: structural.changes.mapPos(edit.from, 1),
+      to: structural.changes.mapPos(edit.to, -1),
+    }));
+  const changes = ChangeSet.of(edits, structural.changes.newLength, state.lineBreak);
+  return {
+    ...structural,
+    changes: structural.changes.compose(changes),
+    selection: structural.selection.map(changes),
+  };
 }
 
 function normalizeIndent(content, state) {
@@ -188,20 +264,18 @@ function readEnterContext(state, range, tree) {
 }
 
 /**
- * Upstream empty-item exit, needed only alongside a loose continuation cursor.
+ * Upstream empty-item exit, used alongside loose continuation or coordinated numbering.
  * @param {EditorState} state
  * @param {EnterContext} current
  * @returns {RangeEdit}
  */
-function planListExit(state, { pos, line, context, inner }) {
+function planListExit(state, { pos, line, context }, numbering) {
   const { doc } = state;
   const parent = context.length > 1 ? context[context.length - 2] : null;
   let { from } = line;
   if (parent) from += parent.item ? parent.from : parent.to;
-  const insert = parent?.item ? parent.marker(doc) : '';
+  const insert = parent?.item ? parent.marker(doc, numbering?.markers.get(parent)) : '';
   const edits = [{ from, to: pos, insert }];
-  if (inner.node.name === 'OrderedList') renumberList(inner.item, doc, edits, -2);
-  if (parent?.node.name === 'OrderedList') renumberList(parent.item, doc, edits);
   return { range: EditorSelection.cursor(from + state.toText(insert).length), changes: edits };
 }
 
@@ -232,17 +306,16 @@ function planQuoteExit(state, range, { line, inner, emptyLine }) {
  * @param {EnterContext} current
  * @returns {RangeEdit}
  */
-function planContinuation(state, { pos, line, context, inner }) {
+function planContinuation(state, { pos, line, context, inner }, numbering) {
   const { doc } = state;
   const edits = [];
-  if (inner.node.name === 'OrderedList') renumberList(inner.item, doc, edits);
   const continued = inner.item && inner.item.from < line.from;
   let insert = '';
   if (!continued || /^[\s\d.)\-+*>]*/.exec(line.text)[0].length >= inner.to) {
     for (let i = 0; i < context.length; i++) {
       insert +=
         i === context.length - 1 && !continued
-          ? context[i].marker(doc)
+          ? context[i].marker(doc, numbering?.markers.get(context[i]))
           : context[i].blank(
               i < context.length - 1 ? countColumn(line.text, 4, context[i + 1].from) - insert.length : null,
             );
@@ -271,25 +344,28 @@ function needsLooseContinuation(current, doc) {
 const continueMarkup = insertNewlineContinueMarkupCommand({ nonTightLists: false });
 
 /**
- * Omit only loose-continuation blank insertion; filters see one final transaction.
+ * Omit loose-continuation blanks and coordinate numbering in one final transaction.
  * @type {import('@codemirror/state').StateCommand}
  */
 export const cherryInsertNewlineContinueMarkup = ({ state, dispatch }) => {
   if (state.readOnly) return false;
   const tree = syntaxTree(state);
   const contexts = state.selection.ranges.map((range) => readEnterContext(state, range, tree));
-  if (!contexts.some((current) => needsLooseContinuation(current, state.doc))) {
+  const looseContinuation = contexts.some((current) => needsLooseContinuation(current, state.doc));
+  const numbering = planNumbering(state, contexts, looseContinuation);
+  if (!numbering && !looseContinuation) {
     return continueMarkup({ state, dispatch });
   }
   // Like upstream, unsupported ranges leave the entire selection to fallback.
   if (contexts.some((current) => !current)) return false;
   let index = 0;
-  const changes = state.changeByRange((range) => {
+  let changes = state.changeByRange((range) => {
     const current = contexts[index];
     index += 1;
-    if (current.inner.item && current.emptyLine) return planListExit(state, current);
-    return planQuoteExit(state, range, current) || planContinuation(state, current);
+    if (current.inner.item && current.emptyLine) return planListExit(state, current, numbering);
+    return planQuoteExit(state, range, current) || planContinuation(state, current, numbering);
   });
+  if (numbering) changes = mergeNumbering(state, changes, numbering);
   dispatch(state.update(changes, { scrollIntoView: true, userEvent: 'input' }));
   return true;
 };

@@ -328,25 +328,6 @@ describe('混合多光标只生成一次最终事务', () => {
     expect(context.dispatch).toHaveBeenCalledOnce();
   });
 
-  it.each(['1. a|\n\n2. b|\n3. c', '1. a\n\n2. b|\n3. c|\n4. d'])(
-    '同一有序列表多个光标保持上游编号行为，仅省略新插入的空行：%s',
-    (source) => {
-      const cherry = createMarkdownTarget(source);
-      const upstream = createMarkdownTarget(source);
-      expect(cherry.pressEnter()).toBe(true);
-      expect(insertNewlineContinueMarkupCommand({ nonTightLists: false })(upstream.target as never)).toBe(true);
-      const transaction = upstream.dispatch.mock.calls[0][0] as Transaction;
-      const changes: { from: number; to: number; insert: string }[] = [];
-      transaction.changes.iterChanges((from, to, _fromB, _toB, text) => {
-        changes.push({ from, to, insert: text.toString().replace(/^\n\n/, '\n') });
-      });
-      const expected = transaction.startState.changes(changes).apply(transaction.startState.doc).toString();
-      expect(cherry.target.state.doc.toString()).toBe(expected);
-      expect(cherry.dispatch).toHaveBeenCalledOnce();
-      expect(cherry.target.state.selection.ranges).toHaveLength(2);
-    },
-  );
-
   it('transactionFilter 整体取消时保留全部源码及光标', () => {
     const source = '- a\n\n- b|\n\n> * c\n> * |';
     const observed: string[] = [];
@@ -375,4 +356,175 @@ describe('混合多光标只生成一次最终事务', () => {
       expect(context.dispatch).not.toHaveBeenCalled();
     },
   );
+});
+
+const numberedCases = [
+  [
+    '三层列表子项同时退级',
+    '- root\n  1. parent\n     1. child\n     2. |\n     3. |\n  2. after',
+    '- root\n  1. parent\n     1. child\n  2. |\n  3. |\n  4. after',
+  ],
+  [
+    '引用内两个子项退级',
+    '> 1. parent\n>    1. child\n>    2. |\n>    3. |\n> 2. after',
+    '> 1. parent\n>    1. child\n> 2. |\n> 3. |\n> 4. after',
+  ],
+  ['正文续行与列表项续写', '1. a\n   body|\n2. b|\n3. c', '1. a\n   body\n   |\n2. b\n3. |\n4. c'],
+  ['同一项标记续写与正文续行', '1. a|\n   body|\n2. b', '1. a\n2. |\n   body\n   |\n3. b'],
+  ['正文续行与空项退出', '1. a\n   body|\n2. |\n3. c', '1. a\n   body\n   |\n|\n2. c'],
+  ['两处正文续行不重排编号', '1. a\n   body|\n2. b\n   body|\n3. c', '1. a\n   body\n   |\n2. b\n   body\n   |\n3. c'],
+  ['紧凑列表双光标', '1. a|\n2. b|\n3. c', '1. a\n2. |\n3. b\n4. |\n5. c'],
+  ['loose 列表双光标', '1. a|\n\n2. b|\n3. c', '1. a\n2. |\n\n3. b\n4. |\n5. c'],
+  ['三个光标', '1. a|\n\n2. b|\n3. c|\n4. d', '1. a\n2. |\n\n3. b\n4. |\n5. c\n6. |\n7. d'],
+  ['末尾两项', '1. a\n\n2. b|\n3. c|', '1. a\n\n2. b\n3. |\n4. c\n5. |'],
+  ['同一项两个位置', '1. a|b|c\n2. d', '1. a\n2. |b\n3. |c\n4. d'],
+  ['两位数边界', '9. a|\n10. b|\n11. c', '9. a\n10. |\n11. b\n12. |\n13. c'],
+  ['括号标记', '1) a|\n2) b|\n3) c', '1) a\n2) |\n3) b\n4) |\n5) c'],
+  ['跳号阻断累计', '1. a|\n2. b|\n8. c\n9. d', '1. a\n2. |\n3. b\n4. |\n8. c\n9. d'],
+  ['跳号后独立续写', '1. a|\n5. b|\n6. c', '1. a\n2. |\n5. b\n6. |\n7. c'],
+  ['紧凑列表续写与退出', '1. a|\n2. |\n3. c', '1. a\n2. |\n|\n3. c'],
+  ['loose 列表续写与退出', '1. a|\n\n2. |\n3. c', '1. a\n2. |\n\n|\n3. c'],
+  ['两个空项退出', '1. a\n2. |\n3. |\n4. d', '1. a\n|\n|\n2. d'],
+  ['退出与后续续写', '1. a\n2. |\n3. c|\n4. d', '1. a\n|\n2. c\n3. |\n4. d'],
+  ['引用中多光标', '> 1. a|\n>\n> 2. b|\n> 3. c', '> 1. a\n> 2. |\n>\n> 3. b\n> 4. |\n> 5. c'],
+  ['嵌套有序列表续写', '- parent\n  1. a|\n\n  2. b|\n  3. c', '- parent\n  1. a\n  2. |\n\n  3. b\n  4. |\n  5. c'],
+  ['父级续写与子级退级', '1. parent|\n   1. child\n   2. |\n2. after', '1. parent\n2. |\n   1. child\n3. |\n4. after'],
+  [
+    '两个子项退级到同一父级',
+    '1. parent\n   1. child\n   2. |\n   3. |\n2. after',
+    '1. parent\n   1. child\n2. |\n3. |\n4. after',
+  ],
+  [
+    '无序子项退级与父级续写',
+    '1. parent\n   - child\n   - |\n2. after|\n3. end',
+    '1. parent\n   - child\n2. |\n3. after\n4. |\n5. end',
+  ],
+  ['父项退出与子项退级', '1. |\n   - child\n   - |\n2. after', '|\n   - child\n1. |\n2. after'],
+  ['编号与引用混合', '1. a|\n2. b|\n3. c\n\n> quote|', '1. a\n2. |\n3. b\n4. |\n5. c\n\n> quote\n> |'],
+];
+
+describe('有序列表的编号由同一次 Enter 统一规划', () => {
+  it.each(numberedCases)('%s：编号、光标及过滤器只看到最终结果', (_name, source, expected) => {
+    const observed: string[] = [];
+    const filtered: string[] = [];
+    const context = createMarkdownTarget(source, {
+      mainIndex: 1,
+      extensions: [
+        EditorState.changeFilter.of((tr) => {
+          observed.push(tr.newDoc.toString());
+          return true;
+        }),
+        EditorState.transactionFilter.of((tr) => {
+          filtered.push(tr.newDoc.toString());
+          return tr;
+        }),
+      ],
+    });
+    upstreamRun.mockClear();
+    expect(context.pressEnter()).toBe(true);
+    expect(context.getDocWithCursors()).toBe(expected);
+    expect(context.target.state.selection.mainIndex).toBe(1);
+    expect(context.dispatch).toHaveBeenCalledOnce();
+    expect(observed).toEqual([parseCursors(expected).doc]);
+    expect(filtered).toEqual(observed);
+    expect(upstreamRun).not.toHaveBeenCalled();
+  });
+
+  it.each(numberedCases)('%s：整体取消保留所有源码和光标', (_name, source, expected) => {
+    const observed: string[] = [];
+    const context = createMarkdownTarget(source, {
+      mainIndex: 1,
+      extensions: [
+        EditorState.transactionFilter.of((tr) => {
+          observed.push(tr.newDoc.toString());
+          return [];
+        }),
+      ],
+    });
+    expect(context.pressEnter()).toBe(true);
+    expect(context.getDocWithCursors()).toBe(source);
+    expect(context.target.state.selection.mainIndex).toBe(1);
+    expect(observed).toEqual([parseCursors(expected).doc]);
+    expect(context.dispatch).toHaveBeenCalledOnce();
+  });
+
+  it('列表外的空白正文行与编号操作混合时整体回退', () => {
+    const source = '1. a\n   |\n2. b|\n3. c';
+    const context = createMarkdownTarget(source);
+    expect(context.pressEnter()).toBe(false);
+    expect(context.getDocWithCursors()).toBe(source);
+    expect(context.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('不支持的选区与编号冲突混合时整体回退', () => {
+    const source = '1. a|\n2. b|\n3. c\n\ntext|';
+    const context = createMarkdownTarget(source);
+    expect(context.pressEnter()).toBe(false);
+    expect(context.getDocWithCursors()).toBe(source);
+    expect(context.dispatch).not.toHaveBeenCalled();
+  });
+
+  it('跨越 9 到 10 的 CRLF 编号修改保留全部光标', () => {
+    const source = parseCursors('8. a|\n9. b|\n10. c');
+    const expected = parseCursors('8. a\n9. |\n10. b\n11. |\n12. c');
+    let state = EditorState.create({
+      doc: Text.of(source.doc.split('\n')),
+      selection: EditorSelection.create(
+        source.cursors.map((pos) => EditorSelection.cursor(pos)),
+        1,
+      ),
+      extensions: [markdown(), EditorState.allowMultipleSelections.of(true), EditorState.lineSeparator.of('\r\n')],
+    });
+    const dispatch = vi.fn((tr: Transaction) => {
+      state = tr.state;
+    });
+    expect(cherryInsertNewlineContinueMarkup({ state, dispatch })).toBe(true);
+    expect(state.sliceDoc()).toBe(expected.doc.replace(/\n/g, '\r\n'));
+    expect(state.selection.ranges.map((range) => range.head)).toEqual(expected.cursors);
+    expect(state.selection.mainIndex).toBe(1);
+    expect(dispatch).toHaveBeenCalledOnce();
+  });
+
+  it.each([0, 1, 2])('编号与引用混合保留主光标 %s', (mainIndex) => {
+    const context = createMarkdownTarget('8. a|\n9. b|\n10. c\n\n> quote|', { mainIndex });
+    expect(context.pressEnter()).toBe(true);
+    const expected = '8. a\n9. |\n10. b\n11. |\n12. c\n\n> quote\n> |';
+    expect(context.getDocWithCursors()).toBe(expected);
+    expect(context.target.state.selection.mainIndex).toBe(mainIndex);
+    expect(context.target.state.selection.main.head).toBe(parseCursors(expected).cursors[mainIndex]);
+    expect(context.dispatch).toHaveBeenCalledOnce();
+  });
+
+  it('连续两次 Enter 分别生成一次事务，退出新项后原有项编号仍连续', () => {
+    const context = createMarkdownTarget('1. a|\n2. b|\n3. c');
+    expect(context.pressEnter()).toBe(true);
+    expect(context.getDocWithCursors()).toBe('1. a\n2. |\n3. b\n4. |\n5. c');
+    expect(context.pressEnter()).toBe(true);
+    expect(context.getDocWithCursors()).toBe('1. a\n|\n2. b\n|\n3. c');
+    expect(context.dispatch).toHaveBeenCalledTimes(2);
+  });
+
+  it('单光标正文续行保持上游现有行为', () => {
+    const source = '1. a\n   body|\n2. b';
+    const cherry = createMarkdownTarget(source);
+    const upstream = createMarkdownTarget(source);
+    upstreamRun.mockClear();
+    expect(cherry.pressEnter()).toBe(true);
+    expect(upstreamRun).toHaveBeenCalledOnce();
+    expect(insertNewlineContinueMarkupCommand({ nonTightLists: false })(upstream.target as never)).toBe(true);
+    expect(cherry.getDocWithCursors()).toBe(upstream.getDocWithCursors());
+  });
+
+  it('Tab 缩进的嵌套有序列表多光标保持编号和缩进', () => {
+    expectEnter('- parent\n\t1. a|\n\t2. b|\n\t3. c', '- parent\n\t1. a\n\t2. |\n\t3. b\n\t4. |\n\t5. c', {
+      extensions: [indentUnit.of('\t')],
+    });
+  });
+
+  it('不同紧凑列表仍调用上游', () => {
+    const source = '1. a|\n2. b\n\n---\n\n1. c|\n2. d';
+    upstreamRun.mockClear();
+    expectEnter(source, '1. a\n2. |\n3. b\n\n---\n\n1. c\n2. |\n3. d');
+    expect(upstreamRun).toHaveBeenCalledOnce();
+  });
 });
