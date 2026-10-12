@@ -94,6 +94,17 @@ describe('@cherry-markdown/miniprogram stream', () => {
     ]);
   });
 
+  it('renders Cherry underline spans as native underline runs', () => {
+    const stream = new CherryStream();
+
+    expect(stream.setMarkdown('/underlined/', { forceNoCursor: true })).toEqual([
+      {
+        type: 'paragraph',
+        inlines: [{ type: 'text', text: 'underlined', className: 'md-underline', href: '' }],
+      },
+    ]);
+  });
+
   it('resolves deferred image src values for post-setData activation', () => {
     const blocks = [{ type: 'image', src: '', pendingSrc: '/img.png', alt: 'A' }];
 
