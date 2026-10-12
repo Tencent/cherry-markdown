@@ -22,7 +22,7 @@
  * - 复用生产 createMarkdownKeymap()，并通过真实 Editor.init() 验证完整拦截链路
  * - 其后是 defaultKeymap（Enter -> insertNewlineAndIndent）作为兜底
  *
- * 验证列表项续写、退出时的源码分隔和光标位置。
+ * 验证 loose 续写不补空行、上游退出和光标位置。
  */
 
 import { describe, it, expect, afterEach, vi } from 'vite-plus/test';
@@ -68,13 +68,13 @@ afterEach(() => {
 });
 
 describe('编辑区回车键：紧凑列表不转 loose list', () => {
-  it('退出列表后为普通文本保留源码段落分隔', () => {
+  it('空列表项直接删除标记，不自动添加段落空行', () => {
     view = createEditor('- 123\n- ');
 
     pressEnter(view);
     view.dispatch(view.state.replaceSelection('ordinary text'));
 
-    expect(view.state.doc.toString()).toBe('- 123\n\nordinary text');
+    expect(view.state.doc.toString()).toBe('- 123\nordinary text');
     expect(view.state.selection.main.head).toBe(view.state.doc.length);
   });
 
@@ -82,7 +82,7 @@ describe('编辑区回车键：紧凑列表不转 loose list', () => {
     view = createEditor('- 123\n- ');
 
     pressEnter(view);
-    expect(view.state.doc.toString()).toBe('- 123\n\n');
+    expect(view.state.doc.toString()).toBe('- 123\n');
 
     expect(undo(view)).toBe(true);
     expect(view.state.doc.toString()).toBe('- 123\n- ');
@@ -91,10 +91,22 @@ describe('编辑区回车键：紧凑列表不转 loose list', () => {
 
 describe('列表按键链路边界', () => {
   it.each([
-    ['无序列表', '- a\n- ', '- a\n\ntext'],
-    ['有序列表', '1. a\n2. ', '1. a\n\ntext'],
-    ['任务列表', '- [x] a\n- [ ] ', '- [x] a\n\ntext'],
-  ])('%s退出后保留源码段落分隔', (_name, source, expected) => {
+    ['无序列表', '- a\n\n- b', '- a\n\n- b\n- '],
+    ['有序列表', '1. a\n\n2. b', '1. a\n\n2. b\n3. '],
+    ['任务列表', '- [ ] a\n\n- [x] b', '- [ ] a\n\n- [x] b\n- [ ] '],
+    ['引用内列表', '> - a\n>\n> - b', '> - a\n>\n> - b\n> - '],
+  ])('%s续写仅省略上游自动补出的空行', (_name, source, expected) => {
+    view = createEditor(source);
+    pressEnter(view);
+    expect(view.state.doc.toString()).toBe(expected);
+    expect(view.state.selection.main.head).toBe(expected.length);
+  });
+
+  it.each([
+    ['无序列表', '- a\n- ', '- a\ntext'],
+    ['有序列表', '1. a\n2. ', '1. a\ntext'],
+    ['任务列表', '- [x] a\n- [ ] ', '- [x] a\ntext'],
+  ])('%s退出后直接删除空列表标记', (_name, source, expected) => {
     view = createEditor(source);
     pressEnter(view);
     view.dispatch(view.state.replaceSelection('text'));
@@ -102,19 +114,19 @@ describe('列表按键链路边界', () => {
     expect(view.state.selection.main.head).toBe(expected.length);
   });
 
-  it('文档中部退出后在普通文本前后保留源码空行', () => {
+  it('文档中部退出时不额外添加空行', () => {
     view = createEditor('- a\n- \n- c', 6);
     pressEnter(view);
     view.dispatch(view.state.replaceSelection('text'));
-    expect(view.state.doc.toString()).toBe('- a\n\ntext\n\n- c');
-    expect(view.state.selection.main.head).toBe('- a\n\ntext'.length);
+    expect(view.state.doc.toString()).toBe('- a\ntext\n- c');
+    expect(view.state.selection.main.head).toBe('- a\ntext'.length);
   });
 
-  it('引用内退出保留引用标记和源码空行', () => {
+  it('引用内退出仅删除列表标记', () => {
     view = createEditor('> - a\n> - ');
     pressEnter(view);
     view.dispatch(view.state.replaceSelection('text'));
-    expect(view.state.doc.toString()).toBe('> - a\n>\n> text');
+    expect(view.state.doc.toString()).toBe('> - a\n> text');
     expect(view.state.selection.main.head).toBe(view.state.doc.length);
   });
 
@@ -218,8 +230,35 @@ describe('真实 Editor 的 Enter 装配', () => {
       event.cancel();
     });
     pressEnter(actualView);
-    expect(observed).toEqual(['- a\n\n']);
+    expect(observed).toEqual(['- a\n']);
     expect(actualView.state.doc.toString()).toBe('- a\n- ');
+  });
+
+  it.each([false, true])('混合 loose 列表与引用仅触发一次 beforeChange（取消=%s）', (cancel) => {
+    const source = '- a\n\n- b\n\n> quote';
+    const expected = '- a\n\n- b\n- \n\n> quote\n> ';
+    const actualView = createActualEditor(source);
+    actualView.dispatch({
+      selection: EditorSelection.create([
+        EditorSelection.cursor(actualView.state.doc.line(3).to),
+        EditorSelection.cursor(source.length),
+      ]),
+    });
+    const observed: string[] = [];
+    editor!.editor!.on('beforeChange', (_cm, event: any) => {
+      observed.push(event.transaction.newDoc.toString());
+      if (cancel) event.cancel();
+    });
+    pressEnter(actualView);
+    expect(observed).toEqual([expected]);
+    expect(actualView.state.doc.toString()).toBe(cancel ? source : expected);
+    if (!cancel) {
+      expect(actualView.state.selection.ranges.map((range) => range.head)).toEqual([11, expected.length]);
+      expect(undo(actualView)).toBe(true);
+      expect(actualView.state.doc.toString()).toBe(source);
+      expect(redo(actualView)).toBe(true);
+      expect(actualView.state.doc.toString()).toBe(expected);
+    }
   });
 
   it.each(['- a', '一. a', '> quote'])('只读切换阻止 %s 的 Enter，恢复编辑后继续处理', (source) => {
@@ -236,11 +275,11 @@ describe('真实 Editor 的 Enter 装配', () => {
     const source = '- a\n- ';
     const actualView = createActualEditor(source);
     pressEnter(actualView);
-    expect(actualView.state.doc.toString()).toBe('- a\n\n');
+    expect(actualView.state.doc.toString()).toBe('- a\n');
     expect(undo(actualView)).toBe(true);
     expect(actualView.state.doc.toString()).toBe(source);
     expect(redo(actualView)).toBe(true);
-    expect(actualView.state.doc.toString()).toBe('- a\n\n');
+    expect(actualView.state.doc.toString()).toBe('- a\n');
   });
 
   it('列表续写后 Tab 缩进，再按 Enter 退回父级', () => {
@@ -271,7 +310,7 @@ describe('真实 Editor 的 Enter 装配', () => {
     const prefix = '---\ntitle: test\n---\n\n| a | b |\n| --- | --- |\n| 1 | 2 |\n\n';
     const actualView = createActualEditor(`${prefix}- a\n- `);
     pressEnter(actualView);
-    expect(actualView.state.doc.toString()).toBe(`${prefix}- a\n\n`);
+    expect(actualView.state.doc.toString()).toBe(`${prefix}- a\n`);
   });
 
   it('原子标记拦截列表退出时没有部分删除', () => {
@@ -369,6 +408,6 @@ describe('真实 Editor 的 Enter 装配', () => {
     expect(actualView.state.doc.toString()).toBe('- a\n- ');
     await editor!.editor!.setKeyMap('sublime');
     pressEnter(actualView);
-    expect(actualView.state.doc.toString()).toBe('- a\n\n');
+    expect(actualView.state.doc.toString()).toBe('- a\n');
   });
 });

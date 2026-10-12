@@ -1,13 +1,23 @@
-import { EditorSelection, EditorState, Transaction, type Extension } from '@codemirror/state';
+import { EditorSelection, EditorState, Text, Transaction, type Extension } from '@codemirror/state';
 import { indentUnit } from '@codemirror/language';
-import { markdown, insertNewlineContinueMarkup, insertNewlineContinueMarkupCommand } from '@codemirror/lang-markdown';
+import { markdown, insertNewlineContinueMarkupCommand } from '@codemirror/lang-markdown';
 import { describe, expect, it, vi } from 'vite-plus/test';
 import { cherryInsertNewlineContinueMarkup } from '../../src/utils/markdownEnter';
 
-// Observe delegation while executing the real upstream command.
+const upstreamRun = vi.hoisted(() => vi.fn());
+
 vi.mock('@codemirror/lang-markdown', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@codemirror/lang-markdown')>();
-  return { ...actual, insertNewlineContinueMarkup: vi.fn(actual.insertNewlineContinueMarkup) };
+  return {
+    ...actual,
+    insertNewlineContinueMarkupCommand: (config: Parameters<typeof actual.insertNewlineContinueMarkupCommand>[0]) => {
+      const command = actual.insertNewlineContinueMarkupCommand(config);
+      return (target: Parameters<typeof command>[0]) => {
+        upstreamRun();
+        return command(target);
+      };
+    },
+  };
 });
 
 const CURSOR = '|';
@@ -25,11 +35,17 @@ const parseCursors = (template: string): { doc: string; cursors: number[] } => {
   return { doc, cursors: cursors.length > 0 ? cursors : [doc.length] };
 };
 
-const createMarkdownTarget = (template: string, options: { readOnly?: boolean; extensions?: Extension[] } = {}) => {
+const createMarkdownTarget = (
+  template: string,
+  options: { readOnly?: boolean; mainIndex?: number; extensions?: Extension[] } = {},
+) => {
   const { doc, cursors } = parseCursors(template);
   let state = EditorState.create({
     doc,
-    selection: EditorSelection.create(cursors.map((p) => EditorSelection.cursor(p))),
+    selection: EditorSelection.create(
+      cursors.map((p) => EditorSelection.cursor(p)),
+      options.mainIndex ?? 0,
+    ),
     extensions: [
       markdown(),
       EditorState.allowMultipleSelections.of(true),
@@ -67,225 +83,83 @@ const expectEnter = (before: string, after: string, options?: { extensions?: Ext
   expect(context.dispatch).toHaveBeenCalledOnce();
 };
 
-describe('utils/autoindent - 准则一：紧凑列表的空列表项退出列表', () => {
-  it('连续两次回车：先续出空项，再补足独立段落边界', () => {
-    const context = createMarkdownTarget('- 123|');
-
-    expect(context.pressEnter()).toBe(true);
-    expect(context.getDocWithCursors()).toBe('- 123\n- |');
-    expect(context.pressEnter()).toBe(true);
-    expect(context.getDocWithCursors()).toBe('- 123\n\n|');
+describe('loose 续写只省略自动空行', () => {
+  it.each([
+    ['- a\n\n- b|', '- a\n\n- b\n- |'],
+    ['* a\n\n* b|', '* a\n\n* b\n* |'],
+    ['+ a\n\n+ b|', '+ a\n\n+ b\n+ |'],
+    ['1. a\n\n2. b|\n3. c', '1. a\n\n2. b\n3. |\n4. c'],
+    ['1) a\n\n2) b|\n8) c', '1) a\n\n2) b\n3) |\n8) c'],
+    ['- [ ] a\n\n- [X] b|', '- [ ] a\n\n- [X] b\n- [ ] |'],
+    ['> - a\n>\n> - b|', '> - a\n>\n> - b\n> - |'],
+    ['- parent\n  - a\n\n  - b|', '- parent\n  - a\n\n  - b\n  - |'],
+    ['- a\n\n- b\n  continuation|', '- a\n\n- b\n  continuation\n  |'],
+    ['- a\n\n- b| tail', '- a\n\n- b\n- | tail'],
+    ['- a\n\n- b   |', '- a\n\n- b\n- |'],
+  ])('%s', (source, expected) => {
+    upstreamRun.mockClear();
+    expectEnter(source, expected);
+    expect(upstreamRun).not.toHaveBeenCalled();
   });
 
   it.each([
-    ['无序列表', '- 123\n- |', '- 123\n\n|'],
-    ['有序列表', '1. 123\n2. |', '1. 123\n\n|'],
-    ['任务列表', '- [ ] a\n- [ ] |', '- [ ] a\n\n|'],
-    ['嵌套列表回退一层', '- a\n  - b\n  - |', '- a\n  - b\n- |'],
-    ['引用内列表退出', '> - a\n> - |', '> - a\n>\n> |'],
-    ['有序列表后续序号重排', '1. a\n2. |\n3. c', '1. a\n\n|\n\n2. c'],
-  ])('%s', (_name, before, after) => {
-    expectEnter(before, after);
-  });
-});
-
-describe('utils/autoindent - 准则二：loose 列表新建列表项不补空行', () => {
-  it.each([
-    ['无序列表', '- a\n\n- b|', '- a\n\n- b\n- |'],
-    ['有序列表', '1. a\n\n2. b|', '1. a\n\n2. b\n3. |'],
-    ['有序列表并重排后续序号', '1. a\n\n2. b|\n3. c', '1. a\n\n2. b\n3. |\n4. c'],
-    ['任务列表（新项重置为未勾选）', '- [ ] a\n\n- [x] b|', '- [ ] a\n\n- [x] b\n- [ ] |'],
-    ['星号标记', '* a\n\n* b|', '* a\n\n* b\n* |'],
-    ['加号标记', '+ a\n\n+ b|', '+ a\n\n+ b\n+ |'],
-    ['右括号分隔符', '1) a\n\n2) b|', '1) a\n\n2) b\n3) |'],
-    ['嵌套列表保留缩进', '- a\n\n  - b\n\n  - c|', '- a\n\n  - b\n\n  - c\n  - |'],
-    ['引用内的列表保留引用标记', '> - a\n>\n> - b|', '> - a\n>\n> - b\n> - |'],
-  ])('%s', (_name, before, after) => {
-    expectEnter(before, after);
-  });
-
-  it('tab 缩进的嵌套列表同样生效', () => {
-    expectEnter('- a\n\n\t- b\n\n\t- c|', '- a\n\n\t- b\n\n\t- c\n\t- |', { extensions: [indentUnit.of('\t')] });
-  });
-
-  it('多光标：各自插入列表标记且都不补空行', () => {
-    expectEnter('- a\n\n- b|\n\n- c|', '- a\n\n- b\n- |\n\n- c\n- |');
-  });
-
-  it('多光标：两条准则同时命中时，各光标位置均正确', () => {
-    expectEnter('- a\n- |\n\n# h\n\n- b\n\n- c|', '- a\n\n|\n\n# h\n\n- b\n\n- c\n- |');
-  });
-
-  it('多光标：退出列表时各自补足段落边界', () => {
-    expectEnter('- a\n- |\n\n# h\n\n- b\n- |', '- a\n\n|\n\n# h\n\n- b\n\n|');
-  });
-
-  it('连续回车不会反复产生空行', () => {
-    const context = createMarkdownTarget('- a\n\n- b|');
-
-    expect(context.pressEnter()).toBe(true);
-    expect(context.getDocWithCursors()).toBe('- a\n\n- b\n- |');
-    expect(context.pressEnter()).toBe(true);
-    expect(context.getDocWithCursors()).toBe('- a\n\n- b\n\n|');
-  });
-
-  it('事务过滤器只观察一次最终结果', () => {
-    const observedDocs: string[] = [];
-    let transactionFilterCalls = 0;
-    const context = createMarkdownTarget('- a\n\n- b|', {
-      extensions: [
-        EditorState.changeFilter.of((tr) => {
-          observedDocs.push(tr.newDoc.toString());
-          return true;
-        }),
-        EditorState.transactionFilter.of((tr) => {
-          transactionFilterCalls += 1;
-          return tr;
-        }),
-      ],
+    '1. a\n\n2.   b|',
+    '1. a\n\n2.    b|',
+    '1. a\n\n2.     b|',
+    '- a\n\n-   b|',
+    '- a\n\n-    b|',
+    '- a\n\n-     b|',
+    '- [ ] a\n\n-  [X]   b|',
+  ])('标记空格边界保持上游语义，仅省略新增空行：%s', (source) => {
+    const cherry = createMarkdownTarget(source);
+    const upstream = createMarkdownTarget(source);
+    upstreamRun.mockClear();
+    expect(cherry.pressEnter()).toBe(true);
+    expect(upstreamRun).not.toHaveBeenCalled();
+    expect(insertNewlineContinueMarkupCommand({ nonTightLists: false })(upstream.target as never)).toBe(true);
+    const transaction = upstream.dispatch.mock.calls[0][0] as Transaction;
+    const changes: { from: number; to: number; insert: string }[] = [];
+    transaction.changes.iterChanges((from, to, _fromB, _toB, text) => {
+      changes.push({ from, to, insert: text.toString().replace(/^\n\n/, '\n') });
     });
-
-    expect(context.pressEnter()).toBe(true);
-    expect(observedDocs).toEqual(['- a\n\n- b\n- ']);
-    expect(transactionFilterCalls).toBe(1);
+    expect(cherry.target.state.doc.toString()).toBe(
+      transaction.startState.changes(changes).apply(transaction.startState.doc).toString(),
+    );
+    expect(cherry.target.state.selection.main.head).toBe(cherry.target.state.doc.length);
   });
 
-  it('保留 input 的 userEvent 与 scrollIntoView', () => {
-    const context = createMarkdownTarget('- a\n\n- b|');
-
-    expect(context.pressEnter()).toBe(true);
-    const transaction = context.dispatch.mock.calls[0][0] as Transaction;
-    expect(transaction.annotation(Transaction.userEvent)).toBe('input');
-    expect(transaction.scrollIntoView).toBe(true);
-  });
-});
-
-describe('utils/autoindent - 不应受影响的书写规则', () => {
-  it.each([
-    ['无序列表续写', '- 123|', '- 123\n- |'],
-    ['有序列表续写', '1. 123|', '1. 123\n2. |'],
-    ['引用续写', '> 123|', '> 123\n> |'],
-    ['引用内段落续写', '> a\n>\n> b|', '> a\n>\n> b\n> |'],
-    ['退出引用保持上游行为', '> a\n> \n> |', '> a\n\n|'],
-    ['列表项内段落续写不自动补空行', '- a\n\n- b\n  c|', '- a\n\n- b\n  c\n  |'],
-    ['已有多段落的列表项续写不自动补空行', '- a\n\n- b\n\n  c|', '- a\n\n- b\n\n  c\n  |'],
-  ])('%s', (_name, before, after) => {
-    expectEnter(before, after);
-  });
-});
-
-describe('utils/autoindent - 交回 CodeMirror 默认按键处理的情形', () => {
-  it.each([
-    ['非列表上下文', 'ordinary text|'],
-    ['不在语法树内的缩进空行', '- a\n  |'],
-    ['代码块内', '```\n- a\n\n- b|\n```'],
-  ])('%s', (_name, before) => {
-    const context = createMarkdownTarget(before);
-
-    expect(context.pressEnter()).toBe(false);
-    expect(context.dispatch).not.toHaveBeenCalled();
-  });
-
-  it('只读状态', () => {
-    const context = createMarkdownTarget('- 123\n- |', { readOnly: true });
-
-    expect(context.pressEnter()).toBe(false);
-    expect(context.dispatch).not.toHaveBeenCalled();
-  });
-
-  it('存在选区时', () => {
-    const state = EditorState.create({
-      doc: '- a\n\n- b',
-      selection: EditorSelection.single(6, 8),
-      extensions: [markdown()],
+  it('Tab 缩进保持层级', () => {
+    expectEnter('- parent\n\t- a\n\n\t- b|', '- parent\n\t- a\n\n\t- b\n\t- |', {
+      extensions: [indentUnit.of('\t')],
     });
-    const dispatch = vi.fn();
-    const target = {
-      get state() {
-        return state;
-      },
-      dispatch,
-    };
-
-    expect(cherryInsertNewlineContinueMarkup(target as never)).toBe(false);
-    expect(dispatch).not.toHaveBeenCalled();
   });
-});
 
-describe('utils/autoindent - 独立段落与列表边界', () => {
-  it.each([
-    ['首个空项不补前置空行', '- |', '|'],
-    ['已有前置分隔不重复补写', '- a\n\n- |', '- a\n\n|'],
-    ['中部退出保留前后段落分隔', '- a\n- |\n- c', '- a\n\n|\n\n- c'],
-    ['已有后置分隔不重复补写', '- a\n- |\n\n- c', '- a\n\n|\n\n- c'],
-    ['退出后跟随普通文本', '- a\n- |\ntext', '- a\n\n|\n\ntext'],
-    ['多层引用内退出', '> > - a\n> > - |', '> > - a\n> >\n> > |'],
-    ['引用中部退出', '> - a\n> - |\n> - c', '> - a\n>\n> |\n>\n> - c'],
-    ['引用内已有分隔', '> - a\n>\n> - |\n>\n> - c', '> - a\n>\n> |\n>\n> - c'],
-    ['有序父级退回继续父级列表', '1. a\n   - b\n   - |\n2. c', '1. a\n   - b\n2. |\n3. c'],
-    ['空项末尾空格', '- a\n- |  ', '- a\n\n|  '],
-  ])('%s', (_name, before, after) => expectEnter(before, after));
-
-  it('CRLF 文档使用同一种换行并保持正确光标', () => {
+  it('CRLF 插入与光标采用文档坐标', () => {
     let state = EditorState.create({
-      doc: '- a\r\n- ',
+      doc: '- a\r\n\r\n- b',
       extensions: [markdown(), EditorState.lineSeparator.of('\r\n')],
-      selection: EditorSelection.single(6),
     });
-    expect(
-      cherryInsertNewlineContinueMarkup({
-        state,
-        dispatch: (tr: Transaction) => {
-          state = tr.state;
-        },
-      }),
-    ).toBe(true);
-    expect(state.sliceDoc()).toBe('- a\r\n\r\n');
+    state = state.update({ selection: { anchor: state.doc.length } }).state;
+    const dispatch = vi.fn((tr: Transaction) => {
+      state = tr.state;
+    });
+    expect(cherryInsertNewlineContinueMarkup({ state, dispatch })).toBe(true);
+    expect(state.sliceDoc()).toBe('- a\r\n\r\n- b\r\n- ');
     expect(state.selection.main.head).toBe(state.doc.length);
+    expect(dispatch).toHaveBeenCalledOnce();
   });
 });
 
-describe('退出列表的最终事务', () => {
-  it('过滤器只收到包含前后段落边界的一次最终变更', () => {
-    const observed: string[] = [];
-    const context = createMarkdownTarget('- a\n- |\n- c', {
-      extensions: [
-        EditorState.changeFilter.of((tr) => {
-          observed.push(tr.newDoc.toString());
-          return true;
-        }),
-      ],
-    });
-    expect(context.pressEnter()).toBe(true);
-    expect(observed).toEqual(['- a\n\n\n\n- c']);
-    expect(context.getDocWithCursors()).toBe('- a\n\n|\n\n- c');
-    expect(context.dispatch).toHaveBeenCalledOnce();
-  });
-
-  it('过滤器取消时不泄漏部分标记删除或分隔符', () => {
-    const context = createMarkdownTarget('- a\n- |', {
-      extensions: [EditorState.changeFilter.of(() => false)],
-    });
-    expect(context.pressEnter()).toBe(true);
-    expect(context.target.state.doc.toString()).toBe('- a\n- ');
-    expect(context.dispatch).toHaveBeenCalledOnce();
-  });
-
-  it('混合列表与普通段落光标交给默认命令，避免部分更新', () => {
-    const context = createMarkdownTarget('- a|\n\ntext|');
-    expect(context.pressEnter()).toBe(false);
-    expect(context.dispatch).not.toHaveBeenCalled();
-  });
-});
-
-// Deliberately exclude Cherry's exit-boundary and no-loose rules. These cases
-// detect unintended drift when upgrading the upstream Markdown command.
-describe('普通 Markdown 行为与上游命令保持一致', () => {
+describe('没有 loose 续写时实际委托上游', () => {
   it.each([
     '- a|',
     '3. a|\n4. b',
     '3. a|\n8. b',
     '- [x] a|',
+    '- a\n- |',
+    '- a\n\n- |',
+    '1. a\n2. |\n3. c',
+    '> - a\n> - |',
     '- a\n  - b|',
     '- a\n  - b\n  - |',
     '> quoted|',
@@ -307,26 +181,66 @@ describe('普通 Markdown 行为与上游命令保持一致', () => {
   ])('%s', (source) => {
     const cherry = createMarkdownTarget(source);
     const upstream = createMarkdownTarget(source);
-    const runUpstream = insertNewlineContinueMarkupCommand({ nonTightLists: false });
-    expect(cherry.pressEnter()).toBe(runUpstream(upstream.target as never));
+    upstreamRun.mockClear();
+    const handled = cherry.pressEnter();
+    expect(upstreamRun).toHaveBeenCalledOnce();
+    expect(handled).toBe(insertNewlineContinueMarkupCommand({ nonTightLists: false })(upstream.target as never));
     expect(cherry.getDocWithCursors()).toBe(upstream.getDocWithCursors());
     expect(cherry.dispatch.mock.calls.length).toBe(upstream.dispatch.mock.calls.length);
   });
+
+  it('只读不调用命令', () => {
+    const context = createMarkdownTarget('- a\n\n- b|', { readOnly: true });
+    upstreamRun.mockClear();
+    expect(context.pressEnter()).toBe(false);
+    expect(context.dispatch).not.toHaveBeenCalled();
+    expect(upstreamRun).not.toHaveBeenCalled();
+  });
 });
 
-describe('引用委托边界与上游兼容性', () => {
-  it.each(['> quoted|', '> > quoted|', '> a\n> \n> |', '> first|\n\n> second|'])('%s', (source) => {
-    vi.mocked(insertNewlineContinueMarkup).mockClear();
-    const context = createMarkdownTarget(source);
+const mixedCases = [
+  ['引用续写', '- a\n\n- b|\n\n> quote|', '- a\n\n- b\n- |\n\n> quote\n> |'],
+  ['紧凑列表续写', '- a\n\n- b|\n\n* c|', '- a\n\n- b\n- |\n\n* c\n* |'],
+  ['空列表退出', '- a\n\n- b|\n\n* c\n* |', '- a\n\n- b\n- |\n\n* c\n|'],
+  ['有序列表退出并重排', '- a\n\n- b|\n\n1. c\n2. |\n3. d', '- a\n\n- b\n- |\n\n1. c\n|\n2. d'],
+  ['嵌套空项退级', '- a\n\n- b|\n\n* c\n  * d\n  * |', '- a\n\n- b\n- |\n\n* c\n  * d\n* |'],
+  ['引用内空项退出', '- a\n\n- b|\n\n> * c\n> * |', '- a\n\n- b\n- |\n\n> * c\n> |'],
+  ['引用退出', '- a\n\n- b|\n\n> quote\n> \n> |', '- a\n\n- b\n- |\n\n> quote\n\n|'],
+  ['同一列表续写与空项退出', '- a\n\n- b|\n- |', '- a\n\n- b\n- |\n|'],
+  ['两处 loose 续写', '- a\n\n- b|\n\n* c\n\n* d|', '- a\n\n- b\n- |\n\n* c\n\n* d\n* |'],
+];
+
+describe('混合多光标只生成一次最终事务', () => {
+  it.each(mixedCases)('%s', (_name, source, expected) => {
+    const observed: string[] = [];
+    const filtered: string[] = [];
+    const context = createMarkdownTarget(source, {
+      extensions: [
+        EditorState.changeFilter.of((tr) => {
+          observed.push(tr.newDoc.toString());
+          return true;
+        }),
+        EditorState.transactionFilter.of((tr) => {
+          filtered.push(tr.newDoc.toString());
+          return tr;
+        }),
+      ],
+    });
+    upstreamRun.mockClear();
     expect(context.pressEnter()).toBe(true);
-    expect(insertNewlineContinueMarkup).toHaveBeenCalledOnce();
+    expect(context.getDocWithCursors()).toBe(expected);
     expect(context.dispatch).toHaveBeenCalledOnce();
+    expect(observed).toEqual([parseCursors(expected).doc]);
+    expect(filtered).toEqual(observed);
+    expect(upstreamRun).not.toHaveBeenCalled();
   });
 
-  it('列表与引用光标在同一最终事务内处理', () => {
-    vi.mocked(insertNewlineContinueMarkup).mockClear();
+  it.each([0, 1, 2])('三个混合光标保留主光标 %s，并只提交最终事务', (mainIndex) => {
+    const source = '- a\n\n- b|\n\n> quote|\n\n* c\n* |';
+    const expected = '- a\n\n- b\n- |\n\n> quote\n> |\n\n* c\n|';
     const observed: string[] = [];
-    const context = createMarkdownTarget('- a\n\n- b|\n\n> quoted|', {
+    const context = createMarkdownTarget(source, {
+      mainIndex,
       extensions: [
         EditorState.changeFilter.of((tr) => {
           observed.push(tr.newDoc.toString());
@@ -335,60 +249,130 @@ describe('引用委托边界与上游兼容性', () => {
       ],
     });
     expect(context.pressEnter()).toBe(true);
-    expect(context.getDocWithCursors()).toBe('- a\n\n- b\n- |\n\n> quoted\n> |');
-    expect(insertNewlineContinueMarkup).not.toHaveBeenCalled();
-    expect(context.dispatch).toHaveBeenCalledOnce();
-    expect(observed).toEqual(['- a\n\n- b\n- \n\n> quoted\n> ']);
-  });
-
-  it.each(['> - a|', '- a\n  > quote|'])('列表上下文 %s 不委托上游', (source) => {
-    vi.mocked(insertNewlineContinueMarkup).mockClear();
-    const context = createMarkdownTarget(source);
-    expect(context.pressEnter()).toBe(true);
-    expect(insertNewlineContinueMarkup).not.toHaveBeenCalled();
+    expect(context.getDocWithCursors()).toBe(expected);
+    expect(context.target.state.selection.mainIndex).toBe(mainIndex);
+    expect(context.target.state.selection.main.head).toBe(parseCursors(expected).cursors[mainIndex]);
+    expect(observed).toEqual([parseCursors(expected).doc]);
     expect(context.dispatch).toHaveBeenCalledOnce();
   });
 
-  it('过滤器取消混合列表与引用光标时没有部分变更', () => {
-    const source = '- a\n\n- b|\n\n> quoted|';
+  it('混合 CRLF 光标保持文档偏移和一次最终事务', () => {
+    const source = '- a\n\n- b|\n\n> quote|';
+    const expected = parseCursors('- a\n\n- b\n- |\n\n> quote\n> |');
+    const { doc, cursors } = parseCursors(source);
+    const observed: string[] = [];
+    let state = EditorState.create({
+      doc: Text.of(doc.split('\n')),
+      selection: EditorSelection.create(
+        cursors.map((pos) => EditorSelection.cursor(pos)),
+        1,
+      ),
+      extensions: [
+        markdown(),
+        EditorState.allowMultipleSelections.of(true),
+        EditorState.lineSeparator.of('\r\n'),
+        EditorState.changeFilter.of((tr) => {
+          observed.push(tr.newDoc.toString());
+          return true;
+        }),
+      ],
+    });
+    const dispatch = vi.fn((tr: Transaction) => {
+      state = tr.state;
+    });
+    expect(cherryInsertNewlineContinueMarkup({ state, dispatch })).toBe(true);
+    expect(state.doc.toString()).toBe(expected.doc);
+    expect(state.sliceDoc()).toBe(expected.doc.replace(/\n/g, '\r\n'));
+    expect(state.selection.ranges.map((range) => range.head)).toEqual(expected.cursors);
+    expect(state.selection.mainIndex).toBe(1);
+    expect(observed).toEqual([expected.doc]);
+    expect(dispatch).toHaveBeenCalledOnce();
+  });
+
+  it('非空选区与 loose 光标混合时整体回退，没有部分编辑', () => {
+    const context = createMarkdownTarget('- a\n\n- b|\n\n> quote|');
+    const [first, second] = context.target.state.selection.ranges;
+    context.target.dispatch({
+      selection: EditorSelection.create([first, EditorSelection.range(second.head - 5, second.head)], 1),
+    });
+    const original = context.target.state;
+    context.dispatch.mockClear();
+    upstreamRun.mockClear();
+    expect(context.pressEnter()).toBe(false);
+    expect(context.target.state).toBe(original);
+    expect(context.dispatch).not.toHaveBeenCalled();
+    expect(upstreamRun).not.toHaveBeenCalled();
+  });
+
+  it.each(mixedCases)('%s被 changeFilter 取消时不部分更新，光标与上游一致', (_name, source, expected) => {
+    const observed: string[] = [];
     const context = createMarkdownTarget(source, {
-      extensions: [EditorState.changeFilter.of(() => false)],
+      mainIndex: 1,
+      extensions: [
+        EditorState.changeFilter.of((tr) => {
+          observed.push(tr.newDoc.toString());
+          return false;
+        }),
+      ],
     });
     expect(context.pressEnter()).toBe(true);
-    expect(context.getDocWithCursors()).toBe(source);
+    expect(observed).toEqual([parseCursors(expected).doc]);
+    expect(context.target.state.doc.toString()).toBe(parseCursors(source).doc);
+    const upstream = createMarkdownTarget(source, {
+      mainIndex: 1,
+      extensions: [EditorState.changeFilter.of(() => false)],
+    });
+    expect(insertNewlineContinueMarkupCommand({ nonTightLists: false })(upstream.target as never)).toBe(true);
+    expect(context.getDocWithCursors()).toBe(upstream.getDocWithCursors());
+    expect(context.target.state.selection.eq(upstream.target.state.selection)).toBe(true);
     expect(context.dispatch).toHaveBeenCalledOnce();
   });
 
-  it.each(['- a\n\t- b|', '- a\n\t> quote|'])('Tab 缩进 %s 与上游行为保持一致', (source) => {
-    const extensions = [indentUnit.of('\t')];
-    const cherry = createMarkdownTarget(source, { extensions });
-    const upstream = createMarkdownTarget(source, { extensions });
-    expect(cherry.pressEnter()).toBe(
-      insertNewlineContinueMarkupCommand({ nonTightLists: false })(upstream.target as never),
-    );
-    expect(cherry.getDocWithCursors()).toBe(upstream.getDocWithCursors());
-    expect(cherry.dispatch).toHaveBeenCalledOnce();
+  it.each(['1. a|\n\n2. b|\n3. c', '1. a\n\n2. b|\n3. c|\n4. d'])(
+    '同一有序列表多个光标保持上游编号行为，仅省略新插入的空行：%s',
+    (source) => {
+      const cherry = createMarkdownTarget(source);
+      const upstream = createMarkdownTarget(source);
+      expect(cherry.pressEnter()).toBe(true);
+      expect(insertNewlineContinueMarkupCommand({ nonTightLists: false })(upstream.target as never)).toBe(true);
+      const transaction = upstream.dispatch.mock.calls[0][0] as Transaction;
+      const changes: { from: number; to: number; insert: string }[] = [];
+      transaction.changes.iterChanges((from, to, _fromB, _toB, text) => {
+        changes.push({ from, to, insert: text.toString().replace(/^\n\n/, '\n') });
+      });
+      const expected = transaction.startState.changes(changes).apply(transaction.startState.doc).toString();
+      expect(cherry.target.state.doc.toString()).toBe(expected);
+      expect(cherry.dispatch).toHaveBeenCalledOnce();
+      expect(cherry.target.state.selection.ranges).toHaveLength(2);
+    },
+  );
+
+  it('transactionFilter 整体取消时保留全部源码及光标', () => {
+    const source = '- a\n\n- b|\n\n> * c\n> * |';
+    const observed: string[] = [];
+    const context = createMarkdownTarget(source, {
+      mainIndex: 1,
+      extensions: [
+        EditorState.transactionFilter.of((tr) => {
+          observed.push(tr.newDoc.toString());
+          return [];
+        }),
+      ],
+    });
+    expect(context.pressEnter()).toBe(true);
+    expect(observed).toEqual(['- a\n\n- b\n- \n\n> * c\n> ']);
+    expect(context.getDocWithCursors()).toBe(source);
+    expect(context.target.state.selection.mainIndex).toBe(1);
+    expect(context.dispatch).toHaveBeenCalledOnce();
   });
 
-  it('混合光标的引用退出与列表续写仍保持上游普通行为', () => {
-    const source = '- a|\n\n> quote\n> \n> |';
-    const cherry = createMarkdownTarget(source);
-    const upstream = createMarkdownTarget(source);
-    expect(cherry.pressEnter()).toBe(
-      insertNewlineContinueMarkupCommand({ nonTightLists: false })(upstream.target as never),
-    );
-    expect(cherry.getDocWithCursors()).toBe(upstream.getDocWithCursors());
-    expect(cherry.dispatch).toHaveBeenCalledOnce();
-  });
-
-  it.each(['- a', '> > quote'])('CRLF %s 与上游行为保持一致', (source) => {
-    const extensions = [EditorState.lineSeparator.of('\r\n')];
-    const cherry = createMarkdownTarget(`${source}|`, { extensions });
-    const upstream = createMarkdownTarget(`${source}|`, { extensions });
-    expect(cherry.pressEnter()).toBe(
-      insertNewlineContinueMarkupCommand({ nonTightLists: false })(upstream.target as never),
-    );
-    expect(cherry.target.state.sliceDoc()).toBe(upstream.target.state.sliceDoc());
-    expect(cherry.target.state.selection.eq(upstream.target.state.selection)).toBe(true);
-  });
+  it.each(['- a\n\n- b|\n\ntext|', '- a\n\n- b|\n\n```\ncode|\n```'])(
+    '不支持的混合选区整体回退而不部分更新：%s',
+    (source) => {
+      const context = createMarkdownTarget(source);
+      expect(context.pressEnter()).toBe(false);
+      expect(context.getDocWithCursors()).toBe(source);
+      expect(context.dispatch).not.toHaveBeenCalled();
+    },
+  );
 });
