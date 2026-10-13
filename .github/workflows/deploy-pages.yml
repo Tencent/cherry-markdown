@@ -55,6 +55,7 @@ jobs:
           cp --parents -r examples/assets gh-pages-out/
           # 可视化配置生成器（目录可能尚未存在，条件复制）
           [ -d examples/config_helper ] && cp --parents -r examples/config_helper gh-pages-out/ || true
+          cp --parents packages/cherry-markdown/src/Cherry.config.js gh-pages-out/
           # logo 资源也复制到 gh-pages-out 根目录
           cp -r logo gh-pages-out/
 
