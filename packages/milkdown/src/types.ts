@@ -1,5 +1,4 @@
 import type { MilkdownPlugin } from '@milkdown/kit/ctx';
-import type CherryEngineConstructor from 'cherry-markdown/dist/cherry-markdown.engine.core.esm.js';
 import type { CherryVisualRenderer } from './wysiwyg/index.js';
 
 export type CherryMilkdownErrorPhase = 'create' | 'parse' | 'render';
@@ -10,12 +9,9 @@ export interface CherryEngineLike {
   makeHtml(markdown: string): string;
 }
 
-// Cherry's published deep-entry declaration currently describes the runtime
-// instance as `CherryEngine` rather than the `Engine` returned by its factory
-// constructor, so `makeHtml` is missing from that inferred public type. Accept
-// that exact published instance type at the API boundary, then validate its
-// runtime contract before the editor uses it.
-export type CherryEngineInput = CherryEngineLike | InstanceType<typeof CherryEngineConstructor>;
+/** Cherry's published JS Engine entry has no matching subpath declaration.
+ * Accept its instance and verify makeHtml at the runtime boundary. */
+export type CherryEngineInput = object;
 
 export interface CherryMilkdownChange {
   markdown: string;
@@ -81,6 +77,10 @@ export interface CherryMilkdownInstance {
   /** Cherry rendering boundary used by this instance. */
   engine: CherryEngineLike;
   getMarkdown(): string;
+  /**
+   * Full replacement outside IME. During IME, rebase the latest non-conflicting
+   * write after commit; overlaps preserve local input and report onError('parse').
+   */
   setMarkdown(markdown: string, options?: { emit?: boolean }): void;
   setTheme(theme: CherryMilkdownTheme): void;
   focus(): void;

@@ -6,26 +6,10 @@ import type { EditorView, NodeView, ViewMutationRecord } from '@milkdown/kit/pro
 import { $prose, $view } from '@milkdown/kit/utils';
 import Prism from 'prismjs';
 
-let languagesReady: Promise<unknown> | undefined;
-export function loadCodeLanguages() {
-  // Read the CJS export before loading grammars that reference Prism globally.
-  void Prism.languages;
-  languagesReady ??= (async () => {
-    await import('prismjs/components/prism-bash.js');
-    await import('prismjs/components/prism-c.js');
-    await import('prismjs/components/prism-cpp.js');
-    await import('prismjs/components/prism-csharp.js');
-    await import('prismjs/components/prism-go.js');
-    await import('prismjs/components/prism-java.js');
-    await import('prismjs/components/prism-json.js');
-    await import('prismjs/components/prism-markdown.js');
-    await import('prismjs/components/prism-python.js');
-    await import('prismjs/components/prism-sql.js');
-    await import('prismjs/components/prism-typescript.js');
-    await import('prismjs/components/prism-yaml.js');
-  })();
-  return languagesReady;
-}
+// Cherry's bundled CodeBlock hook uses the Prism core grammars and falls back
+// to JavaScript for other languages. Keep that default even if an application
+// happens to load extra Prism components into its own module instance.
+const CHERRY_CORE_GRAMMARS = new Set(['markup', 'html', 'xml', 'svg', 'mathml', 'css', 'clike', 'javascript', 'js']);
 
 const CODE_LANGUAGES = [
   '',
@@ -48,24 +32,6 @@ const CODE_LANGUAGES = [
   'yaml',
 ] as const;
 
-const LANGUAGE_ALIASES: Record<string, string> = {
-  bash: 'bash',
-  c: 'c',
-  'c++': 'cpp',
-  'c#': 'csharp',
-  cs: 'csharp',
-  go: 'go',
-  golang: 'go',
-  html: 'markup',
-  js: 'javascript',
-  md: 'markdown',
-  py: 'python',
-  sh: 'bash',
-  shell: 'bash',
-  ts: 'typescript',
-  yml: 'yaml',
-};
-
 type PrismToken = string | { alias?: string | string[]; content: PrismToken | PrismToken[]; type: string };
 
 function languageName(value: unknown) {
@@ -75,8 +41,7 @@ function languageName(value: unknown) {
 }
 
 function prismLanguage(language: string) {
-  const normalized = LANGUAGE_ALIASES[language] ?? language;
-  return Prism.languages[normalized] ?? Prism.languages.javascript ?? Prism.languages.markup;
+  return (CHERRY_CORE_GRAMMARS.has(language) ? Prism.languages[language] : undefined) ?? Prism.languages.javascript;
 }
 
 function tokenDecorations(token: PrismToken, position: number, decorations: Decoration[]): number {

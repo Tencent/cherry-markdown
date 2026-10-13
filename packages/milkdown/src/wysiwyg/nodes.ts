@@ -7,16 +7,14 @@ import type { SerializerState } from '@milkdown/kit/transformer';
 import { $nodeSchema, $prose, $view } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
 import type { CherryWysiwygConfig } from './config.js';
-import {
-  destroyCherryRenderedContent,
-  MERMAID_ALIGNMENT_CLASSES,
-  mermaidLayout,
-  renderMermaid,
-} from './diagram-runtime.js';
+import { destroyCherryRenderedContent, MERMAID_ALIGNMENT_CLASSES, renderMermaid } from './diagram-runtime.js';
+import { readMermaidLayout } from '../native-layout.js';
 import type { CherryVisualRendererResult } from './types.js';
 import { sanitizedEngineFragment } from './html-sanitizer.js';
 import { createEditableLabel, createNodeAction, readEditableSource, selectEditableSource } from './node-view-utils.js';
 import { readTableChartDescriptor, tableChartDescriptorSource } from './table-chart-render-engine.js';
+import { createRendererCleanup, reportRendererError } from './renderer-cleanup.js';
+import { CHERRY_THEME_CHANGE } from './theme.js';
 const headingNavigationTasks = new WeakMap<
   EditorView,
   { frames: number[]; timers: Array<ReturnType<typeof setTimeout>> }
@@ -149,6 +147,7 @@ function leafSchema(
   inline = false,
   extraAttrs: Record<string, { default: string; validate: 'string' }> = {},
 ) {
+  const dataAttribute = (key: string) => `data-${key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`;
   return $nodeSchema(name, () => ({
     atom: true,
     defining: !inline,
@@ -167,7 +166,9 @@ function leafSchema(
         tag: `[data-cherry-node="${name}"]`,
         getAttrs: (dom: HTMLElement) => ({
           source: dom.dataset.source ?? '',
-          ...Object.fromEntries(Object.keys(extraAttrs).map((key) => [key, dom.dataset[key] ?? ''])),
+          ...Object.fromEntries(
+            Object.keys(extraAttrs).map((key) => [key, dom.getAttribute(dataAttribute(key)) ?? '']),
+          ),
         }),
       },
     ],
@@ -176,7 +177,9 @@ function leafSchema(
       {
         'data-cherry-node': name,
         'data-source': String(node.attrs.source),
-        ...Object.fromEntries(Object.keys(extraAttrs).map((key) => [`data-${key}`, String(node.attrs[key] ?? '')])),
+        ...Object.fromEntries(
+          Object.keys(extraAttrs).map((key) => [dataAttribute(key), String(node.attrs[key] ?? '')]),
+        ),
       },
     ],
     parseMarkdown: {
@@ -1022,6 +1025,7 @@ class EmbedView implements NodeView {
     this.dom.append(this.preview, this.controls, this.sourcePanel);
     this.scheduleRender();
     this.syncSource();
+    this.view.dom.addEventListener(CHERRY_THEME_CHANGE, this.handleThemeChange);
   }
 
   update(node: ProseNode) {
@@ -1073,6 +1077,7 @@ class EmbedView implements NodeView {
 
   destroy() {
     this.destroyed = true;
+    this.view.dom.removeEventListener(CHERRY_THEME_CHANGE, this.handleThemeChange);
     this.renderVersion += 1;
     this.renderController?.abort();
     this.renderController = undefined;
@@ -1178,11 +1183,17 @@ class EmbedView implements NodeView {
       return;
     }
     this.dom.dataset.type = 'mermaid';
-    const layout = mermaidLayout(String(this.node.attrs.source ?? ''));
+    const layout = readMermaidLayout(String(this.node.attrs.source ?? ''));
     if (layout.width) this.dom.style.width = layout.width;
     if (layout.height) this.dom.style.height = layout.height;
     if (layout.alignment) this.dom.classList.add(`cherry-mermaid-align-${layout.alignment}`);
   }
+
+  private handleThemeChange = () => {
+    if (this.node.type.name === 'cherry_diagram' && this.node.attrs.diagramType === 'mermaid' && this.renderActivated) {
+      this.render();
+    }
+  };
 
   private updateSource = () => {
     const pos = this.getPos();
@@ -1277,7 +1288,10 @@ class EmbedView implements NodeView {
     const diagramType = String(this.node.attrs.diagramType);
     const renderer =
       this.config.renderers?.[diagramType] ??
-      (diagramType === 'mermaid' ? ({ source }: { source: string }) => renderMermaid(source) : undefined);
+      (diagramType === 'mermaid'
+        ? ({ source, signal, container }: { source: string; signal?: AbortSignal; container: HTMLElement }) =>
+            renderMermaid(source, signal, container)
+        : undefined);
     if (!renderer) {
       controller.abort();
       this.renderController = undefined;
@@ -1302,6 +1316,7 @@ class EmbedView implements NodeView {
     staging.append(container);
     this.pendingPreview = staging;
     const source = String(this.node.attrs.value);
+    const cleanups = createRendererCleanup(controller.signal, (error) => this.config.onError?.(error, 'render'));
     Promise.resolve()
       .then(() => {
         if (this.destroyed || version !== this.renderVersion) return;
@@ -1323,12 +1338,12 @@ class EmbedView implements NodeView {
         });
       })
       .then((result: CherryVisualRendererResult) => {
-        if (this.destroyed || version !== this.renderVersion) {
+        if (typeof result === 'function') cleanups.add(result);
+        if (this.destroyed || version !== this.renderVersion || controller.signal.aborted) {
           staging.remove();
-          if (typeof result === 'function') result();
           return;
         }
-        if (typeof result === 'string') container.innerHTML = result;
+        if (typeof result === 'string') container.replaceChildren(sanitizedEngineFragment(result));
         this.activeRenderController?.abort();
         this.cleanup?.();
         this.cleanup = undefined;
@@ -1337,7 +1352,7 @@ class EmbedView implements NodeView {
         this.preview = container;
         this.pendingPreview = undefined;
         if (typeof result === 'function') {
-          this.cleanup = result;
+          this.cleanup = cleanups.dispose;
           this.activeRenderController = controller;
         } else controller.abort();
         if (this.renderController === controller) this.renderController = undefined;
@@ -1354,7 +1369,7 @@ class EmbedView implements NodeView {
         status.setAttribute('role', 'alert');
         status.textContent = '图表暂时无法渲染，请检查源码。';
         this.preview.append(status);
-        this.config.onError?.(error, 'render');
+        reportRendererError(error, (cause) => this.config.onError?.(cause, 'render'));
       });
   }
 
@@ -1395,7 +1410,7 @@ class EmbedView implements NodeView {
     staging.append(container);
     (this.dom.closest('.cherry-milkdown') ?? this.dom).append(staging);
     this.pendingPreview = staging;
-    const completedCleanups: Array<() => void> = [];
+    const cleanups = createRendererCleanup(controller.signal, (error) => this.config.onError?.(error, 'render'));
     const renders = mounts.map(async (mount) => {
       const descriptor = readTableChartDescriptor(mount);
       if (!descriptor) throw new TypeError('Invalid Cherry table-chart descriptor.');
@@ -1406,19 +1421,21 @@ class EmbedView implements NodeView {
         syntax: descriptor.type,
         signal: controller.signal,
       });
-      if (typeof result === 'string') mount.replaceChildren(sanitizedEngineFragment(result));
-      if (typeof result === 'function') completedCleanups.push(result);
+      if (typeof result === 'string' && !controller.signal.aborted) {
+        mount.replaceChildren(sanitizedEngineFragment(result));
+      }
+      if (typeof result === 'function') cleanups.add(result);
     });
     void Promise.all(renders)
       .then(() => {
-        if (this.destroyed || version !== this.renderVersion) {
+        if (controller.signal.aborted || this.destroyed || version !== this.renderVersion) {
           staging.remove();
-          completedCleanups.forEach((cleanup) => cleanup());
+          cleanups.dispose();
           return;
         }
         this.activeRenderController?.abort();
         this.cleanup?.();
-        this.cleanup = () => completedCleanups.forEach((cleanup) => cleanup());
+        this.cleanup = cleanups.dispose;
         this.activeRenderController = controller;
         if (this.renderController === controller) this.renderController = undefined;
         destroyCherryRenderedContent(this.config.engine, this.preview);
@@ -1428,14 +1445,14 @@ class EmbedView implements NodeView {
         this.pendingPreview = undefined;
       })
       .catch((error: unknown) => {
-        completedCleanups.forEach((cleanup) => cleanup());
+        controller.abort();
+        cleanups.dispose();
         staging.remove();
         if (this.destroyed || version !== this.renderVersion) return;
-        controller.abort();
         if (this.renderController === controller) this.renderController = undefined;
         this.pendingPreview = undefined;
         this.preview.dataset.renderError = 'true';
-        this.config.onError?.(error, 'render');
+        reportRendererError(error, (cause) => this.config.onError?.(cause, 'render'));
       });
   }
 }

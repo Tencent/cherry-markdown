@@ -1,5 +1,6 @@
 import { editorViewCtx } from '@milkdown/kit/core';
 import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
+import { DOMParser, DOMSerializer } from '@milkdown/kit/prose/model';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -55,7 +56,7 @@ function replaceText(instance: CherryMilkdownInstance, before: string, after: st
   const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
   let from = -1;
   view.state.doc.descendants((node, position) => {
-    const offset = node.isText ? node.text?.indexOf(before) ?? -1 : -1;
+    const offset = node.isText ? (node.text?.indexOf(before) ?? -1) : -1;
     if (from < 0 && offset >= 0) from = position + offset;
   });
   if (from < 0) throw new Error(`Missing document text: ${before}`);
@@ -540,6 +541,12 @@ describe('cherryMilkdown WYSIWYG', () => {
     expect(codeBlock?.closest('.cherry-embed')).toBeNull();
     expect(codeBlock?.querySelector('code')?.textContent).toBe('const value = 1;');
 
+    const native = document.createElement('div');
+    native.innerHTML = instance.engine.makeHtml('```js\nconst value = 1;\n```');
+    const tokens = (root: Element) =>
+      Array.from(root.querySelectorAll('.token'), (token) => [token.className, token.textContent]);
+    expect(tokens(codeBlock!)).toEqual(tokens(native));
+
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     let codePosition = -1;
     view.state.doc.descendants((node, position) => {
@@ -547,6 +554,40 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     view.dispatch(view.state.tr.insertText('\nconst next = 2;', codePosition + 'const value = 1;'.length + 1));
     await vi.waitFor(() => expect(instance.getMarkdown()).toContain('const next = 2;'));
+  });
+
+  it.each([
+    ['typescript', 'const answer: number = 42;'],
+    ['json', '{"answer":42}'],
+    ['python', 'print("hello")'],
+    ['html', '<strong>Hello</strong>'],
+    ['unknown-language', 'const fallback = 1;'],
+  ])('matches Cherry token styling for %s code', async (language, code) => {
+    const markdown = `\`\`\`${language}\n${code}\n\`\`\``;
+    const element = root();
+    const instance = await cherryMilkdown({ el: element, value: markdown });
+    instances.push(instance);
+    const native = document.createElement('div');
+    native.innerHTML = instance.engine.makeHtml(markdown);
+    const styledCharacters = (root: Element) => {
+      const codeElement = root.querySelector('code');
+      if (!codeElement) return [];
+      const walker = document.createTreeWalker(codeElement, NodeFilter.SHOW_TEXT);
+      const characters: Array<[string, string]> = [];
+      let textNode: Node | null;
+      while ((textNode = walker.nextNode())) {
+        const classes = new Set<string>();
+        for (let parent = textNode.parentElement; parent && parent !== codeElement; parent = parent.parentElement) {
+          if (!parent.classList.contains('token')) continue;
+          for (const name of parent.classList) if (name !== 'token') classes.add(name);
+        }
+        for (const character of textNode.textContent ?? '') characters.push([character, [...classes].sort().join(' ')]);
+      }
+      return characters;
+    };
+    const editable = element.querySelector('.cherry-milkdown-code-block');
+    expect(editable).not.toBeNull();
+    expect(styledCharacters(editable!)).toEqual(styledCharacters(native));
   });
 
   it('edits inline math in place through MathLive input events', async () => {
@@ -678,7 +719,7 @@ describe('cherryMilkdown WYSIWYG', () => {
     const instance = await cherryMilkdown({
       el: element,
       value: source,
-      engine: { makeHtml: (value) => value },
+      engine: { makeHtml: (value: string) => value },
     });
     instances.push(instance);
     expect(element.querySelector('.cherry-embed--cherry_native_block')).not.toBeNull();
@@ -699,7 +740,7 @@ describe('cherryMilkdown WYSIWYG', () => {
     const instance = await cherryMilkdown({
       el: element,
       value: `# Before\n\n${opaqueSource}\n\nAfter`,
-      engine: { makeHtml: (value) => value },
+      engine: { makeHtml: (value: string) => value },
     });
     instances.push(instance);
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
@@ -742,6 +783,43 @@ describe('cherryMilkdown WYSIWYG', () => {
     expect(positions).toHaveLength(2);
     view.dispatch(view.state.tr.insertText('changed', positions[1], positions[1] + 'repeated'.length));
     await vi.waitFor(() => expect(instance.getMarkdown()).toBe('* repeated\n* changed'));
+  });
+
+  it.each(['mermaid', 'echarts', 'business-chart'])(
+    'preserves %s attributes through clipboard DOM serialization',
+    async (language) => {
+      const instance = await cherryMilkdown({
+        el: root(),
+        value: `\`\`\`${language}\nsource\n\`\`\``,
+        renderers: { [language]: () => '<span>Rendered</span>' },
+      });
+      instances.push(instance);
+      const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+      const container = document.createElement('div');
+      container.append(DOMSerializer.fromSchema(view.state.schema).serializeFragment(view.state.doc.content));
+      expect(container.firstElementChild?.getAttribute('data-diagram-type')).toBe(language);
+      const reparsed = DOMParser.fromSchema(view.state.schema).parse(container);
+      expect(reparsed.firstChild?.attrs).toEqual(view.state.doc.firstChild?.attrs);
+    },
+  );
+
+  it.each(['edit', 'delete'])('keeps a repeated footnote body intact during a paragraph %s', async (operation) => {
+    const element = root();
+    const instance = await cherryMilkdown({
+      el: element,
+      value: '[^note]: repeated\n\nText repeated.[^note]',
+      debounce: 0,
+    });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let position = -1;
+    view.state.doc.descendants((node, offset) => {
+      if (node.isText && node.text?.includes('Text repeated.')) position = offset + node.text.indexOf('repeated');
+    });
+    expect(position).toBeGreaterThan(0);
+    const replacement = operation === 'edit' ? 'changed' : '';
+    view.dispatch(view.state.tr.insertText(replacement, position, position + 'repeated'.length));
+    expect(instance.getMarkdown()).toBe(`[^note]: repeated\n\nText ${replacement}.[^note]`);
   });
 
   it('preserves the active text selection across API/source Markdown synchronization', async () => {

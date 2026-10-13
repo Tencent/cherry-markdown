@@ -471,6 +471,80 @@ test('link inspector keeps adjacent links isolated and reports invalid input', a
   expect(await markdown(page)).toContain('[first](https://one.example) second');
 });
 
+test('unlink removes Cherry target metadata atomically and supports undo/redo', async ({ page }) => {
+  await setMarkdown(page, 'Before [**Link**](https://example.com){target=_blank} after.');
+  const paragraph = page.locator('.ProseMirror > p').first();
+  const link = paragraph.locator('a');
+  await link.click();
+  await page.getByRole('toolbar', { name: '链接' }).getByRole('button', { name: '编辑链接' }).click();
+  const dialog = page.getByRole('dialog', { name: '编辑链接' });
+  await dialog.getByRole('button', { name: '取消链接', exact: true }).click();
+  await expect(link).toHaveCount(1);
+  await dialog.getByRole('button', { name: '确认取消链接' }).click();
+  await expect(link).toHaveCount(0);
+  await expect(paragraph.locator('strong')).toHaveText('Link');
+  await expect(page.locator('.cherry-link-target')).toHaveCount(0);
+  expect((await markdown(page)).trimEnd()).toBe('Before **Link** after.');
+  await expect(page.locator('.ProseMirror')).toBeFocused();
+  await page.keyboard.press('ControlOrMeta+z');
+  await expect(link).toHaveCount(1);
+  expect(await markdown(page)).toContain('{target=_blank}');
+  await page.keyboard.press('ControlOrMeta+Shift+z');
+  await expect(link).toHaveCount(0);
+  expect((await markdown(page)).trimEnd()).toBe('Before **Link** after.');
+});
+
+test('real repeated-word edits and deletion never overwrite a relocated footnote definition', async ({ page }) => {
+  const original = '[^note]: repeated\n\nText repeated.[^note]';
+  await setMarkdown(page, original);
+  const paragraph = page.locator('.ProseMirror > p').filter({ hasText: 'Text repeated.' });
+  const selectRepeated = async () => {
+    await paragraph.scrollIntoViewIfNeeded();
+    const point = await paragraph.evaluate((element) => {
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+      let text = walker.nextNode();
+      while (text && !text.textContent?.includes('repeated')) text = walker.nextNode();
+      if (!text?.textContent) throw new Error('Missing paragraph text');
+      const range = document.createRange();
+      const offset = text.textContent.indexOf('repeated');
+      range.setStart(text, offset);
+      range.setEnd(text, offset + 8);
+      const rect = range.getBoundingClientRect();
+      return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+    });
+    await page.mouse.dblclick(point.x, point.y);
+    await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe('repeated');
+  };
+  await selectRepeated();
+  await page.keyboard.type('changed');
+  await expect.poll(() => markdown(page)).toBe('[^note]: repeated\n\nText changed.[^note]');
+  await page.keyboard.press('ControlOrMeta+z');
+  await expect.poll(() => markdown(page)).toBe(original);
+  // Undo restores the word selection. Use it directly instead of a second
+  // rapid double-click, which Chromium interprets as a paragraph triple-click.
+  await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe('repeated');
+  await page.keyboard.press('Backspace');
+  await expect.poll(() => markdown(page)).toBe('[^note]: repeated\n\nText .[^note]');
+  await expect(page.locator('.cherry-footnote-definition')).toContainText('repeated');
+});
+
+test('real Markdown paste retains diagram syntax and subsequent source editing', async ({ page }) => {
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+  await setMarkdown(page, 'Before');
+  const editor = page.locator('.ProseMirror');
+  await editor.click();
+  await editor.press('ControlOrMeta+a');
+  await page.evaluate(() => navigator.clipboard.writeText('```mermaid\ngraph LR\n A[One]-->B[Two]\n```'));
+  await editor.press('ControlOrMeta+v');
+  const diagram = page.locator('.cherry-embed--cherry_diagram');
+  await expect(diagram.locator('svg')).toContainText('One');
+  expect(await markdown(page)).toContain('```mermaid');
+  await diagram.getByRole('button', { name: '在节点内编辑源码' }).click();
+  await diagram.locator('code[contenteditable=true]').fill('graph LR\n A[Updated]-->B[Two]');
+  await expect(diagram.locator('svg')).toContainText('Updated');
+  await expect(page.getByRole('toolbar', { name: '文本格式' })).toBeHidden();
+});
+
 test('code typing is monotonic and cannot open text Bubble', async ({ page }, testInfo) => {
   await setMarkdown(page, 'Use `x` here.');
   const code = page.locator('.ProseMirror p code');
@@ -691,6 +765,25 @@ test('manual ECharts example renders including its final semicolon', async ({ pa
   await expect(page.locator('[role="alert"], [data-render-error="true"]')).toHaveCount(0);
 });
 
+test('ECharts source edits update the same chart without closing the source editor', async ({ page }) => {
+  await setMarkdown(
+    page,
+    '```echarts\n{"title":{"text":"Before"},"series":[{"type":"pie","data":[{"name":"A","value":1}]}]}\n```',
+  );
+  const node = page.locator('.cherry-embed--cherry_diagram:not([data-type="mermaid"])');
+  await expect(node.locator('svg')).toContainText('Before');
+  await node.getByRole('button', { name: '在节点内编辑源码', exact: true }).click();
+  const source = node.locator('.cherry-embed__source code');
+  await source.fill('{"title":{"text":"After"},"series":[{"type":"pie","data":[{"name":"A","value":2}]}]}');
+  await expect(node.locator('svg')).toContainText('After');
+  await expect(source).toBeFocused();
+  await expect(node.getByRole('button', { name: '在节点内编辑源码', exact: true })).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  expect(await markdown(page)).toContain('"text":"After"');
+});
+
 test('manual line table chart renders inside Cherry-owned columns without injected controls', async ({ page }) => {
   await page.getByRole('link', { name: '折线图', exact: true }).click();
   const heading = page.locator('h3#折线图');
@@ -750,6 +843,19 @@ test('Mermaid source edits preserve width and alignment and can be closed', asyn
   await expect(source).toBeHidden();
 });
 
+test('multiple Mermaid nodes render independently while one source changes', async ({ page }) => {
+  await setMarkdown(page, '```mermaid\ngraph LR\nA-->B\n```\n\n```mermaid\ngraph LR\nC-->D\n```');
+  const diagrams = page.locator('.cherry-embed--cherry_diagram[data-type="mermaid"]');
+  await expect(diagrams).toHaveCount(2);
+  await expect(diagrams.nth(0).locator('svg')).toBeVisible();
+  await expect(diagrams.nth(1).locator('svg')).toBeVisible();
+  await diagrams.nth(0).getByRole('button', { name: '在节点内编辑源码', exact: true }).click();
+  await diagrams.nth(0).locator('.cherry-embed__source code').fill('graph LR\nA-->E');
+  await expect(diagrams.nth(0).locator('svg')).toContainText('E');
+  await expect(diagrams.nth(1).locator('svg')).toContainText('D');
+  await expect(page.locator('[data-cherry-milkdown-mermaid-canvas]')).toHaveCount(0);
+});
+
 test('table chart uses the native table editor and redraws without a blank frame', async ({ page }) => {
   await setMarkdown(page, '| :line:{"title":"Trend"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 1 | 2 |');
   const node = page.locator('.cherry-table-chart');
@@ -764,7 +870,7 @@ test('table chart uses the native table editor and redraws without a blank frame
     const result = { blankSnapshots: 0, minHeight: Number.POSITIVE_INFINITY, maxHeight: 0 };
     const inspect = () => {
       if (!chart.querySelector('.cherry-table-chart__preview svg')) result.blankSnapshots += 1;
-      const height = chart.getBoundingClientRect().height;
+      const { height } = chart.getBoundingClientRect();
       result.minHeight = Math.min(result.minHeight, height);
       result.maxHeight = Math.max(result.maxHeight, height);
     };
@@ -885,6 +991,37 @@ test('table chart cell undo and external revisions stay deterministic', async ({
   await expect(page.locator('.milkdown-table-block th p').first()).toContainText('External');
   await expect(page.locator('.cherry-table-chart svg')).toContainText('External');
   expect(await markdown(page)).toBe(external);
+});
+
+test('real pointer selection and typing edits exactly one chart data cell', async ({ page }) => {
+  await setMarkdown(page, '| :line:{"title":"Pointer"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 1 | 2 |');
+  await expect(page.locator('.cherry-table-chart svg')).toBeVisible();
+  const table = page.locator('.milkdown-table-block').first();
+  const value = table.locator('td p').nth(1);
+  await value.scrollIntoViewIfNeeded();
+  await value.click();
+  await expect(page.locator('.ProseMirror')).toBeFocused();
+  const point = await value.evaluate((element) => {
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    let text = walker.nextNode();
+    while (text && text.textContent !== '1') text = walker.nextNode();
+    if (!text) throw new Error('Missing numeric text');
+    const range = document.createRange();
+    range.setStart(text, 0);
+    range.setEnd(text, 1);
+    const rect = range.getBoundingClientRect();
+    return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+  });
+  await page.mouse.dblclick(point.x, point.y, { delay: 80 });
+  await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe('1');
+  await page.keyboard.type('3');
+  await expect(value).toHaveText('3');
+  await expect(table.locator('td p').nth(2)).toHaveText('2');
+  const chart = page.locator('.cherry-table-chart .cherry-echarts-wrapper');
+  await expect.poll(() => chart.getAttribute('data-table-data')).toContain('["Sales","3","2"]');
+  await page.keyboard.press('ControlOrMeta+z');
+  await expect(value).toHaveText('1');
+  await expect(table.locator('td p').nth(2)).toHaveText('2');
 });
 
 test('invalid Mermaid source recovers locally without leaving a stale global error', async ({ page }) => {

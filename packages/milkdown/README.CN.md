@@ -37,15 +37,17 @@ export function Editor() {
 
 - `cherryMilkdown(options)`：创建独立编辑器。
 - `getMarkdown()`：读取 Markdown。
-- `setMarkdown(markdown, { emit? })`：更新 Markdown；默认触发 `onChange`。
-- `setTheme(theme)`：切换 Cherry 主题，不改变 Markdown 和撤销历史。
+- `setMarkdown(markdown, { emit? })`：普通调用仍为全文替换，默认触发 `onChange`。输入法组合输入期间暂存最新外部回写，提交后合并不冲突的变化，保留中文、光标和撤销历史；同值回写不会覆盖输入或取消其它回写。重叠或无法安全映射的更新保留本地输入，并通过 `onError(error, 'parse')` 报告；这不是协同编辑协议。`emit: false` 仅静默外部修改，同时提交的本地输入仍触发包含合并结果的 `onChange`。
+- `setTheme(theme)`：切换 Cherry 主题，不改变 Markdown 和撤销历史。ECharts 复用 Cherry 的轻量主题更新，保留图表数据；Mermaid 在原节点内重绘，不替换源码编辑面板。
 - `focus()`：聚焦编辑器。
 - `destroy()`：销毁编辑器及其浮层、NodeView 和渲染资源。
 - `bubble`：是否启用文本选区浮层，默认 `true`。首期提供加粗、斜体、下划线、删除线。
 - `readonly`：只读展示。
 - `theme`：Cherry 主题，默认 `default`；支持 `dark`、`abyss`、`green`、`red`、`gray`、`violet` 和 `blue`。
 - `plugins`：附加 Milkdown 插件。
+- 附加插件与内置 Milkdown 插件共同运行；替换 schema、快捷键或 NodeView 的插件可能产生冲突，当前不保证任意第三方插件组合兼容。
 - `renderers`：按 fenced code 的语言名注册可选渲染器。匹配的代码围栏会自动获得源码展开和热更新能力；`tableChart` 保留给表格图表预览。
+- 使用公式时，请在应用中额外引入 `mathlive/fonts.css`；基础样式不强制依赖可选的 MathLive peer。
 - `fileUpload`：可选的图片文件上传函数。选择文件后仅回填地址和图片属性，用户点击“保存”后才写入 Markdown。
 
 ```ts
@@ -81,7 +83,9 @@ await cherryMilkdown({
 
 - Markdown 是唯一的持久化数据格式。
 - 普通 CommonMark/GFM 内容由 Milkdown 结构化编辑。
-- Cherry 特有语法优先复用 CherryEngine 生成的 HTML；可安全结构化的节点提供源码热更新或属性控件，未知语法保留源码，避免错误改写。
+- Cherry 特有语法由 CherryEngine 或配置的 renderer 渲染；只有解析与序列化确定的节点才提供结构化编辑，复杂块和已识别的自定义块使用整块源码编辑。未识别的 Cherry 扩展语法不承诺字节级原样保留。
+- Cherry Engine 和表格图表 addon 当前通过包内适配入口引用 Cherry 发布的 dist 文件；升级 Cherry 时应集中核对这些入口及 Cherry 发布 CSS 路径。
+- 自定义 renderer 可以直接操作传入的 `container`；如返回 HTML 字符串，字符串会先经过安全清洗再挂载。不要把未经处理的用户输入拼成可执行 HTML。
 - 文本 Bubble、链接编辑、图片控件属于本包，不调用 Cherry 编辑器内部 UI。
 - 样式直接引入 Cherry 发布 CSS，并仅在 `.cherry-milkdown` 下补充编辑态样式，降低 Cherry 升级耦合。
 - `mathlive`、`mermaid` 和 `echarts` 是按能力启用的 Peer：使用公式、Mermaid 或 ECharts 时安装对应依赖；运行期渲染失败会隔离在当前节点并通过 `onError` 报告，不阻断普通 Markdown。

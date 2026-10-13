@@ -52,7 +52,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "rimraf ./dist && tsc --project tsconfig.build.json",
+    "build": "node ./scripts/sync-chart-locale.mjs && rimraf ./dist && tsc --project tsconfig.build.json",
     "build:demo": "yarn workspace cherry-markdown build && yarn build:demo:prepared",
     "build:demo:prepared": "yarn build && node ./scripts/build-demo.mjs",
     "build:types": "tsc --project tsconfig.build.json",

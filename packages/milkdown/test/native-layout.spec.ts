@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   imageAltText,
   imageLayoutState,
+  readMermaidLayout,
   replaceImageAltText,
   updateImageLayout,
   updateMermaidLayout,
@@ -27,6 +28,7 @@ describe('native Cherry layout directives', () => {
 
   it('updates only the Mermaid fence layout and preserves source', () => {
     const source = '```mermaid #100px #center\ngraph LR\nA-->B\n```';
+    expect(readMermaidLayout(source)).toEqual({ width: '100px', height: '', alignment: 'center' });
     expect(updateMermaidLayout(source, { width: 240, height: 160 })).toBe(
       '```mermaid #240px #160px #center\ngraph LR\nA-->B\n```',
     );

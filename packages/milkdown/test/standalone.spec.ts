@@ -36,6 +36,72 @@ function replaceText(instance: CherryMilkdownInstance, before: string, after: st
 }
 
 describe('standalone contracts', () => {
+  it('maps an external prepend to the live paragraph in a document ending with a diagram', async () => {
+    const value = '# Heading\n\nFirst\n\n```mermaid\ngraph LR\n A-->B\n```';
+    const instance = await create(value, { renderers: { mermaid: () => '<svg></svg>' } });
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let end = 0;
+    view.state.doc.descendants((node, position) => {
+      if (node.isText && node.text === 'First') end = position + node.nodeSize;
+    });
+    view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, end)));
+    instance.setMarkdown(`Remote\n\n${value}`, { emit: false });
+    expect(view.state.selection.$from.parent.textContent).toBe('First');
+    expect(view.state.selection.$from.parentOffset).toBe('First'.length);
+    view.dispatch(view.state.tr.insertText(' edited'));
+    expect(instance.getMarkdown()).toContain('First edited');
+  });
+
+  it('isolates throwing cleanup/error callbacks across diagram and table renderers', async () => {
+    const cleanup = vi.fn(() => {
+      throw new Error('Cleanup failed');
+    });
+    const onError = vi.fn(() => {
+      throw new Error('Reporter failed');
+    });
+    const renderer = ({ container }: { container: HTMLElement }) => {
+      container.innerHTML = '<svg></svg>';
+      return cleanup;
+    };
+    const instance = await create('```business-chart\nsource\n```\n\n| :line: | Jan |\n| --- | --- |\n| Sales | 1 |', {
+      renderers: { 'business-chart': renderer, tableChart: renderer },
+      onError,
+    });
+    await vi.waitFor(() => expect(document.querySelectorAll('svg')).toHaveLength(2));
+    instance.setMarkdown('Replacement');
+    await vi.waitFor(() => expect(cleanup).toHaveBeenCalledTimes(2));
+    expect(onError).toHaveBeenCalledTimes(2);
+    expect(instance.getMarkdown()).toBe('Replacement');
+    await expect(instance.destroy()).resolves.toBeUndefined();
+  });
+
+  it('refreshes only the themed instance and preserves an open Mermaid source editor', async () => {
+    const renderer = vi.fn(({ container }: { container: HTMLElement }) => {
+      container.innerHTML = '<svg></svg>';
+    });
+    const value = '```mermaid\ngraph LR\n A-->B\n```';
+    const first = await create(value, { renderers: { mermaid: renderer } });
+    const second = await create(value, { renderers: { mermaid: renderer } });
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(2));
+    const view = first.editor.action((ctx) => ctx.get(editorViewCtx));
+    const sourcePanel = view.dom.querySelector<HTMLElement>('.cherry-embed__source')!;
+    view.dom.querySelector<HTMLButtonElement>('.cherry-embed__controls button')!.click();
+    const source = sourcePanel.firstElementChild as HTMLElement;
+    source.tabIndex = 0; // jsdom does not make contentEditable properties focusable.
+    source.focus();
+    expect(document.activeElement).toBe(source);
+    const { selection } = view.state;
+    first.setTheme('dark');
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(3));
+    expect(sourcePanel.hidden).toBe(false);
+    expect(document.activeElement).toBe(source);
+    expect(view.state.selection.eq(selection)).toBe(true);
+    expect(first.getMarkdown()).toBe(value);
+    expect(second.getMarkdown()).toBe(value);
+    first.setTheme('dark');
+    await Promise.resolve();
+    expect(renderer).toHaveBeenCalledTimes(3);
+  });
   it('keeps Cherry layout directives engine-owned instead of rebuilding their DOM', async () => {
     const source = ':::timeline History\n:: [done] 2025 First\nDescription\n:::';
     const instance = await create(source);
@@ -78,6 +144,75 @@ describe('standalone contracts', () => {
     await vi.waitFor(() => expect(onError).toHaveBeenCalled());
     expect(cleanup).toHaveBeenCalledTimes(1);
     expect(document.querySelector('[data-render-pending]')).toBeNull();
+  });
+
+  it.each(['sibling failure', 'replacement', 'destruction'])(
+    'cleans a late nested renderer exactly once after %s',
+    async (action) => {
+      const cleanup = vi.fn();
+      const onError = vi.fn();
+      let finish!: (cleanup: () => void) => void;
+      let call = 0;
+      const renderer = vi.fn(() => {
+        call += 1;
+        if (call === 1 && action === 'sibling failure') return Promise.reject(new Error('Sibling failed'));
+        if (call === 2)
+          return new Promise<() => void>((resolve) => {
+            finish = resolve;
+          });
+        return () => {};
+      });
+      const chart = (title: string) =>
+        [`| :line:{"title":"${title}"} | Jan |`, '| --- | --- |', '| Sales | 1 |'].join('\n');
+      const instance = await create(['::: 2cols', chart('First'), '::', chart('Second'), ':::'].join('\n'), {
+        renderers: { tableChart: renderer },
+        onError,
+      });
+      await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(2));
+      if (action === 'sibling failure') await vi.waitFor(() => expect(onError).toHaveBeenCalled());
+      if (action === 'replacement') instance.setMarkdown('Replacement');
+      if (action === 'destruction') await instance.destroy();
+      finish(cleanup);
+      await vi.waitFor(() => expect(cleanup).toHaveBeenCalledTimes(1));
+      await instance.destroy();
+      expect(cleanup).toHaveBeenCalledTimes(1);
+      expect(document.querySelector('[data-render-pending]')).toBeNull();
+    },
+  );
+
+  it('unlinks annotated text and restores both the link and its target in one undo', async () => {
+    const instance = await create('Before [**Link**](https://example.com){target=_blank} after.');
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, 9)));
+    view.focus();
+    view.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true, cancelable: true }));
+    const form = document.querySelector<HTMLFormElement>('.cherry-milkdown-link-editor')!;
+    expect(form.hidden).toBe(false);
+    form.querySelector<HTMLButtonElement>('[aria-label="取消链接"]')!.click();
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    expect(instance.getMarkdown().trimEnd()).toBe('Before **Link** after.');
+    expect(document.querySelector('.cherry-link-target')).toBeNull();
+    expect(undo(view.state, view.dispatch)).toBe(true);
+    expect(instance.getMarkdown()).toContain('[Link](https://example.com)');
+    expect(instance.getMarkdown()).toContain('{target=_blank}');
+    expect(document.querySelector('.ProseMirror strong')?.textContent).toBe('Link');
+    expect(redo(view.state, view.dispatch)).toBe(true);
+    expect(instance.getMarkdown().trimEnd()).toBe('Before **Link** after.');
+  });
+
+  it('sanitizes configured fenced renderer strings on creation and hot updates', async () => {
+    const instance = await create('```business-chart\nfirst\n```', {
+      renderers: {
+        'business-chart': ({ source }: { source: string }) =>
+          `<img src="image.png" onerror="alert(1)"><script>alert(1)</script><p>${source}</p>`,
+      },
+    });
+    for (const source of ['first', 'second']) {
+      if (source === 'second') instance.setMarkdown('```business-chart\nsecond\n```');
+      await vi.waitFor(() => expect(document.querySelector('.cherry-embed__preview p')?.textContent).toBe(source));
+      expect(document.querySelector('.cherry-embed__preview img')?.hasAttribute('onerror')).toBe(false);
+      expect(document.querySelector('.cherry-embed__preview script')).toBeNull();
+    }
   });
 
   it('uses Cherry native preview structure without duplicating its layout styles', async () => {
@@ -237,9 +372,10 @@ describe('standalone contracts', () => {
     const value = '| :line:{"title":"Before"} | A |\n| --- | --- |\n| Row | 1 |';
     const instance = await create(value, { renderers: { tableChart: renderer }, debounce: 20 });
     await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(1));
+    let current = 'Before';
     for (const title of ['One', 'Two', 'Final']) {
-      const current = title === 'One' ? 'Before' : title === 'Two' ? 'One' : 'Two';
       replaceText(instance, current, title);
+      current = title;
     }
     await vi.waitFor(() => expect(instance.getMarkdown()).toContain('Final'));
     expect(renderer).toHaveBeenCalledTimes(1);

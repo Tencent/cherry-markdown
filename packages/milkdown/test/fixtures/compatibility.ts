@@ -16,7 +16,6 @@ export interface CherryCompatibilityCase {
     delete: string;
     structured: boolean;
     sourceEditing: boolean;
-    passthrough: boolean;
     expectedMarkdown: string;
     expectedDom: string;
     sync: string;
@@ -37,7 +36,6 @@ function interaction(mode: CherryCompatibilityMode, markdown: string, expectedDo
     delete: 'Backspace/Delete 删除节点或内容',
     structured: mode === 'structured',
     sourceEditing: mode === 'native-source',
-    passthrough: mode === 'passthrough',
     expectedMarkdown: markdown,
     expectedDom,
     sync: 'Milkdown 文档与 getMarkdown 内容一致',

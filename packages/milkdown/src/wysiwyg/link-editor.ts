@@ -382,7 +382,7 @@ export const cherryLinkEditor = $prose((ctx) => {
           copyIcon?.classList.toggle('ch-icon-copy', state === 'idle');
           copyIcon?.classList.toggle('ch-icon-ok', state === 'success');
           copyIcon?.classList.toggle('ch-icon-warning', state === 'error');
-          const label = state === 'success' ? '已复制' : state === 'error' ? '复制失败' : '复制链接';
+          const label = { success: '已复制', error: '复制失败', idle: '复制链接' }[state];
           copy.title = label;
           copy.setAttribute('aria-label', label);
         };
@@ -461,7 +461,9 @@ export const cherryLinkEditor = $prose((ctx) => {
       };
       const removeLink = () => {
         if (!active?.mark) return close({ restoreFocus: true });
-        const transaction = view.state.tr.removeMark(active.from, active.to, active.mark);
+        let transaction = view.state.tr.removeMark(active.from, active.to, active.mark);
+        const target = linkTargetAfter(view.state.doc, active.to);
+        if (target) transaction = transaction.delete(target.position, target.position + target.node.nodeSize);
         close();
         view.dispatch(transaction);
         view.focus();

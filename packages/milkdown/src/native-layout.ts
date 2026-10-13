@@ -9,6 +9,17 @@ const ALIGNMENT = '#(?:center|right|left|float-right|float-left)';
 const IMAGE_DECORATION = '#(?:border|shadow|radius|B|S|R)';
 const IMAGE_EXTENSION = `${SIZE}|${IMAGE_DECORATION}|${ALIGNMENT}`;
 
+export function readMermaidLayout(source: string) {
+  const opener = source.split(/\r?\n/, 1)[0] ?? '';
+  const sizes = opener.match(new RegExp(SIZE, 'gi')) ?? [];
+  const alignment = opener.match(new RegExp(ALIGNMENT, 'i'))?.[0].slice(1) ?? '';
+  return {
+    width: sizes[0]?.slice(1) ?? '',
+    height: sizes[1]?.slice(1) ?? '',
+    alignment,
+  };
+}
+
 function sizeToken(value: unknown) {
   const raw = String(value).trim();
   if (/^(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)$/i.test(raw)) return `#${raw}`;

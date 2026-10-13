@@ -1,39 +1,53 @@
 import type { CherryVisualRenderer } from '../types.js';
 import { parseTableChart } from '../wysiwyg/table-chart.js';
-import EChartsTableEngine from 'cherry-markdown/dist/addons/advance/cherry-table-echarts-plugin.esm.js';
+import EChartsTableEngine, { mountCherryTableChart } from '../cherry-echarts.js';
+import EChartsCodeBlockEngine from '../cherry-codeblock-echarts.js';
+import { cherryChartLocale } from '../cherry-chart-locale.js';
 import JSON5 from 'json5';
 
 /** Optional ECharts renderer. Import this entry only when charts are needed. */
 export const echarts: CherryVisualRenderer = async ({ container, source, signal }) => {
-  // Accept object-literal data used in the Cherry manual, never executable JS.
-  // Cherry's native ECharts code-block examples are object literals followed by
-  // a JavaScript statement terminator. JSON5 accepts the object literal but not
-  // that trailing semicolon, so remove only a final terminator before parsing.
-  const option = JSON5.parse(source.trim().replace(/;\s*$/, ''));
-  return mountChart(container, option, signal);
-};
-
-async function mountChart(container: HTMLElement, option: Record<string, unknown>, signal?: AbortSignal) {
+  // Reuse Cherry's own safe JSON5 parser and its trailing-semicolon handling.
+  // Its enableJs default stays false, so chart source cannot execute JavaScript.
   const library = await import('echarts');
   if (signal?.aborted) return;
+  const option = new EChartsCodeBlockEngine({ echarts: library }).parseOption(source);
+  return mountChart(container, option, library, signal);
+};
+
+function mountChart(
+  container: HTMLElement,
+  option: Record<string, unknown>,
+  library: typeof import('echarts'),
+  signal?: AbortSignal,
+) {
+  if (signal?.aborted) return;
   const chartRoot = document.createElement('div');
-  chartRoot.className = 'cherry-echarts-wrapper';
+  chartRoot.className = 'cherry-echarts-codeblock-wrapper cherry-echarts-wrapper';
   chartRoot.style.cssText = 'width:100%;height:300px';
   container.append(chartRoot);
-  const chart = library.init(chartRoot, undefined, { renderer: 'svg' });
+  // Reuse Cherry's CSS-derived theme and lightweight observer. This updates
+  // presentation without rebuilding series/data or losing chart interaction.
+  const chartEngine = new EChartsTableEngine({
+    echarts: library,
+    cherry: { locale: cherryChartLocale },
+    renderer: 'svg',
+  });
   let observer: ResizeObserver | undefined;
   try {
-    chart.setOption({ animation: false, ...option });
-    observer = new ResizeObserver(() => chart.resize());
+    chartEngine.$buildEchartsThemeFromCss(chartRoot.closest('.cherry') ?? chartRoot);
+    const chart = chartEngine.createChart(chartRoot, option, 'codeblock');
+    chartEngine.$applyThemeOnly(chart);
+    observer = new ResizeObserver(() => chart?.resize());
     observer.observe(chartRoot);
   } catch (error) {
-    chart.dispose();
+    chartEngine.onDestroy();
     chartRoot.remove();
     throw error;
   }
   const cleanup = () => {
     observer?.disconnect();
-    if (!chart.isDisposed()) chart.dispose();
+    chartEngine.onDestroy();
     chartRoot.remove();
   };
   return cleanup;
@@ -49,12 +63,14 @@ export const tableChart: CherryVisualRenderer = async ({ container, source, synt
   const chartEngine = new EChartsTableEngine({
     echarts: library,
     cherryOptions: {},
+    cherry: { locale: cherryChartLocale },
     renderer: 'svg',
   });
   const mount = container.matches('[data-cherry-milkdown-table-chart]')
     ? container
     : container.appendChild(document.createElement('div'));
-  const cleanup = chartEngine.renderInto(
+  const cleanup = mountCherryTableChart(
+    chartEngine,
     mount,
     syntax,
     settings,

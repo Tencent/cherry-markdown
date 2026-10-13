@@ -265,13 +265,16 @@ export const cherryImageControls = $prose((ctx) => {
           if (target.getAnimations().some((animation) => animation.playState === 'running')) {
             stableFrames = 0;
             transitionFrame = requestAnimationFrame(sync);
-          } else if (++stableFrames < 2) {
-            // Give the browser a frame to materialize transitions scheduled by
-            // the just-dispatched Milkdown transaction before exposing handles.
-            transitionFrame = requestAnimationFrame(sync);
           } else {
-            layoutTransitionPending = false;
-            place();
+            stableFrames += 1;
+            if (stableFrames < 2) {
+              // Give the browser a frame to materialize transitions scheduled by
+              // the just-dispatched Milkdown transaction before exposing handles.
+              transitionFrame = requestAnimationFrame(sync);
+            } else {
+              layoutTransitionPending = false;
+              place();
+            }
           }
         };
         transitionFrame = requestAnimationFrame(sync);

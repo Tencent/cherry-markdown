@@ -37,8 +37,8 @@ The package creates a default `CherryEngine`. Pass `engine` only when reusing cu
 
 - `cherryMilkdown(options)` creates an independent editor.
 - `getMarkdown()` reads Markdown.
-- `setMarkdown(markdown, { emit? })` updates Markdown and emits by default.
-- `setTheme(theme)` switches the Cherry theme without changing Markdown or history.
+- `setMarkdown(markdown, { emit? })` remains a full replacement outside IME and emits by default. During composition, the latest external write is rebased after commit when non-conflicting, preserving input, caret and undo history. Same-value echoes neither replay preedit text nor cancel other queued updates. Overlapping or unsafe updates preserve local input and report `onError(error, 'parse')`; this is not a collaborative-editing protocol. `emit: false` silences the external edit, not concurrently committed local input, whose `onChange` contains the merged result.
+- `setTheme(theme)` switches the Cherry theme without changing Markdown or history. ECharts reuses Cherry's lightweight theme update without replacing chart data; Mermaid redraws inside its node without replacing the source editor.
 - `focus()` focuses the editor.
 - `destroy()` releases the editor, overlays, NodeViews, and renderer resources.
 - `bubble` enables the selection Bubble (default `true`), initially with bold, italic, underline, and strikethrough.
@@ -46,6 +46,8 @@ The package creates a default `CherryEngine`. Pass `engine` only when reusing cu
 - `theme` selects a Cherry theme and defaults to `default`; `dark`, `abyss`, `green`, `red`, `gray`, `violet`, and `blue` are supported.
 - `plugins` adds Milkdown plugins.
 - `renderers` registers optional renderers by fenced-code language. Matching fences automatically gain source expansion and live updates; `tableChart` is reserved for table-chart previews.
+- When formulas are enabled, import `mathlive/fonts.css` in the application. The base stylesheet does not require the optional MathLive peer.
+- `plugins` are applied alongside the built-in Milkdown plugins. Plugins that replace schemas, keymaps, or NodeViews may conflict; compatibility with arbitrary third-party plugins is not guaranteed.
 - `fileUpload` optionally uploads a selected image. The returned URL and image attributes are written only after the user confirms Save.
 
 ```ts
@@ -81,7 +83,9 @@ await cherryMilkdown({
 
 - Markdown is the only persistent data format.
 - CommonMark/GFM content is structurally edited by Milkdown.
-- Cherry-specific syntax prefers HTML produced by CherryEngine. Safely editable nodes expose live source or property controls; unknown syntax preserves source instead of being rewritten incorrectly.
+- Cherry-specific syntax uses CherryEngine or a configured renderer. Only syntax with deterministic parsing and serialization is structurally edited; complex and recognized custom blocks use whole-block source editing. Byte-for-byte preservation is not guaranteed for Cherry extensions the adapter does not recognize.
+- Cherry Engine and its table-chart addon are imported through package-local adapters that isolate the current published dist paths. Recheck those adapters and Cherry's CSS path when upgrading Cherry.
+- Custom renderers may mutate the supplied `container`. Returned HTML strings are sanitized before insertion; do not concatenate untrusted Markdown into executable HTML.
 - Selection, link, and image UI belongs to this package and does not call Cherry editor internals.
 - The stylesheet imports Cherry's published CSS and scopes editing-only additions under `.cherry-milkdown` to reduce upgrade coupling.
 - `mathlive`, `mermaid`, and `echarts` are capability peers. Install the matching dependency when enabling formulas, Mermaid, or ECharts; runtime renderer failures stay isolated to the affected node and report through `onError` without blocking ordinary Markdown.

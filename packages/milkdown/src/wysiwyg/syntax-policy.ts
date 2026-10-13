@@ -1,4 +1,4 @@
-export type CherrySyntaxHandling = 'structured' | 'native-source' | 'passthrough';
+export type CherrySyntaxHandling = 'structured' | 'native-source';
 
 const PANEL_ALIASES: Readonly<Record<string, string>> = {
   p: 'primary',
@@ -24,8 +24,8 @@ export function canonicalPanelKind(rawType: string) {
 
 /**
  * Only one-to-one content containers are rebuilt as ProseMirror structures.
- * Layout directives and unknown business directives stay engine-owned and
- * retain their complete source in one editable native node.
+ * Layout directives and unrecognized `:::` business blocks stay engine-owned
+ * and retain their complete source in one editable native node.
  */
 export function panelSyntaxHandling(rawType: string): CherrySyntaxHandling {
   return STRUCTURED_PANEL_KINDS.has(canonicalPanelKind(rawType)) ? 'structured' : 'native-source';

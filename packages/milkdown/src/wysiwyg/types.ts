@@ -11,6 +11,11 @@ export interface CherryVisualRenderContext {
 
 export type CherryDiagramRenderContext = CherryVisualRenderContext;
 
+/**
+ * Renderers should prefer mounting DOM into `container`. String results are
+ * sanitized before insertion; return a cleanup callback when resources need
+ * to be released.
+ */
 export type CherryVisualRendererResult = void | string | (() => void);
 export type CherryVisualRenderer = (
   context: CherryVisualRenderContext,

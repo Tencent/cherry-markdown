@@ -7,7 +7,7 @@ describe('Cherry compatibility manifest', () => {
     expect(new Set(ids).size).toBe(ids.length);
     expect(cherryCompatibilityCases).not.toHaveLength(0);
     for (const item of cherryCompatibilityCases) {
-      expect(['structured', 'native-source', 'passthrough']).toContain(item.mode);
+      expect(['structured', 'native-source']).toContain(item.mode);
       expect(item.markdown.trim()).not.toBe('');
       expect(Boolean(item.selector || item.expectedText), `${item.id} browser assertion`).toBe(true);
       expect(item.interaction.create).toBeTruthy();

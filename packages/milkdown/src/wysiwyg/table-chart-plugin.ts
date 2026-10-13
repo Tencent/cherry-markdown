@@ -5,6 +5,7 @@ import { $prose } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx, type CherryWysiwygConfig } from './config.js';
 import { sanitizedEngineFragment } from './html-sanitizer.js';
 import type { CherryVisualRendererResult } from './types.js';
+import { createRendererCleanup, reportRendererError } from './renderer-cleanup.js';
 
 interface TableChartRevision {
   position: number;
@@ -125,10 +126,12 @@ class TableChartPreview {
     const renderer = this.config.renderers?.tableChart;
     if (!renderer) return;
     this.timer = undefined;
-    const version = ++this.renderVersion;
+    this.renderVersion += 1;
+    const version = this.renderVersion;
     this.pendingController?.abort();
     const controller = new AbortController();
     this.pendingController = controller;
+    const cleanups = createRendererCleanup(controller.signal, (error) => this.config.onError?.(error, 'render'));
 
     // Render the next revision outside document flow. The current chart stays
     // visible until the replacement succeeds, preventing cell edits from
@@ -161,8 +164,8 @@ class TableChartPreview {
 
     void Promise.resolve(result)
       .then((cleanup) => {
+        if (typeof cleanup === 'function') cleanups.add(cleanup);
         if (this.destroyed || version !== this.renderVersion || controller.signal.aborted) {
-          if (typeof cleanup === 'function') cleanup();
           staging.remove();
           return;
         }
@@ -172,7 +175,7 @@ class TableChartPreview {
         this.preview.replaceWith(nextPreview);
         this.preview = nextPreview;
         this.activeController = controller;
-        this.cleanup = typeof cleanup === 'function' ? cleanup : undefined;
+        this.cleanup = cleanups.dispose;
         this.pendingController = undefined;
         staging.remove();
       })
@@ -193,7 +196,7 @@ class TableChartPreview {
       status.textContent = '图表暂时无法渲染，请检查表格内容。';
       this.preview.append(status);
     }
-    this.config.onError?.(error, 'render');
+    reportRendererError(error, (cause) => this.config.onError?.(cause, 'render'));
   }
 }
 

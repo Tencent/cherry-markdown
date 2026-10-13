@@ -1,6 +1,5 @@
 @import "cherry-markdown/dist/cherry-markdown.css";
 @import "@milkdown/kit/prose/view/style/prosemirror.css";
-@import "mathlive/fonts.css";
 
 /* Editing controls are outside the native columns' grid. Only content items
  * participate in layout; the NodeView wrapper must not become a spare column. */
