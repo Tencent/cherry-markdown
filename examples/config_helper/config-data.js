@@ -74,8 +74,7 @@ export const CONFIG_CATEGORIES = [
         type: 'string',
         description: '编辑器挂载的 DOM 节点 ID',
         inputType: 'text',
-        enabled: true,
-        value: 'cherry-markdown',
+        initialValue: 'cherry-markdown',
       },
       {
         key: 'value',
@@ -84,8 +83,7 @@ export const CONFIG_CATEGORIES = [
         type: 'string',
         description: '编辑器初始化时的 Markdown 内容',
         inputType: 'textarea',
-        enabled: true,
-        value: '# Hello Cherry Markdown!\n\n这是一个配置生成器的预览示例。\n\n## 功能特性\n\n- **粗体** 和 *斜体*\n- ~~删除线~~\n- `行内代码`\n\n```javascript\nconst cherry = new Cherry(config);\n```\n\n> 引用文本\n\n| 表头1 | 表头2 | 表头3 |\n|-------|-------|-------|\n| 内容1 | 内容2 | 内容3 |\n| 内容4 | 内容5 | 内容6 |\n\n- [x] 已完成任务\n- [ ] 待完成任务\n',
+        initialValue: '# Hello Cherry Markdown!\n\n这是一个配置生成器的预览示例。\n\n## 功能特性\n\n- **粗体** 和 *斜体*\n- ~~删除线~~\n- `行内代码`\n\n```javascript\nconst cherry = new Cherry(config);\n```\n\n> 引用文本\n\n| 表头1 | 表头2 | 表头3 |\n|-------|-------|-------|\n| 内容1 | 内容2 | 内容3 |\n| 内容4 | 内容5 | 内容6 |\n\n- [x] 已完成任务\n- [ ] 待完成任务\n',
       },
       {
         key: 'isPreviewOnly',
@@ -94,8 +92,6 @@ export const CONFIG_CATEGORIES = [
         type: 'boolean',
         description: '是否开启纯预览模式，开启后只能预览不能编辑',
         inputType: 'toggle',
-        enabled: true,
-        value: false,
       },
       {
         key: 'autoScrollByCursor',
@@ -104,8 +100,6 @@ export const CONFIG_CATEGORIES = [
         type: 'boolean',
         description: '是否自动根据光标位置滚动预览区域',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
       },
       {
         key: 'forceAppend',
@@ -114,8 +108,6 @@ export const CONFIG_CATEGORIES = [
         type: 'boolean',
         description: '是否强制将编辑器输出到 body 上',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
       },
       {
         key: 'locale',
@@ -125,8 +117,6 @@ export const CONFIG_CATEGORIES = [
         description: '编辑器界面语言',
         inputType: 'select',
         options: ['zh_CN', 'en_US', 'zh_TW'],
-        enabled: true,
-        value: 'zh_CN',
       },
       {
         key: 'nameSpace',
@@ -135,8 +125,6 @@ export const CONFIG_CATEGORIES = [
         type: 'string',
         description: 'cherry 缓存的作用范围，相同 nameSpace 的实例共享 localStorage 缓存',
         inputType: 'text',
-        enabled: true,
-        value: 'cherry',
       },
       {
         key: 'autoScrollByHashAfterInit',
@@ -145,8 +133,6 @@ export const CONFIG_CATEGORIES = [
         type: 'boolean',
         description: 'cherry 初始化后是否检查 location.hash 尝试滚动到对应位置',
         inputType: 'toggle',
-        enabled: true,
-        value: false,
       },
     ],
   },
@@ -165,8 +151,6 @@ export const CONFIG_CATEGORIES = [
         type: 'string',
         description: '编辑器高度，支持 px 和 % 单位',
         inputType: 'text',
-        enabled: true,
-        value: '100%',
       },
       {
         key: 'editor.defaultModel',
@@ -176,8 +160,6 @@ export const CONFIG_CATEGORIES = [
         description: '编辑器初始化后的默认模式',
         inputType: 'select',
         options: ['edit&preview', 'editOnly', 'previewOnly'],
-        enabled: true,
-        value: 'edit&preview',
       },
       {
         key: 'editor.convertWhenPaste',
@@ -186,8 +168,6 @@ export const CONFIG_CATEGORIES = [
         type: 'boolean',
         description: '粘贴时是否自动将 HTML 转成 Markdown',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
       },
       {
         key: 'editor.keyMap',
@@ -197,8 +177,6 @@ export const CONFIG_CATEGORIES = [
         description: '快捷键风格，目前仅支持 sublime 和 vim',
         inputType: 'select',
         options: ['sublime', 'vim'],
-        enabled: true,
-        value: 'sublime',
       },
       {
         key: 'editor.writingStyle',
@@ -208,8 +186,6 @@ export const CONFIG_CATEGORIES = [
         description: '书写风格：normal 普通 | typewriter 打字机（光标始终在屏幕中间）| focus 专注（当前行高亮）',
         inputType: 'select',
         options: ['normal', 'typewriter', 'focus'],
-        enabled: true,
-        value: 'normal',
       },
       {
         key: 'editor.showFullWidthMark',
@@ -218,8 +194,6 @@ export const CONFIG_CATEGORIES = [
         type: 'boolean',
         description: '是否高亮全角符号（·|￥|、|：等）',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
       },
       {
         key: 'editor.showSuggestList',
@@ -228,18 +202,17 @@ export const CONFIG_CATEGORIES = [
         type: 'boolean',
         description: '是否显示输入联想框',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
       },
       {
         key: 'editor.maxUrlLength',
-        name: 'URL 最大长度',
+        name: 'URL 缩略门槛',
         path: 'editor.maxUrlLength',
         type: 'number',
-        description: 'URL 的最大长度，-1 表示不限制，超过该长度的 URL 会显示省略号',
+        description: '编辑器中 URL 的缩略门槛；-1 关闭缩略，启用时填写 11 及以上的整数，原始 URL 保持完整',
         inputType: 'text',
-        enabled: true,
-        value: -1,
+        min: -1,
+        validate: value => value === -1 || value >= 11,
+        validationMessage: '请输入 -1 或 11 及以上的整数',
       },
     ],
   },
@@ -260,8 +233,6 @@ export const CONFIG_CATEGORIES = [
         inputType: 'toolbar-select',
         options: TOOLBAR_BUTTONS,
         canDisable: true,
-        enabled: true,
-        value: ['bold', 'italic', 'strikethrough', '|', 'color', 'header', 'list', '|', 'graph', 'code', 'formula'],
       },
       {
         key: 'toolbars.toolbarRight',
@@ -272,8 +243,6 @@ export const CONFIG_CATEGORIES = [
         inputType: 'toolbar-select',
         options: TOOLBAR_RIGHT_BUTTONS,
         canDisable: true,
-        enabled: true,
-        value: ['togglePreview', 'settings', 'fullScreen'],
       },
       {
         key: 'toolbars.bubble',
@@ -284,8 +253,6 @@ export const CONFIG_CATEGORIES = [
         inputType: 'toolbar-select',
         options: BUBBLE_BUTTONS,
         canDisable: true,
-        enabled: true,
-        value: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', 'ruby', 'size', 'color'],
       },
       {
         key: 'toolbars.float',
@@ -296,8 +263,6 @@ export const CONFIG_CATEGORIES = [
         inputType: 'toolbar-select',
         options: FLOAT_BUTTONS,
         canDisable: true,
-        enabled: true,
-        value: ['h1', 'h2', 'h3', 'checklist', 'quote', 'quickTable', 'code'],
       },
       {
         key: 'toolbars.sidebar',
@@ -308,8 +273,7 @@ export const CONFIG_CATEGORIES = [
         inputType: 'toolbar-select',
         options: SIDEBAR_BUTTONS,
         canDisable: true,
-        enabled: true,
-        value: ['mobilePreview', 'copy', 'theme'],
+        initialValue: ['mobilePreview', 'copy', 'theme'],
       },
     ],
   },
@@ -328,8 +292,6 @@ export const CONFIG_CATEGORIES = [
         type: 'boolean',
         description: '是否启用经典换行逻辑（true: 一个换行被忽略，两个换行分段）',
         inputType: 'toggle',
-        enabled: true,
-        value: false,
       },
       {
         key: 'engine.global.htmlWhiteList',
@@ -338,8 +300,6 @@ export const CONFIG_CATEGORIES = [
         type: 'string',
         description: '额外允许渲染的 HTML 标签，标签以英文竖线分隔，如：iframe|script|style',
         inputType: 'text',
-        enabled: true,
-        value: '',
       },
       {
         key: 'engine.global.htmlBlackList',
@@ -348,8 +308,6 @@ export const CONFIG_CATEGORIES = [
         type: 'string',
         description: 'HTML 黑名单，优先级高于白名单，标签以英文竖线分隔，配置 * 可禁用所有 HTML 标签',
         inputType: 'text',
-        enabled: true,
-        value: '',
       },
       {
         key: 'engine.global.htmlAttrWhiteList',
@@ -358,8 +316,6 @@ export const CONFIG_CATEGORIES = [
         type: 'string',
         description: '额外允许渲染的 HTML 标签属性，标签以英文竖线分隔，如：part|onmouseover|my-attr',
         inputType: 'text',
-        enabled: true,
-        value: '',
       },
       {
         key: 'engine.global.flowSessionContext',
@@ -368,8 +324,6 @@ export const CONFIG_CATEGORIES = [
         type: 'boolean',
         description: '适配流式会话场景，开启后渲染频率提升、代码块/表格等自动闭合',
         inputType: 'toggle',
-        enabled: true,
-        value: false,
       },
       {
         key: 'engine.global.flowSessionCursor',
@@ -378,8 +332,6 @@ export const CONFIG_CATEGORIES = [
         type: 'string',
         description: "流式会话时在末尾增加光标 DOM，'default' 使用默认样式，'' 不增加",
         inputType: 'text',
-        enabled: true,
-        value: '',
       },
     ],
   },
@@ -398,11 +350,9 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '自动识别并转换 URL 为可点击链接',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'enableShortLink', name: '启用短链接', type: 'boolean', value: true },
-          { key: 'shortLinkLength', name: '短链接长度', type: 'number', value: 20 },
+          { key: 'enableShortLink', name: '启用短链接', type: 'boolean' },
+          { key: 'shortLinkLength', name: '短链接长度', type: 'number', min: 1 },
         ],
       },
       {
@@ -412,11 +362,9 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '有序/无序列表解析配置',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'listNested', name: '同级列表类型转换', type: 'boolean', value: false },
-          { key: 'indentSpace', name: '缩进空格数', type: 'number', value: 2 },
+          { key: 'listNested', name: '同级列表类型转换', type: 'boolean' },
+          { key: 'indentSpace', name: '缩进空格数', type: 'number', min: 2 },
         ],
       },
       {
@@ -426,10 +374,8 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '表格解析配置，支持渲染为图表',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'enableChart', name: '启用图表渲染', type: 'boolean', value: false },
+          { key: 'enableChart', name: '启用图表渲染', type: 'boolean' },
         ],
       },
       {
@@ -439,11 +385,9 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '行内代码解析配置',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'showColor', name: '颜色值显示色块', type: 'boolean', value: true },
-          { key: 'selfClosing', name: '自动闭合', type: 'boolean', value: false },
+          { key: 'showColor', name: '颜色值显示色块', type: 'boolean' },
+          { key: 'selfClosing', name: '自动闭合', type: 'boolean' },
         ],
       },
       {
@@ -453,17 +397,15 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '代码块渲染配置',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'wrap', name: '自动换行', type: 'boolean', value: true },
-          { key: 'lineNumber', name: '显示行号', type: 'boolean', value: true },
-          { key: 'copyCode', name: '复制按鈕', type: 'boolean', value: true },
-          { key: 'editCode', name: '编辑按鈕', type: 'boolean', value: true },
-          { key: 'changeLang', name: '语言切换', type: 'boolean', value: true },
-          { key: 'expandCode', name: '展开/折叠按鈕', type: 'boolean', value: false },
-          { key: 'selfClosing', name: '自动闭合', type: 'boolean', value: true },
-          { key: 'indentedCodeBlock', name: '缩进代码块', type: 'boolean', value: true },
+          { key: 'wrap', name: '自动换行', type: 'boolean' },
+          { key: 'lineNumber', name: '显示行号', type: 'boolean' },
+          { key: 'copyCode', name: '复制按鈕', type: 'boolean' },
+          { key: 'editCode', name: '编辑按鈕', type: 'boolean' },
+          { key: 'changeLang', name: '语言切换', type: 'boolean' },
+          { key: 'expandCode', name: '展开/折叠按鈕', type: 'boolean' },
+          { key: 'selfClosing', name: '自动闭合', type: 'boolean' },
+          { key: 'indentedCodeBlock', name: '缩进代码块', type: 'boolean' },
         ],
       },      {
         key: 'engine.syntax.emoji',
@@ -472,10 +414,8 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: 'Emoji 表情渲染配置',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'useUnicode', name: '使用 Unicode 渲染', type: 'boolean', value: true },
+          { key: 'useUnicode', name: '使用 Unicode 渲染', type: 'boolean' },
         ],
       },
       {
@@ -485,10 +425,8 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '粗体/斜体等字体样式配置',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'allowWhitespace', name: '允许首尾空格', type: 'boolean', value: false },
+          { key: 'allowWhitespace', name: '允许首尾空格', type: 'boolean' },
         ],
       },
       {
@@ -498,10 +436,8 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '删除线语法配置',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'needWhitespace', name: '需要首尾空格', type: 'boolean', value: false },
+          { key: 'needWhitespace', name: '需要首尾空格', type: 'boolean' },
         ],
       },
       {
@@ -511,11 +447,9 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '块级数学公式渲染配置',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'engine', name: '渲染引擎', type: 'select', value: 'MathJax', options: ['MathJax', 'katex'] },
-          { key: 'plugins', name: '加载插件', type: 'boolean', value: true },
+          { key: 'engine', name: '渲染引擎', type: 'select', options: ['MathJax', 'katex'] },
+          { key: 'plugins', name: '加载插件', type: 'boolean' },
         ],
       },
       {
@@ -525,10 +459,8 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '行内数学公式渲染配置',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'engine', name: '渲染引擎', type: 'select', value: 'MathJax', options: ['MathJax', 'katex'] },
+          { key: 'engine', name: '渲染引擎', type: 'select', options: ['MathJax', 'katex'] },
         ],
       },
       {
@@ -538,11 +470,9 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '目录自动生成配置',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'allowMultiToc', name: '允许多个目录', type: 'boolean', value: false },
-          { key: 'showAutoNumber', name: '显示序号', type: 'boolean', value: false },
+          { key: 'allowMultiToc', name: '允许多个目录', type: 'boolean' },
+          { key: 'showAutoNumber', name: '显示序号', type: 'boolean' },
         ],
       },
       {
@@ -552,11 +482,9 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '标题解析配置',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'anchorStyle', name: '锚点样式', type: 'select', value: 'default', options: ['default', 'autonumber', 'none'] },
-          { key: 'strict', name: '严格模式', type: 'boolean', value: false },
+          { key: 'anchorStyle', name: '锚点样式', type: 'select', options: ['default', 'autonumber', 'none'] },
+          { key: 'strict', name: '严格模式', type: 'boolean' },
         ],
       },
       {
@@ -566,11 +494,9 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: 'HTML 块级内容渲染配置',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'filterStyle', name: '过滤 style 属性', type: 'boolean', value: false },
-          { key: 'removeTrailingNewline', name: '去掉闭合标签后连续换行', type: 'boolean', value: false },
+          { key: 'filterStyle', name: '过滤 style 属性', type: 'boolean' },
+          { key: 'removeTrailingNewline', name: '去掉闭合标签后连续换行', type: 'boolean' },
         ],
       },
       {
@@ -580,10 +506,8 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '图片渲染配置',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'selfClosing', name: '自动闭合', type: 'boolean', value: false },
+          { key: 'selfClosing', name: '自动闭合', type: 'boolean' },
         ],
       },
       {
@@ -593,11 +517,9 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '链接渲染配置',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
         subItems: [
-          { key: 'target', name: '打开方式', type: 'select', value: '_blank', options: ['_blank', '_self', '_parent', '_top'] },
-          { key: 'selfClosing', name: '自动闭合', type: 'boolean', value: false },
+          { key: 'target', name: '打开方式', type: 'select', options: ['', '_blank', '_self', '_parent', '_top'] },
+          { key: 'selfClosing', name: '自动闭合', type: 'boolean' },
         ],
       },
     ],
@@ -617,8 +539,6 @@ export const CONFIG_CATEGORIES = [
         type: 'string',
         description: '预览区域的 CSS 类名',
         inputType: 'text',
-        enabled: true,
-        value: 'cherry-markdown',
       },
       {
         key: 'previewer.enablePreviewerBubble',
@@ -627,8 +547,6 @@ export const CONFIG_CATEGORIES = [
         type: 'boolean',
         description: '是否启用预览区域编辑能力（点击预览区可定位到编辑区）',
         inputType: 'toggle',
-        enabled: true,
-        value: true,
       },
       {
         key: 'previewer.isMobilePreview',
@@ -637,8 +555,6 @@ export const CONFIG_CATEGORIES = [
         type: 'boolean',
         description: '是否启用移动端预览模式',
         inputType: 'toggle',
-        enabled: true,
-        value: false,
       },
       {
         key: 'previewer.floatWhenClosePreviewer',
@@ -647,8 +563,6 @@ export const CONFIG_CATEGORIES = [
         type: 'boolean',
         description: '关闭预览时是否浮动显示预览区域',
         inputType: 'toggle',
-        enabled: true,
-        value: false,
       },
     ],
   },
@@ -667,8 +581,6 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '引入 ECharts 组件，用于表格渲染为图表',
         inputType: 'toggle',
-        enabled: false,
-        value: false,
       },
       {
         key: 'externals.MathJax',
@@ -677,8 +589,6 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '引入 MathJax 组件，用于数学公式渲染',
         inputType: 'toggle',
-        enabled: false,
-        value: false,
       },
       {
         key: 'externals.katex',
@@ -687,8 +597,6 @@ export const CONFIG_CATEGORIES = [
         type: 'object',
         description: '引入 KaTeX 组件，用于数学公式渲染',
         inputType: 'toggle',
-        enabled: false,
-        value: false,
       },
     ],
   },
@@ -708,8 +616,6 @@ export const CONFIG_CATEGORIES = [
         description: '编辑器主题',
         inputType: 'select',
         options: ['default', 'dark', 'gray', 'abyss', 'green', 'red', 'violet', 'blue'],
-        enabled: true,
-        value: 'default',
       },
       {
         key: 'themeSettings.codeBlockTheme',
@@ -719,8 +625,6 @@ export const CONFIG_CATEGORIES = [
         description: '代码块的高亮主题',
         inputType: 'select',
         options: ['default', 'dark', 'light', 'monokai', 'github', 'tomorrow', 'solarized-light', 'solarized-dark'],
-        enabled: true,
-        value: 'default',
       },
       {
         key: 'themeSettings.inlineCodeTheme',
@@ -730,8 +634,6 @@ export const CONFIG_CATEGORIES = [
         description: '行内代码的颜色主题',
         inputType: 'select',
         options: ['red', 'black'],
-        enabled: true,
-        value: 'red',
       },
     ],
   },
