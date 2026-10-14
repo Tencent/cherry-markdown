@@ -3,7 +3,14 @@ import type { MarkType } from '@milkdown/kit/prose/model';
 import { Plugin, TextSelection, type EditorState } from '@milkdown/kit/prose/state';
 import { $prose } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
-import { createContextBubble, createContextButton } from './contextual-ui.js';
+import {
+  createContextBubble,
+  createContextButton,
+  createContextFrame,
+  placeContextBubble,
+  preserveContextSelection,
+  watchContextViewport,
+} from './contextual-ui.js';
 
 export function supportsTextFormatting(state: EditorState) {
   const { selection, doc } = state;
@@ -71,51 +78,40 @@ export const cherryTextBubble = $prose((ctx) => {
       host.append(bubble);
       let linkUiOpen = false;
       let dismissedSelection: { from: number; to: number } | undefined;
-      let frame = 0;
 
       const hide = () => {
         bubble.hidden = true;
       };
-      const update = () => {
-        cancelAnimationFrame(frame);
-        frame = requestAnimationFrame(() => {
-          const { from, to } = view.state.selection;
-          if (dismissedSelection?.from === from && dismissedSelection.to === to) return hide();
-          dismissedSelection = undefined;
-          if (linkUiOpen || !view.hasFocus() || !supportsTextFormatting(view.state)) return hide();
-          const selection = document.getSelection();
-          if (
-            !selection ||
-            selection.isCollapsed ||
-            !selection.anchorNode ||
-            !selection.focusNode ||
-            !view.dom.contains(selection.anchorNode) ||
-            !view.dom.contains(selection.focusNode)
-          ) {
-            return hide();
-          }
-          const range = selection.getRangeAt(0);
-          const rect = range.getBoundingClientRect();
-          if (!rect.width && !rect.height) return hide();
-          bubble.hidden = false;
-          const width = bubble.offsetWidth;
-          const height = bubble.offsetHeight;
-          const viewportWidth = document.documentElement.clientWidth;
-          const above = rect.top - height - 10 >= 8;
-          bubble.classList.toggle('is-below', !above);
-          arrow.className = above ? 'cherry-bubble-bottom' : 'cherry-bubble-top';
-          bubble.style.left = `${Math.max(8, Math.min(viewportWidth - width - 8, rect.left + rect.width / 2 - width / 2))}px`;
-          bubble.style.top = `${above ? rect.top - height - 10 : rect.bottom + 10}px`;
-          actions.forEach((action) => {
-            const mark = findMark(view.state, action.names);
-            const active = Boolean(mark && markIsActive(view.state, mark));
-            action.button.classList.toggle('is-active', active);
-            action.button.setAttribute('aria-pressed', String(active));
-            action.button.disabled = !mark;
-          });
+      const updateFrame = createContextFrame(() => {
+        const { from, to } = view.state.selection;
+        if (dismissedSelection?.from === from && dismissedSelection.to === to) return hide();
+        dismissedSelection = undefined;
+        if (linkUiOpen || !view.hasFocus() || !supportsTextFormatting(view.state)) return hide();
+        const selection = document.getSelection();
+        if (
+          !selection ||
+          selection.isCollapsed ||
+          !selection.anchorNode ||
+          !selection.focusNode ||
+          !view.dom.contains(selection.anchorNode) ||
+          !view.dom.contains(selection.focusNode)
+        ) {
+          return hide();
+        }
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        if (!rect.width && !rect.height) return hide();
+        bubble.hidden = false;
+        placeContextBubble(bubble, rect, { gap: 10, arrow });
+        actions.forEach((action) => {
+          const mark = findMark(view.state, action.names);
+          const active = Boolean(mark && markIsActive(view.state, mark));
+          action.button.classList.toggle('is-active', active);
+          action.button.setAttribute('aria-pressed', String(active));
+          action.button.disabled = !mark;
         });
-      };
-      const preserveSelection = (event: PointerEvent) => event.preventDefault();
+      });
+      const update = updateFrame.schedule;
       const onClick = (event: MouseEvent) => {
         const action = actions.find(({ button }) => button === event.currentTarget);
         if (!action || !supportsTextFormatting(view.state)) return;
@@ -137,21 +133,19 @@ export const cherryTextBubble = $prose((ctx) => {
       };
       const onScroll = () => hide();
 
-      bubble.addEventListener('pointerdown', preserveSelection);
+      bubble.addEventListener('pointerdown', preserveContextSelection);
       actions.forEach(({ button }) => button.addEventListener('click', onClick));
       view.dom.addEventListener('cherry-milkdown:link-ui-change', onLinkUi);
-      document.defaultView?.addEventListener('scroll', onScroll, true);
-      document.defaultView?.addEventListener('resize', hide);
+      const releaseViewport = watchContextViewport(document, onScroll, hide);
 
       return {
         update,
         destroy: () => {
-          cancelAnimationFrame(frame);
-          bubble.removeEventListener('pointerdown', preserveSelection);
+          updateFrame.cancel();
+          bubble.removeEventListener('pointerdown', preserveContextSelection);
           actions.forEach(({ button }) => button.removeEventListener('click', onClick));
           view.dom.removeEventListener('cherry-milkdown:link-ui-change', onLinkUi);
-          document.defaultView?.removeEventListener('scroll', onScroll, true);
-          document.defaultView?.removeEventListener('resize', hide);
+          releaseViewport();
           bubble.remove();
         },
       };

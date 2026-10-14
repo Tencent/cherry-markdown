@@ -4,7 +4,13 @@ import type { EditorView } from '@milkdown/kit/prose/view';
 import { sanitizeLinkHref } from '@milkdown/kit/preset/commonmark';
 import { $prose } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
-import { createContextBubble, createContextButton } from './contextual-ui.js';
+import {
+  createContextBubble,
+  createContextButton,
+  placeContextBubble,
+  preserveContextSelection,
+  watchContextViewport,
+} from './contextual-ui.js';
 
 interface LinkRange {
   from: number;
@@ -228,18 +234,7 @@ export const cherryLinkEditor = $prose((ctx) => {
         active = { ...current, anchor };
         inspector.hidden = false;
         const rect = lastClientRect(anchor);
-        const width = inspector.offsetWidth;
-        const height = inspector.offsetHeight;
-        const gap = 8;
-        const viewportWidth = document.documentElement.clientWidth;
-        const viewportHeight = document.documentElement.clientHeight;
-        const left = Math.max(8, Math.min(viewportWidth - width - 8, rect.left + rect.width / 2 - width / 2));
-        const above = rect.top - height - gap >= 8;
-        const top = above ? rect.top - height - gap : Math.min(viewportHeight - height - 8, rect.bottom + gap);
-        inspector.classList.toggle('is-below', !above);
-        arrow.className = above ? 'cherry-bubble-bottom' : 'cherry-bubble-top';
-        inspector.style.left = `${left}px`;
-        inspector.style.top = `${top}px`;
+        placeContextBubble(inspector, rect, { bounds: 'bottom', arrow });
       };
       const placeForm = () => {
         const anchor = active && anchorForRange(active);
@@ -349,8 +344,8 @@ export const cherryLinkEditor = $prose((ctx) => {
         requestAnimationFrame(placeInspector);
       };
       const preserveSelection = (event: PointerEvent) => {
-        // Moving focus to the overlay must not collapse the document selection.
-        event.preventDefault();
+        // Link inspection also owns pointer propagation, unlike formatting controls.
+        preserveContextSelection(event);
         event.stopPropagation();
       };
       const onEdit = (event: MouseEvent) => {
@@ -493,8 +488,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       edit.addEventListener('click', onEdit);
       unlink.addEventListener('click', onUnlink);
       document.addEventListener('pointerdown', onOutsidePointer, true);
-      document.defaultView?.addEventListener('scroll', hideForViewportChange, true);
-      document.defaultView?.addEventListener('resize', hideForViewportChange);
+      const releaseViewport = watchContextViewport(document, hideForViewportChange);
       form.addEventListener('submit', onSubmit);
       textInput.addEventListener('input', () => {
         error.hidden = true;
@@ -521,8 +515,7 @@ export const cherryLinkEditor = $prose((ctx) => {
           unlink.removeEventListener('click', onUnlink);
           if (copyFeedbackTimer !== undefined) window.clearTimeout(copyFeedbackTimer);
           document.removeEventListener('pointerdown', onOutsidePointer, true);
-          document.defaultView?.removeEventListener('scroll', hideForViewportChange, true);
-          document.defaultView?.removeEventListener('resize', hideForViewportChange);
+          releaseViewport();
           form.removeEventListener('submit', onSubmit);
           form.removeEventListener('keydown', onKeyDown);
           cancel.removeEventListener('click', onCancel);

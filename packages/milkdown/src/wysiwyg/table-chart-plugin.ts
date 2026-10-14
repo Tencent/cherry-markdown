@@ -6,7 +6,8 @@ import { EXTERNAL_MARKDOWN_UPDATE } from '../document-update.js';
 import { cherryWysiwygConfigCtx, type CherryWysiwygConfig } from './config.js';
 import { sanitizedEngineFragment } from './html-sanitizer.js';
 import type { CherryVisualRendererResult } from './types.js';
-import { createRendererCleanup, reportRendererError } from './renderer-cleanup.js';
+import { reportRendererError } from './renderer-cleanup.js';
+import { createRenderLifecycle } from './render-lifecycle.js';
 
 interface TableChartRevision {
   position: number;
@@ -100,17 +101,15 @@ class TableChartPreview {
   private source = '';
   private syntax = '';
   private destroyed = false;
-  private renderVersion = 0;
   private timer?: ReturnType<typeof setTimeout>;
-  private pendingController?: AbortController;
-  private activeController?: AbortController;
-  private cleanup?: () => void;
+  private readonly rendering;
   private preview: HTMLElement;
 
   constructor(
     private readonly dom: HTMLElement,
     private readonly config: CherryWysiwygConfig,
   ) {
+    this.rendering = createRenderLifecycle((error) => config.onError?.(error, 'render'));
     const { preview, mount } = createChartPreview();
     // Reserve the same figure (including Cherry's margins) as the rendered
     // chart, so lazy ECharts loading cannot move a cell between mouse clicks.
@@ -136,11 +135,8 @@ class TableChartPreview {
 
   destroy() {
     this.destroyed = true;
-    this.renderVersion += 1;
     if (this.timer) clearTimeout(this.timer);
-    this.pendingController?.abort();
-    this.activeController?.abort();
-    this.cleanup?.();
+    this.rendering.destroy();
   }
 
   private render() {
@@ -148,12 +144,7 @@ class TableChartPreview {
     const renderer = this.config.renderers?.tableChart;
     if (!renderer) return;
     this.timer = undefined;
-    this.renderVersion += 1;
-    const version = this.renderVersion;
-    this.pendingController?.abort();
-    const controller = new AbortController();
-    this.pendingController = controller;
-    const cleanups = createRendererCleanup(controller.signal, (error) => this.config.onError?.(error, 'render'));
+    const revision = this.rendering.begin();
 
     // Render the next revision outside document flow. The current chart stays
     // visible until the replacement succeeds, preventing cell edits from
@@ -164,6 +155,7 @@ class TableChartPreview {
     const { preview: nextPreview, mount } = createChartPreview();
     staging.append(nextPreview);
     this.dom.append(staging);
+    revision.addCleanup(() => staging.remove());
 
     let result: CherryVisualRendererResult | Promise<CherryVisualRendererResult>;
     try {
@@ -172,43 +164,30 @@ class TableChartPreview {
         engine: this.config.engine,
         source: this.source,
         syntax: this.syntax,
-        signal: controller.signal,
+        signal: revision.signal,
       });
     } catch (error) {
-      staging.remove();
-      this.reportError(error, version);
+      if (revision.fail()) this.reportError(error);
       return;
     }
 
-    void Promise.resolve(result)
-      .then((cleanup) => {
-        if (typeof cleanup === 'function') cleanups.add(cleanup);
-        if (this.destroyed || version !== this.renderVersion || controller.signal.aborted) {
-          staging.remove();
-          return;
-        }
-        if (typeof cleanup === 'string') mount.replaceChildren(sanitizedEngineFragment(cleanup));
-        this.activeController?.abort();
-        this.cleanup?.();
+    void revision.settle(result, {
+      prepare: (value) => {
+        if (typeof value === 'string') mount.replaceChildren(sanitizedEngineFragment(value));
+      },
+      commit: () => {
         this.preview.replaceWith(nextPreview);
         this.preview = nextPreview;
-        this.activeController = controller;
-        this.cleanup = cleanups.dispose;
-        this.pendingController = undefined;
         staging.remove();
-      })
-      .catch((error: unknown) => {
-        staging.remove();
-        this.reportError(error, version);
-      });
+      },
+      failure: (error) => this.reportError(error),
+    });
   }
 
-  private reportError(error: unknown, version: number) {
-    if (this.destroyed || version !== this.renderVersion) return;
-    this.pendingController?.abort();
-    this.pendingController = undefined;
+  private reportError(error: unknown) {
+    if (this.destroyed) return;
     this.preview.dataset.renderError = 'true';
-    if (!this.activeController) {
+    if (!this.rendering.hasActive) {
       const status = document.createElement('p');
       status.setAttribute('role', 'alert');
       status.textContent = '图表暂时无法渲染，请检查表格内容。';

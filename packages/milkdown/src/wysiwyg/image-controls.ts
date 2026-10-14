@@ -3,7 +3,14 @@ import { $prose } from '@milkdown/kit/utils';
 import type { CherryMilkdownFileUploadParams } from '../types.js';
 import { imageAltText, imageLayoutState, replaceImageAltText, updateImageLayout } from '../native-layout.js';
 import { cherryWysiwygConfigCtx } from './config.js';
-import { createContextButton, setupContextBubble } from './contextual-ui.js';
+import {
+  createContextButton,
+  createContextFrame,
+  placeContextBubble,
+  preserveContextSelection,
+  setupContextBubble,
+  watchContextViewport,
+} from './contextual-ui.js';
 
 interface ResizeSession {
   position: number;
@@ -150,7 +157,6 @@ export const cherryImageControls = $prose((ctx) => {
       let activeTarget: HTMLImageElement | undefined;
       let sourceOpen = false;
       let resize: ResizeSession | undefined;
-      let positionFrame: number | undefined;
       let transitionFrame: number | undefined;
       let layoutTransitionPending = false;
       let uploadSession = 0;
@@ -200,8 +206,7 @@ export const cherryImageControls = $prose((ctx) => {
         uploadSession += 1;
         uploadController?.abort();
         uploadController = undefined;
-        if (positionFrame !== undefined) cancelAnimationFrame(positionFrame);
-        positionFrame = undefined;
+        placementFrame.cancel();
         releaseTarget();
         activePosition = -1;
         activeTarget = undefined;
@@ -213,7 +218,6 @@ export const cherryImageControls = $prose((ctx) => {
         syncActions();
       };
       const place = () => {
-        positionFrame = undefined;
         if (!activeTarget?.isConnected || sourceOpen || layoutTransitionPending) return;
         if (!resize && activeTarget.getAnimations().some((animation) => animation.playState === 'running')) {
           frame.hidden = true;
@@ -236,14 +240,11 @@ export const cherryImageControls = $prose((ctx) => {
           width: `${rect.width}px`,
           height: `${rect.height}px`,
         });
-        const width = toolbar.offsetWidth;
-        const height = toolbar.offsetHeight;
-        toolbar.style.left = `${Math.max(8, Math.min(viewportWidth - width - 8, rect.left + rect.width / 2 - width / 2))}px`;
-        toolbar.style.top = `${Math.max(8, Math.min(viewportHeight - height - 8, rect.top - height - 8 >= 8 ? rect.top - height - 8 : rect.bottom + 8))}px`;
+        placeContextBubble(toolbar, rect, { bounds: 'both' });
       };
+      const placementFrame = createContextFrame(place);
       function schedulePlace() {
-        if (positionFrame !== undefined) cancelAnimationFrame(positionFrame);
-        positionFrame = requestAnimationFrame(place);
+        placementFrame.schedule();
       }
       function trackTransitionPosition() {
         if (!activeTarget) return;
@@ -497,15 +498,14 @@ export const cherryImageControls = $prose((ctx) => {
         schedulePlace();
       };
 
-      toolbar.addEventListener('pointerdown', (event) => event.preventDefault());
+      toolbar.addEventListener('pointerdown', preserveContextSelection);
       actions.forEach(({ button }) => button.addEventListener('click', onAction));
       frame.addEventListener('pointerdown', beginResize);
       document.addEventListener('pointermove', moveResize, true);
       document.addEventListener('pointerup', finishResize, true);
       document.addEventListener('pointerdown', onOutside, true);
       document.addEventListener('keydown', onKeyDown, true);
-      document.defaultView?.addEventListener('scroll', onViewportChange, true);
-      document.defaultView?.addEventListener('resize', onViewportChange);
+      const releaseViewport = watchContextViewport(document, onViewportChange);
       form.addEventListener('submit', onSubmit);
       cancel.addEventListener('click', onCancel);
       choose.addEventListener('click', chooseImage);
@@ -518,16 +518,16 @@ export const cherryImageControls = $prose((ctx) => {
           uploadSession += 1;
           uploadController?.abort();
           uploadController = undefined;
-          if (positionFrame !== undefined) cancelAnimationFrame(positionFrame);
+          placementFrame.cancel();
           releaseTarget();
           targetObserver?.disconnect();
+          toolbar.removeEventListener('pointerdown', preserveContextSelection);
           frame.removeEventListener('pointerdown', beginResize);
           document.removeEventListener('pointermove', moveResize, true);
           document.removeEventListener('pointerup', finishResize, true);
           document.removeEventListener('pointerdown', onOutside, true);
           document.removeEventListener('keydown', onKeyDown, true);
-          document.defaultView?.removeEventListener('scroll', onViewportChange, true);
-          document.defaultView?.removeEventListener('resize', onViewportChange);
+          releaseViewport();
           form.removeEventListener('submit', onSubmit);
           cancel.removeEventListener('click', onCancel);
           choose.removeEventListener('click', chooseImage);
