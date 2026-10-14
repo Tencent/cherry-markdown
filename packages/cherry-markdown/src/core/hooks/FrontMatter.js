@@ -68,7 +68,9 @@ export default class FrontMatter extends ParagraphBase {
   }
 
   rule() {
-    const ret = { begin: '^\\s*-{3}[^\\n]*\\n', end: '\\n-{3}[^\\n]*\\n', content: '([\\s\\S]+?)' };
+    // 分隔行必须恰好是三个连字符，两侧只允许水平空白，且空白不能跨行。
+    // 更长的分割线（------）或带后缀的行（---#）不是 front matter。
+    const ret = { begin: '^\\h*-{3}\\h*\\n', end: '\\n\\h*-{3}\\h*\\n', content: '([\\s\\S]+?)' };
     ret.reg = compileRegExp(ret, 'g', true);
     return ret;
   }

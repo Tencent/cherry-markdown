@@ -71,7 +71,7 @@ export default class Header extends MenuBase {
   }
 
   $testIsHead(selection) {
-    return /^\s*(#+)\s*.+/.test(selection);
+    return /^[ \t]*#+[ \t]*.+/m.test(selection);
   }
 
   /**
@@ -99,9 +99,9 @@ export default class Header extends MenuBase {
       // 如果选中的内容里有标题语法，并且标记级别与目标一致，则去掉标题语法
       // 反之，修改标题级别与目标一致
       let needClean = true;
-      const tmp = $selection.replace(/(^\s*)(#+)(\s*)(.+$)/gm, (w, m1, m2, m3, m4) => {
-        needClean = needClean ? m2.length === header.length : false;
-        return `${m1}${header}${m3}${m4}`;
+      const tmp = $selection.replace(/^([ \t]*)(#+)?([ \t]*)(.+)$/gm, (w, m1, m2, m3, m4) => {
+        needClean = needClean && !!m2 && m2.length === header.length;
+        return `${m1}${header}${m2 ? m3 : ' '}${m4}`;
       });
       if (needClean) {
         return $selection.replace(/(^\s*)(#+)(\s*)(.+$)/gm, '$1$4');
