@@ -108,6 +108,13 @@ describe('toolbars/hooks formatting', () => {
     expect(createHook(Hook, input).hook.onClick(input)).toBe(expected);
   });
 
+  it('replaces an existing heading after ordinary text in a multiline selection', () => {
+    const input = 'ordinary text\n##   existing heading';
+    const header = createHook(Header, input).hook;
+
+    expect(header.onClick(input, '1')).toBe('# ordinary text\n#   existing heading');
+  });
+
   it.each([
     [H1, '# h1'],
     [H2, '## h2'],
