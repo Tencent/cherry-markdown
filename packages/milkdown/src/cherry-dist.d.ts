@@ -16,13 +16,6 @@ declare module 'cherry-markdown/dist/addons/advance/cherry-table-echarts-plugin.
   }
 
   const EChartsTableEngine: new (options: Record<string, unknown>) => {
-    renderInto?(
-      container: HTMLElement,
-      type: string,
-      options: Record<string, unknown>,
-      table: TableChartData,
-      signal?: AbortSignal,
-    ): () => void;
     $buildEchartsThemeFromCss(container: HTMLElement): void;
     $generateChartOptions(
       type: string,
@@ -30,6 +23,7 @@ declare module 'cherry-markdown/dist/addons/advance/cherry-table-echarts-plugin.
       options: Record<string, unknown>,
     ): Record<string, unknown>;
     createChart(container: HTMLElement, options: Record<string, unknown>, type: string): { resize(): void } | null;
+    destroyChart(container: HTMLElement): void;
     $applyThemeOnly(instance: { resize(): void } | null): void;
     onDestroy(): void;
   };

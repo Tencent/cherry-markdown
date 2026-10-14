@@ -1,4 +1,4 @@
-import { test, expect, markdown, setMarkdown } from './fixtures';
+import { test, expect, markdown, replaceTableCell, setMarkdown } from './fixtures';
 import type { Page } from '@playwright/test';
 
 async function placeCaretAtTextOffset(page: Page, text: string, offset: number) {
@@ -85,6 +85,51 @@ test('theme changes refresh charts without replacing table/code chart DOM or the
     .toBe(lightStroke);
   await expect(source).toBeFocused();
   expect(await markdown(page)).toBe(value);
+});
+
+test('export rebuilds preserve chart content, editing and deletion for both chart kinds', async ({ page }) => {
+  const codeSource =
+    '{animation:false,title:{text:"Code chart"},xAxis:{data:["Jan","Feb"]},yAxis:{},series:[{type:"line",data:[1,2]}]}';
+  await setMarkdown(
+    page,
+    '| :line:{"title":"Table chart"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 1 | 2 |\n\n' +
+      `\`\`\`echarts\n${codeSource}\n\`\`\``,
+  );
+  const table = page.locator('.cherry-table-chart');
+  const code = page.locator('.cherry-embed--cherry_diagram:not([data-type="mermaid"])');
+  await expect(table.locator('svg')).toContainText('Table chart');
+  await expect(code.locator('svg')).toContainText('Code chart');
+  for (let revision = 0; revision < 3; revision += 1) {
+    await page.evaluate(() => window.dispatchEvent(new Event('cherry:export:done')));
+    await expect(table.locator('svg')).toContainText('Table chart');
+    await expect(code.locator('svg')).toContainText('Code chart');
+  }
+
+  await replaceTableCell(page, page.locator('.milkdown-table-block td p').nth(1), '7');
+  await expect(table.locator('.cherry-echarts-wrapper')).toHaveAttribute('data-table-data', /"Sales","7","2"/);
+  await code.getByRole('button', { name: '在节点内编辑源码' }).click();
+  const source = code.locator('.cherry-embed__source code');
+  await source.click();
+  await page.keyboard.press('ControlOrMeta+a');
+  await page.keyboard.type(codeSource.replace('Code chart', 'Code updated'));
+  await expect(code.locator('svg')).toContainText('Code updated');
+  await page.evaluate(() => window.dispatchEvent(new Event('cherry:export:done')));
+  await expect(code.locator('svg')).toContainText('Code updated');
+  await expect(table.locator('.cherry-echarts-wrapper')).toHaveAttribute('data-table-data', /"Sales","7","2"/);
+
+  await setMarkdown(page, '| :line:{"title":"Table chart"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 7 | 2 |');
+  await expect(code).toHaveCount(0);
+  await expect(table.locator('svg')).toContainText('Table chart');
+  await replaceTableCell(page, page.locator('.milkdown-table-block td p').nth(1), '9');
+  await expect(table.locator('.cherry-echarts-wrapper')).toHaveAttribute('data-table-data', /"Sales","9","2"/);
+  await page.evaluate(() => window.dispatchEvent(new Event('cherry:export:done')));
+  await expect(table.locator('svg')).toContainText('Table chart');
+
+  await setMarkdown(page, 'Charts removed');
+  await expect(page.locator('.cherry-echarts-wrapper')).toHaveCount(0);
+  await page.evaluate(() => window.dispatchEvent(new Event('cherry:export:done')));
+  await expect(page.locator('.cherry-echarts-wrapper')).toHaveCount(0);
+  expect(await markdown(page)).toBe('Charts removed');
 });
 
 test('native Chromium composition commits Chinese without duplicate text and supports undo', async ({

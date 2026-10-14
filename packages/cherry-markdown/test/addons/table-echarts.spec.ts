@@ -95,31 +95,6 @@ describe('addons/EChartsTableEngine', () => {
     expect(renderer.instances.size).toBe(0);
   });
 
-  it('mounts into a caller-owned container and releases all retained resources', () => {
-    const environment = createEnvironment();
-    const renderer = new EChartsTableEngine({ echarts: environment.echarts, cherry: environment.cherry });
-    const container = document.createElement('div');
-    environment.root.appendChild(container);
-    const controller = new AbortController();
-
-    const cleanup = renderer.renderInto(
-      container,
-      'line',
-      { title: 'Mounted' },
-      { header: ['', 'Q1'], rows: [['Sales', '1']] },
-      controller.signal,
-    );
-
-    expect(environment.echarts.init).toHaveBeenCalledWith(container, null, renderer.options);
-    expect(container.dataset.chartType).toBe('line');
-    expect(container.dataset.tableData).toContain('Sales');
-    expect(renderer.instances.size).toBe(1);
-    cleanup();
-    cleanup();
-    expect(environment.chart.dispose).toHaveBeenCalledOnce();
-    expect(renderer.instances.size).toBe(0);
-  });
-
   it('provides chart palettes, axes, zoom controls, and numeric normalization', () => {
     const environment = createEnvironment();
     const renderer = new EChartsTableEngine({ echarts: environment.echarts, cherry: environment.cherry });
@@ -576,6 +551,134 @@ describe('addons/EChartsTableEngine', () => {
       {},
     );
     expect(inferredGroup.series[0].name).toBe('系列1');
+  });
+
+  it.each(['global', 'injected', 'both'])('uses the selected ECharts instance for maps (%s)', (mode) => {
+    const environment = createEnvironment();
+    const globalEcharts = { getMap: vi.fn(), registerMap: vi.fn() };
+    environment.echarts.getMap.mockReturnValue({});
+    if (mode === 'global') Object.assign(window, { echarts: environment.echarts });
+    else if (mode === 'both') window.echarts = globalEcharts as unknown as typeof window.echarts;
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const renderer = new EChartsTableEngine({
+      ...(mode === 'global' ? {} : { echarts: environment.echarts }),
+      cherry: environment.cherry,
+    });
+    renderer.$buildEchartsThemeFromCss(environment.root);
+
+    const option = renderer.$generateChartOptions(
+      'map',
+      { header: ['Province', 'Value'], rows: [['北京', '10']] },
+      { mapDataSource: 'china' },
+    );
+
+    expect(option.series[0]).toMatchObject({ type: 'map', map: 'china' });
+    expect(environment.echarts.getMap).toHaveBeenCalledWith('china');
+    expect(globalEcharts.getMap).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('registers fetched maps on the injected instance, not a different global instance', async () => {
+    const environment = createEnvironment();
+    const globalEcharts = { getMap: vi.fn(), registerMap: vi.fn() };
+    window.echarts = globalEcharts as unknown as typeof window.echarts;
+    const geoJson = { type: 'FeatureCollection', features: [] };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => geoJson }));
+    const renderer = new EChartsTableEngine({ echarts: environment.echarts, cherry: environment.cherry });
+    renderer.$buildEchartsThemeFromCss(environment.root);
+    const tableData = { header: ['Province', 'Value'], rows: [['北京', '10']] };
+    const container = environment.previewerDom.appendChild(document.createElement('div'));
+    container.id = 'map-chart';
+    container.dataset.chartType = 'map';
+    container.dataset.tableData = JSON.stringify(tableData);
+    container.dataset.chartOptions = JSON.stringify({ mapDataSource: 'china' });
+
+    renderer.$generateChartOptions('map', tableData, { mapDataSource: 'china', chartId: container.id });
+
+    await vi.waitFor(() => expect(container.dataset.mapStatus).toBe('success'));
+    expect(environment.echarts.registerMap).toHaveBeenCalledWith('china', geoJson);
+    expect(globalEcharts.getMap).not.toHaveBeenCalled();
+    expect(globalEcharts.registerMap).not.toHaveBeenCalled();
+    renderer.onDestroy();
+  });
+
+  it.each(['request', 'rebuild'])('ignores late map responses after optional %s cancellation', async (scope) => {
+    const environment = createEnvironment();
+    const controller = new AbortController();
+    const pending: Array<(value: Response) => void> = [];
+    const fetchMock = vi.fn(() => new Promise<Response>((resolve) => pending.push(resolve)));
+    vi.stubGlobal('fetch', fetchMock);
+    const renderer = new EChartsTableEngine({
+      echarts: environment.echarts,
+      cherry: environment.cherry,
+    });
+    renderer.$buildEchartsThemeFromCss(environment.root);
+    const container = environment.previewerDom.appendChild(document.createElement('div'));
+    container.id = 'cancelled-map';
+    container.dataset.chartType = 'map';
+    const tableData = { header: ['Province', 'Value'], rows: [['北京', '10']] };
+    container.dataset.tableData = JSON.stringify(tableData);
+    container.dataset.chartOptions = JSON.stringify({ mapDataSource: 'china' });
+    renderer.$generateChartOptions('map', tableData, {
+      mapDataSource: 'china',
+      chartId: container.id,
+      signal: controller.signal,
+    });
+    if (scope === 'rebuild') renderer.$chartOptionsFromDataset(container);
+    expect(fetchMock).toHaveBeenCalledTimes(scope === 'rebuild' ? 2 : 1);
+    expect(fetchMock).toHaveBeenCalledWith('china', {
+      referrerPolicy: 'no-referrer',
+      signal: controller.signal,
+    });
+
+    controller.abort();
+    pending.forEach((finish) => finish(new Response(JSON.stringify({ type: 'FeatureCollection', features: [] }))));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(environment.echarts.registerMap).not.toHaveBeenCalled();
+    expect(environment.echarts.init).not.toHaveBeenCalled();
+    expect(container.dataset.mapStatus).toBe('loading');
+  });
+
+  it('does not inherit an engine-level cancellation signal for an ordinary map request', () => {
+    const environment = createEnvironment();
+    const controller = new AbortController();
+    controller.abort();
+    const fetchMock = vi.fn(() => new Promise(() => {}));
+    vi.stubGlobal('fetch', fetchMock);
+    const renderer = new EChartsTableEngine({
+      echarts: environment.echarts,
+      cherry: environment.cherry,
+      signal: controller.signal,
+    });
+    renderer.$buildEchartsThemeFromCss(environment.root);
+
+    renderer.$generateChartOptions(
+      'map',
+      { header: ['Province', 'Value'], rows: [['北京', '10']] },
+      { mapDataSource: 'china' },
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith('china', { referrerPolicy: 'no-referrer' });
+  });
+
+  it('does not start a map request for an already cancelled signal', () => {
+    const environment = createEnvironment();
+    const controller = new AbortController();
+    controller.abort();
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const renderer = new EChartsTableEngine({ echarts: environment.echarts, cherry: environment.cherry });
+    renderer.$buildEchartsThemeFromCss(environment.root);
+
+    renderer.$generateChartOptions(
+      'map',
+      { header: ['Province', 'Value'], rows: [['北京', '10']] },
+      { mapDataSource: 'china', signal: controller.signal },
+    );
+
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('generates a registered map with normalized province names', () => {
