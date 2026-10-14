@@ -407,6 +407,67 @@ describe('standalone contracts', () => {
     expect(document.querySelector('.milkdown-table-block')).toBe(table);
   });
 
+  it('keeps the last valid chart through an incomplete descriptor without remounting its widget', async () => {
+    const renderer = vi.fn(() => '<svg data-chart="draft"></svg>');
+    const descriptor = ':line:{"title":"Before"}';
+    const value = `| ${descriptor} | A |\n| --- | --- |\n| Row | 1 |`;
+    const instance = await create(value, { renderers: { tableChart: renderer }, debounce: 0 });
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(1));
+    const widget = document.querySelector('[data-cherry-milkdown-table-chart-widget]');
+    replaceText(instance, descriptor, ':bar:{');
+    expect(instance.getMarkdown()).toContain(':bar:{');
+    expect(document.querySelector('[data-cherry-milkdown-table-chart-widget]')).toBe(widget);
+
+    replaceText(instance, ':bar:{', ':bar:{"title":"After"}');
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(2));
+    expect(document.querySelector('[data-cherry-milkdown-table-chart-widget]')).toBe(widget);
+    expect(renderer).toHaveBeenLastCalledWith(
+      expect.objectContaining({ syntax: 'bar', source: expect.stringContaining('After') }),
+    );
+  });
+
+  it('does not mistake an ordinary non-history edit for an authoritative external write', async () => {
+    const descriptor = ':line:{"title":"Before"}';
+    const value = `| ${descriptor} | A |\n| --- | --- |\n| Row | 1 |`;
+    const instance = await create(value, { renderers: { tableChart: () => '<svg></svg>' }, debounce: 0 });
+    await vi.waitFor(() => expect(document.querySelector('.cherry-table-chart svg')).not.toBeNull());
+    const view = replaceText(instance, descriptor, ':bar:{');
+    const widget = document.querySelector('.cherry-table-chart');
+    view.dispatch(view.state.tr.insertText('"title":').setMeta('addToHistory', false));
+    expect(document.querySelector('.cherry-table-chart')).toBe(widget);
+  });
+
+  it.each(['selection', 'blur', 'external', 'delete'])(
+    'releases an incomplete chart descriptor on %s instead of keeping a stale preview',
+    async (boundary) => {
+      const cleanup = vi.fn();
+      const renderer = ({ container }: { container: HTMLElement }) => {
+        container.innerHTML = '<svg></svg>';
+        return cleanup;
+      };
+      const descriptor = ':line:{"title":"Before"}';
+      const value = `| ${descriptor} | A |\n| --- | --- |\n| Row | 1 |`;
+      const instance = await create(value, { renderers: { tableChart: renderer }, debounce: 0 });
+      await vi.waitFor(() => expect(document.querySelector('.cherry-table-chart svg')).not.toBeNull());
+      const view = replaceText(instance, descriptor, ':bar:{');
+      expect(document.querySelector('.cherry-table-chart svg')).not.toBeNull();
+
+      if (boundary === 'selection') {
+        view.dispatch(view.state.tr.setSelection(TextSelection.atEnd(view.state.doc)));
+      } else if (boundary === 'blur') {
+        view.dom.dispatchEvent(new FocusEvent('blur'));
+      } else if (boundary === 'external') {
+        instance.setMarkdown(value.replace(descriptor, 'Series'));
+        expect(instance.getMarkdown()).toContain('Series');
+      } else {
+        view.dispatch(view.state.tr.delete(0, view.state.doc.firstChild!.nodeSize));
+      }
+
+      await vi.waitFor(() => expect(document.querySelector('.cherry-table-chart')).toBeNull());
+      expect(cleanup).toHaveBeenCalledTimes(1);
+    },
+  );
+
   it('keeps an external table chart revision authoritative', async () => {
     const renderer = vi.fn(() => '<span>Chart</span>');
     const value = '| :line:{"title":"Before"} | A |\n| --- | --- |\n| Row | 1 |';

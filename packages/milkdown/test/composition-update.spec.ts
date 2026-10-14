@@ -53,7 +53,7 @@ describe('external updates across composition completion', () => {
     await vi.waitFor(() => expect(instance.getMarkdown()).toBe('远程前缀\n\n开始：你好结束'));
     expect(view.state.selection.$from.parent.textContent).toBe('开始：你好结束');
     expect(view.state.selection.$from.parentOffset).toBe(5);
-    expect(onChange).toHaveBeenLastCalledWith({ markdown: '远程前缀\n\n开始：你好结束' });
+    await vi.waitFor(() => expect(onChange).toHaveBeenLastCalledWith({ markdown: '远程前缀\n\n开始：你好结束' }));
     expect(undo(view.state, view.dispatch)).toBe(true);
     expect(instance.getMarkdown()).toBe('远程前缀\n\n开始：结束');
     expect(view.state.selection.$from.parentOffset).toBe(3);

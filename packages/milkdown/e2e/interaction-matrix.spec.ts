@@ -211,19 +211,26 @@ test('code block content, language and deletion stay inside one NodeView', async
 test('inline and block formula edits update Markdown without opening text Bubble', async ({ page }) => {
   await setMarkdown(page, 'Inline $x$ formula.\n\n$$\ny=1\n$$');
   const inline = page.getByLabel('Inline formula');
-  const inlineBox = (await inline.boundingBox())!;
-  await inline.click({ position: { x: inlineBox.width - 2, y: inlineBox.height / 2 } });
-  await inline.press('ControlOrMeta+ArrowRight');
+  // MathLive upgrades lazily and adds toolbar buttons. Its public content
+  // part is the input target; an early host box can point at a later toggle.
+  const inlineContent = inline.locator('[part="content"]');
+  await expect(inlineContent).toBeVisible();
+  await inlineContent.click();
+  // MathLive binds End to the whole field; Ctrl+Right only advances a group.
+  await inline.press('End');
   await inline.pressSequentially('+1');
+  await expect(inline).toHaveJSProperty('value', 'x+1');
   await expect.poll(() => markdown(page)).toContain('+1');
   expect(await markdown(page)).toContain('x');
   await expect(page.getByRole('toolbar', { name: '文本格式' })).toBeHidden();
 
   const block = page.getByLabel('Block formula');
-  const blockBox = (await block.boundingBox())!;
-  await block.click({ position: { x: blockBox.width - 2, y: blockBox.height / 2 } });
-  await block.press('ControlOrMeta+ArrowRight');
+  const blockContent = block.locator('[part="content"]');
+  await expect(blockContent).toBeVisible();
+  await blockContent.click();
+  await block.press('End');
   await block.pressSequentially('+2');
+  await expect(block).toHaveJSProperty('value', 'y=1+2');
   await expect.poll(() => markdown(page)).toContain('+2');
   expect(await markdown(page)).toContain('y=1');
   const math = page.locator('.cherry-math--block');

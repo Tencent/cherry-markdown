@@ -1,7 +1,8 @@
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
-import { Plugin } from '@milkdown/kit/prose/state';
+import { Plugin, PluginKey, type Selection } from '@milkdown/kit/prose/state';
 import { Decoration, DecorationSet, type EditorView } from '@milkdown/kit/prose/view';
 import { $prose } from '@milkdown/kit/utils';
+import { EXTERNAL_MARKDOWN_UPDATE } from '../document-update.js';
 import { cherryWysiwygConfigCtx, type CherryWysiwygConfig } from './config.js';
 import { sanitizedEngineFragment } from './html-sanitizer.js';
 import type { CherryVisualRendererResult } from './types.js';
@@ -15,6 +16,15 @@ interface TableChartRevision {
 
 const widgetSelector = '[data-cherry-milkdown-table-chart-widget]';
 const descriptorPattern = /^:(\w+):(?:\s*(\{[\s\S]*\}))?\s*$/;
+const previewKey = new PluginKey<Map<number, TableChartRevision>>('cherryTableChartPreview');
+
+function insideDescriptor(doc: ProseNode, selection: Selection, position: number) {
+  const table = doc.nodeAt(position);
+  if (table?.type.name !== 'table') return false;
+  const cell = table.firstChild?.firstChild;
+  const from = position + 2; // table opening + first row opening
+  return Boolean(cell && selection.from >= from && selection.to <= from + cell.nodeSize);
+}
 
 function escapeCell(value: string) {
   return value.replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
@@ -77,6 +87,15 @@ function tableChartRevisions(doc: ProseNode) {
   return revisions;
 }
 
+function createChartPreview() {
+  const preview = document.createElement('div');
+  preview.className = 'cherry-table-chart__preview';
+  const mount = document.createElement('figure');
+  mount.className = 'cherry-table-figure';
+  preview.append(mount);
+  return { preview, mount };
+}
+
 class TableChartPreview {
   private source = '';
   private syntax = '';
@@ -92,18 +111,21 @@ class TableChartPreview {
     private readonly dom: HTMLElement,
     private readonly config: CherryWysiwygConfig,
   ) {
-    this.preview = document.createElement('div');
-    this.preview.className = 'cherry-table-chart__preview';
-    this.preview.style.minHeight = '300px';
+    const { preview, mount } = createChartPreview();
+    // Reserve the same figure (including Cherry's margins) as the rendered
+    // chart, so lazy ECharts loading cannot move a cell between mouse clicks.
+    mount.style.minHeight = '300px';
+    this.preview = preview;
     dom.append(this.preview);
   }
 
   update(revision: TableChartRevision, immediate = false) {
     if (revision.source === this.source && revision.syntax === this.syntax) return;
+    const firstRevision = !this.source;
     this.source = revision.source;
     this.syntax = revision.syntax;
     if (this.timer) clearTimeout(this.timer);
-    if (immediate || !this.preview.hasChildNodes()) this.render();
+    if (immediate || firstRevision) this.render();
     else {
       this.timer = setTimeout(() => {
         this.timer = undefined;
@@ -139,11 +161,7 @@ class TableChartPreview {
     const staging = document.createElement('div');
     staging.className = 'cherry-table-chart__staging';
     staging.setAttribute('aria-hidden', 'true');
-    const nextPreview = document.createElement('div');
-    nextPreview.className = 'cherry-table-chart__preview';
-    const mount = document.createElement('figure');
-    mount.className = 'cherry-table-figure';
-    nextPreview.append(mount);
+    const { preview: nextPreview, mount } = createChartPreview();
     staging.append(nextPreview);
     this.dom.append(staging);
 
@@ -190,11 +208,11 @@ class TableChartPreview {
     this.pendingController?.abort();
     this.pendingController = undefined;
     this.preview.dataset.renderError = 'true';
-    if (!this.preview.hasChildNodes()) {
+    if (!this.activeController) {
       const status = document.createElement('p');
       status.setAttribute('role', 'alert');
       status.textContent = '图表暂时无法渲染，请检查表格内容。';
-      this.preview.append(status);
+      this.preview.replaceChildren(status);
     }
     reportRendererError(error, (cause) => this.config.onError?.(cause, 'render'));
   }
@@ -208,7 +226,7 @@ class TableChartPreviewManager {
 
   sync(view: EditorView, initial = false) {
     if (this.destroyed) return;
-    const revisions = tableChartRevisions(view.state.doc);
+    const revisions = previewKey.getState(view.state) ?? new Map<number, TableChartRevision>();
     const mounted = new Set<HTMLElement>();
     view.dom.querySelectorAll<HTMLElement>(widgetSelector).forEach((dom) => {
       const position = Number(dom.dataset.cherryMilkdownTableChartPosition);
@@ -239,11 +257,44 @@ class TableChartPreviewManager {
 export const cherryTableChartPreview = $prose((ctx) => {
   const config = ctx.get(cherryWysiwygConfigCtx.key);
   return new Plugin({
+    key: previewKey,
+    state: {
+      init: (_, state) => tableChartRevisions(state.doc),
+      apply: (transaction, previous, oldState, state) => {
+        if (!transaction.docChanged && !transaction.selectionSet && !transaction.getMeta(previewKey)) {
+          return previous;
+        }
+        const revisions = tableChartRevisions(state.doc);
+        // A descriptor is temporarily incomplete during ordinary typing. Keep
+        // its last valid preview only while editing that same header cell.
+        // Blur, another cell, deletion or an authoritative external write ends
+        // the draft; no stale chart is retained for an ordinary table.
+        if (transaction.getMeta(previewKey) || transaction.getMeta(EXTERNAL_MARKDOWN_UPDATE)) return revisions;
+        previous.forEach((revision, position) => {
+          const mapped = transaction.mapping.mapResult(position);
+          if (
+            !mapped.deleted &&
+            !revisions.has(mapped.pos) &&
+            insideDescriptor(oldState.doc, oldState.selection, position) &&
+            insideDescriptor(state.doc, state.selection, mapped.pos)
+          ) {
+            revisions.set(mapped.pos, { ...revision, position: mapped.pos });
+          }
+        });
+        return revisions;
+      },
+    },
     props: {
+      handleDOMEvents: {
+        blur: (view) => {
+          view.dispatch(view.state.tr.setMeta(previewKey, true).setMeta('addToHistory', false));
+          return false;
+        },
+      },
       decorations: (state) => {
         if (!config.renderers?.tableChart) return DecorationSet.empty;
         const decorations: Decoration[] = [];
-        tableChartRevisions(state.doc).forEach((revision) => {
+        previewKey.getState(state)?.forEach((revision) => {
           decorations.push(
             Decoration.widget(
               revision.position,
@@ -282,7 +333,7 @@ export const cherryTableChartPreview = $prose((ctx) => {
       schedule(view, true);
       return {
         update: (nextView, previousState) => {
-          if (previousState.doc.eq(nextView.state.doc)) return;
+          if (previewKey.getState(previousState) === previewKey.getState(nextView.state)) return;
           schedule(nextView);
         },
         destroy: () => {

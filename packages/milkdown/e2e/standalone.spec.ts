@@ -1,4 +1,4 @@
-import { test, expect, markdown, setMarkdown } from './fixtures';
+import { test, expect, markdown, replaceTableCell, setMarkdown } from './fixtures';
 import { cherryCompatibilityCases } from '../test/fixtures/compatibility';
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -514,6 +514,9 @@ test('real repeated-word edits and deletion never overwrite a relocated footnote
     });
     await page.mouse.dblclick(point.x, point.y);
     await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe('repeated');
+    // The DOM range can precede ProseMirror's selectionchange transaction.
+    // Observe the editor-owned selection before creating a history entry.
+    await expect(page.getByRole('toolbar', { name: '文本格式' })).toBeVisible();
   };
   await selectRepeated();
   await page.keyboard.type('changed');
@@ -891,10 +894,10 @@ test('table chart uses the native table editor and redraws without a blank frame
       return result;
     };
   });
-  await descriptor.fill(':bar:{"title":"Changed"}');
-  await sales.fill('Revenue');
-  await table.locator('td p').nth(1).fill('3');
-  await table.locator('td p').nth(2).fill('4');
+  await replaceTableCell(page, descriptor, ':bar:{"title":"Changed"}');
+  await replaceTableCell(page, sales, 'Revenue');
+  await replaceTableCell(page, table.locator('td p').nth(1), '3');
+  await replaceTableCell(page, table.locator('td p').nth(2), '4');
   await expect(node.locator('svg')).toContainText('Changed');
   const stability = await page.evaluate(() =>
     (window as typeof window & { stopChartStabilityProbe?: () => Record<string, number> }).stopChartStabilityProbe?.(),
@@ -980,7 +983,7 @@ test('table chart cell undo and external revisions stay deterministic', async ({
   const node = page.locator('.cherry-table-chart');
   await expect(node.locator('svg')).toContainText('Before');
   const descriptor = page.locator('.milkdown-table-block th p').first();
-  await descriptor.fill(':line:{"title":"输入中"}');
+  await replaceTableCell(page, descriptor, ':line:{"title":"输入中"}');
   expect(await markdown(page)).toContain('输入中');
   await expect(node.locator('svg')).toContainText('输入中');
 

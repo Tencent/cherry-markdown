@@ -1,6 +1,9 @@
 import { Fragment, type Node as ProseMirrorNode } from '@milkdown/kit/prose/model';
 import { Transform, type StepMap } from '@milkdown/kit/prose/transform';
 
+/** Internal API-write boundary; unrelated non-history edits remain local. */
+export const EXTERNAL_MARKDOWN_UPDATE = 'cherry-milkdown:external-markdown-update';
+
 export function createEditableTail(document: ProseMirrorNode): ProseMirrorNode | undefined {
   const last = document.lastChild;
   if (!last || ['heading', 'paragraph'].includes(last.type.name)) return;

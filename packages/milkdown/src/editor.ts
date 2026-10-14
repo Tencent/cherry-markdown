@@ -35,6 +35,7 @@ import { createCompositionGate } from './composition-gate.js';
 import {
   createDocumentUpdate,
   createEditableTail,
+  EXTERNAL_MARKDOWN_UPDATE,
   rebaseCompositionUpdate,
   withEditableTail,
 } from './document-update.js';
@@ -305,7 +306,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
         if (update.steps.length) {
           const transaction = view.state.tr;
           update.steps.forEach((step) => transaction.step(step));
-          view.dispatch(transaction.setMeta('addToHistory', false));
+          view.dispatch(transaction.setMeta('addToHistory', false).setMeta(EXTERNAL_MARKDOWN_UPDATE, true));
         }
         currentMarkdown = reconciled;
         serializedBaseline = editor.action(getMarkdown());
