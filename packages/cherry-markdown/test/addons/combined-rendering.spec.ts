@@ -45,7 +45,6 @@ describe('addons/combined Markdown rendering', () => {
     PlantUMLCodeEngine.install(options, {});
     const engine = new CherryEngine(options);
     const container = document.createElement('div');
-    // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
     container.innerHTML = engine.makeHtml(`
 # Release diagrams
 
@@ -95,7 +94,6 @@ $$
       },
     });
     const container = document.createElement('div');
-    // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
     container.innerHTML = engine.makeHtml('## Fallback\n\n```mermaid\ngraph TD; A-->B\n```\n\nAfter the diagram.');
     const codeBlock = container.querySelector('[data-type="codeBlock"][data-lang="mermaid"]');
 

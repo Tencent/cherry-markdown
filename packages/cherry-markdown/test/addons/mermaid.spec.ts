@@ -387,7 +387,6 @@ describe('addons/MermaidCodeEngine', () => {
     MermaidCodeEngine.install(options, { mermaidAPI: { initialize, render } });
     const engine = new CherryEngine(options);
     const container = document.createElement('div');
-    // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
     container.innerHTML = engine.makeHtml('```mermaid\ngraph TD; A-->B\n```');
     const figure = container.querySelector('figure[data-type="mermaid"]');
     const svg = figure?.querySelector('svg');

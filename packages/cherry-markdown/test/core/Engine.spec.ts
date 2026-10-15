@@ -8,7 +8,6 @@ import hooksConfig from '../../src/core/HooksConfig';
 type EngineOptions = ConstructorParameters<typeof CherryEngine>[0];
 
 function createEngine(options: EngineOptions = {}): Engine {
-  // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
   return new CherryEngine(options);
 }
 

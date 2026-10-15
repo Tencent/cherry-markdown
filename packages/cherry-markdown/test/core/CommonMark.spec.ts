@@ -57,7 +57,6 @@ describe('engine', () => {
     vi.stubGlobal('BUILD_ENV', 'production');
   });
   it.each(suites)('CommonMark-$example', (item) => {
-    // @ts-expect-error CherryEngine 构造器实际返回 Engine 实例
     const cherryHtml = cherryEngine.makeHtml(String(item.markdown));
 
     expect(cherryHtml).toMatchSnapshot();
