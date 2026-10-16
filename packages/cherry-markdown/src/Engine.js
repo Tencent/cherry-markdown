@@ -201,16 +201,16 @@ export default class Engine {
     return this.$fireHookAction(md, 'sentence', 'makeHtml', this.$dealSentenceByCache.bind(this));
   }
 
-  $fireHookAction(md, type, action, actionArgs) {
+  $fireHookAction(md, type, action, actionArgs, hookList = this.hooks?.[type]) {
     let $md = md;
     const before = actionArgs?.before || '';
     const method = action === 'afterMakeHtml' ? 'reduceRight' : 'reduce';
-    if (!this.hooks || !this.hooks[type] || !this.hooks[type][method]) {
+    if (!hookList || !hookList[method]) {
       return $md;
     }
     try {
       let canContinue = true;
-      $md = this.hooks[type][method]((newMd, oneHook) => {
+      $md = hookList[method]((newMd, oneHook) => {
         if (!canContinue) {
           return newMd;
         }
@@ -436,6 +436,17 @@ export default class Engine {
       return htmlparser2.parseDocument($md.replace(/\n/g, ''));
     }
     return $md;
+  }
+
+  /** Render a detail body without restarting document preparation or cleanup. */
+  makeHtmlForDetail(md, paragraphMakeFunc) {
+    const hooks = this.hooks.paragraph;
+    const start = hooks.findIndex((hook) => hook.getName() === 'detail') + 1;
+    const end = hooks.findIndex((hook) => hook.getName() === 'normalParagraph');
+    const bodyHooks = hooks.slice(start, end < 0 ? undefined : end);
+    const html = this.$fireHookAction(md, 'paragraph', 'makeHtml', this.$dealSentenceByCache.bind(this), bodyHooks);
+    // Leave child caches opaque until the document-level restoration pass.
+    return paragraphMakeFunc(html);
   }
 
   makeHtmlForBlockquote(md) {

@@ -87,9 +87,9 @@ const hooksConfig = [
   Toc,
   Blockquote,
   Header, // 处理标题, 传入strict属性严格要求ATX风格标题#后带空格
+  Detail, // Preserve heading order and line metadata, then protect folding boundaries from lists.
   Hr,
   List,
-  Detail,
   Panel,
   Paragraph, // 普通段落
 

@@ -16,7 +16,14 @@
 import ParagraphBase from '@/core/ParagraphBase';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 import { getDetailRule } from '@/utils/regexp';
+import { parseDetails } from '@/utils/details';
 import { blockNames } from '@/utils/sanitize';
+
+/**
+ * @typedef {import('@/utils/details').DetailNode} DetailNode
+ * @typedef {import('@/utils/details').DetailSection} DetailSection
+ * @typedef {(markdown: string) => { html: string, sign: string }} SentenceRenderer
+ */
 
 /**
  * +++(-) 点击查看详情
@@ -33,49 +40,103 @@ export default class Detail extends ParagraphBase {
 
   constructor() {
     super({ needCache: true });
+    this.hasDetails = false;
+  }
+
+  beforeMakeHtml(str) {
+    this.hasDetails = false;
+    return str;
+  }
+
+  afterMakeHtml(str) {
+    if (!this.hasDetails) return super.afterMakeHtml(str);
+    // A detail can be hidden in a panel/quote cache, and itself contain cached
+    // blocks. Restore the entire cache dependency chain before document passes
+    // such as TOC generation run. Only folding documents need this extra pass.
+    let html = str;
+    let previous;
+    do {
+      previous = html;
+      for (const hook of this.$engine.hooks.paragraph) {
+        if (hook instanceof ParagraphBase) html = hook.restoreCache(html);
+      }
+    } while (html !== previous);
+    return html;
   }
 
   makeHtml(str, sentenceMakeFunc) {
-    return str.replace(this.RULE.reg, (match, preLines, isOpen, title, content) => {
-      const lineCount = this.getLineCount(match, preLines);
+    let cursor = 0;
+    let result = '';
+    for (const node of parseDetails(str)) {
+      this.hasDetails = true;
+      const match = str.slice(node.start, node.end);
       const sign = this.$engine.hash(match);
-      const testHasCache = this.testHasCache(sign);
-      if (testHasCache !== false) {
-        return prependLineFeedForParagraph(match, testHasCache);
-      }
-      const { type, html } = this.$getDetailInfo(isOpen, title, content, sentenceMakeFunc);
-      const ret = this.pushCache(
-        `<div class="cherry-detail cherry-detail__${type}" data-sign="${sign}" data-lines="${lineCount}" >${html}</div>`,
-        sign,
-        lineCount,
-      );
-      return prependLineFeedForParagraph(match, ret);
-    });
-  }
-
-  $getDetailInfo(isOpen, title, str, sentenceMakeFunc) {
-    const type = /\n\s*(\+\+|\+\+-)\s*[^\n]+\n/.test(str) ? 'multiple' : 'single';
-    const arr = str.split(/\n\s*(\+\+[-]{0,1}\s*[^\n]+)\n/);
-    let defaultOpen = isOpen === '-';
-    let currentTitle = title;
-    let html = '';
-    if (type === 'multiple') {
-      arr.forEach((item) => {
-        if (/^\s*\+\+/.test(item)) {
-          defaultOpen = /^\s*\+\+-/.test(item);
-          currentTitle = item.replace(/\+\+[-]{0,1}\s*([^\n]+)$/, '$1');
-          return true;
-        }
-        html += this.$getDetailHtml(defaultOpen, currentTitle, item, sentenceMakeFunc);
-      });
-    } else {
-      html = this.$getDetailHtml(defaultOpen, currentTitle, str, sentenceMakeFunc);
+      const lineCount = this.getLineCount(match, node.preLines);
+      // Revisit child hooks on every render: document-level heading IDs and
+      // other state must also account for bodies whose text has not changed.
+      const cached = this.pushCache(this.$renderNode(node, str, sentenceMakeFunc), sign, lineCount);
+      result += str.slice(cursor, node.start) + prependLineFeedForParagraph(match, cached);
+      cursor = node.end;
     }
-    return { type, html };
+    return result + str.slice(cursor);
   }
 
-  $getDetailHtml(defaultOpen, title, str, sentenceMakeFunc) {
-    let ret = `<details ${defaultOpen ? 'open' : ''}>`;
+  /**
+   * @param {DetailNode} node
+   * @param {string} source
+   * @param {SentenceRenderer} sentenceMakeFunc
+   * @param {boolean} [nested]
+   */
+  $renderNode(node, source, sentenceMakeFunc, nested = false) {
+    const type = node.sections.length > 1 ? 'multiple' : 'single';
+    // Nested single sections need only their native details/summary structure.
+    // Extra wrappers triple DOM depth and make browsers flatten valid HTML.
+    const needsWrapper = !nested || type === 'multiple';
+    const html = this.$renderSections(node, source, sentenceMakeFunc, needsWrapper);
+    if (!needsWrapper) return html;
+    const raw = source.slice(node.start, node.end);
+    const sign = this.$engine.hash(raw);
+    const lines = this.getLineCount(raw, node.preLines);
+    return `<div class="cherry-detail cherry-detail__${type}" data-sign="${sign}" data-lines="${lines}" >${html}</div>`;
+  }
+
+  /**
+   * @param {DetailNode} node
+   * @param {string} source
+   * @param {SentenceRenderer} sentenceMakeFunc
+   * @param {boolean} [bodyWrapper]
+   */
+  $renderSections(node, source, sentenceMakeFunc, bodyWrapper = true) {
+    let html = '';
+    for (const section of node.sections) {
+      let { start } = section;
+      let bodyHtml = '';
+      for (const child of section.children) {
+        bodyHtml += this.$renderBody(source.slice(start, child.start), sentenceMakeFunc);
+        bodyHtml += this.$renderNode(child, source, sentenceMakeFunc, true);
+        start = child.end;
+      }
+      bodyHtml += this.$renderBody(source.slice(start, section.end), sentenceMakeFunc);
+      html += this.$renderSection(section, bodyHtml, sentenceMakeFunc, bodyWrapper);
+    }
+    return html;
+  }
+
+  // Legacy helper: delegate syntax parsing to the same parser used by makeHtml.
+  $getDetailInfo(isOpen, title, str, sentenceMakeFunc) {
+    const source = `+++${isOpen} ${title}\n${str}\n+++`;
+    const [node] = parseDetails(source);
+    if (!node) {
+      return { type: 'single', html: this.$getDetailHtml(isOpen === '-', title, str, sentenceMakeFunc) };
+    }
+    return {
+      type: node.sections.length > 1 ? 'multiple' : 'single',
+      html: this.$renderSections(node, source, sentenceMakeFunc),
+    };
+  }
+
+  $renderBody(str, sentenceMakeFunc) {
+    if (str.trim() === '') return '';
     const paragraphProcessor = (str) => {
       if (str.trim() === '') {
         return '';
@@ -90,16 +151,34 @@ export default class Detail extends ParagraphBase {
       }
       return `<${domName}>${this.$cleanParagraph(html)}</${domName}>`;
     };
-    ret += `<summary>${sentenceMakeFunc(title).html}</summary>`;
-    let $body = '';
-    if (this.isContainsCache(str)) {
-      $body = this.makeExcludingCached(str, paragraphProcessor);
-    } else {
-      $body = paragraphProcessor(str);
+    const paragraphs = (body) =>
+      this.isContainsCache(body) ? this.makeExcludingCached(body, paragraphProcessor) : paragraphProcessor(body);
+    return this.$engine.makeHtmlForDetail(str, paragraphs);
+  }
+
+  // Legacy helper: adapt its arguments to the same normalized section renderer.
+  $getDetailHtml(defaultOpen, title, str, sentenceMakeFunc) {
+    const section = {
+      opening: `<details ${defaultOpen ? 'open' : ''}>`,
+      summaryOpening: '<summary>',
+      title,
+    };
+    return this.$renderSection(section, this.$renderBody(str, sentenceMakeFunc), sentenceMakeFunc);
+  }
+
+  /**
+   * @param {Pick<DetailSection, 'opening' | 'summaryOpening' | 'title'>} section
+   * @param {string} body
+   * @param {SentenceRenderer} sentenceMakeFunc
+   * @param {boolean} [bodyWrapper]
+   */
+  $renderSection(section, body, sentenceMakeFunc, bodyWrapper = true) {
+    let ret = section.opening;
+    if (section.summaryOpening) {
+      ret += `${section.summaryOpening}${sentenceMakeFunc(section.title).html}</summary>`;
     }
-    ret += `<div class="cherry-detail-body">${$body}</div>`;
-    ret += `</details>`;
-    return ret;
+    ret += bodyWrapper ? `<div class="cherry-detail-body">${body}</div>` : body;
+    return `${ret}</details>`;
   }
 
   rule() {
