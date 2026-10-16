@@ -15,7 +15,7 @@
  */
 import ParagraphBase from '@/core/ParagraphBase';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';
-import { getDetailRule } from '@/utils/regexp';
+import { getDetailRule, getDetailHtmlRule } from '@/utils/regexp';
 import { blockNames } from '@/utils/sanitize';
 
 /**
@@ -36,27 +36,31 @@ export default class Detail extends ParagraphBase {
   }
 
   makeHtml(str, sentenceMakeFunc) {
-    return str.replace(this.RULE.reg, (match, preLines, isOpen, title, content) => {
-      const lineCount = this.getLineCount(match, preLines);
-      const sign = this.$engine.hash(match);
-      const testHasCache = this.testHasCache(sign);
-      if (testHasCache !== false) {
-        return prependLineFeedForParagraph(match, testHasCache);
-      }
-      const { type, html } = this.$getDetailInfo(isOpen, title, content, sentenceMakeFunc);
-      const ret = this.pushCache(
-        `<div class="cherry-detail cherry-detail__${type}" data-sign="${sign}" data-lines="${lineCount}" >${html}</div>`,
-        sign,
-        lineCount,
-      );
-      return prependLineFeedForParagraph(match, ret);
-    });
+    this.sentenceMakeFunc = sentenceMakeFunc;
+    str = str.replace(this.RULE.reg, this.$makeHtml.bind(this));
+    return str.replace(getDetailHtmlRule(), this.$makeHtml.bind(this));
+  }
+
+  $makeHtml(match, preLines, isOpen, title, content) {
+    const lineCount = this.getLineCount(match, preLines);
+    const sign = this.$engine.hash(match);
+    const testHasCache = this.testHasCache(sign);
+    if (testHasCache !== false) {
+      return prependLineFeedForParagraph(match, testHasCache);
+    }
+    const { type, html } = this.$getDetailInfo(isOpen, title, content, this.sentenceMakeFunc);
+    const ret = this.pushCache(
+      `<div class="cherry-detail cherry-detail__${type}" data-sign="${sign}" data-lines="${lineCount}" >${html}</div>`,
+      sign,
+      lineCount,
+    );
+    return prependLineFeedForParagraph(match, ret);
   }
 
   $getDetailInfo(isOpen, title, str, sentenceMakeFunc) {
     const type = /\n\s*(\+\+|\+\+-)\s*[^\n]+\n/.test(str) ? 'multiple' : 'single';
     const arr = str.split(/\n\s*(\+\+[-]{0,1}\s*[^\n]+)\n/);
-    let defaultOpen = isOpen === '-';
+    let defaultOpen = /(-|open)/.test(isOpen);
     let currentTitle = title;
     let html = '';
     if (type === 'multiple') {
