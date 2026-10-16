@@ -87,7 +87,6 @@ describe('addons/PlantUMLCodeEngine', () => {
     PlantUMLCodeEngine.install(options, {});
     const engine = new CherryEngine(options);
     const container = document.createElement('div');
-    // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
     container.innerHTML = engine.makeHtml('```plantuml\n@startuml\nAlice -> Bob: Hello\n@enduml\n```');
     const wrapper = container.querySelector('[data-type="plantuml"]');
     const image = wrapper?.querySelector('img');
