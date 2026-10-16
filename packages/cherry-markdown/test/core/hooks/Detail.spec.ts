@@ -13,6 +13,7 @@ function createDetail() {
     value: {
       hash: (value: string) => hashHex(value),
       htmlWhiteListAppend: '',
+      makeHtmlForDetail: (markdown: string, paragraphs: (body: string) => string) => paragraphs(markdown),
     },
   });
   return hook;
@@ -35,6 +36,16 @@ describe('core/hooks/Detail', () => {
     expect(expanded.type).toBe('single');
     expect(expanded.html).toContain('<details open>');
     expect(expanded.html).toContain('<summary>Open</summary>');
+  });
+
+  it.each([
+    { context: 'empty body', body: '' },
+    { context: 'blank body', body: '\n' },
+  ])('Cherry / $context | keeps the legacy rendering helper callable', ({ body }) => {
+    const detail = createDetail().$getDetailInfo('', 'Empty', body, sentenceMake);
+    expect(detail.type).toBe('single');
+    expect(detail.html).toContain('<summary>Empty</summary>');
+    expect(detail.html).toContain('<div class="cherry-detail-body"></div>');
   });
 
   it('renders multiple sections and updates title and open state independently', () => {

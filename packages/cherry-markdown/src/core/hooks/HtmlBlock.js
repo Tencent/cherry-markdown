@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import ParagraphBase from '@/core/ParagraphBase';
+import { parseDocument } from 'htmlparser2';
 import {
   whiteList,
   convertHTMLNumberToName,
@@ -88,6 +89,17 @@ export default class HtmlBlock extends ParagraphBase {
     let $str = str;
     $str = convertHTMLNumberToName($str);
     $str = escapeHTMLEntitiesWithoutSemicolon($str);
+    // Literal tags inside comments/attribute values must not become containers.
+    // Preserve the existing handling of malformed tags outside these literals.
+    $str = $str.replace(/<!--[\s\S]*?-->|<\/?[a-z][a-z0-9-]*(?:[^"'<>]|"[^"]*"|'[^']*')*>/gi, (tag) => {
+      const escapeTags = (text) =>
+        text.replace(/<\/?(?:details|summary)\b[^<>]*>/gi, (literal) =>
+          literal.replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+        );
+      return tag.startsWith('<!--')
+        ? `<!--${escapeTags(tag.slice(4, -3))}-->`
+        : tag.replace(/"[^"]*"|'[^']*'/g, escapeTags);
+    });
     $str = $str.replace(/<[/]?([^<]*?)>/g, (whole, m1) => {
       if (htmlBlackList && htmlBlackList.test(m1) && !this.isAutoLinkTag(whole) && !this.isHtmlComment(whole)) {
         if (/\n[\t ]*$/.test(m1)) {
@@ -224,29 +236,31 @@ export default class HtmlBlock extends ParagraphBase {
     }
     config.HTML_INTEGRATION_POINTS.foreignobject = true;
 
-    const $strArr = $str.split(/(?=<p data-sign=)/);
+    // A batch must never end inside a folding container (including +++ output).
+    const hasDetails = /<details(?:\s|>)/i.test($str);
+    const $strArr = hasDetails
+      ? parseDocument($str, { withStartIndices: true, withEndIndices: true }).children.map((node) =>
+          $str.slice(node.startIndex, node.endIndex + 1),
+        )
+      : $str.split(/(?=<p data-sign=)/);
     // 如果内容很大，则分批处理，用空间换sanitizer.sanitize消耗的时间
     const batch = 50;
     // 最大缓存容量（冗余20%）
     const maxCacheLength = Math.max(20, Math.round((1.2 * $strArr.length) / batch));
-    const cacheMap = {};
-    if ($strArr.length > batch) {
-      const ret = [];
-      for (let i = 0; i < $strArr.length; i += batch) {
-        const batchStr = $strArr.slice(i, i + batch).join('');
-        const cacheKey = this.$engine.hashHex(batchStr);
-        cacheMap[cacheKey] = batchStr;
-        ret.push(
-          this.cacheAndGetData(
-            cacheKey,
-            (cacheKey) => sanitizer.sanitize(cacheMap[cacheKey], config),
-            maxCacheLength,
-            -1 * Math.round(maxCacheLength / 10),
-          ),
-        );
-      }
-      return ret.join('');
+    if ($strArr.length <= batch && !hasDetails) return sanitizer.sanitize($str, config);
+    const ret = [];
+    for (let i = 0; i < $strArr.length; i += batch) {
+      const batchStr = $strArr.length <= batch ? $str : $strArr.slice(i, i + batch).join('');
+      const cacheKey = this.$engine.hashHex(batchStr);
+      ret.push(
+        this.cacheAndGetData(
+          cacheKey,
+          () => sanitizer.sanitize(batchStr, config),
+          maxCacheLength,
+          -1 * Math.round(maxCacheLength / 10),
+        ),
+      );
     }
-    return sanitizer.sanitize($str, config);
+    return ret.join('');
   }
 }
