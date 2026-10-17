@@ -1496,7 +1496,7 @@ const MapChartLoadingOptionsHandler = {
     const { engine } = options;
     // console.log('Rendering map chart:', tableObject);
 
-    return !getExternal('echarts')
+    return !engine.echartsRef
       ? {
           title: {
             text: `${engine.cherry.locale.chartRenderError} : ${engine.cherry.locale.chartLibraryNotLoadedTip}`,
@@ -1618,6 +1618,9 @@ const MapChartFailureOptionsHandler = {
   },
 };
 
+// Preserve optional cancellation when a map is rebuilt from its container data.
+const mapRequestSignals = new WeakMap();
+
 const MapChartOptionsHandler = {
   options(tableObject, options) {
     // 获取当前用户指定的地图数据源
@@ -1634,7 +1637,7 @@ const MapChartOptionsHandler = {
 
     // 用户指定了新的地图数据源，检查是否与已注册的地图源匹配
     if (userMapSource) {
-      if (getExternal('echarts')?.getMap?.(userMapSource)) {
+      if (options.engine.echartsRef?.getMap?.(userMapSource)) {
         // 用户指定数据源已注册，直接使用
         return generateOptions(MapChartCompleteOptionsHandler, tableObject, options);
       }
@@ -1648,7 +1651,7 @@ const MapChartOptionsHandler = {
     let registeredMapSource = null;
 
     for (const source of possibleMapSources) {
-      if (getExternal('echarts')?.getMap?.(source)) {
+      if (options.engine.echartsRef?.getMap?.(source)) {
         isMapRegistered = true;
         registeredMapSource = source;
         break;
@@ -1700,16 +1703,22 @@ const MapChartOptionsHandler = {
     }
 
     const url = paths[index];
+    const container = document.querySelector(`[id="${options.chartId}"][data-chart-type="map"]`);
+    const signal = options.signal ?? (container ? mapRequestSignals.get(container) : undefined);
+    if (container && signal) mapRequestSignals.set(container, signal);
+    if (signal?.aborted) return;
     // console.log(`尝试加载地图数据: ${url}`);
 
-    this.$fetchMapData(url)
+    this.$fetchMapData(url, signal)
       .then((geoJson) => {
-        getExternal('echarts')?.registerMap?.(url, geoJson);
+        if (signal?.aborted) return geoJson;
+        options.engine.echartsRef?.registerMap?.(url, geoJson);
         // console.log(`地图数据加载成功！来源: ${url}`);
         this.$refreshMapChart(options.chartId, url, options.engine);
         return geoJson;
       })
       .catch((error) => {
+        if (error?.name === 'AbortError' || signal?.aborted) return;
         Logger.warn(`Map data loading failed (${url}):`, error.message);
         this.$handleMapLoadFailure(options);
       });
@@ -1742,8 +1751,8 @@ const MapChartOptionsHandler = {
       }
     }
   },
-  async $fetchMapData(url) {
-    const response = await fetch(url, { referrerPolicy: 'no-referrer' });
+  async $fetchMapData(url, signal) {
+    const response = await fetch(url, { referrerPolicy: 'no-referrer', ...(signal ? { signal } : {}) });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status} for ${url}`);
     }
