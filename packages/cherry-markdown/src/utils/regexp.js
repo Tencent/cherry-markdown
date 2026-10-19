@@ -277,7 +277,7 @@ export function getDetailRule() {
  * @returns {object}
  */
 export function getDetailHtmlRule() {
-  const reg = /(?:^|\n)(\n*(?:[^\S\n]*))<details[ ]*(open)?>[\s]*<summary>([\w\W]*?)<\/summary>([\w\W]+?)<\/details>/g;
+  const reg = /(?:^|\n)(\n*(?:[^\S\n]*))<details[ ]*(open)?>[\s]*<summary>([\w\W]*?)<\/summary>([\w\W]*?)<\/details>/g;
   return reg;
 }
 

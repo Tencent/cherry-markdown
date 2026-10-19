@@ -52,13 +52,14 @@ export default class Detail extends ParagraphBase {
   }
 
   $makeHtml(match, preLines, isOpen, title, content) {
+    const isDetailsHtml = /^[\s]*<details[ >]/.test(match);
     const lineCount = this.getLineCount(match, preLines);
     const sign = this.$engine.hash(match);
     const testHasCache = this.testHasCache(sign);
     if (testHasCache !== false) {
       return prependLineFeedForParagraph(match, testHasCache);
     }
-    const { type, html } = this.$getDetailInfo(isOpen, title, content, this.sentenceMakeFunc);
+    const { type, html } = this.$getDetailInfo(isOpen, title, content, this.sentenceMakeFunc, isDetailsHtml);
     const ret = this.pushCache(
       `<div class="cherry-detail cherry-detail__${type}" data-sign="${sign}" data-lines="${lineCount}" >${html}</div>`,
       sign,
@@ -67,8 +68,8 @@ export default class Detail extends ParagraphBase {
     return prependLineFeedForParagraph(match, ret);
   }
 
-  $getDetailInfo(isOpen, title, str, sentenceMakeFunc) {
-    const type = /\n\s*(\+\+|\+\+-)\s*[^\n]+\n/.test(str) ? 'multiple' : 'single';
+  $getDetailInfo(isOpen, title, str, sentenceMakeFunc, isDetailsHtml) {
+    const type = !isDetailsHtml && /\n\s*(\+\+|\+\+-)\s*[^\n]+\n/.test(str) ? 'multiple' : 'single';
     const arr = str.split(/\n\s*(\+\+[-]{0,1}\s*[^\n]+)\n/);
     let defaultOpen = /(-|open)/.test(isOpen);
     let currentTitle = title;
