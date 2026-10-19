@@ -35,6 +35,16 @@ export default class Detail extends ParagraphBase {
     super({ needCache: true });
   }
 
+  afterMakeHtml(
+    str,
+    sentenceMakeFunc = (md) => {
+      return { sign: '', html: md };
+    },
+  ) {
+    // 因为同时处理了details语法和details Html标签，所以需要调用两次restoreCache避免嵌套的情况出现占位符
+    return this.restoreCache(this.restoreCache(str));
+  }
+
   makeHtml(str, sentenceMakeFunc) {
     this.sentenceMakeFunc = sentenceMakeFunc;
     str = str.replace(this.RULE.reg, this.$makeHtml.bind(this));
