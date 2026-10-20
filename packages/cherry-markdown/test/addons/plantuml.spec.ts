@@ -68,9 +68,9 @@ describe('addons/PlantUMLCodeEngine', () => {
     const renderer = new PlantUMLCodeEngine();
 
     expect(renderer.render('a', '')).toContain('id="plantuml-12345678-');
-    expect(renderer.render('ab', 'short')).toContain('http://www.plantuml.com/plantuml/svg/');
+    expect(renderer.render('ab', 'short')).toContain('https://www.plantuml.com/plantuml/svg/');
     expect(renderer.render('@startuml\n用户 -> 系统: 登录\n@enduml', 'unicode')).toMatch(
-      /src="http:\/\/www\.plantuml\.com\/plantuml\/svg\//,
+      /src="https:\/\/www\.plantuml\.com\/plantuml\/svg\//,
     );
   });
 
