@@ -42,11 +42,41 @@
         <div class="sticky top-0 z-10 bg-gray-50 pb-2">
           <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            <input id="search-input" type="text" placeholder="搜索配置项..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition-all">
+            <input id="search-input" type="text" placeholder="搜索配置项..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm">
+          </div>
+        </div>
+        <!-- 快捷预设 -->
+        <div class="preset-section">
+          <div class="panel-section-heading">
+            <span>快捷预设</span>
+            <span class="panel-section-hint">选择后立即预览</span>
+          </div>
+          <div class="preset-grid">
+            <button id="preset-default" class="preset-btn" type="button">
+              <span class="preset-icon bg-blue-50 text-blue-500"><i class="fa-solid fa-sliders"></i></span>
+              <span class="preset-copy"><span class="preset-name">默认配置</span><span class="preset-desc">标准编辑器</span></span>
+            </button>
+            <button id="preset-simple" class="preset-btn" type="button">
+              <span class="preset-icon bg-green-50 text-green-500"><i class="fa-solid fa-feather"></i></span>
+              <span class="preset-copy"><span class="preset-name">精简模式</span><span class="preset-desc">轻量级编辑</span></span>
+            </button>
+            <button id="preset-full" class="preset-btn" type="button">
+              <span class="preset-icon bg-purple-50 text-purple-500"><i class="fa-solid fa-maximize"></i></span>
+              <span class="preset-copy"><span class="preset-name">完整模式</span><span class="preset-desc">全部功能</span></span>
+            </button>
+            <button id="preset-preview" class="preset-btn" type="button">
+              <span class="preset-icon bg-orange-50 text-orange-500"><i class="fa-solid fa-book-open"></i></span>
+              <span class="preset-copy"><span class="preset-name">纯预览</span><span class="preset-desc">只读模式</span></span>
+            </button>
           </div>
         </div>
         <!-- 配置分类列表 -->
+        <div class="panel-section-heading config-list-heading">
+          <span>配置项</span>
+          <span class="panel-section-hint">按分类展开设置</span>
+        </div>
         <div id="config-categories"></div>
+        <div id="search-empty" class="search-empty" hidden>没有找到匹配的配置项</div>
       </aside>
 
       <!-- 右侧：预览区域 -->
@@ -58,10 +88,10 @@
               <i class="fa-solid fa-eye mr-1"></i> 实时预览
             </button>
             <button id="tab-code" class="tab-btn flex-1 py-3 text-sm font-medium text-center transition-all relative">
-              <i class="fa-solid fa-code mr-1"></i> 配置代码
+              <i class="fa-solid fa-code mr-1"></i> 完整配置代码
             </button>
             <button id="tab-source" class="tab-btn flex-1 py-3 text-sm font-medium text-center transition-all relative">
-              <i class="fa-brands fa-github mr-1"></i> 源码参考
+              <i class="fa-brands fa-github mr-1"></i> 配置参考
             </button>
           </div>
 
@@ -80,53 +110,22 @@
             </div>
           </div>
 
-          <!-- 源码参考面板 -->
+          <!-- 配置参考面板 -->
           <div id="panel-source" class="tab-panel hidden">
             <div class="p-6 space-y-4" style="max-height: 600px; overflow-y: auto;">
               <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-800">
-                  <i class="fa-brands fa-github mr-2"></i>Cherry.config.js 源码参考
+                  <i class="fa-solid fa-file-code mr-2"></i>Cherry.config.js 原始文件（含注释）
                 </h3>
                 <a href="https://github.com/Tencent/cherry-markdown/blob/dev/packages/cherry-markdown/src/Cherry.config.js" target="_blank" class="text-sm text-red-500 hover:text-red-600 transition-colors">
                   <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> 在 GitHub 上查看
                 </a>
               </div>
-              <div id="source-content" class="bg-gray-900 rounded-xl p-6 text-sm font-mono text-gray-300 overflow-auto"></div>
+              <pre id="source-content" class="bg-gray-900 rounded-xl p-6 text-sm leading-relaxed font-mono text-gray-300 overflow-auto"></pre>
             </div>
           </div>
         </div>
 
-        <!-- 快捷操作 -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <button id="preset-default" class="preset-btn bg-white hover:bg-gray-50 border border-gray-200 rounded-xl p-4 text-center transition-all hover:shadow-md group">
-            <div class="w-10 h-10 mx-auto mb-2 bg-blue-50 rounded-lg flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-              <i class="fa-solid fa-sliders text-blue-500"></i>
-            </div>
-            <div class="text-sm font-medium text-gray-700">默认配置</div>
-            <div class="text-xs text-gray-400 mt-1">标准编辑器</div>
-          </button>
-          <button id="preset-simple" class="preset-btn bg-white hover:bg-gray-50 border border-gray-200 rounded-xl p-4 text-center transition-all hover:shadow-md group">
-            <div class="w-10 h-10 mx-auto mb-2 bg-green-50 rounded-lg flex items-center justify-center group-hover:bg-green-100 transition-colors">
-              <i class="fa-solid fa-feather text-green-500"></i>
-            </div>
-            <div class="text-sm font-medium text-gray-700">精简模式</div>
-            <div class="text-xs text-gray-400 mt-1">轻量级编辑</div>
-          </button>
-          <button id="preset-full" class="preset-btn bg-white hover:bg-gray-50 border border-gray-200 rounded-xl p-4 text-center transition-all hover:shadow-md group">
-            <div class="w-10 h-10 mx-auto mb-2 bg-purple-50 rounded-lg flex items-center justify-center group-hover:bg-purple-100 transition-colors">
-              <i class="fa-solid fa-maximize text-purple-500"></i>
-            </div>
-            <div class="text-sm font-medium text-gray-700">完整模式</div>
-            <div class="text-xs text-gray-400 mt-1">全部功能</div>
-          </button>
-          <button id="preset-preview" class="preset-btn bg-white hover:bg-gray-50 border border-gray-200 rounded-xl p-4 text-center transition-all hover:shadow-md group">
-            <div class="w-10 h-10 mx-auto mb-2 bg-orange-50 rounded-lg flex items-center justify-center group-hover:bg-orange-100 transition-colors">
-              <i class="fa-solid fa-book-open text-orange-500"></i>
-            </div>
-            <div class="text-sm font-medium text-gray-700">纯预览</div>
-            <div class="text-xs text-gray-400 mt-1">只读模式</div>
-          </button>
-        </div>
       </section>
     </div>
   </main>

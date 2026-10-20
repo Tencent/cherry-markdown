@@ -59,6 +59,32 @@ export function getPanelRule(): object;
  * @returns {object}
  */
 export function getDetailRule(): object;
+/**
+ * detail Html标签语法的识别正则
+ * 例：
+ * <details open>
+ *   <summary>标题</summary>
+ *   内容
+ * </details>
+ * @returns {object}
+ */
+export function getDetailHtmlRule(): object;
+/**
+ * 超链接语法的识别规则
+ * 由 Link 与 LinkFormatter 共享，避免多处重复定义链接正则
+ * 分组：
+ *   1. leadingChar     链接前的字符（非反斜杠）
+ *   2. text            方括号内的链接文字
+ *   3. link            括号内的URL
+ *   4. title           可选的标题（含引号）
+ *   5. target          {target=...} 段
+ *   6. targetValue     target 具体值
+ */
+export function getLinkRule(): {
+    begin: string;
+    content: string;
+    end: string;
+};
 export const mathBlockReg: RegExp;
 export const HORIZONTAL_WHITESPACE: "[ \\t\\u00a0]";
 export const ALLOW_WHITESPACE_MULTILINE: "(?:.*?)(?:(?:\\n.*?)*?)";

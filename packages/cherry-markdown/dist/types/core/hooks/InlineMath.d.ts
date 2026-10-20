@@ -11,6 +11,7 @@ export default class InlineMath extends ParagraphBase {
     engine: "katex" | "MathJax" | "node";
     katex: any;
     MathJax: any;
+    TeXDelimiter: boolean;
     $cherry: any;
     /**
      * 这里本意是用来存储「上一轮」成功渲染里的最后一个公式
@@ -21,7 +22,24 @@ export default class InlineMath extends ParagraphBase {
     toHtml(wholeMatch: any, leadingChar: any, m1: any): any;
     isSelfClosing(): any;
     $dealUnclosingMath(str: any): any;
-    beforeMakeHtml(str: any): any;
+    beforeMakeHtml(str: any): string;
+    /**
+     * 归一化非表格路径下的 `\(...\)`。整体流程为：
+     *   Step 1: 先跑一次 makeInlineMath，把用户原生 ~D..~D 段冻结到 cache——形成保护壳，
+     *           避免下一步的 \(..\) 归一化误吞已闭合的 $..$ 内部的 \( 或 \)。
+     *   Step 2: 正则替换 \(...\) → ~D...~D（带反斜杠转义感知 + 空内容保护）。
+     *   Step 3: selfClosing 场景下补开定界符，让下游 $dealUnclosingMath 能识别半开公式。
+     * 归一化后的结果会由 makeInlineMathWithSelfClosing 再走一次 makeInlineMath 完成最终渲染。
+     *
+     * 当 TeXDelimiter 关闭时，仅保留 Step 1 的冻结能力，不对 \(..\) 做归一化。
+     */
+    normalizeTexInlineMath(str: any): any;
+    /** 将 `\(...\)` 归一化为 `~D...~D`。空白内容不归一化，等价于旧 mathDelimiter 的 content.trim() 判空。 */
+    rewriteParenInline(str: any): any;
+    /** selfClosing 场景下补开定界符：把"未闭合 \("补一个 ~D 前缀。 */
+    rewriteOpenOnlyParen(str: any): any;
+    /** 表格 td 里将 `\[...\]` 归一化为 `~D...~D`。空白内容不归一化。 */
+    rewriteBracketBlockInTd(str: any): any;
     makeInlineMathWithSelfClosing(str: any): any;
     transformBlockMathToInlineMath(str: any): any;
     makeInlineMath(str: any): any;

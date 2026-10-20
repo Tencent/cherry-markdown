@@ -1,13 +1,17 @@
 export default CherryEngineExport;
+/**
+ * Preserve the static API while declaring the Engine instance returned by the
+ * compatibility constructor. A class declaration alone cannot express this.
+ */
+export type CherryEngineConstructor = Omit<typeof CherryEngine, "prototype"> & (new (options?: ConstructorParameters<typeof CherryEngine>[0]) => Engine);
 import SyntaxHookBase from './core/SyntaxBase';
 import MenuHookBase from './toolbars/MenuBase';
-type CherryEngineExport = typeof CherryStatic & (new (options: Partial<import("../../types/cherry").CherryOptions>) => Engine);
 /**
- * @typedef {typeof CherryStatic & (new (options: Partial<import('../../types/cherry').CherryOptions>) => Engine)}
+ * Preserve the static API while declaring the Engine instance returned by the
+ * compatibility constructor. A class declaration alone cannot express this.
+ * @typedef {Omit<typeof CherryEngine, 'prototype'> & (new (options?: ConstructorParameters<typeof CherryEngine>[0]) => Engine)} CherryEngineConstructor
  */
-declare const CherryEngineExport: typeof CherryEngine;
-import { CherryStatic } from './CherryStatic';
-import Engine from './Engine';
+declare const CherryEngineExport: CherryEngineConstructor;
 declare class CherryEngine extends CherryStatic {
     /**
      * @private
@@ -17,11 +21,13 @@ declare class CherryEngine extends CherryStatic {
      * @readonly
      */
     static readonly config: {
-        defaults: Partial<Partial<import("../../types/cherry").CherryOptionsBase<import("../../types/cherry").CherryCustomOptions>>>;
+        defaults: Partial<Partial<import("../types/cherry").CherryOptionsBase<import("../types/cherry").CherryCustomOptions>>>;
     };
     /**
      * @param {any} options
      */
     constructor(options: any);
 }
+import Engine from './Engine';
+import { CherryStatic } from './CherryStatic';
 export { SyntaxHookBase, MenuHookBase };

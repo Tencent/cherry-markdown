@@ -1,6 +1,12 @@
 /** @type {import('../../types/editor')} */
 export default class Editor {
     /**
+     * typewriter 模式下光标行在视口中的垂直锚点位置（占视口高度的比例）。
+     * 0.5 表示正中间；实际使用 0.4（距顶部 40%），参考 iA Writer / Typora / Ulysses 等主流写作应用，
+     * 视觉焦点自然落在屏幕上方 1/3~1/2 区间，比 1/2 正中央体验更佳。
+     */
+    static TYPEWRITER_ANCHOR_RATIO: number;
+    /**
      * @constructor
      * @param {Partial<EditorConfiguration>} options
      */
@@ -34,6 +40,8 @@ export default class Editor {
     vimCompartment: Compartment;
     /** @type {Compartment} */
     readOnlyCompartment: Compartment;
+    /** @type {Compartment} */
+    historyCompartment: Compartment;
     /** @type {ReturnType<typeof setTimeout> | number} */
     dealSpecialWordsTimer: ReturnType<typeof setTimeout> | number;
     /** @type {number} */
@@ -242,6 +250,22 @@ export default class Editor {
      */
     refreshWritingStatus(): void;
     /**
+     * 将当前光标所在行滚动到编辑区可视区域的垂直中间（typewriter 模式）
+     */
+    scrollCursorToCenter(): void;
+    /**
+     * 安装 typewriter 模式的事件监听器：光标变化 / 窗口尺寸变化时重新居中
+     */
+    installTypewriterListener(): void;
+    _typewriterInstalled: boolean;
+    _typewriterCursorHandler: () => void;
+    _typewriterRaf: any;
+    _typewriterResizeHandler: () => void;
+    /**
+     * 卸载 typewriter 模式的事件监听器
+     */
+    uninstallTypewriterListener(): void;
+    /**
      * 修改书写风格
      */
     setWritingStyle(writingStyle: any): void;
@@ -321,6 +345,12 @@ export default class Editor {
      * @param {boolean} useCapture - 是否使用捕获
      */
     addTrackedEvent(elm: Element, evType: string, fn: Function, useCapture?: boolean): void;
+    /**
+     * 清空undo/redo栈
+     * 通过重置 CodeMirror 6 的 history 扩展来清除全部撤销/重做历史，
+     * 清空后当前文档状态将作为新的初始状态，无法再撤销到此前的修改。
+     */
+    clearUndoRedo(): void;
 }
 export type EditorConfiguration = import("../../types/editor").EditorConfiguration;
 export type EditorEventCallback = import("../../types/editor").EditorEventCallback<keyof import("../../types/editor").EditorEventMap>;
@@ -366,8 +396,9 @@ declare class CM6Adapter implements CM6AdapterType {
      * @param {EditorView} view - EditorView 实例
      * @param {Compartment} [vimCompartment] - vim 模式的 Compartment（可选，用于多实例隔离）
      * @param {Compartment} [readOnlyCompartment] - 只读状态的 Compartment（可选，用于动态切换只读）
+     * @param {Compartment} [historyCompartment] - 历史记录的 Compartment（可选，用于清空 undo/redo 栈）
      */
-    constructor(view: EditorView, vimCompartment?: Compartment, readOnlyCompartment?: Compartment);
+    constructor(view: EditorView, vimCompartment?: Compartment, readOnlyCompartment?: Compartment, historyCompartment?: Compartment);
     /** @type {EditorView} */
     view: EditorView;
     /** @type {Map<string, Array<(...args: unknown[]) => void>>} */
@@ -378,8 +409,16 @@ declare class CM6Adapter implements CM6AdapterType {
     vimCompartment: Compartment | null;
     /** @type {Compartment | null} */
     readOnlyCompartment: Compartment | null;
+    /** @type {Compartment | null} */
+    historyCompartment: Compartment | null;
     /** @type {number} 实例级 markId 计数器 */
     markIdCounter: number;
+    /**
+     * 清空 undo/redo 历史栈
+     * 通过 Compartment 先将 history 扩展重置为空，再重新装载 history() 实现
+     * @returns {void}
+     */
+    clearHistory(): void;
     /**
      * 获取编辑器状态
      * @returns {EditorState}

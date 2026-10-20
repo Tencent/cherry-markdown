@@ -85,9 +85,10 @@ export default class Engine {
     /**
      * 流式输出场景时，把最后的光标占位替换为配置的dom元素，并在一段时间后删除该元素
      * @param {string} md 内容
+     * @param {boolean} forceNoCursor 是否强制不添加光标占位
      * @returns {string}
      */
-    $clearFlowSessionCursorCache(md: string): string;
+    $clearFlowSessionCursorCache(md: string, forceNoCursor?: boolean): string;
     clearCursorTimer: number;
     /**
      * @param {string} md md字符串

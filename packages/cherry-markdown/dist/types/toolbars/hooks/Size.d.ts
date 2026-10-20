@@ -1,6 +1,6 @@
 export default class Size extends MenuBase {
     subMenuConfig: {
-        name: any;
+        name: string;
         noIcon: boolean;
         onclick: any;
     }[];
@@ -17,7 +17,7 @@ export default class Size extends MenuBase {
         };
     };
     getSubMenuConfig(): {
-        name: any;
+        name: string;
         noIcon: boolean;
         onclick: any;
     }[];

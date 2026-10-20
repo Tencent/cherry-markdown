@@ -6,7 +6,7 @@ export default class Timeline extends MenuBase {
     constructor($cherry: any);
     panelRule: any;
     noSubMenu: boolean;
-    $getTitle(): any;
+    $getTitle(): string;
     /**
      * 点击工具栏按钮时，插入一个时间线模板。
      * 复用父类 Panel.onClick 的骨架：把 shortKey 固定为 'timeline'，

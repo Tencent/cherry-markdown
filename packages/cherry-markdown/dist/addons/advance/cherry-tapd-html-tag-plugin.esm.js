@@ -451,6 +451,9 @@ var h = class {
 		return this.cache.size;
 	}
 }, g = 0, _ = class e extends o {
+	static resetCacheCounter() {
+		g = 0;
+	}
 	constructor({ needCache: e, defaultCache: t = {} } = { needCache: !1 }) {
 		super({}), this.needCache = !!e, this.sign = "", e && (this.cache = new h(2e3), this.cacheKey = `~~C${g}`, g += 1), this.cacheData = {}, this.cacheDataMap = [];
 	}

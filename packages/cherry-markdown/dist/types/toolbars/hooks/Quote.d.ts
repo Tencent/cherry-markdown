@@ -8,6 +8,6 @@ export default class Quote extends MenuBase {
      * @param {string} selection selection in editor
      * @returns
      */
-    onClick(selection: string): any;
+    onClick(selection: string): string;
 }
 import MenuBase from '../../toolbars/MenuBase';

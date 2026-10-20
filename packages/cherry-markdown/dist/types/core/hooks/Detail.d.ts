@@ -11,7 +11,9 @@
 export default class Detail extends ParagraphBase {
     constructor();
     makeHtml(str: any, sentenceMakeFunc: any): any;
-    $getDetailInfo(isOpen: any, title: any, str: any, sentenceMakeFunc: any): {
+    sentenceMakeFunc: any;
+    $makeHtml(match: any, preLines: any, isOpen: any, title: any, content: any): string;
+    $getDetailInfo(isOpen: any, title: any, str: any, sentenceMakeFunc: any, isDetailsHtml: any): {
         type: string;
         html: string;
     };
