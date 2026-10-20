@@ -6,7 +6,6 @@ import { createPreviewer } from './helpers/previewer';
 type EngineOptions = ConstructorParameters<typeof CherryEngine>[0];
 
 function createEngine(options: EngineOptions = {}): Engine {
-  // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
   return new CherryEngine(options);
 }
 

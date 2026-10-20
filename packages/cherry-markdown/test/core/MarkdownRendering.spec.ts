@@ -19,7 +19,6 @@ const createEngine = (options = {}) =>
 const render = (markdown: string, options = {}) => {
   const engine = createEngine(options);
   const container = document.createElement('div');
-  // @ts-expect-error CherryEngine's compatibility constructor returns an Engine instance.
   container.innerHTML = engine.makeHtml(markdown);
   return container;
 };

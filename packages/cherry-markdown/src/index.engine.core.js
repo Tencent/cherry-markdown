@@ -61,8 +61,10 @@ class CherryEngine extends CherryStatic {
 export { SyntaxHookBase, MenuHookBase };
 
 /**
- * @typedef {typeof CherryStatic & (new (options: Partial<import('~types/cherry').CherryOptions>) => Engine)}
+ * Preserve the static API while declaring the Engine instance returned by the
+ * compatibility constructor. A class declaration alone cannot express this.
+ * @typedef {Omit<typeof CherryEngine, 'prototype'> & (new (options?: ConstructorParameters<typeof CherryEngine>[0]) => Engine)} CherryEngineConstructor
  */
-const CherryEngineExport = CherryEngine;
+const CherryEngineExport = /** @type {CherryEngineConstructor} */ (/** @type {unknown} */ (CherryEngine));
 
 export default CherryEngineExport;
