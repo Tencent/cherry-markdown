@@ -1,5 +1,5 @@
 # Reusable Workflow: NPM Release — npm 包发布 + dist 产物上传到 GitHub Release
-# 使用 OIDC Trusted Publisher 进行 npm 认证，无需 NPM_TOKEN
+# 默认使用 OIDC；新包首次发布可由调用方提供临时 npm_token
 
 name: 'Reusable: npm Release'
 
@@ -31,6 +31,10 @@ on:
         required: false
         type: string
         default: ''
+    secrets:
+      npm_token:
+        description: 'Optional bootstrap token for a new package; omit after configuring OIDC'
+        required: false
 
 permissions:
   contents: write
@@ -63,7 +67,9 @@ jobs:
 
       - name: Publish ${{ inputs.package_name }}
         working-directory: ${{ inputs.package_dir }}
-        run: NODE_AUTH_TOKEN="" npm publish --access public --provenance --no-workspaces
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+        run: npm publish --access public --provenance --no-workspaces
 
       # =========================================================================
       # 将 dist 产物打包为 zip 并上传到 GitHub Release

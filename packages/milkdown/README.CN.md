@@ -2,6 +2,8 @@
 
 基于 Milkdown/ProseMirror 的开箱即用 Markdown 即见即所得编辑器。它复用 Cherry Markdown 的解析语义、渲染结果和视觉样式，但不创建 Cherry 编辑器、Previewer 或顶部工具栏，也不依赖 Cherry 的编辑器模式。
 
+需要 Node.js 22+ 和 `cherry-markdown >=0.11.11 <0.12.0`。Cherry 最低版本包含注入 ECharts 实例的地图注册表修复；地图加载、取消与重试仍由 Milkdown 负责。版本管理和 npm 发布配置见[发布说明](./RELEASING.md)。
+
 ## React 最小接入
 
 ```tsx

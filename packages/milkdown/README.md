@@ -2,6 +2,8 @@
 
 An out-of-the-box Milkdown/ProseMirror WYSIWYG Markdown editor that reuses Cherry Markdown parsing, rendered HTML, and visual styles. It does not create a Cherry editor or Previewer and is independent from Cherry's editor modes.
 
+Requires Node.js 22+ and `cherry-markdown >=0.11.11 <0.12.0`. The Cherry minimum includes the injected ECharts map-registry fix; map loading, cancellation and retry remain in Milkdown. See [release setup](./RELEASING.md) for versioning and npm publisher configuration.
+
 ## Minimal React setup
 
 ```tsx

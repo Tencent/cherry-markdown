@@ -43,6 +43,7 @@
     "README.md",
     "README.CN.md",
     "ARCHITECTURE.md",
+    "RELEASING.md",
     "LICENSE"
   ],
   "sideEffects": [
@@ -67,7 +68,7 @@
   },
   "peerDependencies": {
     "@milkdown/kit": "^7.21.3",
-    "cherry-markdown": "^0.11.10",
+    "cherry-markdown": "^0.11.11",
     "echarts": "^6.0.0",
     "mathlive": "^0.110.0",
     "mermaid": "^11.14.0"

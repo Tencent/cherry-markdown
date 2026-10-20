@@ -1,28 +1,29 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { chromium } from '@playwright/test';
+import { prepareConsumerPackages } from './prepare-consumer-packages.mjs';
 
-const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const cherryRoot = resolve(packageRoot, '../cherry-markdown');
 const fixture = mkdtempSync(join(tmpdir(), 'cherry-milkdown-consumer-'));
 console.log(`Consumer fixture: ${fixture}`);
 const childEnv = { ...process.env, npm_config_cache: join(fixture, '.npm-cache') };
-const manifest = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'));
+const prepared = prepareConsumerPackages(fixture, childEnv);
+const manifest = JSON.parse(readFileSync(join(prepared.milkdown, 'package.json'), 'utf8'));
+const cherryManifest = JSON.parse(readFileSync(join(prepared['cherry-markdown'], 'package.json'), 'utf8'));
 function run(command, args) {
   execFileSync(command, args, { cwd: fixture, env: childEnv, stdio: 'inherit' });
 }
 const packed = JSON.parse(
-  execFileSync('npm', ['pack', packageRoot, '--json', '--pack-destination', fixture], {
+  execFileSync('npm', ['pack', prepared.milkdown, '--json', '--pack-destination', fixture], {
     cwd: fixture,
     env: childEnv,
     encoding: 'utf8',
   }),
 );
 const packedCherry = JSON.parse(
-  execFileSync('npm', ['pack', cherryRoot, '--json', '--pack-destination', fixture], {
+  execFileSync('npm', ['pack', prepared['cherry-markdown'], '--json', '--pack-destination', fixture], {
     cwd: fixture,
     env: childEnv,
     encoding: 'utf8',
@@ -77,7 +78,16 @@ import React, { useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core.esm.js';
 import { cherryMilkdown, type CherryMilkdownInstance } from '@cherry-markdown/milkdown';
-${charts ? "import { echarts, tableChart } from '@cherry-markdown/milkdown/echarts';" : ''}
+${
+  charts
+    ? `import { echarts, tableChart } from '@cherry-markdown/milkdown/echarts';
+import * as chartLibrary from 'echarts';
+chartLibrary.registerMap('consumer-map', {
+  type: 'FeatureCollection', features: [{ type: 'Feature', properties: { name: '北京市' },
+    geometry: { type: 'Polygon', coordinates: [[[116,39],[117,39],[117,40],[116,40],[116,39]]] } }],
+});`
+    : ''
+}
 import '@cherry-markdown/milkdown/style.css';
 declare global { interface Window { consumerEditor?: CherryMilkdownInstance; } }
 function App() {
@@ -92,7 +102,7 @@ function App() {
       onError: (error, phase) => console.error(phase, error),
       value: ${JSON.stringify(
         charts
-          ? '# Published package\n\n| :line:{"title":"Published chart"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 1 | 2 |\n\n```echarts\n{animation:false,title:{text:"Code chart"},xAxis:{data:["Jan","Feb"]},yAxis:{},series:[{type:"line",data:[1,2]}]}\n```'
+          ? '# Published package\n\n| :map:{"title":"Published map","mapDataSource":"consumer-map"} | Value |\n| --- | --- |\n| 北京 | 10 |\n\n| :line:{"title":"Published chart"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 1 | 2 |\n\n```echarts\n{animation:false,title:{text:"Code chart"},xAxis:{data:["Jan","Feb"]},yAxis:{},series:[{type:"line",data:[1,2]}]}\n```'
           : '# Published package',
       )},
       ${charts ? 'renderers: { echarts, tableChart },' : ''}
@@ -115,6 +125,7 @@ createRoot(root).render(<App />);
   );
 }
 function build(label) {
+  run('npm', ['ls', 'cherry-markdown']);
   run(join(fixture, 'node_modules/.bin/tsc'), ['--noEmit']);
   run(join(fixture, 'node_modules/.bin/vite'), ['build', '--logLevel', 'warn']);
   console.log(`Consumer build passed: ${label}`);
@@ -138,13 +149,15 @@ async function checkChartRuntime(label) {
     const { port } = server.httpServer.address();
     await page.goto(`http://127.0.0.1:${port}/`);
     try {
-      await page.locator('.ProseMirror .cherry-echarts-wrapper svg').first().waitFor();
+      await page.locator('.ProseMirror .cherry-echarts-wrapper svg').nth(1).waitFor();
     } catch (error) {
       throw new Error(`${label}: ${errors.join('\n')}\n${await page.locator('body').innerText()}`, { cause: error });
     }
-    if (!(await page.locator('.cherry-echarts-wrapper').first().textContent()).includes('Published chart')) {
+    if (!(await page.locator('.cherry-echarts-wrapper').nth(1).textContent()).includes('Published chart')) {
       throw new Error('Cherry table chart did not render its configured title.');
     }
+    await page.locator('.cherry-echarts-wrapper[data-map-status=success] svg').waitFor();
+    await page.locator('.cherry-echarts-wrapper svg text').filter({ hasText: 'Published map' }).waitFor();
     const title = page.locator('.cherry-echarts-codeblock-wrapper svg text').filter({ hasText: 'Code chart' });
     await title.waitFor();
     const before = await title.getAttribute('fill');
@@ -183,15 +196,31 @@ writeEntry();
 build('workspace Cherry, MathLive absent');
 const minimumCherry = manifest.peerDependencies['cherry-markdown'].match(/\d+\.\d+\.\d+/)?.[0];
 if (!minimumCherry) throw new Error('Unable to identify the declared minimum Cherry version.');
-run('npm', [
-  'install',
-  '--ignore-scripts',
-  '--legacy-peer-deps',
-  '--no-audit',
-  '--no-fund',
-  `cherry-markdown@${minimumCherry}`,
-]);
-build(`published Cherry ${minimumCherry}, MathLive absent`);
+const published = spawnSync('npm', ['view', `cherry-markdown@${minimumCherry}`, 'version', '--json'], {
+  cwd: fixture,
+  env: childEnv,
+  encoding: 'utf8',
+});
+let minimumSource = `cherry-markdown@${minimumCherry}`;
+let minimumLabel = `published Cherry ${minimumCherry}`;
+if (published.status !== 0) {
+  let registryError;
+  try {
+    registryError = JSON.parse(published.stdout).error;
+  } catch {
+    /* Report the original failure below. */
+  }
+  if (registryError?.code !== 'E404')
+    throw new Error(`Registry lookup failed: ${published.stderr}`, { cause: published.error });
+  if (cherryManifest.version !== minimumCherry)
+    throw new Error(`Unpublished minimum ${minimumCherry} must match planned Cherry ${cherryManifest.version}.`);
+  minimumSource = join(fixture, packedCherry[0].filename);
+  minimumLabel = `planned minimum Cherry ${minimumCherry} (not yet published)`;
+} else if (JSON.parse(published.stdout) !== minimumCherry) {
+  throw new Error(`Registry did not resolve the declared minimum ${minimumCherry}.`);
+}
+run('npm', ['install', '--ignore-scripts', '--legacy-peer-deps', '--no-audit', '--no-fund', minimumSource]);
+build(`${minimumLabel}, MathLive absent`);
 run('npm', [
   'install',
   '--ignore-scripts',
@@ -201,8 +230,8 @@ run('npm', [
   `echarts@${manifest.peerDependencies.echarts}`,
 ]);
 writeEntry(true);
-build(`published Cherry ${minimumCherry}, charts enabled`);
-await checkChartRuntime(`published Cherry ${minimumCherry}`);
+build(`${minimumLabel}, charts enabled`);
+await checkChartRuntime(minimumLabel);
 run('npm', [
   'install',
   '--ignore-scripts',
