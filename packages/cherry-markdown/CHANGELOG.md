@@ -1,5 +1,37 @@
 # Change Log
 
+## 0.11.11
+
+### Patch Changes
+
+- fix: 修复多行选区中标题级别设置不一致的问题，close #1900 [@SomSamantray](https://github.com/SomSamantray)([#1901](https://github.com/Tencent/cherry-markdown/pull/1901))([`8c4f17b`](https://github.com/Tencent/cherry-markdown/commit/8c4f17b2993eaeef7cf38297b181b971234ee967))
+- fix: 编辑器销毁后忽略尚未完成的图片懒加载回调，避免访问已清理的配置，close #1868 [@dvd233](https://github.com/dvd233)([#1871](https://github.com/Tencent/cherry-markdown/pull/1871))([`11652f3`](https://github.com/Tencent/cherry-markdown/commit/11652f3c0597440175d1d637e6ca9c1d134ffe81))
+- fix: 按实例重置段落缓存计数器，确保新建引擎渲染同一文档时生成一致的 HTML。 [@cynic3](https://github.com/cynic3)([#1877](https://github.com/Tencent/cherry-markdown/pull/1877))([`5bb02e3`](https://github.com/Tencent/cherry-markdown/commit/5bb02e30e5da6e579cdb383882b1e880a44f627b))
+- fix: 严格识别 front matter 分隔符，避免误吞表格内容，close #1812 [@mvanhorn](https://github.com/mvanhorn)([#1899](https://github.com/Tencent/cherry-markdown/pull/1899))([`9b221b3`](https://github.com/Tencent/cherry-markdown/commit/9b221b34f6d0a070716a8693bab11430315fc286))
+- fix: 修复自定义 `locales` 配置不生效的问题，close #1878 [@sunsonliu](https://github.com/sunsonliu)([#1885](https://github.com/Tencent/cherry-markdown/pull/1885))([`1634d64`](https://github.com/Tencent/cherry-markdown/commit/1634d64aae831f3af9547decb0ced15e5156e395))
+- feat: 支持新旧两种 PlantUML 编码方式，并提供相应的配置选项。 [@sunsonliu](https://github.com/sunsonliu)([#1907](https://github.com/Tencent/cherry-markdown/pull/1907))([`f499816`](https://github.com/Tencent/cherry-markdown/commit/f49981651326cb4ce19269539cd025f1747ddc66))
+- feat: 支持使用 `\(...\)` 定义行内公式，使用 `\[...\]` 定义块级公式，close #775 [@ArkciaTheDragon](https://github.com/ArkciaTheDragon)([#1879](https://github.com/Tencent/cherry-markdown/pull/1879))([`947d43e`](https://github.com/Tencent/cherry-markdown/commit/947d43eecf849ff90aba604dc5977ce31c9728d3))
+- fix: 优化 TeX 定界符处理，避免公式与链接语法相互干扰。
+
+- 统一公式归一化与链接转义逻辑。
+- 新增 `engine.syntax.mathBlock.TeXDelimiter` 和 `engine.syntax.inlineMath.TeXDelimiter` 配置项，默认开启。
+- 修复 CommonMark 示例 12 中转义字符被误识别为块级公式的问题。 [@sunsonliu](https://github.com/sunsonliu)([#1884](https://github.com/Tencent/cherry-markdown/pull/1884))([`2b0706c`](https://github.com/Tencent/cherry-markdown/commit/2b0706cf66a4c00a1ca3f5c7224f3ed02e2a3e7f))
+- fix: 修复切换书写模式时的宽度处理逻辑，并优化客户端的模式切换入口。 [@sunsonliu](https://github.com/sunsonliu)([#1894](https://github.com/Tencent/cherry-markdown/pull/1894))([`94ceca1`](https://github.com/Tencent/cherry-markdown/commit/94ceca1d1dfb63a8e777c088f39c60ac6b88d653))
+- feat: 新增 `clearUndoRedo()` 接口，客户端切换文件时清空撤销历史，并优化本地版本存储。 [@sunsonliu](https://github.com/sunsonliu)([#1867](https://github.com/Tencent/cherry-markdown/pull/1867))([`da119ee`](https://github.com/Tencent/cherry-markdown/commit/da119eeb41c64983255054b39c3acb528c330685))
+- feat: 支持使用 `<details>` 标签创建折叠内容，close #1902 [@sunsonliu](https://github.com/sunsonliu)([#1905](https://github.com/Tencent/cherry-markdown/pull/1905))([`bab96a4`](https://github.com/Tencent/cherry-markdown/commit/bab96a4268fb7ce2d15b54d0ba9e9868ea96aba9))
+- fix: 优化列表续写、多光标编号及 Vim 按键处理。
+
+- 松散列表按 Enter 续写时不再额外插入空行，空项直接退出或退级。
+- 统一协调多光标续写、退出和退级时的有序列表编号，合并为一次事务。
+- 修复 Vim 普通模式的按键优先级问题。 [@RSS1102](https://github.com/RSS1102)([#1893](https://github.com/Tencent/cherry-markdown/pull/1893))([`b7b33dd`](https://github.com/Tencent/cherry-markdown/commit/b7b33ddaf3fcc6c9898c7c70bdbb4b7fe9b4e691))
+- fix: #1895 修复autolink渲染出错的问题 [@sunsonliu](https://github.com/sunsonliu)([#1909](https://github.com/Tencent/cherry-markdown/pull/1909))([`94fcefd`](https://github.com/Tencent/cherry-markdown/commit/94fcefd739f11794ca19bce58598c8f926c17e30))
+- fix: 修复 macOS 下空列表项无法通过 Tab 键缩进的问题。 [@sunsonliu](https://github.com/sunsonliu)([#1883](https://github.com/Tencent/cherry-markdown/pull/1883))([`e803d07`](https://github.com/Tencent/cherry-markdown/commit/e803d0784feddeb8aef28fba9f187b9c5eebec55))
+- fix: 统一工具栏下拉菜单中图标与文字的跨平台对齐效果，修复 Windows Chrome 中图标偏高的问题，close #1876 [@dvd233](https://github.com/dvd233)([#1898](https://github.com/Tencent/cherry-markdown/pull/1898))([`5001137`](https://github.com/Tencent/cherry-markdown/commit/500113765186189d8ec99e35c7071d8e8d6aabd1))
+- perf: 优化 Terser 压缩配置，ESM 产物经 gzip 压缩后的体积减少约 18 KB（1.26%）。 [@Chenlber](https://github.com/Chenlber)([#1873](https://github.com/Tencent/cherry-markdown/pull/1873))([`d12bc62`](https://github.com/Tencent/cherry-markdown/commit/d12bc6246387d6b55432374cada5faaa753c5617))
+- fix: 优化打字机模式下双向同步滚动的定位逻辑。 [@sunsonliu](https://github.com/sunsonliu)([#1872](https://github.com/Tencent/cherry-markdown/pull/1872))([`6e0300a`](https://github.com/Tencent/cherry-markdown/commit/6e0300a433cd0c9361ab8714e4677c9b55816fbf))
+- fix: 修复打字机模式的异常行为，并提升流式输出时公式渲染的稳定性。 [@sunsonliu](https://github.com/sunsonliu)([#1870](https://github.com/Tencent/cherry-markdown/pull/1870))([`41271d5`](https://github.com/Tencent/cherry-markdown/commit/41271d5cad0a150bbf24a3422e2b21c5856ece7e))
+- fix: 将 `CherryEngine` 的构造结果类型声明为 `Engine`，同时保留其静态 API，close #1822 [@FOWEPJF255](https://github.com/FOWEPJF255)([#1903](https://github.com/Tencent/cherry-markdown/pull/1903))([`856bf21`](https://github.com/Tencent/cherry-markdown/commit/856bf214c92622893a217cc79aa8ecdbe818205a))
+
 ## 0.11.10
 
 ### Patch Changes
