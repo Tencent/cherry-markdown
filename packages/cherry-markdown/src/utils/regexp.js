@@ -267,6 +267,20 @@ export function getDetailRule() {
   return ret;
 }
 
+/**
+ * detail Html标签语法的识别正则
+ * 例：
+ * <details open>
+ *   <summary>标题</summary>
+ *   内容
+ * </details>
+ * @returns {object}
+ */
+export function getDetailHtmlRule() {
+  const reg = /(?:^|\n)(\n*(?:[^\S\n]*))<details[ ]*(open)?>[\s]*<summary>([\w\W]*?)<\/summary>([\w\W]*?)<\/details>/g;
+  return reg;
+}
+
 // 匹配图片URL里的base64，[name](data:image/png;base64,xxx) 和 ![alt](data:image/png;base64,xxx) 这两种形式的都处理
 export const imgBase64Reg = /(\[[^\n]*?\]\(data:image\/[a-z]{1,10};base64,)([^)]+)\)/g;
 
