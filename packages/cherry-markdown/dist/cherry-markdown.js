@@ -54922,6 +54922,10 @@
     return _createClass$244(AutoLink, [{
       key: "stripBreakChars",
       value: function stripBreakChars(address) {
+        if (/[*]+$/.test(address)) return {
+          address: address.replace(/[*]+$/, ""),
+          trailing: address.match(/[*]+$/)[0]
+        };
         if (!this.breakChars || typeof address !== "string" || address.length === 0) return {
           address: address,
           trailing: ""
