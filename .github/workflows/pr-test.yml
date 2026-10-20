@@ -55,14 +55,19 @@ jobs:
           cache: 'yarn'
       - name: Install dependencies
         run: vp install
-      - name: Install Chromium
-        run: ./node_modules/.bin/playwright install --with-deps chromium
+      - name: Install browsers
+        run: ./node_modules/.bin/playwright install --with-deps chromium firefox webkit
       - name: Build Cherry artifacts
         run: vp run -F cherry-markdown build
       - name: Browser interactions
         run: vp run test:e2e:milkdown
         env:
           MILKDOWN_E2E_PREBUILT: '1'
+      - name: Shared behavior across browsers
+        run: vp run -F @cherry-markdown/milkdown test:e2e shared-behavior.spec.ts --project=firefox-matrix --project=webkit-matrix --project=chromium-touch
+        env:
+          MILKDOWN_E2E_PREBUILT: '1'
+          MILKDOWN_BROWSER_MATRIX: '1'
       - name: Verify packed consumers
         run: vp run -F @cherry-markdown/milkdown test:consumer:prepared
       - name: Upload browser diagnostics

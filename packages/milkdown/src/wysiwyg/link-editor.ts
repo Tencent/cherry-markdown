@@ -1,6 +1,7 @@
 import type { Mark, Node as ProseNode } from '@milkdown/kit/prose/model';
 import { Plugin, TextSelection } from '@milkdown/kit/prose/state';
 import type { EditorView } from '@milkdown/kit/prose/view';
+import { copyToClip, isValidScheme } from '../generated/cherry-helpers.js';
 import { sanitizeLinkHref } from '@milkdown/kit/preset/commonmark';
 import { $prose } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
@@ -201,6 +202,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       let editorOpen = false;
       let uiVisible = false;
       let unlinkPending = false;
+      let disposed = false;
       let copyFeedbackTimer: number | undefined;
 
       const notifyUi = (open: boolean) => {
@@ -383,11 +385,11 @@ export const cherryLinkEditor = $prose((ctx) => {
         };
         if (copyFeedbackTimer !== undefined) window.clearTimeout(copyFeedbackTimer);
         try {
-          const clipboard = document.defaultView?.navigator.clipboard;
-          if (!clipboard) throw new Error('Clipboard API is unavailable');
-          await clipboard.writeText(href);
+          await copyToClip(href);
+          if (disposed) return;
           setCopyFeedback('success');
         } catch {
+          if (disposed) return;
           setCopyFeedback('error');
         }
         copyFeedbackTimer = window.setTimeout(() => {
@@ -402,7 +404,8 @@ export const cherryLinkEditor = $prose((ctx) => {
           removeLink();
           return;
         }
-        const href = sanitizeLinkHref(hrefInput.value.trim());
+        const enteredHref = hrefInput.value.trim();
+        const href = isValidScheme(enteredHref) ? sanitizeLinkHref(enteredHref) : null;
         const text = textInput.value.trim();
         if (!href || !text) {
           error.textContent = !href ? '请输入有效的链接地址。' : '链接显示文本不能为空。';
@@ -507,6 +510,7 @@ export const cherryLinkEditor = $prose((ctx) => {
           showForSelection();
         },
         destroy: () => {
+          disposed = true;
           if (uiVisible) notifyUi(false);
           view.dom.removeEventListener('cherry-milkdown:edit-link', onEditRequest);
           inspector.removeEventListener('pointerdown', preserveSelection);

@@ -1,3 +1,4 @@
+import { cherryInlineMatchers } from './inline-syntax.js';
 import type { CherryInlineMatch } from './types.js';
 import { canonicalPanelKind, panelSyntaxHandling } from './syntax-policy.js';
 
@@ -102,59 +103,8 @@ function collectDelimitedBlocks(
 }
 
 const INLINE_MATCHERS = [
-  {
-    type: 'cherry_color',
-    pattern: /!!(#[0-9a-zA-Z]{3,6}|[a-z]{3,20})\s(!!!(#[0-9a-zA-Z]{3,6}|[a-z]{3,10})\s[\s\S]+?!!!)!!/,
-    attrs: (match: RegExpExecArray) => ({ color: match[1] ?? '' }),
-    text: (match: RegExpExecArray) => match[2] ?? '',
-  },
-  {
-    type: 'cherry_background_color',
-    pattern: /!!!(#[0-9a-zA-Z]{3,6}|[a-z]{3,10})\s(!!(#[0-9a-zA-Z]{3,6}|[a-z]{3,20})\s[\s\S]+?!!)!!!/,
-    attrs: (match: RegExpExecArray) => ({ color: match[1] ?? '' }),
-    text: (match: RegExpExecArray) => match[2] ?? '',
-  },
-  {
-    type: 'cherry_background_color',
-    pattern: /!!!(#[0-9a-zA-Z]{3,6}|[a-z]{3,10})\s([\s\S]+?)!!!/,
-    attrs: (match: RegExpExecArray) => ({ color: match[1] ?? '' }),
-    text: (match: RegExpExecArray) => match[2] ?? '',
-  },
-  {
-    type: 'cherry_color',
-    pattern: /!!(#[0-9a-zA-Z]{3,6}|[a-z]{3,20})\s([\s\S]+?)!!/,
-    attrs: (match: RegExpExecArray) => ({ color: match[1] ?? '' }),
-    text: (match: RegExpExecArray) => match[2] ?? '',
-  },
-  {
-    type: 'cherry_font_size',
-    pattern: /!([0-9]{1,2})\s([\s\S]*?)!/,
-    attrs: (match: RegExpExecArray) => ({ size: match[1] ?? '' }),
-    text: (match: RegExpExecArray) => match[2] ?? '',
-  },
-  { type: 'cherry_subscript', pattern: /\^\^([^\n]+?)\^\^/, text: (match: RegExpExecArray) => match[1] ?? '' },
-  {
-    type: 'cherry_superscript',
-    pattern: /(?<!\^)\^([^\n^]+?)\^(?!\^)/,
-    text: (match: RegExpExecArray) => match[1] ?? '',
-  },
-  {
-    type: 'cherry_ruby',
-    pattern: /(?<!\S)\{([^|\n]+?)\|([^}\n]+?)\}(?!\S)/,
-    attrs: (match: RegExpExecArray) => ({ annotation: match[2] ?? '' }),
-    text: (match: RegExpExecArray) => match[1] ?? '',
-  },
-  {
-    type: 'cherry_underline',
-    pattern: /(?<!\S)\/([^/\n]+?)\/(?!\S)/,
-    text: (match: RegExpExecArray) => match[1] ?? '',
-  },
-  {
-    type: 'cherry_highlight',
-    pattern: /==([^=\n]+?)==/,
-    text: (match: RegExpExecArray) => match[1] ?? '',
-  },
-  { type: 'cherry_emoji', pattern: /:[+\w-]+:/, attrs: () => ({}) },
+  ...cherryInlineMatchers,
+  { type: 'cherry_emoji', pattern: /:[+\w-]+:/, attrs: () => ({}), text: undefined, trailingGroup: undefined },
 ];
 
 function collectBlocks(
@@ -242,10 +192,14 @@ export function findCherryInlineMatches(source: string): CherryInlineMatch[] {
     let selected:
       { descriptor: (typeof INLINE_MATCHERS)[number]; match: RegExpExecArray; from: number; to: number } | undefined;
     for (const descriptor of INLINE_MATCHERS) {
-      const match = descriptor.pattern.exec(source.slice(cursor));
+      const search = new RegExp(descriptor.pattern.source, 'g');
+      search.lastIndex = cursor;
+      const match = search.exec(source);
       if (!match) continue;
-      const from = cursor + match.index;
-      const to = from + match[0].length;
+      const leading = descriptor.type === 'cherry_emoji' ? 0 : (match[1]?.length ?? 0);
+      const trailing = descriptor.trailingGroup ? (match[descriptor.trailingGroup]?.length ?? 0) : 0;
+      const from = match.index + leading;
+      const to = match.index + match[0].length - trailing;
       if (!selected || from < selected.from || (from === selected.from && to > selected.to)) {
         selected = { descriptor, match, from, to };
       }
@@ -258,7 +212,7 @@ export function findCherryInlineMatches(source: string): CherryInlineMatch[] {
       type: descriptor.type,
       text: descriptor.text?.(match),
       attrs: descriptor.attrs?.(match),
-      source: match[0],
+      source: source.slice(from, to),
     });
     cursor = to;
   }
@@ -527,26 +481,41 @@ function replaceRootBlocks(
   tree.children = next;
 }
 
-function splitText(node: MarkdownNode): MarkdownNode[] {
+function decodeMarkdownText(value: string) {
+  return value
+    .replace(/&(?:#[0-9]+|#x[0-9a-f]+|[a-z][a-z0-9]+);/gi, (entity) => {
+      const field = document.createElement('textarea');
+      field.innerHTML = entity;
+      return field.value;
+    })
+    .replace(/\\([!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~])/g, '$1');
+}
+
+function splitText(node: MarkdownNode, source = '', rawOverride?: string): MarkdownNode[] {
   const value = node.value ?? '';
-  const matches = findCherryInlineMatches(value);
+  const range = nodeRange(node);
+  const raw = rawOverride ?? (range ? source.slice(range.from, range.to) : value);
+  // remark has already removed Markdown escapes. Match the original text when
+  // it maps to this AST node, so escaped Cherry delimiters stay literal.
+  const input = decodeMarkdownText(raw) === value ? raw : value;
+  const matches = findCherryInlineMatches(input);
   if (!matches.length) return [node];
   const next: MarkdownNode[] = [];
   let cursor = 0;
   for (const match of matches) {
-    if (match.from > cursor) next.push({ type: 'text', value: value.slice(cursor, match.from) });
+    if (match.from > cursor) next.push({ type: 'text', value: decodeMarkdownText(input.slice(cursor, match.from)) });
     if (match.type === 'cherry_emoji') {
       next.push({ type: 'cherryEmoji', value: match.source, source: match.source });
     } else {
       next.push({
         type: match.type,
-        children: splitText({ type: 'text', value: match.text ?? '' }),
+        children: splitText({ type: 'text', value: decodeMarkdownText(match.text ?? '') }, '', match.text),
         ...match.attrs,
       });
     }
     cursor = match.to;
   }
-  if (cursor < value.length) next.push({ type: 'text', value: value.slice(cursor) });
+  if (cursor < input.length) next.push({ type: 'text', value: decodeMarkdownText(input.slice(cursor)) });
   return next;
 }
 
@@ -616,9 +585,9 @@ function transformInline(node: MarkdownNode, source: string, root = false) {
           target: String(target[1] ?? '').replace(/^['"]|['"]$/g, ''),
         });
         const remainder = value.slice(target[0].length);
-        if (remainder) next.push(...splitText({ ...child, value: remainder }));
+        if (remainder) next.push(...splitText({ ...child, value: remainder }, '', rawValue.slice(rawTarget.length)));
       } else {
-        next.push(...splitText(child));
+        next.push(...splitText(child, source));
       }
     } else {
       transformInline(child, source);

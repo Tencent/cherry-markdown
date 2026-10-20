@@ -53,7 +53,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "node ./scripts/sync-chart-locale.mjs && rimraf ./dist && tsc --project tsconfig.build.json",
+    "build": "node ./scripts/sync-chart-locale.mjs && node ./scripts/sync-cherry-helpers.mjs && rimraf ./dist && tsc --project tsconfig.build.json && node ./scripts/sync-cherry-helpers.mjs --dist",
     "build:demo": "yarn workspace cherry-markdown build && yarn build:demo:prepared",
     "build:demo:prepared": "yarn build && node ./scripts/build-demo.mjs",
     "build:types": "tsc --project tsconfig.build.json",
@@ -64,7 +64,7 @@
     "test:e2e": "playwright test --config playwright.config.ts",
     "test:consumer": "yarn workspace cherry-markdown build && yarn build && yarn test:consumer:prepared",
     "test:consumer:prepared": "node ./scripts/verify-consumer.mjs",
-    "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project examples/react/tsconfig.json --noEmit"
+    "typecheck": "node ./scripts/sync-cherry-helpers.mjs --check && tsc --project tsconfig.json --noEmit && tsc --project examples/react/tsconfig.json --noEmit"
   },
   "peerDependencies": {
     "@milkdown/kit": "^7.21.3",

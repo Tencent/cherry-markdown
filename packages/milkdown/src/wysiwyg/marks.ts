@@ -1,4 +1,5 @@
-import { markRule } from '@milkdown/kit/prose';
+import { cherryInlineSyntax, inlineInputPattern } from './inline-syntax.js';
+import { InputRule } from '@milkdown/kit/prose/inputrules';
 import { $inputRule, $mark } from '@milkdown/kit/utils';
 
 type MarkAttrs = Record<string, string>;
@@ -10,12 +11,6 @@ interface MarkDefinition {
   attrs?: Record<string, { default: string; validate: 'string' }>;
   parseAttrs?: (node: Record<string, unknown>) => MarkAttrs;
   dom: (attrs: MarkAttrs) => MarkDom;
-  serialize: (text: string, attrs: MarkAttrs) => string;
-  input?: {
-    pattern: RegExp;
-    attrs?: (match: RegExpMatchArray) => MarkAttrs;
-    content?: (match: RegExpMatchArray) => string;
-  };
 }
 
 const stringAttr = { default: '', validate: 'string' as const };
@@ -31,8 +26,6 @@ const definitions: MarkDefinition[] = [
     attrs: { color: stringAttr },
     parseAttrs: (node) => ({ color: String(node.color ?? '') }),
     dom: ({ color }) => ['span', { class: 'cherry-wysiwyg-bg', style: `background-color:${color}` }, 0],
-    serialize: (text, { color }) => `!!!${color} ${text}!!!`,
-    input: { pattern: /!!!(#[0-9a-zA-Z]{3,6}|[a-z]{3,10})\s([\s\S]+?)!!!$/, attrs: (m) => ({ color: m[1] ?? '' }) },
   },
   {
     name: 'cherry_color',
@@ -40,8 +33,6 @@ const definitions: MarkDefinition[] = [
     attrs: { color: stringAttr },
     parseAttrs: (node) => ({ color: String(node.color ?? '') }),
     dom: ({ color }) => ['span', { class: 'cherry-wysiwyg-color', style: `color:${color}` }, 0],
-    serialize: (text, { color }) => `!!${color} ${text}!!`,
-    input: { pattern: /!!(#[0-9a-zA-Z]{3,6}|[a-z]{3,20})\s([\s\S]+?)!!$/, attrs: (m) => ({ color: m[1] ?? '' }) },
   },
   {
     name: 'cherry_font_size',
@@ -49,22 +40,16 @@ const definitions: MarkDefinition[] = [
     attrs: { size: stringAttr },
     parseAttrs: (node) => ({ size: String(node.size ?? '') }),
     dom: ({ size }) => ['span', { class: 'cherry-wysiwyg-size', style: `font-size:${size}px` }, 0],
-    serialize: (text, { size }) => `!${size} ${text}!`,
-    input: { pattern: /!([0-9]{1,2})\s([\s\S]+?)!$/, attrs: (m) => ({ size: m[1] ?? '' }) },
   },
   {
     name: 'cherry_subscript',
     mdastType: 'cherry_subscript',
     dom: () => ['sub', { class: 'cherry-wysiwyg-sub' }, 0],
-    serialize: (text) => `^^${text}^^`,
-    input: { pattern: /\^\^([^\n]+?)\^\^$/ },
   },
   {
     name: 'cherry_superscript',
     mdastType: 'cherry_superscript',
     dom: () => ['sup', { class: 'cherry-wysiwyg-sup' }, 0],
-    serialize: (text) => `^${text}^`,
-    input: { pattern: /(?<!\^)\^([^\n^]+?)\^$/ },
   },
   {
     name: 'cherry_ruby',
@@ -75,26 +60,16 @@ const definitions: MarkDefinition[] = [
     // renderer emits. Keeping the annotation in an <rt> child avoids a
     // parallel pseudo-element layout that can truncate or shift headings.
     dom: ({ annotation }) => ['ruby', { class: 'cherry-wysiwyg-ruby' }, ['span', {}, 0], ['rt', {}, annotation]],
-    serialize: (text, { annotation }) => `{${text}|${annotation}}`,
-    input: {
-      pattern: /(?:^|\s)\{([^|\n]+?)\|([^}\n]+?)\}$/,
-      attrs: (m) => ({ annotation: m[2] ?? '' }),
-      content: (m) => m[1] ?? '',
-    },
   },
   {
     name: 'cherry_underline',
     mdastType: 'cherry_underline',
     dom: () => ['span', { class: 'cherry-wysiwyg-underline' }, 0],
-    serialize: (text) => `/${text}/`,
-    input: { pattern: /(?:^|\s)\/([^/\n]+?)\/$/ },
   },
   {
     name: 'cherry_highlight',
     mdastType: 'cherry_highlight',
     dom: () => ['mark', { class: 'cherry-wysiwyg-highlight' }, 0],
-    serialize: (text) => `==${text}==`,
-    input: { pattern: /(?:^|\s)==([^=\n]+?)==$/ },
   },
 ];
 
@@ -136,18 +111,32 @@ export const cherryWysiwygMarkSchemas = definitions.map((definition) =>
 );
 
 export const cherryWysiwygMarkInputRules = definitions.flatMap((definition, index) => {
-  if (!definition.input) return [];
+  const syntax = cherryInlineSyntax.find((item) => item.type === definition.mdastType);
+  if (!syntax) return [];
+  const inputPattern = inlineInputPattern(syntax);
   const schema = cherryWysiwygMarkSchemas[index];
   if (!schema) return [];
   return [
-    $inputRule((ctx) =>
-      markRule(definition.input!.pattern, schema.type(ctx), {
-        getAttr: (match) => definition.input?.attrs?.(match) ?? {},
-        updateCaptured: (captured) => {
-          const match = definition.input?.pattern.exec(captured.fullMatch ?? '');
-          return match && definition.input?.content ? { group: definition.input.content(match) } : {};
-        },
-      }),
+    $inputRule(
+      (ctx) =>
+        new InputRule(inputPattern, (state, match, start, end) => {
+          // Capture indices distinguish a payload from an identical attribute
+          // (e.g. !!red red!!), without reparsing the shared Cherry grammar.
+          const range = (match as RegExpMatchArray & { indices?: Array<[number, number]> }).indices?.[syntax.textGroup];
+          if (!range || range[1] <= range[0]) return null;
+          const leading = match[1]?.length ?? 0;
+          const trailing = syntax.trailingGroup ? (match[syntax.trailingGroup]?.length ?? 0) : 0;
+          const transaction = state.tr;
+          transaction.delete(start + range[1], end - trailing);
+          transaction.delete(start + leading, start + range[0]);
+          transaction.addMark(
+            start + leading,
+            start + leading + range[1] - range[0],
+            schema.type(ctx).create(syntax.attrs?.(match) ?? {}),
+          );
+          transaction.setStoredMarks(state.storedMarks ?? []);
+          return transaction;
+        }),
     ),
   ];
 });

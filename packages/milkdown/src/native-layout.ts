@@ -1,12 +1,15 @@
+import { image as cherryImage } from './generated/cherry-helpers.js';
+import { cherryImagePatterns } from './generated/cherry-syntax.js';
+
 export interface NativeLayoutChange {
   type?: string;
   width?: number | string;
   height?: number | string;
 }
 
-const SIZE = '#(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)';
-const ALIGNMENT = '#(?:center|right|left|float-right|float-left)';
-const IMAGE_DECORATION = '#(?:border|shadow|radius|B|S|R)';
+const SIZE = cherryImagePatterns.size.source;
+const ALIGNMENT = cherryImagePatterns.alignment.source;
+const IMAGE_DECORATION = cherryImagePatterns.decoration.source;
 const IMAGE_EXTENSION = `${SIZE}|${IMAGE_DECORATION}|${ALIGNMENT}`;
 
 export function readMermaidLayout(source: string) {
@@ -22,20 +25,18 @@ export function readMermaidLayout(source: string) {
 
 function sizeToken(value: unknown) {
   const raw = String(value).trim();
-  if (/^(?:[0-9]+(?:px|em|pt|pc|in|mm|cm|ex|%)|auto)$/i.test(raw)) return `#${raw}`;
+  if (new RegExp(`^(?:${SIZE.slice(1)})$`, 'i').test(raw)) return `#${raw}`;
   const number = Math.round(Number.parseFloat(raw));
   return Number.isFinite(number) ? `#${number}px` : '';
 }
 
 export function imageLayoutState(source: string) {
-  const tokens = source.match(new RegExp(IMAGE_EXTENSION, 'g')) ?? [];
-  const hasDecoration = (long: string, short: string) =>
-    tokens.some((token) => new RegExp(`^#(?:${long}|${short})$`).test(token));
+  const { extendClasses } = cherryImage.processExtendStyleInAlt(source);
   return {
-    alignment: tokens.find((token) => new RegExp(`^${ALIGNMENT}$`).test(token))?.slice(1) ?? '',
-    border: hasDecoration('border', 'B'),
-    shadow: hasDecoration('shadow', 'S'),
-    radius: hasDecoration('radius', 'R'),
+    alignment: cherryImage.$getAlignment(source),
+    border: extendClasses.includes('cherry-img-deco-border'),
+    shadow: extendClasses.includes('cherry-img-deco-shadow'),
+    radius: extendClasses.includes('cherry-img-deco-radius'),
   };
 }
 

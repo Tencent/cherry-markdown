@@ -1,3 +1,4 @@
+import { copyToClip } from '../generated/cherry-helpers.js';
 import { codeBlockSchema } from '@milkdown/kit/preset/commonmark';
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
 import { NodeSelection, Plugin, TextSelection } from '@milkdown/kit/prose/state';
@@ -84,6 +85,7 @@ class CherryCodeBlockView implements NodeView {
   private readonly language: HTMLSelectElement;
   private readonly copy: HTMLButtonElement;
   private readonly pre: HTMLPreElement;
+  private disposed = false;
   private copyTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
@@ -160,6 +162,7 @@ class CherryCodeBlockView implements NodeView {
   }
 
   destroy() {
+    this.disposed = true;
     if (this.copyTimer) clearTimeout(this.copyTimer);
     this.language.removeEventListener('change', this.updateLanguage);
     this.copy.removeEventListener('click', this.copyCode);
@@ -254,20 +257,24 @@ class CherryCodeBlockView implements NodeView {
   };
 
   private copyCode = () => {
-    const value = this.node.textContent;
-    if (navigator.clipboard?.writeText) {
-      void navigator.clipboard.writeText(value).catch(() => {
-        // Clipboard permission is optional in embedded previews. Do not leak
-        // an unhandled rejection or block ordinary code editing.
-      });
+    void this.copySource();
+  };
+
+  private async copySource() {
+    try {
+      await copyToClip(this.node.textContent);
+      if (this.disposed) return;
+      this.copy.textContent = '已复制';
+    } catch {
+      if (this.disposed) return;
+      this.copy.textContent = '复制失败';
     }
     if (this.copyTimer) clearTimeout(this.copyTimer);
-    this.copy.textContent = '已复制';
     this.copyTimer = setTimeout(() => {
       this.copy.textContent = '复制';
       this.copyTimer = undefined;
     }, 800);
-  };
+  }
 }
 
 export const cherryCodeBlockView = $view(
