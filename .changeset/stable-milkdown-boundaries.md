@@ -1,5 +1,5 @@
 ---
-'@cherry-markdown/milkdown': minor
+'@cherry-markdown/milkdown': patch
 ---
 
 feat: 新增基于 Milkdown/ProseMirror 的独立所见即所得编辑器，复用 Cherry Engine 的解析语义、主题和样式，支持 CommonMark/GFM、表格图表及 Mermaid/ECharts 源码编辑。

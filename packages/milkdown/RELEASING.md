@@ -4,8 +4,8 @@
 
 ## 版本与顺序
 
-- Milkdown 当前开发版本为 `0.0.0`；合并到 main 后，由 Changesets 的版本 PR 生成首个正式版本 `0.1.0`。不要在功能 PR 中提前消费 changeset 或手动改成正式版本。
-- `stable-milkdown-boundaries.md` 声明 Milkdown minor，`fix-injected-echarts-map-registry.md` 声明 Cherry core patch。Changesets 根据合并时的 core 基线计算补丁版本，并同步更新 Milkdown 的 peer 范围，确保正式包依赖包含地图注册表修复的 Cherry 版本；最终版本以版本 PR 生成的 manifest 为准。
+- Milkdown 当前开发版本为 `0.0.0`；合并到 main 后，由 Changesets 的版本 PR 生成首个正式版本 `0.0.1`。不要在功能 PR 中提前消费 changeset 或手动改成正式版本。
+- `stable-milkdown-boundaries.md` 声明 Milkdown patch（首次发布从 `0.0.0` 升到 `0.0.1`），`fix-injected-echarts-map-registry.md` 声明 Cherry core patch。Changesets 根据合并时的 core 基线计算补丁版本，并同步更新 Milkdown 的 peer 范围，确保正式包依赖包含地图注册表修复的 Cherry 版本；最终版本以版本 PR 生成的 manifest 为准。
 - 正式发布任务先等待同批 Cherry core 发布成功，再发布 Milkdown；只发布 Milkdown 时允许 core 任务跳过，core 发布失败时阻止 Milkdown 发布。
 - Milkdown 复用 npm 发布子工作流，公开发布并生成 provenance，同时上传 dist zip 到 `@cherry-markdown/milkdown@<version>` 对应的 GitHub Release。
 
