@@ -53,14 +53,25 @@ export function readEditableSource(source: HTMLElement) {
 }
 
 export function selectEditableSource(event: KeyboardEvent) {
-  if (event.key.toLowerCase() !== 'a' || (!event.metaKey && !event.ctrlKey) || event.altKey) return;
+  if ((!event.metaKey && !event.ctrlKey) || event.altKey || event.isComposing) return;
+  const selectAll = event.key.toLowerCase() === 'a';
+  const boundary = event.key === 'Home' || event.key === 'End';
+  if (!selectAll && !boundary) return;
   const source = event.currentTarget;
   if (!(source instanceof HTMLElement) || source.contentEditable !== 'true') return;
   event.preventDefault();
   event.stopPropagation();
   const selection = source.ownerDocument.getSelection();
+  // Linux Chromium can move Ctrl+End out of a nested contenteditable and into
+  // ProseMirror's trailing paragraph. This source surface owns its navigation,
+  // just as it owns select-all; subsequent native IME input must stay here.
+  if (boundary && event.shiftKey && selection?.rangeCount) {
+    selection.extend(source, event.key === 'Home' ? 0 : source.childNodes.length);
+    return;
+  }
   const range = source.ownerDocument.createRange();
   range.selectNodeContents(source);
+  if (boundary) range.collapse(event.key === 'Home');
   selection?.removeAllRanges();
   selection?.addRange(range);
 }

@@ -318,6 +318,27 @@ test('controlled-value echoes never replay the intermediate composition over com
   await input.detach();
 });
 
+test('source boundary shortcuts and range selection stay inside the owned source editor', async ({ page }) => {
+  await setMarkdown(page, 'Before\n\n```custom-preview\nAlpha\nBeta\n```\n\nAfter');
+  await page.getByRole('button', { name: '在节点内编辑源码' }).click();
+  const source = page.locator('.cherry-embed__source code');
+  await source.click();
+  await source.press('ControlOrMeta+Home');
+  await page.keyboard.type('X');
+  await expect(source).toHaveText('XAlpha\nBeta');
+  await source.press('ControlOrMeta+End');
+  await page.keyboard.type('Y');
+  await expect(source).toHaveText('XAlpha\nBetaY');
+  await source.press('ControlOrMeta+Shift+Home');
+  expect(await page.evaluate(() => window.getSelection()?.toString())).toBe('XAlpha\nBetaY');
+  await page.keyboard.type('Replaced');
+  await expect(source).toHaveText('Replaced');
+  await expect
+    .poll(async () => (await markdown(page)).trimEnd())
+    .toBe('Before\n\n```custom-preview\nReplaced\n```\n\nAfter');
+  await expect(source).toBeFocused();
+});
+
 test('native composition inside an owned source editor persists exactly one committed Chinese value', async ({
   page,
   browserName,
@@ -328,6 +349,13 @@ test('native composition inside an owned source editor persists exactly one comm
   const source = page.locator('.cherry-embed__source code');
   await source.click();
   await source.press('ControlOrMeta+End');
+  await expect(source).toBeFocused();
+  expect(
+    await source.evaluate((element) => {
+      const selection = element.ownerDocument.getSelection();
+      return Boolean(selection?.focusNode && element.contains(selection.focusNode));
+    }),
+  ).toBe(true);
   const input = await page.context().newCDPSession(page);
   await input.send('Input.imeSetComposition', { text: 'nihao', selectionStart: 0, selectionEnd: 5 });
   await input.send('Input.insertText', { text: '你好' });
@@ -351,6 +379,8 @@ test('an external prepend keeps the composed source editor focused and updates i
   await source.press('ControlOrMeta+End');
   await source.press('ArrowLeft');
   await source.press('ArrowLeft');
+  await expect(source).toBeFocused();
+  expect(await page.evaluate(() => window.getSelection()?.anchorOffset)).toBe(3);
   const input = await page.context().newCDPSession(page);
   await input.send('Input.imeSetComposition', { text: 'ni', selectionStart: 0, selectionEnd: 2 });
   await page.evaluate(() =>
