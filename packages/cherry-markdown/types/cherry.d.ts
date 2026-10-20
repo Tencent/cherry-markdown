@@ -275,6 +275,32 @@ export interface CherryEngineOptions {
     // 'hookName': {
     //
     // }
+    plantuml?:
+      | false
+      | {
+          /**
+           * 编码方式
+           *  - true： 使用 HEX（`~h` 前缀）编码，不压缩，URL 更长但兼容性最好，适合内网/老版本 PlantUML 服务或 DEFLATE 兼容异常时作为兜底
+           *  - false：使用标准 DEFLATE 压缩后再编码，URL 更短，适用于官方 PlantUML 服务（默认推荐）
+           *  当 DEFLATE 过程异常时，会自动降级为 HEX，保证图至少能渲染出来
+           */
+          useHex?: false;
+          /**
+           * PlantUML 服务输出的内容格式，对应 URL 中 `/<type>/` 这一段路径
+           *  - 'svg'：矢量图（默认，推荐，可缩放不失真）
+           *  - 'png'：位图
+           *  - 'txt'：ASCII 字符画
+           *  - 'uml'：原始 UML 源码（主要用于调试）
+           */
+          type?: 'svg';
+          /**
+           * PlantUML 渲染服务的基础地址
+           *  - 默认指向官方公网服务：https://www.plantuml.com/plantuml
+           *  - 内网场景可改为自建的 PlantUML Server 地址，例如：https://plantuml.your-company.com/plantuml
+           *  - 注意：不要在末尾加 `/`，也不要带上 `/svg` 等 type 段，type 段由上面的 `type` 字段单独控制
+           */
+          baseUrl?: 'https://www.plantuml.com/plantuml';
+        };
     link?:
       | false
       | {
