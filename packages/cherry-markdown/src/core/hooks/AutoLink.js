@@ -93,6 +93,9 @@ export default class AutoLink extends SyntaxBase {
    * @returns {{ address: string, trailing: string }}
    */
   stripBreakChars(address) {
+    if (/[*]+$/.test(address)) {
+      return { address: address.replace(/[*]+$/, ''), trailing: address.match(/[*]+$/)[0] };
+    }
     if (!this.breakChars || typeof address !== 'string' || address.length === 0) {
       return { address, trailing: '' };
     }
