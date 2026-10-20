@@ -1,4 +1,17 @@
-import { vi } from 'vitest';
+import { afterAll, beforeAll, vi } from 'vitest';
+
+beforeAll(() => {
+  // Milkdown's readiness timers keep their timeout callbacks even after they
+  // resolve. Own these timers so they cannot run after jsdom removes globals.
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'], shouldAdvanceTime: true });
+});
+
+afterAll(() => {
+  if (vi.isFakeTimers()) {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+  }
+});
 
 class ResizeObserverMock {
   observe() {}
