@@ -1,5 +1,20 @@
 # @cherry-markdown/client
 
+## 0.5.2
+
+### Patch Changes
+
+- feat(client): 支持配置专注模式宽度，并新增本地历史版本功能。
+
+- 固定宽度支持 400–1600 px，默认 800 px，保存后立即生效。
+- 自动保存本地版本并按时间聚合快照，支持差异预览和版本删除。
+- 打开文件时提示可恢复的较新本地版本，切换文件不再弹出未保存确认框。
+- 状态栏新增自动快照提示和历史版本入口，修复预览区域无法滚动的问题。 [@sunsonliu](https://github.com/sunsonliu)([#1866](https://github.com/Tencent/cherry-markdown/pull/1866))([`7ea1856`](https://github.com/Tencent/cherry-markdown/commit/7ea1856c4322e59723bbe6e3c4f841efc156acaf))
+- fix: 修复切换书写模式时的宽度处理逻辑，并优化客户端的模式切换入口。 [@sunsonliu](https://github.com/sunsonliu)([#1894](https://github.com/Tencent/cherry-markdown/pull/1894))([`94ceca1`](https://github.com/Tencent/cherry-markdown/commit/94ceca1d1dfb63a8e777c088f39c60ac6b88d653))
+- feat: 新增 `clearUndoRedo()` 接口，客户端切换文件时清空撤销历史，并优化本地版本存储。 [@sunsonliu](https://github.com/sunsonliu)([#1867](https://github.com/Tencent/cherry-markdown/pull/1867))([`da119ee`](https://github.com/Tencent/cherry-markdown/commit/da119eeb41c64983255054b39c3acb528c330685))
+- Updated dependencies [[`8c4f17b`](https://github.com/Tencent/cherry-markdown/commit/8c4f17b2993eaeef7cf38297b181b971234ee967), [`11652f3`](https://github.com/Tencent/cherry-markdown/commit/11652f3c0597440175d1d637e6ca9c1d134ffe81), [`5bb02e3`](https://github.com/Tencent/cherry-markdown/commit/5bb02e30e5da6e579cdb383882b1e880a44f627b), [`9b221b3`](https://github.com/Tencent/cherry-markdown/commit/9b221b34f6d0a070716a8693bab11430315fc286), [`1634d64`](https://github.com/Tencent/cherry-markdown/commit/1634d64aae831f3af9547decb0ced15e5156e395), [`f499816`](https://github.com/Tencent/cherry-markdown/commit/f49981651326cb4ce19269539cd025f1747ddc66), [`947d43e`](https://github.com/Tencent/cherry-markdown/commit/947d43eecf849ff90aba604dc5977ce31c9728d3), [`2b0706c`](https://github.com/Tencent/cherry-markdown/commit/2b0706cf66a4c00a1ca3f5c7224f3ed02e2a3e7f), [`94ceca1`](https://github.com/Tencent/cherry-markdown/commit/94ceca1d1dfb63a8e777c088f39c60ac6b88d653), [`da119ee`](https://github.com/Tencent/cherry-markdown/commit/da119eeb41c64983255054b39c3acb528c330685), [`bab96a4`](https://github.com/Tencent/cherry-markdown/commit/bab96a4268fb7ce2d15b54d0ba9e9868ea96aba9), [`b7b33dd`](https://github.com/Tencent/cherry-markdown/commit/b7b33ddaf3fcc6c9898c7c70bdbb4b7fe9b4e691), [`94fcefd`](https://github.com/Tencent/cherry-markdown/commit/94fcefd739f11794ca19bce58598c8f926c17e30), [`e803d07`](https://github.com/Tencent/cherry-markdown/commit/e803d0784feddeb8aef28fba9f187b9c5eebec55), [`5001137`](https://github.com/Tencent/cherry-markdown/commit/500113765186189d8ec99e35c7071d8e8d6aabd1), [`d12bc62`](https://github.com/Tencent/cherry-markdown/commit/d12bc6246387d6b55432374cada5faaa753c5617), [`6e0300a`](https://github.com/Tencent/cherry-markdown/commit/6e0300a433cd0c9361ab8714e4677c9b55816fbf), [`41271d5`](https://github.com/Tencent/cherry-markdown/commit/41271d5cad0a150bbf24a3422e2b21c5856ece7e), [`856bf21`](https://github.com/Tencent/cherry-markdown/commit/856bf214c92622893a217cc79aa8ecdbe818205a)]:
+  - cherry-markdown@0.11.11
+
 ## 0.5.1
 
 ### Patch Changes

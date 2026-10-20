@@ -1,6 +1,6 @@
 {
   "name": "@cherry-markdown/client",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "type": "module",
   "scripts": {
     "dev": "node ./scripts/sync-version.js && vp dev",
