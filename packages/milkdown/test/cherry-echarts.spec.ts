@@ -241,8 +241,7 @@ describe('Cherry chart mounting boundary', () => {
     );
     const cleanup = mount({ type: 'map', options: { mapDataSource: 'china' } });
     window.dispatchEvent(new Event('cherry:export:done'));
-    expect(pending).toHaveLength(2);
-    expect(pending[0].signal).toBe(pending[1].signal);
+    expect(pending).toHaveLength(1);
     cleanup();
     expect(registry.size).toBe(0);
     pending.forEach(({ signal, resolve }) => {
@@ -263,6 +262,61 @@ describe('Cherry chart mounting boundary', () => {
     expect(registry.size).toBe(0);
   });
 
+  it('uses the injected map registry without modifying a different global ECharts', async () => {
+    const { mount, library, charts } = fixture();
+    const globalLibrary = { getMap: vi.fn(), registerMap: vi.fn() };
+    vi.stubGlobal('echarts', globalLibrary);
+    const maps = new Set<string>();
+    library.getMap.mockImplementation((name) => (maps.has(name) ? {} : undefined));
+    library.registerMap.mockImplementation((name) => {
+      maps.add(name);
+    });
+    const data = { type: 'FeatureCollection', features: [] };
+    const fetchMap = vi.fn().mockResolvedValue({ ok: true, json: async () => data });
+    vi.stubGlobal('fetch', fetchMap);
+    mount({
+      type: 'map',
+      options: { mapDataSource: 'china' },
+      table: {
+        header: ['Province', 'Value'],
+        rows: [['北京', '10']],
+        colLength: 2,
+        rowLength: 1,
+      },
+    });
+    await vi.waitFor(() =>
+      expect(charts[0].getOption().series).toEqual([
+        expect.objectContaining({ type: 'map', map: 'china', data: [{ name: '北京市', value: 10 }] }),
+      ]),
+    );
+    expect(library.registerMap).toHaveBeenCalledWith('china', data);
+    expect(globalLibrary.getMap).not.toHaveBeenCalled();
+    expect(globalLibrary.registerMap).not.toHaveBeenCalled();
+    expect(window.echarts).toBe(globalLibrary);
+    window.dispatchEvent(new Event('cherry:export:done'));
+    expect(fetchMap).toHaveBeenCalledTimes(1);
+  });
+
+  it('tries fallback map sources and retries failures with the same owned cancellation signal', async () => {
+    const { container, mount, library } = fixture();
+    const fetchMap = vi.fn().mockRejectedValue(new Error('Network unavailable'));
+    vi.stubGlobal('fetch', fetchMap);
+    mount({ type: 'map', options: { mapDataSource: 'china' } });
+    const chartRoot = container.querySelector<HTMLElement>('.cherry-echarts-wrapper')!;
+    await vi.waitFor(() => expect(chartRoot.dataset.mapStatus).toBe('failed'));
+    expect(fetchMap).toHaveBeenCalledTimes(3);
+    const chart = library.getInstanceByDom(chartRoot)!;
+    const retry = (chart.getOption().graphic as { onclick(): void }).onclick;
+    fetchMap.mockResolvedValue({ ok: true, json: async () => ({ type: 'FeatureCollection', features: [] }) });
+    library.registerMap.mockImplementation(() => {
+      library.getMap.mockReturnValue({});
+    });
+    retry();
+    await vi.waitFor(() => expect(chartRoot.dataset.mapStatus).toBe('success'));
+    expect(fetchMap).toHaveBeenCalledTimes(4);
+    expect(fetchMap.mock.calls[0][1].signal).toBe(fetchMap.mock.calls[3][1].signal);
+  });
+
   it('keeps map cancellation independent between sibling mounts after export', async () => {
     const { root, mount, echarts, library } = fixture();
     const pending: Array<{ signal: AbortSignal; resolve(value: Response): void }> = [];
@@ -279,11 +333,10 @@ describe('Cherry chart mounting boundary', () => {
     const cleanupSecond = mountCherryChart(other, { echarts, table, ...settings });
     cleanups.push(cleanupSecond);
     window.dispatchEvent(new Event('cherry:export:done'));
-    expect(pending).toHaveLength(4);
-    expect(pending[0].signal).toBe(pending[2].signal);
-    expect(pending[1].signal).toBe(pending[3].signal);
+    expect(pending).toHaveLength(2);
+    expect(pending[0].signal).not.toBe(pending[1].signal);
     cleanupFirst();
-    expect(pending.map(({ signal }) => signal.aborted)).toEqual([true, false, true, false]);
+    expect(pending.map(({ signal }) => signal.aborted)).toEqual([true, false]);
     cleanupSecond();
     pending.forEach(({ signal, resolve }) => {
       expect(signal.aborted).toBe(true);

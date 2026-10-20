@@ -28,6 +28,7 @@ interface BlockMatch {
   syntax: 'frontmatter' | 'toc' | 'comment-reference' | 'panel' | 'detail' | 'diagram' | 'native';
   source: string;
   diagramType?: string;
+  value?: string;
 }
 
 const BLOCK_PATTERNS = [
@@ -48,7 +49,28 @@ const DEFAULT_SOURCE_BLOCK_TYPES = ['mermaid', 'plantuml', 'echarts'] as const;
 // every pair of horizontal rules as frontmatter can swallow most of a long
 // document, including fenced examples between those rules.
 const FRONTMATTER_PATTERN = /^(?:\uFEFF)?---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?=\r?\n|$)/;
-const FENCED_BLOCK_PATTERN = /^( {0,3})(`{3,}|~{3,})[^\n]*\n[\s\S]*?^\1\2[ \t]*$/gm;
+
+// The Markdown parser owns literal boundaries, including indented/unclosed
+// code, longer closing fences and code nested in lists or blockquotes.
+function literalRanges(tree: MarkdownNode, source: string) {
+  const ranges: Array<{ from: number; to: number }> = [];
+  const visit = (node: MarkdownNode) => {
+    if (node.type === 'code' || node.type === 'html') {
+      const range = nodeRange(node);
+      if (range) {
+        const lineStart = source.lastIndexOf('\n', range.from - 1) + 1;
+        // A nested indented code node can start after the line's whitespace,
+        // while a directive regex starts before it. Protect that prefix too.
+        if (!source.slice(lineStart, range.from).trim()) range.from = lineStart;
+        ranges.push(range);
+      }
+      return;
+    }
+    node.children?.forEach(visit);
+  };
+  visit(tree);
+  return ranges;
+}
 
 function containsOffset(ranges: Array<{ from: number; to: number }>, offset: number) {
   return ranges.some((range) => range.from <= offset && offset < range.to);
@@ -59,17 +81,17 @@ function collectDelimitedBlocks(
   syntax: 'panel' | 'detail',
   openerPattern: RegExp,
   closerPattern: RegExp,
-  fencedRanges: Array<{ from: number; to: number }>,
+  protectedRanges: Array<{ from: number; to: number }>,
 ) {
   const matches: BlockMatch[] = [];
   openerPattern.lastIndex = 0;
   let opener: RegExpExecArray | null;
   while ((opener = openerPattern.exec(source))) {
-    if (containsOffset(fencedRanges, opener.index)) continue;
+    if (containsOffset(protectedRanges, opener.index)) continue;
     closerPattern.lastIndex = opener.index + opener[0].length;
     let closer: RegExpExecArray | null;
     while ((closer = closerPattern.exec(source))) {
-      if (containsOffset(fencedRanges, closer.index)) continue;
+      if (containsOffset(protectedRanges, closer.index)) continue;
       const to = closer.index + closer[0].length;
       matches.push({ from: opener.index, to, syntax, source: source.slice(opener.index, to) });
       openerPattern.lastIndex = to;
@@ -135,14 +157,13 @@ const INLINE_MATCHERS = [
   { type: 'cherry_emoji', pattern: /:[+\w-]+:/, attrs: () => ({}) },
 ];
 
-function collectBlocks(source: string, sourceBlockTypes: readonly string[] = []) {
+function collectBlocks(
+  tree: MarkdownNode,
+  source: string,
+  protectedRanges: Array<{ from: number; to: number }>,
+  sourceBlockTypes: readonly string[] = [],
+) {
   const matches: BlockMatch[] = [];
-  const fencedRanges: Array<{ from: number; to: number; source: string }> = [];
-  FENCED_BLOCK_PATTERN.lastIndex = 0;
-  let fenced: RegExpExecArray | null;
-  while ((fenced = FENCED_BLOCK_PATTERN.exec(source))) {
-    fencedRanges.push({ from: fenced.index, to: fenced.index + fenced[0].length, source: fenced[0] });
-  }
   const visualTypes = new Map<string, string>();
   [...DEFAULT_SOURCE_BLOCK_TYPES, ...sourceBlockTypes].forEach((type) => {
     const normalized = type.trim();
@@ -150,16 +171,21 @@ function collectBlocks(source: string, sourceBlockTypes: readonly string[] = [])
       visualTypes.set(normalized.toLowerCase(), normalized);
     }
   });
-  fencedRanges.forEach((range) => {
-    const language = /^(?: {0,3})(?:`{3,}|~{3,})[ \t]*([^\s`~]+)/.exec(range.source)?.[1];
+  tree.children?.forEach((node) => {
+    if (node.type !== 'code') return;
+    const range = nodeRange(node);
+    if (!range) return;
+    const raw = source.slice(range.from, range.to);
+    const language = typeof node.lang === 'string' ? node.lang : undefined;
     const diagramType = language ? visualTypes.get(language.toLowerCase()) : undefined;
     if (!diagramType) return;
     matches.push({
       from: range.from,
       to: range.to,
       syntax: 'diagram',
-      source: range.source,
+      source: raw,
       diagramType,
+      value: node.value ?? '',
     });
   });
   matches.push(
@@ -168,14 +194,14 @@ function collectBlocks(source: string, sourceBlockTypes: readonly string[] = [])
       'panel',
       /^[ \t]*:::[^:\n][^\n]*(?:\r?\n|$)/gm,
       /^[ \t]*:::[ \t]*(?=\r?$)/gm,
-      fencedRanges,
+      protectedRanges,
     ),
     ...collectDelimitedBlocks(
       source,
       'detail',
       /^[ \t]*\+\+\+-?[ \t]+[^\n]+(?:\r?\n|$)/gm,
       /^[ \t]*\+\+\+[ \t]*(?=\r?$)/gm,
-      fencedRanges,
+      protectedRanges,
     ),
   );
   const frontmatter = FRONTMATTER_PATTERN.exec(source);
@@ -191,7 +217,7 @@ function collectBlocks(source: string, sourceBlockTypes: readonly string[] = [])
     descriptor.pattern.lastIndex = 0;
     let match: RegExpExecArray | null;
     while ((match = descriptor.pattern.exec(source))) {
-      if (containsOffset(fencedRanges, match.index)) continue;
+      if (containsOffset(protectedRanges, match.index)) continue;
       matches.push({
         from: match.index,
         to: match.index + match[0].length,
@@ -365,12 +391,11 @@ function createBlockNode(match: BlockMatch, parse: ParseMarkdown): MarkdownNode 
   }
   if (match.syntax === 'detail') return parseDetail(match.source, parse);
   if (match.syntax === 'diagram') {
-    const lines = match.source.split(/\r?\n/);
     return {
       type: 'cherryDiagram',
       diagramType: match.diagramType ?? 'diagram',
       source: match.source,
-      value: lines.slice(1, -1).join('\n'),
+      value: match.value ?? '',
     };
   }
   if (match.syntax === 'comment-reference') {
@@ -403,14 +428,19 @@ function replaceRootBlocks(
 ) {
   if (!tree.children) return;
   const originalChildren = tree.children;
-  const blocks = collectBlocks(source, sourceBlockTypes);
+  const protectedRanges = literalRanges(tree, source);
+  const blocks = collectBlocks(tree, source, protectedRanges, sourceBlockTypes);
   if (!blocks.length) return;
   const next: MarkdownNode[] = [];
   const supplementalDefinitions = supplementalDefinitionsEnabled
-    ? Array.from(source.matchAll(/^\[(?:\^)?[^\]\n]+\]:[^\n]*/gm), (match) => match[0]).join('\n')
+    ? Array.from(source.matchAll(/^\[(?:\^)?[^\]\n]+\]:[^\n]*/gm))
+        .filter((match) => !containsOffset(protectedRanges, match.index))
+        .map((match) => match[0])
+        .join('\n')
     : '';
   const linkDefinitions = new Map<string, { url: string; title?: string }>();
   for (const match of source.matchAll(/^\[(?!\^)([^\]\n]+)\]:\s*(\S+)(?:\s+["'(](.*?)["')])?\s*$/gm)) {
+    if (containsOffset(protectedRanges, match.index)) continue;
     const rawUrl = match[2] ?? '';
     linkDefinitions.set(String(match[1]).toLowerCase(), {
       url: rawUrl.startsWith('<') && rawUrl.endsWith('>') ? rawUrl.slice(1, -1) : rawUrl,
@@ -442,6 +472,23 @@ function replaceRootBlocks(
   };
   const parseSegment = (segment: string, baseOffset: number) => {
     if (!segment) return [];
+    // Reuse complete parsed blocks, retaining document-wide reference context
+    // and absolute positions. Only a directive cutting through an original
+    // node requires another parse of the remaining source.
+    const segmentEnd = baseOffset + segment.length;
+    const overlapping = originalChildren.filter((node) => {
+      const range = nodeRange(node);
+      return range && range.from < segmentEnd && baseOffset < range.to;
+    });
+    if (
+      overlapping.length &&
+      overlapping.every((node) => {
+        const range = nodeRange(node)!;
+        return range.from >= baseOffset && range.to <= segmentEnd;
+      })
+    ) {
+      return resolveReferences(overlapping, source);
+    }
     const omitSyntheticEmptyParagraphs = (nodes: MarkdownNode[]) =>
       nodes.filter(
         (node) => node.type !== 'paragraph' || Boolean(node.value?.length) || Boolean(node.children?.length),

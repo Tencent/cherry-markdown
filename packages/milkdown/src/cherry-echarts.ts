@@ -1,5 +1,6 @@
 import EChartsTableEngine from 'cherry-markdown/dist/addons/advance/cherry-table-echarts-plugin.esm.js';
 import { cherryChartLocale } from './cherry-chart-locale.js';
+import { createMapOptions } from './cherry-map.js';
 
 type TableEngine = InstanceType<typeof EChartsTableEngine>;
 type TableData = Parameters<TableEngine['$generateChartOptions']>[1];
@@ -16,26 +17,37 @@ interface ChartMountOptions {
 interface ChartEngineScope {
   engine: TableEngine;
   references: number;
+  maps: Map<string, (table: TableData, options: Record<string, unknown>) => Record<string, unknown>>;
+  generate: TableEngine['$generateChartOptions'];
 }
 
 const chartEngines = new WeakMap<HTMLElement, WeakMap<ChartMountOptions['echarts'], ChartEngineScope>>();
 
 function acquireChartEngine(root: HTMLElement, echarts: ChartMountOptions['echarts']) {
   const engines = chartEngines.get(root) ?? new WeakMap<ChartMountOptions['echarts'], ChartEngineScope>();
-  const scope = engines.get(echarts) ?? {
-    engine: new EChartsTableEngine({
+  let scope = engines.get(echarts);
+  if (!scope) {
+    const engine = new EChartsTableEngine({
       echarts,
       cherry: { locale: cherryChartLocale },
       cherryOptions: {},
       renderer: 'svg',
-    }),
-    references: 0,
-  };
+    });
+    const maps: ChartEngineScope['maps'] = new Map();
+    const generate = engine.$generateChartOptions.bind(engine);
+    // Export/theme rebuilds must use the same mount-owned loader and signal.
+    engine.$generateChartOptions = (type, table, options) =>
+      (type === 'map' ? maps.get(String(options.chartId))?.(table, options) : undefined) ??
+      generate(type, table, options);
+    scope = { engine, references: 0, maps, generate };
+  }
   chartEngines.set(root, engines);
   engines.set(echarts, scope);
   scope.references += 1;
   return {
     engine: scope.engine,
+    maps: scope.maps,
+    generate: scope.generate,
     release() {
       scope.references -= 1;
       if (scope.references === 0) {
@@ -67,6 +79,7 @@ export function mountCherryChart(
   mount.dataset.chartType = type;
   let engine: TableEngine | undefined;
   let releaseEngine: (() => void) | undefined;
+  let releaseMap: (() => void) | undefined;
   let observer: ResizeObserver | undefined;
   let disposed = false;
   // Cherry can rebuild table charts from their datasets. Fenced charts keep
@@ -85,6 +98,7 @@ export function mountCherryChart(
     signal?.removeEventListener('abort', cleanup);
     window.removeEventListener('cherry:export:done', restoreCodeChart);
     controller.abort();
+    releaseMap?.();
     observer?.disconnect();
     try {
       // Export/locale rebuilds may have replaced the first chart instance.
@@ -109,9 +123,22 @@ export function mountCherryChart(
     engine = scope.engine;
     releaseEngine = scope.release;
     engine.$buildEchartsThemeFromCss(root);
-    const chartOptions = table
-      ? engine.$generateChartOptions(type, table, { ...options, chartId: mount.id, signal: controller.signal })
-      : options;
+    if (table && type === 'map') {
+      scope.maps.set(
+        mount.id,
+        createMapOptions(
+          mount,
+          echarts,
+          controller.signal,
+          (data, config) => scope.generate('map', data, config),
+          cherryChartLocale,
+        ),
+      );
+      releaseMap = () => {
+        scope.maps.delete(mount.id);
+      };
+    }
+    const chartOptions = table ? engine.$generateChartOptions(type, table, { ...options, chartId: mount.id }) : options;
     const chart = engine.createChart(mount, chartOptions, type);
     if (!table) {
       engine.$applyThemeOnly(chart);

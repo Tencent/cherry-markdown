@@ -1618,9 +1618,6 @@ const MapChartFailureOptionsHandler = {
   },
 };
 
-// Preserve optional cancellation when a map is rebuilt from its container data.
-const mapRequestSignals = new WeakMap();
-
 const MapChartOptionsHandler = {
   options(tableObject, options) {
     // 获取当前用户指定的地图数据源
@@ -1703,22 +1700,16 @@ const MapChartOptionsHandler = {
     }
 
     const url = paths[index];
-    const container = document.querySelector(`[id="${options.chartId}"][data-chart-type="map"]`);
-    const signal = options.signal ?? (container ? mapRequestSignals.get(container) : undefined);
-    if (container && signal) mapRequestSignals.set(container, signal);
-    if (signal?.aborted) return;
     // console.log(`尝试加载地图数据: ${url}`);
 
-    this.$fetchMapData(url, signal)
+    this.$fetchMapData(url)
       .then((geoJson) => {
-        if (signal?.aborted) return geoJson;
         options.engine.echartsRef?.registerMap?.(url, geoJson);
         // console.log(`地图数据加载成功！来源: ${url}`);
         this.$refreshMapChart(options.chartId, url, options.engine);
         return geoJson;
       })
       .catch((error) => {
-        if (error?.name === 'AbortError' || signal?.aborted) return;
         Logger.warn(`Map data loading failed (${url}):`, error.message);
         this.$handleMapLoadFailure(options);
       });
@@ -1751,8 +1742,8 @@ const MapChartOptionsHandler = {
       }
     }
   },
-  async $fetchMapData(url, signal) {
-    const response = await fetch(url, { referrerPolicy: 'no-referrer', ...(signal ? { signal } : {}) });
+  async $fetchMapData(url) {
+    const response = await fetch(url, { referrerPolicy: 'no-referrer' });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status} for ${url}`);
     }

@@ -912,7 +912,9 @@ test('table chart uses the native table editor and redraws without a blank frame
 });
 
 test('map table chart reuses Cherry map semantics and mounts fetched GeoJSON', async ({ page }) => {
+  let requests = 0;
   await page.route('https://maps.example/china.json', async (route) => {
+    requests += 1;
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
@@ -948,6 +950,16 @@ test('map table chart reuses Cherry map semantics and mounts fetched GeoJSON', a
   const chart = page.locator('.cherry-table-chart .cherry-echarts-wrapper');
   await expect(chart).toHaveAttribute('data-map-status', 'success');
   await expect(chart.locator('svg')).toBeVisible();
+  await expect(chart.locator('svg')).toContainText('北京市');
+  const saved = await markdown(page);
+  await page.evaluate(() => {
+    window.milkdownEditor!.setTheme('dark');
+    window.dispatchEvent(new Event('cherry:export:done'));
+  });
+  await expect(chart).toHaveAttribute('data-map-status', 'success');
+  await expect(chart.locator('svg')).toContainText('北京市');
+  expect(await markdown(page)).toBe(saved);
+  expect(requests).toBe(1);
   await expect(page.locator('[role="alert"], [data-render-error="true"]')).toHaveCount(0);
 });
 

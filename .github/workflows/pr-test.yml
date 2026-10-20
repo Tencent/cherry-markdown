@@ -39,3 +39,38 @@ jobs:
 
       - name: Test
         run: vp run test
+
+  milkdown-browser-consumer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version-file: '.node-version'
+          cache: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+          cache: 'yarn'
+      - name: Install dependencies
+        run: vp install
+      - name: Install Chromium
+        run: ./node_modules/.bin/playwright install --with-deps chromium
+      - name: Build Cherry artifacts
+        run: vp run -F cherry-markdown build
+      - name: Browser interactions
+        run: vp run test:e2e:milkdown
+        env:
+          MILKDOWN_E2E_PREBUILT: '1'
+      - name: Verify packed consumers
+        run: vp run -F @cherry-markdown/milkdown test:consumer:prepared
+      - name: Upload browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: milkdown-browser-diagnostics
+          path: |
+            packages/milkdown/playwright-report
+            packages/milkdown/test-results
+          if-no-files-found: ignore

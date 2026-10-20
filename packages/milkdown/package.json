@@ -61,7 +61,8 @@
     "preview:demo": "vite preview --config vite.demo.config.mjs",
     "test": "yarn workspace cherry-markdown build:engine && yarn workspace cherry-markdown build:addons && vitest run --config vitest.config.ts",
     "test:e2e": "playwright test --config playwright.config.ts",
-    "test:consumer": "yarn workspace cherry-markdown build && yarn build && node ./scripts/verify-consumer.mjs",
+    "test:consumer": "yarn workspace cherry-markdown build && yarn build && yarn test:consumer:prepared",
+    "test:consumer:prepared": "node ./scripts/verify-consumer.mjs",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project examples/react/tsconfig.json --noEmit"
   },
   "peerDependencies": {
