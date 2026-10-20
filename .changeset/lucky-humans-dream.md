@@ -3,4 +3,4 @@
 '@cherry-markdown/client': patch
 ---
 
-feat: 增加clearUndoRedo接口；feat(client): 切换文件时清空undo栈，优化本地版本的存储逻辑
+feat: 新增 `clearUndoRedo()` 接口，客户端切换文件时清空撤销历史，并优化本地版本存储。
