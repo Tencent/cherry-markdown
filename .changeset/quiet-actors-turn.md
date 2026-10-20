@@ -2,4 +2,6 @@
 'cherry-markdown': patch
 ---
 
-feat: 增加对<details>标签的支持
+feat: 支持使用 `<details>` 标签创建折叠内容。
+
+close #1902

@@ -1,5 +1,5 @@
 ---
-"cherry-markdown": patch
+'cherry-markdown': patch
 ---
 
-Tighten terser minify options (`passes`/`toplevel`/`pure_getters`/`unsafe_comps`/`unsafe_math` and toplevel mangle) in `packages/cherry-markdown/build/vite.build.js` to shrink the built bundle (≈ -1.26% esm gzip, ~18KB). No runtime behavior change; all existing tests pass.
+perf: 优化 Terser 压缩配置，ESM 产物经 gzip 压缩后的体积减少约 18 KB（1.26%）。
