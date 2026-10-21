@@ -16,6 +16,9 @@ import { defineConfig } from 'vite-plus';
 import path from 'path';
 import { cherryDevPlugin, printLinksPlugin } from './vite.plugins';
 import { getBuildVersion } from './build/revision.js';
+import { generatePrismLanguages } from './build/generate-prism.js';
+
+generatePrismLanguages();
 
 // Cherry Markdown 源码目录
 const cherryMarkdownDir = path.resolve(__dirname);

@@ -30,6 +30,8 @@
     "provenance": true
   },
   "scripts": {
+    "prism:generate": "node build/generate-prism.js",
+    "prism:check": "node build/generate-prism.js --check",
     "iconfont": "node build/run-iconfont.js",
     "dev": "vp dev",
     "dev:vite": "vp dev",
@@ -65,7 +67,6 @@
     "@babel/plugin-proposal-optional-chaining": "^7.12.7",
     "@babel/plugin-transform-runtime": "^7.12.10",
     "@babel/runtime-corejs3": "^7.12.5",
-    "babel-plugin-prismjs": "^2.1.0",
     "es-check": "^7.1.1",
     "es-toolkit": "^1.44.0",
     "fonteditor-core": "^2.6.3",

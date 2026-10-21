@@ -1,6 +1,9 @@
 import { build } from 'vite';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { generatePrismLanguages } from '../../cherry-markdown/build/generate-prism.js';
+
+generatePrismLanguages();
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const repoRoot = resolve(root, '../..');
