@@ -102,6 +102,7 @@ describe('Cherry built-in hook fixtures', () => {
     expect(instance.getMarkdown()).toBe(markdown);
   });
 
+  // Full-manual round trips exceed the unit default under coverage on shared CI runners.
   it('round-trips the complete Cherry manual with stable Markdown and equivalent rendering', async () => {
     const root = document.createElement('div');
     document.body.append(root);
@@ -153,7 +154,7 @@ describe('Cherry built-in hook fixtures', () => {
     const flowHeading = [...root.querySelectorAll('h2')].find((element) => element.textContent?.includes('流程图'));
     expect(flowHeading?.outerHTML).toContain('cherry-footnote-number');
     expect(flowHeading?.textContent).not.toContain('^');
-  });
+  }, 30_000);
 
   it('renders GFM footnote references as inline nodes instead of literal heading text', async () => {
     const root = document.createElement('div');

@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite-plus';
+import { coverageConfigDefaults, defineConfig } from 'vite-plus';
 
 const coverageThresholds = process.env.COVERAGE_THRESHOLDS
   ? {
@@ -18,6 +18,7 @@ export default defineConfig({
     coverage: {
       enabled: true,
       include: ['src/**/*.ts'],
+      exclude: [...coverageConfigDefaults.exclude, '**/*.d.ts'],
       reporter: ['text', 'json', 'html'],
       thresholds: coverageThresholds,
     },
