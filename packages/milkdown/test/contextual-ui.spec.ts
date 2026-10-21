@@ -77,6 +77,23 @@ describe('contextual control behavior contract', () => {
     expect(resize).toHaveBeenCalledOnce();
   });
 
+  it('keeps forms open while long URL inputs scroll internally', () => {
+    const scroll = vi.fn();
+    const form = document.body.appendChild(document.createElement('form'));
+    form.className = 'cherry-milkdown-context-form';
+    const input = form.appendChild(document.createElement('input'));
+    const release = watchContextViewport(document, scroll);
+    try {
+      input.dispatchEvent(new Event('scroll'));
+      expect(scroll).not.toHaveBeenCalled();
+      window.dispatchEvent(new Event('scroll'));
+      expect(scroll).toHaveBeenCalledOnce();
+    } finally {
+      release();
+      form.remove();
+    }
+  });
+
   it('destroying one subscription does not remove a sibling control subscription', () => {
     const first = vi.fn();
     const second = vi.fn();

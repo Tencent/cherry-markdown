@@ -43,10 +43,17 @@ export function preserveContextSelection(event: Event) {
 /** One viewport subscription contract, disposed by its owning editor plugin. */
 export function watchContextViewport(document: Document, scroll: () => void, resize: () => void = scroll) {
   const window = document.defaultView;
-  window?.addEventListener('scroll', scroll, true);
+  const onScroll = (event: Event) => {
+    const target = event.target as Element | null;
+    // Long URLs scroll their own input while typing. That does not move the
+    // document anchor and must not dismiss the editor-owned form.
+    if (target?.nodeType === 1 && target.closest('.cherry-milkdown-context-form')) return;
+    scroll();
+  };
+  window?.addEventListener('scroll', onScroll, true);
   window?.addEventListener('resize', resize);
   return () => {
-    window?.removeEventListener('scroll', scroll, true);
+    window?.removeEventListener('scroll', onScroll, true);
     window?.removeEventListener('resize', resize);
   };
 }

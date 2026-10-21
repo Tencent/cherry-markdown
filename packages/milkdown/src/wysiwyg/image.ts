@@ -6,12 +6,17 @@ import { cherryWysiwygConfigCtx } from './config.js';
 import type { CherryWysiwygConfig } from './config.js';
 
 function imageMarkdown(node: ProseNode) {
-  const alt = String(node.attrs.alt ?? '')
-    .replace(/\\/g, '\\\\')
-    .replace(/\]/g, '\\]');
-  const src = String(node.attrs.src ?? '').replace(/\s/g, '%20');
-  const title = node.attrs.title ? ` "${String(node.attrs.title).replace(/"/g, '\\"')}"` : '';
-  return `![${alt}](${src}${title})`;
+  const alt = String(node.attrs.alt ?? '').replace(/[\r\n[\]\\]/g, (character) => `&#${character.charCodeAt(0)};`);
+  // These are decoded ProseMirror attributes, not Markdown source. Encode
+  // destination delimiters for Cherry's parser without changing the document
+  // or skipping its URL processor / beforeImageMounted callback.
+  const src = String(node.attrs.src ?? '').replace(/[\s()"<>\\]/g, (character) =>
+    encodeURIComponent(character).replace(
+      /[()]/g,
+      (delimiter) => `%${delimiter.charCodeAt(0).toString(16).toUpperCase()}`,
+    ),
+  );
+  return `![${alt}](${src})`;
 }
 
 export function cherryImagePresentation(node: ProseNode, config: CherryWysiwygConfig) {
@@ -19,6 +24,10 @@ export function cherryImagePresentation(node: ProseNode, config: CherryWysiwygCo
   template.innerHTML = config.engine.makeHtml(imageMarkdown(node));
   const rendered = template.content.querySelector('img');
   if (!rendered) return undefined;
+  // Titles are already parsed text. Sending quoted text through a second
+  // Markdown parse can discard the entire Cherry presentation.
+  rendered.setAttribute('alt', String(node.attrs.alt ?? ''));
+  if (node.attrs.title) rendered.setAttribute('title', String(node.attrs.title));
   return Array.from(rendered.attributes).map(({ name, value }) => [name, value] as const);
 }
 

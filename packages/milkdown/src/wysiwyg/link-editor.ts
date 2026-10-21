@@ -44,17 +44,24 @@ function linkAtRange(view: EditorView, from: number, to = from): LinkRange | und
     let rangeFrom = position;
     let rangeTo = position + node.nodeSize;
     const resolved = view.state.doc.resolve(position);
-    const parentStart = position - resolved.parentOffset;
-    resolved.parent.forEach((sibling, offset) => {
+    const { parent } = resolved;
+    const index = resolved.index();
+    const belongsToLink = (sibling: ProseNode) => {
       const siblingMark = sibling.isText ? linkType.isInSet(sibling.marks) : undefined;
-      if (!siblingMark || !sameLinkMark(mark, siblingMark)) return;
-      const siblingFrom = parentStart + offset;
-      const siblingTo = siblingFrom + sibling.nodeSize;
-      if (siblingTo >= rangeFrom && siblingFrom <= rangeTo) {
-        rangeFrom = Math.min(rangeFrom, siblingFrom);
-        rangeTo = Math.max(rangeTo, siblingTo);
-      }
-    });
+      return Boolean(siblingMark && sameLinkMark(mark, siblingMark));
+    };
+    // Walk outwards from the hit, so an earlier sibling is not missed when a
+    // later formatted sibling extends the range back towards it.
+    for (let left = index - 1; left >= 0; left -= 1) {
+      const sibling = parent.child(left);
+      if (!belongsToLink(sibling)) break;
+      rangeFrom -= sibling.nodeSize;
+    }
+    for (let right = index + 1; right < parent.childCount; right += 1) {
+      const sibling = parent.child(right);
+      if (!belongsToLink(sibling)) break;
+      rangeTo += sibling.nodeSize;
+    }
     result = { from: rangeFrom, to: rangeTo, mark };
   });
   return result;

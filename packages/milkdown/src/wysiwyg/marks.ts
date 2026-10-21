@@ -119,24 +119,38 @@ export const cherryWysiwygMarkInputRules = definitions.flatMap((definition, inde
   return [
     $inputRule(
       (ctx) =>
-        new InputRule(inputPattern, (state, match, start, end) => {
-          // Capture indices distinguish a payload from an identical attribute
-          // (e.g. !!red red!!), without reparsing the shared Cherry grammar.
-          const range = (match as RegExpMatchArray & { indices?: Array<[number, number]> }).indices?.[syntax.textGroup];
-          if (!range || range[1] <= range[0]) return null;
-          const leading = match[1]?.length ?? 0;
-          const trailing = syntax.trailingGroup ? (match[syntax.trailingGroup]?.length ?? 0) : 0;
-          const transaction = state.tr;
-          transaction.delete(start + range[1], end - trailing);
-          transaction.delete(start + leading, start + range[0]);
-          transaction.addMark(
-            start + leading,
-            start + leading + range[1] - range[0],
-            schema.type(ctx).create(syntax.attrs?.(match) ?? {}),
-          );
-          transaction.setStoredMarks(state.storedMarks ?? []);
-          return transaction;
-        }),
+        new InputRule(
+          inputPattern,
+          (state, match, start, end) => {
+            // Milkdown's custom input-rule runner does not honor inCodeMark.
+            // Protect both the caret and code fragments inside the full match.
+            if ((state.storedMarks ?? state.selection.$from.marks()).some((mark) => mark.type.spec.code)) return null;
+            let containsCode = false;
+            state.doc.nodesBetween(start, end, (node) => {
+              if (node.marks.some((mark) => mark.type.spec.code)) containsCode = true;
+            });
+            if (containsCode) return null;
+            // Capture indices distinguish a payload from an identical attribute
+            // (e.g. !!red red!!), without reparsing the shared Cherry grammar.
+            const range = (match as RegExpMatchArray & { indices?: Array<[number, number]> }).indices?.[
+              syntax.textGroup
+            ];
+            if (!range || range[1] <= range[0]) return null;
+            const leading = match[1]?.length ?? 0;
+            const trailing = syntax.trailingGroup ? (match[syntax.trailingGroup]?.length ?? 0) : 0;
+            const transaction = state.tr;
+            transaction.delete(start + range[1], end - trailing);
+            transaction.delete(start + leading, start + range[0]);
+            transaction.addMark(
+              start + leading,
+              start + leading + range[1] - range[0],
+              schema.type(ctx).create(syntax.attrs?.(match) ?? {}),
+            );
+            transaction.setStoredMarks(state.storedMarks ?? []);
+            return transaction;
+          },
+          { inCodeMark: false },
+        ),
     ),
   ];
 });
