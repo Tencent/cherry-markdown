@@ -91,8 +91,14 @@ await cherryMilkdown({
 - Selection, link, and image UI belongs to this package and does not call Cherry editor internals.
 - The stylesheet imports Cherry's published CSS and scopes editing-only additions under `.cherry-milkdown` to reduce upgrade coupling.
 - `mathlive`, `mermaid`, and `echarts` are capability peers. Install the matching dependency when enabling formulas, Mermaid, or ECharts; runtime renderer failures stay isolated to the affected node and report through `onError` without blocking ordinary Markdown.
-- ECharts configuration accepts JSON5 data only and never executes JavaScript. Maps still require consumer-provided map data or a custom renderer.
+- Fenced ECharts configuration accepts JSON5 data only and never executes JavaScript. Maps still require consumer-provided map data or a custom renderer.
 - Standalone table charts keep Milkdown's native GFM table as their editable source of truth; a package-owned derived preview hot-updates from its cells. Cherry-owned compound blocks such as Columns and Tabs remain whole-block renders and whole-block source editors; this package never injects child controls or chart mount points into Cherry-generated DOM.
 - Generic drag handles cover top-level paragraphs and blockquotes only. Headings keep Cherry's native anchor interaction; lists and compound Cherry nodes retain selection/cut/paste semantics so their internal controls are not intercepted.
 
 Run the demo with `yarn workspace @cherry-markdown/milkdown dev:demo`.
+
+### Table-chart syntax and performance boundaries
+
+Cherry Engine owns table-chart recognition, option parsing and column padding; Milkdown retains live cell editing, selection and undo. Prefer standard JSON such as `:line:{"title":"Trend"}`, without trailing commas. Cherry's deprecated legacy format, such as `:line:{title: My Chart}`, remains supported with upstream warnings. Table options no longer use a separate JSON5 dialect; invalid standard JSON follows Cherry's fallback and diagnostics. Fenced ECharts code still uses Cherry's data-only JSON5 parser and never executes JavaScript.
+
+Cell splitting and escaping follow Cherry: escape a cell pipe as `\|` rather than relying on backticks around a bare pipe. Full parsing runs after debounce and only for the current table; unchanged table nodes and header recognition use caches. Earlier edits retain unrelated chart mounts. Complete Engine parsing costs more than a lightweight splitter, so cold rendering of large tables is not promised to match the former adapter. See [ARCHITECTURE.md](./ARCHITECTURE.md#table-chart-parsing) for compatibility and performance verification.

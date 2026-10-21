@@ -8,6 +8,7 @@ import { sanitizedEngineFragment } from './html-sanitizer.js';
 import type { CherryVisualRendererResult } from './types.js';
 import { reportRendererError } from './renderer-cleanup.js';
 import { createRenderLifecycle } from './render-lifecycle.js';
+import { tableChartCellType } from './table-chart.js';
 
 interface TableChartRevision {
   position: number;
@@ -15,9 +16,15 @@ interface TableChartRevision {
   syntax: string;
 }
 
+interface KeyedTableChartRevision extends TableChartRevision {
+  key: string;
+}
+
+let chartRevisionId = 0;
+const widgetPositions = new WeakMap<HTMLElement, () => number | undefined>();
 const widgetSelector = '[data-cherry-milkdown-table-chart-widget]';
-const descriptorPattern = /^:(\w+):(?:\s*(\{[\s\S]*\}))?\s*$/;
-const previewKey = new PluginKey<Map<number, TableChartRevision>>('cherryTableChartPreview');
+const revisionCache = new WeakMap<ProseNode, Omit<TableChartRevision, 'position'> | undefined>();
+const previewKey = new PluginKey<Map<number, KeyedTableChartRevision>>('cherryTableChartPreview');
 
 function insideDescriptor(doc: ProseNode, selection: Selection, position: number) {
   const table = doc.nodeAt(position);
@@ -49,10 +56,15 @@ function delimiterFor(cell: ProseNode) {
  */
 export function tableChartRevision(node: ProseNode, position: number): TableChartRevision | undefined {
   if (node.type.name !== 'table' || node.childCount < 2) return undefined;
+  if (revisionCache.has(node)) {
+    const cached = revisionCache.get(node);
+    return cached ? { ...cached, position } : undefined;
+  }
+  revisionCache.set(node, undefined);
   const header = node.firstChild;
   if (!header?.childCount) return undefined;
-  const descriptor = descriptorPattern.exec(header.firstChild?.textContent.trim() ?? '');
-  if (!descriptor?.[1]) return undefined;
+  const syntax = tableChartCellType(header.firstChild?.textContent ?? '');
+  if (!syntax) return undefined;
 
   const rows: string[][] = [];
   node.forEach((row) => {
@@ -72,18 +84,23 @@ export function tableChartRevision(node: ProseNode, position: number): TableChar
   }
   const line = (cells: string[]) => `| ${cells.join(' | ')} |`;
 
-  return {
-    position,
-    source: [line(rows[0] ?? []), line(delimiter), ...rows.slice(1).map(line)].join('\n'),
-    syntax: descriptor[1],
-  };
+  const revision = { source: [line(rows[0] ?? []), line(delimiter), ...rows.slice(1).map(line)].join('\n'), syntax };
+  revisionCache.set(node, revision);
+  return { ...revision, position };
 }
 
 function tableChartRevisions(doc: ProseNode) {
-  const revisions = new Map<number, TableChartRevision>();
+  const revisions = new Map<number, KeyedTableChartRevision>();
   doc.descendants((node, position) => {
+    if (node.type.name !== 'table') return;
     const revision = tableChartRevision(node, position);
-    if (revision) revisions.set(position, revision);
+    if (revision) {
+      chartRevisionId += 1;
+      revisions.set(position, { ...revision, key: `cherry-table-chart:${chartRevisionId}` });
+    }
+    // GFM table cells cannot contain another table. Do not walk every row
+    // and cell merely to rediscover the same cached table revision.
+    return false;
   });
   return revisions;
 }
@@ -208,7 +225,9 @@ class TableChartPreviewManager {
     const revisions = previewKey.getState(view.state) ?? new Map<number, TableChartRevision>();
     const mounted = new Set<HTMLElement>();
     view.dom.querySelectorAll<HTMLElement>(widgetSelector).forEach((dom) => {
-      const position = Number(dom.dataset.cherryMilkdownTableChartPosition);
+      const position = widgetPositions.get(dom)?.();
+      if (position === undefined) return;
+      dom.dataset.cherryMilkdownTableChartPosition = String(position);
       const revision = revisions.get(position);
       if (!revision) return;
       mounted.add(dom);
@@ -244,6 +263,11 @@ export const cherryTableChartPreview = $prose((ctx) => {
           return previous;
         }
         const revisions = tableChartRevisions(state.doc);
+        previous.forEach((revision, position) => {
+          const mapped = transaction.mapping.mapResult(position);
+          const next = revisions.get(mapped.pos);
+          if (!mapped.deleted && next) next.key = revision.key;
+        });
         // A descriptor is temporarily incomplete during ordinary typing. Keep
         // its last valid preview only while editing that same header cell.
         // Blur, another cell, deletion or an authoritative external write ends
@@ -277,15 +301,16 @@ export const cherryTableChartPreview = $prose((ctx) => {
           decorations.push(
             Decoration.widget(
               revision.position,
-              () => {
+              (_view, getPos) => {
                 const dom = document.createElement('figure');
                 dom.className = 'cherry-table-chart cherry-table-chart--derived';
                 dom.dataset.cherryMilkdownTableChartWidget = '';
                 dom.dataset.cherryMilkdownTableChartPosition = String(revision.position);
                 dom.contentEditable = 'false';
+                widgetPositions.set(dom, getPos);
                 return dom;
               },
-              { key: `cherry-table-chart:${revision.position}`, side: -1 },
+              { key: revision.key, side: -1 },
             ),
           );
         });

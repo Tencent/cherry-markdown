@@ -64,7 +64,7 @@ jobs:
         env:
           MILKDOWN_E2E_PREBUILT: '1'
       - name: Shared behavior across browsers
-        run: vp run -F @cherry-markdown/milkdown test:e2e shared-behavior.spec.ts editing-boundaries.spec.ts --project=firefox-matrix --project=webkit-matrix --project=chromium-touch
+        run: vp run -F @cherry-markdown/milkdown test:e2e shared-behavior.spec.ts editing-boundaries.spec.ts table-chart-parser.spec.ts --project=firefox-matrix --project=webkit-matrix --project=chromium-touch
         env:
           MILKDOWN_E2E_PREBUILT: '1'
           MILKDOWN_BROWSER_MATRIX: '1'

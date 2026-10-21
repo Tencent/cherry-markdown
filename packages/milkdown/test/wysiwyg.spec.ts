@@ -104,17 +104,12 @@ describe('Cherry WYSIWYG markdown transform', () => {
     expect(tree.children).toEqual([expect.objectContaining({ type: 'table' })]);
   });
 
-  it('parses chart data from Markdown without depending on Cherry HTML', () => {
-    const source = [
-      '| :line:{"title":"Real"} | Jan | `Feb | Mar` |',
-      '| --- | --- | --- |',
-      '| Sales \\| retail | 1 | 2 |',
-    ].join('\n');
+  it('uses Cherry table data instead of a second Markdown table grammar', () => {
+    const source = '| :line:{"title":"Real"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 1 | 2 |';
     expect(parseTableChart(source)).toEqual({
-      syntax: 'line',
-      optionsSource: '{"title":"Real"}',
-      header: ['Jan', '`Feb | Mar`'],
-      rows: [['Sales | retail', '1', '2']],
+      type: 'line',
+      options: { title: 'Real' },
+      table: { header: ['', 'Jan', 'Feb'], rows: [['Sales', '1', '2']], colLength: 3, rowLength: 1 },
     });
   });
 

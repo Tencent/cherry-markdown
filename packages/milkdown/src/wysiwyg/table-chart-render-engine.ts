@@ -25,11 +25,21 @@ export class TableChartDescriptorEngine {
   }
 }
 
+/** Decode the Engine's HTML transport layer once, without mounting authored HTML. */
+export function decodeTableChartDescriptor(value: string, ownerDocument = document): CherryTableChartDescriptor {
+  const decoder = ownerDocument.createElement('textarea');
+  return JSON.parse(value, (_key, item: unknown) => {
+    if (typeof item !== 'string' || !item.includes('&')) return item;
+    decoder.innerHTML = item;
+    return decoder.value;
+  }) as CherryTableChartDescriptor;
+}
+
 export function readTableChartDescriptor(element: HTMLElement): CherryTableChartDescriptor | undefined {
   const value = element.dataset.cherryMilkdownTableChart;
   if (!value) return undefined;
   try {
-    return JSON.parse(decodeURIComponent(value)) as CherryTableChartDescriptor;
+    return decodeTableChartDescriptor(decodeURIComponent(value), element.ownerDocument);
   } catch {
     return undefined;
   }

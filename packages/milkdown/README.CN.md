@@ -91,8 +91,14 @@ await cherryMilkdown({
 - 文本 Bubble、链接编辑、图片控件属于本包，不调用 Cherry 编辑器内部 UI。
 - 样式直接引入 Cherry 发布 CSS，并仅在 `.cherry-milkdown` 下补充编辑态样式，降低 Cherry 升级耦合。
 - `mathlive`、`mermaid` 和 `echarts` 是按能力启用的 Peer：使用公式、Mermaid 或 ECharts 时安装对应依赖；运行期渲染失败会隔离在当前节点并通过 `onError` 报告，不阻断普通 Markdown。
-- ECharts 配置只解析 JSON5 数据，不执行 JavaScript；地图仍需业务提供地图数据或自定义 renderer。
+- ECharts 代码围栏配置只解析 JSON5 数据，不执行 JavaScript；地图仍需业务提供地图数据或自定义 renderer。
 - 独立表格图表以 Milkdown 原生 GFM 表格作为唯一可编辑数据源，图表预览由单元格内容派生并热更新。Columns/Tabs 等 Cherry 原生复合块保持整体渲染和整体源码编辑，不向 Cherry 生成的内部 DOM 注入子节点按钮或图表挂载点。
 - 通用拖动仅覆盖顶层段落和引用。标题保留 Cherry 原生锚点交互；列表与复合 Cherry 节点保留文本选择、剪切和粘贴语义，避免拖动手柄抢占内部交互。
 
 运行 Demo：`yarn workspace @cherry-markdown/milkdown dev:demo`。
+
+### 表格图表语法与性能边界
+
+表格图表由 Cherry Engine 统一识别、解析参数和补齐缺列；Milkdown 继续负责单元格实时编辑、撤销与选区。推荐标准 JSON，例如 `:line:{"title":"趋势"}`；标准 JSON 不支持尾逗号。Cherry 的旧格式（例如 `:line:{title: 我的图表}`）继续兼容，但会给出上游弃用提示。不再将表格参数作为独立 JSON5 方言解析；非法标准 JSON 遵循 Cherry 的回退与诊断。代码围栏中的 ECharts 配置仍使用 Cherry 的数据型 JSON5 解析器，不执行 JavaScript。
+
+表格分隔与转义以 Cherry 为准，单元格中的竖线应写作 `\|`，不要依赖反引号保护裸竖线。解析只处理当前表格，完整解析在防抖后进行；未变化表格与表头识别使用缓存，修改前面的表格不会重建无关图表。完整 Cherry 解析比轻量拆分更有开销，不能保证大表格的冷渲染与旧适配器同速。兼容性和性能验证见 [ARCHITECTURE.md](./ARCHITECTURE.md#table-chart-parsing)。

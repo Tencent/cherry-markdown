@@ -38,11 +38,24 @@ Every editor owns its overlays, observers, timers, NodeViews, and renderer insta
 
 ## Reuse boundaries
 
-| Surface           | Shared Cherry logic                                            | Milkdown-owned interaction                                        |
-| ----------------- | -------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Links             | Scheme validation and clipboard helper                         | Selection ranges, form, save/cancel and ProseMirror transaction   |
-| Images            | Image rendering, layout grammar and decoration/alignment state | Attribute form, resize, upload ownership and document updates     |
-| Code blocks       | Clipboard helper; Prism appearance checked against Cherry      | Editable NodeView, language control, selection and decorations    |
-| Inline extensions | Cherry-generated syntax rules shared by import and live input  | Schema, serialization, delimiter precedence while typing and undo |
+| Surface           | Shared Cherry logic                                                 | Milkdown-owned interaction                                        |
+| ----------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Links             | Scheme validation and clipboard helper                              | Selection ranges, form, save/cancel and ProseMirror transaction   |
+| Images            | Image rendering, layout grammar and decoration/alignment state      | Attribute form, resize, upload ownership and document updates     |
+| Code blocks       | Clipboard helper; Prism appearance checked against Cherry           | Editable NodeView, language control, selection and decorations    |
+| Table charts      | Engine table recognition, options, data, chart generation and theme | GFM table edits, scheduling and stable chart mounts               |
+| Inline extensions | Cherry-generated syntax rules shared by import and live input       | Schema, serialization, delimiter precedence while typing and undo |
 
 Generated modules are build artifacts with Cherry as their source of truth. Do not hand-edit them or import Cherry toolbar/Previewer controllers to reuse a pure operation. Existing controls retain their DOM, class names and styles; visual parity checks supplement behavior tests.
+
+## Table-chart parsing
+
+`wysiwyg/table-chart.ts` delegates table recognition, options and cell data to the published Cherry Engine. A short-lived Engine is configured with the existing `chartRenderEngine` extension; its `render(type, options, table)` callback captures a descriptor directly. No Cherry source import, private method, generated table parser, presentation-DOM query, or ECharts instance is needed for parsing. The dedicated parser uses Cherry's default table rules with charts enabled; it does not inspect injected-engine internals or inherit application callbacks. Business-specific dialects remain the responsibility of custom renderers. Native layout charts keep the existing package-owned descriptor marker; both paths decode the Engine's HTML transport layer once.
+
+Milkdown's immutable table node remains the editable source of truth. The adapter only serializes cell text into Markdown; Cherry owns splitting, column padding and chart-option semantics. Header-only recognition has a separate bounded cache, unchanged table nodes reuse revisions via a WeakMap, and complete table parsing stays behind the existing redraw debounce. Each parser cache holds at most 32 entries and skips sources/results longer than 32,768 UTF-16 code units; callers receive fresh objects. A fresh Engine on a cache miss prevents its internal HTML caches from retaining an unbounded series of edited table snapshots.
+
+Chart widgets retain their identity across mapped document positions, so changing an earlier table does not recreate unrelated charts. ProseMirror supplies each retained widget's current position. Milkdown continues to own cell selection, history and IME; its native table component may rebuild selection chrome independently of chart rendering. Neither CSS nor the control DOM structure changes.
+
+Compatibility follows Cherry, rather than JSON5: standard JSON options use double-quoted keys and no trailing commas; Cherry's deprecated legacy key/value options remain accepted. Invalid standard JSON follows Cherry's fallback and diagnostics. Bare pipes inside backticks receive Cherry's table behavior; escape cell pipes as `\|`. Ragged rows, compact delimiters and escaped cells also follow Cherry. ECharts _fenced-code_ options still use Cherry's data-only JSON5 parser. Parsing is not guaranteed to cost less than the former handwritten splitter: the performance contract is no full-table parse on each body keystroke, bounded caches, coalesced redraw, and no unrelated chart remounts.
+
+`test/table-chart-parser.spec.ts` compares the adapter with native Engine output and exercises compatibility, unsafe keys, non-execution and cache bounds. `test/table-chart-updates.spec.ts` verifies that 50 synchronous edits across a five-table/500-row document trigger one deferred full parse. `e2e/table-chart-parser.spec.ts` exercises real editing, undo, URL queries and stable chart mounts, and records whole-operation timings as diagnostic artifacts rather than enforcing hardware-dependent millisecond thresholds.

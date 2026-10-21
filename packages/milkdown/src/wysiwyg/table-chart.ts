@@ -1,96 +1,61 @@
-export interface ParsedTableChart {
-  syntax: string;
-  optionsSource?: string;
-  header: string[];
-  rows: string[][];
-}
+import CherryEngine from '../cherry-engine.js';
+import {
+  TableChartDescriptorEngine,
+  decodeTableChartDescriptor,
+  type CherryTableChartDescriptor,
+} from './table-chart-render-engine.js';
 
-export function tableChartType(source: string) {
-  const firstLine = source.split(/\r?\n/, 1)[0]?.trim() ?? '';
-  const firstCell =
-    firstLine
-      .replace(/^\|/, '')
-      .split(/(?<!\\)\|/, 1)[0]
-      ?.trim() ?? '';
-  return /^:(\w+):(?:[ ]*\{[\s\S]*\}[ ]*)?$/.exec(firstCell)?.[1] ?? '';
-}
-
-function isTableDelimiter(line: string) {
-  const cells = line
-    .trim()
-    .replace(/^\|/, '')
-    .replace(/\|$/, '')
-    .split(/(?<!\\)\|/);
-  // Cherry accepts compact `|-|-|` delimiters in addition to GFM's three-dash
-  // form, so the chart parser must preserve that published compatibility.
-  return cells.length > 0 && cells.every((cell) => /^\s*:?-+:?\s*$/.test(cell));
-}
-
-function isTableRow(line: string) {
-  return line.trim().startsWith('|') && /(?<!\\)\|/.test(line.trim().slice(1));
-}
+export type ParsedTableChart = CherryTableChartDescriptor;
 
 /**
- * Parse the small, documented Markdown-table surface used by Cherry charts.
- *
- * This intentionally consumes Markdown source instead of inspecting the HTML
- * returned by `engine.makeHtml()`. Cherry's generated wrapper/class names are
- * presentation details and must not become a renderer API for this package.
+ * One public Engine boundary for Cherry's table grammar, options and cells.
+ * Capture the chartRenderEngine contract directly; no presentation DOM is read.
  */
-function splitTableRow(line: string) {
-  const value = line.trim();
-  const cells: string[] = [];
-  let cell = '';
-  let escaped = false;
-  let codeFence = 0;
-  let index = value.startsWith('|') ? 1 : 0;
-
-  while (index < value.length) {
-    const character = value[index] ?? '';
-    if (escaped) {
-      cell += character;
-      escaped = false;
-      index += 1;
-      continue;
+export function createTableChartParser() {
+  const cache = new Map<string, string | undefined>();
+  return (source: string): ParsedTableChart | undefined => {
+    let serialized = cache.get(source);
+    if (cache.has(source)) {
+      cache.delete(source);
+      cache.set(source, serialized);
+    } else {
+      // A short-lived engine bounds Cherry's own rendering caches as well as
+      // this adapter's cache. No editor, Previewer or chart library is created.
+      const descriptors: CherryTableChartDescriptor[] = [];
+      class CaptureTableChart extends TableChartDescriptorEngine {
+        render(type: string, options: Record<string, unknown>, table: CherryTableChartDescriptor['table']) {
+          descriptors.push({ type, options, table });
+          return '';
+        }
+      }
+      const engine = new CherryEngine({
+        engine: { syntax: { table: { enableChart: true, chartRenderEngine: CaptureTableChart } } },
+      });
+      engine.makeHtml(source);
+      const descriptor = descriptors.length === 1 ? descriptors[0] : undefined;
+      serialized = descriptor ? JSON.stringify(decodeTableChartDescriptor(JSON.stringify(descriptor))) : undefined;
+      // Bound both entry count and per-entry string sizes, including negative results.
+      if (source.length <= 32_768 && (serialized?.length ?? 0) <= 32_768) {
+        cache.set(source, serialized);
+        if (cache.size > 32) cache.delete(cache.keys().next().value!);
+      }
     }
-    if (character === '\\') {
-      escaped = true;
-      cell += character;
-      index += 1;
-      continue;
-    }
-    if (character === '`') {
-      let length = 1;
-      while (value[index + length] === '`') length += 1;
-      if (codeFence === length) codeFence = 0;
-      else if (codeFence === 0) codeFence = length;
-      cell += '`'.repeat(length);
-      index += length;
-      continue;
-    }
-    if (character === '|' && codeFence === 0) {
-      cells.push(cell.trim().replace(/\\\|/g, '|'));
-      cell = '';
-      index += 1;
-      continue;
-    }
-    cell += character;
-    index += 1;
-  }
-  if (cell || !value.endsWith('|')) cells.push(cell.trim().replace(/\\\|/g, '|'));
-  return cells;
+    // Renderers can mutate chart data. Never expose a cached object by reference.
+    return serialized ? (JSON.parse(serialized) as ParsedTableChart) : undefined;
+  };
 }
 
-export function parseTableChart(source: string): ParsedTableChart | undefined {
-  const lines = source.split(/\r?\n/).filter((line) => line.trim());
-  if (lines.length < 2 || !isTableDelimiter(lines[1] ?? '')) return undefined;
-  const first = splitTableRow(lines[0] ?? '');
-  const descriptor = /^:(\w+):(?:\s*(\{[\s\S]*\}))?\s*$/.exec(first[0] ?? '');
-  if (!descriptor) return undefined;
-  return {
-    syntax: descriptor[1] ?? '',
-    optionsSource: descriptor[2],
-    header: first.slice(1),
-    rows: lines.slice(2).filter(isTableRow).map(splitTableRow),
-  };
+export const parseTableChart = createTableChartParser();
+const parseChartCell = createTableChartParser();
+
+export function tableChartType(source: string) {
+  return parseTableChart(source)?.type ?? '';
+}
+
+/** Header-only recognition stays independent of body edits and uses Cherry grammar. */
+export function tableChartCellType(cell: string) {
+  const value = cell.trim();
+  if (!value.startsWith(':')) return '';
+  const escaped = value.replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+  return parseChartCell(`| ${escaped} | Value |\n| --- | --- |\n| Row | 1 |`)?.type ?? '';
 }
