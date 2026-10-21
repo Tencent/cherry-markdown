@@ -59,3 +59,21 @@ Chart widgets retain their identity across mapped document positions, so changin
 Compatibility follows Cherry, rather than JSON5: standard JSON options use double-quoted keys and no trailing commas; Cherry's deprecated legacy key/value options remain accepted. Invalid standard JSON follows Cherry's fallback and diagnostics. Bare pipes inside backticks receive Cherry's table behavior; escape cell pipes as `\|`. Ragged rows, compact delimiters and escaped cells also follow Cherry. ECharts _fenced-code_ options still use Cherry's data-only JSON5 parser. Parsing is not guaranteed to cost less than the former handwritten splitter: the performance contract is no full-table parse on each body keystroke, bounded caches, coalesced redraw, and no unrelated chart remounts.
 
 `test/table-chart-parser.spec.ts` compares the adapter with native Engine output and exercises compatibility, unsafe keys, non-execution and cache bounds. `test/table-chart-updates.spec.ts` verifies that 50 synchronous edits across a five-table/500-row document trigger one deferred full parse. `e2e/table-chart-parser.spec.ts` exercises real editing, undo, URL queries and stable chart mounts, and records whole-operation timings as diagnostic artifacts rather than enforcing hardware-dependent millisecond thresholds.
+
+## Test and CI entry points
+
+Tests use the repository's Vite+ commands and configuration entry point. Run these commands from the workspace root:
+
+- `vp run test`: Cherry, MiniProgram and Milkdown unit tests, including the existing security regressions.
+- `vp run -F @cherry-markdown/milkdown test:coverage`: Milkdown unit tests with coverage thresholds enabled.
+- `vp run test:e2e:milkdown`: the complete Chromium interaction suite.
+- `vp run -F @cherry-markdown/milkdown test:e2e:matrix`: shared behavior, editing boundaries and table-chart parser regressions on Firefox, WebKit and touch Chromium. The file selection lives in `playwright.config.ts`, not workflow YAML.
+- `vp run -F @cherry-markdown/milkdown test:consumer`: build and validate versioned package consumers. CI uses `test:consumer:prepared` after building the same artifacts for browser tests.
+
+The browser commands build Cherry by default. CI sets `MILKDOWN_E2E_PREBUILT=1` only after its explicit Cherry build; the demo still builds Milkdown. Each browser command owns its preview server and uses the same package scripts locally and in CI.
+
+Cherry and Milkdown generate text, JSON and HTML unit coverage reports by default. The unit-test CI job uploads both packages' reports, including available reports after a test failure. As with Cherry, thresholds are opt-in through `COVERAGE_THRESHOLDS` and the package's `test:coverage` command; the ordinary root test command does not enable this gate. MiniProgram keeps its existing test configuration.
+
+Milkdown's measured unit-test baseline is 77.74% statements, 59.44% branches, 82.62% functions and 81.50% lines. Its initial thresholds are 77%, 59%, 82% and 81%, respectively, across `src/**/*.ts`, using Vitest's default exclusions. These measurements do not include browser or consumer-test coverage. Keep those separate regressions even when the unit threshold passes; update thresholds deliberately when the unit baseline improves. Cherry's existing thresholds are unchanged.
+
+The workflow and job identifiers remain unchanged to preserve existing required-check configuration. Unit tests, browser regressions and packed-consumer checks remain separate steps for diagnosis; this consolidation does not remove tests or change editor behavior.
