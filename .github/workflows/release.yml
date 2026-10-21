@@ -123,8 +123,8 @@ jobs:
       package_version: ${{ needs.release.outputs.publishedMilkdownVersion }}
       dist_asset_name: 'cherry-markdown-milkdown'
       release_tag: '@cherry-markdown/milkdown@${{ needs.release.outputs.publishedMilkdownVersion }}'
-    secrets:
-      npm_token: ${{ secrets.MILKDOWN_NPM_TOKEN }}
+      # The maintainer publishes 0.0.1 locally, then configures npm OIDC.
+      publish_npm: ${{ needs.release.outputs.publishedMilkdownVersion != '0.0.1' }}
 
   build-client-release:
     needs: release
