@@ -1,6 +1,7 @@
 import { build } from 'vite';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { prismLanguagePlugin } from '../../cherry-markdown/build/prism.plugin.js';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const repoRoot = resolve(root, '../..');
@@ -8,6 +9,7 @@ const cherrySrc = resolve(repoRoot, 'packages/cherry-markdown/src');
 const sanitizer = resolve(root, 'src/shared/Sanitizer.miniProgram.js');
 
 await build({
+  plugins: [prismLanguagePlugin()],
   configFile: false,
   root,
   define: {

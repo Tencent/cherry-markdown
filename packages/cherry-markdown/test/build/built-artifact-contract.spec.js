@@ -11,7 +11,6 @@ import { describe, expect, it } from 'vite-plus/test';
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const require = createRequire(import.meta.url);
 const distRoot = resolve(projectRoot, 'dist');
-const declarationRoot = resolve(distRoot, 'types');
 const readDistFile = (filePath) => readFileSync(resolve(distRoot, filePath), 'utf-8');
 
 const bundleNames = [
@@ -38,6 +37,21 @@ function resolvesDeclaration(fromFile, specifier) {
 }
 
 describe('built Cherry Markdown artifact contract', () => {
+  it.each(bundleNames)(
+    'preserves Prism languages and streaming highlighting in %s',
+    (file) => {
+      execFileSync(
+        process.execPath,
+        [resolve(projectRoot, 'test/build/verify-prism-artifact.mjs'), resolve(distRoot, file)],
+        {
+          stdio: 'pipe',
+          timeout: 30000,
+        },
+      );
+    },
+    35000,
+  );
+
   it('publishes the complete UMD and ESM bundle matrix with declarations', () => {
     [...bundleNames, ...declarationNames].forEach((file) => {
       expect(existsSync(resolve(distRoot, file)), file).toBe(true);
@@ -92,8 +106,15 @@ describe('built Cherry Markdown artifact contract', () => {
     bundles.forEach(([file, globalName, expectedType]) => {
       const dom = new JSDOM('', { runScripts: 'outside-only', url: 'https://localhost/' });
       dom.window.mermaid = { initialize() {}, mermaidAPI: { initialize() {} } };
+      // Exercise CDN bundles on a page with existing application globals.
+      dom.window.e = { application: true };
+      dom.window.t = { application: true };
+      const existingE = dom.window.e;
+      const existingT = dom.window.t;
       dom.window.eval(readDistFile(file));
       expect(typeof dom.window[globalName], file).toBe(expectedType);
+      expect(dom.window.e, file).toBe(existingE);
+      expect(dom.window.t, file).toBe(existingT);
       dom.window.close();
     });
   });

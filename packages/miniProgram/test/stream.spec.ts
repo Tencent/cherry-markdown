@@ -6,6 +6,15 @@ import { htmlToMiniProgramBlocks } from '../src/shared/transform';
 import { markdownToHtml } from '../src/renderer';
 
 describe('@cherry-markdown/miniprogram stream', () => {
+  it.each([
+    ['bash', 'tar -czvf filename.tar.gz directory_name', 'token function'],
+    ['python', 'def example():\n    return True', 'token keyword'],
+  ])('loads %s through the shared test adapter', (language, code, token) => {
+    const html = markdownToHtml(`\`\`\`${language}\n${code}\n\`\`\``);
+    expect(html).toContain(`class="language-${language}"`);
+    expect(html).toContain(token);
+  });
+
   it('returns MiniProgram block AST from the isolated stream entry', () => {
     vi.stubGlobal('BUILD_ENV', 'production');
     const stream = new CherryStream({
