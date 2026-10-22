@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import ParagraphBase from '@/core/ParagraphBase';
-import Prism from '@/utils/prism';
+import Prism from 'prismjs';
 import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 import { getTableRule, getCodeBlockRule } from '@/utils/regexp';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';

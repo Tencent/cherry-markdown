@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
-import Prism from '../../src/utils/prism';
 import CherryEngine from '../../src/index.engine.core';
+// Inspect the core after the real Engine/CodeBlock import registers languages.
+import Prism from 'prismjs/components/prism-core.js';
 import languages from '../../build/prism-languages.json';
 
 // These components extend another grammar rather than register a language.

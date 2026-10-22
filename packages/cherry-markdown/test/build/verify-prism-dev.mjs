@@ -5,25 +5,27 @@ import { createContext, SourceTextModule } from 'node:vm';
 
 // Execute Vite's actual client module graph, including prebundled dependencies,
 // in a fresh realm without window, WorkerGlobalScope or Node global.
-const [root, entry] = process.argv.slice(2);
+const [root, entry, graphFile] = process.argv.slice(2);
+const graph = JSON.parse(readFileSync(graphFile, 'utf8'));
 const context = createContext({ console, setTimeout, clearTimeout });
 const modules = new Map();
 function getModule(file) {
   if (!modules.has(file)) {
-    modules.set(file, new SourceTextModule(readFileSync(file, 'utf8'), { context, identifier: file }));
+    modules.set(file, new SourceTextModule(graph[file] ?? readFileSync(file, 'utf8'), { context, identifier: file }));
   }
   return modules.get(file);
 }
 const module = getModule(entry);
 await module.link((specifier, parent) => {
-  const path = specifier.split('?')[0];
+  const path = decodeURI(specifier.split('?')[0]);
   let file = resolve(dirname(parent.identifier), path);
   if (path.startsWith('/@fs/')) file = resolve(path.slice(4));
   else if (path.startsWith('/')) file = resolve(root, `.${path}`);
   return getModule(file);
 });
 await module.evaluate();
-const Prism = module.namespace.default;
+assert.equal(module.namespace.default.HOOK_NAME, 'codeBlock');
+const { Prism } = module.namespace;
 assert.equal(module.namespace.probe, 'undefined', 'unrelated dependencies must retain the original global semantics');
 assert.equal(Prism.manual, true);
 const languages = JSON.parse(readFileSync(new URL('../../build/prism-languages.json', import.meta.url), 'utf8'));

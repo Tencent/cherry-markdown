@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { createServer, normalizePath } from 'vite';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 import { createRequire } from 'node:module';
+import { parseAsync } from '@babel/core';
 import { prismLanguagePlugin } from '../../build/prism.plugin.js';
 import languages from '../../build/prism-languages.json';
 
@@ -26,8 +27,8 @@ const require = createRequire(import.meta.url);
 const getLoader = require('prismjs/dependencies.js');
 const components = require('prismjs/components.json');
 
-function createFixture() {
-  const root = realpathSync(mkdtempSync(join(tmpdir(), 'cherry-prism-')));
+function createFixture(prefix = 'cherry-prism-') {
+  const root = realpathSync(mkdtempSync(join(tmpdir(), prefix)));
   fixtures.push(root);
   writeFileSync(join(root, 'package.json'), '{"type":"module"}');
   symlinkSync(join(repoRoot, 'node_modules'), join(root, 'node_modules'), 'junction');
@@ -41,7 +42,7 @@ function createFixture() {
     root,
     cherry,
     languageFile: join(cherry, 'build/prism-languages.json'),
-    entryFile: join(cherry, 'src/utils/prism.js'),
+    entryFile: join(cherry, 'src/core/hooks/CodeBlock.js'),
   };
 }
 
@@ -56,7 +57,7 @@ describe('shared Prism Babel adapter', () => {
   });
 
   it('injects core before the original language dependency order and returns a source map', async () => {
-    const entry = join(projectRoot, 'src/utils/prism.js');
+    const entry = join(projectRoot, 'src/core/hooks/CodeBlock.js');
     const source = readFileSync(entry, 'utf8');
     const result = await prismLanguagePlugin().transform(source, `${entry}?test`);
     const imports = [...result.code.matchAll(/import (?:\w+ from )?["']prismjs\/components\/prism-([^"']+)["'];/g)].map(
@@ -64,15 +65,19 @@ describe('shared Prism Babel adapter', () => {
     );
     expect(imports).toEqual(['core', ...getLoader(components, languages).getIds()]);
     expect(result.code).not.toContain('prism-runtime');
+    expect(result.code).not.toContain('utils/prism');
     expect(result.code).not.toMatch(/from ["']prismjs["']/);
+    expect(result.code.match(/Prism\.manual = true/g)).toHaveLength(1);
     expect(result.map.sourcesContent).toContain(source);
     expect(result.map.mappings.length).toBeGreaterThan(0);
+    expect((await prismLanguagePlugin().transform(source, entry.replace(/\//g, '\\'))).code).toBe(result.code);
   });
 
   it('leaves other source files and dependencies untouched', async () => {
     const plugin = prismLanguagePlugin();
     const code = "import Prism from 'prismjs';";
     expect(await plugin.transform(code, join(projectRoot, 'src/utils/other.js'))).toBeNull();
+    expect(await plugin.transform(code, join(projectRoot, 'src/other/CodeBlock.js'))).toBeNull();
     expect(await plugin.transform(code, join(repoRoot, 'node_modules/prismjs/prism.js'))).toBeNull();
     expect(
       await plugin.transform('global.Prism = value;', join(repoRoot, 'node_modules/other/prism-core.js')),
@@ -126,12 +131,13 @@ describe('shared Prism Babel adapter', () => {
   }, 20000);
 
   it('initializes actual development prebundles without changing another dependency global', async () => {
-    const fixture = createFixture();
+    // Exercise encoded dependency URLs without relying on the host's TMPDIR.
+    const fixture = createFixture('cherry prism-');
     const probe = join(fixture.root, 'other-global-probe.cjs');
     writeFileSync(probe, 'module.exports = typeof global;');
     writeFileSync(
       fixture.entryFile,
-      `${readFileSync(fixture.entryFile, 'utf8')}\nimport probe from 'other-global-probe';\nexport { probe };`,
+      `${readFileSync(fixture.entryFile, 'utf8')}\nimport probe from 'other-global-probe';\nexport { Prism, probe };`,
     );
     const server = await createServer({
       configFile: join(fixture.cherry, 'vite.config.ts'),
@@ -142,20 +148,34 @@ describe('shared Prism Babel adapter', () => {
       logLevel: 'silent',
     });
     try {
-      const entry = join(fixture.root, 'dev-entry.js');
-      const result = await server.transformRequest(`/@fs/${normalizePath(fixture.entryFile)}`);
-      writeFileSync(entry, result.code);
+      const graphFile = join(fixture.root, 'dev-graph.json');
+      async function captureGraph(url, graph) {
+        const path = decodeURI(url.split('?')[0]);
+        const file = path.startsWith('/@fs/') ? resolve(path.slice(4)) : resolve(server.config.root, `.${path}`);
+        if (file.startsWith(join(fixture.root, 'vite-cache')) || graph.has(file)) return;
+        const result = await server.transformRequest(decodeURI(url));
+        graph.set(file, result.code);
+        const ast = await parseAsync(result.code, { babelrc: false, configFile: false, sourceType: 'module' });
+        for (const node of ast.program.body) {
+          if (node.source?.value)
+            await captureGraph(new URL(node.source.value, `http://vite.local${url}`).pathname, graph);
+        }
+      }
       await expect
         .poll(
-          () => {
+          async () => {
             try {
+              const graph = new Map();
+              await captureGraph(`/@fs/${normalizePath(fixture.entryFile)}`, graph);
+              writeFileSync(graphFile, JSON.stringify(Object.fromEntries(graph)));
               return execFileSync(
                 process.execPath,
                 [
                   '--experimental-vm-modules',
                   join(projectRoot, 'test/build/verify-prism-dev.mjs'),
-                  fixture.root,
-                  entry,
+                  server.config.root,
+                  fixture.entryFile,
+                  graphFile,
                 ],
                 { encoding: 'utf8', stdio: 'pipe', timeout: 5000 },
               ).trim();

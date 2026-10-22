@@ -6,7 +6,7 @@ import languages from './prism-languages.json' with { type: 'json' };
 
 const require = createRequire(import.meta.url);
 const prismPlugin = require.resolve('babel-plugin-prismjs');
-const prismEntry = fileURLToPath(new URL('../src/utils/prism.js', import.meta.url)).replace(/\\/g, '/');
+const codeBlockEntry = fileURLToPath(new URL('../src/core/hooks/CodeBlock.js', import.meta.url)).replace(/\\/g, '/');
 const prismCore = require.resolve('prismjs/components/prism-core.js').replace(/\\/g, '/');
 
 // Prism's language components need its core to publish a global instance even
@@ -41,7 +41,7 @@ function prismGlobalPlugin() {
 }
 
 // Share language injection across development, tests and all published bundles.
-// Only the Prism entry and core are transformed; UMD syntax compatibility stays
+// Only CodeBlock and the Prism core are transformed; UMD syntax compatibility stays
 // in legacyUmdPlugin and other source/dependency modules are left to Vite.
 /** @returns {import('vite').Plugin} */
 export function prismLanguagePlugin() {
@@ -56,7 +56,7 @@ export function prismLanguagePlugin() {
     },
     async transform(code, id) {
       const filename = id.split('?')[0].replace(/\\/g, '/');
-      if (filename !== prismEntry) return globalPlugin.transform(code, id);
+      if (filename !== codeBlockEntry) return globalPlugin.transform(code, id);
       const result = await transformAsync(code, {
         filename,
         babelrc: false,
