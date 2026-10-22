@@ -9,6 +9,7 @@ const readProjectFile = (filePath) => readFileSync(resolve(projectRoot, filePath
 
 describe('Cherry Markdown published artifact contract', () => {
   const viteBuild = readProjectFile('build/vite.build.js');
+  const libraryBuild = readProjectFile('build/library.js');
   const stylesBuild = readProjectFile('build/styles.build.js');
   const addonsBuild = readProjectFile('build/addons.build.js');
   const packageJson = JSON.parse(readProjectFile('package.json'));
@@ -49,12 +50,12 @@ describe('Cherry Markdown published artifact contract', () => {
     );
     expect(viteBuild).toContain("const engineExternal = [...baseExternal, 'mermaid']");
     expect(viteBuild).toContain("const streamExternal = [...engineExternal, 'codemirror', /^codemirror\\//]");
-    expect(viteBuild).toMatch(/emptyOutDir: false/);
+    expect(libraryBuild).toMatch(/emptyOutDir: false/);
     expect(viteBuild).toContain("minify: current.id === 'full-umd' ? false : 'terser'");
     expect(viteBuild).toContain("pure_funcs: ['console.log', 'console.info']");
     expect(readProjectFile('build/legacy-umd.plugin.js')).toMatch(/async transform/);
     expect(viteBuild).toMatch(/treeshake: false/);
-    expect(viteBuild).toMatch(/codeSplitting: false/);
+    expect(libraryBuild).toMatch(/codeSplitting: false/);
     expect(viteBuild).toContain("generatedCode: { preset: 'es5' }");
     expect(viteBuild).toMatch(/exports: 'named'/);
   });
