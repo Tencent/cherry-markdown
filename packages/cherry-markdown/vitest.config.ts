@@ -1,5 +1,6 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vite-plus';
+import { prismLanguagePlugin } from './build/prism.plugin.js';
 
 const coverageThresholds = process.env.COVERAGE_THRESHOLDS
   ? {
@@ -11,6 +12,7 @@ const coverageThresholds = process.env.COVERAGE_THRESHOLDS
   : undefined;
 
 export default defineConfig({
+  plugins: [prismLanguagePlugin()],
   define: {
     BUILD_ENV: '"production"',
   },
