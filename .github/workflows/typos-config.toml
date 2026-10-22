@@ -1,4 +1,6 @@
 default.check-filename = true
+# Intentional encoded URL scheme used by security regression tests.
+default.extend-ignore-re = ['java&#x73;cript']
 
 [default.extend-words]
 ths="ths"

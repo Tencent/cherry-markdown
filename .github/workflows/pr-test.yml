@@ -1,8 +1,9 @@
 # =============================================================================
-# PR: Unit Test — 单元测试运行
+# PR 测试 — 单元测试、浏览器交互与打包消费验证
 #
 # 触发时机: 提交 PR 到 main 或 dev 分支时自动运行
-# 功能: 执行 Vite+ test，验证代码逻辑正确性
+# 功能: 通过 Vite+ 统一调度各包测试；Milkdown 补充浏览器与消费验证
+# 保留现有 workflow/job 名称，兼容分支保护中的必需检查
 # =============================================================================
 
 name: 'PR: Unit Test'
@@ -39,3 +40,51 @@ jobs:
 
       - name: Test
         run: vp run test
+      - name: Upload coverage reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-coverage
+          path: |
+            packages/cherry-markdown/coverage
+            packages/milkdown/coverage
+          if-no-files-found: ignore
+
+  milkdown-browser-consumer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version-file: '.node-version'
+          cache: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.node-version'
+          cache: 'yarn'
+      - name: Install dependencies
+        run: vp install
+      - name: Install browsers
+        run: vp exec playwright install --with-deps chromium firefox webkit
+      - name: Build Cherry artifacts
+        run: vp run -F cherry-markdown build
+      - name: Browser interactions
+        run: vp run test:e2e:milkdown
+        env:
+          MILKDOWN_E2E_PREBUILT: '1'
+      - name: Shared behavior across browsers
+        run: vp run -F @cherry-markdown/milkdown test:e2e:matrix
+        env:
+          MILKDOWN_E2E_PREBUILT: '1'
+      - name: Verify packed consumers
+        run: vp run -F @cherry-markdown/milkdown test:consumer:prepared
+      - name: Upload browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: milkdown-browser-diagnostics
+          path: |
+            packages/milkdown/playwright-report
+            packages/milkdown/test-results
+          if-no-files-found: ignore

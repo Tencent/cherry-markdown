@@ -553,6 +553,56 @@ describe('addons/EChartsTableEngine', () => {
     expect(inferredGroup.series[0].name).toBe('系列1');
   });
 
+  it.each(['global', 'injected', 'both'])('uses the selected ECharts instance for maps (%s)', (mode) => {
+    const environment = createEnvironment();
+    const globalEcharts = { getMap: vi.fn(), registerMap: vi.fn() };
+    environment.echarts.getMap.mockReturnValue({});
+    if (mode === 'global') Object.assign(window, { echarts: environment.echarts });
+    else if (mode === 'both') window.echarts = globalEcharts as unknown as typeof window.echarts;
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const renderer = new EChartsTableEngine({
+      ...(mode === 'global' ? {} : { echarts: environment.echarts }),
+      cherry: environment.cherry,
+    });
+    renderer.$buildEchartsThemeFromCss(environment.root);
+
+    const option = renderer.$generateChartOptions(
+      'map',
+      { header: ['Province', 'Value'], rows: [['北京', '10']] },
+      { mapDataSource: 'china' },
+    );
+
+    expect(option.series[0]).toMatchObject({ type: 'map', map: 'china' });
+    expect(environment.echarts.getMap).toHaveBeenCalledWith('china');
+    expect(globalEcharts.getMap).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('registers fetched maps on the injected instance, not a different global instance', async () => {
+    const environment = createEnvironment();
+    const globalEcharts = { getMap: vi.fn(), registerMap: vi.fn() };
+    window.echarts = globalEcharts as unknown as typeof window.echarts;
+    const geoJson = { type: 'FeatureCollection', features: [] };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => geoJson }));
+    const renderer = new EChartsTableEngine({ echarts: environment.echarts, cherry: environment.cherry });
+    renderer.$buildEchartsThemeFromCss(environment.root);
+    const tableData = { header: ['Province', 'Value'], rows: [['北京', '10']] };
+    const container = environment.previewerDom.appendChild(document.createElement('div'));
+    container.id = 'map-chart';
+    container.dataset.chartType = 'map';
+    container.dataset.tableData = JSON.stringify(tableData);
+    container.dataset.chartOptions = JSON.stringify({ mapDataSource: 'china' });
+
+    renderer.$generateChartOptions('map', tableData, { mapDataSource: 'china', chartId: container.id });
+
+    await vi.waitFor(() => expect(container.dataset.mapStatus).toBe('success'));
+    expect(environment.echarts.registerMap).toHaveBeenCalledWith('china', geoJson);
+    expect(globalEcharts.getMap).not.toHaveBeenCalled();
+    expect(globalEcharts.registerMap).not.toHaveBeenCalled();
+    renderer.onDestroy();
+  });
+
   it('generates a registered map with normalized province names', () => {
     const environment = createEnvironment();
     environment.echarts.getMap.mockReturnValue({});
@@ -605,6 +655,7 @@ describe('addons/EChartsTableEngine', () => {
   it('renders a library error while map support is unavailable', () => {
     const environment = createEnvironment();
     const renderer = new EChartsTableEngine({ echarts: environment.echarts, cherry: environment.cherry });
+    renderer.echartsRef = false;
     renderer.$buildEchartsThemeFromCss(environment.root);
     vi.stubGlobal(
       'fetch',
