@@ -1,4 +1,5 @@
 import { transformAsync } from '@babel/core';
+import { posix } from 'node:path';
 
 /**
  * Preserve the ES5 syntax contract of the historical UMD browser bundles.
@@ -61,9 +62,17 @@ export function legacyUmdPlugin({ enabled = true, compact = true, sourceMaps = f
           });
 
           if (transformed?.code) {
+            const mapFileName = output.sourcemapFileName || `${output.fileName}.map`;
             output.code = sourceMaps
-              ? `${transformed.code}\n//# sourceMappingURL=${output.fileName}.map`
+              ? `${transformed.code}\n//# sourceMappingURL=${posix.relative(posix.dirname(output.fileName), mapFileName)}`
               : transformed.code;
+            // generateBundle runs after the source map asset has been emitted.
+            // Updating the chunk metadata alone leaves the published map stale.
+            if (sourceMaps && transformed.map) {
+              transformed.map.file = output.map?.file || posix.basename(output.fileName);
+              const mapAsset = bundle[mapFileName];
+              if (mapAsset?.type === 'asset') mapAsset.source = JSON.stringify(transformed.map);
+            }
             output.map = sourceMaps ? transformed.map : null;
           }
         }
