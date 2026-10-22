@@ -5,6 +5,7 @@ import { mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { legacyUmdPlugin } from './legacy-umd.plugin.js';
+import { createLibraryBuild } from './library.js';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const src = resolve(root, 'src');
@@ -24,41 +25,33 @@ for (const entry of addonEntries) {
 
   for (const format of ['es', 'umd']) {
     const suffix = format === 'es' ? '.esm.js' : '.js';
-    await build({
-      configFile: false,
-      root,
-      plugins: format === 'umd' ? [legacyUmdPlugin()] : [],
-      define: {
-        BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
-      },
-      resolve: {
-        alias: {
-          '@': src,
-          '@cherry': src,
-        },
-      },
-      build: {
-        outDir: outputDir,
-        emptyOutDir: false,
-        target: 'es2015',
-        minify: 'oxc',
-        lib: {
-          entry: input,
-          formats: [format],
-          fileName: () => `${baseName}${suffix}`,
-          name: globalName,
-        },
-        rollupOptions: {
-          output: {
-            format,
-            name: globalName,
-            entryFileNames: `${baseName}${suffix}`,
-            codeSplitting: false,
-            manualChunks: undefined,
+    await build(
+      createLibraryBuild(
+        { root, entry: input, file: `${baseName}${suffix}`, format, name: globalName },
+        {
+          plugins: format === 'umd' ? [legacyUmdPlugin()] : [],
+          define: {
+            BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
+          },
+          resolve: {
+            alias: {
+              '@': src,
+              '@cherry': src,
+            },
+          },
+          build: {
+            outDir: outputDir,
+            rollupOptions: {
+              output: {
+                format,
+                name: globalName,
+                entryFileNames: `${baseName}${suffix}`,
+              },
+            },
           },
         },
-      },
-    });
+      ),
+    );
     console.log(`[addons build] ${join(outputDir, `${baseName}${suffix}`)}`);
   }
 }

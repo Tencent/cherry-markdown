@@ -18,6 +18,7 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 import { createRequire } from 'node:module';
 import { parseAsync } from '@babel/core';
 import { prismLanguagePlugin } from '../../build/prism.plugin.js';
+import { transformPrismCore, transformPrismLanguages } from '../../build/prism.js';
 import languages from '../../build/prism-languages.json';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -71,6 +72,16 @@ describe('shared Prism Babel adapter', () => {
     expect(result.map.sourcesContent).toContain(source);
     expect(result.map.mappings.length).toBeGreaterThan(0);
     expect((await prismLanguagePlugin().transform(source, entry.replace(/\//g, '\\'))).code).toBe(result.code);
+    // Milkdown supplies its own entry rather than invoking the Vite adapter.
+    const standalone = await transformPrismLanguages(
+      "import Prism from 'prismjs'; Prism.manual = true; export default Prism;",
+      'milkdown-prism-entry.js',
+    );
+    const standaloneImports = [...standalone.code.matchAll(/import (?:\w+ from )?["']([^"']+)["'];/g)].map(
+      (match) => match[1],
+    );
+    expect(standaloneImports).toEqual(imports.map((id) => `prismjs/components/prism-${id}`));
+    expect(standalone.code).toContain('export default Prism');
   });
 
   it('leaves other source files and dependencies untouched', async () => {
@@ -90,7 +101,11 @@ describe('shared Prism Babel adapter', () => {
     const source = `if (typeof global !== 'undefined') global.Prism = Prism;
       function local(global) { return global.Prism; }
       const value = { global: 'global' };`;
-    for (const adapter of [plugin, plugin.config().optimizeDeps.rolldownOptions.plugins[0]]) {
+    for (const adapter of [
+      plugin,
+      plugin.config().optimizeDeps.rolldownOptions.plugins[0],
+      { transform: transformPrismCore },
+    ]) {
       const result = await adapter.transform(source, `${core}?test`);
       expect(result.code).toContain('globalThis.Prism = Prism');
       expect(result.code).toContain('typeof globalThis');
