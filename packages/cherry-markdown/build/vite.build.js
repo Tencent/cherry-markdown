@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import { legacyUmdPlugin } from './legacy-umd.plugin.js';
 import { getBuildVersion } from './revision.js';
+import { prismLanguagePlugin } from './prism.plugin.js';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const src = resolve(root, 'src');
@@ -97,10 +98,12 @@ for (const current of builds) {
   await build({
     configFile: false,
     root,
-    plugins:
-      current.format === 'umd'
+    plugins: [
+      prismLanguagePlugin(),
+      ...(current.format === 'umd'
         ? [legacyUmdPlugin({ compact: current.id !== 'full-umd', sourceMaps: Boolean(current.sourcemap) })]
-        : [],
+        : []),
+    ],
     define: {
       BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
       'process.env.BUILD_VERSION': JSON.stringify(buildVersion),

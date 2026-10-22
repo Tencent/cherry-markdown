@@ -57,6 +57,26 @@ export function legacyUmdPlugin({ enabled = true, compact = true, sourceMaps = f
               '@babel/plugin-transform-arrow-functions',
               '@babel/plugin-transform-shorthand-properties',
               '@babel/plugin-transform-template-literals',
+              ({ types }) => ({
+                visitor: {
+                  Program: {
+                    exit(path) {
+                      // Terser can inline the UMD wrapper and hoist its local
+                      // variables into the script scope. Restore isolation after
+                      // minification while retaining the wrapper's original this.
+                      if (!path.node.body.some((node) => types.isDeclaration(node))) return;
+                      const wrapper = types.functionExpression(null, [], types.blockStatement(path.node.body));
+                      path.node.body = [
+                        types.expressionStatement(
+                          types.callExpression(types.memberExpression(wrapper, types.identifier('call')), [
+                            types.thisExpression(),
+                          ]),
+                        ),
+                      ];
+                    },
+                  },
+                },
+              }),
             ],
           });
 

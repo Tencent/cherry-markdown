@@ -1040,9 +1040,9 @@ exports[`engine > CommonMark-142 1`] = `
         style="position:relative"
         class="cherry-code-expand"
       >
-      <pre class="language-javascript"><code class="language-javascript"><span class="code-line">def <span class="token function">foo</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span></span>
+      <pre class="language-ruby"><code class="language-ruby"><span class="code-line"><span class="token keyword">def</span> <span class="token method-definition"><span class="token function">foo</span></span><span class="token punctuation">(</span>x<span class="token punctuation">)</span></span>
 <span class="code-line">  <span class="token keyword">return</span> <span class="token number">3</span></span>
-<span class="code-line">end</span></code></pre>
+<span class="code-line"><span class="token keyword">end</span></span></code></pre>
       </div>
 "
 `;
@@ -1163,7 +1163,7 @@ exports[`engine > CommonMark-161 1`] = `
         style="position:relative"
         class="cherry-code-expand"
       >
-      <pre class="language-javascript"><code class="language-javascript"><span class="code-line">int x <span class="token operator">=</span> <span class="token number">33</span><span class="token punctuation">;</span></span></code></pre>
+      <pre class="language-c"><code class="language-c"><span class="code-line"><span class="token keyword">int</span> x <span class="token operator">=</span> <span class="token number">33</span><span class="token punctuation">;</span></span></code></pre>
       </div>
 "
 `;

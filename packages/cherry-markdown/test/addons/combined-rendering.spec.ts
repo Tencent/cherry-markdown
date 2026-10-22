@@ -99,7 +99,7 @@ $$
 
     expect(container.querySelector('h2')?.textContent).toBe('Fallback');
     expect(container.querySelector('figure[data-type="mermaid"]')).toBeNull();
-    expect(codeBlock?.querySelector('pre.language-javascript')).not.toBeNull();
+    expect(codeBlock?.querySelector('pre.language-mermaid')).not.toBeNull();
     expect(codeBlock?.textContent).toContain('graph TD; A-->B');
     expect(container.querySelectorAll('p[data-type="p"]')).toHaveLength(1);
     expect(container.querySelector('p[data-type="p"]')?.textContent).toBe('After the diagram.');
