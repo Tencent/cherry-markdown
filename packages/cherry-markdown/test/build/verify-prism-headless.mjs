@@ -14,6 +14,9 @@ await module.link((specifier) => {
   throw new Error(`Unexpected runtime dependency: ${specifier}`);
 });
 await module.evaluate();
+if ('probe' in module.namespace) {
+  assert.equal(module.namespace.probe, 'undefined', 'unrelated dependencies must retain the original global semantics');
+}
 const stream = new module.namespace.default();
 const engine = stream.engine || stream;
 engine.$cherry.options.engine.global.flowSessionContext = true;

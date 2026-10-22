@@ -106,8 +106,15 @@ describe('built Cherry Markdown artifact contract', () => {
     bundles.forEach(([file, globalName, expectedType]) => {
       const dom = new JSDOM('', { runScripts: 'outside-only', url: 'https://localhost/' });
       dom.window.mermaid = { initialize() {}, mermaidAPI: { initialize() {} } };
+      // Exercise CDN bundles on a page with existing application globals.
+      dom.window.e = { application: true };
+      dom.window.t = { application: true };
+      const existingE = dom.window.e;
+      const existingT = dom.window.t;
       dom.window.eval(readDistFile(file));
       expect(typeof dom.window[globalName], file).toBe(expectedType);
+      expect(dom.window.e, file).toBe(existingE);
+      expect(dom.window.t, file).toBe(existingT);
       dom.window.close();
     });
   });

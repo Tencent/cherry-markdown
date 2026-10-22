@@ -1,6 +1,6 @@
-// Keep initialization as a value dependency so MiniProgram tree shaking retains
-// it. The shared Babel adapter replaces the next import with language imports.
-import Prism from './prism-runtime.js';
-import 'prismjs';
+// The shared Babel adapter injects languages and scopes global compatibility
+// to Prism's core in both production and development dependency prebundling.
+import Prism from 'prismjs';
 
+Prism.manual = true;
 export default Prism;
