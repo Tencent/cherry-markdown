@@ -53,14 +53,14 @@
     "access": "public"
   },
   "scripts": {
-    "build": "node ./scripts/sync-chart-locale.mjs && node ./scripts/sync-cherry-helpers.mjs && rimraf ./dist && tsc --project tsconfig.build.json && node ./scripts/sync-cherry-helpers.mjs --dist",
+    "build": "node ./scripts/sync-chart-locale.mjs && node ./scripts/sync-cherry-helpers.mjs && node ./scripts/sync-cherry-prism.mjs && rimraf ./dist && tsc --project tsconfig.build.json && node ./scripts/sync-cherry-helpers.mjs --dist && node ./scripts/sync-cherry-prism.mjs --dist",
     "build:demo": "vp run -F cherry-markdown build && vp run build:demo:prepared",
     "build:demo:prepared": "vp run build && node ./scripts/build-demo.mjs",
     "build:types": "tsc --project tsconfig.build.json",
     "clean": "rimraf ./dist",
-    "dev:demo": "vite --config vite.demo.config.mjs",
+    "dev:demo": "node ./scripts/sync-cherry-prism.mjs && vite --config vite.demo.config.mjs",
     "preview:demo": "vite preview --config vite.demo.config.mjs",
-    "test": "vp run -F cherry-markdown build:engine && vp run -F cherry-markdown build:addons && vp test run --config vitest.config.ts",
+    "test": "vp run -F cherry-markdown build:engine && vp run -F cherry-markdown build:addons && node ./scripts/sync-cherry-prism.mjs && vp test run --config vitest.config.ts",
     "test:coverage": "COVERAGE_THRESHOLDS=true vp run test",
     "test:e2e": "playwright test --config playwright.config.ts",
     "test:e2e:matrix": "MILKDOWN_BROWSER_MATRIX=1 vp run test:e2e",

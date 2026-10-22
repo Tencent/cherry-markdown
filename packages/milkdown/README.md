@@ -83,6 +83,8 @@ await cherryMilkdown({
 
 ## Boundaries
 
+Editable code highlighting follows Cherry's language list, including TypeScript, JSON, Python and aliases. Live editing, language selection and copy controls remain available; unknown languages fall back to JavaScript.
+
 - Markdown is the only persistent data format.
 - CommonMark/GFM content is structurally edited by Milkdown.
 - Cherry-specific syntax uses CherryEngine or a configured renderer. Only syntax with deterministic parsing and serialization is structurally edited; complex and recognized custom blocks use whole-block source editing. Byte-for-byte preservation is not guaranteed for Cherry extensions the adapter does not recognize.

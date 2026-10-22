@@ -74,3 +74,32 @@ test('typed and imported Cherry extensions share their grammar and retain undo',
     await expect(mark).toHaveCount(0);
   }
 });
+
+test('Cherry code languages keep live highlighting, undo and existing controls', async ({ page }) => {
+  const block = page.locator('.cherry-milkdown-code-block');
+  for (const [language, source, type, text] of [
+    ['typescript', 'const answer: number = 42;', 'builtin', 'number'],
+    ['json', '{"answer":42}', 'property', '"answer"'],
+    ['python', 'print("hello")', 'keyword', 'print'],
+  ]) {
+    await setMarkdown(page, `\`\`\`${language}\n${source}\n\`\`\``);
+    await expect(block.locator(`.token.${type}`).filter({ hasText: text })).toHaveCount(1);
+  }
+  const original = await markdown(page);
+  const content = block.locator('code');
+  await content.click();
+  await page.keyboard.press('End');
+  await page.keyboard.type('\nreturn True');
+  await expect(block.locator('.token.keyword').filter({ hasText: 'return' })).toHaveCount(1);
+  expect(await markdown(page)).toContain('return True');
+  await page.keyboard.press('ControlOrMeta+z');
+  await expect.poll(() => markdown(page)).toBe(original);
+  const node = await block.elementHandle();
+  await page.evaluate(() => window.milkdownEditor!.setTheme('dark'));
+  expect(await node!.evaluate((element) => element.isConnected)).toBe(true);
+  expect(await markdown(page)).toBe(original);
+  await expect(block.getByRole('button', { name: '复制代码' })).toBeVisible();
+  await block.getByRole('combobox', { name: '代码语言' }).selectOption('javascript');
+  await expect(block.locator('.token.function').filter({ hasText: 'print' })).toHaveCount(1);
+  expect(await content.textContent()).toBe('print("hello")');
+});

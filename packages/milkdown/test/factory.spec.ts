@@ -561,6 +561,18 @@ describe('cherryMilkdown WYSIWYG', () => {
     ['json', '{"answer":42}'],
     ['python', 'print("hello")'],
     ['html', '<strong>Hello</strong>'],
+    ['ts', 'const answer: number = 42;'],
+    ['TS', 'const answer: number = 42;'],
+    ['tsx', 'const view = <div>Hello</div>;'],
+    ['py', 'print("hello")'],
+    ['bash', 'tar -czvf archive.tar.gz directory'],
+    ['shell', 'tar -czvf archive.tar.gz directory'],
+    ['json5', '{answer: 42}'],
+    ['yaml', 'answer: true'],
+    ['sql', 'SELECT answer FROM results;'],
+    ['php', '<?php echo true; ?>'],
+    ['javascript', 'const view = html`<div>Hello</div>`;'],
+    ['csharp', '/// <summary>Hello</summary>'],
     ['unknown-language', 'const fallback = 1;'],
   ])('matches Cherry token styling for %s code', async (language, code) => {
     const markdown = `\`\`\`${language}\n${code}\n\`\`\``;

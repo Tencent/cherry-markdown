@@ -5,12 +5,8 @@ import { NodeSelection, Plugin, TextSelection } from '@milkdown/kit/prose/state'
 import { Decoration, DecorationSet } from '@milkdown/kit/prose/view';
 import type { EditorView, NodeView, ViewMutationRecord } from '@milkdown/kit/prose/view';
 import { $prose, $view } from '@milkdown/kit/utils';
-import Prism from 'prismjs';
-
-// Cherry's bundled CodeBlock hook uses the Prism core grammars and falls back
-// to JavaScript for other languages. Keep that default even if an application
-// happens to load extra Prism components into its own module instance.
-const CHERRY_CORE_GRAMMARS = new Set(['markup', 'html', 'xml', 'svg', 'mathml', 'css', 'clike', 'javascript', 'js']);
+import Prism from '../generated/cherry-prism.js';
+import type { TokenEnvironment } from 'prismjs';
 
 const CODE_LANGUAGES = [
   '',
@@ -41,8 +37,16 @@ function languageName(value: unknown) {
     .toLowerCase();
 }
 
-function prismLanguage(language: string) {
-  return (CHERRY_CORE_GRAMMARS.has(language) ? Prism.languages[language] : undefined) ?? Prism.languages.javascript;
+function prismTokens(source: string, language: string) {
+  const name = Prism.languages[language] ? language : 'javascript';
+  const environment: TokenEnvironment = { code: source, grammar: Prism.languages[name], language: name };
+  if (!environment.grammar) return [];
+  // Match Prism.highlight's public token hooks, including Cherry's template
+  // and embedded-language components, while keeping ProseMirror decorations.
+  Prism.hooks.run('before-tokenize', environment);
+  environment.tokens = Prism.tokenize(environment.code, environment.grammar);
+  Prism.hooks.run('after-tokenize', environment);
+  return environment.tokens;
 }
 
 function tokenDecorations(token: PrismToken, position: number, decorations: Decoration[]): number {
@@ -63,11 +67,9 @@ function buildHighlights(doc: ProseNode) {
   const decorations: Decoration[] = [];
   doc.descendants((node, position) => {
     if (node.type.name !== 'code_block' || !node.textContent) return;
-    const grammar = prismLanguage(languageName(node.attrs.language));
-    if (!grammar) return;
     let cursor = position + 1;
     try {
-      for (const token of Prism.tokenize(node.textContent, grammar))
+      for (const token of prismTokens(node.textContent, languageName(node.attrs.language)))
         cursor = tokenDecorations(token, cursor, decorations);
     } catch {
       // Highlighting is progressive enhancement; editing and source fidelity

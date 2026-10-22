@@ -70,6 +70,8 @@ writeFileSync(
     include: ['main.tsx'],
   }),
 );
+const prismFixture =
+  '\n\n```typescript\nconst answer: number = 42;\n```\n\n```json\n{"answer":42}\n```\n\n```python\nprint("hello")\n```';
 function writeEntry(charts = false) {
   writeFileSync(
     join(fixture, 'main.tsx'),
@@ -101,9 +103,9 @@ function App() {
       engine: new CherryEngine({}),
       onError: (error, phase) => console.error(phase, error),
       value: ${JSON.stringify(
-        charts
+        (charts
           ? '# Published package\n\n| :map:{"title":"Published map","mapDataSource":"consumer-map"} | Value |\n| --- | --- |\n| 北京 | 10 |\n\n| :line:{"title":"Published chart"} | Jan | Feb |\n| --- | --- | --- |\n| Sales | 1 | 2 |\n\n```echarts\n{animation:false,title:{text:"Code chart"},xAxis:{data:["Jan","Feb"]},yAxis:{},series:[{type:"line",data:[1,2]}]}\n```'
-          : '# Published package',
+          : '# Published package') + prismFixture,
       )},
       ${charts ? 'renderers: { echarts, tableChart },' : ''}
     }).then((instance) => {
@@ -155,6 +157,17 @@ async function checkChartRuntime(label) {
     }
     if (!(await page.locator('.cherry-echarts-wrapper').nth(1).textContent()).includes('Published chart')) {
       throw new Error('Cherry table chart did not render its configured title.');
+    }
+    for (const [language, type, text] of [
+      ['typescript', 'builtin', 'number'],
+      ['json', 'property', '"answer"'],
+      ['python', 'keyword', 'print'],
+    ]) {
+      const token = page
+        .locator(`.cherry-milkdown-code-block pre.language-${language} .token.${type}`)
+        .filter({ hasText: text });
+      await token.waitFor();
+      if ((await token.count()) !== 1) throw new Error(`Packed Prism ${language} token mismatch.`);
     }
     await page.locator('.cherry-echarts-wrapper[data-map-status=success] svg').waitFor();
     await page.locator('.cherry-echarts-wrapper svg text').filter({ hasText: 'Published map' }).waitFor();

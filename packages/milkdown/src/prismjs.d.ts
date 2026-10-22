@@ -5,8 +5,16 @@ declare module 'prismjs' {
     type: string;
   }
 
+  export interface TokenEnvironment {
+    code: string;
+    grammar: unknown;
+    language: string;
+    tokens?: Array<string | Token>;
+  }
+
   export interface PrismApi {
     languages: Record<string, unknown>;
+    hooks: { run(name: string, environment: TokenEnvironment): void };
     tokenize(source: string, grammar: unknown): Array<string | Token>;
   }
 
