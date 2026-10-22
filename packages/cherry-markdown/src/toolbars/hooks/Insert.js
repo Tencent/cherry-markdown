@@ -23,7 +23,8 @@ export default class Insert extends MenuBase {
   constructor($cherry) {
     super($cherry);
     this.setName('insert', 'insert');
-    this.noIcon = true;
+    // 复用 ch-icon 字体中的 .ch-icon-insert 字形（EA36）作为"插入"按钮图标
+    this.noIcon = false;
 
     this.subBubbleTableMenu = new BubbleTableMenu({ row: 9, col: 9 });
     $cherry.editor.options.wrapperDom.appendChild(this.subBubbleTableMenu.dom);
