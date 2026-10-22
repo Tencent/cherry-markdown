@@ -1,5 +1,5 @@
 # Reusable Workflow: NPM Release — npm 包发布 + dist 产物上传到 GitHub Release
-# 使用 OIDC Trusted Publisher 进行 npm 认证，无需 NPM_TOKEN
+# 使用 npm OIDC；支持只构建并上传产物，由维护者本地首发新包
 
 name: 'Reusable: npm Release'
 
@@ -31,6 +31,11 @@ on:
         required: false
         type: string
         default: ''
+      publish_npm:
+        description: 'Publish via npm OIDC; disable for a manual first release'
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -62,8 +67,13 @@ jobs:
         run: cp ../../README*.md . || { echo "❌ Failed to copy README files" >&2; exit 1; }
 
       - name: Publish ${{ inputs.package_name }}
+        if: inputs.publish_npm
         working-directory: ${{ inputs.package_dir }}
-        run: NODE_AUTH_TOKEN="" npm publish --access public --provenance --no-workspaces
+        run: npm publish --access public --provenance --no-workspaces
+
+      - name: Record manual npm release
+        if: ${{ !inputs.publish_npm }}
+        run: echo 'npm publish skipped for a manual first release. Build and GitHub Release assets do not confirm npm publication.' >> "$GITHUB_STEP_SUMMARY"
 
       # =========================================================================
       # 将 dist 产物打包为 zip 并上传到 GitHub Release

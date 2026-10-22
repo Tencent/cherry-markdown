@@ -2,6 +2,9 @@
 node_modules
 dist
 coverage
+packages/milkdown/preview/
+packages/milkdown/test-results/
+packages/milkdown/playwright-report/
 
 # local env files
 .env.local
@@ -38,3 +41,6 @@ examples/cherry-markdown-publish/src/common/config/*.yaml
 
 # MiniProgram demo vendor bundle (built from packages/miniProgram)
 examples/miniProgram/miniprogram/vendor/
+
+# Build-only Prism bundle generated from Cherry language configuration.
+packages/milkdown/src/generated/cherry-prism.js
