@@ -202,7 +202,8 @@ export default class Graph extends MenuBase {
   constructor($cherry) {
     super($cherry);
     this.setName('graph', 'insertChart');
-    this.noIcon = true;
+    // 复用 ch-icon 字体中的 .ch-icon-insertChart 字形（EA43）作为"画图"按钮图标
+    this.noIcon = false;
     this.localeName = $cherry.options.locale;
     this.subMenuConfig = [
       // 流程图
