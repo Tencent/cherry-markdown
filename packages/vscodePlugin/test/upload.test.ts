@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vite-plus/test';
 import axios from 'axios';
 import { parseUploadResponse, uploadFileHandler } from '../src/handler/uploadFile';
 

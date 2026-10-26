@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'vite-plus/test';
 import { isPreviewEditEnabled } from '../src/editState';
 
 describe('preview edit activation', () => {
@@ -8,23 +8,13 @@ describe('preview edit activation', () => {
 
   test('enables editing when the matching Markdown editor is active', () => {
     expect(
-      isPreviewEditEnabled(
-        'file:///workspace/readme.md',
-        'markdown',
-        'file:///workspace/readme.md',
-        'markdown',
-      ),
+      isPreviewEditEnabled('file:///workspace/readme.md', 'markdown', 'file:///workspace/readme.md', 'markdown'),
     ).toBe(true);
   });
 
   test('disables editing when another editor is active', () => {
     expect(
-      isPreviewEditEnabled(
-        'file:///workspace/readme.md',
-        'markdown',
-        'file:///workspace/notes.txt',
-        'plaintext',
-      ),
+      isPreviewEditEnabled('file:///workspace/readme.md', 'markdown', 'file:///workspace/notes.txt', 'plaintext'),
     ).toBe(false);
   });
 });

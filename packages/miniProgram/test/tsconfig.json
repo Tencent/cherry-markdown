@@ -5,7 +5,7 @@
     "checkJs": false,
     "noEmit": true,
     "rootDir": "..",
-    "types": ["vitest/globals"]
+    "types": ["vite-plus/test/globals"]
   },
   "include": ["./**/*.ts", "../src/shared/transform.js"]
 }

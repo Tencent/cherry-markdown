@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
-import { expect, it } from 'vitest';
+import { expect, it } from 'vite-plus/test';
 
 it('loads the generated Prism runtime without browser or Node globals', () => {
   const result = execFileSync(

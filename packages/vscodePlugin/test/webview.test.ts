@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vite-plus/test';
 import { getWebviewContent } from '../src/webview';
 
 const mockVscode = vi.hoisted(() => ({

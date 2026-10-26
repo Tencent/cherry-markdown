@@ -1,11 +1,9 @@
-import { transformAsync } from '@babel/core';
 import { build } from 'esbuild';
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { prismLanguagePlugin } from '../../cherry-markdown/build/prism.plugin.js';
-import languages from '../../cherry-markdown/build/prism-languages.json' with { type: 'json' };
+import { transformPrismCore, transformPrismLanguages } from '../../cherry-markdown/build/prism.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const cherryRoot = resolve(root, '../cherry-markdown');
@@ -21,14 +19,11 @@ if (process.argv.includes('--dist')) {
   // Use Cherry's language source and the same dependency/alias loader, rather
   // than maintain a second list or manually order Prism component imports.
   const require = createRequire(new URL('../../cherry-markdown/package.json', import.meta.url));
-  const entry = await transformAsync("import Prism from 'prismjs'; Prism.manual = true; export default Prism;", {
-    filename: 'cherry-prism-entry.js',
-    babelrc: false,
-    configFile: false,
-    plugins: [[require.resolve('babel-plugin-prismjs'), { languages, plugins: [], css: false }]],
-  });
+  const entry = await transformPrismLanguages(
+    "import Prism from 'prismjs'; Prism.manual = true; export default Prism;",
+    'cherry-prism-entry.js',
+  );
   if (!entry?.code) throw new Error('Cherry Prism language loading produced no entry.');
-  const cherryPlugin = prismLanguagePlugin();
   const result = await build({
     absWorkingDir: root,
     stdin: { contents: entry.code, resolveDir: cherryRoot, sourcefile: 'cherry-prism-entry.js' },
@@ -47,7 +42,7 @@ if (process.argv.includes('--dist')) {
           // from the Cherry editor or its build plugins enters the output.
           builder.onLoad({ filter: /[/\\]prism-core\.js$/ }, async ({ path }) => {
             const source = readFileSync(path, 'utf8');
-            const transformed = await cherryPlugin.transform(source, path);
+            const transformed = await transformPrismCore(source, path);
             return { contents: transformed?.code ?? source, loader: 'js' };
           });
         },

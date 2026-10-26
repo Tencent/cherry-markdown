@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import { renderMermaid } from '../src/wysiwyg/diagram-runtime';
 
 const render = vi.hoisted(() => vi.fn());

@@ -123,6 +123,11 @@ export default [
     },
   },
   ...tencentBaseConfigs,
+  // This JavaScript-compatible test config uses native ESM metadata.
+  {
+    files: ['packages/miniProgram/vitest.config.ts'],
+    languageOptions: { ecmaVersion: 2020 },
+  },
   // client
   ...createTencentTsConfigs(
     packageRoots.client,

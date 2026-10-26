@@ -25,7 +25,7 @@
     "globals": "^15.14.0",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.18.2",
-    "vite": "^8.2.1",
-    "vite-plus": "0.2.6"
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.4.0",
+    "vite-plus": "1.4.0"
   }
 }

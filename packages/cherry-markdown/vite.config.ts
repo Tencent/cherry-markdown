@@ -19,8 +19,8 @@ import { getBuildVersion } from './build/revision.js';
 import { prismLanguagePlugin } from './build/prism.plugin.js';
 
 // Cherry Markdown 源码目录
-const cherryMarkdownDir = path.resolve(__dirname);
-const examplesDir = path.resolve(__dirname, '../../examples');
+const cherryMarkdownDir = path.resolve(import.meta.dirname);
+const examplesDir = path.resolve(import.meta.dirname, '../../examples');
 const srcDir = path.resolve(cherryMarkdownDir, 'src');
 
 // examples 目录下所有可访问的 HTML 页面

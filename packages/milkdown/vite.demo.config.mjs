@@ -94,7 +94,7 @@ export default defineConfig({
   build: {
     outDir: resolve(packageRoot, 'preview'),
     emptyOutDir: true,
-    rollupOptions: {
+    rolldownOptions: {
       input: {
         index: resolve(examplesRoot, 'index.html'),
       },

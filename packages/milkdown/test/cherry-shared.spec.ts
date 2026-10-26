@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import { copyToClip, image, isValidScheme } from '../src/generated/cherry-helpers.js';
 import { imageLayoutState, imageAltText, replaceImageAltText } from '../src/native-layout';
 import { findCherryInlineMatches } from '../src/wysiwyg/transform';

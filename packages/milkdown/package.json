@@ -58,8 +58,8 @@
     "build:demo:prepared": "vp run build && node ./scripts/build-demo.mjs",
     "build:types": "tsc --project tsconfig.build.json",
     "clean": "rimraf ./dist",
-    "dev:demo": "node ./scripts/sync-cherry-prism.mjs && vite --config vite.demo.config.mjs",
-    "preview:demo": "vite preview --config vite.demo.config.mjs",
+    "dev:demo": "node ./scripts/sync-cherry-prism.mjs && vp dev --config vite.demo.config.mjs",
+    "preview:demo": "vp preview --config vite.demo.config.mjs",
     "test": "vp run -F cherry-markdown build:engine && vp run -F cherry-markdown build:addons && node ./scripts/sync-cherry-prism.mjs && vp test run --config vitest.config.ts",
     "test:coverage": "COVERAGE_THRESHOLDS=true vp run test",
     "test:e2e": "playwright test --config playwright.config.ts",
@@ -101,8 +101,7 @@
     "pngjs": "^7.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "rimraf": "^3.0.2",
-    "vite": "^8.2.1"
+    "rimraf": "^3.0.2"
   },
   "dependencies": {
     "prismjs": "^1.24.1",

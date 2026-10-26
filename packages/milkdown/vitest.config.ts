@@ -1,4 +1,5 @@
-import { coverageConfigDefaults, defineConfig } from 'vite-plus';
+import { coverageConfigDefaults } from 'vite-plus';
+import { createBrowserTestConfig } from '../../build/test.mjs';
 
 const coverageThresholds = process.env.COVERAGE_THRESHOLDS
   ? {
@@ -9,17 +10,14 @@ const coverageThresholds = process.env.COVERAGE_THRESHOLDS
     }
   : undefined;
 
-export default defineConfig({
+export default createBrowserTestConfig({
   test: {
-    environment: 'jsdom',
-    globals: true,
     setupFiles: ['./test/setup.ts'],
     include: ['test/**/*.spec.ts'],
     coverage: {
       enabled: true,
       include: ['src/**/*.ts'],
       exclude: [...coverageConfigDefaults.exclude, '**/*.d.ts'],
-      reporter: ['text', 'json', 'html'],
       thresholds: coverageThresholds,
     },
   },

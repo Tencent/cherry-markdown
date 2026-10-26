@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import { mountCherryChart } from '../src/cherry-echarts';
 import { cherryChartLocale } from '../src/cherry-chart-locale';
 import { execFileSync } from 'node:child_process';

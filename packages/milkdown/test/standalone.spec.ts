@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import { editorViewCtx } from '@milkdown/kit/core';
 import { redo, undo } from '@milkdown/kit/prose/history';
 import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';

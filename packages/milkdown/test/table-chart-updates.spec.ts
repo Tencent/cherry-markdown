@@ -1,4 +1,4 @@
-import { expect, it, vi } from 'vitest';
+import { expect, it, vi } from 'vite-plus/test';
 import { editorViewCtx } from '@milkdown/kit/core';
 import CherryEngine from '../src/cherry-engine';
 import { parseTableChart } from '../src/wysiwyg/table-chart';

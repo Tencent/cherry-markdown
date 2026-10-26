@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { legacyUmdPlugin } from './legacy-umd.plugin.js';
 import { getBuildVersion } from './revision.js';
 import { prismLanguagePlugin } from './prism.plugin.js';
+import { createLibraryBuild } from '../../../build/library.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const src = resolve(root, 'src');
@@ -95,67 +96,61 @@ const builds = [
 
 for (const current of builds) {
   console.log(`[vite build] ${current.id}`);
-  await build({
-    configFile: false,
-    root,
-    plugins: [
-      prismLanguagePlugin(),
-      ...(current.format === 'umd'
-        ? [legacyUmdPlugin({ compact: current.id !== 'full-umd', sourceMaps: Boolean(current.sourcemap) })]
-        : []),
-    ],
-    define: {
-      BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
-      'process.env.BUILD_VERSION': JSON.stringify(buildVersion),
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
-    },
-    resolve: {
-      alias: {
-        '@': src,
-        '@cherry': src,
-      },
-    },
-    build: {
-      emptyOutDir: false,
-      target: 'es2015',
-      // The historical full UMD bundle is Babel-transformed but not minified.
-      // Other bundles retain their Terser contract.
-      minify: current.id === 'full-umd' ? false : 'terser',
-      terserOptions: {
-        compress: {
-          pure_funcs: ['console.log', 'console.info'],
-          passes: 3,
-          toplevel: true,
-          pure_getters: true,
-          unsafe_comps: true,
-          unsafe_math: true,
+  await build(
+    createLibraryBuild(
+      { root, entry: current.entry, file: current.file, format: current.format, name: current.name },
+      {
+        plugins: [
+          prismLanguagePlugin(),
+          ...(current.format === 'umd'
+            ? [legacyUmdPlugin({ compact: current.id !== 'full-umd', sourceMaps: Boolean(current.sourcemap) })]
+            : []),
+        ],
+        define: {
+          BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
+          'process.env.BUILD_VERSION': JSON.stringify(buildVersion),
+          'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
         },
-        mangle: {
-          toplevel: true,
+        resolve: {
+          alias: {
+            '@': src,
+            '@cherry': src,
+          },
         },
-        format: {
-          comments: false,
-        },
-      },
-      sourcemap: current.sourcemap || false,
-      lib: {
-        entry: current.entry,
-        formats: [current.format],
-        fileName: () => current.file,
-        name: current.name,
-      },
-      rollupOptions: {
-        // Cherry relies on registration side effects that are not fully covered by
-        // runtime tests yet. Preserve the historical published-bundle contract.
-        treeshake: false,
-        external: current.external,
-        output: {
-          codeSplitting: false,
-          exports: 'named',
-          generatedCode: { preset: 'es5' },
-          globals: current.format === 'umd' && current.external.includes('mermaid') ? { mermaid: 'mermaid' } : {},
+        build: {
+          // The historical full UMD bundle is Babel-transformed but not minified.
+          // Other bundles retain their Terser contract.
+          minify: current.id === 'full-umd' ? false : 'terser',
+          terserOptions: {
+            compress: {
+              pure_funcs: ['console.log', 'console.info'],
+              passes: 3,
+              toplevel: true,
+              pure_getters: true,
+              unsafe_comps: true,
+              unsafe_math: true,
+            },
+            mangle: {
+              toplevel: true,
+            },
+            format: {
+              comments: false,
+            },
+          },
+          sourcemap: current.sourcemap || false,
+          rolldownOptions: {
+            // Cherry relies on registration side effects that are not fully covered by
+            // runtime tests yet. Preserve the historical published-bundle contract.
+            treeshake: false,
+            external: current.external,
+            output: {
+              exports: 'named',
+              generatedCode: { preset: 'es5' },
+              globals: current.format === 'umd' && current.external.includes('mermaid') ? { mermaid: 'mermaid' } : {},
+            },
+          },
         },
       },
-    },
-  });
+    ),
+  );
 }

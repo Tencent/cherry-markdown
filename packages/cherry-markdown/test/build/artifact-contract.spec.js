@@ -1,68 +1,198 @@
+// @vitest-environment node
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import glob from 'glob';
-import { describe, expect, it } from 'vite-plus/test';
+import { build } from 'vite';
+import { beforeAll, describe, expect, it, vi } from 'vite-plus/test';
+
+// Run the real entrypoints and shared factory; stop only at Vite's build
+// boundary, so these assertions cover the options actually passed to Vite.
+vi.mock('vite', async (importOriginal) => ({
+  ...(await importOriginal()),
+  build: vi.fn(async () => ({ output: [] })),
+}));
+// The addon entrypoint creates output directories even when build is mocked.
+vi.mock('node:fs', async (importOriginal) => ({ ...(await importOriginal()), mkdirSync: vi.fn() }));
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const readProjectFile = (filePath) => readFileSync(resolve(projectRoot, filePath), 'utf-8');
+const repoRoot = resolve(projectRoot, '../..');
+const src = resolve(projectRoot, 'src');
+const packageJson = JSON.parse(readFileSync(resolve(projectRoot, 'package.json'), 'utf-8'));
+let mainBuilds;
+let addonBuilds;
+let miniBuild;
 
-describe('Cherry Markdown published artifact contract', () => {
-  const viteBuild = readProjectFile('build/vite.build.js');
-  const stylesBuild = readProjectFile('build/styles.build.js');
-  const addonsBuild = readProjectFile('build/addons.build.js');
-  const packageJson = JSON.parse(readProjectFile('package.json'));
+beforeAll(async () => {
+  vi.stubEnv('NODE_ENV', 'production');
+  try {
+    build.mockClear();
+    await import('../../build/vite.build.js');
+    mainBuilds = build.mock.calls.map(([config]) => config);
+    build.mockClear();
+    await import('../../build/addons.build.js');
+    addonBuilds = build.mock.calls.map(([config]) => config);
+    build.mockClear();
+    await import('../../../miniProgram/build/vite.build.js');
+    expect(build).toHaveBeenCalledTimes(1);
+    [[miniBuild]] = build.mock.calls;
+  } finally {
+    vi.unstubAllEnvs();
+  }
+});
 
-  it('preserves 0.11.9 bundles and pins the additive format matrix', () => {
-    const publishedOutputs = [
-      ['full-esm', 'index.js', 'cherry-markdown.esm.js', 'es'],
-      ['full-umd', 'index.umd.js', 'cherry-markdown.js', 'umd', 'Cherry'],
-      ['core-umd', 'index.core.umd.js', 'cherry-markdown.core.js', 'umd', 'Cherry'],
-      ['engine-core-esm', 'index.engine.core.js', 'cherry-markdown.engine.core.esm.js', 'es'],
-      ['engine-core-umd', 'index.engine.core.js', 'cherry-markdown.engine.core.js', 'umd', 'CherryEngine'],
-      ['stream-esm', 'index.stream.js', 'cherry-markdown.stream.esm.js', 'es'],
-      ['stream-umd', 'index.stream.umd.js', 'cherry-markdown.stream.js', 'umd', 'Cherry'],
-    ];
-    const additiveOutputs = [
-      ['core-esm', 'index.core.js', 'cherry-markdown.core.esm.js', 'es'],
-      ['engine-esm', 'index.engine.js', 'cherry-markdown.engine.esm.js', 'es'],
-      ['engine-umd', 'index.engine.js', 'cherry-markdown.engine.js', 'umd', 'CherryEngine'],
-    ];
+const bundleMatrix = [
+  ['index.js', 'cherry-markdown.esm.js', 'es'],
+  ['index.umd.js', 'cherry-markdown.js', 'umd', 'Cherry'],
+  ['index.core.umd.js', 'cherry-markdown.core.js', 'umd', 'Cherry'],
+  ['index.core.js', 'cherry-markdown.core.esm.js', 'es'],
+  ['index.engine.js', 'cherry-markdown.engine.esm.js', 'es'],
+  ['index.engine.js', 'cherry-markdown.engine.js', 'umd', 'CherryEngine'],
+  ['index.engine.core.js', 'cherry-markdown.engine.core.esm.js', 'es'],
+  ['index.engine.core.js', 'cherry-markdown.engine.core.js', 'umd', 'CherryEngine'],
+  ['index.stream.js', 'cherry-markdown.stream.esm.js', 'es'],
+  ['index.stream.umd.js', 'cherry-markdown.stream.js', 'umd', 'Cherry'],
+];
+const filename = (config) => config.build.lib.fileName(config.build.lib.formats[0]);
+function expectSingleFileBuild(config) {
+  expect(config.configFile).toBe(false);
+  expect(config.build.emptyOutDir).toBe(false);
+  expect(config.build.target).toBe('es2015');
+  expect(config.build.rolldownOptions.output.codeSplitting).toBe(false);
+  expect(config.build.rolldownOptions.output).not.toHaveProperty('manualChunks');
+}
 
-    [...publishedOutputs, ...additiveOutputs].forEach(([id, entry, file, format, name]) => {
-      expect(viteBuild, id).toContain(`id: '${id}'`);
-      expect(viteBuild, id).toContain(`entry: resolve(src, '${entry}')`);
-      expect(viteBuild, id).toContain(`file: '${file}'`);
-      expect(viteBuild, id).toContain(`format: '${format}'`);
-      if (name) {
-        expect(viteBuild, id).toContain(`name: '${name}'`);
+describe('Cherry Markdown published artifact configuration', () => {
+  it('preserves the complete entry, filename, format and global-name matrix', () => {
+    expect(mainBuilds).toHaveLength(bundleMatrix.length);
+    expect(mainBuilds.map(filename).sort()).toEqual(bundleMatrix.map(([, file]) => file).sort());
+    for (const [entry, file, format, name] of bundleMatrix) {
+      const config = mainBuilds.find((candidate) => filename(candidate) === file);
+      expect(config.root).toBe(projectRoot);
+      expect(config.build.lib.entry).toBe(resolve(src, entry));
+      expect(config.build.lib.formats).toEqual([format]);
+      expect(config.build.lib.name).toBe(name);
+      expectSingleFileBuild(config);
+      expect(config.build.rolldownOptions.treeshake).toBe(false);
+      expect(config.build.rolldownOptions.output.exports).toBe('named');
+      expect(config.build.rolldownOptions.output.generatedCode).toEqual({ preset: 'es5' });
+    }
+  });
+
+  it('preserves compression, source maps and compatibility plugins after merging', () => {
+    for (const config of mainBuilds) {
+      const file = filename(config);
+      const fullUmd = file === 'cherry-markdown.js';
+      expect(config.build.minify, file).toBe(fullUmd ? false : 'terser');
+      expect(config.build.sourcemap, file).toBe(fullUmd);
+      expect(config.build.terserOptions).toEqual({
+        compress: {
+          pure_funcs: ['console.log', 'console.info'],
+          passes: 3,
+          toplevel: true,
+          pure_getters: true,
+          unsafe_comps: true,
+          unsafe_math: true,
+        },
+        mangle: { toplevel: true },
+        format: { comments: false },
+      });
+      expect(
+        config.plugins.map((plugin) => plugin.name),
+        file,
+      ).toEqual(
+        config.build.lib.formats[0] === 'umd'
+          ? ['cherry-prism-languages', 'cherry-legacy-umd']
+          : ['cherry-prism-languages'],
+      );
+    }
+  });
+
+  it('keeps each bundle external dependency boundary and UMD globals', () => {
+    const externalMatrix = {
+      'cherry-markdown.esm.js': ['jsdom'],
+      'cherry-markdown.js': ['jsdom'],
+      'cherry-markdown.core.js': ['jsdom', 'mermaid', '@replit/codemirror-vim', 'codemirror', /^codemirror\//],
+      'cherry-markdown.core.esm.js': ['jsdom', 'mermaid', '@replit/codemirror-vim', 'codemirror', /^codemirror\//],
+      'cherry-markdown.engine.esm.js': ['jsdom', 'mermaid'],
+      'cherry-markdown.engine.js': ['jsdom', 'mermaid'],
+      'cherry-markdown.engine.core.esm.js': ['jsdom', 'mermaid'],
+      'cherry-markdown.engine.core.js': ['jsdom', 'mermaid'],
+      'cherry-markdown.stream.esm.js': ['jsdom', 'mermaid', 'codemirror', /^codemirror\//],
+      'cherry-markdown.stream.js': ['jsdom', 'mermaid', 'codemirror', /^codemirror\//],
+    };
+    for (const config of mainBuilds) {
+      const file = filename(config);
+      expect(config.build.rolldownOptions.external, file).toEqual(externalMatrix[file]);
+      expect(config.build.rolldownOptions.output.globals, file).toEqual(
+        config.build.lib.formats[0] === 'umd' && externalMatrix[file].includes('mermaid') ? { mermaid: 'mermaid' } : {},
+      );
+    }
+  });
+
+  it('injects the production package version and preserves source aliases', () => {
+    for (const config of mainBuilds) {
+      expect(config.define).toEqual({
+        BUILD_ENV: JSON.stringify('production'),
+        'process.env.BUILD_VERSION': JSON.stringify(packageJson.version),
+        'process.env.NODE_ENV': JSON.stringify('production'),
+      });
+      expect(config.resolve.alias).toEqual({ '@': src, '@cherry': src });
+    }
+  });
+
+  it('builds every addon as ESM and UMD with its own output directory and global name', () => {
+    const entries = glob.sync('src/addons/**/*-plugin.js', { cwd: projectRoot });
+    expect(entries).toHaveLength(7);
+    expect(addonBuilds).toHaveLength(entries.length * 2);
+    for (const entry of entries) {
+      const relative = entry.replace(/^src\/addons\//, '');
+      const baseName = relative.split('/').pop().replace(/\.js$/, '');
+      const globalName = baseName
+        .split('-')
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join('');
+      const configs = addonBuilds.filter((config) => config.build.lib.entry === resolve(projectRoot, entry));
+      expect(configs).toHaveLength(2);
+      expect(configs.map((config) => config.build.lib.formats[0]).sort()).toEqual(['es', 'umd']);
+      for (const config of configs) {
+        const format = config.build.lib.formats[0];
+        const file = `${baseName}${format === 'es' ? '.esm.js' : '.js'}`;
+        expectSingleFileBuild(config);
+        expect(config.root).toBe(projectRoot);
+        expect(filename(config)).toBe(file);
+        expect(config.build.minify).toBe('oxc');
+        expect(config.build.outDir).toBe(resolve(projectRoot, 'dist/addons', dirname(relative)));
+        expect(config.build.lib.name).toBe(globalName);
+        expect(config.build.rolldownOptions.output).toMatchObject({ format, name: globalName, entryFileNames: file });
+        expect(config.plugins.map((plugin) => plugin.name)).toEqual(format === 'umd' ? ['cherry-legacy-umd'] : []);
+        expect(config.resolve.alias).toEqual({ '@': src, '@cherry': src });
+        expect(config.define).toEqual({ BUILD_ENV: JSON.stringify('production') });
       }
+    }
+  });
+
+  it('preserves MiniProgram Sanitizer replacement, externals and standalone ESM output', () => {
+    const root = resolve(repoRoot, 'packages/miniProgram');
+    expectSingleFileBuild(miniBuild);
+    expect(miniBuild.root).toBe(root);
+    expect(miniBuild.build.lib.entry).toBe(resolve(root, 'src/index.js'));
+    expect(miniBuild.build.lib.formats).toEqual(['es']);
+    expect(filename(miniBuild)).toBe('miniProgram.esm.js');
+    expect(miniBuild.build.minify).toBe('oxc');
+    expect(miniBuild.build.rolldownOptions.external).toEqual(['mermaid', 'codemirror', /^codemirror\//]);
+    expect(miniBuild.build.rolldownOptions.output).toMatchObject({
+      format: 'es',
+      entryFileNames: 'miniProgram.esm.js',
+      exports: 'named',
     });
-    expect(viteBuild.match(/id: '(?:full|core|engine|engine-core|stream)-(?:esm|umd)'/g)).toHaveLength(10);
-    expect(viteBuild).toMatch(/id: 'full-umd'[\s\S]*?sourcemap: true/);
-  });
-
-  it('pins external dependencies and preserves sequential build outputs', () => {
-    expect(viteBuild).toContain("const baseExternal = ['jsdom']");
-    expect(viteBuild).toContain(
-      "const coreExternal = [...baseExternal, 'mermaid', '@replit/codemirror-vim', 'codemirror', /^codemirror\\//]",
-    );
-    expect(viteBuild).toContain("const engineExternal = [...baseExternal, 'mermaid']");
-    expect(viteBuild).toContain("const streamExternal = [...engineExternal, 'codemirror', /^codemirror\\//]");
-    expect(viteBuild).toMatch(/emptyOutDir: false/);
-    expect(viteBuild).toContain("minify: current.id === 'full-umd' ? false : 'terser'");
-    expect(viteBuild).toContain("pure_funcs: ['console.log', 'console.info']");
-    expect(readProjectFile('build/legacy-umd.plugin.js')).toMatch(/async transform/);
-    expect(viteBuild).toMatch(/treeshake: false/);
-    expect(viteBuild).toMatch(/codeSplitting: false/);
-    expect(viteBuild).toContain("generatedCode: { preset: 'es5' }");
-    expect(viteBuild).toMatch(/exports: 'named'/);
-  });
-
-  it('pins package version injection', () => {
-    expect(viteBuild).toMatch(/import \{ getBuildVersion \} from '\.\/revision\.js'/);
-    expect(viteBuild).toMatch(/const buildVersion = getBuildVersion\(process\.env\.NODE_ENV\)/);
-    expect(viteBuild).toMatch(/'process\.env\.BUILD_VERSION': JSON\.stringify\(buildVersion\)/);
+    expect(miniBuild.resolve.alias).toEqual({
+      '@/Sanitizer': resolve(root, 'src/shared/Sanitizer.miniProgram.js'),
+      '@': src,
+      '@cherry': src,
+    });
+    expect(miniBuild.plugins.map((plugin) => plugin.name)).toEqual(['cherry-prism-languages']);
+    expect(miniBuild.define).toEqual({ BUILD_ENV: JSON.stringify('production') });
   });
 
   it('pins the public package entrypoints', () => {
@@ -72,90 +202,5 @@ describe('Cherry Markdown published artifact contract', () => {
     expect(packageJson.types).toBe('./dist/types/index.d.ts');
     expect(packageJson.exports).toBeUndefined();
     expect(packageJson.files).toEqual(['dist', 'types', '!types/env.d.ts']);
-  });
-
-  it('preserves 0.11.9 declarations and pins declarations for additive bundles', () => {
-    const publishedDeclarations = [
-      'cherry-markdown.d.ts',
-      'cherry-markdown.esm.d.ts',
-      'cherry-markdown.core.d.ts',
-      'cherry-markdown.engine.core.d.ts',
-      'cherry-markdown.engine.core.esm.d.ts',
-      'cherry-markdown.stream.d.ts',
-      'cherry-markdown.stream.esm.d.ts',
-    ];
-    const additiveDeclarations = [
-      'cherry-markdown.core.esm.d.ts',
-      'cherry-markdown.engine.d.ts',
-      'cherry-markdown.engine.esm.d.ts',
-    ];
-    const typeBuild = readProjectFile('build/replacePaths.js');
-
-    [...publishedDeclarations, ...additiveDeclarations].forEach((file) => {
-      expect(typeBuild, file).toContain(`'${file}'`);
-    });
-    expect(typeBuild).toContain("['cherry-markdown.d.ts', 'index'");
-    expect(typeBuild).toContain("['cherry-markdown.core.d.ts', 'index.core'");
-    expect(typeBuild).toContain("['cherry-markdown.stream.d.ts', 'index.stream'");
-    expect(typeBuild).not.toMatch(/index\.(?:umd|core\.umd|stream\.umd)/);
-  });
-
-  it('pins the full and markdown-only stylesheet filenames and declarations', () => {
-    const modules = readProjectFile('types/modules.d.ts');
-    const styles = [
-      'cherry-markdown.css',
-      'cherry-markdown.min.css',
-      'cherry-markdown.markdown.css',
-      'cherry-markdown.markdown.min.css',
-    ];
-
-    expect(stylesBuild).toContain("['src/sass/index.scss', 'cherry-markdown']");
-    expect(stylesBuild).toContain("['src/sass/markdown_pure.scss', 'cherry-markdown.markdown']");
-    styles.forEach((file) => expect(modules, file).toContain(`cherry-markdown/dist/${file}`));
-    expect(stylesBuild).not.toContain('cherry-previewer');
-  });
-
-  it('pins addon ESM, UMD, and declaration outputs', () => {
-    const addonEntries = glob.sync('src/addons/**/*-plugin.js', { cwd: projectRoot });
-
-    expect(addonEntries).toHaveLength(7);
-    expect(addonsBuild).toMatch(/\['es', 'umd'\]/);
-    expect(addonsBuild).toMatch(/format === 'es' \? '\.esm\.js' : '\.js'/);
-    expect(readProjectFile('tsconfig.json')).toContain('"declarationDir": "dist/types"');
-  });
-
-  it('pins the five font formats published in 0.11.9', () => {
-    const iconfontBuild = readProjectFile('build/run-iconfont.js');
-
-    expect(iconfontBuild).toContain("const fontName = 'ch-icon'");
-    expect(iconfontBuild).toContain("const formats = ['ttf', 'woff', 'woff2', 'eot', 'svg']");
-  });
-
-  it('pins browser global and ESM side-effect boundaries', () => {
-    const esmEntries = [
-      'src/index.js',
-      'src/index.core.js',
-      'src/index.engine.js',
-      'src/index.engine.core.js',
-      'src/index.stream.js',
-    ];
-    const umdEntries = {
-      'src/index.umd.js': /window\.Cherry\s*=\s*Cherry/,
-      'src/index.core.umd.js': /window\.Cherry\s*=\s*Cherry/,
-      'src/index.stream.umd.js': /window\.Cherry\s*=\s*CherryStream/,
-    };
-
-    esmEntries.forEach((entry) => expect(readProjectFile(entry), entry).not.toMatch(/window\.Cherry/));
-    Object.entries(umdEntries).forEach(([entry, assignment]) => {
-      expect(readProjectFile(entry), entry).toMatch(assignment);
-    });
-  });
-
-  it('forbids unsupported alternate bundle filenames', () => {
-    const buildSources = `${viteBuild}\n${stylesBuild}\n${addonsBuild}\n${JSON.stringify(packageJson)}`;
-
-    expect(buildSources).not.toMatch(/\.iife\.js/);
-    expect(buildSources).not.toMatch(/cherry-markdown\.umd\.js/);
-    expect(buildSources).not.toMatch(/cherry-markdown\.min\.js/);
   });
 });

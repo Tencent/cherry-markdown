@@ -2,7 +2,7 @@ import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core.esm.j
 import { editorViewCtx } from '@milkdown/kit/core';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 import {
   createTestEditor as cherryMilkdown,
   type TestCherryMilkdownInstance as CherryMilkdownInstance,

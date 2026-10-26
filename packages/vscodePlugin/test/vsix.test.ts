@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'vite-plus/test';
 
 const nodeRequire = createRequire(__filename);
 const { readZip } = nodeRequire('@vscode/vsce/out/zip.js') as {
