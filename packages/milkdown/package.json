@@ -101,9 +101,7 @@
     "pngjs": "^7.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "rimraf": "^3.0.2",
-    "vite": "npm:@voidzero-dev/vite-plus-core@1.4.0",
-    "vitest": "5.0.5"
+    "rimraf": "^3.0.2"
   },
   "dependencies": {
     "prismjs": "^1.24.1",

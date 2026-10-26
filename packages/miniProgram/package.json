@@ -52,8 +52,7 @@
     "htmlparser2": "^10.0.0"
   },
   "devDependencies": {
-    "rimraf": "^3.0.2",
-    "vitest": "5.0.5"
+    "rimraf": "^3.0.2"
   },
   "engines": {
     "node": ">=22",

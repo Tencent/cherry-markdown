@@ -6,6 +6,10 @@
 
 各包继续维护入口矩阵、外部依赖、别名、UMD 全局名称、版本注入及兼容配置。主包保留 Terser/ES5 约定，附加插件保留各自的 UMD 全局名称，小程序保留 Sanitizer 替换。VS Code Node 扩展/Webview、客户端和演示应用的构建模式不同，继续使用各自配置。
 
+`test.mjs` 提供三个包共用的浏览器单元测试默认项：jsdom、全局测试 API，以及启用覆盖率的包共用的报告格式。测试范围、setup、全局变量清理、覆盖率文件与阈值仍由各包明确配置；VS Code 的 Node 测试保持独立。
+
+`packages/` 的通用 Vite、Vite+、Vitest 与 coverage 工具只在根目录声明，各包从 workspace 根目录解析。包专属插件、运行时依赖及发布的 peerDependencies 保留在所属包。本轮收尾不调整 `examples/` 的配置或依赖声明，因此示例现有的工具链声明仍保留，并由根 resolutions 约束版本。
+
 Cherry 专属的 Prism 语言清单与兼容转换仍由 [`packages/cherry-markdown/build/`](../packages/cherry-markdown/build/README.md) 维护，Milkdown 仅复用这些转换，不使用库构建工厂。
 
 ## 工具链版本与升级

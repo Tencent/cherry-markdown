@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import { defineConfig } from 'vite-plus';
+import { createBrowserTestConfig } from '../../build/test.mjs';
 import { prismLanguagePlugin } from './build/prism.plugin.js';
 
 const coverageThresholds = process.env.COVERAGE_THRESHOLDS
@@ -11,7 +11,7 @@ const coverageThresholds = process.env.COVERAGE_THRESHOLDS
     }
   : undefined;
 
-export default defineConfig({
+export default createBrowserTestConfig({
   plugins: [prismLanguagePlugin()],
   define: {
     BUILD_ENV: '"production"',
@@ -23,13 +23,10 @@ export default defineConfig({
     },
   },
   test: {
-    globals: true,
     unstubGlobals: true,
-    environment: 'jsdom', // Use jsdom for browser-like tests
     coverage: {
       enabled: true,
       include: ['src/**/*.js'],
-      reporter: ['text', 'json', 'html'],
       thresholds: coverageThresholds,
     },
   },
