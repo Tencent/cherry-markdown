@@ -33,6 +33,7 @@ function createFixture(prefix = 'cherry-prism-') {
   fixtures.push(root);
   writeFileSync(join(root, 'package.json'), '{"type":"module"}');
   symlinkSync(join(repoRoot, 'node_modules'), join(root, 'node_modules'), 'junction');
+  cpSync(join(repoRoot, 'build'), join(root, 'build'), { recursive: true });
   mkdirSync(join(root, 'examples'), { recursive: true });
   const cherry = join(root, 'packages/cherry-markdown');
   mkdirSync(cherry, { recursive: true });

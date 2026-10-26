@@ -2,7 +2,7 @@ import { build } from 'vite';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { prismLanguagePlugin } from '../../cherry-markdown/build/prism.plugin.js';
-import { createLibraryBuild } from '../../cherry-markdown/build/library.js';
+import { createLibraryBuild } from '../../../build/library.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const repoRoot = resolve(root, '../..');

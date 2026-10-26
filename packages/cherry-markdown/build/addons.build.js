@@ -5,7 +5,7 @@ import { mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { legacyUmdPlugin } from './legacy-umd.plugin.js';
-import { createLibraryBuild } from './library.js';
+import { createLibraryBuild } from '../../../build/library.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const src = resolve(root, 'src');

@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { runInNewContext } from 'node:vm';
 import { build } from 'vite';
 import { afterEach, expect, it } from 'vite-plus/test';
-import { createLibraryBuild } from '../../build/library.js';
+import { createLibraryBuild } from '../../../../build/library.mjs';
 
 const fixtures = [];
 afterEach(() => fixtures.splice(0).forEach((root) => rmSync(root, { recursive: true, force: true })));
