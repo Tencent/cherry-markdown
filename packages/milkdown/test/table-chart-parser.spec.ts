@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vite-plus/test';
 import CherryEngine from '../src/cherry-engine';
 import { createTableChartParser, tableChartCellType } from '../src/wysiwyg/table-chart';
 import { TableChartDescriptorEngine, readTableChartDescriptor } from '../src/wysiwyg/table-chart-render-engine';

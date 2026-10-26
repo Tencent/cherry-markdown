@@ -44,3 +44,4 @@ examples/miniProgram/miniprogram/vendor/
 
 # Build-only Prism bundle generated from Cherry language configuration.
 packages/milkdown/src/generated/cherry-prism.js
+.vitest/

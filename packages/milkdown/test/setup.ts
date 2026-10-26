@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, vi } from 'vitest';
+import { afterAll, beforeAll, vi } from 'vite-plus/test';
 
 beforeAll(() => {
   // Milkdown's readiness timers keep their timeout callbacks even after they

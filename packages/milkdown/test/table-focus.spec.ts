@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { tableWordRange } from '../src/wysiwyg/table-focus';
 
 describe('table text selection', () => {

@@ -58,8 +58,8 @@ function expectSingleFileBuild(config) {
   expect(config.configFile).toBe(false);
   expect(config.build.emptyOutDir).toBe(false);
   expect(config.build.target).toBe('es2015');
-  expect(config.build.rollupOptions.output.codeSplitting).toBe(false);
-  expect(config.build.rollupOptions.output.manualChunks).toBeUndefined();
+  expect(config.build.rolldownOptions.output.codeSplitting).toBe(false);
+  expect(config.build.rolldownOptions.output).not.toHaveProperty('manualChunks');
 }
 
 describe('Cherry Markdown published artifact configuration', () => {
@@ -73,9 +73,9 @@ describe('Cherry Markdown published artifact configuration', () => {
       expect(config.build.lib.formats).toEqual([format]);
       expect(config.build.lib.name).toBe(name);
       expectSingleFileBuild(config);
-      expect(config.build.rollupOptions.treeshake).toBe(false);
-      expect(config.build.rollupOptions.output.exports).toBe('named');
-      expect(config.build.rollupOptions.output.generatedCode).toEqual({ preset: 'es5' });
+      expect(config.build.rolldownOptions.treeshake).toBe(false);
+      expect(config.build.rolldownOptions.output.exports).toBe('named');
+      expect(config.build.rolldownOptions.output.generatedCode).toEqual({ preset: 'es5' });
     }
   });
 
@@ -123,8 +123,8 @@ describe('Cherry Markdown published artifact configuration', () => {
     };
     for (const config of mainBuilds) {
       const file = filename(config);
-      expect(config.build.rollupOptions.external, file).toEqual(externalMatrix[file]);
-      expect(config.build.rollupOptions.output.globals, file).toEqual(
+      expect(config.build.rolldownOptions.external, file).toEqual(externalMatrix[file]);
+      expect(config.build.rolldownOptions.output.globals, file).toEqual(
         config.build.lib.formats[0] === 'umd' && externalMatrix[file].includes('mermaid') ? { mermaid: 'mermaid' } : {},
       );
     }
@@ -164,7 +164,7 @@ describe('Cherry Markdown published artifact configuration', () => {
         expect(config.build.minify).toBe('oxc');
         expect(config.build.outDir).toBe(resolve(projectRoot, 'dist/addons', dirname(relative)));
         expect(config.build.lib.name).toBe(globalName);
-        expect(config.build.rollupOptions.output).toMatchObject({ format, name: globalName, entryFileNames: file });
+        expect(config.build.rolldownOptions.output).toMatchObject({ format, name: globalName, entryFileNames: file });
         expect(config.plugins.map((plugin) => plugin.name)).toEqual(format === 'umd' ? ['cherry-legacy-umd'] : []);
         expect(config.resolve.alias).toEqual({ '@': src, '@cherry': src });
         expect(config.define).toEqual({ BUILD_ENV: JSON.stringify('production') });
@@ -180,8 +180,8 @@ describe('Cherry Markdown published artifact configuration', () => {
     expect(miniBuild.build.lib.formats).toEqual(['es']);
     expect(filename(miniBuild)).toBe('miniProgram.esm.js');
     expect(miniBuild.build.minify).toBe('oxc');
-    expect(miniBuild.build.rollupOptions.external).toEqual(['mermaid', 'codemirror', /^codemirror\//]);
-    expect(miniBuild.build.rollupOptions.output).toMatchObject({
+    expect(miniBuild.build.rolldownOptions.external).toEqual(['mermaid', 'codemirror', /^codemirror\//]);
+    expect(miniBuild.build.rolldownOptions.output).toMatchObject({
       format: 'es',
       entryFileNames: 'miniProgram.esm.js',
       exports: 'named',

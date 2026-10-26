@@ -1,7 +1,7 @@
 import { builtinModules } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineConfig, type UserConfig } from 'vite';
+import { defineConfig, type UserConfig } from 'vite-plus';
 
 const packageRoot = path.dirname(fileURLToPath(import.meta.url));
 const webviewDist = path.resolve(packageRoot, 'web-resources/dist');
@@ -26,10 +26,10 @@ const extensionConfig: UserConfig = {
       formats: ['cjs'],
       fileName: () => 'extension.js',
     },
-    rollupOptions: {
+    rolldownOptions: {
       external: (id) => id === 'vscode' || id.startsWith('node:') || builtinModules.includes(id),
       output: {
-        inlineDynamicImports: true,
+        codeSplitting: false,
       },
     },
   },
@@ -56,7 +56,7 @@ const webviewConfig: UserConfig = {
     sourcemap: false,
     minify: 'oxc',
     assetsInlineLimit: 0,
-    rollupOptions: {
+    rolldownOptions: {
       input: path.resolve(packageRoot, 'web-resources/scripts/index.ts'),
       output: {
         entryFileNames: 'index.js',
@@ -67,10 +67,11 @@ const webviewConfig: UserConfig = {
           if (/\.(?:eot|ttf|woff2?)$/i.test(name)) return 'fonts/[name][extname]';
           return 'assets/[name][extname]';
         },
-        manualChunks: (id) => {
-          if (id.includes('/mathjax/')) return 'mathjax';
-          if (id.includes('/html-to-image/')) return 'html-to-image';
-          return undefined;
+        codeSplitting: {
+          groups: [
+            { name: 'mathjax', test: /\/mathjax\//, priority: 20 },
+            { name: 'html-to-image', test: /\/html-to-image\//, priority: 10 },
+          ],
         },
       },
     },

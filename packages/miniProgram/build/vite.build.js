@@ -25,7 +25,7 @@ await build(
         },
       },
       build: {
-        rollupOptions: {
+        rolldownOptions: {
           external: ['mermaid', 'codemirror', /^codemirror\//],
           output: {
             format: 'es',

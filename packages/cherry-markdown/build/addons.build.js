@@ -41,7 +41,7 @@ for (const entry of addonEntries) {
           },
           build: {
             outDir: outputDir,
-            rollupOptions: {
+            rolldownOptions: {
               output: {
                 format,
                 name: globalName,

@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'vite-plus/test';
 import { getVSCodeMathJaxConfig, MATHJAX_MODULE, waitForMathJax } from '../src/mathjaxConfig';
 
 describe('VS Code MathJax configuration', () => {
@@ -12,9 +12,7 @@ describe('VS Code MathJax configuration', () => {
   });
 
   test('does not block preview when MathJax startup fails', async () => {
-    const startup = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('startup failed')), 0),
-    );
+    const startup = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('startup failed')), 0));
 
     await expect(waitForMathJax({ startup: { promise: startup } })).resolves.toBeUndefined();
   });

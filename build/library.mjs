@@ -17,8 +17,8 @@ export function createLibraryBuild({ root, entry, file, format, name }, override
         target: 'es2015',
         minify: 'oxc',
         lib: { entry, formats: [format], fileName: () => file, name },
-        rollupOptions: {
-          output: { codeSplitting: false, manualChunks: undefined },
+        rolldownOptions: {
+          output: { codeSplitting: false },
         },
       },
     },

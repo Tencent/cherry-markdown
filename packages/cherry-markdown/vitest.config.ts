@@ -18,14 +18,11 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
-      '@cherry': resolve(__dirname, './src'),
+      '@': resolve(import.meta.dirname, './src'),
+      '@cherry': resolve(import.meta.dirname, './src'),
     },
   },
   test: {
-    testTransformMode: {
-      web: ['\\.[jt]sx$'],
-    },
     globals: true,
     unstubGlobals: true,
     environment: 'jsdom', // Use jsdom for browser-like tests

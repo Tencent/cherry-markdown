@@ -32,7 +32,7 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   webServer: {
-    command: `vp run -F @cherry-markdown/milkdown ${demoBuildScript} && vp exec vite preview --config packages/milkdown/vite.demo.config.mjs --host 127.0.0.1 --port ${port}`,
+    command: `vp run -F @cherry-markdown/milkdown ${demoBuildScript} && vp preview --config packages/milkdown/vite.demo.config.mjs --host 127.0.0.1 --port ${port}`,
     cwd: workspaceRoot,
     url: `http://127.0.0.1:${port}/index.html`,
     reuseExistingServer: !process.env.CI,

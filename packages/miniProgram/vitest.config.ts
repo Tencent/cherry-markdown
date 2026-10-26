@@ -6,9 +6,9 @@ export default defineConfig({
   plugins: [prismLanguagePlugin()],
   resolve: {
     alias: {
-      '@/Sanitizer': resolve(__dirname, './src/shared/Sanitizer.miniProgram.js'),
-      '@': resolve(__dirname, '../cherry-markdown/src'),
-      '@cherry': resolve(__dirname, '../cherry-markdown/src'),
+      '@/Sanitizer': resolve(import.meta.dirname, './src/shared/Sanitizer.miniProgram.js'),
+      '@': resolve(import.meta.dirname, '../cherry-markdown/src'),
+      '@cherry': resolve(import.meta.dirname, '../cherry-markdown/src'),
     },
   },
   test: {

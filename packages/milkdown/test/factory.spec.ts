@@ -3,7 +3,7 @@ import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
 import { DOMParser, DOMSerializer } from '@milkdown/kit/prose/model';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 import {
   createTestEditor as cherryMilkdown,
   type TestCherryMilkdownInstance as CherryMilkdownInstance,

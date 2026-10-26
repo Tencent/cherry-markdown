@@ -1,6 +1,6 @@
 import { editorViewCtx, parserCtx } from '@milkdown/kit/core';
 import type { Node } from '@milkdown/kit/prose/model';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { createTestEditor } from './helpers/create-editor';
 
 const literalCases = [

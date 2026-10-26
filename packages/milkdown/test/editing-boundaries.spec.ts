@@ -1,4 +1,4 @@
-import { it, expect } from 'vitest';
+import { it, expect } from 'vite-plus/test';
 import { editorViewCtx } from '@milkdown/kit/core';
 import { TextSelection } from '@milkdown/kit/prose/state';
 import { createTestEditor } from './helpers/create-editor';

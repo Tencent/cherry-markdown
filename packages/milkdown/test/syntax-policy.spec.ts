@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { canonicalPanelKind, panelSyntaxHandling } from '../src/wysiwyg/syntax-policy';
 
 describe('Cherry syntax handling policy', () => {

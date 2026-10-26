@@ -138,7 +138,7 @@ for (const current of builds) {
             },
           },
           sourcemap: current.sourcemap || false,
-          rollupOptions: {
+          rolldownOptions: {
             // Cherry relies on registration side effects that are not fully covered by
             // runtime tests yet. Preserve the historical published-bundle contract.
             treeshake: false,
