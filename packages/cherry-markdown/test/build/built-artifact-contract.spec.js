@@ -53,9 +53,43 @@ describe('built Cherry Markdown artifact contract', () => {
   );
 
   it('publishes the complete UMD and ESM bundle matrix with declarations', () => {
+    expect(glob.sync('*.js', { cwd: distRoot }).sort()).toEqual([...bundleNames].sort());
     [...bundleNames, ...declarationNames].forEach((file) => {
       expect(existsSync(resolve(distRoot, file)), file).toBe(true);
     });
+  });
+
+  it('publishes every addon in both formats with its declaration', () => {
+    const entries = glob.sync('**/*-plugin.js', { cwd: resolve(projectRoot, 'src/addons') });
+    const bundles = entries.flatMap((entry) => [entry, entry.replace(/\.js$/, '.esm.js')]);
+    expect(entries).toHaveLength(7);
+    expect(glob.sync('**/*.js', { cwd: resolve(distRoot, 'addons') }).sort()).toEqual(bundles.sort());
+    for (const entry of entries) {
+      expect(existsSync(resolve(distRoot, 'types/addons', entry.replace(/\.js$/, '.d.ts'))), entry).toBe(true);
+    }
+  });
+
+  it('publishes the full and markdown-only stylesheets with their module declarations', () => {
+    const styles = [
+      'cherry-markdown.css',
+      'cherry-markdown.min.css',
+      'cherry-markdown.markdown.css',
+      'cherry-markdown.markdown.min.css',
+    ];
+    expect(glob.sync('*.css', { cwd: distRoot }).sort()).toEqual(styles.sort());
+    const modules = readFileSync(resolve(projectRoot, 'types/modules.d.ts'), 'utf8');
+    for (const file of styles) {
+      expect(readDistFile(file).length, file).toBeGreaterThan(0);
+      expect(modules).toContain(`declare module 'cherry-markdown/dist/${file}'`);
+    }
+  });
+
+  it('publishes all five nonempty icon font formats', () => {
+    const fonts = ['ch-icon.ttf', 'ch-icon.woff', 'ch-icon.woff2', 'ch-icon.eot', 'ch-icon.svg'];
+    expect(glob.sync('*', { cwd: resolve(distRoot, 'fonts') }).sort()).toEqual(fonts.sort());
+    for (const file of fonts) {
+      expect(readFileSync(resolve(distRoot, 'fonts', file)).length, file).toBeGreaterThan(0);
+    }
   });
 
   it('emits consumer-resolvable declaration imports without source aliases', () => {
