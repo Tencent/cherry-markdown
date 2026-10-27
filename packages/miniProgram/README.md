@@ -6,6 +6,8 @@
 
 Cherry Markdown view data and maintained native WeChat MiniProgram components. Paragraphs, headings, nested lists, quotes, tables, code and images use WXML `view`, `text`, `image` and `scroll-view`. Neither `web-view` nor `rich-text` is used.
 
+Mobile styling is checked against the real Web and Skyline renderers using one Markdown fixture. See the repository's [390px comparison and remaining differences](../../examples/miniProgram/compare/README.md). Default/dark simulator checks do not establish pixel equality across all themes, widths or devices.
+
 ## Native component
 
 ```sh

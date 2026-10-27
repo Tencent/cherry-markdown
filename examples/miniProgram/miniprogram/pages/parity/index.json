@@ -1,0 +1,7 @@
+{
+  "usingComponents": { "cherry-markdown": "/components/cherry/markdown/index" },
+  "renderer": "skyline",
+  "componentFramework": "glass-easel",
+  "navigationStyle": "custom",
+  "disableScroll": true
+}

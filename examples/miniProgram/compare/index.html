@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cherry mobile parity · 390px</title>
+<link rel="stylesheet" href="/packages/cherry-markdown/dist/cherry-markdown.css">
+<style>
+body { margin: 0; background: #ddd; }
+#frame { width: 390px; height: 844px; margin: 0 auto; border: 0; display: block; }
+body.document { background: #fff; }
+.document .cherry { min-height: 100vh; box-shadow: none; }
+.document .cherry-previewer { padding: 20px; border: 0; }
+</style></head><body><script type="module">
+import Cherry from '/packages/cherry-markdown/dist/cherry-markdown.esm.js';
+import { MOBILE_PARITY_MARKDOWN } from '/examples/miniProgram/src/fixtures/mobile-parity.ts';
+if (!new URLSearchParams(location.search).has('document')) {
+  const frame = document.createElement('iframe'); frame.id = 'frame'; frame.src = '?document=1'; document.body.append(frame);
+} else {
+  document.body.className = 'document'; const root = document.createElement('div'); root.id = 'cherry'; document.body.append(root);
+  window.cherry = new Cherry({ themeSettings: {mainTheme: new URLSearchParams(location.search).get('theme') || 'default'}, id: 'cherry', value: MOBILE_PARITY_MARKDOWN, editor: { defaultModel: 'previewOnly' }, toolbars: { toolbar: [] }, engine: { syntax: { codeBlock: { lineNumber: false } } } });
+}
+</script></body></html>

@@ -6,6 +6,8 @@
 
 将 Cherry Markdown 转为结构化数据，并提供包内维护的微信小程序原生组件。段落、标题、列表、引用、表格、代码和图片均通过 WXML `view`、`text`、`image`、`scroll-view` 渲染；不使用 `web-view` 或 `rich-text`。
 
+移动端样式对齐依据真实 Web/Skyline 同源对照，而非只比较主题变量；复现入口、390px 实测尺寸和剩余差异见仓库中的[移动端对照记录](../../examples/miniProgram/compare/README.md)。当前覆盖默认/深色主题，不能视为所有主题、宽度或真机已逐像素对齐。
+
 ## 使用原生组件
 
 ```sh
@@ -140,6 +142,7 @@ const stream = new CherryStream({ bridge: new CherrySemanticParser() });
 | 基础语法、嵌套列表、表格、图片、代码高亮 | 原生组件与 Prism token                                |
 | 颜色、背景色、字号、高亮、下划线、注音   | 安全文本样式或文本标注                                |
 | Panel、Detail                            | 原生标题、分组及展开收起                              |
+| cols、tabs、timeline 等复杂布局           | 面板正文降级，尚未提供对应的原生布局和交互             |
 | 目录与脚注                               | 共享节点和编号；跳转由业务 linktap 处理               |
 | 公式、Mermaid、表格图表                  | 保留语义/源码或表格，尚无原生数学排版、图形或图表绘制 |
 | 任意 HTML/CSS、第三方 HTML renderer      | 不执行网页布局；需要语义适配或文本降级                |

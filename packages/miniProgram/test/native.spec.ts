@@ -1,5 +1,6 @@
 import { CherrySemanticParser } from 'cherry-markdown/semantic';
-import { nativeThemeStyle, nativeInlineStyle } from '../src/native/theme';
+import { nativeThemeStyle, nativeInlineStyle, nativePanelStyle, nativePanelTextColor } from '../src/native/theme';
+import { nativeCodeLayout } from '../src/native/code-layout';
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import CherryStream from '../src';
@@ -148,6 +149,12 @@ describe('native streaming controller', () => {
 });
 
 describe('public semantic bridge and native presentation', () => {
+  it('reserves every source line and accounts for tabs and wide characters without wrapping', () => {
+    expect(nativeCodeLayout('a\nb\nc').codeHeight).toBe(91);
+    expect(nativeCodeLayout('\t中文').codeWidth).toBeGreaterThan(nativeCodeLayout('    ab').codeWidth);
+    expect(nativeCodeLayout('a'.repeat(100)).codeWidth).toBeGreaterThan(390);
+    expect(nativeCodeLayout('\n'.repeat(100000)).codeHeight).toBe(100001 * 21 + 28);
+  });
   it('consumes the public Cherry document and can use an injected compatible core', () => {
     const bridge = new CherrySemanticParser();
     const parse = vi.spyOn(bridge, 'parse');
@@ -178,5 +185,10 @@ describe('public semantic bridge and native presentation', () => {
     expect(nativeInlineStyle('background-image:url(x);position:fixed;color:expression(x);font-size:99999px')).toBe('');
     expect(nativeThemeStyle('dark')).not.toBe(nativeThemeStyle('default'));
     expect(nativeThemeStyle('__proto__')).toBe(nativeThemeStyle('default'));
+    expect(nativePanelStyle('default', 'warning')).toContain('--panel-title-bg:#b38806');
+    // Real previewOnly DOM has `cherry-markdown dark`; theme__dark-only panel rules do not apply.
+    expect(nativePanelStyle('dark', 'primary')).toBe(nativePanelStyle('default', 'primary'));
+    expect(nativePanelStyle('__proto__', '__proto__')).toBe(nativePanelStyle());
+    expect(nativePanelTextColor('tabs')).toBe(nativePanelTextColor('primary'));
   });
 });

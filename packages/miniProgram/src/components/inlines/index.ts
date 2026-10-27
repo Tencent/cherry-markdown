@@ -18,12 +18,23 @@ export function groupInlineRuns(nodes: MiniProgramInlineRun[]): InlineGroup[] {
       else groups.push({ type: 'text', runs: [node] });
     }
   }
+  // A terminal HTML <br> does not start an extra line; native '\n' does.
+  const last = groups[groups.length - 1];
+  const lastRun = last?.type === 'text' ? last.runs[last.runs.length - 1] : undefined;
+  if (last?.type === 'text' && lastRun?.type === 'text' && lastRun.text === '\n') {
+    last.runs.pop();
+    if (!last.runs.length) groups.pop();
+  }
   return withNativeKeys(groups, 'inline');
 }
 
 Component({
   options: { styleIsolation: 'isolated' },
-  properties: { nodes: { type: Array, value: [] }, theme: { type: String, value: 'default' } },
+  properties: {
+    nodes: { type: Array, value: [] },
+    theme: { type: String, value: 'default' },
+    textColor: { type: String, value: '--md-paragraph-color' },
+  },
   data: { groups: [], themeStyle: nativeThemeStyle() },
   observers: {
     theme(this: NativeInstance<object>, theme: string) {

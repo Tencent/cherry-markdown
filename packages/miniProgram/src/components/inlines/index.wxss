@@ -2,8 +2,9 @@
   display: block;
 }
 .md-inline-text {
-  line-height: var(--md-paragraph-line-height);
-  color: var(--md-paragraph-color);
+  word-break: break-all;
+  line-height: inherit;
+  color: inherit;
 }
 .md-strong {
   font-weight: 700;
@@ -16,6 +17,11 @@
   font-family: monospace;
   color: var(--md-inline-code-color);
   background: var(--md-inline-code-bg);
+}
+.md-inline-code {
+  padding: 0.1em;
+  border: 1px solid var(--md-hr-border);
+  border-radius: 0.3em;
 }
 .md-underline {
   text-decoration: underline;
@@ -36,6 +42,7 @@
 .md-inline-image {
   display: block;
   width: 240rpx;
+  max-width: 100%;
   margin: 12rpx 0;
   background: #eef2f7;
 }
@@ -52,4 +59,8 @@
 .md-ruby-annotation {
   font-size: 24rpx;
   color: #64748b;
+}
+
+.md-inline-text > text {
+  line-height: var(--md-run-line-height);
 }

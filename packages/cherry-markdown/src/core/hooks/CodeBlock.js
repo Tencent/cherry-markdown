@@ -499,10 +499,10 @@ export default class CodeBlock extends ParagraphBase {
       if (this.$engine?.semanticRenderer) {
         const text = $code.replace(/\n$/, '');
         const tokens = [];
-        const flatten = (value, type = '') => {
-          if (typeof value === 'string') tokens.push({ text: value, type });
-          else if (Array.isArray(value)) value.forEach((item) => flatten(item, type));
-          else flatten(value.content, value.type);
+        const flatten = (value, type = '', aliases = []) => {
+          if (typeof value === 'string') tokens.push({ text: value, type, ...(aliases.length ? { aliases } : {}) });
+          else if (Array.isArray(value)) value.forEach((item) => flatten(item, type, aliases));
+          else flatten(value.content, value.type, [value.alias || []].flat());
         };
         const grammar = Prism.languages[$lang] || Prism.languages.javascript;
         flatten(grammar ? Prism.tokenize(text, grammar) : text);

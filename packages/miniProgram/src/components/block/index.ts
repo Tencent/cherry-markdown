@@ -1,4 +1,5 @@
-import { nativeThemeStyle } from '../../native/theme';
+import { nativeThemeStyle, nativePanelStyle, nativePanelTextColor } from '../../native/theme';
+import { nativeCodeLayout } from '../../native/code-layout';
 import type { MiniProgramViewBlock } from '../../types';
 import type { NativeEvent, NativeInstance, NativeSelectorQuery } from '../platform';
 
@@ -8,6 +9,10 @@ interface BlockInstance extends NativeInstance<{
   tableWidth: number;
   tableScrollLeft: number;
   detailOpen: boolean;
+  codeHeight: number;
+  codeWidth: number;
+  panelStyle: string;
+  theme: string;
 }> {
   tableReady?: boolean;
   detailDefaultOpen?: boolean;
@@ -38,13 +43,38 @@ function measureTable(instance: BlockInstance) {
 
 Component({
   options: { styleIsolation: 'isolated' },
-  properties: { block: { type: Object, value: null }, theme: { type: String, value: 'default' } },
-  data: { themeStyle: nativeThemeStyle(), detailOpen: false, tableHeight: 0, tableWidth: 0, tableScrollLeft: 0 },
+  properties: {
+    block: { type: Object, value: null },
+    theme: { type: String, value: 'default' },
+    context: { type: String, value: '' },
+    listDepth: { type: Number, value: 0 },
+    textColor: { type: String, value: '--md-paragraph-color' },
+  },
+  data: {
+    themeStyle: nativeThemeStyle(),
+    detailOpen: false,
+    codeHeight: 0,
+    codeWidth: 0,
+    tableHeight: 0,
+    tableWidth: 0,
+    tableScrollLeft: 0,
+  },
   observers: {
-    theme(this: NativeInstance<object>, theme: string) {
-      this.setData({ themeStyle: nativeThemeStyle(theme) });
+    theme(this: BlockInstance, theme: string) {
+      this.setData({
+        themeStyle: nativeThemeStyle(theme),
+        panelStyle: nativePanelStyle(theme, this.data.block?.type === 'panel' ? this.data.block.kind : undefined),
+      });
     },
     block(this: BlockInstance, block: MiniProgramViewBlock | null) {
+      if (block?.type === 'panel')
+        this.setData({
+          panelStyle: nativePanelStyle(this.data.theme, block.kind),
+          panelTextColor: nativePanelTextColor(block.kind),
+        });
+      if (block?.type === 'code_block') {
+        this.setData(nativeCodeLayout(block.text));
+      }
       if (block?.type === 'detail') {
         const open = block.open === true;
         if (this.detailDefaultOpen !== open) {
@@ -64,7 +94,7 @@ Component({
         if (!activeCells.has(key.split(':')[0])) this.imageMeasurements?.delete(key);
       }
       const columns = [...block.header, ...block.rows].reduce((count, row) => Math.max(count, row.cells.length), 0);
-      this.setData({ tableWidth: columns * 252 }, () => measureTable(this));
+      this.setData({ tableWidth: columns * 114 }, () => measureTable(this));
     },
   },
   lifetimes: {

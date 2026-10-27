@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "node build.mjs",
+    "compare": "node compare/serve.mjs",
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {},

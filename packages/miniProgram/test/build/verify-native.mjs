@@ -73,6 +73,26 @@ assert.equal(emitted[0][0], 'linktap');
 assert.equal(emitted[0][1].href, '/pages/detail/index');
 assert.equal(emitted[0][2].composed, true);
 
+// Match HTML terminal <br> layout without mutating semantic/view data or removing real blank lines.
+const inline = {
+  data: {},
+  setData(patch) {
+    Object.assign(this.data, patch);
+  },
+};
+const trailingBreaks = [
+  { type: 'text', text: 'one' },
+  { type: 'text', text: '\n' },
+  { type: 'text', text: '\n' },
+];
+definitions.get('inlines').observers.nodes.call(inline, trailingBreaks);
+assert.equal(inline.data.groups[0].runs.map((run) => run.text).join(''), 'one\n');
+assert.equal(trailingBreaks.length, 3);
+definitions
+  .get('inlines')
+  .observers.nodes.call(inline, [{ type: 'text', text: 'one' }, { type: 'text', text: '\n' }, { type: 'cursor' }]);
+assert.equal(inline.data.groups[0].runs.at(-1).type, 'cursor');
+
 // Exercise layout against actual built component definitions, including asynchronous stale queries.
 const tableDefinition = definitions.get('block');
 let naturalHeight = 60;

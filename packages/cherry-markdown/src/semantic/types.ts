@@ -83,7 +83,7 @@ export type SemanticCodeBlock = {
   type: 'code_block';
   lang: string;
   text: string;
-  tokens?: Array<{ text: string; type: string }>;
+  tokens?: Array<{ text: string; type: string; aliases?: string[] }>;
   attrs?: Record<string, string>;
 };
 export type SemanticMathBlock = {

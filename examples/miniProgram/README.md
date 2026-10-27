@@ -34,6 +34,8 @@ node examples/miniProgram/build.mjs /absolute/path/to/package
 
 ## 手动验收
 
+同源 Web/Skyline 样式对照使用 `pages/parity/index`；视口、共享 Markdown、启动方式、实测数据及已知差异见[移动端对照记录](./compare/README.md)。
+
 对两种页面引擎分别检查中英文混排、链接、选择、嵌套列表、引用、表格横向滚动、代码复制、流中图片占位和结束后图片显示；验证流中重置、退出页面、长文滚动和图片加载后的滚动位置。公式和 Mermaid 仅展示源码。
 
 记录目标基础库、工具版本、实际引擎、设备和系统版本。真机需记录长文解析、提交数据量、布局帧耗时和内存，不能用桌面测试耗时替代。

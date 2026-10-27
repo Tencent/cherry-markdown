@@ -1,20 +1,20 @@
-<view class="md-theme" style="{{themeStyle}}">
-<view wx:if="{{block.type === 'panel' || block.type === 'detail'}}" class="md-group">
-  <button wx:if="{{block.type === 'detail'}}" class="md-group-head md-detail-toggle" bindtap="toggleDetail"><text>{{block.title}}</text><text>{{detailOpen ? '▾' : '▸'}}</text></button>
+<view class="md-theme md-context-{{context}}" style="{{themeStyle}}">
+<view wx:if="{{block.type === 'panel' || block.type === 'detail'}}" class="md-group md-{{block.type}}" style="{{panelStyle}}">
+  <view wx:if="{{block.type === 'detail'}}" class="md-group-head md-detail-toggle" bindtap="toggleDetail"><text class="md-detail-arrow">{{detailOpen ? '▲' : '▼'}}</text><text>{{block.title}}</text><button class="md-detail-hit" aria-label="{{block.title}}" catchtap="toggleDetail" /></view>
   <view wx:else class="md-group-head"><text>{{block.title}}</text></view>
-  <view wx:if="{{block.type === 'panel' || detailOpen}}"><cherry-block wx:for="{{block.children}}" wx:key="id" block="{{item}}" theme="{{theme}}" /></view>
+  <view wx:if="{{block.type === 'panel' || detailOpen}}" class="md-group-body"><cherry-block wx:for="{{block.children}}" wx:key="id" block="{{item}}" theme="{{theme}}" text-color="{{block.type === 'panel' ? panelTextColor : '--accordion-body-color'}}" context="{{block.type === 'detail' && index === block.children.length - 1 ? 'detail-last' : ''}}" /></view>
 </view>
-<view wx:elif="{{block.type === 'paragraph' || block.type === 'heading'}}" class="md-p {{block.type === 'heading' ? 'md-heading md-h' + block.level : ''}}">
-  <cherry-inlines theme="{{theme}}" nodes="{{block.inlines}}" />
+<view wx:elif="{{block.type === 'paragraph' || block.type === 'heading'}}" class="md-p {{block.type === 'heading' ? 'md-heading md-h' + block.level : 'md-paragraph'}}">
+  <cherry-inlines theme="{{theme}}" text-color="{{block.type === 'heading' ? '--md-heading-color' : textColor}}" nodes="{{block.inlines}}" />
 </view>
 <view wx:elif="{{block.type === 'blockquote'}}" class="md-blockquote">
-  <cherry-block wx:for="{{block.children}}" wx:key="id" block="{{item}}" theme="{{theme}}" />
+  <cherry-block wx:for="{{block.children}}" wx:key="id" block="{{item}}" theme="{{theme}}" context="quote" text-color="{{textColor}}" />
 </view>
 <view wx:elif="{{block.type === 'list'}}" class="md-list">
   <view wx:for="{{block.children}}" wx:key="id" class="md-list-item">
-    <text class="md-list-marker">{{item.marker}}</text>
+    <view class="md-list-marker" style="color:var({{textColor}});"><view wx:if="{{item.task}}" class="md-checkbox"><text>{{item.checked ? '✓' : ''}}</text></view><text wx:else>{{block.ordered ? item.marker : listDepth % 3 === 1 ? '◦' : listDepth % 3 === 2 ? '▪' : '•'}}</text></view>
     <view class="md-list-body">
-      <cherry-block wx:for="{{item.children}}" wx:key="id" wx:for-item="child" block="{{child}}" theme="{{theme}}" />
+      <cherry-block wx:for="{{item.children}}" wx:key="id" wx:for-item="child" block="{{child}}" theme="{{theme}}" context="list" list-depth="{{listDepth + 1}}" text-color="{{textColor}}" />
     </view>
   </view>
 </view>
@@ -29,7 +29,7 @@
     <text>{{block.lang}}</text>
     <button class="md-copy" size="mini" data-text="{{block.text}}" bindtap="copyCode">复制</button>
   </view>
-  <text class="md-code" user-select="{{true}}"><text wx:for="{{block.runs}}" wx:key="id" class="{{item.className}}">{{item.text}}</text></text>
+  <scroll-view scroll-x="{{true}}" class="md-code-scroll" type="custom" style="height: {{codeHeight}}px;"><text class="md-code" style="width: {{codeWidth}}px;" user-select="{{true}}"><text wx:for="{{block.runs}}" wx:key="id" class="{{item.className}}">{{item.text}}</text></text></scroll-view>
 </view>
 <view wx:elif="{{block.type === 'math_block' || block.type === 'diagram'}}" class="md-source-card">
   <view class="md-code-head">
@@ -45,9 +45,9 @@
 
 </view>
 <template name="table">
-  <view class="md-table" style="width: {{tableWidth}}rpx;">
+  <view class="md-table" style="width: {{tableWidth}}px;">
     <view wx:for="{{block.header}}" wx:key="id" class="md-table-row md-table-head">
-      <view wx:for="{{item.cells}}" wx:key="id" wx:for-item="cell" class="md-table-cell md-table-th" style="text-align: {{cell.align || 'left'}};">
+      <view wx:for="{{item.cells}}" wx:key="id" wx:for-item="cell" class="md-table-cell md-table-th" style="text-align: {{cell.align || 'center'}};">
         <cherry-inlines theme="{{theme}}" nodes="{{cell.inlines}}" data-cell="{{cell.id}}" bind:layoutchange="tableImageLoaded" />
       </view>
     </view>

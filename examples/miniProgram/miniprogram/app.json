@@ -1,5 +1,5 @@
 {
-  "pages": ["pages/index/index", "pages/skyline/index"],
+  "pages": ["pages/index/index", "pages/skyline/index", "pages/parity/index"],
   "window": {
     "navigationBarTitleText": "Cherry MiniProgram",
     "navigationBarBackgroundColor": "#ffffff",

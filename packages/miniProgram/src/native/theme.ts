@@ -7,6 +7,25 @@ export function nativeThemeStyle(theme = 'default'): string {
     .join(';');
 }
 
+function panelKind(kind: string): string {
+  return ['primary', 'info', 'warning', 'danger', 'success'].includes(kind) ? kind : 'primary';
+}
+
+export function nativePanelTextColor(kind = 'primary'): string {
+  return `--native-panel-${panelKind(kind)}-body-color`;
+}
+
+export function nativePanelStyle(theme = 'default', kind = 'primary'): string {
+  const tokens =
+    cherryThemes[
+      Object.prototype.hasOwnProperty.call(cherryThemes, theme) ? (theme as keyof typeof cherryThemes) : 'default'
+    ];
+  const name = panelKind(kind);
+  return ['bg', 'border-color', 'title-bg', 'title-color', 'body-bg', 'body-color']
+    .map((part) => `--panel-${part}:${tokens[`--native-panel-${name}-${part}`]}`)
+    .join(';');
+}
+
 /** Only native text styles supported by both renderers; no arbitrary source CSS. */
 export function nativeInlineStyle(source = '', inherited = ''): string {
   const values = new Map<string, string>();

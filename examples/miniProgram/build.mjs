@@ -7,7 +7,7 @@ const packageRoot = resolve(process.argv[2] || resolve(demoRoot, '../../packages
 const runtimeRoot = resolve(demoRoot, 'miniprogram');
 await rm(resolve(runtimeRoot, 'components/cherry'), { recursive: true, force: true });
 await cp(resolve(packageRoot, 'dist/components'), resolve(runtimeRoot, 'components/cherry'), { recursive: true });
-for (const page of ['index', 'skyline']) {
+for (const page of ['index', 'skyline', 'parity']) {
   const outDir = resolve(runtimeRoot, 'pages', page);
   await mkdir(outDir, { recursive: true });
   await build({
@@ -18,7 +18,7 @@ for (const page of ['index', 'skyline']) {
       emptyOutDir: false,
       target: 'es2015',
       lib: {
-        entry: resolve(demoRoot, 'src/pages/index/index.ts'),
+        entry: resolve(demoRoot, page === 'parity' ? 'src/pages/parity/index.ts' : 'src/pages/index/index.ts'),
         formats: ['cjs'],
         fileName: () => 'index.js',
       },

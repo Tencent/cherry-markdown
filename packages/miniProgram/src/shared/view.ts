@@ -49,6 +49,8 @@ const DEFAULT_INLINE_CLASS: Record<string, string> = {
 const CODE_TOKEN_CLASS: Record<string, string> = {
   comment: 'md-code-comment',
   keyword: 'md-code-keyword',
+  function: 'md-code-function',
+  'class-name': 'md-code-function',
   number: 'md-code-number',
   operator: 'md-code-operator',
   punctuation: 'md-code-punctuation',
@@ -59,6 +61,8 @@ const CODE_TOKEN_CLASS: Record<string, string> = {
 const PRISM_TOKEN_CLASS_MAP: Record<string, string> = {
   comment: 'md-code-comment',
   keyword: 'md-code-keyword',
+  function: 'md-code-function',
+  'class-name': 'md-code-function',
   number: 'md-code-number',
   operator: 'md-code-operator',
   punctuation: 'md-code-punctuation',
@@ -292,7 +296,13 @@ export function blocksToMiniProgramView(
       const runs = block.tokens
         ? block.tokens.map((token) => ({
             text: token.text,
-            className: joinNonEmptyClasses(CODE_TOKEN_CLASS.text, PRISM_TOKEN_CLASS_MAP[token.type] || ''),
+            className: joinNonEmptyClasses(
+              CODE_TOKEN_CLASS.text,
+              [token.type, ...(token.aliases || [])]
+                .map((type) => PRISM_TOKEN_CLASS_MAP[type] || '')
+                .filter(Boolean)
+                .join(' '),
+            ),
           }))
         : block.nodes && block.nodes.length > 0
           ? codeNodesToRuns(block.nodes)
