@@ -1,5 +1,8 @@
 import { nativeThemeStyle, nativePanelStyle, nativePanelTextColor } from '../../native/theme';
 import { nativeCodeLayout } from '../../native/code-layout';
+import { nativeCodeAfterGap } from '../../native/text-metrics';
+import { nativeTableLayout } from '../../native/table-layout';
+import type { NativeCellMeasurements } from '../../native/table-layout';
 import type { MiniProgramViewBlock } from '../../types';
 import type { NativeEvent, NativeInstance, NativeSelectorQuery } from '../platform';
 
@@ -7,6 +10,7 @@ interface BlockInstance extends NativeInstance<{
   block: MiniProgramViewBlock | null;
   tableHeight: number;
   tableWidth: number;
+  columnWidths: number[];
   tableScrollLeft: number;
   detailOpen: boolean;
   codeHeight: number;
@@ -15,6 +19,7 @@ interface BlockInstance extends NativeInstance<{
   theme: string;
 }> {
   tableReady?: boolean;
+  tableMeasurements?: NativeCellMeasurements;
   detailDefaultOpen?: boolean;
   imageMeasurements?: Map<string, string>;
   scrollLeft?: number;
@@ -26,19 +31,36 @@ function measureTable(instance: BlockInstance) {
   if (!instance.tableReady || instance.data.block?.type !== 'table') return;
   const version = (instance.measurementVersion || 0) + 1;
   instance.measurementVersion = version;
-  instance.setData({ tableHeight: 0, tableScrollLeft: instance.scrollLeft || 0 }, () => {
-    if (!instance.tableReady || version !== instance.measurementVersion) return;
-    instance
-      .createSelectorQuery()
-      .select('.md-table')
-      .boundingClientRect((rect) => {
-        if (!instance.tableReady || version !== instance.measurementVersion || instance.data.block?.type !== 'table')
-          return;
-        const height = Math.ceil(rect?.height || 0);
-        if (height > 0 && height !== instance.data.tableHeight) instance.setData({ tableHeight: height });
-      })
-      .exec();
-  });
+  const current = () =>
+    instance.tableReady && version === instance.measurementVersion && instance.data.block?.type === 'table';
+  instance
+    .createSelectorQuery()
+    .select('.md-table-shell')
+    .boundingClientRect((shell) => {
+      if (!current() || !shell?.width || instance.data.block?.type !== 'table') return;
+      const layout = nativeTableLayout(
+        instance.data.block,
+        shell.width,
+        instance.data.theme,
+        wx.getWindowInfo?.().windowWidth,
+        (instance.tableMeasurements ||= new Map()),
+      );
+      // Keep the scroll node and its content mounted while updating layout. No height:0/remount cycle.
+      instance.scrollLeft = Math.min(instance.scrollLeft || 0, Math.max(0, layout.tableWidth - shell.width));
+      instance.setData({ ...layout, tableScrollLeft: instance.scrollLeft }, () => {
+        if (!current()) return;
+        instance
+          .createSelectorQuery()
+          .selectAll('.md-table-row')
+          .boundingClientRect((rows) => {
+            if (!current()) return;
+            const height = Math.ceil(rows.reduce((sum, row) => sum + row.height, layout.tableBorderWidth));
+            if (height > 0 && height !== instance.data.tableHeight) instance.setData({ tableHeight: height });
+          })
+          .exec();
+      });
+    })
+    .exec();
 }
 
 Component({
@@ -55,16 +77,22 @@ Component({
     detailOpen: false,
     codeHeight: 0,
     codeWidth: 0,
+    codeAfterGap: 0,
+    columnWidths: [],
     tableHeight: 0,
     tableWidth: 0,
     tableScrollLeft: 0,
   },
   observers: {
     theme(this: BlockInstance, theme: string) {
-      this.setData({
-        themeStyle: nativeThemeStyle(theme),
-        panelStyle: nativePanelStyle(theme, this.data.block?.type === 'panel' ? this.data.block.kind : undefined),
-      });
+      this.setData(
+        {
+          themeStyle: nativeThemeStyle(theme),
+          codeAfterGap: nativeCodeAfterGap(theme),
+          panelStyle: nativePanelStyle(theme, this.data.block?.type === 'panel' ? this.data.block.kind : undefined),
+        },
+        () => measureTable(this),
+      );
     },
     block(this: BlockInstance, block: MiniProgramViewBlock | null) {
       if (block?.type === 'panel')
@@ -73,7 +101,7 @@ Component({
           panelTextColor: nativePanelTextColor(block.kind),
         });
       if (block?.type === 'code_block') {
-        this.setData(nativeCodeLayout(block.text));
+        this.setData({ ...nativeCodeLayout(block.text), codeAfterGap: nativeCodeAfterGap(this.data.theme) });
       }
       if (block?.type === 'detail') {
         const open = block.open === true;
@@ -85,6 +113,7 @@ Component({
       this.measurementVersion = (this.measurementVersion || 0) + 1;
       if (block?.type !== 'table') {
         this.imageMeasurements = undefined;
+        this.tableMeasurements = undefined;
         if (this.data.tableHeight) this.setData({ tableHeight: 0 });
         return;
       }
@@ -93,8 +122,7 @@ Component({
       for (const key of this.imageMeasurements?.keys() || []) {
         if (!activeCells.has(key.split(':')[0])) this.imageMeasurements?.delete(key);
       }
-      const columns = [...block.header, ...block.rows].reduce((count, row) => Math.max(count, row.cells.length), 0);
-      this.setData({ tableWidth: columns * 114 }, () => measureTable(this));
+      measureTable(this);
     },
   },
   lifetimes: {
@@ -104,6 +132,7 @@ Component({
     },
     detached(this: BlockInstance) {
       this.tableReady = false;
+      this.tableMeasurements = undefined;
       this.measurementVersion = (this.measurementVersion || 0) + 1;
     },
   },

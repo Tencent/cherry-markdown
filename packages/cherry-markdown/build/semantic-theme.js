@@ -108,6 +108,9 @@ export function collectSemanticThemes() {
         tokens[`--native-code-${type}`] = property(`.token.${type}`, 'color');
       tokens['--native-code-bg'] = property('pre[class*=language-]', 'background');
       tokens['--native-panel-radius'] = property('.cherry-panel', 'border-radius');
+      tokens['--native-table-cell-min'] = property('.cherry-markdown table th', 'min-width');
+      tokens['--native-table-cell-padding'] = property('.cherry-markdown table th', 'padding');
+      tokens['--native-table-border-width'] = property('.cherry-markdown table th', 'border').split(' ')[0];
       return [theme, tokens];
     }),
   );

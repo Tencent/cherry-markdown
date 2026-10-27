@@ -1,6 +1,6 @@
 <view class="md-theme md-context-{{context}}" style="{{themeStyle}}">
 <view wx:if="{{block.type === 'panel' || block.type === 'detail'}}" class="md-group md-{{block.type}}" style="{{panelStyle}}">
-  <view wx:if="{{block.type === 'detail'}}" class="md-group-head md-detail-toggle" bindtap="toggleDetail"><text class="md-detail-arrow">{{detailOpen ? '▲' : '▼'}}</text><text>{{block.title}}</text><button class="md-detail-hit" aria-label="{{block.title}}" catchtap="toggleDetail" /></view>
+  <view wx:if="{{block.type === 'detail'}}" class="md-group-head md-detail-toggle" aria-role="button" aria-expanded="{{detailOpen}}" bindtap="toggleDetail"><text class="md-detail-arrow">{{detailOpen ? '▲' : '▼'}}</text><text>{{block.title}}</text></view>
   <view wx:else class="md-group-head"><text>{{block.title}}</text></view>
   <view wx:if="{{block.type === 'panel' || detailOpen}}" class="md-group-body"><cherry-block wx:for="{{block.children}}" wx:key="id" block="{{item}}" theme="{{theme}}" text-color="{{block.type === 'panel' ? panelTextColor : '--accordion-body-color'}}" context="{{block.type === 'detail' && index === block.children.length - 1 ? 'detail-last' : ''}}" /></view>
 </view>
@@ -19,12 +19,11 @@
   </view>
 </view>
 <view wx:elif="{{block.type === 'table'}}" class="md-table-shell">
-  <scroll-view wx:if="{{tableHeight > 0}}" class="md-table-scroll" scroll-x="{{true}}" enable-flex="{{true}}" type="custom" scroll-left="{{tableScrollLeft}}" bindscroll="tableScrolled" style="height: {{tableHeight}}px;">
-    <template is="table" data="{{block, tableWidth, theme}}" />
+  <scroll-view class="md-table-scroll" scroll-x="{{true}}" enable-flex="{{true}}" type="custom" scroll-left="{{tableScrollLeft}}" bindscroll="tableScrolled" style="height: {{tableHeight || 1}}px;">
+    <template is="table" data="{{block, tableWidth, columnWidths, theme}}" />
   </scroll-view>
-  <template wx:else is="table" data="{{block, tableWidth, theme}}" />
 </view>
-<view wx:elif="{{block.type === 'code_block'}}" class="md-code-card">
+<view wx:elif="{{block.type === 'code_block'}}" class="md-code-card" style="--md-code-after-gap:{{codeAfterGap}}px;">
   <view class="md-code-head">
     <text>{{block.lang}}</text>
     <button class="md-copy" size="mini" data-text="{{block.text}}" bindtap="copyCode">复制</button>
@@ -47,12 +46,12 @@
 <template name="table">
   <view class="md-table" style="width: {{tableWidth}}px;">
     <view wx:for="{{block.header}}" wx:key="id" class="md-table-row md-table-head">
-      <view wx:for="{{item.cells}}" wx:key="id" wx:for-item="cell" class="md-table-cell md-table-th" style="text-align: {{cell.align || 'center'}};">
+      <view wx:for="{{item.cells}}" wx:key="id" wx:for-item="cell" class="md-table-cell md-table-th" style="width:{{columnWidths[index]}}px;text-align: {{cell.align || 'center'}};">
         <cherry-inlines theme="{{theme}}" nodes="{{cell.inlines}}" data-cell="{{cell.id}}" bind:layoutchange="tableImageLoaded" />
       </view>
     </view>
     <view wx:for="{{block.rows}}" wx:key="id" class="md-table-row">
-      <view wx:for="{{item.cells}}" wx:key="id" wx:for-item="cell" class="md-table-cell" style="text-align: {{cell.align || 'left'}};">
+      <view wx:for="{{item.cells}}" wx:key="id" wx:for-item="cell" class="md-table-cell" style="width:{{columnWidths[index]}}px;text-align: {{cell.align || 'left'}};">
         <cherry-inlines theme="{{theme}}" nodes="{{cell.inlines}}" data-cell="{{cell.id}}" bind:layoutchange="tableImageLoaded" />
       </view>
     </view>

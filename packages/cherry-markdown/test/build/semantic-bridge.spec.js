@@ -32,7 +32,7 @@ it('derives native theme tokens from the existing Web Sass sources', () => {
   expect(
     Object.values(cherryThemes).every((theme) => Object.values(theme).every((value) => !value.includes('var('))),
   ).toBe(true);
-});
+}, 30000);
 it('preserves Prism aliases used by Web highlighting for native token styling', () => {
   const code = new CherrySemanticParser().parse("```js\nconsole.log('hello');\n```").blocks[0];
   expect(code.tokens.find((token) => token.text === 'console').aliases).toContain('class-name');

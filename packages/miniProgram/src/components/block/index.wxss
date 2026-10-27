@@ -81,13 +81,14 @@
 
 .md-table {
   flex-shrink: 0;
-  min-width: 100%;
-  border-top: 1px solid var(--md-table-border);
-  border-left: 1px solid var(--md-table-border);
+  box-sizing: border-box;
+  border-top: var(--native-table-border-width) solid var(--md-table-border);
+  border-left: var(--native-table-border-width) solid var(--md-table-border);
   background: var(--base-previewer-bg);
 }
 
 .md-table-row {
+  flex-shrink: 0;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -102,12 +103,11 @@
   flex-direction: column;
   justify-content: center;
   box-sizing: border-box;
-  width: 114px;
-  min-width: 114px;
-  flex: 1 0 114px;
-  padding: 3.2px 6.4px;
-  border-right: 1px solid var(--md-table-border);
-  border-bottom: 1px solid var(--md-table-border);
+  min-width: 0;
+  flex-shrink: 0;
+  padding: var(--native-table-cell-padding);
+  border-right: var(--native-table-border-width) solid var(--md-table-border);
+  border-bottom: var(--native-table-border-width) solid var(--md-table-border);
   color: var(--md-paragraph-color);
   font-size: inherit;
   line-height: inherit;
@@ -119,7 +119,7 @@
 
 .md-code-card {
   overflow: hidden;
-  margin: 0 0 var(--spacing-lg);
+  margin: 0 0 calc(var(--spacing-lg) + var(--md-code-after-gap));
   border-radius: 2px;
   background: var(--native-code-bg);
   display: inline-block;
@@ -345,16 +345,7 @@
   color: var(--native-code-function);
 }
 
-.md-detail-hit {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  opacity: 0;
-}
+
 
 .md-list-marker {
   display: flex;

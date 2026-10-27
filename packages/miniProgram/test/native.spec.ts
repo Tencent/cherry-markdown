@@ -1,6 +1,7 @@
 import { CherrySemanticParser } from 'cherry-markdown/semantic';
 import { nativeThemeStyle, nativeInlineStyle, nativePanelStyle, nativePanelTextColor } from '../src/native/theme';
 import { nativeCodeLayout } from '../src/native/code-layout';
+import { distributeTableColumns, nativeTableLayout } from '../src/native/table-layout';
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import CherryStream from '../src';
@@ -191,4 +192,56 @@ describe('public semantic bridge and native presentation', () => {
     expect(nativePanelStyle('__proto__', '__proto__')).toBe(nativePanelStyle());
     expect(nativePanelTextColor('tabs')).toBe(nativePanelTextColor('primary'));
   });
+});
+
+describe('native intrinsic table layout', () => {
+  it('leaves short columns at the Web minimum and gives remaining width to longer content', () => {
+    expect(distributeTableColumns([113.8, 113.8, 113.8], [113.8, 237.8, 113.8], 350)).toEqual([
+      113.8, 121.40000000000002, 113.8,
+    ]);
+    expect(distributeTableColumns([114, 114], [114, 114], 600)).toEqual([114, 114]);
+    expect(distributeTableColumns([114, 114, 114, 114], [114, 200, 200, 114], 350)).toEqual([114, 114, 114, 114]);
+  });
+  it('measures multiline and styled semantic cells without an HTML intermediate', () => {
+    const table = new CherryStream().makeView(
+      '| A | Description | C |\n|---|---|---|\n| a | **较长的说明内容在这里** | c |',
+    )[0];
+    if (table.type !== 'table') throw new Error('Expected table');
+    const layout = nativeTableLayout(table, 350);
+    expect(layout.columnWidths[1]).toBeGreaterThan(layout.columnWidths[0]);
+    expect(layout.tableWidth).toBeCloseTo(350);
+    expect(nativeTableLayout(table, 900).tableWidth).toBeLessThan(900);
+  });
+});
+
+it('streams table, code and detail chunks to the same final native view with stable component identities', () => {
+  vi.useFakeTimers();
+  const content =
+    'Prefix\n\n| A | B |\n| --- | --- |\n| left | growing cell |\n| next | last |\n\n```js\nconst a = 1;\nconsole.log(a);\n```\n\n+++ Details\nstreamed body\n+++';
+  const actual: Array<MiniProgramViewBlock & { id: string }> = [];
+  const controller = new NativeMarkdownController((patch, done) => {
+    for (const [key, value] of Object.entries(patch)) {
+      if (key === 'blocks') actual.splice(0, actual.length, ...(value as typeof actual));
+      else actual[Number(/\d+/.exec(key)![0])] = value as (typeof actual)[number];
+    }
+    done();
+  });
+  let tableId: string | undefined;
+  for (let end = 1; end <= content.length; end += 3) {
+    controller.setMarkdown(content.slice(0, end), true);
+    vi.advanceTimersByTime(80);
+    const table = actual.find((block) => block.type === 'table');
+    if (table) {
+      if (tableId) expect(table.id).toBe(tableId);
+      tableId = table.id;
+    }
+  }
+  controller.setMarkdown(content, false);
+  const expected = new NativeViewState().update(new CherryStream().setMarkdown(content));
+  const stripIds = (value: unknown) =>
+    JSON.parse(JSON.stringify(value, (key, child) => (key === 'id' ? undefined : child)));
+  expect(stripIds(actual)).toEqual(stripIds(Object.values(expected)));
+  expect(actual.find((block) => block.type === 'table')?.id).toBe(tableId);
+  expect(actual.map((block) => block.type)).toEqual(['paragraph', 'table', 'code_block', 'detail']);
+  controller.dispose();
 });

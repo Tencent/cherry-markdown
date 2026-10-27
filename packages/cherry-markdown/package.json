@@ -116,6 +116,10 @@
       "import": "./dist/cherry-markdown.semantic.esm.js",
       "require": "./dist/cherry-markdown.semantic.cjs"
     },
+    "./types/*.d.ts": "./types/*.d.ts",
+    "./types/*": {
+      "types": "./types/*.d.ts"
+    },
     "./*": "./*",
     "./theme": {
       "types": "./dist/types/semantic/theme.d.ts",

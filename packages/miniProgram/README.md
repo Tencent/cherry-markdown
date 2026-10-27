@@ -109,6 +109,8 @@ vp run -F @cherry-markdown/mini-program-demo build
 
 Open `examples/miniProgram` in WeChat DevTools. See the [Demo README](../../examples/miniProgram/README.md) for package verification.
 
+Native tables size columns from native text metrics and Web Sass cell constraints. Code-block spacing follows the parent font line box. A single small offscreen context only measures text; the document stays in native WXML. Streaming updates keep the scroll node and valid horizontal offset mounted while row heights and column widths change. See the mobile comparison record for device and interaction acceptance limits.
+
 ## License
 
 Apache-2.0. See [LICENSE](./LICENSE).

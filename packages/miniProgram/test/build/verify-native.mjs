@@ -100,17 +100,32 @@ let deferred = false;
 let measurements = 0;
 const callbacks = [];
 const table = {
-  data: { ...tableDefinition.data, block: { type: 'table', header: [], rows: [{ cells: [{ id: 'cell' }] }] } },
+  data: {
+    ...tableDefinition.data,
+    block: {
+      type: 'table',
+      header: [],
+      rows: [
+        { cells: Array.from({ length: 4 }, (_, i) => ({ id: i ? 'cell' + i : 'cell', header: false, inlines: [] })) },
+      ],
+    },
+  },
   setData(patch, done) {
     Object.assign(this.data, patch);
     done?.();
   },
   createSelectorQuery() {
-    measurements++;
     let callback;
+    let shell = false;
     const query = {
       select(selector) {
-        assert.equal(selector, '.md-table');
+        assert.equal(selector, '.md-table-shell');
+        shell = true;
+        return query;
+      },
+      selectAll(selector) {
+        assert.equal(selector, '.md-table-row');
+        measurements++;
         return query;
       },
       boundingClientRect(value) {
@@ -118,8 +133,9 @@ const table = {
         return query;
       },
       exec() {
-        if (deferred) callbacks.push(callback);
-        else callback({ height: naturalHeight });
+        if (shell) callback({ width: 350, height: naturalHeight });
+        else if (deferred) callbacks.push((rect) => callback([{ height: rect.height - 1 }]));
+        else callback([{ height: naturalHeight - 1 }]);
       },
     };
     return query;
@@ -147,13 +163,13 @@ deferred = true;
 tableDefinition.methods.measureTable.call(table);
 tableDefinition.observers.block.call(table, table.data.block);
 callbacks.shift()({ height: 999 });
-assert.equal(table.data.tableHeight, 0, 'ignore measurements from older content');
+assert.equal(table.data.tableHeight, 241, 'retain visible height while ignoring measurements from older content');
 callbacks.shift()({ height: 125 });
 assert.equal(table.data.tableHeight, 125);
 tableDefinition.methods.measureTable.call(table);
 tableDefinition.lifetimes.detached.call(table);
 callbacks.shift()({ height: 777 });
-assert.equal(table.data.tableHeight, 0, 'ignore measurements after unmount');
+assert.equal(table.data.tableHeight, 125, 'ignore measurements after unmount');
 
 const detail = {
   data: { block: { type: 'detail', open: false }, detailOpen: false },

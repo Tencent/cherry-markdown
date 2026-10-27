@@ -5,6 +5,7 @@ import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import glob from 'glob';
+import ts from 'typescript';
 import { JSDOM } from 'jsdom';
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -37,6 +38,23 @@ function resolvesDeclaration(fromFile, specifier) {
 }
 
 describe('built Cherry Markdown artifact contract', () => {
+  it.each(['cherry', 'cherry.d.ts', 'modules'])(
+    'keeps the legacy public types/%s subpath resolvable with package exports',
+    (name) => {
+      const result = ts.resolveModuleName(
+        `cherry-markdown/types/${name}`,
+        resolve(projectRoot, 'type-consumer.ts'),
+        {
+          moduleResolution: ts.ModuleResolutionKind.Bundler,
+          module: ts.ModuleKind.ESNext,
+        },
+        ts.sys,
+      );
+      expect(result.resolvedModule?.resolvedFileName).toBe(
+        resolve(projectRoot, `types/${name.replace(/\.d\.ts$/, '')}.d.ts`),
+      );
+    },
+  );
   it.each(bundleNames)(
     'preserves Prism languages and streaming highlighting in %s',
     (file) => {

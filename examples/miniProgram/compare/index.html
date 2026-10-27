@@ -10,10 +10,12 @@ body.document { background: #fff; }
 </style></head><body><script type="module">
 import Cherry from '/packages/cherry-markdown/dist/cherry-markdown.esm.js';
 import { MOBILE_PARITY_MARKDOWN } from '/examples/miniProgram/src/fixtures/mobile-parity.ts';
+import { MOBILE_INTERACTION_MARKDOWN } from '/examples/miniProgram/src/fixtures/mobile-interactions.ts';
+const params = new URLSearchParams(location.search);
 if (!new URLSearchParams(location.search).has('document')) {
-  const frame = document.createElement('iframe'); frame.id = 'frame'; frame.src = '?document=1'; document.body.append(frame);
+  const frame = document.createElement('iframe'); frame.id = 'frame'; params.set('document', '1'); frame.src = '?' + params.toString(); document.body.append(frame);
 } else {
   document.body.className = 'document'; const root = document.createElement('div'); root.id = 'cherry'; document.body.append(root);
-  window.cherry = new Cherry({ themeSettings: {mainTheme: new URLSearchParams(location.search).get('theme') || 'default'}, id: 'cherry', value: MOBILE_PARITY_MARKDOWN, editor: { defaultModel: 'previewOnly' }, toolbars: { toolbar: [] }, engine: { syntax: { codeBlock: { lineNumber: false } } } });
+  window.cherry = new Cherry({ themeSettings: {mainTheme: new URLSearchParams(location.search).get('theme') || 'default'}, id: 'cherry', value: params.get('interactive') === '1' ? MOBILE_INTERACTION_MARKDOWN : MOBILE_PARITY_MARKDOWN, editor: { defaultModel: 'previewOnly' }, toolbars: { toolbar: [] }, engine: { syntax: { codeBlock: { lineNumber: false } } } });
 }
 </script></body></html>
