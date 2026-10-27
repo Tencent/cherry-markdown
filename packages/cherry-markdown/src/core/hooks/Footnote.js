@@ -51,6 +51,20 @@ export default class Footnote extends ParagraphBase {
     const num = this.footnote.length + 1;
     const fn = {};
     const refNumberContent = this.config.refNumber.render(num, $key) || `[${num}]`;
+    if (this.$engine?.semanticRenderer) {
+      const renderer = this.$engine?.semanticRenderer;
+      fn.fn = renderer.wrap('sup', {}, renderer.wrap('link', { href: `#fn:${num}` }, refNumberContent));
+      fn.note = renderer.wrap(
+        'paragraph',
+        { classicBr: false },
+        renderer.wrap('link', { href: `#fnref:${num}` }, refNumberContent) +
+          this.$engine.makeHtmlForFootnote(note.trim()),
+      );
+      this.footnote.push(fn);
+      const replaceKey = `\0~fn#${num - 1}#\0`;
+      this.footnoteMap[key] = replaceKey;
+      return replaceKey;
+    }
     const refNumberClass = this.config.refNumber?.appendClass || '';
     const refNumberLinkContent = this.config.refList?.listItem?.render(num, $key, note, () => {
       const refNumberContent = this.config.refNumber.render(num, $key) || `[${num}]`;
@@ -78,6 +92,7 @@ export default class Footnote extends ParagraphBase {
     if (footnote.length <= 0) {
       return '';
     }
+    if (this.$engine?.semanticRenderer) return footnote.map((note) => note.note).join('');
     const oneFootnoteClass = this.config.refList?.listItem?.appendClass || '';
     let html = footnote
       .map(
@@ -102,6 +117,8 @@ export default class Footnote extends ParagraphBase {
   beforeMakeHtml(str) {
     // 单行注释，TODO: 替换为引用
     // str = str.replace(/(^|\n)\[([^^][^\]]*?)\]:([^\n]+?)(?=$|\n)/g, '$1');
+    if (this.$engine?.semanticRenderer && /\[\^/.test(str))
+      this.$engine.semanticRenderer.invalidateDocument('Footnote');
     let $str = str;
     $str = $str.replace(this.RULE.reg, (match, leading, key, content) => {
       this.pushFootnoteCache(key, content);
@@ -127,6 +144,12 @@ export default class Footnote extends ParagraphBase {
         const refNumberClass = this.config.refNumber?.appendClass || '';
         const refNumberFinalClass = `footnote ${refNumberClass}`;
         const refNumberContent = this.config.refNumber.render(num, $key) || `[${num}]`;
+        if (this.$engine?.semanticRenderer)
+          return this.$engine?.semanticRenderer.wrap(
+            'sup',
+            {},
+            this.$engine.semanticRenderer.wrap('link', { href: `#fn:${num}` }, refNumberContent),
+          );
         return `<sup class="cherry-footnote-number"><a href="#fn:${num}" id="fnref:${num}" class="${refNumberFinalClass}">${refNumberContent}</a></sup>`;
       }
       return match;

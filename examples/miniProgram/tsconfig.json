@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": [],
+    "paths": {
+      "@cherry-markdown/miniprogram": ["../../packages/miniProgram/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

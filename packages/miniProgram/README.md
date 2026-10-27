@@ -1,111 +1,107 @@
 # @cherry-markdown/miniprogram
 
-> [!WARNING]
->
-> This package is in early development. Stability and completeness have not yet reached production level. Use with caution in production environments.
+> Early development. Validate native components and the Skyline example on your target base library and devices before production use.
 
 [简体中文](./README.CN.md)
 
-## Purpose
+Cherry Markdown view data and maintained native WeChat MiniProgram components. Paragraphs, headings, nested lists, quotes, tables, code and images use WXML `view`, `text`, `image` and `scroll-view`. Neither `web-view` nor `rich-text` is used.
 
-`@cherry-markdown/miniprogram` converts Cherry Markdown into structured, WXML-friendly view data. It does not ship a WXML component, styles, or interaction handlers: consumers render the returned blocks and runs with their own MiniProgram templates.
-
-Core Markdown structures can be rendered with native MiniProgram components and do not require WebView or DOM. Unknown or complex HTML is returned as an `html` block; consumers may render that block with `rich-text` as a fallback.
-
-## Usage
+## Native component
 
 ```sh
 npm install @cherry-markdown/miniprogram
 ```
 
-The package is ESM-only and exposes `CherryStream`, which creates and owns its Cherry engine. Its `setMarkdown()` input model matches Web CherryStream; it returns MiniProgram view data instead of updating a DOM previewer. SSE requests, framing, and payload extraction are application responsibilities.
+Copy the installed package's entire `dist/components` directory into your MiniProgram at `components/cherry`. Keep all three subdirectories together. Runtime scripts are already bundled as CommonJS; no npm build or ESM parser import in your page is required.
 
-The native MiniProgram runtime does not execute ESM packages directly. Bundle application source that imports this package into the MiniProgram runtime format; the Demo uses Vite/Rolldown for that build step.
+Page JSON:
 
-### Stream rendering
-
-```js
-import CherryStream from '@cherry-markdown/miniprogram';
-
-const page = this;
-const cherry = new CherryStream();
-let markdownContent = '';
-function render(streaming) {
-  page.setData({
-    blocks: cherry.setMarkdown(markdownContent, { deferImages: !streaming }),
-    streaming,
-  });
-}
-
-function finishStream() {
-  render(false);
-}
-
-// Your SSE client extracts Markdown strings from the transport.
-function onMarkdownChunk(chunk) {
-  markdownContent += chunk;
-  render(true);
-}
-
-function onStreamComplete() {
-  finishStream();
+```json
+{
+  "usingComponents": {
+    "cherry-markdown": "/components/cherry/markdown/index"
+  }
 }
 ```
 
-Pass the complete accumulated Markdown to `setMarkdown()`, matching Web `CherryStream.setMarkdown()`. It re-renders the current complete content, which preserves valid rendering for incomplete syntax. The package does not implement SSE requests, decoding, framing, or provider payload extraction.
+Page WXML:
 
-`setMarkdown()` re-renders the accumulated Markdown for correctness with incomplete syntax. While a stream is active, pass `deferImages: true` to render image placeholders; call it once with `deferImages: false` when the stream completes. For high-frequency model output, batch page-level `setData` calls (for example, every 50-100 ms) instead of updating for every chunk.
+```xml
+<cherry-markdown id="markdown" update-interval="80" bind:linktap="onLinkTap" />
+```
 
-## Module Formats
+For high-frequency streaming, get the component handle in the page's `onReady` and call its logic-layer method. This avoids repeatedly passing complete Markdown through page `setData`:
 
-| Entry                          | ESM                       |
-| ------------------------------ | ------------------------- |
-| `@cherry-markdown/miniprogram` | `dist/miniProgram.esm.js` |
+```ts
+import type { NativeMarkdownHandle } from '@cherry-markdown/miniprogram';
 
-## Supported Features
+const renderer = this.selectComponent('#markdown') as NativeMarkdownHandle;
+renderer.setMarkdown(accumulatedMarkdown, true);
+renderer.setMarkdown(finalMarkdown, false);
+```
 
-| Feature       | Syntax                          | Render                                                         | Status |
-| ------------- | ------------------------------- | -------------------------------------------------------------- | ------ |
-| Paragraph     | plain text                      | Native `view` + `text` runs                                    | ✅     |
-| Heading       | `#` `##` `###`                  | Native `view` with level class                                 | ✅     |
-| Blockquote    | `>`                             | Native child-block data                                        | ✅     |
-| List          | `-` / `1.`                      | Flexbox + marker text                                          | ✅     |
-| Task List     | `- [x]` / `- [ ]`               | Flexbox, `☑`/`☐` markers                                       | ✅     |
-| Table         | `\| A \| B \|`                  | Native table rows and cell runs                                | ✅     |
-| Code Block    | ` ```lang ``` `                 | Highlight runs; template adds copy                             | ✅     |
-| Image         | `![alt](src)`                   | Placeholder while streaming; native image run after completion | ✅     |
-| Link          | `[text](url)`                   | Text run with `href`; template binds tap                       | ✅     |
-| Math Inline   | `$E=mc^2$`                      | Formula source in a text run                                   | ✅     |
-| Math Block    | `$$...$$`                       | Formula source block, not typeset                              | ✅     |
-| Mermaid       | ` ```mermaid ``` `              | Mermaid source block, not a diagram                            | ✅     |
-| Bold          | `**text**`                      | `class="md-strong"`                                            | ✅     |
-| Italic        | `*text*`                        | `class="md-em"`                                                | ✅     |
-| Inline Code   | `` `code` ``                    | `class="md-inline-code"`                                       | ✅     |
-| Underline     | `++text++`                      | `class="md-underline"`                                         | ✅     |
-| Strikethrough | `~~text~~`                      | `class="md-strike"`                                            | ✅     |
-| Sub / Sup     | `~text~` / `^text^`             | Inline text with class                                         | ✅     |
-| Line Break    | two trailing spaces             | `\n` in text run                                               | ✅     |
-| AutoLink      | `https://...`                   | Same as link                                                   | ✅     |
-| Emoji         | `:smile:`                       | Image component                                                | ✅     |
-| Cursor        | stream only                     | `\|` cursor symbol                                             | ✅     |
-| Footnote ref  | `[^key]`                        | Sup/link data; template owns navigation                        | ✅     |
-| Panel         | `:::tip/warning/danger/success` | Plain paragraph, styling lost                                  | ❌     |
-| Footnote body | generated content               | Plain paragraphs, styling lost                                 | ❌     |
-| Color / Size  | `==color=red text==`            | Attr preserved, WXML ignores                                   | ❌     |
-| Align         | `:::left/center/right`          | CSS class not consumed                                         | ❌     |
-| Toc           | `[TOC]`                         | List structure ok, styling lost                                | ❌     |
-| Hr            | `---`                           | Rich-text fallback                                             | ❌     |
-| Detail        | `+++`                           | Rich-text fallback, static                                     | ❌     |
-| Ruby          | `{ Ruby }`                      | Rich-text fallback                                             | ❌     |
-| Raw HTML      | `<div>...</div>`                | Rich-text fallback                                             | ❌     |
-| SuggestList   | editor only                     | Not rendering                                                  | —      |
-| FrontMatter   | `---yaml---`                    | Not rendered by default                                        | —      |
+Applications own requests, SSE decoding and framing. Pass the complete accumulated string. Static or infrequent content can instead bind the `markdown` and `streaming` properties; choose one input method per component. Handle `event.detail.href` from `linktap` in your app. The component never opens a web page. Code copy and image preview are built in.
 
-The package returns WXML-friendly data only. The bundled Demo shows one template implementation for common blocks, code copy, image preview, link handling, and `html` fallback; applications must provide their own template, styles, and event handlers.
+Updates are coalesced over 80 ms by default. Only one `setData` commit is in flight; its acknowledgement schedules the latest pending input. Completion flushes immediately when possible and replaces image placeholders with native images. Detachment cancels pending work. `update-interval` is read on attachment.
+
+Consecutive inline text runs share one native text host for wrapping and selection. Images are separate blocks; browser-style inline image layout is not promised.
+
+## TypeScript and data-only integration
+
+Transforms, view mapping, scheduling and native components use strict TypeScript with declarations emitted from source. `shared/engine.js` remains an integration boundary to the existing Cherry JS engine. The Web editor is unchanged.
+
+```ts
+import CherryStream, { NativeMarkdownController } from '@cherry-markdown/miniprogram';
+import type { MiniProgramViewBlock } from '@cherry-markdown/miniprogram';
+
+const blocks: MiniProgramViewBlock[] = new CherryStream().setMarkdown('**hello**', { deferImages: false });
+const controller = new NativeMarkdownController((patch, done) => page.setData(patch, done));
+controller.setMarkdown(accumulatedMarkdown, true);
+controller.setMarkdown(finalMarkdown, false);
+// Call controller.dispose() on page destruction.
+```
+
+The data-only entry is ESM and must be bundled by custom consumers. The default component already includes its parser; do not also bundle it into the page.
+
+## Capabilities and migration
+
+- Native paragraphs, headings, quotes, nested/task lists, tables, code, links, images and thematic breaks.
+- List items contain recursive `children: MiniProgramViewBlock[]`, preserving nested block structure.
+- Math and Mermaid preserve semantic nodes and source, displayed as copyable native text. Mathematical typesetting and diagram drawing are not implemented.
+- Unsupported block HTML becomes `{ type: 'unsupported', tag, text }`. `unknownTag: 'unwrap'` retains supported descendants; `'drop'` discards the block. Scripts, styles and event attributes do not become native interactions.
+- Web parity for colors, font sizes, panels, TOC, footnote navigation and collapsible details is not promised.
+- Code highlighting uses Prism tokens directly. Panels/details preserve semantic metadata and render as static native groups; mark/underline render natively and ruby annotations as additional text. TOC/footnotes preserve links; apps own navigation.
+
+Migrating from 0.0.2: replace list item `inlines` with recursive `children`, `html` blocks with `unsupported` text, and `unknownTag: 'html'` with `'text'`. Existing Markdown input methods remain available. Using the default component avoids maintaining custom templates.
+
+## Direct semantics, incremental parsing and Skyline
+
+The native pipeline is `Markdown → existing Cherry hooks → semantic nodes → native view`. Built-in recognition rules, hook order, escaping and streaming auto-closure are shared with Web. Hooks emit semantic references that build nodes directly, rather than serializing generated Markdown HTML and parsing it back. Code highlighting uses `Prism.tokenize`. Only explicit source HTML is parsed as HTML, and still becomes native data.
+
+Append-only input reuses confirmed top-level semantic blocks and reparses two trailing blocks plus their separator. Checkpoints come from actual Cherry parse results and line metadata. Both candidate fragments are reparsed and checked before a boundary is trusted. Existing FrontMatter/Panel/Detail opener rules prevent checkpoints inside unclosed structures.
+
+Edits, clearing, transform-option changes, actual reference definitions, footnotes, TOC and source HTML invalidate reuse. Dependencies are reported by the actual hooks, so literal lookalikes in code do not trigger invalidation. Multiline whitespace emphasis, callbacks and custom hooks conservatively use full parsing. `{ incremental: false }` disables reuse for comparison.
+
+`stream.getParseStats()` reports `mode` (`full`, `incremental`, `unchanged`), `parsedCharacters` (normalized string units processed by the grammar, including boundary verification) and `reusedCharacters`. Identical Markdown avoids re-parsing while image/style view options can still update.
+
+Unchanged blocks still retain identity for differential native commits. Input comparison, view mapping and comparison still cost work. A growing single block still needs active-block parsing; global dependencies may require full parsing. This is not constant-time rendering or list virtualization.
+
+HTML-only third-party renderers must adapt to `this.$engine.semanticRenderer.wrap/atom` and report global dependencies using `invalidateDocument`. They do not silently fall back to an HTML intermediate. The Web backend keeps its original HTML output. `makeHtml()` remains an explicit compatibility API; native `setMarkdown`, `makeView` and `makeBlocks` use direct semantics. Public `makeBlocks()` returns detached copies of cached nodes.
+
+The Demo includes ordinary and Skyline pages sharing the same components. The Skyline page explicitly configures its renderer, glass-easel, custom navigation and scroll container, with no web content fallback. Confirm the actual engine in WeChat DevTools and test on target iOS/Android devices: mixed text/selection, nested lists, wide tables, code copy, image transitions, stream completion/reset/detachment, scroll position, parse time, payload size, layout frames and memory.
+
+Local TS, semantic, scheduling, package and WXML checks do not establish Skyline device performance.
 
 ## Demo
 
-A complete WeChat MiniProgram demo is available at `examples/miniProgram`. Install its dependencies and run `yarn --cwd examples/miniProgram build` before opening `examples/miniProgram` in WeChat DevTools. See the [Demo README](../../examples/miniProgram/README.md) for local-package and preview-tarball verification.
+From the repository root:
+
+```sh
+vp run -F @cherry-markdown/miniprogram build
+vp run -F @cherry-markdown/mini-program-demo build
+```
+
+Open `examples/miniProgram` in WeChat DevTools. See the [Demo README](../../examples/miniProgram/README.md) for package verification.
 
 ## License
 

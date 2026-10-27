@@ -1,6 +1,17 @@
 import { parseDocument } from 'htmlparser2';
 
-const hooks = {
+type HtmlNode = ReturnType<typeof parseDocument>['children'][number];
+interface SanitizeConfig {
+  FORBID_ATTR?: string[];
+}
+interface AttributeNode {
+  hasAttribute(name: string): boolean;
+  getAttribute(name: string): string | undefined;
+  setAttribute(name: string, value: string): void;
+}
+type SanitizeHook = (node: AttributeNode) => void;
+
+const hooks: Record<string, SanitizeHook[]> = {
   afterSanitizeAttributes: [],
 };
 
@@ -31,8 +42,8 @@ function escapeHtml(value = '') {
     .replace(/'/g, '&#39;');
 }
 
-function sanitizeAttributes(attrs = {}, config = {}) {
-  const safeAttrs = {};
+function sanitizeAttributes(attrs: Record<string, string> = {}, config: SanitizeConfig = {}) {
+  const safeAttrs: Record<string, string> = {};
   Object.keys(attrs).forEach((key) => {
     if (/^on/i.test(key)) {
       return;
@@ -49,7 +60,7 @@ function sanitizeAttributes(attrs = {}, config = {}) {
   return safeAttrs;
 }
 
-function serializeNode(node, config) {
+function serializeNode(node: HtmlNode, config: SanitizeConfig): string {
   if (!node) {
     return '';
   }
@@ -66,8 +77,8 @@ function serializeNode(node, config) {
     return '';
   }
 
-  if (node.type !== 'tag' && node.type !== 'script' && node.type !== 'style') {
-    const children = node.children || [];
+  if (node.type !== 'tag') {
+    const children = 'children' in node ? node.children : [];
     return children.map((child) => serializeNode(child, config)).join('');
   }
 
@@ -98,13 +109,13 @@ function serializeNode(node, config) {
 }
 
 export const sanitizer = {
-  addHook(name, callback) {
+  addHook(name: string, callback: SanitizeHook) {
     if (!hooks[name]) {
       hooks[name] = [];
     }
     hooks[name].push(callback);
   },
-  sanitize(html, config = {}) {
+  sanitize(html: string, config: SanitizeConfig = {}) {
     if (typeof html !== 'string' || html.length === 0) {
       return '';
     }

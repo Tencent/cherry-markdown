@@ -188,6 +188,38 @@ export default class Table extends ParagraphBase {
       return cols.map((col) => col.trim());
     });
     const { textAlignRules, COLUMN_ALIGN_MAP } = this.$parseColumnAlignRules(rows[1]);
+    if (this.$engine?.semanticRenderer) {
+      const renderer = this.$engine.semanticRenderer;
+      const chart = this.$parseChartOptions(rows[0][0]);
+      if (chart) rows[0][0] = '';
+      const row = (cells, header) =>
+        renderer.wrap(
+          'table_row',
+          {},
+          this.$extendColumns(cells, maxCol)
+            .map((cell, col) => {
+              const content = sentenceMakeFunc(cell.replace(/~CS/g, '\\|')).html;
+              return renderer.wrap(
+                'table_cell',
+                { header, align: COLUMN_ALIGN_MAP[textAlignRules[col]] || '' },
+                content,
+              );
+            })
+            .join(''),
+        );
+      const content =
+        (rows[0].some((cell) => cell.replace(/&nbsp;/g, '').trim())
+          ? renderer.wrap('table_head', {}, row(rows[0], true))
+          : '') +
+        rows
+          .slice(2)
+          .map((cells) => row(cells, false))
+          .join('');
+      return {
+        html: renderer.wrap('table', { lines: dataLines, chart }, content),
+        sign: this.$engine.hash(`${lines.join('\n')}:${dataLines}`),
+      };
+    }
     const tableObject = {
       header: [],
       rows: [],

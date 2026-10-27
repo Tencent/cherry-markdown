@@ -62,7 +62,15 @@ export default class Toc extends ParagraphBase {
       $str = $str.replace(this.RULE.extend.reg, (match, lines, toc) => {
         if (!this.allowMultiToc && !this.isFirstTocToken) {
           // 需要补齐非捕获的\n，以及第一个分组中的\n
-          return `\n${lines}${emptyLinePlaceholder}`;
+          return this.$engine?.semanticRenderer ? `\n${lines}` : `\n${lines}${emptyLinePlaceholder}`;
+        }
+        if (this.$engine?.semanticRenderer) {
+          this.$engine.semanticRenderer.invalidateDocument('toc');
+          this.isFirstTocToken = false;
+          return prependLineFeedForParagraph(
+            match,
+            this.pushCache(this.$engine.semanticRenderer.atom('toc', { lines: this.getLineCount(match, lines) })),
+          );
         }
         const placeHolder = this.pushCache(match);
         this.isFirstTocToken = false;
@@ -75,9 +83,17 @@ export default class Toc extends ParagraphBase {
       $str = $str.replace(this.RULE.standard.reg, (match, lines, toc) => {
         if (!this.allowMultiToc && !this.isFirstTocToken) {
           // 需要补齐非捕获的\n，以及第一个分组中的\n
-          return `\n${lines}${emptyLinePlaceholder}`;
+          return this.$engine?.semanticRenderer ? `\n${lines}` : `\n${lines}${emptyLinePlaceholder}`;
         }
         this.isFirstTocToken = false;
+        if (this.$engine?.semanticRenderer) {
+          this.$engine.semanticRenderer.invalidateDocument('toc');
+          this.isFirstTocToken = false;
+          return prependLineFeedForParagraph(
+            match,
+            this.pushCache(this.$engine.semanticRenderer.atom('toc', { lines: this.getLineCount(match, lines) })),
+          );
+        }
         const placeHolder = this.pushCache(match);
         return prependLineFeedForParagraph(match, placeHolder);
       });
@@ -244,6 +260,10 @@ export default class Toc extends ParagraphBase {
 
   afterMakeHtml(str) {
     let $str = super.afterMakeHtml(str);
+    if (this.$engine?.semanticRenderer) {
+      this.isFirstTocToken = true;
+      return $str;
+    }
     const headerList = [];
     const headerRegex = /<h([1-6])([^>]*?) id="([^"]+?)"[^>]*?>(?:<a[^/]+?\/a>|)(.+?)<\/h\1>/g;
     let str2Hash = '';

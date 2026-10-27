@@ -26,6 +26,12 @@ export default class Underline extends SyntaxBase {
     if (!this.test(str)) {
       return str;
     }
+    if (this.$engine?.semanticRenderer)
+      return str.replace(
+        this.RULE.reg,
+        (whole, before, text, after = '') =>
+          before + this.$engine?.semanticRenderer.wrap('underline', {}, text) + after,
+      );
     return str.replace(this.RULE.reg, '$1<span style="text-decoration: underline;">$2</span>$3');
   }
 

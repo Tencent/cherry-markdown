@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import HookCenter from './core/HookCenter';
+import CodeBlock from './core/hooks/CodeBlock';
 import hooksConfig from './core/HooksConfig';
 import NestedError, { $expectTarget, $expectInherit, $expectInstance } from './utils/error';
 import { hashHex } from './utils/hash';
@@ -30,6 +31,9 @@ import LRUCache from './utils/LRUCache';
 import { initMathEngines } from './utils/math-loader';
 
 export default class Engine {
+  /** @type {import('~types/semantic').SemanticRenderer | undefined} */
+  semanticRenderer;
+
   /**
    *
    * @param {Partial<import('./Cherry').CherryOptions>} markdownParams 初始化Cherry时传入的选项
@@ -417,11 +421,10 @@ export default class Engine {
 
   /**
    * @param {string} md md字符串
-   * @param {'string'|'object'} returnType 返回格式，string：返回html字符串，object：返回结构化数据
    * @param {boolean} forceNoCursor 是否强制不添加光标占位
-   * @returns {string|object} 获取html
+   * @returns {string} Rendered output for the selected backend
    */
-  makeHtml(md, returnType = 'string', forceNoCursor = false) {
+  $renderMarkdown(md, forceNoCursor = false) {
     this.$prepareMakeHtml(md);
     let $md = this.$setFlowSessionCursorCache(md, forceNoCursor);
     $md = this.$cacheBigData($md);
@@ -432,10 +435,56 @@ export default class Engine {
     $md = this.$deCacheBigData($md);
     $md = this.$clearFlowSessionCursorCache($md, forceNoCursor);
     this.$completeMakeHtml($md);
-    if (returnType === 'object') {
-      return htmlparser2.parseDocument($md.replace(/\n/g, ''));
-    }
     return $md;
+  }
+
+  /** @param {string} md @param {'string'|'object'} [returnType] @param {boolean} [forceNoCursor] @returns {string|object} */
+  makeHtml(md, returnType = 'string', forceNoCursor = false) {
+    const html = this.$renderMarkdown(md, forceNoCursor);
+    return returnType === 'object' ? htmlparser2.parseDocument(html.replace(/\n/g, '')) : html;
+  }
+
+  /**
+   * Run the same hooks and precedence using a non-HTML output backend.
+   * @param {string} md
+   * @param {import('~types/semantic').SemanticRenderer} renderer
+   * @param {boolean} forceNoCursor
+   */
+  makeSemantic(md, renderer, forceNoCursor = true) {
+    const clear = () => {
+      this.hashCache.clear();
+      this.$fireHookAction('', 'paragraph', '$cleanCache');
+      this.hooks.paragraph?.forEach((hook) => {
+        if (hook instanceof ParagraphBase) {
+          hook.clearCache();
+          hook.cache?.clear();
+        }
+      });
+    };
+    clear();
+    this.cachedBigData = {};
+    this.semanticRenderer = renderer;
+    try {
+      // User text cannot impersonate renderer references.
+      return this.$renderMarkdown(md.replace(/\uE000/g, '&#57344;').replace(/\uE001/g, '&#57345;'), forceNoCursor);
+    } finally {
+      this.semanticRenderer = undefined;
+      clear();
+    }
+  }
+
+  /** Expand only Cherry-owned references when a hook needs semantic text before the restore phase. */
+  resolveSemanticReferences(content) {
+    let result = content;
+    for (let pass = 0; pass < this.hooks.paragraph.length; pass++) {
+      let next = result.replace(/~~CODE([0-9a-zA-Z]+)\$/g, (match, sign) => CodeBlock.inlineCodeCache[sign] || match);
+      this.hooks.paragraph.forEach((hook) => {
+        if (hook instanceof ParagraphBase) next = hook.restoreCache(next);
+      });
+      if (next === result) break;
+      result = next;
+    }
+    return result;
   }
 
   makeHtmlForBlockquote(md) {

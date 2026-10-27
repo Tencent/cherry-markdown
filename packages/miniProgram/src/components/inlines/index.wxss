@@ -1,0 +1,55 @@
+:host {
+  display: block;
+}
+.md-inline-text {
+  line-height: 1.75;
+  color: #24292f;
+}
+.md-strong {
+  font-weight: 700;
+}
+.md-em {
+  font-style: italic;
+}
+.md-inline-code,
+.md-math-inline {
+  font-family: monospace;
+  color: #c2410c;
+  background: #f1f5f9;
+}
+.md-underline {
+  text-decoration: underline;
+}
+.md-strike {
+  text-decoration: line-through;
+}
+.md-link,
+.md-cursor {
+  color: #1677ff;
+}
+.md-sub {
+  font-size: 0.8em;
+}
+.md-sup {
+  font-size: 0.8em;
+}
+.md-inline-image {
+  display: block;
+  width: 240rpx;
+  margin: 12rpx 0;
+  background: #eef2f7;
+}
+.md-image-placeholder {
+  padding: 20rpx;
+  margin: 12rpx 0;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.md-highlight {
+  background: #fff3b0;
+}
+.md-ruby-annotation {
+  font-size: 24rpx;
+  color: #64748b;
+}

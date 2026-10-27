@@ -55,7 +55,7 @@ export default class MathBlock extends ParagraphBase {
   }
 
   toHtml(wholeMatch, lineSpace, leadingChar, content) {
-    LoadMathModule.bind(this)('engine');
+    if (!this.$engine?.semanticRenderer) LoadMathModule.bind(this)('engine');
     // 去掉开头的空字符，去掉结尾的换行符
     const wholeMatchWithoutSpace = wholeMatch.replace(/^[ \f\r\t\v]*/, '').replace(/\s*$/, '');
     // 去掉匹配到的第一个换行符
@@ -79,6 +79,19 @@ export default class MathBlock extends ParagraphBase {
     const hasCursor = /CHERRYFLOWSESSIONCURSOR/.test($content);
     $content = $content.replace('CHERRYFLOWSESSIONCURSOR', '');
     // 保留一份源码到渲染节点上，供 formulaUtilsHandler 直接读取，避免再次对全文做正则解析。
+    if (this.$engine?.semanticRenderer) {
+      return (
+        leadingChar +
+        this.getCacheWithSpace(
+          this.pushCache(
+            this.$engine?.semanticRenderer.atom('math_block', { text: $content, display: true, lines }),
+            sign,
+            lines,
+          ),
+          wholeMatch,
+        )
+      );
+    }
     const encodedFormulaSource = encodeURIComponent($content);
 
     if (this.engine === 'katex') {

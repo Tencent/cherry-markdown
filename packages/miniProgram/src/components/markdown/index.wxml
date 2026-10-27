@@ -1,0 +1,3 @@
+<view class="cherry-markdown custom-class">
+  <cherry-block wx:for="{{blocks}}" wx:key="id" block="{{item}}" />
+</view>

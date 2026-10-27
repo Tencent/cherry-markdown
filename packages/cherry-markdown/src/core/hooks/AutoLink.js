@@ -188,7 +188,14 @@ export default class AutoLink extends SyntaxBase {
     if (!(this.test(str) && (EMAIL_INLINE.test(str) || URL_INLINE_NO_SLASH.test(str)))) {
       return str;
     }
-    return str.replace(this.RULE.reg, (match, left, protocol, _address, right, index, str) => {
+    const rule = this.$engine?.semanticRenderer
+      ? new RegExp(
+          this.RULE.reg.source.replace(/\[\^((?:\\.|[^\]])*)\]/g, (_, content) => `[^${content}\\uE000\\uE001]`),
+          this.RULE.reg.flags,
+        )
+      : this.RULE.reg;
+    return str.replace(rule, (match, left, protocol, _address, right, index, str) => {
+      if (this.$engine?.semanticRenderer?.isInLink(str, index)) return match;
       // 数字实体字符系临时处理方法，详情参见HTMLBlock注释
       // maybe a html attr, skip it
       let address = _address?.replace(/CHERRYFLOWSESSIONCURSOR/g, '');
@@ -231,6 +238,17 @@ export default class AutoLink extends SyntaxBase {
           return match;
         case 'mailto:': // email
           if (EMAIL.test(address)) {
+            if (this.$engine?.semanticRenderer)
+              return (
+                prefix +
+                this.$engine?.semanticRenderer.wrap(
+                  'link',
+                  { href: encodeURIOnce(`${$protocol}${address}`) },
+                  $e(address),
+                ) +
+                suffix +
+                breakTrailing
+              );
             return `${prefix}<a href="${encodeURIOnce(`${$protocol}${address}`)}" ${this.target} ${this.rel}>${$e(
               address,
             )}</a>${suffix}${breakTrailing}`;
@@ -241,6 +259,17 @@ export default class AutoLink extends SyntaxBase {
           if (prefix === suffix || !isWrappedByBracket) {
             // mailto
             if (EMAIL.test(address)) {
+              if (this.$engine?.semanticRenderer)
+                return (
+                  prefix +
+                  this.$engine?.semanticRenderer.wrap(
+                    'link',
+                    { href: `mailto:${encodeURIOnce(address)}` },
+                    $e(address),
+                  ) +
+                  suffix +
+                  breakTrailing
+                );
               return `${prefix}<a href="mailto:${encodeURIOnce(address)}" ${this.target} ${this.rel}>${$e(
                 address,
               )}</a>${suffix}${breakTrailing}`;
@@ -256,6 +285,12 @@ export default class AutoLink extends SyntaxBase {
           if (isWrappedByBracket) {
             // mailto
             if (EMAIL.test(address)) {
+              if (this.$engine?.semanticRenderer)
+                return this.$engine?.semanticRenderer.wrap(
+                  'link',
+                  { href: `mailto:${encodeURIOnce(address)}` },
+                  $e(address),
+                );
               return `<a href="mailto:${encodeURIOnce(address)}" ${this.target} ${this.rel}>${$e(address)}</a>`;
             }
             // 可识别任意协议的URL，或不以斜杠开头的URL
@@ -323,6 +358,12 @@ export default class AutoLink extends SyntaxBase {
     const safeUri = encodeURIOnce(processedURL);
     const displayUri = $e(linkText);
     const additionalAttrs = [this.target, this.rel].filter(Boolean).join(' ');
+    if (this.$engine?.semanticRenderer)
+      return this.$engine?.semanticRenderer.wrap(
+        'link',
+        { href: AutoLink.escapePreservedSymbol(safeUri) },
+        AutoLink.escapePreservedSymbol(displayUri),
+      );
     const customAttrs =
       // @ts-ignore
       this.$engine.$cherry.options.engine.syntax.autoLink.attrRender(processedURL, processedURL) ?? '';

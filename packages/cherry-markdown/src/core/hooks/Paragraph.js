@@ -65,6 +65,13 @@ export default class Paragraph extends ParagraphBase {
         }
         // 计算行号
         const lines = this.getLineCount(p, p);
+        if (this.$engine?.semanticRenderer) {
+          return this.$engine?.semanticRenderer.wrap(
+            'paragraph',
+            { lines, classicBr: this.classicBr },
+            html.replace(/^\n+|\n+$/g, ''),
+          );
+        }
         return `<${domName} data-sign="${sign}${lines}" data-type="${domName}" data-lines="${lines}">${this.$cleanParagraph(
           html,
         )}</${domName}>`;

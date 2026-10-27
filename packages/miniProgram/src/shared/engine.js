@@ -2,9 +2,18 @@ import mergeWith from '@/utils/toolkit/mergeWith';
 import cloneDeep from '@/utils/toolkit/cloneDeep';
 import defaultConfig from '@/Cherry.config';
 import { customizer } from '@/utils/config';
-import { urlProcessorProxy } from '@/UrlCache';
+import UrlCache, { urlProcessorProxy } from '@/UrlCache';
 import Engine from '@/Engine';
 import locales from '@/locales/index';
+import { isValidScheme } from '@/utils/sanitize';
+
+export function cloneSemanticBlocks(blocks) {
+  return cloneDeep(blocks);
+}
+
+export function isValidSemanticUrl(value, image = false) {
+  return (image && /^data:image\/(?:png|jpe?g|gif|webp|svg\+xml)[;,]/i.test(value)) || isValidScheme(value);
+}
 
 class MiniProgramCherryContext {
   constructor(options) {
@@ -44,11 +53,14 @@ export function createMiniProgramEngine(options = {}) {
   const cherry = new MiniProgramCherryContext(normalizedOptions);
   const engine = new Engine(normalizedOptions, cherry);
   engine.$clearFlowSessionCursorCache = function clearFlowSessionCursorCache(md) {
+    if (this.semanticRenderer) return md.replace(/CHERRYFLOWSESSIONCURSOR/g, this.semanticRenderer.atom('cursor', {}));
     if (this.$cherry.options.engine.global.flowSessionCursor) {
       return md.replace(/CHERRYFLOWSESSIONCURSOR/g, this.$cherry.options.engine.global.flowSessionCursor);
     }
     return md;
   };
+  engine.restoreSemanticText = (value) =>
+    engine.$decodeReservedKeywords(UrlCache.restoreAll(engine.$deCacheBigData(value)));
   return engine;
 }
 

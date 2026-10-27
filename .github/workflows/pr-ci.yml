@@ -56,3 +56,6 @@ jobs:
 
       - name: Verify Cherry Markdown published artifacts
         run: vp run -F cherry-markdown test:artifacts
+
+      - name: Verify native MiniProgram artifacts
+        run: vp run -F @cherry-markdown/miniprogram test:artifact

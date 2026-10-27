@@ -49,6 +49,11 @@ export default class Br extends ParagraphBase {
         // node环境下直接输出br
         html = this.classicBr ? '' : '<br/>';
       }
+      if (this.$engine?.semanticRenderer)
+        html = this.$engine?.semanticRenderer.atom('blank', {
+          lines: lineCount,
+          text: this.classicBr ? '' : index === 0 ? '' : '\n',
+        });
       const placeHolder = this.pushCache(html, sign, lineCount);
       // 结尾只补充一个\n是因为Br将下一个段落中间的所有换行都替换掉了，而两个换行符会导致下一个区块行数计算错误
       return `\n\n${placeHolder}\n`;

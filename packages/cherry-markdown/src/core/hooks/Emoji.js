@@ -100,6 +100,7 @@ export default class Emoji extends SyntaxBase {
         emojiCode = emojiCode.toUpperCase();
       }
       const src = this.options.resourceURL.replace(/\$\{code\}/g, emojiCode);
+      if (this.$engine?.semanticRenderer) return this.$engine?.semanticRenderer.atom('image', { src, alt: emojiKey });
       return `<img class="emoji" src="${src}" alt="${_e(emojiKey)}" />`;
     });
   }

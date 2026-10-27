@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "Cherry MiniProgram"
+  "navigationBarTitleText": "Cherry Native",
+  "usingComponents": {
+    "cherry-markdown": "/components/cherry/markdown/index"
+  }
 }

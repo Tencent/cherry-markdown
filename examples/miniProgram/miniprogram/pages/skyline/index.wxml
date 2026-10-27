@@ -1,0 +1,6 @@
+<view class="page">
+  <view class="toolbar"><text class="title">Cherry 原生 Markdown</text><button size="mini" bindtap="resetDemo">重新播放</button></view>
+  <scroll-view class="content" scroll-y="{{true}}" type="list">
+    <view class="preview"><cherry-markdown id="markdown" bind:linktap="handleLinkTap" /></view>
+  </scroll-view>
+</view>

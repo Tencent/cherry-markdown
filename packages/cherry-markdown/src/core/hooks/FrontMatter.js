@@ -25,6 +25,11 @@ export default class FrontMatter extends ParagraphBase {
   }
 
   beforeMakeHtml(str) {
+    this.$engine?.semanticRenderer?.protectUnclosed(
+      str,
+      compileRegExp({ begin: this.RULE.begin, content: '', end: '' }, 'g', true),
+      this.RULE.reg,
+    );
     return str.replace(this.RULE.reg, (match, content) => {
       const lineCount = match.match(/\n/g)?.length ?? 0;
       const sign = `fontMatter${lineCount}`;
@@ -52,12 +57,15 @@ export default class FrontMatter extends ParagraphBase {
         return match;
       }
       // update font-size
-      if ('font-size' in frontmatter || 'fontSize' in frontmatter) {
+      if (!this.$engine?.semanticRenderer && ('font-size' in frontmatter || 'fontSize' in frontmatter)) {
         this.$engine.$cherry.previewer.getDom().style.fontSize = frontmatter['font-size'] || frontmatter.fontSize;
       }
-      const html = `<p data-sign="${sign}" data-type="frontMatter" data-lines="${lineCount}" data-content="${escapeHTMLSpecialChar(
-        JSON.stringify(frontmatter),
-      )}"></p>`;
+      const semantic = this.$engine?.semanticRenderer?.atom('frontmatter', { lines: lineCount });
+      const html =
+        semantic ??
+        `<p data-sign="${sign}" data-type="frontMatter" data-lines="${lineCount}" data-content="${escapeHTMLSpecialChar(
+          JSON.stringify(frontmatter),
+        )}"></p>`;
       const placeHolder = this.pushCache(html, sign, lineCount);
       return `${placeHolder}\n`;
     });

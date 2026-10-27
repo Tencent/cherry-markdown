@@ -1,7 +1,7 @@
 /* global globalThis */
 import { describe, expect, it, vi } from 'vite-plus/test';
 import CherryStream from '../src';
-import { blocksToMiniProgramView, resolvePendingImages } from '../src/shared/view';
+import { blocksToMiniProgramView } from '../src/shared/view';
 import { htmlToMiniProgramBlocks } from '../src/shared/transform';
 import { markdownToHtml } from '../src/renderer';
 
@@ -103,12 +103,13 @@ describe('@cherry-markdown/miniprogram stream', () => {
     ]);
   });
 
-  it('resolves deferred image src values for post-setData activation', () => {
-    const blocks = [{ type: 'image', src: '', pendingSrc: '/img.png', alt: 'A' }];
-
-    expect(resolvePendingImages(blocks)).toEqual([
-      { type: 'image', src: '/img.png', pendingSrc: '/img.png', alt: 'A' },
-    ]);
+  it('replaces image placeholders with native images when streaming finishes', () => {
+    const stream = new CherryStream();
+    expect(stream.setMarkdown('![A](/img.png)', { deferImages: true })[0].type).toBe('image_placeholder');
+    expect(stream.setMarkdown('![A](/img.png)', { deferImages: false })[0]).toMatchObject({
+      type: 'image',
+      src: '/img.png',
+    });
   });
 
   it('keeps deferred images as placeholders to avoid native image work during streaming', () => {
@@ -189,13 +190,13 @@ describe('@cherry-markdown/miniprogram stream', () => {
             task: true,
             marker: '☑',
             checked: true,
-            inlines: [{ type: 'text', text: 'done', className: '', href: '' }],
+            children: [{ type: 'paragraph', inlines: [{ type: 'text', text: 'done', className: '', href: '' }] }],
           },
           {
             task: true,
             marker: '☐',
             checked: false,
-            inlines: [{ type: 'text', text: 'todo', className: '', href: '' }],
+            children: [{ type: 'paragraph', inlines: [{ type: 'text', text: 'todo', className: '', href: '' }] }],
           },
         ],
       },
@@ -209,8 +210,16 @@ describe('@cherry-markdown/miniprogram stream', () => {
       type: 'list',
       ordered: false,
       children: [
-        { task: false, marker: '•', inlines: [{ type: 'text', text: 'one', className: '', href: '' }] },
-        { task: false, marker: '•', inlines: [{ type: 'text', text: 'two', className: '', href: '' }] },
+        {
+          task: false,
+          marker: '•',
+          children: [{ type: 'paragraph', inlines: [{ type: 'text', text: 'one', className: '', href: '' }] }],
+        },
+        {
+          task: false,
+          marker: '•',
+          children: [{ type: 'paragraph', inlines: [{ type: 'text', text: 'two', className: '', href: '' }] }],
+        },
       ],
     });
 
@@ -218,8 +227,16 @@ describe('@cherry-markdown/miniprogram stream', () => {
       type: 'list',
       ordered: true,
       children: [
-        { task: false, marker: '1.', inlines: [{ type: 'text', text: 'one', className: '', href: '' }] },
-        { task: false, marker: '2.', inlines: [{ type: 'text', text: 'two', className: '', href: '' }] },
+        {
+          task: false,
+          marker: '1.',
+          children: [{ type: 'paragraph', inlines: [{ type: 'text', text: 'one', className: '', href: '' }] }],
+        },
+        {
+          task: false,
+          marker: '2.',
+          children: [{ type: 'paragraph', inlines: [{ type: 'text', text: 'two', className: '', href: '' }] }],
+        },
       ],
     });
   });
@@ -286,8 +303,8 @@ describe('@cherry-markdown/miniprogram stream', () => {
     const originalSelf = globalThis.self;
 
     try {
-      delete globalThis.window;
-      delete globalThis.self;
+      vi.stubGlobal('window', undefined);
+      vi.stubGlobal('self', undefined);
 
       const stream = new CherryStream();
       expect(stream.makeBlocks('**hello**')).toEqual([

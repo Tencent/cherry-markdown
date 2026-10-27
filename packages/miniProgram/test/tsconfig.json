@@ -7,5 +7,5 @@
     "rootDir": "..",
     "types": ["vite-plus/test/globals"]
   },
-  "include": ["./**/*.ts", "../src/shared/transform.js"]
+  "include": ["./**/*.ts", "../src/**/*.ts"]
 }

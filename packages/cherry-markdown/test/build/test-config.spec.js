@@ -40,7 +40,7 @@ it.each([false, true])('loads package test configurations with coverage gate %s'
   expect(configs.milkdown.test.coverage.exclude).toContain('**/*.d.ts');
   expect(configs.miniProgram.test.coverage).toBeUndefined();
   expect(configs.miniProgram.resolve.alias['@/Sanitizer']).toBe(
-    resolve(repoRoot, 'packages/miniProgram/src/shared/Sanitizer.miniProgram.js'),
+    resolve(repoRoot, 'packages/miniProgram/src/shared/Sanitizer.miniProgram.ts'),
   );
   expect(configs.vscodePlugin.test).toEqual({ environment: 'node', include: ['test/**/*.test.ts'] });
 });

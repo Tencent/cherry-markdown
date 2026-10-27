@@ -13,35 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import type {
+  MiniProgramImage,
+  MiniProgramMathInline,
+  MiniProgramInline,
+  MiniProgramListItem,
+  MiniProgramTableCell,
+  MiniProgramTableRow,
+  MiniProgramTableBlock,
+  MiniProgramCodeBlock,
+  MiniProgramMathBlock,
+  MiniProgramDiagramBlock,
+  MiniProgramRichTextNode,
+  MiniProgramUnsupportedBlock,
+  MiniProgramBlock,
+  MiniProgramTransformOptions,
+  MiniProgramEngine,
+} from '../types';
 import * as htmlparser2 from 'htmlparser2';
-
-/**
- * @typedef {{ type: 'text'; text: string }} MiniProgramText
- * @typedef {{ type: 'break' }} MiniProgramBreak
- * @typedef {{ type: 'cursor' }} MiniProgramCursor
- * @typedef {{ type: 'strong' | 'em' | 'code' | 'span' | 'underline' | 'strikethrough' | 'sub' | 'sup'; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramInlineWrapper
- * @typedef {{ type: 'link'; href: string; title?: string; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramLink
- * @typedef {{ type: 'image'; src: string; alt?: string; title?: string; attrs?: Record<string, string> }} MiniProgramImage
- * @typedef {{ type: 'math_inline'; text: string; attrs?: Record<string, string> }} MiniProgramMathInline
- * @typedef {MiniProgramText | MiniProgramBreak | MiniProgramCursor | MiniProgramInlineWrapper | MiniProgramLink | MiniProgramImage | MiniProgramMathInline} MiniProgramInline
- *
- * @typedef {{ type: 'paragraph'; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramParagraphBlock
- * @typedef {{ type: 'heading'; level: number; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramHeadingBlock
- * @typedef {{ type: 'blockquote'; attrs?: Record<string, string>; children: MiniProgramBlock[] }} MiniProgramBlockquoteBlock
- * @typedef {{ type: 'list_item'; attrs?: Record<string, string>; checked?: boolean; children: MiniProgramBlock[] }} MiniProgramListItem
- * @typedef {{ type: 'list'; ordered: boolean; attrs?: Record<string, string>; children: MiniProgramListItem[] }} MiniProgramListBlock
- * @typedef {{ type: 'table_cell'; header: boolean; align?: 'left' | 'center' | 'right'; attrs?: Record<string, string>; children: MiniProgramInline[] }} MiniProgramTableCell
- * @typedef {{ type: 'table_row'; attrs?: Record<string, string>; children: MiniProgramTableCell[] }} MiniProgramTableRow
- * @typedef {{ type: 'table'; attrs?: Record<string, string>; header: MiniProgramTableRow[]; rows: MiniProgramTableRow[] }} MiniProgramTableBlock
- * @typedef {{ type: 'code_block'; lang: string; text: string; nodes?: MiniProgramRichTextNode[]; attrs?: Record<string, string> }} MiniProgramCodeBlock
- * @typedef {{ type: 'math_block'; text: string; display: boolean; attrs?: Record<string, string> }} MiniProgramMathBlock
- * @typedef {{ type: 'diagram'; kind: 'mermaid'; text: string; attrs?: Record<string, string> }} MiniProgramDiagramBlock
- * @typedef {{ type: 'html'; nodes: MiniProgramRichTextNode[] }} MiniProgramHtmlBlock
- * @typedef {MiniProgramParagraphBlock | MiniProgramHeadingBlock | MiniProgramBlockquoteBlock | MiniProgramListBlock | MiniProgramListItem | MiniProgramTableBlock | MiniProgramCodeBlock | MiniProgramMathBlock | MiniProgramDiagramBlock | MiniProgramImage | MiniProgramHtmlBlock} MiniProgramBlock
- *
- * @typedef {{ type: 'text'; text: string } | { name: string; attrs?: Record<string, string>; children?: MiniProgramRichTextNode[] }} MiniProgramRichTextNode
- * @typedef {{ unknownTag?: 'html' | 'unwrap' | 'drop'; forceNoCursor?: boolean }} MiniProgramTransformOptions
- */
+type AnyNode = ReturnType<typeof htmlparser2.parseDocument>['children'][number];
+type Element = ReturnType<typeof htmlparser2.DomUtils.getElementsByTagName>[number];
+type Text = Extract<AnyNode, { type: typeof htmlparser2.ElementType.Text }>;
 
 const BLOCK_TAGS = new Set([
   'address',
@@ -80,44 +72,27 @@ const FALLBACK_TAGS = new Set(['table', 'thead', 'tbody', 'tfoot', 'tr', 'th', '
 const SKIP_TAGS = new Set(['script', 'style']);
 const INLINE_TAGS = new Set(['a', 'b', 'br', 'code', 'del', 'em', 'i', 's', 'span', 'strong', 'sub', 'sup', 'u']);
 
-const RICH_TEXT_TABLE_STYLE = {
+const RICH_TEXT_TABLE_STYLE: Record<string, string> = {
   table:
     'width:100%;border-collapse:collapse;border-spacing:0;background:#fff;margin:8px 0;font-size:14px;line-height:1.6;',
   th: 'border:1px solid #d0d7de;background:#f6f8fa;color:#24292f;font-weight:600;padding:6px 8px;text-align:left;',
   td: 'border:1px solid #d0d7de;color:#24292f;padding:6px 8px;text-align:left;',
 };
 
-/**
- * @param {any} node
- * @returns {node is { type: string; name: string; attribs?: Record<string, string>; children?: any[] }}
- */
-function isTag(node) {
-  return node && (node.type === 'tag' || node.type === 'script' || node.type === 'style');
+function isTag(node: AnyNode | null | undefined): node is Element {
+  return !!node && (node.type === 'tag' || node.type === 'script' || node.type === 'style');
 }
 
-/**
- * @param {any} node
- * @returns {boolean}
- */
-function isText(node) {
-  return node && node.type === 'text';
+function isText(node: AnyNode | null | undefined): node is Text {
+  return !!node && node.type === 'text';
 }
 
-/**
- * @param {any} node
- * @returns {boolean}
- */
-function isSkippableTag(node) {
+function isSkippableTag(node: AnyNode) {
   return isTag(node) && SKIP_TAGS.has(String(node.name).toLowerCase());
 }
 
-/**
- * @param {Record<string, string>} attrs
- * @returns {Record<string, string>}
- */
-function sanitizeAttrs(attrs = {}) {
-  /** @type {Record<string, string>} */
-  const safeAttrs = {};
+function sanitizeAttrs(attrs: Record<string, string> = {}) {
+  const safeAttrs: Record<string, string> = {};
   Object.keys(attrs).forEach((key) => {
     if (/^on/i.test(key)) {
       return;
@@ -134,7 +109,7 @@ function sanitizeAttrs(attrs = {}) {
   return safeAttrs;
 }
 
-function withRichTextDefaultStyle(tagName, attrs = {}) {
+function withRichTextDefaultStyle(tagName: string, attrs: Record<string, string> = {}) {
   const defaultStyle = RICH_TEXT_TABLE_STYLE[tagName];
   if (!defaultStyle) {
     return attrs;
@@ -145,35 +120,19 @@ function withRichTextDefaultStyle(tagName, attrs = {}) {
   };
 }
 
-/**
- * @param {Record<string, string>} attrs
- * @returns {boolean}
- */
-function isCursorAttrs(attrs = {}) {
+function isCursorAttrs(attrs: Record<string, string> = {}) {
   return /\bcherry-flow-session-cursor\b/.test(attrs.class || '');
 }
 
-/**
- * @param {Record<string, string>} attrs
- * @returns {boolean}
- */
-function isTaskMarkerAttrs(attrs = {}) {
+function isTaskMarkerAttrs(attrs: Record<string, string> = {}) {
   return /\bch-icon\b/.test(attrs.class || '') && /\bch-icon-(?:check|square)\b/.test(attrs.class || '');
 }
 
-/**
- * @param {Record<string, string>} attrs
- * @returns {boolean}
- */
-function isCheckedTaskMarkerAttrs(attrs = {}) {
+function isCheckedTaskMarkerAttrs(attrs: Record<string, string> = {}) {
   return /\bch-icon-check\b/.test(attrs.class || '');
 }
 
-/**
- * @param {Record<string, string>} attrs
- * @returns {boolean}
- */
-function isMathAttrs(attrs = {}) {
+function isMathAttrs(attrs: Record<string, string> = {}) {
   return attrs['data-type'] === 'mathBlock' || /\bCherry-(?:InlineMath|Math)\b/.test(attrs.class || '');
 }
 
@@ -185,42 +144,30 @@ function safeDecodeURIComponent(value = '') {
   }
 }
 
-/**
- * @param {any} node
- * @returns {string}
- */
-function getText(node) {
+function getText(node: AnyNode): string {
   if (!node) {
     return '';
   }
+  if (isSkippableTag(node)) return '';
   if (isText(node)) {
     return node.data || '';
   }
-  return (node.children || []).map(getText).join('');
+  return ('children' in node ? node.children : []).map(getText).join('');
 }
 
-/**
- * @param {string | undefined} className
- * @returns {string}
- */
 function getLanguageFromClass(className = '') {
   const match = String(className).match(/(?:^|\s)language-([^\s]+)/);
   return match ? match[1] : '';
 }
 
-/**
- * @param {any} node
- * @param {(node: any) => boolean} predicate
- * @returns {any}
- */
-function findDescendant(node, predicate) {
+function findDescendant(node: AnyNode | null | undefined, predicate: (node: Element) => boolean): Element | null {
   if (!node) {
     return null;
   }
-  if (predicate(node)) {
+  if (isTag(node) && predicate(node)) {
     return node;
   }
-  const children = node.children || [];
+  const children = 'children' in node ? node.children : [];
   for (let index = 0; index < children.length; index += 1) {
     const found = findDescendant(children[index], predicate);
     if (found) {
@@ -230,19 +177,11 @@ function findDescendant(node, predicate) {
   return null;
 }
 
-/**
- * @param {any} node
- * @returns {any[]}
- */
-function getElementChildren(node) {
-  return (node?.children || []).filter(isTag);
+function getElementChildren(node: AnyNode | null | undefined): Element[] {
+  return (node && 'children' in node ? node.children : []).filter(isTag);
 }
 
-/**
- * @param {any} node
- * @returns {boolean}
- */
-function isCodeBlockWrapper(node) {
+function isCodeBlockWrapper(node: AnyNode) {
   if (!isTag(node)) {
     return false;
   }
@@ -250,11 +189,7 @@ function isCodeBlockWrapper(node) {
   return attrs['data-type'] === 'codeBlock' || /\bcherry-code-(?:expand|unExpand)\b/.test(attrs.class || '');
 }
 
-/**
- * @param {any} node
- * @returns {MiniProgramCodeBlock}
- */
-function toCodeBlock(node) {
+function toCodeBlock(node: Element): MiniProgramCodeBlock {
   const pre = node.name === 'pre' ? node : findDescendant(node, (child) => isTag(child) && child.name === 'pre');
   const code = findDescendant(pre, (child) => isTag(child) && child.name === 'code');
   const wrapperAttrs = sanitizeAttrs(node.attribs || {});
@@ -271,11 +206,7 @@ function toCodeBlock(node) {
   };
 }
 
-/**
- * @param {any} node
- * @returns {MiniProgramImage}
- */
-function toImage(node) {
+function toImage(node: Element): MiniProgramImage {
   const attrs = sanitizeAttrs(node.attribs || {});
   return {
     type: 'image',
@@ -286,12 +217,7 @@ function toImage(node) {
   };
 }
 
-/**
- * @param {Record<string, string>} attrs
- * @param {any} node
- * @returns {string}
- */
-function getMathText(attrs, node) {
+function getMathText(attrs: Record<string, string>, node: AnyNode): string {
   if (attrs['data-formula-source']) {
     return safeDecodeURIComponent(attrs['data-formula-source']);
   }
@@ -301,11 +227,7 @@ function getMathText(attrs, node) {
   return getText(node).replace(/^\${1,2}|\${1,2}$/g, '');
 }
 
-/**
- * @param {any} node
- * @returns {MiniProgramMathInline}
- */
-function toMathInline(node) {
+function toMathInline(node: Element): MiniProgramMathInline {
   const attrs = sanitizeAttrs(node.attribs || {});
   return {
     type: 'math_inline',
@@ -314,11 +236,7 @@ function toMathInline(node) {
   };
 }
 
-/**
- * @param {any} node
- * @returns {MiniProgramMathBlock}
- */
-function toMathBlock(node) {
+function toMathBlock(node: Element): MiniProgramMathBlock {
   const attrs = sanitizeAttrs(node.attribs || {});
   return {
     type: 'math_block',
@@ -328,11 +246,7 @@ function toMathBlock(node) {
   };
 }
 
-/**
- * @param {MiniProgramCodeBlock} codeBlock
- * @returns {MiniProgramDiagramBlock}
- */
-function codeBlockToDiagram(codeBlock) {
+function codeBlockToDiagram(codeBlock: MiniProgramCodeBlock): MiniProgramDiagramBlock {
   return {
     type: 'diagram',
     kind: 'mermaid',
@@ -341,24 +255,16 @@ function codeBlockToDiagram(codeBlock) {
   };
 }
 
-/**
- * @param {Record<string, string>} attrs
- * @returns {'left' | 'center' | 'right' | undefined}
- */
-function getTableCellAlign(attrs = {}) {
+function getTableCellAlign(attrs: Record<string, string> = {}): 'left' | 'center' | 'right' | undefined {
   const align = String(attrs.align || '').toLowerCase();
   if (align === 'left' || align === 'center' || align === 'right') {
     return align;
   }
   const styleAlign = String(attrs.style || '').match(/text-align\s*:\s*(left|center|right)/i);
-  return styleAlign ? styleAlign[1].toLowerCase() : undefined;
+  return styleAlign ? (styleAlign[1].toLowerCase() as 'left' | 'center' | 'right') : undefined;
 }
 
-/**
- * @param {any} node
- * @returns {MiniProgramTableCell}
- */
-function toTableCell(node) {
+function toTableCell(node: Element): MiniProgramTableCell {
   const tagName = String(node.name).toLowerCase();
   const attrs = sanitizeAttrs(node.attribs || {});
   const align = getTableCellAlign(attrs);
@@ -367,15 +273,11 @@ function toTableCell(node) {
     header: tagName === 'th',
     ...(align ? { align } : {}),
     attrs,
-    children: nodesToInline(node.children || []),
+    children: nodesToInline('children' in node ? node.children : []),
   };
 }
 
-/**
- * @param {any} node
- * @returns {MiniProgramTableRow | null}
- */
-function toTableRow(node) {
+function toTableRow(node: Element): MiniProgramTableRow | null {
   const attrs = sanitizeAttrs(node.attribs || {});
   const cells = getElementChildren(node)
     .filter((child) => child.name === 'th' || child.name === 'td')
@@ -383,15 +285,11 @@ function toTableRow(node) {
   return cells.length > 0 ? { type: 'table_row', attrs, children: cells } : null;
 }
 
-/**
- * @param {any} section
- * @returns {MiniProgramTableRow[]}
- */
-function tableSectionToRows(section) {
+function tableSectionToRows(section: Element): MiniProgramTableRow[] {
   const rows = getElementChildren(section)
     .filter((child) => child.name === 'tr')
     .map(toTableRow)
-    .filter(Boolean);
+    .filter((row): row is MiniProgramTableRow => row !== null);
   if (rows.length > 0) {
     return rows;
   }
@@ -401,11 +299,7 @@ function tableSectionToRows(section) {
     : [];
 }
 
-/**
- * @param {any} node
- * @returns {MiniProgramTableBlock}
- */
-function toTable(node) {
+function toTable(node: Element): MiniProgramTableBlock {
   const table = node.name === 'table' ? node : findDescendant(node, (child) => isTag(child) && child.name === 'table');
   const attrs = sanitizeAttrs((table || node).attribs || {});
   const sections = getElementChildren(table || node);
@@ -416,9 +310,9 @@ function toTable(node) {
   const directRows = sections
     .filter((child) => child.name === 'tr')
     .map(toTableRow)
-    .filter(Boolean);
+    .filter((row): row is MiniProgramTableRow => row !== null);
   const directCells = sections.filter((child) => child.name === 'th' || child.name === 'td');
-  const standaloneRow =
+  const standaloneRow: MiniProgramTableRow[] =
     directCells.length > 0 ? [{ type: 'table_row', attrs: {}, children: directCells.map(toTableCell) }] : [];
 
   return {
@@ -429,18 +323,14 @@ function toTable(node) {
   };
 }
 
-/**
- * @param {any[]} children
- * @returns {{ checked: boolean; children: any[] } | null}
- */
-function extractTaskListInfo(children = []) {
+function extractTaskListInfo(children: AnyNode[] = []) {
   const markerIndex = children.findIndex((child) => !(isText(child) && child.data.trim() === ''));
   const markerParent = children[markerIndex];
   if (!markerParent) {
     return null;
   }
 
-  const stripMarkerFromInlineChildren = (inlineChildren = []) => {
+  const stripMarkerFromInlineChildren = (inlineChildren: AnyNode[] = []) => {
     const inlineMarkerIndex = inlineChildren.findIndex((child) => !(isText(child) && child.data.trim() === ''));
     const marker = inlineChildren[inlineMarkerIndex];
     if (!isTag(marker) || marker.name !== 'span' || !isTaskMarkerAttrs(marker.attribs || {})) {
@@ -450,7 +340,9 @@ function extractTaskListInfo(children = []) {
     const nextTextIndex = nextChildren.findIndex((child) => !(isText(child) && child.data === ''));
     const nextText = nextChildren[nextTextIndex];
     if (isText(nextText)) {
-      nextChildren[nextTextIndex] = { ...nextText, data: nextText.data.replace(/^\s+/, '') };
+      const trimmed = nextText.cloneNode();
+      trimmed.data = nextText.data.replace(/^\s+/, '');
+      nextChildren[nextTextIndex] = trimmed;
     }
     return {
       checked: isCheckedTaskMarkerAttrs(marker.attribs || {}),
@@ -464,7 +356,9 @@ function extractTaskListInfo(children = []) {
       return null;
     }
     const nextChildren = children.slice();
-    nextChildren[markerIndex] = { ...markerParent, children: stripped.children };
+    const paragraph = markerParent.cloneNode(false);
+    paragraph.children = stripped.children;
+    nextChildren[markerIndex] = paragraph;
     return { checked: stripped.checked, children: nextChildren };
   }
 
@@ -472,11 +366,7 @@ function extractTaskListInfo(children = []) {
   return stripped ? { checked: stripped.checked, children: stripped.children } : null;
 }
 
-/**
- * @param {MiniProgramInline[]} children
- * @returns {boolean}
- */
-function hasVisibleInline(children) {
+function hasVisibleInline(children: MiniProgramInline[]) {
   return children.some((child) => {
     if (child.type === 'text') {
       return child.text.trim() !== '';
@@ -485,11 +375,7 @@ function hasVisibleInline(children) {
   });
 }
 
-/**
- * @param {any[]} children
- * @returns {any | null}
- */
-function getOnlyImageChild(children = []) {
+function getOnlyImageChild(children: AnyNode[] = []) {
   const meaningful = children.filter((child) => !(isText(child) && child.data.trim() === ''));
   if (meaningful.length === 1 && isTag(meaningful[0]) && meaningful[0].name === 'img') {
     return meaningful[0];
@@ -497,11 +383,7 @@ function getOnlyImageChild(children = []) {
   return null;
 }
 
-/**
- * @param {any} node
- * @returns {boolean}
- */
-function isBlockLikeNode(node) {
+function isBlockLikeNode(node: AnyNode) {
   if (!isTag(node)) {
     return false;
   }
@@ -515,24 +397,17 @@ function isBlockLikeNode(node) {
   return BLOCK_TAGS.has(tagName) || FALLBACK_TAGS.has(tagName) || !INLINE_TAGS.has(tagName);
 }
 
-/**
- * @param {any[]} children
- * @returns {boolean}
- */
-function hasBlockChildren(children = []) {
+function hasBlockChildren(children: AnyNode[] = []) {
   return children.some((child) => isBlockLikeNode(child));
 }
 
-/**
- * @param {any[]} children
- * @param {MiniProgramTransformOptions} options
- * @returns {MiniProgramBlock[]}
- */
-function mixedChildrenToBlocks(children = [], options = {}) {
-  /** @type {MiniProgramBlock[]} */
-  const blocks = [];
-  /** @type {any[]} */
-  let inlineBuffer = [];
+function mixedChildrenToBlocks(
+  children: AnyNode[] = [],
+  options: MiniProgramTransformOptions = {},
+): MiniProgramBlock[] {
+  const blocks: MiniProgramBlock[] = [];
+
+  let inlineBuffer: AnyNode[] = [];
   const flushInline = () => {
     if (inlineBuffer.length === 0) {
       return;
@@ -555,19 +430,11 @@ function mixedChildrenToBlocks(children = [], options = {}) {
   return blocks;
 }
 
-/**
- * @param {any[]} nodes
- * @returns {MiniProgramInline[]}
- */
-function nodesToInline(nodes = []) {
+function nodesToInline(nodes: AnyNode[] = []): MiniProgramInline[] {
   return nodes.flatMap((node) => nodeToInline(node));
 }
 
-/**
- * @param {any} node
- * @returns {MiniProgramInline[]}
- */
-function nodeToInline(node) {
+function nodeToInline(node: AnyNode): MiniProgramInline[] {
   if (!node || isSkippableTag(node)) {
     return [];
   }
@@ -575,7 +442,7 @@ function nodeToInline(node) {
     return node.data ? [{ type: 'text', text: node.data }] : [];
   }
   if (!isTag(node)) {
-    return nodesToInline(node.children || []);
+    return nodesToInline('children' in node ? node.children : []);
   }
   const tagName = String(node.name).toLowerCase();
   const rawAttrs = node.attribs || {};
@@ -593,7 +460,7 @@ function nodeToInline(node) {
   if (tagName === 'span' && isMathAttrs(rawAttrs)) {
     return [toMathInline(node)];
   }
-  const children = nodesToInline(node.children || []);
+  const children = nodesToInline('children' in node ? node.children : []);
   switch (tagName) {
     case 'a':
       return [
@@ -629,11 +496,7 @@ function nodeToInline(node) {
   }
 }
 
-/**
- * @param {any} node
- * @returns {MiniProgramRichTextNode[]}
- */
-function nodeToRichTextNodes(node) {
+function nodeToRichTextNodes(node: AnyNode): MiniProgramRichTextNode[] {
   if (!node || isSkippableTag(node)) {
     return [];
   }
@@ -641,11 +504,11 @@ function nodeToRichTextNodes(node) {
     return node.data ? [{ type: 'text', text: node.data }] : [];
   }
   if (!isTag(node)) {
-    return nodesToRichTextNodes(node.children || []);
+    return nodesToRichTextNodes('children' in node ? node.children : []);
   }
   const tagName = String(node.name).toLowerCase();
   const attrs = withRichTextDefaultStyle(tagName, sanitizeAttrs(node.attribs || {}));
-  const children = nodesToRichTextNodes(node.children || []);
+  const children = nodesToRichTextNodes('children' in node ? node.children : []);
   return [
     {
       name: node.name,
@@ -655,29 +518,15 @@ function nodeToRichTextNodes(node) {
   ];
 }
 
-/**
- * @param {any[]} nodes
- * @returns {MiniProgramRichTextNode[]}
- */
-function nodesToRichTextNodes(nodes = []) {
+function nodesToRichTextNodes(nodes: AnyNode[] = []): MiniProgramRichTextNode[] {
   return nodes.flatMap((node) => nodeToRichTextNodes(node));
 }
 
-/**
- * @param {any} node
- * @returns {MiniProgramHtmlBlock[]}
- */
-function toHtmlFallback(node) {
-  const nodes = nodeToRichTextNodes(node);
-  return nodes.length > 0 ? [{ type: 'html', nodes }] : [];
+function toUnsupported(node: Element): MiniProgramUnsupportedBlock[] {
+  return [{ type: 'unsupported', tag: node.name, text: getText(node) }];
 }
 
-/**
- * @param {any} node
- * @param {MiniProgramTransformOptions} options
- * @returns {MiniProgramBlock[]}
- */
-function nodeToBlocks(node, options = {}) {
+function nodeToBlocks(node: AnyNode, options: MiniProgramTransformOptions = {}): MiniProgramBlock[] {
   if (!node || isSkippableTag(node)) {
     return [];
   }
@@ -688,7 +537,7 @@ function nodeToBlocks(node, options = {}) {
     return [{ type: 'paragraph', children: [{ type: 'text', text: node.data }] }];
   }
   if (!isTag(node)) {
-    return mixedChildrenToBlocks(node.children || [], options);
+    return mixedChildrenToBlocks('children' in node ? node.children : [], options);
   }
   const tagName = String(node.name).toLowerCase();
   const rawAttrs = node.attribs || {};
@@ -701,7 +550,14 @@ function nodeToBlocks(node, options = {}) {
     return String(codeBlock.lang || '').toLowerCase() === 'mermaid' ? [codeBlockToDiagram(codeBlock)] : [codeBlock];
   }
   if (/^h[1-6]$/.test(tagName)) {
-    return [{ type: 'heading', level: Number(tagName[1]), attrs, children: nodesToInline(node.children || []) }];
+    return [
+      {
+        type: 'heading',
+        level: Number(tagName[1]),
+        attrs,
+        children: nodesToInline('children' in node ? node.children : []),
+      },
+    ];
   }
   if (tagName === 'img') {
     const image = toImage(node);
@@ -714,10 +570,9 @@ function nodeToBlocks(node, options = {}) {
     return [toTable(node)];
   }
   if (tagName === 'ul' || tagName === 'ol') {
-    /** @type {MiniProgramListItem[]} */
-    const children = (node.children || [])
-      .filter((child) => isTag(child) && child.name === 'li')
-      .map((child) => {
+    const children = getElementChildren(node)
+      .filter((child) => child.name === 'li')
+      .map((child): MiniProgramListItem => {
         const taskListInfo = extractTaskListInfo(child.children || []);
         return {
           type: 'list_item',
@@ -729,7 +584,7 @@ function nodeToBlocks(node, options = {}) {
     return [{ type: 'list', ordered: tagName === 'ol', attrs, children }];
   }
   if (tagName === 'li') {
-    const taskListInfo = extractTaskListInfo(node.children || []);
+    const taskListInfo = extractTaskListInfo('children' in node ? node.children : []);
     return [
       {
         type: 'list_item',
@@ -740,38 +595,32 @@ function nodeToBlocks(node, options = {}) {
     ];
   }
   if (tagName === 'p' || tagName === 'div') {
-    const onlyImage = getOnlyImageChild(node.children || []);
+    const onlyImage = getOnlyImageChild('children' in node ? node.children : []);
     if (onlyImage) {
       const image = toImage(onlyImage);
       return image.src ? [image] : [];
     }
-    if (hasBlockChildren(node.children || [])) {
-      return mixedChildrenToBlocks(node.children || [], options);
+    if (hasBlockChildren('children' in node ? node.children : [])) {
+      return mixedChildrenToBlocks('children' in node ? node.children : [], options);
     }
-    const children = nodesToInline(node.children || []);
+    const children = nodesToInline('children' in node ? node.children : []);
     return hasVisibleInline(children) ? [{ type: 'paragraph', attrs, children }] : [];
   }
-  if (FALLBACK_TAGS.has(tagName)) {
-    return toHtmlFallback(node);
+  if (tagName === 'hr') {
+    return [{ type: 'thematic_break' }];
   }
-  switch (options.unknownTag || 'html') {
+  switch (options.unknownTag || 'text') {
     case 'unwrap':
-      return mixedChildrenToBlocks(node.children || [], options);
+      return mixedChildrenToBlocks('children' in node ? node.children : [], options);
     case 'drop':
       return [];
-    case 'html':
+    case 'text':
     default:
-      return toHtmlFallback(node);
+      return toUnsupported(node);
   }
 }
 
-/**
- * Converts Cherry-rendered HTML into a MiniProgram-friendly block AST.
- * @param {string} html HTML generated by Cherry.
- * @param {MiniProgramTransformOptions} [options]
- * @returns {MiniProgramBlock[]}
- */
-export function htmlToMiniProgramBlocks(html, options = {}) {
+export function htmlToMiniProgramBlocks(html: string, options: MiniProgramTransformOptions = {}): MiniProgramBlock[] {
   if (typeof html !== 'string' || html.length === 0) {
     return [];
   }
@@ -779,14 +628,11 @@ export function htmlToMiniProgramBlocks(html, options = {}) {
   return mixedChildrenToBlocks(doc.children || [], options);
 }
 
-/**
- * Converts markdown through a Cherry engine instance and returns MiniProgram blocks.
- * @param {{ makeHtml: (markdown: string, returnType?: string, forceNoCursor?: boolean) => string }} engine Cherry Engine instance.
- * @param {string} markdown Markdown source.
- * @param {MiniProgramTransformOptions} [options]
- * @returns {MiniProgramBlock[]}
- */
-export function markdownToMiniProgramBlocks(engine, markdown, options = {}) {
+export function markdownToMiniProgramBlocks(
+  engine: MiniProgramEngine,
+  markdown: string,
+  options: MiniProgramTransformOptions = {},
+): MiniProgramBlock[] {
   if (!engine || typeof engine.makeHtml !== 'function') {
     throw new Error('markdownToMiniProgramBlocks requires a Cherry engine instance.');
   }

@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "cherry-block": "../block/index",
+    "cherry-inlines": "../inlines/index"
+  }
+}

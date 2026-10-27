@@ -46,6 +46,7 @@ export default class Detail extends ParagraphBase {
   }
 
   makeHtml(str, sentenceMakeFunc) {
+    this.$engine?.semanticRenderer?.protectUnclosed(str, this.RULE.begin, this.RULE.reg);
     this.sentenceMakeFunc = sentenceMakeFunc;
     str = str.replace(this.RULE.reg, this.$makeHtml.bind(this));
     return str.replace(getDetailHtmlRule(), this.$makeHtml.bind(this));
@@ -58,6 +59,14 @@ export default class Detail extends ParagraphBase {
     const testHasCache = this.testHasCache(sign);
     if (testHasCache !== false) {
       return prependLineFeedForParagraph(match, testHasCache);
+    }
+    if (this.$engine?.semanticRenderer) {
+      const renderer = this.$engine?.semanticRenderer;
+      const body = this.$getDetailInfo(isOpen, title, content, this.sentenceMakeFunc, isDetailsHtml).html;
+      return prependLineFeedForParagraph(
+        match,
+        this.pushCache(renderer.wrap('detail_group', { lines: lineCount }, body), sign, lineCount),
+      );
     }
     const { type, html } = this.$getDetailInfo(isOpen, title, content, this.sentenceMakeFunc, isDetailsHtml);
     const ret = this.pushCache(
@@ -90,6 +99,19 @@ export default class Detail extends ParagraphBase {
   }
 
   $getDetailHtml(defaultOpen, title, str, sentenceMakeFunc) {
+    if (this.$engine?.semanticRenderer) {
+      const renderer = this.$engine?.semanticRenderer;
+      const paragraph = (text) =>
+        text.trim()
+          ? renderer.wrap(
+              'paragraph',
+              { classicBr: this.classicBr },
+              sentenceMakeFunc(text).html.replace(/^\n+|\n+$/g, ''),
+            )
+          : '';
+      const body = this.isContainsCache(str) ? this.makeExcludingCached(str, paragraph) : paragraph(str);
+      return renderer.wrap('detail', { open: defaultOpen, title }, paragraph(title) + body);
+    }
     let ret = `<details ${defaultOpen ? 'open' : ''}>`;
     const paragraphProcessor = (str) => {
       if (str.trim() === '') {

@@ -176,7 +176,7 @@ describe('Cherry Markdown published artifact configuration', () => {
     const root = resolve(repoRoot, 'packages/miniProgram');
     expectSingleFileBuild(miniBuild);
     expect(miniBuild.root).toBe(root);
-    expect(miniBuild.build.lib.entry).toBe(resolve(root, 'src/index.js'));
+    expect(miniBuild.build.lib.entry).toBe(resolve(root, 'src/index.ts'));
     expect(miniBuild.build.lib.formats).toEqual(['es']);
     expect(filename(miniBuild)).toBe('miniProgram.esm.js');
     expect(miniBuild.build.minify).toBe('oxc');
@@ -187,11 +187,14 @@ describe('Cherry Markdown published artifact configuration', () => {
       exports: 'named',
     });
     expect(miniBuild.resolve.alias).toEqual({
-      '@/Sanitizer': resolve(root, 'src/shared/Sanitizer.miniProgram.js'),
+      '@/Sanitizer': resolve(root, 'src/shared/Sanitizer.miniProgram.ts'),
       '@': src,
       '@cherry': src,
     });
-    expect(miniBuild.plugins.map((plugin) => plugin.name)).toEqual(['cherry-prism-languages']);
+    expect(miniBuild.plugins.map((plugin) => plugin.name)).toEqual([
+      'cherry-prism-languages',
+      'cherry-miniprogram-entity-tables',
+    ]);
     expect(miniBuild.define).toEqual({ BUILD_ENV: JSON.stringify('production') });
   });
 

@@ -37,6 +37,11 @@ export default class Strikethrough extends SyntaxBase {
     if (!this.test(str)) {
       return str;
     }
+    if (this.$engine?.semanticRenderer)
+      return str.replace(
+        this.RULE.reg,
+        (whole, before, text) => before + this.$engine?.semanticRenderer.wrap('strikethrough', {}, text),
+      );
     return str.replace(this.RULE.reg, '$1<del>$2</del>');
   }
 

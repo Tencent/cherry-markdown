@@ -4,9 +4,10 @@ import { prismLanguagePlugin } from '../cherry-markdown/build/prism.plugin.js';
 
 export default createBrowserTestConfig({
   plugins: [prismLanguagePlugin()],
+  define: { BUILD_ENV: JSON.stringify('production') },
   resolve: {
     alias: {
-      '@/Sanitizer': resolve(import.meta.dirname, './src/shared/Sanitizer.miniProgram.js'),
+      '@/Sanitizer': resolve(import.meta.dirname, './src/shared/Sanitizer.miniProgram.ts'),
       '@': resolve(import.meta.dirname, '../cherry-markdown/src'),
       '@cherry': resolve(import.meta.dirname, '../cherry-markdown/src'),
     },

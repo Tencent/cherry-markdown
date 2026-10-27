@@ -41,6 +41,8 @@ export default class Header extends ParagraphBase {
     if (typeof html !== 'string') {
       return '';
     }
+    if (this.$engine?.semanticRenderer)
+      return this.$engine.semanticRenderer.text(this.$engine.resolveSemanticReferences(html));
     return html.replace(/<.*?>/g, '').replace(/&#60;/g, '<').replace(/&#62;/g, '>');
   }
 
@@ -80,6 +82,7 @@ export default class Header extends ParagraphBase {
     // 处理被引擎转换过的实体字符
     const unescapedHeaderText = headerText.replace(/&#60;/g, '<').replace(/&#62;/g, '>');
     let newId = this.$generateId(unescapedHeaderText, true);
+    if (this.$engine?.semanticRenderer) return this.$engine?.semanticRenderer.headingId(newId);
     const idIndex = this.headerIDCache.indexOf(newId);
     if (idIndex !== -1) {
       this.headerIDCounter[idIndex] += 1;
@@ -122,6 +125,15 @@ export default class Header extends ParagraphBase {
     }
     const safeAnchorID = `safe_${anchorID}`; // transform header id to avoid being sanitized
     const sign = this.$engine.hash(`${level}-${processedText.sign}-${anchorID}-${dataLines}`);
+    if (this.$engine?.semanticRenderer)
+      return {
+        html: this.$engine?.semanticRenderer.wrap(
+          'heading',
+          { level, id: anchorID, autoId: idMatch === null, lines: dataLines },
+          html,
+        ),
+        sign,
+      };
     const result = [
       `<h${level} id="${safeAnchorID}" data-sign="${sign}" data-lines="${dataLines}">`,
       this.$getAnchor(anchorID),

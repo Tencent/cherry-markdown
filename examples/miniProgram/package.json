@@ -3,10 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "node build.mjs"
+    "build": "node build.mjs",
+    "typecheck": "tsc --project tsconfig.json --noEmit"
   },
-  "dependencies": {
-    "@cherry-markdown/miniprogram": "https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniprogram@1827.tgz"
-  },
+  "dependencies": {},
   "devDependencies": {}
 }

@@ -30,7 +30,8 @@ export default class Hr extends ParagraphBase {
       const lineCount = (preLines.match(/\n/g) || []).length + 1;
       // 计算签名，签名可能会重复，符合预期
       const sign = `hr${lineCount}`;
-      const placeHolder = this.pushCache(`<hr data-sign="${sign}" data-lines="${lineCount}" />`, sign);
+      const semantic = this.$engine?.semanticRenderer?.atom('thematic_break', { lines: lineCount });
+      const placeHolder = this.pushCache(semantic ?? `<hr data-sign="${sign}" data-lines="${lineCount}" />`, sign);
       return prependLineFeedForParagraph(match, placeHolder);
     });
   }

@@ -215,7 +215,7 @@ describe('shared Prism Babel adapter', () => {
       cpSync(join(repoRoot, 'packages/miniProgram', file), join(mini, file), { recursive: true });
     }
     writeFileSync(join(mini, 'src/other-global-probe.cjs'), 'module.exports = typeof global;');
-    const miniEntry = join(mini, 'src/index.js');
+    const miniEntry = join(mini, 'src/index.ts');
     writeFileSync(
       miniEntry,
       `${readFileSync(miniEntry, 'utf8')}\nexport { default as probe } from './other-global-probe.cjs';`,

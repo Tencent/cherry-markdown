@@ -1,0 +1,49 @@
+<view wx:if="{{block.type === 'panel' || block.type === 'detail'}}" class="md-group">
+  <cherry-block wx:for="{{block.children}}" block="{{item}}" />
+</view>
+<view wx:elif="{{block.type === 'paragraph' || block.type === 'heading'}}" class="md-p {{block.type === 'heading' ? 'md-heading md-h' + block.level : ''}}">
+  <cherry-inlines nodes="{{block.inlines}}" />
+</view>
+<view wx:elif="{{block.type === 'blockquote'}}" class="md-blockquote">
+  <cherry-block wx:for="{{block.children}}" block="{{item}}" />
+</view>
+<view wx:elif="{{block.type === 'list'}}" class="md-list">
+  <view wx:for="{{block.children}}" class="md-list-item">
+    <text class="md-list-marker">{{item.marker}}</text>
+    <view class="md-list-body">
+      <cherry-block wx:for="{{item.children}}" wx:for-item="child" block="{{child}}" />
+    </view>
+  </view>
+</view>
+<scroll-view wx:elif="{{block.type === 'table'}}" class="md-table-scroll" scroll-x="{{true}}" type="list">
+  <view class="md-table">
+    <view wx:for="{{block.header}}" class="md-table-row md-table-head">
+      <view wx:for="{{item.cells}}" wx:for-item="cell" class="md-table-cell md-table-th" style="text-align: {{cell.align || 'left'}};">
+        <cherry-inlines nodes="{{cell.inlines}}" />
+      </view>
+    </view>
+    <view wx:for="{{block.rows}}" class="md-table-row">
+      <view wx:for="{{item.cells}}" wx:for-item="cell" class="md-table-cell" style="text-align: {{cell.align || 'left'}};">
+        <cherry-inlines nodes="{{cell.inlines}}" />
+      </view>
+    </view>
+  </view>
+</scroll-view>
+<view wx:elif="{{block.type === 'code_block'}}" class="md-code-card">
+  <view class="md-code-head">
+    <text>{{block.lang}}</text>
+    <button class="md-copy" size="mini" data-text="{{block.text}}" bindtap="copyCode">复制</button>
+  </view>
+  <text class="md-code" user-select="{{true}}"><text wx:for="{{block.runs}}" class="{{item.className}}">{{item.text}}</text></text>
+</view>
+<view wx:elif="{{block.type === 'math_block' || block.type === 'diagram'}}" class="md-source-card">
+  <view class="md-code-head">
+    <text>{{block.type === 'diagram' ? 'Mermaid 源码' : '公式源码'}}</text>
+    <button class="md-copy" size="mini" data-text="{{block.source || block.text}}" bindtap="copyCode">复制</button>
+  </view>
+  <text class="md-source" user-select="{{true}}">{{block.text}}</text>
+</view>
+<image wx:elif="{{block.type === 'image'}}" class="md-image" src="{{block.src}}" mode="widthFix" lazy-load="{{true}}" data-src="{{block.src}}" bindtap="previewImage" />
+<view wx:elif="{{block.type === 'image_placeholder'}}" class="md-image-placeholder"><text>{{block.text}}</text></view>
+<view wx:elif="{{block.type === 'thematic_break'}}" class="md-rule" />
+<view wx:elif="{{block.type === 'unsupported'}}" class="md-unsupported"><text user-select="{{true}}">{{block.text}}</text></view>

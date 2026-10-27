@@ -32,6 +32,11 @@ export default class Blockquote extends ParagraphBase {
       if (testHasCache !== false) {
         return this.getCacheWithSpace(testHasCache, match);
       }
+      if (this.$engine?.semanticRenderer) {
+        const body = this.$engine.makeHtmlForBlockquote(content.replace(/^([ \t]*>)/gm, ''));
+        const result = this.$engine?.semanticRenderer.wrap('blockquote', { lines: lineCount }, body);
+        return this.getCacheWithSpace(this.pushCache(result, sign, lineCount), match);
+      }
       let handledHtml = `<blockquote data-sign="${sign}_${lineCount}" data-lines="${lineCount}">`;
       const htmlDomTest = content.split(/\n</);
       // 如果引用内容后面有html dom结构，就认为这不是引用内容

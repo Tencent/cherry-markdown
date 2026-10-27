@@ -100,6 +100,12 @@ export default class Link extends SyntaxBase {
     if (isValidScheme(processedURL)) {
       processedURL = this.$engine.urlProcessor(processedURL, 'link');
       processedURL = encodeURIOnce(processedURL);
+      if (this.$engine?.semanticRenderer)
+        return (
+          leadingChar +
+          extraLeadingChar +
+          this.$engine?.semanticRenderer.wrap('link', { href: processedURL, title: title || '' }, processedText)
+        );
       const customAttrs =
         // @ts-ignore
         this.$engine.$cherry.options.engine.syntax.link.attrRender(processedText, processedURL) ?? '';
@@ -107,6 +113,7 @@ export default class Link extends SyntaxBase {
         typeof customAttrs === 'string' ? customAttrs : ''
       } ${this.rel} ${attrs}>${processedText}</a>`;
     }
+    if (this.$engine?.semanticRenderer) return leadingChar + extraLeadingChar + text;
     return `${leadingChar + extraLeadingChar}<span>${text}</span>`;
   }
 

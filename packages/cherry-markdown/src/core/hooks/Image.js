@@ -96,6 +96,15 @@ export default class Image extends SyntaxBase {
             .replace(/[{}]/g, '')
             .replace(/([^=\s]+)=([^\s]+)/g, (match, key, value) => `${key}="${$e(value)}"`)
         : '';
+      if (this.$engine?.semanticRenderer)
+        return (
+          leadingChar +
+          this.$engine?.semanticRenderer.atom('image', {
+            src: encodeURIOnce(this.$engine.urlProcessor(srcValue, 'image')),
+            alt: alt || '',
+            title: title || '',
+          })
+        );
       return `${leadingChar}<img ${srcProp}="${UrlCache.set(
         encodeURIOnce(this.$engine.urlProcessor(srcValue, 'image')),
       )}" ${style} ${classes} alt="${$e(alt || '')}"${attrs} ${extendAttrStr}/>`;
@@ -108,6 +117,10 @@ export default class Image extends SyntaxBase {
     if (!/(video|audio)/.test(mediaType)) {
       return match;
     }
+    if (this.$engine?.semanticRenderer)
+      return (
+        leadingChar + this.$engine?.semanticRenderer.atom('unsupported', { tag: mediaType, text: alt || link || '' })
+      );
     return this.replaceToHtml(mediaType, match, leadingChar, alt, link, title, poster);
   }
 
