@@ -56,12 +56,18 @@
   flex: 1;
 }
 
+.md-table-shell {
+  margin: 22rpx 0;
+}
 .md-table-scroll {
   width: 100%;
-  margin: 22rpx 0;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
 }
 
 .md-table {
+  flex-shrink: 0;
   min-width: 100%;
   border-top: 1rpx solid #d0d7de;
   border-left: 1rpx solid #d0d7de;
@@ -79,7 +85,9 @@
 }
 
 .md-table-cell {
-  flex: 0 0 220rpx;
+  box-sizing: border-box;
+  width: 252rpx;
+  flex: 0 0 252rpx;
   padding: 14rpx 16rpx;
   border-right: 1rpx solid #d0d7de;
   border-bottom: 1rpx solid #d0d7de;

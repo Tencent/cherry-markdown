@@ -1,5 +1,5 @@
-<block wx:for="{{groups}}">
-  <text wx:if="{{item.type === 'text'}}" class="md-inline-text" user-select="{{true}}"><text wx:for="{{item.runs}}" wx:for-item="run" class="{{run.className}} {{run.type === 'cursor' ? 'md-cursor' : ''}}" data-href="{{run.href}}" bindtap="linkTap">{{run.type === 'cursor' ? '|' : run.text}}</text></text>
-  <image wx:elif="{{item.type === 'image'}}" class="md-inline-image" src="{{item.src}}" mode="widthFix" lazy-load="{{true}}" data-src="{{item.src}}" bindtap="previewImage" />
+<block wx:for="{{groups}}" wx:key="id">
+  <text wx:if="{{item.type === 'text'}}" class="md-inline-text" user-select="{{true}}"><text wx:for="{{item.runs}}" wx:key="id" wx:for-item="run" class="{{run.className}} {{run.type === 'cursor' ? 'md-cursor' : ''}}" data-href="{{run.href}}" bindtap="linkTap">{{run.type === 'cursor' ? '|' : run.text}}</text></text>
+  <image wx:elif="{{item.type === 'image'}}" class="md-inline-image" src="{{item.src}}" mode="widthFix" lazy-load="{{true}}" data-src="{{item.src}}" data-id="{{item.id}}" bindtap="previewImage" bindload="imageLoaded" />
   <view wx:elif="{{item.type === 'image_placeholder'}}" class="md-image-placeholder"><text>{{item.text}}</text></view>
 </block>

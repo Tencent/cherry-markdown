@@ -16,6 +16,9 @@ for (const name of ['markdown', 'block', 'inlines']) {
   const config = JSON.parse(readFileSync(resolve(directory, 'index.json'), 'utf8'));
   const template = readFileSync(resolve(directory, 'index.wxml'), 'utf8');
   assert.doesNotMatch(template, /<(?:web-view|rich-text)\b/);
+  for (const [tag] of template.matchAll(/<[^>]+wx:for="[^"]+"[^>]*>/g)) {
+    assert.match(tag, /wx:key="id"/, `${name}: every native loop must use keyed items`);
+  }
   for (const dependency of Object.values(config.usingComponents || {})) {
     for (const extension of ['js', 'json', 'wxml', 'wxss']) {
       assert.ok(existsSync(`${resolve(directory, dependency)}.${extension}`));
@@ -66,6 +69,85 @@ definitions
 assert.equal(emitted[0][0], 'linktap');
 assert.equal(emitted[0][1].href, '/pages/detail/index');
 assert.equal(emitted[0][2].composed, true);
+
+// Exercise layout against actual built component definitions, including asynchronous stale queries.
+const tableDefinition = definitions.get('block');
+let naturalHeight = 60;
+let deferred = false;
+let measurements = 0;
+const callbacks = [];
+const table = {
+  data: { ...tableDefinition.data, block: { type: 'table', header: [], rows: [{ cells: [{ id: 'cell' }] }] } },
+  setData(patch, done) {
+    Object.assign(this.data, patch);
+    done?.();
+  },
+  createSelectorQuery() {
+    measurements++;
+    let callback;
+    const query = {
+      select(selector) {
+        assert.equal(selector, '.md-table');
+        return query;
+      },
+      boundingClientRect(value) {
+        callback = value;
+        return query;
+      },
+      exec() {
+        if (deferred) callbacks.push(callback);
+        else callback({ height: naturalHeight });
+      },
+    };
+    return query;
+  },
+};
+tableDefinition.observers.block.call(table, table.data.block);
+assert.equal(measurements, 0, 'do not query before native nodes are ready');
+tableDefinition.lifetimes.ready.call(table);
+assert.equal(table.data.tableHeight, 60);
+naturalHeight = 240.25;
+tableDefinition.observers.block.call(table, table.data.block);
+assert.equal(table.data.tableHeight, 241, 'new rows must be measured without the previous viewport constraint');
+tableDefinition.methods.tableScrolled.call(table, { detail: { scrollLeft: 37 } });
+tableDefinition.pageLifetimes.resize.call(table);
+assert.equal(table.data.tableScrollLeft, 37);
+const imageLayout = {
+  currentTarget: { dataset: { cell: 'cell' } },
+  detail: { id: 'inline-0', src: '/a.png', width: 100, height: 200 },
+};
+tableDefinition.methods.tableImageLoaded.call(table, imageLayout);
+const afterImage = measurements;
+tableDefinition.methods.tableImageLoaded.call(table, imageLayout);
+assert.equal(measurements, afterImage, 'remounting a loaded image must not create a measure/remount loop');
+deferred = true;
+tableDefinition.methods.measureTable.call(table);
+tableDefinition.observers.block.call(table, table.data.block);
+callbacks.shift()({ height: 999 });
+assert.equal(table.data.tableHeight, 0, 'ignore measurements from older content');
+callbacks.shift()({ height: 125 });
+assert.equal(table.data.tableHeight, 125);
+tableDefinition.methods.measureTable.call(table);
+tableDefinition.lifetimes.detached.call(table);
+callbacks.shift()({ height: 777 });
+assert.equal(table.data.tableHeight, 0, 'ignore measurements after unmount');
+
+const inlineComponent = definitions.get('inlines');
+let groups;
+inlineComponent.observers.nodes.call(
+  {
+    setData(patch) {
+      groups = patch.groups;
+    },
+  },
+  [
+    { type: 'text', text: 'same' },
+    { type: 'text', text: 'same' },
+    { type: 'image', src: '/a.png' },
+  ],
+);
+assert.equal(new Set(groups.map((group) => group.id)).size, groups.length);
+assert.equal(new Set(groups[0].runs.map((run) => run.id)).size, 2);
 
 // The public declarations must work for a strict TS consumer, independently of source aliases.
 const temporary = mkdtempSync(resolve(tmpdir(), 'cherry-native-types-'));

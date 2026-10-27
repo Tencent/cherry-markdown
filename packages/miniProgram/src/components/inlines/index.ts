@@ -1,3 +1,4 @@
+import { withNativeKeys } from '../../native/keys';
 import type { MiniProgramInlineRun } from '../../types';
 import type { NativeEvent, NativeInstance } from '../platform';
 
@@ -16,7 +17,7 @@ export function groupInlineRuns(nodes: MiniProgramInlineRun[]): InlineGroup[] {
       else groups.push({ type: 'text', runs: [node] });
     }
   }
-  return groups;
+  return withNativeKeys(groups, 'inline');
 }
 
 Component({
@@ -29,6 +30,18 @@ Component({
     },
   },
   methods: {
+    imageLoaded(this: NativeInstance<object>, event: NativeEvent & { detail: { width: number; height: number } }) {
+      this.triggerEvent(
+        'layoutchange',
+        {
+          id: event.currentTarget.dataset.id || '',
+          src: event.currentTarget.dataset.src || '',
+          width: event.detail.width,
+          height: event.detail.height,
+        },
+        { bubbles: false, composed: false },
+      );
+    },
     linkTap(this: NativeInstance<object>, event: NativeEvent) {
       const href = event.currentTarget.dataset.href;
       if (href) this.triggerEvent('linktap', { href }, { bubbles: true, composed: true });

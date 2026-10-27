@@ -8,6 +8,13 @@ export interface NativeInstance<Data> {
   triggerEvent(name: string, detail: Record<string, unknown>, options?: { bubbles: boolean; composed: boolean }): void;
 }
 
+export interface NativeSelectorQuery {
+  select(selector: string): {
+    boundingClientRect(callback: (rect: { height: number } | null) => void): NativeSelectorQuery;
+  };
+  exec(): void;
+}
+
 declare global {
   function Component(options: object): void;
   const wx: {

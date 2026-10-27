@@ -18,6 +18,24 @@ describe('native view reconciliation', () => {
     expect(state.update([paragraph('fixed'), paragraph('ab')])).toEqual({});
   });
 
+  it('gives duplicate nested rows and cells unique keys that survive tail growth', () => {
+    const state = new NativeViewState();
+    const source = '| A | B |\n| --- | --- |\n| same | same |\n| same | same |';
+    const stream = new CherryStream();
+    const initial = state.update(stream.setMarkdown(source));
+    const table = initial['blocks[0]'] as MiniProgramViewBlock & {
+      id: string;
+      rows: Array<{ id: string; cells: Array<{ id: string }> }>;
+    };
+    expect(new Set(table.rows.map((row) => row.id)).size).toBe(2);
+    expect(new Set(table.rows.flatMap((row) => row.cells.map((cell) => cell.id))).size).toBe(4);
+    const updated = state.update(stream.setMarkdown(source + ' tail'))['blocks[0]'] as typeof table;
+    expect(updated.id).toBe(table.id);
+    expect(updated.rows[0].id).toBe(table.rows[0].id);
+    expect(updated.rows[0].cells[0].id).toBe(table.rows[0].cells[0].id);
+    expect(stream.makeView(source)[0]).not.toHaveProperty('id');
+  });
+
   it('keeps transmission bounded to the changed block in a long document', () => {
     const state = new NativeViewState();
     const view = Array.from({ length: 1000 }, (_, index) => paragraph(`Paragraph ${index}: ${'content '.repeat(20)}`));

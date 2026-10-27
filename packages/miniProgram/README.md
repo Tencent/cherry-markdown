@@ -46,6 +46,10 @@ Updates are coalesced over 80 ms by default. Only one `setData` commit is in fli
 
 Consecutive inline text runs share one native text host for wrapping and selection. Images are separate blocks; browser-style inline image layout is not promised.
 
+Tables are measured as native flow content before assigning an explicit horizontal scroll-view height. Added rows, image loads and page resizing trigger measurement while preserving horizontal offset; stale/unmounted measurements and duplicate image-load notifications are ignored.
+
+Every component loop has sibling-unique IDs. Top-level blocks retain reconciled identity; nested rows, cells and runs use positional IDs within that block for tail appends, rather than arbitrary nested reordering. Public semantic nodes do not include these component-only IDs.
+
 ## TypeScript and data-only integration
 
 Transforms, view mapping, scheduling and native components use strict TypeScript with declarations emitted from source. `shared/engine.js` remains an integration boundary to the existing Cherry JS engine. The Web editor is unchanged.
@@ -106,3 +110,7 @@ Open `examples/miniProgram` in WeChat DevTools. See the [Demo README](../../exam
 ## License
 
 Apache-2.0. See [LICENSE](./LICENSE).
+
+### Shared-core boundary
+
+The build currently imports Cherry source from this monorepo; semantic nodes and incremental state still live in this package rather than a stable public cross-package entry. Precompiled native components bundle the engine. Updating only the application's `cherry-markdown` dependency cannot replace that bundled engine: rebuild the components or upgrade a coordinated MiniProgram release. Shared syntax does not imply equivalent layout, theming, or advanced rendering features.

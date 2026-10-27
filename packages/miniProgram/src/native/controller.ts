@@ -1,4 +1,5 @@
 import CherryStream from '../renderer';
+import { withNativeKeys } from './keys';
 import type { MiniProgramRenderOptions, MiniProgramViewBlock } from '../types';
 
 export type NativeViewBlock = MiniProgramViewBlock & { id: string };
@@ -26,7 +27,7 @@ export class NativeViewState {
       if (matches[index]) return matches[index];
       const previous = this.blocks[index];
       const id = previous?.type === block.type && !reserved.has(previous.id) ? previous.id : `md-${this.sequence++}`;
-      return { ...block, id };
+      return { ...withNativeKeys(block, id), id };
     });
     const patch: NativeViewPatch = {};
     // setData cannot truncate an array with indexed updates.
