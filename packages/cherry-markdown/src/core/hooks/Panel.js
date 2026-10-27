@@ -93,8 +93,12 @@ export default class Panel extends ParagraphBase {
         const body = this.isContainsCache(content) ? this.makeExcludingCached(content, paragraph) : paragraph(content);
         const token = renderer.wrap(
           'panel',
-          { panelType: type, title, lines: lineCount },
-          (title ? paragraph(title) : '') + body,
+          {
+            panelType: type,
+            title: renderer.text(this.$engine.resolveSemanticReferences(sentenceMakeFunc(title).html)),
+            lines: lineCount,
+          },
+          body,
         );
         return prependLineFeedForParagraph(match, this.pushCache(token, sign, lineCount));
       }

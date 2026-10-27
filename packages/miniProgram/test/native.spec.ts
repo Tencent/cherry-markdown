@@ -1,3 +1,5 @@
+import { CherrySemanticParser } from 'cherry-markdown/semantic';
+import { nativeThemeStyle, nativeInlineStyle } from '../src/native/theme';
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import CherryStream from '../src';
@@ -142,5 +144,39 @@ describe('native streaming controller', () => {
     controller.setMarkdown('b');
     vi.runAllTimers();
     expect(commit).not.toHaveBeenCalled();
+  });
+});
+
+describe('public semantic bridge and native presentation', () => {
+  it('consumes the public Cherry document and can use an injected compatible core', () => {
+    const bridge = new CherrySemanticParser();
+    const parse = vi.spyOn(bridge, 'parse');
+    const stream = new CherryStream({ bridge });
+    const markdown = '# Shared\n\n**native**';
+    expect(stream.makeBlocks(markdown)).toEqual(new CherrySemanticParser().parse(markdown).blocks);
+    expect(parse).toHaveBeenCalledWith(markdown, expect.any(Object));
+    expect(() => new CherryStream({ bridge: { ...bridge, schemaVersion: 2 } as unknown as typeof bridge })).toThrow(
+      'Unsupported Cherry semantic schema',
+    );
+  });
+  it('maps Cherry color and size semantics onto safe native text styles', () => {
+    const stream = new CherryStream();
+    const view = stream.makeView('!!#c0392b 红色!! 和 !24 大号!');
+    expect(view[0]).toMatchObject({
+      type: 'paragraph',
+      inlines: expect.arrayContaining([
+        expect.objectContaining({ text: '红色', style: 'color:#c0392b' }),
+        expect.objectContaining({ text: '大号', style: 'font-size:24px' }),
+      ]),
+    });
+    const panel = stream.makeView(':::tip Title\nbody\n:::')[0];
+    expect(panel).toMatchObject({ type: 'panel', title: 'Title' });
+    expect(JSON.stringify(panel)).not.toContain('"text":"Title"');
+    expect(nativeInlineStyle('color:#123456;background-color:rgb(1, 2, 3);font-size:24px')).toBe(
+      'color:#123456;background-color:rgb(1, 2, 3);font-size:24px',
+    );
+    expect(nativeInlineStyle('background-image:url(x);position:fixed;color:expression(x);font-size:99999px')).toBe('');
+    expect(nativeThemeStyle('dark')).not.toBe(nativeThemeStyle('default'));
+    expect(nativeThemeStyle('__proto__')).toBe(nativeThemeStyle('default'));
   });
 });

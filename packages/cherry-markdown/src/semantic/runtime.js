@@ -2,11 +2,12 @@ import mergeWith from '@/utils/toolkit/mergeWith';
 import cloneDeep from '@/utils/toolkit/cloneDeep';
 import defaultConfig from '@/Cherry.config';
 import { customizer } from '@/utils/config';
-import UrlCache, { urlProcessorProxy } from '@/UrlCache';
+import { urlProcessorProxy } from '@/UrlCache';
 import Engine from '@/Engine';
 import locales from '@/locales/index';
 import { isValidScheme } from '@/utils/sanitize';
 
+/** @template T @param {T} blocks @returns {T} */
 export function cloneSemanticBlocks(blocks) {
   return cloneDeep(blocks);
 }
@@ -15,7 +16,7 @@ export function isValidSemanticUrl(value, image = false) {
   return (image && /^data:image\/(?:png|jpe?g|gif|webp|svg\+xml)[;,]/i.test(value)) || isValidScheme(value);
 }
 
-class MiniProgramCherryContext {
+class SemanticCherryContext {
   constructor(options) {
     this.options = options;
     this.locales = options.locales ? { ...options.locales, ...locales } : locales;
@@ -48,10 +49,14 @@ function normalizeOptions(options = {}) {
   return mergedOptions;
 }
 
-export function createMiniProgramEngine(options = {}) {
+/** @param {import('./types').SemanticOptions} options @returns {import('./types').SemanticEngine} */
+export function createSemanticEngine(options = {}) {
   const normalizedOptions = normalizeOptions(options);
-  const cherry = new MiniProgramCherryContext(normalizedOptions);
-  const engine = new Engine(normalizedOptions, cherry);
+  const cherry = new SemanticCherryContext(normalizedOptions);
+  const engine = new Engine(
+    normalizedOptions,
+    /** @type {import('../Cherry').default} */ (/** @type {unknown} */ (cherry)),
+  );
   engine.$clearFlowSessionCursorCache = function clearFlowSessionCursorCache(md) {
     if (this.semanticRenderer) return md.replace(/CHERRYFLOWSESSIONCURSOR/g, this.semanticRenderer.atom('cursor', {}));
     if (this.$cherry.options.engine.global.flowSessionCursor) {
@@ -59,9 +64,7 @@ export function createMiniProgramEngine(options = {}) {
     }
     return md;
   };
-  engine.restoreSemanticText = (value) =>
-    engine.$decodeReservedKeywords(UrlCache.restoreAll(engine.$deCacheBigData(value)));
-  return engine;
+  return /** @type {import('./types').SemanticEngine} */ (/** @type {unknown} */ (engine));
 }
 
-export { MiniProgramCherryContext };
+export { SemanticCherryContext };

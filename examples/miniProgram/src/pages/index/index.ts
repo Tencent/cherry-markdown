@@ -2,6 +2,8 @@ import type { NativeMarkdownHandle } from '@cherry-markdown/miniprogram';
 import { createMockMarkdownChunks } from '../../utils/mock-stream';
 
 interface DemoPage {
+  data: { theme: string };
+  setData(patch: { theme: string }): void;
   timer?: ReturnType<typeof setTimeout>;
   chunks: string[];
   position: number;
@@ -37,6 +39,18 @@ const message = 'hello mini program';
 console.log(message);
 \`\`\`
 
+## Cherry 扩展与主题
+
+!!#c0392b 共享颜色语法!! 和 !24 原生字号!。
+
+:::tip 原生信息面板
+面板、颜色与字号直接来自 Cherry 共享语义。
+:::
+
++++ 点击展开详情
+这是原生展开收起内容，支持 **加粗** 和链接。
++++
+
 ## 更多基础语法
 
 1. 有序列表
@@ -69,7 +83,10 @@ graph TD;
 `;
 
 Page({
-  data: {},
+  data: { theme: 'default' },
+  toggleTheme(this: DemoPage) {
+    this.setData({ theme: this.data.theme === 'dark' ? 'default' : 'dark' });
+  },
   chunks: [],
   position: 0,
   content: '',

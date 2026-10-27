@@ -94,8 +94,12 @@ jobs:
     secrets: inherit
 
   build-miniProgram-release:
-    needs: release
-    if: ${{ contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/miniprogram"') }}
+    needs: [release, build-core-release]
+    # Native components bundle the exact public core; do not publish them before a paired core succeeds.
+    if: >-
+      ${{ !cancelled() && needs.release.result == 'success' &&
+          contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/miniprogram"') &&
+          (needs.build-core-release.result == 'success' || needs.build-core-release.result == 'skipped') }}
     uses: ./.github/workflows/reusable-npm-release.yml
     with:
       package_name: '@cherry-markdown/miniprogram'

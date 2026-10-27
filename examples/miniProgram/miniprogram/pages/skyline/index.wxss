@@ -27,3 +27,6 @@
   background: #fff;
   border-radius: 8rpx;
 }
+
+.toolbar-actions { display: flex; flex-direction: row; }
+.toolbar-actions button { margin: 0 0 0 12rpx; }

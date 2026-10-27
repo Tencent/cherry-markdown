@@ -1,3 +1,4 @@
+import { nativeThemeStyle } from '../../native/theme';
 import { withNativeKeys } from '../../native/keys';
 import type { MiniProgramInlineRun } from '../../types';
 import type { NativeEvent, NativeInstance } from '../platform';
@@ -22,9 +23,12 @@ export function groupInlineRuns(nodes: MiniProgramInlineRun[]): InlineGroup[] {
 
 Component({
   options: { styleIsolation: 'isolated' },
-  properties: { nodes: { type: Array, value: [] } },
-  data: { groups: [] },
+  properties: { nodes: { type: Array, value: [] }, theme: { type: String, value: 'default' } },
+  data: { groups: [], themeStyle: nativeThemeStyle() },
   observers: {
+    theme(this: NativeInstance<object>, theme: string) {
+      this.setData({ themeStyle: nativeThemeStyle(theme) });
+    },
     nodes(this: NativeInstance<{ nodes: MiniProgramInlineRun[] }>, nodes: MiniProgramInlineRun[]) {
       this.setData({ groups: groupInlineRuns(nodes || []) });
     },

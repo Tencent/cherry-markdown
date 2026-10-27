@@ -52,7 +52,7 @@ Every component loop has sibling-unique IDs. Top-level blocks retain reconciled 
 
 ## TypeScript and data-only integration
 
-Transforms, view mapping, scheduling and native components use strict TypeScript with declarations emitted from source. `shared/engine.js` remains an integration boundary to the existing Cherry JS engine. The Web editor is unchanged.
+The public semantic protocol, incremental parser, view mapping, scheduler and native components use strict TypeScript. The adapter imports only the public bridge; the core owns its typed boundary to the existing JavaScript engine.
 
 ```ts
 import CherryStream, { NativeMarkdownController } from '@cherry-markdown/miniprogram';
@@ -73,8 +73,8 @@ The data-only entry is ESM and must be bundled by custom consumers. The default 
 - List items contain recursive `children: MiniProgramViewBlock[]`, preserving nested block structure.
 - Math and Mermaid preserve semantic nodes and source, displayed as copyable native text. Mathematical typesetting and diagram drawing are not implemented.
 - Unsupported block HTML becomes `{ type: 'unsupported', tag, text }`. `unknownTag: 'unwrap'` retains supported descendants; `'drop'` discards the block. Scripts, styles and event attributes do not become native interactions.
-- Web parity for colors, font sizes, panels, TOC, footnote navigation and collapsible details is not promised.
-- Code highlighting uses Prism tokens directly. Panels/details preserve semantic metadata and render as static native groups; mark/underline render natively and ruby annotations as additional text. TOC/footnotes preserve links; apps own navigation.
+- Cherry color/background/font-size semantics map to a safe native text-style subset; arbitrary HTML/CSS does not run browser layout.
+- Code highlighting uses Prism tokens directly. Panels have native titles and content; Detail uses a native expand/collapse button and retains user state through body updates; mark/underline render natively and ruby annotations as additional text. TOC/footnotes preserve links; apps own navigation.
 
 Migrating from 0.0.2: replace list item `inlines` with recursive `children`, `html` blocks with `unsupported` text, and `unknownTag: 'html'` with `'text'`. Existing Markdown input methods remain available. Using the default component avoids maintaining custom templates.
 
@@ -111,6 +111,10 @@ Open `examples/miniProgram` in WeChat DevTools. See the [Demo README](../../exam
 
 Apache-2.0. See [LICENSE](./LICENSE).
 
-### Shared-core boundary
+### Public bridge, releases and themes
 
-The build currently imports Cherry source from this monorepo; semantic nodes and incremental state still live in this package rather than a stable public cross-package entry. Precompiled native components bundle the engine. Updating only the application's `cherry-markdown` dependency cannot replace that bundled engine: rebuild the components or upgrade a coordinated MiniProgram release. Shared syntax does not imply equivalent layout, theming, or advanced rendering features.
+Semantic nodes and incremental state now live in `cherry-markdown/semantic`, with schema version 1. The adapter consumes that public artifact; `dist/semantic-bridge.json` records the core/schema bundled into native components. ESM remains linked to the declared core dependency, while precompiled components bundle it.
+
+The exact core dependency causes Changesets to bump the adapter and update its dependency for every core patch, minor or major release. Publishing waits for the paired core job. Applications still need to rebuild/publish; changing only a root dependency cannot replace precompiled component code. Advanced callers can pass `{ bridge: new CherrySemanticParser() }` using a compatible schema and should unify dependencies in their own build.
+
+Use `theme="dark"` on the native component to select a theme. The eight Cherry themes are compiled from the existing Sass via the lightweight `cherry-markdown/theme` entry. Native colors/backgrounds/font sizes, Panel titles and Detail expand/collapse are supported; math, Mermaid and chart-table graphics still retain source or table content. Arbitrary HTML/CSS and HTML-only renderers do not execute browser layout. Shared tokens do not promise pixel-identical rendering.

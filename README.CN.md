@@ -104,6 +104,24 @@ UMD 产物会暴露全局变量 `Cherry`。需要使用原生 ESM 时：
 
 Cherry 提供多种构建产物（完整包 / 核心包 / 流式输出包 / 引擎包），以适配浏览器、Node.js、AI Chat 流式输出等不同场景。使用示例、构建包差异、mermaid 集成方式及异步动态加载等详细内容，请参考 **[构建产物介绍](https://github.com/Tencent/cherry-markdown/wiki/%E6%9E%84%E5%BB%BA%E4%BA%A7%E7%89%A9%E4%BB%8B%E7%BB%8D)**。
 
+## 公共语义桥接（本次版本新增）
+
+`cherry-markdown/semantic` 是不依赖 DOM 的公共解析入口，复用 Cherry 的语法 hook、转义和流式闭合规则，直接输出语义节点，不生成 HTML 再转换。
+
+```ts
+import { CherrySemanticParser, SEMANTIC_CORE_VERSION } from 'cherry-markdown/semantic';
+
+const parser = new CherrySemanticParser();
+const document = parser.parse('## 标题\n\n**共享语法**');
+// document.schemaVersion === 1
+// document.blocks 为独立副本；document.stats 记录增量解析处理量
+console.log(SEMANTIC_CORE_VERSION, document.stats);
+```
+
+`cherry-markdown/theme` 提供从现有 Sass 主题编译的 `cherryThemes`，供原生适配层使用。`@cherry-markdown/miniprogram` 只消费公共协议并映射原生组件，不另维护语法和增量状态。小程序包精确依赖核心版本，Changesets 在核心升版时自动安排适配包更新；发布先完成核心，再发布原生组件。预编译组件升级后仍需业务重新构建、发布小程序。
+
+旧版 npm 包没有该入口；需使用本次配套发布的版本。共享语义和主题变量不代表浏览器排版、HTML/CSS 插件、公式或图表已在原生环境完全等效。
+
 ## 贡献指南
 
 欢迎加入我们，一起打造强大的 Markdown 编辑器。在实现新功能或提交特性前，请先阅读：

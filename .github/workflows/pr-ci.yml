@@ -59,3 +59,6 @@ jobs:
 
       - name: Verify native MiniProgram artifacts
         run: vp run -F @cherry-markdown/miniprogram test:artifact
+
+      - name: Verify packed semantic bridge and native adapter
+        run: vp run -F @cherry-markdown/miniprogram test:bridge

@@ -1,4 +1,4 @@
-import type { MiniProgramBlock, MiniProgramEngine, MiniProgramOptions, MiniProgramTransformOptions } from '../types';
+import type { SemanticBlock, SemanticEngine, SemanticOptions, SemanticTransformOptions } from './types';
 import { SemanticWriter } from './writer';
 import type { SemanticResult, SemanticSegment } from './writer';
 
@@ -15,7 +15,7 @@ const hasFunction = (value: unknown, seen = new WeakSet<object>()): boolean => {
   seen.add(value);
   return Object.values(value).some((item) => hasFunction(item, seen));
 };
-const join = (segments: SemanticSegment[]): MiniProgramBlock[] => segments.flatMap((segment) => segment.blocks);
+const join = (segments: SemanticSegment[]): SemanticBlock[] => segments.flatMap((segment) => segment.blocks);
 
 /** Incremental checkpoints come from Cherry's parsed top-level blocks, never guessed fence regexes. */
 export class SemanticParser {
@@ -29,8 +29,8 @@ export class SemanticParser {
   stats: SemanticParseStats = { mode: 'full', parsedCharacters: 0, reusedCharacters: 0 };
 
   constructor(
-    private readonly engine: MiniProgramEngine,
-    options: MiniProgramOptions = {},
+    private readonly engine: SemanticEngine,
+    options: SemanticOptions = {},
   ) {
     const syntax = options.engine?.syntax;
     const emphasis = syntax?.fontEmphasis as { allowWhitespace?: boolean } | undefined;
@@ -49,7 +49,7 @@ export class SemanticParser {
 
   private render(
     source: string,
-    options: MiniProgramTransformOptions,
+    options: SemanticTransformOptions,
     headings: ReadonlyMap<string, number>,
   ): SemanticResult {
     this.stats.parsedCharacters += source.length;
@@ -57,7 +57,7 @@ export class SemanticParser {
     return writer.finish(this.engine.makeSemantic(source, writer, options.forceNoCursor !== false));
   }
 
-  parse(markdown: string, options: MiniProgramTransformOptions = {}): SemanticResult {
+  parse(markdown: string, options: SemanticTransformOptions = {}): SemanticResult {
     markdown = markdown.replace(/\r\n?/g, '\n');
     const key = JSON.stringify({ unknownTag: options.unknownTag || 'text', cursor: options.forceNoCursor !== false });
     const append = markdown.startsWith(this.source) && key === this.optionKey;

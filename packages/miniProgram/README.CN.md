@@ -56,7 +56,7 @@ renderer.setMarkdown(finalMarkdown, false);
 
 ## 数据接口与 TypeScript
 
-源代码中的转换、视图、调度和原生组件采用严格 TypeScript。类型声明由源码生成；`shared/engine.js` 是与现有 Cherry JS 引擎对接的边界，未改造 Web 编辑器。
+公共语义协议、增量解析、原生视图、调度和组件采用严格 TypeScript；类型声明由源码生成。小程序仅从 `cherry-markdown/semantic` 接入，现有 JS 引擎的兼容边界由核心维护。
 
 ```ts
 import CherryStream, { NativeMarkdownController } from '@cherry-markdown/miniprogram';
@@ -80,9 +80,9 @@ controller.setMarkdown(finalMarkdown, false);
 - 列表项保留 `children: MiniProgramViewBlock[]`，不再将嵌套结构压平成 `inlines`。
 - 公式和 Mermaid：保留语义及源码，原生文本展示并可复制；尚未实现数学排版或图形绘制。
 - 未支持的块级 HTML：返回 `{ type: 'unsupported', tag, text }`，默认显示可读文本；`unknownTag: 'unwrap'` 可保留内部支持的结构，`'drop'` 可丢弃。脚本、样式和事件属性不进入原生交互。
-- 颜色、字号、Panel、目录、脚注跳转、折叠详情等尚未承诺与 Web 等效。
+- 支持 Cherry 颜色、背景色、字号的安全原生文本样式；任意输入 HTML/CSS 不会直接作为网页布局执行。
 - 代码高亮直接使用 Prism token 数据，不生成高亮 HTML；没有 token 时显示原文。
-- Panel、Detail 保留分组、标题和展开状态的语义信息，默认组件静态展示内容；高亮和下划线原生展示，注音以附加文本展示。目录生成标题链接，脚注保留编号和引用；跳转仍由业务的 `linktap` 处理。
+- Panel 显示原生标题和内容，Detail 使用原生按钮展开/收起，并在流式正文更新时保留用户状态；高亮和下划线原生展示，注音以附加文本展示。目录生成标题链接，脚注保留编号和引用；跳转仍由业务的 `linktap` 处理。
 
 ### 从 0.0.2 迁移
 
@@ -112,7 +112,39 @@ console.log(stream.getParseStats());
 
 相同 Markdown 不会重复解析；图片占位切换和样式选项仍可重新生成视图。视图层继续按顶层块差量提交。累计字符串比较、视图映射、节点比较仍有工作量；单个持续增长的代码块/列表仍需要解析活跃块，文档依赖可能触发完整重解析。这不是任意长度文档的恒定耗时保证，也尚未实现长列表虚拟化。
 
-当前构建直接引用同仓 Cherry 源码，语义节点和增量状态仍由本包维护，尚未形成独立、稳定的跨包语义入口。现成原生组件内已打包引擎；只升级业务依赖中的 `cherry-markdown` 不会替换组件内引擎，需要重新构建组件或升级联动发布的小程序包。共享语法不代表 Web 与原生的布局、主题或高级功能已完全等效。
+### 公共协议与版本联动
+
+语义节点和增量状态由 Cherry 核心维护，适配层只消费 `cherry-markdown/semantic` 的 `schemaVersion: 1` 文档。原生组件内的引擎来自该公共产物，不从内部源码拼装另一套解析器。`dist/semantic-bridge.json` 记录组件内核心版本和协议版本。
+
+小程序 ESM 入口在构建时链接公共核心；预编译组件包含一份核心。包内精确版本依赖确保核心 patch/minor/major 升版都由 Changesets 联动更新适配包及依赖版本，核心发布失败会阻止配套小程序包发布。协议版本不兼容时明确报错，升级不会让已发布小程序自动替换代码。
+
+高级接入可显式注入兼容协议的解析器，避免绑定适配层内部实现：
+
+```ts
+import { CherrySemanticParser } from 'cherry-markdown/semantic';
+const stream = new CherryStream({ bridge: new CherrySemanticParser() });
+```
+
+默认推荐升级配套的小程序包并重新构建。仅升级业务根依赖不会自动替换已打包的组件；注入不同核心版本时也应由业务构建统一依赖，避免重复打包。
+
+### 共享主题与能力范围
+
+```xml
+<cherry-markdown id="markdown" theme="dark" />
+```
+
+支持 `default`、`dark`、`blue`、`green`、`red`、`violet`、`gray`、`abyss`。变量直接由 Cherry 现有 Sass 编译，标题、正文、链接、行内代码、引用、表格和背景使用相同来源。轻量 `cherry-markdown/theme` 入口让块和行内组件无需重复包含解析器。
+
+| 能力                                     | 原生实现                                              |
+| ---------------------------------------- | ----------------------------------------------------- |
+| 基础语法、嵌套列表、表格、图片、代码高亮 | 原生组件与 Prism token                                |
+| 颜色、背景色、字号、高亮、下划线、注音   | 安全文本样式或文本标注                                |
+| Panel、Detail                            | 原生标题、分组及展开收起                              |
+| 目录与脚注                               | 共享节点和编号；跳转由业务 linktap 处理               |
+| 公式、Mermaid、表格图表                  | 保留语义/源码或表格，尚无原生数学排版、图形或图表绘制 |
+| 任意 HTML/CSS、第三方 HTML renderer      | 不执行网页布局；需要语义适配或文本降级                |
+
+共享主题变量不保证 Web 与 Skyline 像素级一致，操作系统字体和原生布局差异仍需目标设备验收。
 
 ### 自定义渲染兼容边界
 

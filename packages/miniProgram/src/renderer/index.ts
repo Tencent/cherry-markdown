@@ -20,10 +20,10 @@ import type {
   MiniProgramRenderOptions,
   MiniProgramTransformOptions,
 } from '../types';
-import { parseDocument } from 'htmlparser2';
-import { createMiniProgramEngine, cloneSemanticBlocks } from '../shared/engine';
-import type { SemanticParseStats } from '../semantic/parser';
-import { SemanticParser } from '../semantic/parser';
+import { parseHtmlDocument as parseDocument } from 'cherry-markdown/semantic';
+import { createMiniProgramEngine } from '../shared/engine';
+import { CherrySemanticParser } from 'cherry-markdown/semantic';
+import type { SemanticBridge, SemanticParseStats } from 'cherry-markdown/semantic';
 import { blocksToMiniProgramView } from '../shared/view';
 
 export function markdownToHtml(markdown: string, options: MiniProgramOptions = {}) {
@@ -47,7 +47,7 @@ export default class CherryStream {
   options: MiniProgramOptions;
   lastMarkdownText: string;
   engine: MiniProgramEngine;
-  private readonly semantic: SemanticParser;
+  private readonly semantic: SemanticBridge;
 
   constructor(options: MiniProgramOptions = {}) {
     this.options = {
@@ -61,8 +61,10 @@ export default class CherryStream {
       },
     };
     this.lastMarkdownText = this.options.value || '';
-    this.engine = createMiniProgramEngine(this.options);
-    this.semantic = new SemanticParser(this.engine, this.options);
+    this.semantic = this.options.bridge || new CherrySemanticParser(this.options);
+    if (this.semantic.schemaVersion !== 1)
+      throw new Error(`Unsupported Cherry semantic schema: ${this.semantic.schemaVersion}`);
+    this.engine = this.semantic.engine;
   }
 
   makeHtml(markdown: string, returnType?: 'string', forceNoCursor?: boolean): string;
@@ -79,7 +81,7 @@ export default class CherryStream {
 
   makeBlocks(markdown: string, options: MiniProgramTransformOptions = {}) {
     const forceNoCursor = options.forceNoCursor !== false;
-    return cloneSemanticBlocks(this.semantic.parse(markdown || '', { ...options, forceNoCursor }).blocks);
+    return this.semantic.parse(markdown || '', { ...options, forceNoCursor }).blocks;
   }
 
   setMarkdown(content: string, options: MiniProgramRenderOptions = {}) {
@@ -96,7 +98,7 @@ export default class CherryStream {
   }
 
   getParseStats(): Readonly<SemanticParseStats> {
-    return { ...this.semantic.stats };
+    return this.semantic.getParseStats();
   }
 
   getMarkdown() {

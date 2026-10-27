@@ -20,7 +20,7 @@ vp run -F @cherry-markdown/mini-program-demo build
 
 两页共享同一套组件和 TS 业务逻辑，无 `web-view` 或 `rich-text`。在工具的“设置 → 项目设置 → 本地设置”中开启“Skyline 渲染调试”，再确认模拟器实际显示“当前渲染模式：Skyline”；不要仅以编译模式名称或页面能打开判断引擎生效。
 
-业务只负责模拟分片和累积 Markdown，通过 `selectComponent` 获取句柄并直接调用 `setMarkdown`，不把累计全文反复送入页面 `setData`。包内组件负责解析、流式更新合并、差量 `setData`、代码复制、图片预览；链接事件由页面处理，此示例将地址复制到剪贴板。重置按钮用于验证流中清空和重新输入。
+业务只负责模拟分片和累积 Markdown，通过 `selectComponent` 获取句柄并直接调用 `setMarkdown`，不把累计全文反复送入页面 `setData`。包内组件负责解析、流式更新合并、差量 `setData`、代码复制、图片预览；链接事件由页面处理，此示例将地址复制到剪贴板。重播按钮用于验证流中清空和重新输入；主题按钮切换共享的默认/深色主题。示例还覆盖原生颜色、字号、Panel 标题和 Detail 展开收起。
 
 ## 验证实际发布包
 

@@ -1,14 +1,14 @@
 import { parseDocument } from 'htmlparser2';
 import { decodeHTML } from 'entities';
-import { isValidSemanticUrl } from '../shared/engine';
+import { isValidSemanticUrl } from './engine';
 import type {
-  MiniProgramBlock,
-  MiniProgramInline,
-  MiniProgramTransformOptions,
-  MiniProgramListItem,
-  MiniProgramTableRow,
-  MiniProgramTableCell,
-} from '../types';
+  SemanticBlock,
+  SemanticInline,
+  SemanticTransformOptions,
+  SemanticListItem,
+  SemanticTableRow,
+  SemanticTableCell,
+} from './types';
 
 interface Event {
   kind: string;
@@ -43,11 +43,11 @@ const inlineKinds = new Set([
 
 export interface SemanticSegment {
   lines: number;
-  blocks: MiniProgramBlock[];
+  blocks: SemanticBlock[];
   headings: string[];
 }
 export interface SemanticResult {
-  blocks: MiniProgramBlock[];
+  blocks: SemanticBlock[];
   segments: SemanticSegment[];
   documentDependent: boolean;
   checkpointBlocked: boolean;
@@ -69,7 +69,7 @@ export class SemanticWriter {
 
   constructor(
     private readonly restore: (value: string) => string,
-    private readonly options: MiniProgramTransformOptions = {},
+    private readonly options: SemanticTransformOptions = {},
     headings: ReadonlyMap<string, number> = new Map(),
   ) {
     this.headingCounts = new Map(headings);
@@ -253,14 +253,14 @@ export class SemanticWriter {
     this.checkpointBlocked ||= opener.test(remaining);
   }
 
-  private inlines(nodes: Tree[], classicBr = true): MiniProgramInline[] {
-    return nodes.flatMap((node): MiniProgramInline[] => {
+  private inlines(nodes: Tree[], classicBr = true): SemanticInline[] {
+    return nodes.flatMap((node): SemanticInline[] => {
       if (typeof node === 'string') {
         const text = decodeHTML(node);
         if (classicBr || !text.includes('\n')) return text ? [{ type: 'text', text }] : [];
         return text
           .split('\n')
-          .flatMap((part, index): MiniProgramInline[] => [
+          .flatMap((part, index): SemanticInline[] => [
             ...(index ? [{ type: 'break' } as const] : []),
             ...(part ? [{ type: 'text', text: part } as const] : []),
           ]);
@@ -314,10 +314,10 @@ export class SemanticWriter {
     });
   }
 
-  private row(node: Branch): MiniProgramTableRow {
+  private row(node: Branch): SemanticTableRow {
     return {
       type: 'table_row',
-      children: node.children.flatMap((cell): MiniProgramTableCell[] =>
+      children: node.children.flatMap((cell): SemanticTableCell[] =>
         typeof cell === 'string' || cell.kind !== 'table_cell'
           ? []
           : [
@@ -345,7 +345,7 @@ export class SemanticWriter {
       .join('');
   }
 
-  private block(node: Branch): MiniProgramBlock[] {
+  private block(node: Branch): SemanticBlock[] {
     const { kind, data, children } = node;
     if (kind === 'frontmatter') return [];
     if (kind === 'paragraph' || kind === 'container') {
@@ -372,7 +372,7 @@ export class SemanticWriter {
       ];
     if (kind === 'blockquote') return [{ type: 'blockquote', children: this.blocks(children) }];
     if (kind === 'list') {
-      const items = children.flatMap((item): MiniProgramListItem[] => {
+      const items = children.flatMap((item): SemanticListItem[] => {
         if (typeof item === 'string' || item.kind !== 'list_item') return [];
         let checked: boolean | undefined;
         const strip = (nodes: Tree[]): Tree[] =>
@@ -422,7 +422,7 @@ export class SemanticWriter {
       return [{ type: 'code_block', lang, text, tokens }];
     }
     if (kind === 'math_block') return [{ type: 'math_block', text: this.restore(string(data.text)), display: true }];
-    if (kind === 'image') return this.inlines([node]) as MiniProgramBlock[];
+    if (kind === 'image') return this.inlines([node]) as SemanticBlock[];
     if (kind === 'thematic_break') return [{ type: 'thematic_break' }];
     if (kind === 'unsupported')
       return [
@@ -456,8 +456,8 @@ export class SemanticWriter {
     return this.blocks(children);
   }
 
-  private blocks(nodes: Tree[]): MiniProgramBlock[] {
-    const result: MiniProgramBlock[] = [];
+  private blocks(nodes: Tree[]): SemanticBlock[] {
+    const result: SemanticBlock[] = [];
     let inline: Tree[] = [];
     const flush = () => {
       if (inline.length) {

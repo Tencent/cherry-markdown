@@ -1,122 +1,34 @@
-export type MiniProgramText = { type: 'text'; text: string };
-export type MiniProgramBreak = { type: 'break' };
-export type MiniProgramCursor = { type: 'cursor' };
-export type MiniProgramInlineWrapper = {
-  type: 'strong' | 'em' | 'code' | 'span' | 'underline' | 'strikethrough' | 'sub' | 'sup' | 'mark';
-  attrs?: Record<string, string>;
-  children: MiniProgramInline[];
-};
-export type MiniProgramLink = {
-  type: 'link';
-  href: string;
-  title?: string;
-  attrs?: Record<string, string>;
-  children: MiniProgramInline[];
-};
-export type MiniProgramImage = {
-  type: 'image';
-  src: string;
-  alt?: string;
-  title?: string;
-  attrs?: Record<string, string>;
-};
-export type MiniProgramMathInline = { type: 'math_inline'; text: string; attrs?: Record<string, string> };
-export type MiniProgramRuby = { type: 'ruby'; annotation: string; children: MiniProgramInline[] };
-export type MiniProgramInline =
-  | MiniProgramRuby
-  | MiniProgramText
-  | MiniProgramBreak
-  | MiniProgramCursor
-  | MiniProgramInlineWrapper
-  | MiniProgramLink
-  | MiniProgramImage
-  | MiniProgramMathInline;
-
-export type MiniProgramParagraphBlock = {
-  type: 'paragraph';
-  attrs?: Record<string, string>;
-  children: MiniProgramInline[];
-};
-export type MiniProgramHeadingBlock = {
-  type: 'heading';
-  level: number;
-  attrs?: Record<string, string>;
-  children: MiniProgramInline[];
-};
-export type MiniProgramBlockquoteBlock = {
-  type: 'blockquote';
-  attrs?: Record<string, string>;
-  children: MiniProgramBlock[];
-};
-export type MiniProgramListItem = {
-  type: 'list_item';
-  attrs?: Record<string, string>;
-  checked?: boolean;
-  children: MiniProgramBlock[];
-};
-export type MiniProgramListBlock = {
-  type: 'list';
-  ordered: boolean;
-  attrs?: Record<string, string>;
-  children: MiniProgramListItem[];
-};
-export type MiniProgramTableCell = {
-  type: 'table_cell';
-  header: boolean;
-  align?: 'left' | 'center' | 'right';
-  attrs?: Record<string, string>;
-  children: MiniProgramInline[];
-};
-export type MiniProgramTableRow = {
-  type: 'table_row';
-  attrs?: Record<string, string>;
-  children: MiniProgramTableCell[];
-};
-export type MiniProgramTableBlock = {
-  type: 'table';
-  chart?: Record<string, unknown>;
-  attrs?: Record<string, string>;
-  header: MiniProgramTableRow[];
-  rows: MiniProgramTableRow[];
-};
-export type MiniProgramCodeBlock = {
-  type: 'code_block';
-  lang: string;
-  text: string;
-  nodes?: MiniProgramRichTextNode[];
-  tokens?: Array<{ text: string; type: string }>;
-  attrs?: Record<string, string>;
-};
-export type MiniProgramMathBlock = {
-  type: 'math_block';
-  text: string;
-  display: boolean;
-  attrs?: Record<string, string>;
-};
-export type MiniProgramDiagramBlock = {
-  type: 'diagram';
-  kind: 'mermaid';
-  text: string;
-  attrs?: Record<string, string>;
-};
+import type * as Semantic from 'cherry-markdown/semantic';
+export type MiniProgramText = Semantic.SemanticText;
+export type MiniProgramBreak = Semantic.SemanticBreak;
+export type MiniProgramCursor = Semantic.SemanticCursor;
+export type MiniProgramInlineWrapper = Semantic.SemanticInlineWrapper;
+export type MiniProgramLink = Semantic.SemanticLink;
+export type MiniProgramImage = Semantic.SemanticImage;
+export type MiniProgramMathInline = Semantic.SemanticMathInline;
+export type MiniProgramRuby = Semantic.SemanticRuby;
+export type MiniProgramInline = Semantic.SemanticInline;
+export type MiniProgramParagraphBlock = Semantic.SemanticParagraphBlock;
+export type MiniProgramHeadingBlock = Semantic.SemanticHeadingBlock;
+export type MiniProgramBlockquoteBlock = Semantic.SemanticBlockquoteBlock;
+export type MiniProgramListItem = Semantic.SemanticListItem;
+export type MiniProgramListBlock = Semantic.SemanticListBlock;
+export type MiniProgramTableCell = Semantic.SemanticTableCell;
+export type MiniProgramTableRow = Semantic.SemanticTableRow;
+export type MiniProgramTableBlock = Semantic.SemanticTableBlock;
+export type MiniProgramCodeBlock = Semantic.SemanticCodeBlock & { nodes?: MiniProgramRichTextNode[] };
+export type MiniProgramMathBlock = Semantic.SemanticMathBlock;
+export type MiniProgramDiagramBlock = Semantic.SemanticDiagramBlock;
+export type MiniProgramUnsupportedBlock = Semantic.SemanticUnsupportedBlock;
+export type MiniProgramThematicBreak = Semantic.SemanticThematicBreak;
+export type MiniProgramPanelBlock = Semantic.SemanticPanelBlock;
+export type MiniProgramDetailBlock = Semantic.SemanticDetailBlock;
+export type MiniProgramContainerBlock = Semantic.SemanticContainerBlock;
+export type MiniProgramBlock = Exclude<Semantic.SemanticBlock, Semantic.SemanticCodeBlock> | MiniProgramCodeBlock;
+export type MiniProgramTransformOptions = Semantic.SemanticTransformOptions;
 export type MiniProgramRichTextNode =
   | { type: 'text'; text: string }
   | { name: string; attrs?: Record<string, string>; children?: MiniProgramRichTextNode[] };
-export type MiniProgramUnsupportedBlock = { type: 'unsupported'; tag: string; text: string };
-export type MiniProgramThematicBreak = { type: 'thematic_break' };
-export interface MiniProgramPanelBlock {
-  type: 'panel';
-  kind?: string;
-  title: string;
-  children: MiniProgramBlock[];
-}
-export interface MiniProgramDetailBlock {
-  type: 'detail';
-  title: string;
-  open?: boolean;
-  children: MiniProgramBlock[];
-}
-export type MiniProgramContainerBlock = MiniProgramPanelBlock | MiniProgramDetailBlock;
 export interface MiniProgramPanelViewBlock {
   type: 'panel';
   kind?: string;
@@ -131,32 +43,18 @@ export interface MiniProgramDetailViewBlock {
 }
 export type MiniProgramContainerViewBlock = MiniProgramPanelViewBlock | MiniProgramDetailViewBlock;
 
-export type MiniProgramBlock =
-  | MiniProgramContainerBlock
-  | MiniProgramParagraphBlock
-  | MiniProgramHeadingBlock
-  | MiniProgramBlockquoteBlock
-  | MiniProgramListBlock
-  | MiniProgramListItem
-  | MiniProgramTableBlock
-  | MiniProgramCodeBlock
-  | MiniProgramMathBlock
-  | MiniProgramDiagramBlock
-  | MiniProgramImage
-  | MiniProgramUnsupportedBlock
-  | MiniProgramThematicBreak;
-
-export type MiniProgramTransformOptions = {
-  unknownTag?: 'text' | 'unwrap' | 'drop';
-  forceNoCursor?: boolean;
-};
-
 export type MiniProgramViewOptions = {
   inlineClassMap?: Record<string, string>;
   deferImages?: boolean;
   imagePlaceholderText?: string;
 };
-export type MiniProgramTextRun = { type: 'text' | 'link'; text: string; className?: string; href?: string };
+export type MiniProgramTextRun = {
+  type: 'text' | 'link';
+  text: string;
+  className?: string;
+  href?: string;
+  style?: string;
+};
 export type MiniProgramMathInlineRun = { type: 'math_inline'; text: string; source: string; className?: string };
 export type MiniProgramCursorRun = { type: 'cursor' };
 export type MiniProgramImageRun = { type: 'image'; src: string; pendingSrc?: string; alt?: string };
@@ -205,23 +103,11 @@ export type MiniProgramViewBlock =
   | MiniProgramUnsupportedBlock
   | MiniProgramThematicBreak;
 
-export interface MiniProgramOptions {
-  /** Disable checkpoint reuse for diagnostics or custom integrations. */
-  incremental?: boolean;
-  value?: string;
-  engine?: {
-    global?: { flowSessionContext?: boolean; [key: string]: unknown };
-    syntax?: Record<string, unknown>;
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
+export interface MiniProgramOptions extends Semantic.SemanticOptions {
+  /** Inject a newer shared core using the same schema; bypasses the bundled adapter dependency. */
+  bridge?: Semantic.SemanticBridge;
 }
-
-export interface MiniProgramEngine {
-  makeHtml(markdown: string, returnType?: string, forceNoCursor?: boolean): string;
-  makeSemantic(markdown: string, renderer: unknown, forceNoCursor?: boolean): string;
-  restoreSemanticText(value: string): string;
-}
+export type MiniProgramEngine = Semantic.SemanticEngine;
 
 export type MiniProgramRenderOptions = MiniProgramTransformOptions & MiniProgramViewOptions;
 

@@ -1,3 +1,4 @@
+import { nativeThemeStyle } from '../../native/theme';
 import type { MiniProgramViewBlock } from '../../types';
 import type { NativeEvent, NativeInstance, NativeSelectorQuery } from '../platform';
 
@@ -6,8 +7,10 @@ interface BlockInstance extends NativeInstance<{
   tableHeight: number;
   tableWidth: number;
   tableScrollLeft: number;
+  detailOpen: boolean;
 }> {
   tableReady?: boolean;
+  detailDefaultOpen?: boolean;
   imageMeasurements?: Map<string, string>;
   scrollLeft?: number;
   measurementVersion?: number;
@@ -35,10 +38,20 @@ function measureTable(instance: BlockInstance) {
 
 Component({
   options: { styleIsolation: 'isolated' },
-  properties: { block: { type: Object, value: null } },
-  data: { tableHeight: 0, tableWidth: 0, tableScrollLeft: 0 },
+  properties: { block: { type: Object, value: null }, theme: { type: String, value: 'default' } },
+  data: { themeStyle: nativeThemeStyle(), detailOpen: false, tableHeight: 0, tableWidth: 0, tableScrollLeft: 0 },
   observers: {
+    theme(this: NativeInstance<object>, theme: string) {
+      this.setData({ themeStyle: nativeThemeStyle(theme) });
+    },
     block(this: BlockInstance, block: MiniProgramViewBlock | null) {
+      if (block?.type === 'detail') {
+        const open = block.open === true;
+        if (this.detailDefaultOpen !== open) {
+          this.detailDefaultOpen = open;
+          this.setData({ detailOpen: open });
+        }
+      } else this.detailDefaultOpen = undefined;
       this.measurementVersion = (this.measurementVersion || 0) + 1;
       if (block?.type !== 'table') {
         this.imageMeasurements = undefined;
@@ -73,6 +86,9 @@ Component({
     },
   },
   methods: {
+    toggleDetail(this: BlockInstance) {
+      if (this.data.block?.type === 'detail') this.setData({ detailOpen: !this.data.detailOpen });
+    },
     tableImageLoaded(
       this: BlockInstance,
       event: NativeEvent & { detail: { id: string; src: string; width: number; height: number } },

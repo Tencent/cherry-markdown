@@ -7,7 +7,7 @@ export default createBrowserTestConfig({
   define: { BUILD_ENV: JSON.stringify('production') },
   resolve: {
     alias: {
-      '@/Sanitizer': resolve(import.meta.dirname, './src/shared/Sanitizer.miniProgram.ts'),
+      '@/Sanitizer': resolve(import.meta.dirname, '../cherry-markdown/src/semantic/sanitizer.ts'),
       '@': resolve(import.meta.dirname, '../cherry-markdown/src'),
       '@cherry': resolve(import.meta.dirname, '../cherry-markdown/src'),
     },

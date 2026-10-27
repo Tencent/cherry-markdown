@@ -2,8 +2,8 @@
   display: block;
 }
 .md-inline-text {
-  line-height: 1.75;
-  color: #24292f;
+  line-height: var(--md-paragraph-line-height);
+  color: var(--md-paragraph-color);
 }
 .md-strong {
   font-weight: 700;
@@ -14,8 +14,8 @@
 .md-inline-code,
 .md-math-inline {
   font-family: monospace;
-  color: #c2410c;
-  background: #f1f5f9;
+  color: var(--md-inline-code-color);
+  background: var(--md-inline-code-bg);
 }
 .md-underline {
   text-decoration: underline;
@@ -25,7 +25,7 @@
 }
 .md-link,
 .md-cursor {
-  color: #1677ff;
+  color: var(--md-link-color);
 }
 .md-sub {
   font-size: 0.8em;

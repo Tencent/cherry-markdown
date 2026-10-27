@@ -1,3 +1,4 @@
+import { nativeThemeStyle } from '../../native/theme';
 import { NativeMarkdownController } from '../../native/controller';
 import type { NativeViewBlock } from '../../native/controller';
 import type { NativeInstance } from '../platform';
@@ -15,12 +16,16 @@ Component({
   options: { styleIsolation: 'isolated' },
   externalClasses: ['custom-class'],
   properties: {
+    theme: { type: String, value: 'default' },
     markdown: { type: String, value: '' },
     streaming: { type: Boolean, value: false },
     updateInterval: { type: Number, value: 80 },
   },
-  data: { blocks: [] },
+  data: { blocks: [], themeStyle: nativeThemeStyle() },
   observers: {
+    theme(this: MarkdownInstance, theme: string) {
+      this.setData({ themeStyle: nativeThemeStyle(theme) });
+    },
     'markdown, streaming'(this: MarkdownInstance, markdown: string, streaming: boolean) {
       this.controller?.setMarkdown(markdown, streaming);
     },

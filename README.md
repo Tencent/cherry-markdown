@@ -104,6 +104,23 @@ The UMD artifact exposes the global `Cherry` variable. For native ESM:
 
 Cherry provides multiple build artifacts (Full / Core / Stream / Engine) to fit different scenarios such as browser, Node.js, and AI Chat streaming. For usage examples, bundle differences, mermaid integration and dynamic import, please refer to **[Build Artifacts Guide](https://github.com/Tencent/cherry-markdown/wiki/%E6%9E%84%E5%BB%BA%E4%BA%A7%E7%89%A9%E4%BB%8B%E7%BB%8D)**.
 
+## Public semantic bridge (new in this release)
+
+`cherry-markdown/semantic` provides a DOM-free public parser using Cherry's grammar hooks, escaping and streaming closure rules. It produces semantic nodes directly, without a generated-HTML conversion step.
+
+```ts
+import { CherrySemanticParser, SEMANTIC_CORE_VERSION } from 'cherry-markdown/semantic';
+
+const parser = new CherrySemanticParser();
+const document = parser.parse('## Heading\n\n**shared grammar**');
+// schemaVersion: 1; detached blocks; incremental parsing statistics
+console.log(SEMANTIC_CORE_VERSION, document.stats);
+```
+
+`cherry-markdown/theme` exposes `cherryThemes` compiled from the existing Sass sources. The native MiniProgram adapter consumes the public protocol rather than maintaining its own grammar or incremental state. Its exact core dependency makes Changesets schedule a native-package update for every core release; publishing waits for the paired core release. Applications must still rebuild and publish their MiniProgram after updating precompiled components.
+
+Older npm releases do not include these entrypoints. Shared semantics and theme tokens do not imply browser-equivalent HTML/CSS plugins, layout, math or chart rendering.
+
 ## Contribution Guidelines
 
 Welcome to join us in building a powerful Markdown editor. Before implementing new features or submitting a pull request, please read:

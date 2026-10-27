@@ -1,3 +1,4 @@
+import { nativeInlineStyle } from '../native/theme';
 /**
  * Copyright (C) 2021 Tencent.
  *
@@ -179,6 +180,7 @@ export function inlineNodesToRuns(
   options: MiniProgramViewOptions = {},
   className = '',
   href = '',
+  style = '',
 ): MiniProgramInlineRun[] {
   return nodes.reduce<MiniProgramInlineRun[]>((runs, node) => {
     if (!node) {
@@ -187,7 +189,7 @@ export function inlineNodesToRuns(
 
     if ('type' in node && node.type === 'text') {
       if (node.text) {
-        runs.push({ type: href ? 'link' : 'text', text: node.text, className, href });
+        runs.push({ type: href ? 'link' : 'text', text: node.text, className, href, ...(style ? { style } : {}) });
       }
       return runs;
     }
@@ -213,17 +215,29 @@ export function inlineNodesToRuns(
     }
 
     if (node.type === 'ruby')
-      return runs.concat(inlineNodesToRuns(node.children, options, className, href), [
+      return runs.concat(inlineNodesToRuns(node.children, options, className, href, style), [
         { type: 'text', text: `（${node.annotation}）`, className: 'md-ruby-annotation', href },
       ]);
     if (node.type === 'link') {
       return runs.concat(
-        inlineNodesToRuns(node.children || [], options, joinClass(className, 'md-link'), node.href || ''),
+        inlineNodesToRuns(
+          node.children || [],
+          options,
+          joinClass(className, 'md-link'),
+          node.href || '',
+          nativeInlineStyle(node.attrs?.style, style),
+        ),
       );
     }
 
     return runs.concat(
-      inlineNodesToRuns(node.children || [], options, joinClass(className, getInlineClass(node.type, options)), href),
+      inlineNodesToRuns(
+        node.children || [],
+        options,
+        joinClass(className, getInlineClass(node.type, options)),
+        href,
+        nativeInlineStyle(node.attrs?.style, style),
+      ),
     );
   }, []);
 }

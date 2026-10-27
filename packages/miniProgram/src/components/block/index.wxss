@@ -1,13 +1,13 @@
 .md-p {
   margin: 0 0 20rpx;
-  color: #24292f;
-  font-size: 30rpx;
-  line-height: 1.75;
+  color: var(--md-paragraph-color);
+  font-size: var(--font-size-md);
+  line-height: var(--md-paragraph-line-height);
 }
 
 .md-heading {
   margin: 28rpx 0 16rpx;
-  color: #111827;
+  color: var(--md-heading-color);
   font-weight: 700;
   line-height: 1.35;
 }
@@ -30,8 +30,8 @@
 .md-blockquote {
   margin: 20rpx 0;
   padding: 16rpx 20rpx;
-  border-left: 6rpx solid #cbd5e1;
-  background: #f8fafc;
+  border-left: 6rpx solid var(--md-blockquote-border);
+  background: var(--md-blockquote-bg);
 }
 
 .md-list {
@@ -48,8 +48,8 @@
 .md-list-marker {
   width: 44rpx;
   color: #64748b;
-  font-size: 30rpx;
-  line-height: 1.75;
+  font-size: var(--font-size-md);
+  line-height: var(--md-paragraph-line-height);
 }
 
 .md-list-body {
@@ -69,9 +69,9 @@
 .md-table {
   flex-shrink: 0;
   min-width: 100%;
-  border-top: 1rpx solid #d0d7de;
-  border-left: 1rpx solid #d0d7de;
-  background: #ffffff;
+  border-top: 1rpx solid var(--md-table-border);
+  border-left: 1rpx solid var(--md-table-border);
+  background: var(--base-previewer-bg);
 }
 
 .md-table-row {
@@ -81,7 +81,7 @@
 }
 
 .md-table-head {
-  background: #f6f8fa;
+  background: var(--secondary-color);
 }
 
 .md-table-cell {
@@ -89,9 +89,9 @@
   width: 252rpx;
   flex: 0 0 252rpx;
   padding: 14rpx 16rpx;
-  border-right: 1rpx solid #d0d7de;
-  border-bottom: 1rpx solid #d0d7de;
-  color: #24292f;
+  border-right: 1rpx solid var(--md-table-border);
+  border-bottom: 1rpx solid var(--md-table-border);
+  color: var(--md-paragraph-color);
   font-size: 28rpx;
   line-height: 1.6;
 }
@@ -105,7 +105,7 @@
   margin: 22rpx 0;
   border: 1rpx solid #d8dee4;
   border-radius: 8rpx;
-  background: #0f172a;
+  background: var(--base-previewer-bg);
 }
 
 .md-code-head {
@@ -115,7 +115,7 @@
   justify-content: space-between;
   padding: 14rpx 18rpx;
   border-bottom: 1rpx solid rgba(255, 255, 255, 0.12);
-  color: #cbd5e1;
+  color: var(--base-font-color);
   font-size: 24rpx;
 }
 
@@ -123,8 +123,8 @@
   margin: 0;
   padding: 0 18rpx;
   border-radius: 6rpx;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--base-previewer-bg);
+  color: var(--base-font-color);
   font-size: 24rpx;
   line-height: 48rpx;
 }
@@ -132,7 +132,7 @@
 .md-code {
   display: block;
   padding: 20rpx;
-  color: #e2e8f0;
+  color: var(--base-font-color);
   font-family: Menlo, Monaco, Consolas, monospace;
   font-size: 26rpx;
   line-height: 1.65;
@@ -140,28 +140,28 @@
 }
 
 .md-code-token {
-  color: #e2e8f0;
+  color: var(--base-font-color);
 }
 
 .md-code-comment {
-  color: #94a3b8;
+  color: var(--base-sub-font-color);
 }
 
 .md-code-keyword {
-  color: #93c5fd;
+  color: var(--primary-color);
 }
 
 .md-code-string {
-  color: #86efac;
+  color: var(--md-link-color);
 }
 
 .md-code-number {
-  color: #fbbf24;
+  color: var(--md-inline-code-color);
 }
 
 .md-code-operator,
 .md-code-punctuation {
-  color: #c4b5fd;
+  color: var(--md-link-color);
 }
 
 .md-image {
@@ -178,7 +178,7 @@
   padding: 20rpx;
   border: 1rpx dashed #cbd5e1;
   border-radius: 8rpx;
-  background: #f8fafc;
+  background: var(--md-blockquote-bg);
   color: #64748b;
   font-size: 26rpx;
 }
@@ -195,7 +195,7 @@
 .md-rule {
   height: 1px;
   margin: 24rpx 0;
-  background: #d0d7de;
+  background: var(--md-table-border);
 }
 .md-unsupported {
   margin: 16rpx 0;
@@ -203,7 +203,7 @@
 }
 .md-source-card {
   margin: 20rpx 0;
-  background: #f1f5f9;
+  background: var(--secondary-color);
   border-radius: 8rpx;
 }
 .md-source {
@@ -216,6 +216,11 @@
 .md-group {
   padding: 16rpx;
   margin: 20rpx 0;
-  border-left: 4rpx solid #1677ff;
-  background: #f8fafc;
+  border-left: 4rpx solid var(--primary-color);
+  background: var(--md-blockquote-bg);
 }
+
+.md-theme { color: var(--base-font-color); }
+.md-group-head { display: flex; flex-direction: row; justify-content: space-between; font-weight: bold; color: var(--md-heading-color); margin-bottom: 12rpx; }
+
+.md-detail-toggle { width: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; font-size: inherit; line-height: 1.6; text-align: left; }

@@ -4,3 +4,5 @@
 .cherry-markdown {
   width: 100%;
 }
+
+.cherry-markdown { background: var(--base-previewer-bg); color: var(--base-font-color); }

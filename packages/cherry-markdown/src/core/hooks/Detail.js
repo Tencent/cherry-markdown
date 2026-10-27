@@ -110,7 +110,14 @@ export default class Detail extends ParagraphBase {
             )
           : '';
       const body = this.isContainsCache(str) ? this.makeExcludingCached(str, paragraph) : paragraph(str);
-      return renderer.wrap('detail', { open: defaultOpen, title }, paragraph(title) + body);
+      return renderer.wrap(
+        'detail',
+        {
+          open: defaultOpen,
+          title: renderer.text(this.$engine.resolveSemanticReferences(sentenceMakeFunc(title).html)),
+        },
+        body,
+      );
     }
     let ret = `<details ${defaultOpen ? 'open' : ''}>`;
     const paragraphProcessor = (str) => {

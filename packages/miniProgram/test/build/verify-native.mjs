@@ -8,6 +8,9 @@ import ts from 'typescript';
 
 const root = resolve(process.argv[2] || resolve(dirname(fileURLToPath(import.meta.url)), '../..'));
 const components = resolve(root, 'dist/components');
+const bridgeManifest = JSON.parse(readFileSync(resolve(root, 'dist/semantic-bridge.json'), 'utf8'));
+assert.equal(bridgeManifest.schemaVersion, 1);
+assert.equal(bridgeManifest.source, 'cherry-markdown/semantic');
 const definitions = new Map();
 const clipboard = [];
 const previews = [];
@@ -132,6 +135,26 @@ tableDefinition.lifetimes.detached.call(table);
 callbacks.shift()({ height: 777 });
 assert.equal(table.data.tableHeight, 0, 'ignore measurements after unmount');
 
+const detail = {
+  data: { block: { type: 'detail', open: false }, detailOpen: false },
+  setData(patch) {
+    Object.assign(this.data, patch);
+  },
+};
+tableDefinition.observers.block.call(detail, detail.data.block);
+tableDefinition.methods.toggleDetail.call(detail);
+assert.equal(detail.data.detailOpen, true);
+tableDefinition.observers.block.call(detail, detail.data.block);
+assert.equal(detail.data.detailOpen, true, 'streaming body updates retain user expansion');
+const themed = {
+  data: {},
+  setData(patch) {
+    Object.assign(this.data, patch);
+  },
+};
+tableDefinition.observers.theme.call(themed, 'dark');
+assert.match(themed.data.themeStyle, /--md-paragraph-color:/);
+
 const inlineComponent = definitions.get('inlines');
 let groups;
 inlineComponent.observers.nodes.call(
@@ -189,9 +212,12 @@ blocks.forEach(block => { if (block.type === 'list') block.children.forEach(item
   rmSync(temporary, { recursive: true, force: true });
 }
 
-const { default: CherryStream, NativeMarkdownController } = await import(
-  pathToFileURL(resolve(root, 'dist/miniProgram.esm.js')).href
-);
+const {
+  default: CherryStream,
+  NativeMarkdownController,
+  SEMANTIC_CORE_VERSION,
+} = await import(pathToFileURL(resolve(root, 'dist/miniProgram.esm.js')).href);
+assert.equal(SEMANTIC_CORE_VERSION, bridgeManifest.coreVersion);
 assert.equal(new CherryStream().setMarkdown('**hello**')[0].type, 'paragraph');
 assert.equal(typeof NativeMarkdownController, 'function');
 const semantic = new CherryStream();

@@ -355,6 +355,11 @@ export default class Engine {
     });
   }
 
+  /** Restore literal payloads for non-HTML backends. @param {string} value */
+  restoreSemanticText(value) {
+    return this.$decodeReservedKeywords(UrlCache.restoreAll(this.$deCacheBigData(value)));
+  }
+
   /**
    * 流式输出场景时，在最后增加一个光标占位
    * @param {string} md 内容

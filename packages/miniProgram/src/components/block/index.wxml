@@ -1,25 +1,28 @@
+<view class="md-theme" style="{{themeStyle}}">
 <view wx:if="{{block.type === 'panel' || block.type === 'detail'}}" class="md-group">
-  <cherry-block wx:for="{{block.children}}" wx:key="id" block="{{item}}" />
+  <button wx:if="{{block.type === 'detail'}}" class="md-group-head md-detail-toggle" bindtap="toggleDetail"><text>{{block.title}}</text><text>{{detailOpen ? '▾' : '▸'}}</text></button>
+  <view wx:else class="md-group-head"><text>{{block.title}}</text></view>
+  <view wx:if="{{block.type === 'panel' || detailOpen}}"><cherry-block wx:for="{{block.children}}" wx:key="id" block="{{item}}" theme="{{theme}}" /></view>
 </view>
 <view wx:elif="{{block.type === 'paragraph' || block.type === 'heading'}}" class="md-p {{block.type === 'heading' ? 'md-heading md-h' + block.level : ''}}">
-  <cherry-inlines nodes="{{block.inlines}}" />
+  <cherry-inlines theme="{{theme}}" nodes="{{block.inlines}}" />
 </view>
 <view wx:elif="{{block.type === 'blockquote'}}" class="md-blockquote">
-  <cherry-block wx:for="{{block.children}}" wx:key="id" block="{{item}}" />
+  <cherry-block wx:for="{{block.children}}" wx:key="id" block="{{item}}" theme="{{theme}}" />
 </view>
 <view wx:elif="{{block.type === 'list'}}" class="md-list">
   <view wx:for="{{block.children}}" wx:key="id" class="md-list-item">
     <text class="md-list-marker">{{item.marker}}</text>
     <view class="md-list-body">
-      <cherry-block wx:for="{{item.children}}" wx:key="id" wx:for-item="child" block="{{child}}" />
+      <cherry-block wx:for="{{item.children}}" wx:key="id" wx:for-item="child" block="{{child}}" theme="{{theme}}" />
     </view>
   </view>
 </view>
 <view wx:elif="{{block.type === 'table'}}" class="md-table-shell">
   <scroll-view wx:if="{{tableHeight > 0}}" class="md-table-scroll" scroll-x="{{true}}" enable-flex="{{true}}" type="custom" scroll-left="{{tableScrollLeft}}" bindscroll="tableScrolled" style="height: {{tableHeight}}px;">
-    <template is="table" data="{{block, tableWidth}}" />
+    <template is="table" data="{{block, tableWidth, theme}}" />
   </scroll-view>
-  <template wx:else is="table" data="{{block, tableWidth}}" />
+  <template wx:else is="table" data="{{block, tableWidth, theme}}" />
 </view>
 <view wx:elif="{{block.type === 'code_block'}}" class="md-code-card">
   <view class="md-code-head">
@@ -40,16 +43,17 @@
 <view wx:elif="{{block.type === 'thematic_break'}}" class="md-rule" />
 <view wx:elif="{{block.type === 'unsupported'}}" class="md-unsupported"><text user-select="{{true}}">{{block.text}}</text></view>
 
+</view>
 <template name="table">
   <view class="md-table" style="width: {{tableWidth}}rpx;">
     <view wx:for="{{block.header}}" wx:key="id" class="md-table-row md-table-head">
       <view wx:for="{{item.cells}}" wx:key="id" wx:for-item="cell" class="md-table-cell md-table-th" style="text-align: {{cell.align || 'left'}};">
-        <cherry-inlines nodes="{{cell.inlines}}" data-cell="{{cell.id}}" bind:layoutchange="tableImageLoaded" />
+        <cherry-inlines theme="{{theme}}" nodes="{{cell.inlines}}" data-cell="{{cell.id}}" bind:layoutchange="tableImageLoaded" />
       </view>
     </view>
     <view wx:for="{{block.rows}}" wx:key="id" class="md-table-row">
       <view wx:for="{{item.cells}}" wx:key="id" wx:for-item="cell" class="md-table-cell" style="text-align: {{cell.align || 'left'}};">
-        <cherry-inlines nodes="{{cell.inlines}}" data-cell="{{cell.id}}" bind:layoutchange="tableImageLoaded" />
+        <cherry-inlines theme="{{theme}}" nodes="{{cell.inlines}}" data-cell="{{cell.id}}" bind:layoutchange="tableImageLoaded" />
       </view>
     </view>
   </view>

@@ -19,7 +19,8 @@
   "files": [
     "dist",
     "types",
-    "!types/env.d.ts"
+    "!types/env.d.ts",
+    "!types/semantic-env.d.ts"
   ],
   "sideEffects": [
     "./dist/*.css"
@@ -35,7 +36,7 @@
     "dev": "vp dev",
     "dev:vite": "vp dev",
     "build": "vp run clean && vp run build:all",
-    "build:all": "vp run iconfont && vp run build:styles && vp run build:types && vp run build:addons && vp run build:full",
+    "build:all": "vp run iconfont && vp run build:styles && vp run build:types && vp run build:addons && vp run build:full && vp run build:semantic",
     "build:full": "NODE_ENV=production node build/vite.build.js",
     "build:core": "NODE_ENV=production node build/vite.build.js",
     "build:engine": "NODE_ENV=production node build/vite.build.js",
@@ -45,12 +46,13 @@
     "build:styles": "NODE_ENV=production node build/styles.build.js",
     "clean": "rimraf ./dist",
     "check-bundle": "es-check es5 dist/cherry-markdown.js",
-    "test": "vp test --exclude test/build/built-artifact-contract.spec.js",
+    "test": "vp run build:semantic && vp test --exclude test/build/built-artifact-contract.spec.js",
     "test:artifacts": "vp test run test/build/built-artifact-contract.spec.js",
     "test:coverage": "COVERAGE_THRESHOLDS=true vp test run --coverage --exclude test/build/built-artifact-contract.spec.js",
     "test:update": "vp test -u --exclude test/build/built-artifact-contract.spec.js",
-    "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project test/tsconfig.json --noEmit",
-    "examples": "serve -p 3000 ."
+    "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project test/tsconfig.json --noEmit && tsc --project tsconfig.semantic.json --noEmit",
+    "examples": "serve -p 3000 .",
+    "build:semantic": "NODE_ENV=production node build/semantic.build.js && tsc --project tsconfig.semantic.json && node build/replacePaths.js"
   },
   "keywords": [
     "markdown"
@@ -97,9 +99,28 @@
     "dompurify": "^3.2.6",
     "htmlparser2": "^10.0.0",
     "jsdom": "~19.0.0",
-    "pako": "^2.2.0"
+    "pako": "^2.2.0",
+    "entities": "^7.0.1"
   },
   "optionalDependencies": {
     "mermaid": "^11.14.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/cherry-markdown.esm.js",
+      "require": "./dist/cherry-markdown.js"
+    },
+    "./semantic": {
+      "types": "./dist/types/semantic/index.d.ts",
+      "import": "./dist/cherry-markdown.semantic.esm.js",
+      "require": "./dist/cherry-markdown.semantic.cjs"
+    },
+    "./*": "./*",
+    "./theme": {
+      "types": "./dist/types/semantic/theme.d.ts",
+      "import": "./dist/cherry-markdown.theme.esm.js",
+      "require": "./dist/cherry-markdown.theme.cjs"
+    }
   }
 }
