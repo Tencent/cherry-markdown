@@ -10,7 +10,7 @@
 #     • @cherry-markdown/milkdown → reusable-npm-release.yml (after core)
 #     • @cherry-markdown/client → reusable-client-build.yml (mode=release)
 #     • cherry-markdown-vscode-plugin → reusable-vscode-plugin.yml (mode=release)
-#   - 所有目标发布完成后创建 main → dev 同步 PR
+#   - 所有目标发布完成后直接同步 main 的 tree 到 dev
 # =============================================================================
 
 name: 'Release'
@@ -149,20 +149,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: read
-      pull-requests: write
+      contents: write
     steps:
-      - name: Create or reuse main → dev PR
-        env:
-          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
-          GH_REPO: ${{ github.repository }}
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          token: ${{ secrets.BOT_TOKEN }}
+
+      - name: Sync released tree to dev
         run: |
-          ahead=$(gh api "repos/$GH_REPO/compare/dev...main" --jq '.ahead_by')
-          if [ "$ahead" = "0" ]; then exit 0; fi
-          pr=$(gh pr list --base dev --head main --state open --json url --jq '.[0].url // empty')
-          if [ -n "$pr" ]; then
-            echo "$pr"
-          else
-            gh pr create --base dev --head main --title 'chore: 同步发布版本到 dev' \
-              --body "发布任务已完成，请检查差异和冲突后合并。发布流程：$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin dev
+          tree=$(git rev-parse "$GITHUB_SHA^{tree}")
+          if [ "$tree" = "$(git rev-parse 'origin/dev^{tree}')" ]; then exit 0; fi
+          # 保留双方历史，但文件内容完全采用本次发布的 tree。
+          commit=$(git commit-tree "$tree" -p origin/dev -p "$GITHUB_SHA" -m 'chore: sync released main tree to dev')
+          # 普通推送：dev 若在同步期间前进则失败，不覆盖并发提交。
+          git push origin "$commit:refs/heads/dev"
