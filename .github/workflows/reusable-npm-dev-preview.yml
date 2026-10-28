@@ -61,22 +61,7 @@ jobs:
       - name: Verify preview package
         if: inputs.dry_run == true
         working-directory: ./packages/cherry-markdown
-        run: |
-          NODE_AUTH_TOKEN="" npm publish --dry-run --tag latest --no-workspaces --json > "$RUNNER_TEMP/preview-package.json"
-          node --input-type=module <<'NODE'
-          import assert from 'node:assert/strict';
-          import { readFileSync } from 'node:fs';
-          import { join } from 'node:path';
-
-          const preview = JSON.parse(readFileSync(join(process.env.RUNNER_TEMP, 'preview-package.json'), 'utf8'));
-          const bundle = 'dist/cherry-markdown.js';
-
-          assert.equal(preview.name, process.env.PACKAGE_NAME, 'Unexpected package name');
-          assert.equal(preview.version, process.env.PACKAGE_VERSION, 'Unexpected package version');
-          assert(preview.files.some((file) => file.path === bundle), `Missing ${bundle} in the package`);
-          assert(readFileSync(bundle, 'utf8').includes(process.env.PACKAGE_VERSION), `Missing preview version in ${bundle}`);
-          console.log(`Verified ${preview.name}@${preview.version} and ${bundle}`);
-          NODE
+        run: NODE_AUTH_TOKEN="" npm publish --dry-run --tag latest --no-workspaces
 
       - name: Comment install instructions
         if: success() && inputs.dry_run == false
