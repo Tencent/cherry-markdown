@@ -149,8 +149,6 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v6
-
       - name: Check publication results
         id: check
         uses: actions/github-script@v7
@@ -158,11 +156,31 @@ jobs:
           RELEASE_NEEDS: ${{ toJSON(needs) }}
         with:
           script: |
-            const { checkReleaseResults } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/release-sync.mjs`);
-            const result = checkReleaseResults(JSON.parse(process.env.RELEASE_NEEDS));
-            core.setOutput('should_sync', String(result.shouldSync));
-            core.setOutput('verify_milkdown', String(result.verifyMilkdown));
-            await core.summary.addRaw(result.summary).write();
+            const needs = JSON.parse(process.env.RELEASE_NEEDS);
+            if (needs.release.result !== 'success') throw new Error('Release versioning or tagging failed.');
+            for (const [name, job] of Object.entries(needs)) {
+              if (job.result === 'failure' || job.result === 'cancelled') throw new Error(`Release job ${name} did not succeed.`);
+            }
+            const packages = JSON.parse(needs.release.outputs.publishedPackages || '[]');
+            if (!Array.isArray(packages)) throw new Error('Invalid published packages output.');
+            const jobs = {
+              'cherry-markdown': 'build-core-release',
+              '@cherry-markdown/miniprogram': 'build-miniProgram-release',
+              '@cherry-markdown/milkdown': 'build-milkdown-release',
+              '@cherry-markdown/client': 'build-client-release',
+              'cherry-markdown-vscode-plugin': 'build-vscodePlugin-release',
+            };
+            for (const pkg of packages) {
+              if (!jobs[pkg.name] || !pkg.version || needs[jobs[pkg.name]]?.result !== 'success') {
+                throw new Error(`Release job for ${pkg.name} did not succeed.`);
+              }
+            }
+            const milkdown = packages.find(pkg => pkg.name === '@cherry-markdown/milkdown');
+            if (milkdown && milkdown.version !== needs.release.outputs.publishedMilkdownVersion) {
+              throw new Error('Milkdown version does not match the release output.');
+            }
+            core.setOutput('should_sync', String(packages.length > 0));
+            core.setOutput('verify_milkdown', String(milkdown?.version === '0.0.1'));
 
       - name: Verify manual Milkdown publication
         if: steps.check.outputs.verify_milkdown == 'true'
@@ -184,9 +202,42 @@ jobs:
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
-            const { createSyncPullRequest } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/release-sync.mjs`);
-            const result = await createSyncPullRequest(github, context);
-            await core.summary.addRaw(result).write();
+            const { owner, repo } = context.repo;
+            const sha = context.sha;
+            if (!/^[a-f0-9]{40}$/.test(sha)) throw new Error('Invalid release commit SHA.');
+            const branch = `release-sync/${sha}`;
+            const comparison = await github.rest.repos.compareCommitsWithBasehead({ owner, repo, basehead: `dev...${sha}` });
+            if (!Number.isInteger(comparison.data.ahead_by)) throw new Error('Invalid branch comparison.');
+            if (comparison.data.ahead_by === 0) {
+              core.info('dev already contains the release commit.');
+              return;
+            }
+            const list = () => github.rest.pulls.list({ owner, repo, state: 'open', base: 'dev', head: `${owner}:${branch}` });
+            const existing = await list();
+            if (existing.data.length) {
+              if (existing.data[0].head.sha !== sha) throw new Error('Existing sync PR points to a different commit.');
+              core.info(`Existing sync PR: ${existing.data[0].html_url}`);
+              return;
+            }
+            try {
+              await github.rest.git.createRef({ owner, repo, ref: `refs/heads/${branch}`, sha });
+            } catch (error) {
+              if (error.status !== 422) throw error;
+              const ref = await github.rest.git.getRef({ owner, repo, ref: `heads/${branch}` });
+              if (ref.data.object.sha !== sha) throw new Error('Existing sync branch points to a different commit.');
+            }
+            try {
+              const pr = await github.rest.pulls.create({
+                owner, repo, base: 'dev', head: branch, title: 'chore: 同步发布版本到 dev',
+                body: `将 main 的发布提交 \`${sha}\` 同步到 dev。请检查差异和冲突后再合并。\n\n发布流程：${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`,
+              });
+              core.info(`Created sync PR: ${pr.data.html_url}`);
+            } catch (error) {
+              if (error.status !== 422) throw error;
+              const concurrent = await list();
+              if (!concurrent.data.length || concurrent.data[0].head.sha !== sha) throw error;
+              core.info(`Existing sync PR: ${concurrent.data[0].html_url}`);
+            }
 
       - name: Record sync failure
         if: failure()
