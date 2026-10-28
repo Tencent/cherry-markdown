@@ -1,0 +1,26 @@
+name: 'PR: npm Dev Preview'
+
+on:
+  pull_request:
+    paths:
+      - 'packages/**'
+      - 'examples/**'
+      - 'build/**'
+      - 'package.json'
+      - 'vite.config.ts'
+      - 'yarn.lock'
+      - '.node-version'
+      - '.npmrc'
+      - '.github/workflows/reusable-npm-dev-preview.yml'
+      - '.github/workflows/merge-dev-preview.yml'
+      - '.github/workflows/pr-npm-dev-preview.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  npm-dev-preview:
+    uses: ./.github/workflows/reusable-npm-dev-preview.yml
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      dry_run: true

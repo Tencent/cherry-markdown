@@ -50,4 +50,5 @@ jobs:
     uses: ./.github/workflows/reusable-npm-dev-preview.yml
     with:
       pr_number: ${{ github.event.pull_request.number }}
+      dry_run: false
     secrets: inherit

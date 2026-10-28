@@ -10,12 +10,9 @@ on:
       pr_number:
         required: true
         type: number
-
-permissions:
-  contents: read
-  pull-requests: write
-  issues: write
-  id-token: write
+      dry_run:
+        required: true
+        type: boolean
 
 jobs:
   npm-dev-preview:
@@ -54,11 +51,20 @@ jobs:
           printf '**⚠️ Development Preview Warning / 开发预览版警告**\n\nThis is a dev preview version, do NOT use in production!\n此版本为开发预览版，禁止在生产环境使用！\n' > README.md
 
       - name: Publish to npm
+        if: inputs.dry_run == false
         working-directory: ./packages/cherry-markdown
         run: NODE_AUTH_TOKEN="" npm publish --tag latest --no-workspaces
 
+      - name: Verify preview package
+        if: inputs.dry_run == true
+        working-directory: ./packages/cherry-markdown
+        run: |
+          NODE_AUTH_TOKEN="" npm publish --dry-run --tag latest --no-workspaces --json > "$RUNNER_TEMP/preview-package.json"
+          node -e 'const p = require(process.argv[1]); if (p.name !== process.env.PACKAGE_NAME || p.version !== process.env.PACKAGE_VERSION || !p.files.some(f => f.path === "dist/cherry-markdown.js")) process.exit(1);' "$RUNNER_TEMP/preview-package.json"
+          node -e 'if (!require("node:fs").readFileSync("dist/cherry-markdown.js", "utf8").includes(process.env.PACKAGE_VERSION)) process.exit(1);'
+
       - name: Comment install instructions
-        if: success()
+        if: success() && inputs.dry_run == false
         uses: actions/github-script@v7
         with:
           script: |
