@@ -180,10 +180,17 @@
 }
 .md-code-scroll {
   width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+.md-code-content {
+  flex-shrink: 0;
+  min-width: 100%;
 }
 .md-code {
   display: block;
-  min-width: 100%;
+  width: 100%;
   box-sizing: border-box;
   padding: 14px;
   color: #000;
