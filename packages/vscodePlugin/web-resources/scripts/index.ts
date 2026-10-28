@@ -82,7 +82,7 @@ const uploadCallbacks = new Map<number, UploadCallback | undefined>();
  * 在侧边栏增加编辑/预览入口
  */
 function createCustomMenus(labels: WebviewLabels) {
-  const customMenuChangeModule = CherryEditor.createMenuHook(labels.edit, {
+  const customMenuChangeModule = CherryEditor.createMenuHook(labels.edit.replace(/\s+/g, ''), {
     iconName: 'pen',
     onClick(selection: unknown) {
       if (window.isDisableEdit) {
@@ -94,8 +94,8 @@ function createCustomMenus(labels: WebviewLabels) {
     },
   });
 
-  const customMenuFont = CherryEditor.createMenuHook(labels.fontStyle, { iconName: 'font' });
-  const customMenuExport = CherryEditor.createMenuHook(labels.save, {
+  const customMenuFont = CherryEditor.createMenuHook(labels.fontStyle.replace(/\s+/g, ''), { iconName: 'font' });
+  const customMenuExport = CherryEditor.createMenuHook(labels.save.replace(/\s+/g, ''), {
     iconName: 'export',
     subMenuConfig: [
       {
