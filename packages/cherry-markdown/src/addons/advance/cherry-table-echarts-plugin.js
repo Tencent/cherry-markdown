@@ -1496,7 +1496,7 @@ const MapChartLoadingOptionsHandler = {
     const { engine } = options;
     // console.log('Rendering map chart:', tableObject);
 
-    return !getExternal('echarts')
+    return !engine.echartsRef
       ? {
           title: {
             text: `${engine.cherry.locale.chartRenderError} : ${engine.cherry.locale.chartLibraryNotLoadedTip}`,
@@ -1634,7 +1634,7 @@ const MapChartOptionsHandler = {
 
     // 用户指定了新的地图数据源，检查是否与已注册的地图源匹配
     if (userMapSource) {
-      if (getExternal('echarts')?.getMap?.(userMapSource)) {
+      if (options.engine.echartsRef?.getMap?.(userMapSource)) {
         // 用户指定数据源已注册，直接使用
         return generateOptions(MapChartCompleteOptionsHandler, tableObject, options);
       }
@@ -1648,7 +1648,7 @@ const MapChartOptionsHandler = {
     let registeredMapSource = null;
 
     for (const source of possibleMapSources) {
-      if (getExternal('echarts')?.getMap?.(source)) {
+      if (options.engine.echartsRef?.getMap?.(source)) {
         isMapRegistered = true;
         registeredMapSource = source;
         break;
@@ -1704,7 +1704,7 @@ const MapChartOptionsHandler = {
 
     this.$fetchMapData(url)
       .then((geoJson) => {
-        getExternal('echarts')?.registerMap?.(url, geoJson);
+        options.engine.echartsRef?.registerMap?.(url, geoJson);
         // console.log(`地图数据加载成功！来源: ${url}`);
         this.$refreshMapChart(options.chartId, url, options.engine);
         return geoJson;

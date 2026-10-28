@@ -31,6 +31,7 @@
   },
   "scripts": {
     "iconfont": "node build/run-iconfont.js",
+    "iconfont:normalize": "node build/normalize-icons.js",
     "dev": "vp dev",
     "dev:vite": "vp dev",
     "build": "vp run clean && vp run build:all",

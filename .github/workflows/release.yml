@@ -7,6 +7,7 @@
 #   - 按发布的包名分别调用子工作流:
 #     • cherry-markdown → reusable-npm-release.yml
 #     • @cherry-markdown/miniprogram → reusable-npm-release.yml
+#     • @cherry-markdown/milkdown → reusable-npm-release.yml (after core)
 #     • @cherry-markdown/client → reusable-client-build.yml (mode=release)
 #     • cherry-markdown-vscode-plugin → reusable-vscode-plugin.yml (mode=release)
 #   - 发布完成后强制同步 main → dev（仅在有包发布时执行）
@@ -34,18 +35,15 @@ jobs:
       publishedClientVersion: ${{ steps.extract_version.outputs.clientVersion }}
       publishedCoreVersion: ${{ steps.extract_version.outputs.coreVersion }}
       publishedMiniProgramVersion: ${{ steps.extract_version.outputs.miniProgramVersion }}
+      publishedMilkdownVersion: ${{ steps.extract_version.outputs.milkdownVersion }}
     steps:
       - uses: actions/checkout@v6
 
-      - uses: voidzero-dev/setup-vp@v1
+      - uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
         with:
+          version-file: package.json
           node-version-file: '.node-version'
           cache: true
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.node-version'
 
       - name: Install dependencies
         run: vp install
@@ -73,11 +71,15 @@ jobs:
           miniProgramVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/miniprogram") | .version')
           echo "miniProgramVersion=$miniProgramVersion" >> $GITHUB_OUTPUT
 
+          milkdownVersion=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | select(.name=="@cherry-markdown/milkdown") | .version')
+          echo "milkdownVersion=$milkdownVersion" >> $GITHUB_OUTPUT
+
           # Debugging output
           echo "publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}"
           echo "clientVersion=$clientVersion"
           echo "coreVersion=$coreVersion"
           echo "miniProgramVersion=$miniProgramVersion"
+          echo "milkdownVersion=$milkdownVersion"
 
   build-core-release:
     needs: release
@@ -102,6 +104,23 @@ jobs:
       dist_asset_name: 'cherry-markdown-mini-program'
       release_tag: '@cherry-markdown/miniprogram@${{ needs.release.outputs.publishedMiniProgramVersion }}'
     secrets: inherit
+
+  build-milkdown-release:
+    needs: [release, build-core-release]
+    # A Milkdown-only release may skip core; a failed core publish must block it.
+    if: >-
+      ${{ !cancelled() && needs.release.result == 'success' &&
+          contains(needs.release.outputs.publishedPackages, '"name":"@cherry-markdown/milkdown"') &&
+          (needs.build-core-release.result == 'success' || needs.build-core-release.result == 'skipped') }}
+    uses: ./.github/workflows/reusable-npm-release.yml
+    with:
+      package_name: '@cherry-markdown/milkdown'
+      package_dir: './packages/milkdown'
+      package_version: ${{ needs.release.outputs.publishedMilkdownVersion }}
+      dist_asset_name: 'cherry-markdown-milkdown'
+      release_tag: '@cherry-markdown/milkdown@${{ needs.release.outputs.publishedMilkdownVersion }}'
+      # The maintainer publishes 0.0.1 locally, then configures npm OIDC.
+      publish_npm: ${{ needs.release.outputs.publishedMilkdownVersion != '0.0.1' }}
 
   build-client-release:
     needs: release

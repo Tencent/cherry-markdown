@@ -2,7 +2,7 @@
  * Editor.setCursor boundary clamping regression tests.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import type { EditorView } from '@codemirror/view';
 import Editor from '../../src/Editor';
 import { createCm6View, getSelection } from '../helpers/cM6View';

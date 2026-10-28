@@ -20,23 +20,28 @@
     "changeset-version": "npx @changesets/cli version",
     "dev": "vp run dev:core",
     "dev:core": "vp dev --config packages/cherry-markdown/vite.config.ts",
-    "build": "vp run -F cherry-markdown build && vp run -F @cherry-markdown/miniprogram build && vp run -F @cherry-markdown/mini-program-demo build && vp run -F @cherry-markdown/react_demo build && vp run -F @cherry-markdown/client build && vp run -F cherry-markdown-vscode-plugin build",
+    "build": "vp run -F cherry-markdown build && vp run -F @cherry-markdown/miniprogram build && vp run -F @cherry-markdown/milkdown build && vp run -F @cherry-markdown/mini-program-demo build && vp run -F @cherry-markdown/react_demo build && vp run -F @cherry-markdown/client build && vp run -F cherry-markdown-vscode-plugin build",
     "build:core": "vp run -F cherry-markdown build",
     "build:miniProgram": "vp run -F @cherry-markdown/miniprogram build",
+    "build:milkdown": "vp run -F @cherry-markdown/milkdown build",
     "dev:client": "vp run -F @cherry-markdown/client tauri:dev",
     "build:client": "vp run -F @cherry-markdown/client build",
     "build:vscodePlugin": "vp run -F cherry-markdown build && vp run -F cherry-markdown-vscode-plugin build",
     "example:react": "vp run -F @cherry-markdown/react_demo dev",
-    "test": "vp run -F cherry-markdown test && vp run -F @cherry-markdown/miniprogram test",
+    "test": "vp run -F cherry-markdown test && vp run -F @cherry-markdown/miniprogram test && vp run -F @cherry-markdown/milkdown test",
     "test:core": "vp run -F cherry-markdown test",
     "test:miniProgram": "vp run -F @cherry-markdown/miniprogram test",
+    "test:milkdown": "vp run -F @cherry-markdown/milkdown test",
+    "test:e2e:milkdown": "vp run -F @cherry-markdown/milkdown test:e2e",
     "test:update": "vp run -F cherry-markdown test:update",
     "lint": "vp check",
     "lint:fix": "vp check --fix",
-    "typecheck": "vp run -F cherry-markdown typecheck && vp run -F @cherry-markdown/miniprogram typecheck",
+    "typecheck": "vp run -F cherry-markdown typecheck && vp run -F @cherry-markdown/miniprogram typecheck && vp run -F @cherry-markdown/milkdown typecheck",
     "typecheck:core": "vp run -F cherry-markdown typecheck",
     "typecheck:miniProgram": "vp run -F @cherry-markdown/miniprogram typecheck",
-    "validate": "vp check"
+    "typecheck:milkdown": "vp run -F @cherry-markdown/milkdown typecheck",
+    "validate": "vp check",
+    "check:toolchain": "node build/verify-toolchain.mjs"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
@@ -51,7 +56,7 @@
     "@types/node": "^20.10.6",
     "@typescript-eslint/eslint-plugin": "^8.62.0",
     "@typescript-eslint/parser": "^8.62.0",
-    "@vitest/coverage-v8": "4.1.10",
+    "@vitest/coverage-v8": "5.0.5",
     "@vue/typescript-plugin": "^3.2.2",
     "commitlint": "21.0.0",
     "esbuild": "^0.28.2",
@@ -63,15 +68,19 @@
     "husky": "~9.1.7",
     "prettier": "^3.9.3",
     "typescript": "^6.0.2",
-    "vite": "^8.2.1",
-    "vite-plus": "0.2.6",
-    "vitest": "4.1.10",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.4.0",
+    "vite-plus": "1.4.0",
+    "vitest": "5.0.5",
     "vue-eslint-parser": "^10.4.1",
     "vue-tsc": "^3.2.2"
   },
   "engines": {
-    "node": ">=22",
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0",
     "yarn": ">=1.22.18"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "resolutions": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.4.0",
+    "vitest": "5.0.5"
+  }
 }

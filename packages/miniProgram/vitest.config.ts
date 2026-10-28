@@ -1,16 +1,14 @@
 import { resolve } from 'path';
-import { defineConfig } from 'vite-plus';
+import { createBrowserTestConfig } from '../../build/test.mjs';
+import { prismLanguagePlugin } from '../cherry-markdown/build/prism.plugin.js';
 
-export default defineConfig({
+export default createBrowserTestConfig({
+  plugins: [prismLanguagePlugin()],
   resolve: {
     alias: {
-      '@/Sanitizer': resolve(__dirname, './src/shared/Sanitizer.miniProgram.js'),
-      '@': resolve(__dirname, '../cherry-markdown/src'),
-      '@cherry': resolve(__dirname, '../cherry-markdown/src'),
+      '@/Sanitizer': resolve(import.meta.dirname, './src/shared/Sanitizer.miniProgram.js'),
+      '@': resolve(import.meta.dirname, '../cherry-markdown/src'),
+      '@cherry': resolve(import.meta.dirname, '../cherry-markdown/src'),
     },
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
   },
 });
