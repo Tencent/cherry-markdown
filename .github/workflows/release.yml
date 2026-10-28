@@ -157,14 +157,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.BOT_TOKEN }}
 
-      - name: Sync released tree to dev
+      - name: Reset dev to released main
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git fetch origin dev
-          tree=$(git rev-parse "$GITHUB_SHA^{tree}")
-          if [ "$tree" = "$(git rev-parse 'origin/dev^{tree}')" ]; then exit 0; fi
-          # 保留双方历史，但文件内容完全采用本次发布的 tree。
-          commit=$(git commit-tree "$tree" -p origin/dev -p "$GITHUB_SHA" -m 'chore: sync released main tree to dev')
-          # 普通推送：dev 若在同步期间前进则失败，不覆盖并发提交。
-          git push origin "$commit:refs/heads/dev"
+          git push origin "$GITHUB_SHA:refs/heads/dev" --force-with-lease="refs/heads/dev:$(git rev-parse origin/dev)"
