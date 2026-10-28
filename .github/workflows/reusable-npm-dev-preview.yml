@@ -63,8 +63,22 @@ jobs:
         working-directory: ./packages/cherry-markdown
         run: |
           NODE_AUTH_TOKEN="" npm publish --dry-run --tag latest --no-workspaces --json > "$RUNNER_TEMP/preview-package.json"
-          node -e 'const p = require(process.argv[1]); if (p.name !== process.env.PACKAGE_NAME || p.version !== process.env.PACKAGE_VERSION || !p.files.some(f => f.path === "dist/cherry-markdown.js")) process.exit(1);' "$RUNNER_TEMP/preview-package.json"
-          node -e 'if (!require("node:fs").readFileSync("dist/cherry-markdown.js", "utf8").includes(process.env.PACKAGE_VERSION)) process.exit(1);'
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const preview = JSON.parse(fs.readFileSync(path.join(process.env.RUNNER_TEMP, 'preview-package.json'), 'utf8'));
+          const bundle = 'dist/cherry-markdown.js';
+
+          function verify(condition, message) {
+            if (!condition) throw new Error(message);
+          }
+
+          verify(preview.name === process.env.PACKAGE_NAME, `Unexpected package name: ${preview.name}`);
+          verify(preview.version === process.env.PACKAGE_VERSION, `Unexpected package version: ${preview.version}`);
+          verify(preview.files.some((file) => file.path === bundle), `Missing ${bundle} in the package`);
+          verify(fs.readFileSync(bundle, 'utf8').includes(process.env.PACKAGE_VERSION), `Missing preview version in ${bundle}`);
+          console.log(`Verified ${preview.name}@${preview.version} and ${bundle}`);
+          NODE
 
       - name: Comment install instructions
         if: success() && inputs.dry_run == false
