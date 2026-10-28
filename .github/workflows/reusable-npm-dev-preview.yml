@@ -25,12 +25,13 @@ jobs:
           version-file: package.json
           node-version-file: '.node-version'
           cache: true
+          run-install: false
 
       - name: Compute dev version
         working-directory: ./packages/cherry-markdown
         run: |
           BASE_VERSION=$(node -p "require('./package.json').version")
-          VERSION="${BASE_VERSION}-$(date +'%Y%m%d%H%M').${GITHUB_SHA:0:7}"
+          VERSION="${BASE_VERSION}-$(date -u +'%Y%m%d%H%M').g${GITHUB_SHA:0:7}.${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
           echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
           echo "PACKAGE_NAME=@cherry-markdown/cherry-markdown-dev" >> $GITHUB_ENV
 
@@ -41,7 +42,7 @@ jobs:
 
       # 在原始 name 下 install & build，workspace 依赖原始包名
       - name: Install and build
-        run: vp install && vp run build
+        run: vp install && vp run -F cherry-markdown build
 
       # build 完成后改包名、写 README
       - name: Prepare package for publish
@@ -53,7 +54,9 @@ jobs:
       - name: Publish to npm
         if: inputs.dry_run == false
         working-directory: ./packages/cherry-markdown
-        run: NODE_AUTH_TOKEN="" npm publish --tag latest --no-workspaces
+        run: |
+          NODE_AUTH_TOKEN="" npm publish --tag latest --no-workspaces
+          echo "Published \`$PACKAGE_NAME@$PACKAGE_VERSION\` to npm." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Verify preview package
         if: inputs.dry_run == true
@@ -94,7 +97,7 @@ jobs:
               jsonBlock('yarn resolutions', { resolutions: { 'cherry-markdown': alias } }),
               jsonBlock('pnpm.overrides', { pnpm: { overrides: { 'cherry-markdown': alias } } }),
             ].join('\n');
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: ${{ inputs.pr_number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
