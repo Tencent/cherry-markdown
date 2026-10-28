@@ -152,48 +152,17 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - name: Create or reuse sync PR
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.BOT_TOKEN }}
-          script: |
-            const { owner, repo } = context.repo;
-            const sha = context.sha;
-            if (!/^[a-f0-9]{40}$/.test(sha)) throw new Error('Invalid release commit SHA.');
-            const branch = `release-sync/${sha}`;
-            const comparison = await github.rest.repos.compareCommitsWithBasehead({ owner, repo, basehead: `dev...${sha}` });
-            if (!Number.isInteger(comparison.data.ahead_by)) throw new Error('Invalid branch comparison.');
-            if (comparison.data.ahead_by === 0) {
-              core.info('dev already contains the release commit.');
-              return;
-            }
-            const list = () => github.rest.pulls.list({ owner, repo, state: 'open', base: 'dev', head: `${owner}:${branch}` });
-            const existing = await list();
-            if (existing.data.length) {
-              if (existing.data[0].head.sha !== sha) throw new Error('Existing sync PR points to a different commit.');
-              core.info(`Existing sync PR: ${existing.data[0].html_url}`);
-              return;
-            }
-            try {
-              await github.rest.git.createRef({ owner, repo, ref: `refs/heads/${branch}`, sha });
-            } catch (error) {
-              if (error.status !== 422) throw error;
-              const ref = await github.rest.git.getRef({ owner, repo, ref: `heads/${branch}` });
-              if (ref.data.object.sha !== sha) throw new Error('Existing sync branch points to a different commit.');
-            }
-            try {
-              const pr = await github.rest.pulls.create({
-                owner, repo, base: 'dev', head: branch, title: 'chore: 同步发布版本到 dev',
-                body: `将 main 的发布提交 \`${sha}\` 同步到 dev。请检查差异和冲突后再合并。\n\n发布流程：${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`,
-              });
-              core.info(`Created sync PR: ${pr.data.html_url}`);
-            } catch (error) {
-              if (error.status !== 422) throw error;
-              const concurrent = await list();
-              if (!concurrent.data.length || concurrent.data[0].head.sha !== sha) throw error;
-              core.info(`Existing sync PR: ${concurrent.data[0].html_url}`);
-            }
-
-      - name: Record sync failure
-        if: failure()
-        run: echo 'Release synchronization was not completed. Inspect the failed step, reconcile any partially published packages, and rerun this job after resolving the cause.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Create or reuse main → dev PR
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          ahead=$(gh api "repos/$GH_REPO/compare/dev...main" --jq '.ahead_by')
+          if [ "$ahead" = "0" ]; then exit 0; fi
+          pr=$(gh pr list --base dev --head main --state open --json url --jq '.[0].url // empty')
+          if [ -n "$pr" ]; then
+            echo "$pr"
+          else
+            gh pr create --base dev --head main --title 'chore: 同步发布版本到 dev' \
+              --body "发布任务已完成，请检查差异和冲突后合并。发布流程：$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fi
