@@ -6,6 +6,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import glob from 'glob';
 import { JSDOM } from 'jsdom';
+import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
 import { describe, expect, it } from 'vite-plus/test';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -27,6 +28,10 @@ const bundleNames = [
 ];
 
 const declarationNames = bundleNames.map((file) => file.replace(/\.js$/, '.d.ts'));
+const umdFiles = [
+  ...bundleNames.filter((file) => !file.endsWith('.esm.js')),
+  ...glob.sync('src/addons/**/*-plugin.js', { cwd: projectRoot }).map((file) => file.replace(/^src\//, '')),
+];
 
 function resolvesDeclaration(fromFile, specifier) {
   const target = resolve(dirname(fromFile), specifier);
@@ -162,5 +167,63 @@ describe('built Cherry Markdown artifact contract', () => {
     expect(sourceMap.sources.length).toBeGreaterThan(0);
     expect(sourceMap.sourcesContent).toHaveLength(sourceMap.sources.length);
     expect(sourceMap.mappings.length).toBeGreaterThan(0);
+    // Check an actual token rather than only accepting a nonempty map. The
+    // final Babel pass can change line positions after the asset was generated.
+    const code = readDistFile('cherry-markdown.js');
+    const token = 'function highlightAutomaticallyCallback';
+    const index = code.indexOf(token);
+    expect(index).toBeGreaterThan(0);
+    const prefix = code.slice(0, index);
+    const position = originalPositionFor(new TraceMap(sourceMap), {
+      line: prefix.split('\n').length,
+      column: prefix.length - prefix.lastIndexOf('\n') - 1,
+    });
+    expect(position.source).toMatch(/prismjs\/(?:components\/prism-core|prism)\.js$/);
+    expect(
+      sourceMap.sourcesContent[sourceMap.sources.indexOf(position.source)].split('\n')[position.line - 1],
+    ).toContain(token);
+  });
+
+  describe.each(['commonjs', 'amd', 'browser-without-globalThis'])('%s loading', (mode) => {
+    it.each(umdFiles)('preserves exports and application globals in %s', (file) => {
+      const dom = new JSDOM('', { runScripts: 'outside-only', url: 'https://localhost/' });
+      try {
+        const win = dom.window;
+        const mermaid = { initialize() {}, mermaidAPI: { initialize() {} } };
+        win.mermaid = mermaid;
+        const dependency = (id) => (id === 'mermaid' ? mermaid : require(id));
+        let exported;
+        if (mode === 'commonjs') {
+          win.module = { exports: {} };
+          win.exports = win.module.exports;
+          win.require = dependency;
+        } else if (mode === 'amd') {
+          win.define = (ids, factory) => {
+            const exports = {};
+            exported = factory(...ids.map((id) => (id === 'exports' ? exports : dependency(id)))) ?? exports;
+          };
+          win.define.amd = {};
+        } else {
+          win.globalThis = undefined;
+        }
+        const existingE = { application: true };
+        const existingT = { application: true };
+        win.e = existingE;
+        win.t = existingT;
+        const before = new Set(Object.getOwnPropertyNames(win));
+        win.eval(readDistFile(file));
+        if (mode === 'commonjs') exported = win.module.exports;
+        else if (mode === 'browser-without-globalThis') {
+          [exported] = Object.getOwnPropertyNames(win)
+            .filter((name) => !before.has(name) && name.startsWith('Cherry'))
+            .map((name) => win[name]);
+        }
+        expect(typeof exported === 'function' || Object.keys(exported || {}).length > 0, file).toBe(true);
+        expect(win.e, file).toBe(existingE);
+        expect(win.t, file).toBe(existingT);
+      } finally {
+        dom.window.close();
+      }
+    });
   });
 });
