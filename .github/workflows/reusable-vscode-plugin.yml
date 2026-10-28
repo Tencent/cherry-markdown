@@ -146,9 +146,7 @@ jobs:
 
       - name: Publish to Open VSX Registry
         if: inputs.mode == 'release'
-        env:
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
         run: |
           cd packages/vscodePlugin
           VSIX=$(ls -1 *.vsix | head -1)
-          ../../node_modules/.bin/ovsx publish "$VSIX"
+          ../../node_modules/.bin/ovsx publish "$VSIX" --trusted-publishing
