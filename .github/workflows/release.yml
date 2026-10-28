@@ -10,7 +10,7 @@
 #     • @cherry-markdown/milkdown → reusable-npm-release.yml (after core)
 #     • @cherry-markdown/client → reusable-client-build.yml (mode=release)
 #     • cherry-markdown-vscode-plugin → reusable-vscode-plugin.yml (mode=release)
-#   - 发布完成后强制同步 main → dev（仅在有包发布时执行）
+#   - 所有目标发布完成后创建 main → dev 同步 PR
 # =============================================================================
 
 name: 'Release'
@@ -139,21 +139,55 @@ jobs:
       mode: release
     secrets: inherit
 
-  # 仅当有实际版本发布时才同步 main 到 dev，避免意外覆盖 dev
+  # 等待所有发布任务；需要发布的包若失败或被跳过，不创建同步 PR。
   sync-main-to-dev:
-    needs: release
-    if: needs.release.outputs.publishedPackages != ''
+    needs: [release, build-core-release, build-miniProgram-release, build-milkdown-release, build-client-release, build-vscodePlugin-release]
+    if: ${{ always() && !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: main
-          fetch-depth: 0
-          token: ${{ secrets.BOT_TOKEN }}
 
-      - name: Sync main to dev
+      - name: Check publication results
+        id: check
+        uses: actions/github-script@v7
+        env:
+          RELEASE_NEEDS: ${{ toJSON(needs) }}
+        with:
+          script: |
+            const { checkReleaseResults } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/release-sync.mjs`);
+            const result = checkReleaseResults(JSON.parse(process.env.RELEASE_NEEDS));
+            core.setOutput('should_sync', String(result.shouldSync));
+            core.setOutput('verify_milkdown', String(result.verifyMilkdown));
+            await core.summary.addRaw(result.summary).write();
+
+      - name: Verify manual Milkdown publication
+        if: steps.check.outputs.verify_milkdown == 'true'
+        env:
+          MILKDOWN_VERSION: ${{ needs.release.outputs.publishedMilkdownVersion }}
         run: |
-          git fetch origin dev
-          git checkout -B dev origin/main
-          git push origin dev --force
+          if ! actual=$(npm view "@cherry-markdown/milkdown@$MILKDOWN_VERSION" version --registry=https://registry.npmjs.org --prefer-online); then
+            echo "::error::Could not verify Milkdown $MILKDOWN_VERSION on npm. Complete its manual publication and rerun this job."
+            exit 1
+          fi
+          if [ "$actual" != "$MILKDOWN_VERSION" ]; then
+            echo "::error::npm returned an unexpected Milkdown version: $actual"
+            exit 1
+          fi
+
+      - name: Create or reuse sync PR
+        if: steps.check.outputs.should_sync == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.BOT_TOKEN }}
+          script: |
+            const { createSyncPullRequest } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/release-sync.mjs`);
+            const result = await createSyncPullRequest(github, context);
+            await core.summary.addRaw(result).write();
+
+      - name: Record sync failure
+        if: failure()
+        run: echo 'Release synchronization was not completed. Inspect the failed step, reconcile any partially published packages, and rerun this job after resolving the cause.' >> "$GITHUB_STEP_SUMMARY"
