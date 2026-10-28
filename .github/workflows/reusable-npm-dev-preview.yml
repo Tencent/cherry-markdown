@@ -40,7 +40,8 @@ jobs:
       # 先改 version（保持原始 name），确保构建产物内嵌新版本
       - name: Update version
         working-directory: ./packages/cherry-markdown
-        run: npm version "$PACKAGE_VERSION" --no-git-tag-version
+        run: |
+          node -e 'const fs = require("node:fs"); const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); pkg.version = process.env.PACKAGE_VERSION; fs.writeFileSync("package.json", `${JSON.stringify(pkg, null, 2)}\n`);'
 
       # 在原始 name 下 install & build，workspace 依赖原始包名
       - name: Install and build
@@ -50,7 +51,7 @@ jobs:
       - name: Prepare package for publish
         working-directory: ./packages/cherry-markdown
         run: |
-          npm pkg set name="$PACKAGE_NAME"
+          node -e 'const fs = require("node:fs"); const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); pkg.name = process.env.PACKAGE_NAME; fs.writeFileSync("package.json", `${JSON.stringify(pkg, null, 2)}\n`);'
           printf '**⚠️ Development Preview Warning / 开发预览版警告**\n\nThis is a dev preview version, do NOT use in production!\n此版本为开发预览版，禁止在生产环境使用！\n' > README.md
 
       - name: Publish to npm
