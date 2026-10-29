@@ -92,7 +92,7 @@ jobs:
       - name: Install Chromium
         run: vp exec playwright install --with-deps chromium
       - name: Browser interactions
-        run: vp exec playwright test --config packages/milkdown/playwright.config.ts --fully-parallel --shard=${{ matrix.shard }}/2
+        run: vp run -F @cherry-markdown/milkdown test:e2e --fully-parallel --shard=${{ matrix.shard }}/2
         env:
           MILKDOWN_E2E_DEMO_PREBUILT: '1'
       - name: Upload browser diagnostics
