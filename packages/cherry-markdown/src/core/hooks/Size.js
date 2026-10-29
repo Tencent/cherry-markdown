@@ -25,6 +25,8 @@ export default class Size extends SyntaxBase {
   // }
 
   toHtml(whole, m1, m2, m3) {
+    if (this.$engine?.semanticRenderer)
+      return m1 + this.$engine?.semanticRenderer.wrap('span', { attrs: { style: `font-size:${m2}px` } }, m3);
     return `${m1}<span style="font-size:${m2}px;line-height:1em;">${m3}</span>`;
   }
 
@@ -34,9 +36,9 @@ export default class Size extends SyntaxBase {
     }
 
     if (isLookbehindSupported()) {
-      return str.replace(this.RULE.reg, this.toHtml);
+      return str.replace(this.RULE.reg, this.toHtml.bind(this));
     }
-    return replaceLookbehind(str, this.RULE.reg, this.toHtml, true, 1);
+    return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1);
   }
 
   rule() {

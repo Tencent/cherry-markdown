@@ -1,0 +1,2 @@
+.parity-page { height: 100vh; width: 100%; background: #fff; }
+.parity-document { padding: 20px; }

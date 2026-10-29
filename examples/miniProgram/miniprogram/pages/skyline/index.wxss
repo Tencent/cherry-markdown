@@ -1,0 +1,32 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 24rpx;
+}
+.toolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  flex-shrink: 0;
+}
+.title {
+  font-size: 30rpx;
+  font-weight: bold;
+}
+.content {
+  flex: 1;
+  height: 0;
+  width: 100%;
+}
+.preview {
+  padding: 24rpx;
+  background: #fff;
+  border-radius: 8rpx;
+}
+
+.toolbar-actions { display: flex; flex-direction: row; }
+.toolbar-actions button { margin: 0 0 0 12rpx; }

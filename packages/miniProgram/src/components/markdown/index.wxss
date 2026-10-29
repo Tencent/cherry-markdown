@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+.cherry-markdown {
+  width: 100%;
+}
+
+.cherry-markdown {
+  background: var(--base-previewer-bg);
+  color: var(--md-paragraph-color);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-md);
+  line-height: var(--md-paragraph-line-height);
+  word-break: break-all;
+  --md-run-line-height: 26px;
+}

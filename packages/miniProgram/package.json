@@ -28,7 +28,8 @@
       "types": "./dist/types/miniProgram.d.ts",
       "import": "./dist/miniProgram.esm.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./components/*": "./dist/components/*"
   },
   "files": [
     "dist",
@@ -41,15 +42,19 @@
     "access": "public"
   },
   "scripts": {
-    "build": "vp run clean && vp run build:esm && vp run build:types",
+    "build": "vp run -F cherry-markdown build:semantic && vp run clean && vp run build:esm && vp run build:components && vp run build:types",
     "build:esm": "NODE_ENV=production node build/vite.build.js",
-    "build:types": "node build/types.js",
+    "build:types": "tsc --project tsconfig.json && node build/types.js",
     "clean": "rimraf ./dist",
-    "test": "vp test run --config vitest.config.ts",
-    "typecheck": "tsc --project test/tsconfig.json --noEmit"
+    "test": "vp run -F cherry-markdown build:semantic && vp test run --config vitest.config.ts",
+    "typecheck": "vp run -F cherry-markdown build:semantic && tsc --project tsconfig.json --noEmit && tsc --project test/tsconfig.json --noEmit",
+    "build:components": "NODE_ENV=production node build/components.js",
+    "test:artifact": "node test/build/verify-native.mjs",
+    "test:bridge": "node test/build/verify-bridge-packages.mjs"
   },
   "dependencies": {
-    "htmlparser2": "^10.0.0"
+    "htmlparser2": "^10.0.0",
+    "cherry-markdown": "0.11.11"
   },
   "devDependencies": {
     "rimraf": "^3.0.2"

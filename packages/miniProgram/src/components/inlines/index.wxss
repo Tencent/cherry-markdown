@@ -1,0 +1,66 @@
+:host {
+  display: block;
+}
+.md-inline-text {
+  word-break: break-all;
+  line-height: inherit;
+  color: inherit;
+}
+.md-strong {
+  font-weight: 700;
+}
+.md-em {
+  font-style: italic;
+}
+.md-inline-code,
+.md-math-inline {
+  font-family: monospace;
+  color: var(--md-inline-code-color);
+  background: var(--md-inline-code-bg);
+}
+.md-inline-code {
+  padding: 0.1em;
+  border: 1px solid var(--md-hr-border);
+  border-radius: 0.3em;
+}
+.md-underline {
+  text-decoration: underline;
+}
+.md-strike {
+  text-decoration: line-through;
+}
+.md-link,
+.md-cursor {
+  color: var(--md-link-color);
+}
+.md-sub {
+  font-size: 0.8em;
+}
+.md-sup {
+  font-size: 0.8em;
+}
+.md-inline-image {
+  display: block;
+  width: 240rpx;
+  max-width: 100%;
+  margin: 12rpx 0;
+  background: #eef2f7;
+}
+.md-image-placeholder {
+  padding: 20rpx;
+  margin: 12rpx 0;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.md-highlight {
+  background: #fff3b0;
+}
+.md-ruby-annotation {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.md-inline-text > text {
+  line-height: var(--md-run-line-height);
+}

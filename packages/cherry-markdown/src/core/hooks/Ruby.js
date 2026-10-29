@@ -23,6 +23,12 @@ export default class Ruby extends SyntaxBase {
     if (!this.test(str)) {
       return str;
     }
+    if (this.$engine?.semanticRenderer)
+      return str.replace(
+        this.RULE.reg,
+        (whole, before, text, ruby, after) =>
+          before + this.$engine?.semanticRenderer.wrap('ruby', { ruby }, text) + after,
+      );
     return str.replace(this.RULE.reg, `$1<ruby>$2<rt>$3</rt></ruby>$4`);
   }
 

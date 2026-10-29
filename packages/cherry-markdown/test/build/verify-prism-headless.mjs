@@ -19,6 +19,7 @@ if ('probe' in module.namespace) {
 }
 const stream = new module.namespace.default();
 const engine = stream.engine || stream;
+const htmlRenderer = typeof stream.makeHtml === 'function' ? stream : engine;
 engine.$cherry.options.engine.global.flowSessionContext = true;
 const hook = engine.hooks.paragraph.find((item) => typeof item.renderCodeBlock === 'function');
 const languages = JSON.parse(readFileSync(new URL('../../build/prism-languages.json', import.meta.url), 'utf8'));
@@ -38,10 +39,10 @@ for (const [language, code, token] of [
 ]) {
   const markdown = `\`\`\`${language}\n${code}\n\`\`\``;
   for (let length = 1; length <= markdown.length; length++) {
-    const html = stream.makeHtml(markdown.slice(0, length));
+    const html = htmlRenderer.makeHtml(markdown.slice(0, length));
     if (length > markdown.indexOf('\n') + 1)
       assert.ok(html.includes(`class="language-${language}"`), `${language}: ${length}`);
   }
-  assert.ok(stream.makeHtml(markdown).includes(token), `${language}: ${token}`);
+  assert.ok(htmlRenderer.makeHtml(markdown).includes(token), `${language}: ${token}`);
 }
 console.log('Verified loading, languages and incremental rendering without browser/Node globals.');

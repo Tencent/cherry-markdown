@@ -36,7 +36,7 @@
     "test:update": "vp run -F cherry-markdown test:update",
     "lint": "vp check",
     "lint:fix": "vp check --fix",
-    "typecheck": "vp run -F cherry-markdown typecheck && vp run -F @cherry-markdown/miniprogram typecheck && vp run -F @cherry-markdown/milkdown typecheck",
+    "typecheck": "vp run -F cherry-markdown typecheck && vp run -F @cherry-markdown/miniprogram typecheck && vp run -F @cherry-markdown/milkdown typecheck && vp run -F @cherry-markdown/mini-program-demo typecheck",
     "typecheck:core": "vp run -F cherry-markdown typecheck",
     "typecheck:miniProgram": "vp run -F @cherry-markdown/miniprogram typecheck",
     "typecheck:milkdown": "vp run -F @cherry-markdown/milkdown typecheck",

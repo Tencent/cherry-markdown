@@ -68,7 +68,7 @@ export default class InlineMath extends ParagraphBase {
     if (!m1) {
       return wholeMatch;
     }
-    LoadMathModule.bind(this)('engine');
+    if (!this.$engine?.semanticRenderer) LoadMathModule.bind(this)('engine');
     const linesArr = m1.match(/\n/g);
     const lines = linesArr ? linesArr.length + 2 : 2;
     const sign = this.$engine.hash(wholeMatch);
@@ -76,6 +76,12 @@ export default class InlineMath extends ParagraphBase {
     const hasCursor = /CHERRYFLOWSESSIONCURSOR/.test($m1);
     $m1 = $m1.replace('CHERRYFLOWSESSIONCURSOR', '');
     // 保留一份源码到渲染节点上，供 formulaUtilsHandler 直接读取，避免再次对全文做正则解析。
+    if (this.$engine?.semanticRenderer) {
+      return this.pushCache(
+        this.$engine?.semanticRenderer.atom('math_inline', { text: $m1 }),
+        ParagraphBase.IN_PARAGRAPH_CACHE_KEY_PREFIX + sign,
+      );
+    }
     const encodedFormulaSource = encodeURIComponent($m1);
     // 既无MathJax又无katex时，原样输出
     let result = '';

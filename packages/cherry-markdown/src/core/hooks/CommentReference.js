@@ -78,6 +78,8 @@ export default class CommentReference extends ParagraphBase {
    * @returns
    */
   beforeMakeHtml(str) {
+    if (this.$engine?.semanticRenderer && new RegExp(this.RULE.reg.source, this.RULE.reg.flags).test(str))
+      this.$engine.semanticRenderer.invalidateDocument('CommentReference');
     let $str = str;
     if (this.test($str)) {
       $str = $str.replace(this.RULE.reg, (match, leading, key, content) => {

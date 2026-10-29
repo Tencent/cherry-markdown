@@ -172,26 +172,22 @@ describe('Cherry Markdown published artifact configuration', () => {
     }
   });
 
-  it('preserves MiniProgram Sanitizer replacement, externals and standalone ESM output', () => {
+  it('links MiniProgram ESM through the public semantic bridge', () => {
     const root = resolve(repoRoot, 'packages/miniProgram');
     expectSingleFileBuild(miniBuild);
     expect(miniBuild.root).toBe(root);
-    expect(miniBuild.build.lib.entry).toBe(resolve(root, 'src/index.js'));
+    expect(miniBuild.build.lib.entry).toBe(resolve(root, 'src/index.ts'));
     expect(miniBuild.build.lib.formats).toEqual(['es']);
     expect(filename(miniBuild)).toBe('miniProgram.esm.js');
     expect(miniBuild.build.minify).toBe('oxc');
-    expect(miniBuild.build.rolldownOptions.external).toEqual(['mermaid', 'codemirror', /^codemirror\//]);
+    expect(miniBuild.build.rolldownOptions.external).toEqual(['cherry-markdown/semantic', 'cherry-markdown/theme']);
     expect(miniBuild.build.rolldownOptions.output).toMatchObject({
       format: 'es',
       entryFileNames: 'miniProgram.esm.js',
       exports: 'named',
     });
-    expect(miniBuild.resolve.alias).toEqual({
-      '@/Sanitizer': resolve(root, 'src/shared/Sanitizer.miniProgram.js'),
-      '@': src,
-      '@cherry': src,
-    });
-    expect(miniBuild.plugins.map((plugin) => plugin.name)).toEqual(['cherry-prism-languages']);
+    expect(miniBuild.resolve?.alias).toBeUndefined();
+    expect(miniBuild.plugins.map((plugin) => plugin.name)).toEqual(['cherry-miniprogram-entity-tables']);
     expect(miniBuild.define).toEqual({ BUILD_ENV: JSON.stringify('production') });
   });
 
@@ -200,7 +196,8 @@ describe('Cherry Markdown published artifact configuration', () => {
     expect(packageJson.module).toBe('./dist/cherry-markdown.esm.js');
     expect(packageJson.style).toBe('./dist/cherry-markdown.min.css');
     expect(packageJson.types).toBe('./dist/types/index.d.ts');
-    expect(packageJson.exports).toBeUndefined();
-    expect(packageJson.files).toEqual(['dist', 'types', '!types/env.d.ts']);
+    expect(packageJson.exports['./semantic'].import).toBe('./dist/cherry-markdown.semantic.esm.js');
+    expect(packageJson.exports['./*']).toBe('./*');
+    expect(packageJson.files).toEqual(['dist', 'types', '!types/env.d.ts', '!types/semantic-env.d.ts']);
   });
 });

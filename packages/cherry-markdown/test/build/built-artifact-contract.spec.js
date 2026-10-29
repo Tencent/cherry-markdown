@@ -5,6 +5,7 @@ import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import glob from 'glob';
+import ts from 'typescript';
 import { JSDOM } from 'jsdom';
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
 import { describe, expect, it } from 'vite-plus/test';
@@ -42,6 +43,23 @@ function resolvesDeclaration(fromFile, specifier) {
 }
 
 describe('built Cherry Markdown artifact contract', () => {
+  it.each(['cherry', 'cherry.d.ts', 'modules'])(
+    'keeps the legacy public types/%s subpath resolvable with package exports',
+    (name) => {
+      const result = ts.resolveModuleName(
+        `cherry-markdown/types/${name}`,
+        resolve(projectRoot, 'type-consumer.ts'),
+        {
+          moduleResolution: ts.ModuleResolutionKind.Bundler,
+          module: ts.ModuleKind.ESNext,
+        },
+        ts.sys,
+      );
+      expect(result.resolvedModule?.resolvedFileName).toBe(
+        resolve(projectRoot, `types/${name.replace(/\.d\.ts$/, '')}.d.ts`),
+      );
+    },
+  );
   it.each(bundleNames)(
     'preserves Prism languages and streaming highlighting in %s',
     (file) => {
@@ -58,10 +76,25 @@ describe('built Cherry Markdown artifact contract', () => {
   );
 
   it('publishes the complete UMD and ESM bundle matrix with declarations', () => {
-    expect(glob.sync('*.js', { cwd: distRoot }).sort()).toEqual([...bundleNames].sort());
+    expect(glob.sync('*.js', { cwd: distRoot }).sort()).toEqual(
+      [...bundleNames, 'cherry-markdown.semantic.esm.js', 'cherry-markdown.theme.esm.js'].sort(),
+    );
     [...bundleNames, ...declarationNames].forEach((file) => {
       expect(existsSync(resolve(distRoot, file)), file).toBe(true);
     });
+  });
+
+  it('publishes the DOM-free public semantic and theme entrypoints', () => {
+    for (const file of [
+      'cherry-markdown.semantic.cjs',
+      'cherry-markdown.theme.cjs',
+      'types/semantic/index.d.ts',
+      'types/semantic/theme.d.ts',
+    ])
+      expect(existsSync(resolve(distRoot, file)), file).toBe(true);
+    const core = require(resolve(distRoot, 'cherry-markdown.semantic.cjs'));
+    expect(core.SEMANTIC_SCHEMA_VERSION).toBe(1);
+    expect(new core.CherrySemanticParser().parse('**native**').blocks).toHaveLength(1);
   });
 
   it('publishes every addon in both formats with its declaration', () => {

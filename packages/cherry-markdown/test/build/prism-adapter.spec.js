@@ -207,22 +207,11 @@ describe('shared Prism Babel adapter', () => {
     }
   }, 20000);
 
-  it('injects updated languages in a standalone MiniProgram build without generated files or host globals', () => {
+  it('injects updated languages in the public semantic bridge without host globals', () => {
     const fixture = createFixture();
-    const mini = join(fixture.root, 'packages/miniProgram');
-    mkdirSync(mini, { recursive: true });
-    for (const file of ['src', 'build', 'package.json']) {
-      cpSync(join(repoRoot, 'packages/miniProgram', file), join(mini, file), { recursive: true });
-    }
-    writeFileSync(join(mini, 'src/other-global-probe.cjs'), 'module.exports = typeof global;');
-    const miniEntry = join(mini, 'src/index.js');
-    writeFileSync(
-      miniEntry,
-      `${readFileSync(miniEntry, 'utf8')}\nexport { default as probe } from './other-global-probe.cjs';`,
-    );
     addLanguage(fixture, 'kotlin');
     const source = readFileSync(fixture.entryFile, 'utf8');
-    execFileSync(process.execPath, [join(mini, 'build/vite.build.js')], {
+    execFileSync(process.execPath, [join(fixture.cherry, 'build/semantic.build.js')], {
       cwd: fixture.root,
       stdio: 'pipe',
       timeout: 30000,
@@ -233,7 +222,7 @@ describe('shared Prism Babel adapter', () => {
       [
         '--experimental-vm-modules',
         join(projectRoot, 'test/build/verify-prism-headless.mjs'),
-        join(mini, 'dist/miniProgram.esm.js'),
+        join(fixture.cherry, 'dist/cherry-markdown.semantic.esm.js'),
         'kotlin',
       ],
       { stdio: 'pipe', timeout: 30000 },

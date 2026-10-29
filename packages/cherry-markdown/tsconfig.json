@@ -16,7 +16,14 @@
     },
     "experimentalDecorators": true
   },
-  "include": ["src/index.js", "src/index.core.js", "src/index.engine.js", "src/index.stream.js"],
+  "include": [
+    "src/index.js",
+    "src/index.core.js",
+    "src/index.engine.js",
+    "src/index.stream.js",
+    "src/semantic/index.ts",
+    "src/semantic/runtime.js"
+  ],
   "exclude": ["**/node_modules/**", "src/libs/**/*", "dist"],
-  "files": ["types/codemirror.d.ts", "types/env.d.ts"]
+  "files": ["types/codemirror.d.ts", "types/env.d.ts", "types/semantic-env.d.ts"]
 }

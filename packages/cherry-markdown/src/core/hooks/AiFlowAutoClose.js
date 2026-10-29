@@ -108,6 +108,7 @@ export default class AiFlowAutoClose extends ParagraphBase {
       if (ret) {
         return `${before}${ret}`;
       }
+      if (this.$engine?.semanticRenderer) return before;
       return `${before}<${targetType} src></${targetType}>`;
     });
     return $str;
@@ -124,6 +125,8 @@ export default class AiFlowAutoClose extends ParagraphBase {
     }
     return str.replace(/([^[]*?)\[([^\n\]]*?)(\]\([^)]*|\]|)$/, (whole, before, content, url) => {
       const urlFix = url ? url.replace(/^(\]\(|\])/, '') : '';
+      if (this.$engine?.semanticRenderer)
+        return before + this.$engine?.semanticRenderer.wrap('link', { href: urlFix }, content);
       return `${before}<a href="${urlFix}">${content}</a>`;
     });
   }

@@ -228,29 +228,20 @@ describe('miniProgramTransform', () => {
     ]);
   });
 
-  it('falls back to sanitized rich-text nodes for unknown complex tags', () => {
+  it('degrades unsupported HTML into plain native text without executable content', () => {
     expect(
       htmlToMiniProgramBlocks(
-        '<custom onclick="bad()"><script>bad()</script><span onmouseover="bad()">ok</span></custom>',
+        '<custom onclick="bad()"><script>bad()</script><style>bad</style><span>ok</span></custom>',
       ),
-    ).toEqual([
-      {
-        type: 'html',
-        nodes: [
-          {
-            name: 'custom',
-            attrs: {},
-            children: [
-              {
-                name: 'span',
-                attrs: {},
-                children: [{ type: 'text', text: 'ok' }],
-              },
-            ],
-          },
-        ],
-      },
+    ).toEqual([{ type: 'unsupported', tag: 'custom', text: 'ok' }]);
+    expect(htmlToMiniProgramBlocks('<custom><p>ok</p></custom>', { unknownTag: 'unwrap' })).toEqual([
+      { type: 'paragraph', attrs: {}, children: [{ type: 'text', text: 'ok' }] },
     ]);
+    expect(htmlToMiniProgramBlocks('<custom>ok</custom>', { unknownTag: 'drop' })).toEqual([]);
+  });
+
+  it('uses a native thematic break instead of HTML fallback', () => {
+    expect(htmlToMiniProgramBlocks('<hr>')).toEqual([{ type: 'thematic_break' }]);
   });
 
   it('converts stream cursor span to a cursor inline node', () => {

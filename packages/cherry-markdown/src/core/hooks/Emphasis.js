@@ -28,9 +28,16 @@ export default class Emphasis extends SyntaxBase {
   }
 
   makeHtml(str, sentenceMakeFunc) {
+    const renderer = this.$engine?.semanticRenderer;
+    const wrap = (symbol, content) => {
+      if (symbol.length % 2) content = renderer.wrap('em', {}, content);
+      for (let i = 0; i < Math.floor(symbol.length / 2); i++) content = renderer.wrap('strong', {}, content);
+      return content;
+    };
     const convertAsterisk = function (match, leading, symbol, text) {
       const tagType = symbol.length % 2 === 1 ? 'em' : 'strong';
       const repeat = Math.floor(symbol.length / 2);
+      if (renderer) return leading + wrap(symbol, sentenceMakeFunc(text).html.replace(/_/g, '~U'));
       let prefix = '<strong>'.repeat(repeat);
       let suffix = '</strong>'.repeat(repeat);
       if (tagType === 'em') {
@@ -65,6 +72,7 @@ export default class Emphasis extends SyntaxBase {
       }
       const tagType = symbol.length % 2 === 1 ? 'em' : 'strong';
       const repeat = Math.floor(symbol.length / 2);
+      if (renderer) return leading + wrap(symbol, sentenceMakeFunc(text).html.replace(/_/g, '~U'));
       let prefix = '<strong>'.repeat(repeat);
       let suffix = '</strong>'.repeat(repeat);
       const innerText = sentenceMakeFunc(text).html;

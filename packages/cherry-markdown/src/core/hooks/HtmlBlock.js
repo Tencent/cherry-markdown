@@ -150,7 +150,7 @@ export default class HtmlBlock extends ParagraphBase {
     if (this.removeTrailingNewline) {
       $str = $str.replace(/(<\/[^>\n]+>)\s*\n\s*\n+/g, '$1\n');
     }
-    return $str;
+    return this.$engine?.semanticRenderer ? this.$engine?.semanticRenderer.sourceHtml($str) : $str;
   }
 
   // beforeMakeHtml(str) {
@@ -162,6 +162,7 @@ export default class HtmlBlock extends ParagraphBase {
   }
 
   afterMakeHtml(str) {
+    if (this.$engine?.semanticRenderer) return str;
     let $str = str;
     const config = {
       ALLOW_UNKNOWN_PROTOCOLS: true,

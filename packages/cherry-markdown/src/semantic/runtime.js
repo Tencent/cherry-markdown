@@ -5,8 +5,18 @@ import { customizer } from '@/utils/config';
 import { urlProcessorProxy } from '@/UrlCache';
 import Engine from '@/Engine';
 import locales from '@/locales/index';
+import { isValidScheme } from '@/utils/sanitize';
 
-class MiniProgramCherryContext {
+/** @template T @param {T} blocks @returns {T} */
+export function cloneSemanticBlocks(blocks) {
+  return cloneDeep(blocks);
+}
+
+export function isValidSemanticUrl(value, image = false) {
+  return (image && /^data:image\/(?:png|jpe?g|gif|webp|svg\+xml)[;,]/i.test(value)) || isValidScheme(value);
+}
+
+class SemanticCherryContext {
   constructor(options) {
     this.options = options;
     this.locales = options.locales ? { ...options.locales, ...locales } : locales;
@@ -39,17 +49,22 @@ function normalizeOptions(options = {}) {
   return mergedOptions;
 }
 
-export function createMiniProgramEngine(options = {}) {
+/** @param {import('./types').SemanticOptions} options @returns {import('./types').SemanticEngine} */
+export function createSemanticEngine(options = {}) {
   const normalizedOptions = normalizeOptions(options);
-  const cherry = new MiniProgramCherryContext(normalizedOptions);
-  const engine = new Engine(normalizedOptions, cherry);
+  const cherry = new SemanticCherryContext(normalizedOptions);
+  const engine = new Engine(
+    normalizedOptions,
+    /** @type {import('../Cherry').default} */ (/** @type {unknown} */ (cherry)),
+  );
   engine.$clearFlowSessionCursorCache = function clearFlowSessionCursorCache(md) {
+    if (this.semanticRenderer) return md.replace(/CHERRYFLOWSESSIONCURSOR/g, this.semanticRenderer.atom('cursor', {}));
     if (this.$cherry.options.engine.global.flowSessionCursor) {
       return md.replace(/CHERRYFLOWSESSIONCURSOR/g, this.$cherry.options.engine.global.flowSessionCursor);
     }
     return md;
   };
-  return engine;
+  return /** @type {import('./types').SemanticEngine} */ (/** @type {unknown} */ (engine));
 }
 
-export { MiniProgramCherryContext };
+export { SemanticCherryContext };

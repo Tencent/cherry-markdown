@@ -1,0 +1,1 @@
+<scroll-view class="parity-page" style="background:{{background}};" scroll-y="{{true}}" type="list"><view class="parity-document"><cherry-markdown id="markdown" markdown="{{markdown}}" theme="{{theme}}" /></view></scroll-view>

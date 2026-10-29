@@ -29,8 +29,9 @@ function attrsToAttributeString(object) {
   return attrs.join(' ');
 }
 
-export function makeChecklist(text) {
+export function makeChecklist(text, renderer) {
   return text.replace(/^((?:|[\t ]+)[*+-]\s+)\[(\s|x)\]/gm, (whole, pre, test) => {
+    if (renderer) return `${pre}${renderer.atom('task_marker', { checked: test === 'x' })}`;
     const checkHtml = /\s/.test(test)
       ? '<span class="ch-icon ch-icon-square"></span>'
       : '<span class="ch-icon ch-icon-check"></span>';
@@ -172,6 +173,27 @@ export default class List extends ParagraphBase {
   }
 
   renderSubTree(node, children, type) {
+    if (this.$engine?.semanticRenderer) {
+      const renderer = this.$engine?.semanticRenderer;
+      const content = children
+        .map((index) => {
+          const child = this.tree[index];
+          child.lines += this.getLineCount(child.strs.join('\n'));
+          const nested = child.children.length ? this.renderTree(index) : '';
+          node.lines += child.lines;
+          return renderer.wrap(
+            'list_item',
+            {},
+            renderer.wrap('paragraph', { classicBr: false }, child.strs.join('\n')) + nested,
+          );
+        })
+        .join('');
+      return renderer.wrap(
+        'list',
+        { ordered: type === 'ol', start: this.tree[children[0]]?.start, lines: node.lines + this.emptyLines },
+        content,
+      );
+    }
     let lines = 0;
     const attr = {};
     const content = children.reduce((html, item) => {
@@ -228,7 +250,7 @@ export default class List extends ParagraphBase {
     // 行数计算吸收的空行
     this.emptyLines = wholeMatch.match(/^\n\n/)?.length ?? 0;
     const text = wholeMatch.replace(/~0$/g, '').replace(/^\n+/, '');
-    this.buildTree(makeChecklist(text), sentenceMakeFunc);
+    this.buildTree(makeChecklist(text, this.$engine?.semanticRenderer), sentenceMakeFunc);
     const result = this.renderTree(0);
     return this.pushCache(result, this.sign, this.$getLineNum(wholeMatch));
   }

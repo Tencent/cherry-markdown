@@ -54,6 +54,7 @@ export default class Panel extends ParagraphBase {
   }
 
   makeHtml(str, sentenceMakeFunc) {
+    this.$engine?.semanticRenderer?.protectUnclosed(str, this.RULE.begin, this.RULE.reg);
     return str.replace(this.RULE.reg, (match, preLines, name, content) => {
       const type = this.$getTargetType(name);
       if (!this.enablePanel && /primary|info|warning|danger|success/i.test(type)) {
@@ -77,6 +78,29 @@ export default class Panel extends ParagraphBase {
       const testHasCache = this.testHasCache(sign);
       if (testHasCache !== false) {
         return prependLineFeedForParagraph(match, testHasCache);
+      }
+      if (this.$engine?.semanticRenderer) {
+        const renderer = this.$engine?.semanticRenderer;
+        const paragraph = (text) =>
+          text.trim()
+            ? renderer.wrap(
+                'paragraph',
+                { classicBr: this.classicBr },
+                sentenceMakeFunc(text).html.replace(/^\n+|\n+$/g, ''),
+              )
+            : '';
+        const title = this.$getTitle(name);
+        const body = this.isContainsCache(content) ? this.makeExcludingCached(content, paragraph) : paragraph(content);
+        const token = renderer.wrap(
+          'panel',
+          {
+            panelType: type,
+            title: renderer.text(this.$engine.resolveSemanticReferences(sentenceMakeFunc(title).html)),
+            lines: lineCount,
+          },
+          body,
+        );
+        return prependLineFeedForParagraph(match, this.pushCache(token, sign, lineCount));
       }
       const { title, body, appendStyle, className } = this.$getPanelInfo(name, content, sentenceMakeFunc);
       const ret = this.pushCache(

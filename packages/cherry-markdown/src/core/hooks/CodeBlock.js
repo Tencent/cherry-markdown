@@ -356,9 +356,19 @@ export default class CodeBlock extends ParagraphBase {
     return this.$recoverCodeInIndent(str).replace(this.$getIndentedCodeReg(), (match, code) => {
       const lineCount = (match.match(/\n/g) || []).length;
       const sign = this.$engine.hash(match);
-      const html = `<pre data-sign="${sign}" data-lines="${lineCount}"><code class="indent-code">${escapeHTMLSpecialChar(
-        code.replace(/\n( {4}|\t)/g, '\n'),
-      )}</code></pre>`;
+      const semantic = this.$engine?.semanticRenderer?.atom('code_block', {
+        text: code
+          .replace(/\n( {4}|\t)/g, '\n')
+          .replace(/~D/g, '$')
+          .replace(/~T/g, '~'),
+        lang: 'text',
+        lines: lineCount,
+      });
+      const html =
+        semantic ??
+        `<pre data-sign="${sign}" data-lines="${lineCount}"><code class="indent-code">${escapeHTMLSpecialChar(
+          code.replace(/\n( {4}|\t)/g, '\n'),
+        )}</code></pre>`;
       // return this.getCacheWithSpace(this.pushCache(html), match, true);
       return prependLineFeedForParagraph(match, this.pushCache(html, sign, lineCount));
     });
@@ -486,6 +496,24 @@ export default class CodeBlock extends ParagraphBase {
         return `${prefix}~D~D\n${$code}~D~D`; // 提供公式语法供公式钩子解析
       }
       [$code, $lang] = this.appendMermaid($code, $lang);
+      if (this.$engine?.semanticRenderer) {
+        const text = $code.replace(/\n$/, '');
+        const tokens = [];
+        const flatten = (value, type = '', aliases = []) => {
+          if (typeof value === 'string') tokens.push({ text: value, type, ...(aliases.length ? { aliases } : {}) });
+          else if (Array.isArray(value)) value.forEach((item) => flatten(item, type, aliases));
+          else flatten(value.content, value.type, [value.alias || []].flat());
+        };
+        const grammar = Prism.languages[$lang] || Prism.languages.javascript;
+        flatten(grammar ? Prism.tokenize(text, grammar) : text);
+        const semantic = this.$engine?.semanticRenderer.atom('code_block', {
+          text,
+          lang: $lang || 'javascript',
+          lines,
+          tokens,
+        });
+        return addBlockQuoteSignToResult(this.getCacheWithSpace(this.pushCache(semantic, sign, lines), match));
+      }
       // 自定义语言渲染，可覆盖内置的自定义语言逻辑
       const $oldLang = $lang;
       $lang = this.formatLang($lang);
@@ -573,6 +601,7 @@ export default class CodeBlock extends ParagraphBase {
         $code = $code.replace(/~CHERRYNormalLine/g, '|');
         // 行内语法里的换行不应该生效，需要替换成空格
         $code = $code.replace(/\n/g, ' ');
+        const semanticCode = $code;
         $code = $code.replace(/\\/g, '\\\\');
 
         // 如果行内代码只有一个颜色值，则在code末尾追加一个颜色圆点
@@ -582,7 +611,9 @@ export default class CodeBlock extends ParagraphBase {
         const isHsl = /^hsl\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%\s*\)$/i.test(trimmed);
         const escaped = escapeHTMLSpecialChar($code);
         let html = '';
-        if (this.showInlineColor && (isHex || isRgb || isHsl)) {
+        if (this.$engine?.semanticRenderer) {
+          html = this.$engine?.semanticRenderer.atom('inline_code', { text: semanticCode });
+        } else if (this.showInlineColor && (isHex || isRgb || isHsl)) {
           const color = trimmed;
           html = `<code>${escaped}<span class="ch-inline-color" style="background:${color};"></span></code>`;
         } else {

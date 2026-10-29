@@ -22,6 +22,11 @@ export default class HighLight extends SyntaxBase {
     if (!this.test(str)) {
       return str;
     }
+    if (this.$engine?.semanticRenderer)
+      return str.replace(
+        this.RULE.reg,
+        (whole, before, text, after = '') => before + this.$engine?.semanticRenderer.wrap('mark', {}, text) + after,
+      );
     return str.replace(this.RULE.reg, '$1<mark>$2</mark>$3');
   }
 

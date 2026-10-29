@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/semantic/index.ts"],
+  "compilerOptions": {
+    "strict": true,
+    "checkJs": false
+  },
+  "files": ["types/semantic-env.d.ts"]
+}

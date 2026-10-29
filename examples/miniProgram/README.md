@@ -1,119 +1,45 @@
-# Cherry Markdown MiniProgram Demo
+# Cherry Markdown 原生小程序示例
 
-> **Warning / 警告**
->
-> This package is in early development. Stability and completeness have not yet reached production level. Use with caution in production environments.
->
-> 该包仍在早期开发中，稳定性和完备性尚未达到生产可用水平，请谨慎在生产环境中使用。
+> 早期开发版本。Skyline 配置及自动检查不代表真机兼容性或性能验收通过。
 
----
+## 本地运行
 
-English | [简体中文](#简体中文)
+在仓库根目录安装依赖后执行：
+
+```sh
+vp run -F @cherry-markdown/miniprogram build
+vp run -F @cherry-markdown/mini-program-demo build
+```
+
+构建默认复制当前仓库 `packages/miniProgram/dist/components`，并将示例 TS 页面编译为 CommonJS。生成组件和运行脚本不纳入源码管理。在微信开发者工具中打开 `examples/miniProgram`，直接编译，无需构建 npm。
+
+编译模式分别选择：
+
+- `pages/index/index`：普通页面引擎，使用原生 WXML 组件。
+- `pages/skyline/index`：显式 Skyline + glass-easel，自定义导航和原生滚动容器。
+
+两页共享同一套组件和 TS 业务逻辑，无 `web-view` 或 `rich-text`。在工具的“设置 → 项目设置 → 本地设置”中开启“Skyline 渲染调试”，再确认模拟器实际显示“当前渲染模式：Skyline”；不要仅以编译模式名称或页面能打开判断引擎生效。
+
+业务只负责模拟分片和累积 Markdown，通过 `selectComponent` 获取句柄并直接调用 `setMarkdown`，不把累计全文反复送入页面 `setData`。包内组件负责解析、流式更新合并、差量 `setData`、代码复制、图片预览；链接事件由页面处理，此示例将地址复制到剪贴板。重播按钮用于验证流中清空和重新输入；主题按钮切换共享的默认/深色主题。示例还覆盖原生颜色、字号、Panel 标题和 Detail 展开收起。
+
+## 验证实际发布包
+
+将待验收包安装或解压到独立目录后，传入包含 `dist/components` 的包根目录：
+
+```sh
+node examples/miniProgram/build.mjs /absolute/path/to/package
+```
+
+构建会完整替换生成的组件目录，避免混用上次构建的文件。可用本地 `npm pack` 产物或 pkg-pr-new tarball；不要仅验证仓库源码而宣称预览包已通过。
+
+## 手动验收
+
+同源 Web/Skyline 样式对照使用 `pages/parity/index`；视口、共享 Markdown、启动方式、实测数据及已知差异见[移动端对照记录](./compare/README.md)。
+
+对两种页面引擎分别检查中英文混排、链接、选择、嵌套列表、引用、表格横向滚动、代码复制、流中图片占位和结束后图片显示；验证流中重置、退出页面、长文滚动和图片加载后的滚动位置。公式和 Mermaid 仅展示源码。
+
+记录目标基础库、工具版本、实际引擎、设备和系统版本。真机需记录长文解析、提交数据量、布局帧耗时和内存，不能用桌面测试耗时替代。
 
 ## English
 
-Minimal WeChat MiniProgram demo for stream rendering Markdown with `@cherry-markdown/miniprogram`.
-
-### Run
-
-```sh
-yarn --cwd examples/miniProgram install
-yarn --cwd examples/miniProgram build
-```
-
-The Demo source imports `@cherry-markdown/miniprogram` directly. Its build script compiles that ESM source into the ignored `miniprogram/pages/index/index.js` runtime file because native MiniProgram runtime does not directly load ESM files. Open `examples/miniProgram` in WeChat DevTools and compile; **Build npm is not required**.
-
-To use the local package source instead, replace the package dependency and rebuild:
-
-```sh
-yarn --cwd examples/miniProgram add "@cherry-markdown/miniprogram@file:../../packages/miniProgram"
-yarn --cwd examples/miniProgram build
-```
-
-To verify a pkg-pr-new tarball instead, install it into this Demo project, then rebuild the MiniProgram runtime file:
-
-```sh
-yarn --cwd examples/miniProgram add "@cherry-markdown/miniprogram@https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniprogram@1827.tgz"
-yarn --cwd examples/miniProgram build
-```
-
-### What's Covered
-
-- Paragraph, heading, list/task list, blockquote, table, code block, image, link — all rendered as native WXML components
-- Streaming: chunks are accumulated, incomplete syntax normalized, images deferred until stream ends
-- Streaming: the page accumulates Markdown strings and calls `CherryStream.setMarkdown`; local chunk simulation stays in Demo-only `src/utils/mock-stream.js`
-- Interactions: code copy, image preview, link tap
-
-### Stream Integration
-
-```js
-import CherryStream from '@cherry-markdown/miniprogram';
-
-const cherry = new CherryStream();
-let markdownContent = '';
-
-// Extract a Markdown string from your transport, then add it to markdownContent.
-onMarkdownChunk((chunk) => {
-  markdownContent += chunk;
-  this.setData({ blocks: cherry.setMarkdown(markdownContent, { deferImages: true }) });
-});
-
-onStreamComplete(() => {
-  this.setData({ blocks: cherry.setMarkdown(markdownContent, { deferImages: false }) });
-});
-```
-
----
-
-## 简体中文
-
-使用 `@cherry-markdown/miniprogram` 在小程序中流式渲染 Markdown 的最小示例。
-
-### 运行
-
-```sh
-yarn --cwd examples/miniProgram install
-yarn --cwd examples/miniProgram build
-```
-
-Demo 源码会直接 import 已安装的 `@cherry-markdown/miniprogram`。由于小程序原生运行时不能直接加载 ESM 文件，构建脚本会把 ESM 源码编译为被忽略的 `miniprogram/pages/index/index.js` 运行文件。在微信开发者工具中打开 `examples/miniProgram` 后直接编译，**无需构建 npm**。
-
-若要使用本地包源码，替换依赖后重新构建：
-
-```sh
-yarn --cwd examples/miniProgram add "@cherry-markdown/miniprogram@file:../../packages/miniProgram"
-yarn --cwd examples/miniProgram build
-```
-
-若要验证 pkg-pr-new tarball，在该 Demo 项目中安装预览包后重新生成小程序运行文件：
-
-```sh
-yarn --cwd examples/miniProgram add "@cherry-markdown/miniprogram@https://pkg.pr.new/Tencent/cherry-markdown/@cherry-markdown/miniprogram@1827.tgz"
-yarn --cwd examples/miniProgram build
-```
-
-### 覆盖能力
-
-- 段落、标题、列表/任务列表、引用、表格、代码块、图片、链接 — 全部原生 WXML 组件渲染
-- 流式：chunk 累积、不完整语法自动规整、流中图片延迟加载
-- 流式：页面累积 Markdown 字符串并调用 `CherryStream.setMarkdown`；本地分片模拟仅在 Demo 的 `src/utils/mock-stream.js` 中实现
-- 交互：代码复制、图片预览、链接跳转
-
-### 流式接入示例
-
-```js
-import CherryStream from '@cherry-markdown/miniprogram';
-
-const cherry = new CherryStream();
-let markdownContent = '';
-
-// 从传输层提取 Markdown 字符串后累积到 markdownContent。
-onMarkdownChunk((chunk) => {
-  markdownContent += chunk;
-  this.setData({ blocks: cherry.setMarkdown(markdownContent, { deferImages: true }) });
-});
-
-onStreamComplete(() => {
-  this.setData({ blocks: cherry.setMarkdown(markdownContent, { deferImages: false }) });
-});
-```
+Build the local package and then this Demo from the repository root using the commands above. Open this directory in WeChat DevTools; no npm build is needed. The ordinary and Skyline pages share the same bundled native components and TS page source. Pass an extracted/installed package directory to `build.mjs` to verify a tarball instead. Confirm the actual renderer and validate target devices before claiming compatibility or performance.

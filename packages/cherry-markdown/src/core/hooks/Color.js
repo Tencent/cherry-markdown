@@ -24,14 +24,16 @@ export default class Color extends SyntaxBase {
   // }
 
   toHtml(whole, leadingChar, m1, m2) {
+    if (this.$engine?.semanticRenderer)
+      return leadingChar + this.$engine?.semanticRenderer.wrap('span', { attrs: { style: `color:${m1}` } }, m2);
     return `${leadingChar}<span style="color:${m1}">${m2}</span>`;
   }
 
   makeHtml(str) {
     if (isLookbehindSupported()) {
-      return str.replace(this.RULE.reg, this.toHtml);
+      return str.replace(this.RULE.reg, this.toHtml.bind(this));
     }
-    return replaceLookbehind(str, this.RULE.reg, this.toHtml, true, 1);
+    return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1);
   }
 
   rule() {

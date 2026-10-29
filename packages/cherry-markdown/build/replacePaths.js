@@ -15,7 +15,7 @@
  */
 import replaceInFile from 'replace-in-file';
 import glob from 'glob';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { dirname, relative, resolve } from 'path';
 
 const declarationEntries = [
@@ -54,12 +54,13 @@ async function replacePaths() {
   // 在产物主入口顶部插入三斜线引用，使消费者自动加载环境模块声明（CSS、addon 等）
   const entryPath = resolve(declarationRoot, 'index.d.ts');
   const modulesReference = '/// <reference path="../../types/modules.d.ts" />';
-  const content = readFileSync(entryPath, 'utf-8');
+  const content = existsSync(entryPath) ? readFileSync(entryPath, 'utf-8') : modulesReference;
   if (!content.startsWith(modulesReference)) {
     writeFileSync(entryPath, `/// <reference path="../../types/modules.d.ts" />\n${content}`);
   }
 
   for (const [file, entry, defaultName, namedExports] of declarationEntries) {
+    if (!existsSync(resolve(declarationRoot, `${entry}.d.ts`))) continue;
     const names = namedExports.join(', ');
     writeFileSync(
       `dist/${file}`,
