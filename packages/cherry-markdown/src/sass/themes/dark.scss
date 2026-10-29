@@ -231,4 +231,16 @@
   --panel-success-title-color: var(--oc-green-2);
   --panel-success-body-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
   --panel-success-body-color: var(--oc-green-3);
+
+  /* ========== GFM Alerts 相关变量覆盖（暗色模式下提升对比度） ========== */
+  --alert-note-color: var(--oc-blue-3);
+  --alert-note-bg: rgba(59, 130, 246, 0.1);
+  --alert-tip-color: var(--oc-green-3);
+  --alert-tip-bg: rgba(34, 197, 94, 0.1);
+  --alert-important-color: var(--oc-violet-3);
+  --alert-important-bg: rgba(139, 92, 246, 0.1);
+  --alert-warning-color: var(--oc-yellow-3);
+  --alert-warning-bg: rgba(234, 179, 8, 0.1);
+  --alert-caution-color: var(--oc-red-3);
+  --alert-caution-bg: rgba(239, 68, 68, 0.1);
 }
