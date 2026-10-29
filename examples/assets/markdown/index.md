@@ -317,6 +317,59 @@
 
 ---
 
+## GFM Alerts（GitHub 风格提示块）
+
+**说明**
+
+兼容 [GitHub Flavored Markdown Alerts](https://github.com/orgs/community/discussions/16925) 语法。
+在引用（blockquote）首行使用 `[!TYPE]` 标记即可，支持 5 种官方类型：
+
+| 类型 | 语法 | 用途 |
+| :-- | :-- | :-- |
+| `NOTE` | `> [!NOTE]` | 用户应当了解的有用信息 |
+| `TIP` | `> [!TIP]` | 可帮助用户做得更好的建议 |
+| `IMPORTANT` | `> [!IMPORTANT]` | 用户需要了解以达成目标的关键信息 |
+| `WARNING` | `> [!WARNING]` | 用户应留意以避免问题的紧急信息 |
+| `CAUTION` | `> [!CAUTION]` | 某些行为的负面后果提醒 |
+
+> 兼容性：从 GitHub 复制粘贴的 Alerts 内容无需任何改动即可直接渲染；可通过 `engine.syntax.blockquote.gfmAlert = false` 关闭该能力，恢复为普通 blockquote。
+
+```markdown
+> [!NOTE]
+> Useful information that users should know, even when skimming content.
+
+> [!TIP]
+> Helpful advice for doing things better or more easily.
+
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
+
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+
+> [!CAUTION]
+> Advises about risks or negative outcomes of certain actions.
+```
+
+**效果**
+
+> [!NOTE]
+> Useful information that users should know, even when skimming content.
+
+> [!TIP]
+> Helpful advice for doing things better or more easily.
+
+> [!IMPORTANT]
+> Key information users need to know to achieve their goal.
+
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+
+> [!CAUTION]
+> Advises about risks or negative outcomes of certain actions.
+
+---
+
 ## 手风琴
 
 **说明**
