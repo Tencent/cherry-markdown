@@ -46,9 +46,9 @@ jobs:
             packages/milkdown/coverage
           if-no-files-found: ignore
 
-  milkdown-browser-consumer:
+  milkdown-prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
       - uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
@@ -56,28 +56,87 @@ jobs:
           version-file: package.json
           node-version-file: '.node-version'
           cache: true
-      - name: Install dependencies
-        run: vp install
-      - name: Install browsers
-        run: vp exec playwright install --with-deps chromium firefox webkit
-      - name: Build Cherry artifacts
-        run: vp run -F cherry-markdown build
+      - name: Build Cherry and Milkdown artifacts
+        run: |
+          vp run -F cherry-markdown build
+          vp run -F @cherry-markdown/milkdown build:demo:prepared
+      - uses: actions/upload-artifact@v4
+        with:
+          name: milkdown-prepared-artifacts
+          path: |
+            packages/cherry-markdown/dist
+            packages/milkdown/dist
+            packages/milkdown/preview
+          if-no-files-found: error
+          retention-days: 5
+
+  milkdown-browser:
+    needs: milkdown-prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
+        with:
+          version-file: package.json
+          node-version-file: '.node-version'
+          cache: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: milkdown-prepared-artifacts
+          path: packages
+      - name: Install Chromium
+        run: vp exec playwright install --with-deps chromium
       - name: Browser interactions
-        run: vp run test:e2e:milkdown
+        run: vp run -F @cherry-markdown/milkdown test:e2e --fully-parallel --shard=${{ matrix.shard }}/2
         env:
-          MILKDOWN_E2E_PREBUILT: '1'
-      - name: Shared behavior across browsers
-        run: vp run -F @cherry-markdown/milkdown test:e2e:matrix
-        env:
-          MILKDOWN_E2E_PREBUILT: '1'
-      - name: Verify packed consumers
-        run: vp run -F @cherry-markdown/milkdown test:consumer:prepared
+          MILKDOWN_E2E_DEMO_PREBUILT: '1'
       - name: Upload browser diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: milkdown-browser-diagnostics
+          name: milkdown-browser-diagnostics-${{ matrix.shard }}
           path: |
             packages/milkdown/playwright-report
             packages/milkdown/test-results
           if-no-files-found: ignore
+
+  milkdown-consumer:
+    needs: milkdown-prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
+        with:
+          version-file: package.json
+          node-version-file: '.node-version'
+          cache: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: milkdown-prepared-artifacts
+          path: packages
+      - name: Install Chromium
+        run: vp exec playwright install --with-deps chromium
+      - name: Verify packed consumers
+        run: vp run -F @cherry-markdown/milkdown test:consumer:prepared
+
+  # Keep the existing required check name and fail if any suite did not succeed.
+  milkdown-browser-consumer:
+    if: ${{ always() }}
+    needs: [milkdown-prepare, milkdown-browser, milkdown-consumer]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all Milkdown checks passed
+        env:
+          PREPARE_RESULT: ${{ needs.milkdown-prepare.result }}
+          BROWSER_RESULT: ${{ needs.milkdown-browser.result }}
+          CONSUMER_RESULT: ${{ needs.milkdown-consumer.result }}
+        run: |
+          test "$PREPARE_RESULT" = success
+          test "$BROWSER_RESULT" = success
+          test "$CONSUMER_RESULT" = success
