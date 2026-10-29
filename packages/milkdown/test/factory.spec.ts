@@ -386,7 +386,7 @@ describe('cherryMilkdown WYSIWYG', () => {
 
     expect(frontmatterCount).toBe(0);
     expect(onChange.mock.calls.length).toBe(0);
-    expect(element.querySelectorAll('.milkdown-table-block')).toHaveLength(11);
+    expect(element.querySelectorAll('.milkdown-table-block')).toHaveLength(12);
 
     await instance.destroy();
     instances.splice(instances.indexOf(instance), 1);
