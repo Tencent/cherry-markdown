@@ -1,11 +1,10 @@
-//#region src/utils/toolkit/isPlainObject.js
+// src/utils/toolkit/isPlainObject.js
 function e(e) {
 	if (typeof e != "object" || !e) return !1;
 	let t = Object.getPrototypeOf(e);
 	return t === Object.prototype || t === null;
 }
-//#endregion
-//#region src/utils/toolkit/mergeWith.js
+// src/utils/toolkit/mergeWith.js
 function t(n, r, i) {
 	if (typeof r != "object" || !r) return;
 	let a = Object.keys(r);
@@ -199,8 +198,8 @@ var S = (e) => e < 256 ? p[e] : p[256 + (e >>> 7)], C = (e, t) => {
 	for (ee(d, 287, l), e = 0; e < a; e++) f[e * 2 + 1] = 5, f[e * 2] = E(e, 5);
 	v = new _(d, o, 257, 286, 15), y = new _(f, s, 0, a, 15), b = new _([], c, 0, 19, 7);
 }, ne = (e) => {
-	let t;
-	for (t = 0; t < 286; t++) e.dyn_ltree[t * 2] = 0;
+	let t = 0;
+	for (; t < 286; t++) e.dyn_ltree[t * 2] = 0;
 	for (t = 0; t < a; t++) e.dyn_dtree[t * 2] = 0;
 	for (t = 0; t < 19; t++) e.bl_tree[t * 2] = 0;
 	e.dyn_ltree[512] = 1, e.opt_len = e.static_len = 0, e.sym_next = e.matches = 0;
@@ -250,8 +249,8 @@ var S = (e) => e < 256 ? p[e] : p[256 + (e >>> 7)], C = (e, t) => {
 	for (w(e, t - 257, 5), w(e, n - 1, 5), w(e, r - 4, 4), i = 0; i < r; i++) w(e, e.bl_tree[l[i] * 2 + 1], 3);
 	le(e, e.dyn_ltree, t - 1), le(e, e.dyn_dtree, n - 1);
 }, fe = (e) => {
-	let t = 4093624447, n;
-	for (n = 0; n <= 31; n++, t >>>= 1) if (t & 1 && e.dyn_ltree[n * 2] !== 0) return 0;
+	let t = 4093624447, n = 0;
+	for (; n <= 31; n++, t >>>= 1) if (t & 1 && e.dyn_ltree[n * 2] !== 0) return 0;
 	if (e.dyn_ltree[18] !== 0 || e.dyn_ltree[20] !== 0 || e.dyn_ltree[26] !== 0) return 1;
 	for (n = 32; n < 256; n++) if (e.dyn_ltree[n * 2] !== 0) return 1;
 	return 0;
@@ -271,7 +270,7 @@ var S = (e) => e < 256 ? p[e] : p[256 + (e >>> 7)], C = (e, t) => {
 		w(e, 2, 3), T(e, 256, d), D(e);
 	}
 }, _e = (e, t, n, r) => {
-	let i = e & 65535 | 0, a = e >>> 16 & 65535 | 0, o = 0;
+	let i = e & 65535, a = e >>> 16 & 65535, o = 0;
 	for (; n !== 0;) {
 		o = n > 2e3 ? 2e3 : n, n -= o;
 		do
@@ -279,7 +278,7 @@ var S = (e) => e < 256 ? p[e] : p[256 + (e >>> 7)], C = (e, t) => {
 		while (--o);
 		i %= 65521, a %= 65521;
 	}
-	return i | a << 16 | 0;
+	return i | a << 16;
 }, ve = new Uint32Array((() => {
 	let e, t = [];
 	for (var n = 0; n < 256; n++) {
@@ -372,8 +371,8 @@ var S = (e) => e < 256 ? p[e] : p[256 + (e >>> 7)], C = (e, t) => {
 	do
 		if (i = t, l[i + o] === m && l[i + o - 1] === p && l[i] === l[r] && l[++i] === l[r + 1]) {
 			r += 2, i++;
-			do			;
-while (l[++r] === l[++i] && l[++r] === l[++i] && l[++r] === l[++i] && l[++r] === l[++i] && l[++r] === l[++i] && l[++r] === l[++i] && l[++r] === l[++i] && l[++r] === l[++i] && r < f);
+			do;
+			while (l[++r] === l[++i] && l[++r] === l[++i] && l[++r] === l[++i] && l[++r] === l[++i] && l[++r] === l[++i] && l[++r] === l[++i] && l[++r] === l[++i] && l[++r] === l[++i] && r < f);
 			if (a = I - (f - r), r = f - I, a > o) {
 				if (e.match_start = t, o = a, a >= s) break;
 				p = l[r + o - 1], m = l[r + o];
@@ -442,8 +441,8 @@ while (l[++r] === l[++i] && l[++r] === l[++i] && l[++r] === l[++i] && l[++r] ===
 		}
 		if (e.match_length = 0, e.lookahead >= F && e.strstart > 0 && (i = e.strstart - 1, r = o[i], r === o[++i] && r === o[++i] && r === o[++i])) {
 			a = e.strstart + I;
-			do			;
-while (r === o[++i] && r === o[++i] && r === o[++i] && r === o[++i] && r === o[++i] && r === o[++i] && r === o[++i] && r === o[++i] && i < a);
+			do;
+			while (r === o[++i] && r === o[++i] && r === o[++i] && r === o[++i] && r === o[++i] && r === o[++i] && r === o[++i] && r === o[++i] && i < a);
 			e.match_length = I - (a - i), e.match_length > e.lookahead && (e.match_length = e.lookahead);
 		}
 		if (e.match_length >= F ? (n = A(e, 1, e.match_length - F), e.lookahead -= e.match_length, e.strstart += e.match_length, e.match_length = 0) : (n = A(e, 0, e.window[e.strstart]), e.lookahead--, e.strstart++), n && (G(e, !1), e.strm.avail_out === 0)) return z;
@@ -658,16 +657,11 @@ var Tt = (e) => {
 				continue;
 			}
 			let o = wt[t];
-			if (o > 4) {
-				a[i++] = 65533, r += o - 1;
-				continue;
+			if (o > 4) a[i++] = 65533, r += o - 1;
+			else {
+				for (t &= o === 2 ? 31 : o === 3 ? 15 : 7; o > 1 && r < n;) t = t << 6 | e[r++] & 63, o--;
+				o > 1 ? a[i++] = 65533 : t < 65536 ? a[i++] = t : (t -= 65536, a[i++] = 55296 | t >> 10 & 1023, a[i++] = 56320 | t & 1023);
 			}
-			for (t &= o === 2 ? 31 : o === 3 ? 15 : 7; o > 1 && r < n;) t = t << 6 | e[r++] & 63, o--;
-			if (o > 1) {
-				a[i++] = 65533;
-				continue;
-			}
-			t < 65536 ? a[i++] = t : (t -= 65536, a[i++] = 55296 | t >> 10 & 1023, a[i++] = 56320 | t & 1023);
 		}
 		return Et(a, i);
 	},
@@ -705,21 +699,12 @@ function Vt(e) {
 Vt.prototype.push = function(e, t) {
 	let n = this.strm, r = this.options.chunkSize, i, a;
 	if (this.ended) return !1;
-	for (a = t === ~~t ? t : t === !0 ? Pt : jt, n.input = typeof e == "string" ? Dt.string2buf(e) : At.call(e) === "[object ArrayBuffer]" ? new Uint8Array(e) : e, n.next_in = 0, n.avail_in = n.input.length;;) {
-		if (n.avail_out === 0 && (n.output = new Uint8Array(r), n.next_out = 0, n.avail_out = r), (a === Mt || a === Nt) && n.avail_out <= 6) {
-			this.onData(n.output.subarray(0, n.next_out)), n.avail_out = 0;
-			continue;
-		}
+	for (a = t === ~~t ? t : t === !0 ? Pt : jt, n.input = typeof e == "string" ? Dt.string2buf(e) : At.call(e) === "[object ArrayBuffer]" ? new Uint8Array(e) : e, n.next_in = 0, n.avail_in = n.input.length;;) if (n.avail_out === 0 && (n.output = new Uint8Array(r), n.next_out = 0, n.avail_out = r), (a === Mt || a === Nt) && n.avail_out <= 6) this.onData(n.output.subarray(0, n.next_out)), n.avail_out = 0;
+	else {
 		if (i = bt.deflate(n, a), i === It) return n.next_out > 0 && this.onData(n.output.subarray(0, n.next_out)), i = bt.deflateEnd(this.strm), this.onEnd(i), this.ended = !0, i === Ft;
-		if (n.avail_out === 0) {
-			this.onData(n.output);
-			continue;
-		}
-		if (a > 0 && n.next_out > 0) {
-			this.onData(n.output.subarray(0, n.next_out)), n.avail_out = 0;
-			continue;
-		}
-		if (n.avail_in === 0) break;
+		if (n.avail_out === 0) this.onData(n.output);
+		else if (a > 0 && n.next_out > 0) this.onData(n.output.subarray(0, n.next_out)), n.avail_out = 0;
+		else if (n.avail_in === 0) break;
 	}
 	return !0;
 }, Vt.prototype.onData = function(e) {
@@ -970,7 +955,7 @@ var Gt = {
 	for (;;) {
 		ee = l - h, o[u] + 1 < T ? (te = 0, ne = o[u]) : o[u] >= T ? (te = O[o[u] - T], ne = w[o[u] - T]) : (te = 96, ne = 0), y = 1 << l - h, b = 1 << m, d = b;
 		do
-			b -= y, i[C + (v >> h) + b] = ee << 24 | te << 16 | ne | 0;
+			b -= y, i[C + (v >> h) + b] = ee << 24 | te << 16 | ne;
 		while (b !== 0);
 		for (y = 1 << l - 1; v & y;) y >>= 1;
 		if (y === 0 ? v = 0 : (v &= y - 1, v += y), u++, --E[l] === 0) {
@@ -980,7 +965,7 @@ var Gt = {
 		if (l > p && (v & S) !== x) {
 			for (h === 0 && (h = p), C += d, m = l - h, g = 1 << m; m + h < f && (g -= E[m + h], !(g <= 0));) m++, g <<= 1;
 			if (_ += 1 << m, e === $t && _ > Xt || e === en && _ > Zt) return 1;
-			x = v & S, i[x] = p << 24 | m << 16 | C - a | 0;
+			x = v & S, i[x] = p << 24 | m << 16 | C - a;
 		}
 	}
 	return v !== 0 && (i[C + v] = l - h << 24 | 4194304), s.bits = p, 0;
@@ -1394,7 +1379,7 @@ var Q = (e) => {
 						if (s === 0) break inf_leave;
 						s--, l += r[a++] << u, u += 8;
 					}
-					if (n.wrap & 4 && l !== (n.total & 4294967295)) {
+					if (n.wrap & 4 && l !== (n.total | 0)) {
 						e.msg = "incorrect length check", n.mode = Z;
 						break;
 					}
@@ -1490,8 +1475,7 @@ var Er = {
 	ungzip: wr,
 	constants: be
 }, { Deflate: Dr, deflate: Or, deflateRaw: kr, gzip: Ar } = Gt, { Inflate: jr, inflate: Mr, inflateRaw: Nr, ungzip: Pr } = Er, Fr = kr;
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/typeof.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/typeof.js
 function Ir(e) {
 	"@babel/helpers - typeof";
 	return Ir = typeof Symbol == "function" && typeof Symbol.iterator == "symbol" ? function(e) {
@@ -1500,8 +1484,7 @@ function Ir(e) {
 		return e && typeof Symbol == "function" && e.constructor === Symbol && e !== Symbol.prototype ? "symbol" : typeof e;
 	}, Ir(e);
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/toPrimitive.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/toPrimitive.js
 function Lr(e, t) {
 	if (Ir(e) != "object" || !e) return e;
 	var n = e[Symbol.toPrimitive];
@@ -1512,14 +1495,12 @@ function Lr(e, t) {
 	}
 	return (t === "string" ? String : Number)(e);
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/toPropertyKey.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/toPropertyKey.js
 function Rr(e) {
 	var t = Lr(e, "string");
 	return Ir(t) == "symbol" ? t : t + "";
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/defineProperty.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/defineProperty.js
 function zr(e, t, n) {
 	return (t = Rr(t)) in e ? Object.defineProperty(e, t, {
 		value: n,
@@ -1528,8 +1509,7 @@ function zr(e, t, n) {
 		writable: !0
 	}) : e[t] = n, e;
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/objectSpread2.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/objectSpread2.js
 function Br(e, t) {
 	var n = Object.keys(e);
 	if (Object.getOwnPropertySymbols) {
@@ -1551,8 +1531,7 @@ function Vr(e) {
 	}
 	return e;
 }
-//#endregion
-//#region src/addons/cherry-code-block-plantuml-plugin.js
+// src/addons/cherry-code-block-plantuml-plugin.js
 function Hr(e) {
 	let t = e;
 	return t < 10 ? String.fromCharCode(48 + t) : (t -= 10, t < 26 ? String.fromCharCode(65 + t) : (t -= 26, t < 26 ? String.fromCharCode(97 + t) : (t -= 26, t === 0 ? "-" : t === 1 ? "_" : "?")));
@@ -1609,5 +1588,4 @@ var Jr = class e {
 		return n || (n = Math.round(Math.random() * 1e8)), `<img id="${`plantuml-${n}-${(/* @__PURE__ */ new Date()).getTime()}`}" src="${this.getUrl(e)}" />`;
 	}
 };
-//#endregion
 export { Jr as default };

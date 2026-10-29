@@ -1,11 +1,10 @@
-//#region src/utils/toolkit/isPlainObject.js
+// src/utils/toolkit/isPlainObject.js
 function e(e) {
 	if (typeof e != "object" || !e) return !1;
 	let t = Object.getPrototypeOf(e);
 	return t === Object.prototype || t === null;
 }
-//#endregion
-//#region src/utils/toolkit/mergeWith.js
+// src/utils/toolkit/mergeWith.js
 function t(n, r, i) {
 	if (typeof r != "object" || !r) return;
 	let a = Object.keys(r);
@@ -30,19 +29,16 @@ function n(e, ...n) {
 	}
 	return e;
 }
-//#endregion
-//#region src/utils/env.js
+// src/utils/env.js
 function r() {
 	return typeof window == "object";
 }
-//#endregion
-//#region src/utils/external.js
+// src/utils/external.js
 function i(e, t) {
 	if (t !== void 0) return t;
 	if (r()) return window[e];
 }
-//#endregion
-//#region src/utils/dom.js
+// src/utils/dom.js
 function a(e, t) {
 	return new Promise((n, r) => {
 		if (document.getElementById(t)) {
@@ -53,8 +49,7 @@ function a(e, t) {
 		i.src = e, i.async = !0, i.onload = n, i.onerror = r, document.head.appendChild(i);
 	});
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/typeof.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/typeof.js
 function o(e) {
 	"@babel/helpers - typeof";
 	return o = typeof Symbol == "function" && typeof Symbol.iterator == "symbol" ? function(e) {
@@ -63,8 +58,7 @@ function o(e) {
 		return e && typeof Symbol == "function" && e.constructor === Symbol && e !== Symbol.prototype ? "symbol" : typeof e;
 	}, o(e);
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/toPrimitive.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/toPrimitive.js
 function s(e, t) {
 	if (o(e) != "object" || !e) return e;
 	var n = e[Symbol.toPrimitive];
@@ -75,14 +69,12 @@ function s(e, t) {
 	}
 	return (t === "string" ? String : Number)(e);
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/toPropertyKey.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/toPropertyKey.js
 function c(e) {
 	var t = s(e, "string");
 	return o(t) == "symbol" ? t : t + "";
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/defineProperty.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/defineProperty.js
 function l(e, t, n) {
 	return (t = c(t)) in e ? Object.defineProperty(e, t, {
 		value: n,
@@ -91,8 +83,7 @@ function l(e, t, n) {
 		writable: !0
 	}) : e[t] = n, e;
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/objectSpread2.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/objectSpread2.js
 function u(e, t) {
 	var n = Object.keys(e);
 	if (Object.getOwnPropertySymbols) {
@@ -114,8 +105,7 @@ function d(e) {
 	}
 	return e;
 }
-//#endregion
-//#region src/addons/cherry-code-block-mermaid-plugin.js
+// src/addons/cherry-code-block-mermaid-plugin.js
 var f = [
 	"flowchart",
 	"sequence",
@@ -174,11 +164,7 @@ var m = class e {
 		let { mermaid: t, mermaidAPI: n } = e;
 		this.hasExplicitMermaid = !!(t || n), this.mermaidScriptLoading = !1, this.mermaidScriptLoaded = !1;
 		let r = i("mermaid"), a = i("mermaidAPI"), o = t || r, s = n || a || o && o.mermaidAPI || null;
-		if (this.options = d(d({}, p), e), delete this.options.mermaid, delete this.options.mermaidAPI, !r && !s) {
-			this.mermaidAPIRefs = null;
-			return;
-		}
-		s ? (this.mermaidAPIRefs = s, this.isAsyncRenderVersion() && (this.mermaidAPIRefs = r || this.mermaidAPIRefs)) : this.mermaidAPIRefs = r, this.mermaidAPIRefs.initialize(this.options);
+		this.options = d(d({}, p), e), delete this.options.mermaid, delete this.options.mermaidAPI, !r && !s ? this.mermaidAPIRefs = null : (s ? (this.mermaidAPIRefs = s, this.isAsyncRenderVersion() && (this.mermaidAPIRefs = r || this.mermaidAPIRefs)) : this.mermaidAPIRefs = r, this.mermaidAPIRefs.initialize(this.options));
 	}
 	isAsyncRenderVersion() {
 		return !this.mermaidAPIRefs || !this.mermaidAPIRefs.render || this.mermaidAPIRefs.render.length <= 3;
@@ -199,11 +185,7 @@ var m = class e {
 		});
 	}
 	releaseRenderSlot() {
-		if (this.pendingRenderQueue.length > 0) {
-			this.pendingRenderQueue.shift()();
-			return;
-		}
-		this.activeRenderCount = Math.max(0, this.activeRenderCount - 1);
+		this.pendingRenderQueue.length > 0 ? this.pendingRenderQueue.shift()() : this.activeRenderCount = Math.max(0, this.activeRenderCount - 1);
 	}
 	convertMermaidSvgToImg(e, t, n = !1) {
 		let r = new DOMParser(), i, a = (e) => e.replace("<svg ", "<svg style=\"max-width:100%;height:auto;font-family:sans-serif;\" ");
@@ -325,5 +307,4 @@ var m = class e {
 	}
 };
 l(m, "TYPE", "figure");
-//#endregion
 export { m as default };

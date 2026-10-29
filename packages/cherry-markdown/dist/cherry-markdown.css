@@ -7301,8 +7301,9 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 .cherry-flex-toc .cherry-toc-head .ch-icon-chevronsLeft {
   padding: 5px;
   position: absolute;
-  right: 0;
-  top: 0;
+  font-size: 12px;
+  right: 5px;
+  top: 5px;
 }
 .cherry-flex-toc .cherry-toc-head i {
   cursor: pointer;

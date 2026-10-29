@@ -1,11 +1,10 @@
-//#region src/utils/toolkit/isPlainObject.js
+// src/utils/toolkit/isPlainObject.js
 function e(e) {
 	if (typeof e != "object" || !e) return !1;
 	let t = Object.getPrototypeOf(e);
 	return t === Object.prototype || t === null;
 }
-//#endregion
-//#region src/utils/toolkit/mergeWith.js
+// src/utils/toolkit/mergeWith.js
 function t(n, r, i) {
 	if (typeof r != "object" || !r) return;
 	let a = Object.keys(r);
@@ -30,24 +29,20 @@ function n(e, ...n) {
 	}
 	return e;
 }
-//#endregion
-//#region src/Logger.js
+// src/Logger.js
 var r = new Proxy({}, { get(e, t, n) {
 	return () => {};
 } });
-//#endregion
-//#region src/utils/env.js
+// src/utils/env.js
 function i() {
 	return typeof window == "object";
 }
-//#endregion
-//#region src/utils/external.js
+// src/utils/external.js
 function a(e, t) {
 	if (t !== void 0) return t;
 	if (i()) return window[e];
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/objectWithoutPropertiesLoose.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/objectWithoutPropertiesLoose.js
 function o(e, t) {
 	if (e == null) return {};
 	var n = {};
@@ -57,8 +52,7 @@ function o(e, t) {
 	}
 	return n;
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/objectWithoutProperties.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/objectWithoutProperties.js
 function s(e, t) {
 	if (e == null) return {};
 	var n, r, i = o(e, t);
@@ -68,8 +62,7 @@ function s(e, t) {
 	}
 	return i;
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/typeof.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/typeof.js
 function c(e) {
 	"@babel/helpers - typeof";
 	return c = typeof Symbol == "function" && typeof Symbol.iterator == "symbol" ? function(e) {
@@ -78,8 +71,7 @@ function c(e) {
 		return e && typeof Symbol == "function" && e.constructor === Symbol && e !== Symbol.prototype ? "symbol" : typeof e;
 	}, c(e);
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/toPrimitive.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/toPrimitive.js
 function l(e, t) {
 	if (c(e) != "object" || !e) return e;
 	var n = e[Symbol.toPrimitive];
@@ -90,14 +82,12 @@ function l(e, t) {
 	}
 	return (t === "string" ? String : Number)(e);
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/toPropertyKey.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/toPropertyKey.js
 function u(e) {
 	var t = l(e, "string");
 	return c(t) == "symbol" ? t : t + "";
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/defineProperty.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/defineProperty.js
 function d(e, t, n) {
 	return (t = u(t)) in e ? Object.defineProperty(e, t, {
 		value: n,
@@ -106,8 +96,7 @@ function d(e, t, n) {
 		writable: !0
 	}) : e[t] = n, e;
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/objectSpread2.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/objectSpread2.js
 function f(e, t) {
 	var n = Object.keys(e);
 	if (Object.getOwnPropertySymbols) {
@@ -129,8 +118,7 @@ function p(e) {
 	}
 	return e;
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/asyncToGenerator.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/asyncToGenerator.js
 function m(e, t, n, r, i, a, o) {
 	try {
 		var s = e[a](o), c = s.value;
@@ -155,8 +143,7 @@ function h(e) {
 		});
 	};
 }
-//#endregion
-//#region src/addons/advance/cherry-table-echarts-plugin.js
+// src/addons/advance/cherry-table-echarts-plugin.js
 var g = [
 	"echarts",
 	"cherryOptions",
@@ -183,23 +170,15 @@ var g = [
 	height: 300
 }, y = class e {
 	static install(t, ...a) {
-		if (!i()) {
-			r.warn("echarts-table-engine only works in browser."), n(t, { engine: { syntax: { table: { enableChart: !1 } } } });
-			return;
-		}
-		n(t, { engine: { syntax: { table: {
+		i() ? n(t, { engine: { syntax: { table: {
 			enableChart: !0,
 			chartRenderEngine: e,
 			externals: ["echarts"]
-		} } } });
+		} } } }) : (r.warn("echarts-table-engine only works in browser."), n(t, { engine: { syntax: { table: { enableChart: !1 } } } }));
 	}
 	constructor(e = {}) {
 		let { echarts: t, cherryOptions: n, cherry: r } = e, i = s(e, g), o = a("echarts"), c = t || o;
-		if (!c) {
-			console.warn("table-echarts-plugin[init]: Package echarts not found."), this.echartsRef = !1;
-			return;
-		}
-		this.options = p(p({}, v), i || {}), this.echartsRef = c, this.dom = null, this.cherryOptions = n, this.cherry = r, this.instances = /* @__PURE__ */ new Set(), this.themeObservers = /* @__PURE__ */ new Map(), this.themeRuntime = null, this.themeCache = /* @__PURE__ */ new Map(), this.exportObservers = /* @__PURE__ */ new Map(), this.$enableLocaleObserver();
+		c ? (this.options = p(p({}, v), i || {}), this.echartsRef = c, this.dom = null, this.cherryOptions = n, this.cherry = r, this.instances = /* @__PURE__ */ new Set(), this.themeObservers = /* @__PURE__ */ new Map(), this.themeRuntime = null, this.themeCache = /* @__PURE__ */ new Map(), this.exportObservers = /* @__PURE__ */ new Map(), this.$enableLocaleObserver()) : (console.warn("table-echarts-plugin[init]: Package echarts not found."), this.echartsRef = !1);
 	}
 	isValid() {
 		return !!this.echartsRef;
@@ -381,7 +360,7 @@ var g = [
 				return;
 			}
 			let n = t.getDom && t.getDom();
-			(!n || !n.isConnected) && e.push(t);
+			n && n.isConnected || e.push(t);
 		}), e.forEach((e) => {
 			e.isDisposed() || e.dispose(), this.instances.delete(e);
 		}), e.length > 0 && r.info(`Cleaned up ${e.length} invalid chart instances`);
@@ -654,11 +633,7 @@ var g = [
 	addClickHighlightEffect(e, t) {
 		let n = null;
 		e.on("click", (i) => {
-			if (r.log("Chart clicked:", i), n === i.dataIndex) {
-				n = null, this.clearHighlight(e, t);
-				return;
-			}
-			n = i.dataIndex;
+			r.log("Chart clicked:", i), n === i.dataIndex ? (n = null, this.clearHighlight(e, t)) : n = i.dataIndex;
 		});
 	}
 	clearHighlight(e, t) {
@@ -1064,7 +1039,7 @@ var g = [
 		let i = Infinity, a = -Infinity;
 		t && (e.forEach((e) => {
 			typeof e.size == "number" && !Number.isNaN(e.size) && (i = Math.min(i, e.size), a = Math.max(a, e.size));
-		}), (!Number.isFinite(i) || !Number.isFinite(a)) && (i = 0, a = 0));
+		}), Number.isFinite(i) && Number.isFinite(a) || (i = 0, a = 0));
 		let o = [];
 		if (n) {
 			let n = /* @__PURE__ */ new Map();
@@ -1175,7 +1150,7 @@ var g = [
 	}
 }, A = { options(e, t) {
 	let { engine: n } = t;
-	return a("echarts") ? {
+	return n.echartsRef ? {
 		title: {
 			text: `${n.cherry.locale.mapChartLoading}...`,
 			left: "center",
@@ -1290,18 +1265,18 @@ var g = [
 		let n = t && t.mapDataSource ? t.mapDataSource : null, r = document.querySelector(`[id="${t.chartId}"][data-chart-type="map"]`);
 		if (r && r.getAttribute("data-map-status") === "failed") return I(M, e, t);
 		if (n) {
-			var i, o;
-			return (i = a("echarts")) != null && (o = i.getMap) != null && o.call(i, n) ? I(j, e, t) : (this.$loadMapData(e, t), I(A, e, t));
+			var i, a;
+			return (i = t.engine.echartsRef) != null && (a = i.getMap) != null && a.call(i, n) ? I(j, e, t) : (this.$loadMapData(e, t), I(A, e, t));
 		}
-		let s = this.$getAllPossibleMapSources(t), c = !1, l = null;
-		for (let e of s) {
-			var u, d;
-			if ((u = a("echarts")) != null && (d = u.getMap) != null && d.call(u, e)) {
-				c = !0, l = e;
+		let o = this.$getAllPossibleMapSources(t), s = !1, c = null;
+		for (let e of o) {
+			var l, u;
+			if ((l = t.engine.echartsRef) != null && (u = l.getMap) != null && u.call(l, e)) {
+				s = !0, c = e;
 				break;
 			}
 		}
-		return c ? I(j, e, p(p({}, t), {}, { mapDataSource: l })) : (this.$loadMapData(e, t), I(A, e, t));
+		return s ? I(j, e, p(p({}, t), {}, { mapDataSource: c })) : (this.$loadMapData(e, t), I(A, e, t));
 	},
 	$getAllPossibleMapSources(e) {
 		var t;
@@ -1314,11 +1289,7 @@ var g = [
 			let e = document.querySelector(`[id="${t.chartId}"][data-chart-type="map"]`);
 			e && e.setAttribute("data-map-status", "loading");
 		}
-		if (!n || n.length === 0) {
-			this.$handleMapLoadFailure(t);
-			return;
-		}
-		this.$tryLoadMapDataFromPaths(n, 0, t);
+		!n || n.length === 0 ? this.$handleMapLoadFailure(t) : this.$tryLoadMapDataFromPaths(n, 0, t);
 	},
 	$tryLoadMapDataFromPaths(e, t, n) {
 		if (t >= e.length) {
@@ -1328,7 +1299,7 @@ var g = [
 		let i = e[t];
 		this.$fetchMapData(i).then((e) => {
 			var t, r;
-			return (t = a("echarts")) == null || (r = t.registerMap) == null || r.call(t, i, e), this.$refreshMapChart(n.chartId, i, n.engine), e;
+			return (t = n.engine.echartsRef) == null || (r = t.registerMap) == null || r.call(t, i, e), this.$refreshMapChart(n.chartId, i, n.engine), e;
 		}).catch((e) => {
 			r.warn(`Map data loading failed (${i}):`, e.message), this.$handleMapLoadFailure(n);
 		});
@@ -1422,5 +1393,4 @@ function L(e, t) {
 	}
 	return e;
 }
-//#endregion
 export { y as default };

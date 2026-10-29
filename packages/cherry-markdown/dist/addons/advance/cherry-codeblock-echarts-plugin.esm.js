@@ -1,5 +1,5 @@
-//#region \0rolldown/runtime.js
-var e = Object.create, t = Object.defineProperty, n = Object.getOwnPropertyDescriptor, r = Object.getOwnPropertyNames, i = Object.getPrototypeOf, a = Object.prototype.hasOwnProperty, o = (e, t) => () => (t || (e((t = { exports: {} }).exports, t), e = null), t.exports), s = (e, i, o, s) => {
+// \0rolldown/runtime.js
+var e = Object.create, t = Object.defineProperty, n = Object.getOwnPropertyDescriptor, r = Object.getOwnPropertyNames, i = Object.getPrototypeOf, a = Object.prototype.hasOwnProperty, o = (e, t) => () => (t || (e((t = { exports: {} }).exports, t, t.exports), e = null), t.exports), s = (e, i, o, s) => {
 	if (i && typeof i == "object" || typeof i == "function") for (var c = r(i), l = 0, u = c.length, d; l < u; l++) d = c[l], !a.call(e, d) && d !== o && t(e, d, {
 		get: ((e) => i[e]).bind(null, d),
 		enumerable: !(s = n(i, d)) || s.enumerable
@@ -9,15 +9,13 @@ var e = Object.create, t = Object.defineProperty, n = Object.getOwnPropertyDescr
 	value: n,
 	enumerable: !0
 }) : o, n));
-//#endregion
-//#region src/utils/toolkit/isPlainObject.js
+// src/utils/toolkit/isPlainObject.js
 function l(e) {
 	if (typeof e != "object" || !e) return !1;
 	let t = Object.getPrototypeOf(e);
 	return t === Object.prototype || t === null;
 }
-//#endregion
-//#region src/utils/toolkit/mergeWith.js
+// src/utils/toolkit/mergeWith.js
 function u(e, t, n) {
 	if (typeof t != "object" || !t) return;
 	let r = Object.keys(t);
@@ -42,12 +40,11 @@ function d(e, ...t) {
 	}
 	return e;
 }
-//#endregion
-//#region src/utils/env.js
-var f = /* @__PURE__ */ c((/* @__PURE__ */ o(((e, t) => {
+// src/utils/env.js
+var f = /* @__PURE__ */ c((/* @__PURE__ */ o(((e, t, n) => {
 	(function(n, r) {
 		typeof e == "object" && t !== void 0 ? t.exports = r() : typeof define == "function" && define.amd ? define(r) : n.JSON5 = r();
-	})(e, (function() {
+	})(n, (function() {
 		function e(e, t) {
 			return t = { exports: {} }, e(t, t.exports), t.exports;
 		}
@@ -155,9 +152,9 @@ var f = /* @__PURE__ */ c((/* @__PURE__ */ o(((e, t) => {
 			if (e == null) throw TypeError("Can't call method on  " + e);
 			return e;
 		}, ce = function(e) {
-			return function(t, n) {
-				var r = String(se(t)), i = C(n), a = r.length, o, s;
-				return i < 0 || i >= a ? e ? "" : void 0 : (o = r.charCodeAt(i), o < 55296 || o > 56319 || i + 1 === a || (s = r.charCodeAt(i + 1)) < 56320 || s > 57343 ? e ? r.charAt(i) : o : e ? r.slice(i, i + 2) : (o - 55296 << 10) + (s - 56320) + 65536);
+			return function(e, t) {
+				var n = String(se(e)), r = C(t), i = n.length, a, o;
+				return r < 0 || r >= i ? void 0 : (a = n.charCodeAt(r), a < 55296 || a > 56319 || r + 1 === i || (o = n.charCodeAt(r + 1)) < 56320 || o > 57343 ? a : (a - 55296 << 10) + (o - 56320) + 65536);
 			};
 		}(!1);
 		S(S.P, "String", { codePointAt: function(e) {
@@ -259,11 +256,8 @@ var f = /* @__PURE__ */ c((/* @__PURE__ */ o(((e, t) => {
 						return;
 					case void 0: return W(), K("eof");
 				}
-				if (D.isSpaceSeparator(H)) {
-					W();
-					return;
-				}
-				return G[k]();
+				if (D.isSpaceSeparator(H)) W();
+				else return G[k]();
 			},
 			comment: function() {
 				switch (H) {
@@ -369,11 +363,8 @@ var f = /* @__PURE__ */ c((/* @__PURE__ */ o(((e, t) => {
 						W(), R = "identifierNameEscape";
 						return;
 				}
-				if (D.isIdContinueChar(H)) {
-					z += W();
-					return;
-				}
-				return K("identifier", z);
+				if (D.isIdContinueChar(H)) z += W();
+				else return K("identifier", z);
 			},
 			identifierNameEscape: function() {
 				if (H !== "u") throw Z(W());
@@ -438,18 +429,12 @@ var f = /* @__PURE__ */ c((/* @__PURE__ */ o(((e, t) => {
 						z += W(), R = "decimalExponent";
 						return;
 				}
-				if (D.isDigit(H)) {
-					z += W();
-					return;
-				}
-				return K("numeric", V * Number(z));
+				if (D.isDigit(H)) z += W();
+				else return K("numeric", V * Number(z));
 			},
 			decimalPointLeading: function() {
-				if (D.isDigit(H)) {
-					z += W(), R = "decimalFraction";
-					return;
-				}
-				throw Z(W());
+				if (D.isDigit(H)) z += W(), R = "decimalFraction";
+				else throw Z(W());
 			},
 			decimalPoint: function() {
 				switch (H) {
@@ -458,11 +443,8 @@ var f = /* @__PURE__ */ c((/* @__PURE__ */ o(((e, t) => {
 						z += W(), R = "decimalExponent";
 						return;
 				}
-				if (D.isDigit(H)) {
-					z += W(), R = "decimalFraction";
-					return;
-				}
-				return K("numeric", V * Number(z));
+				if (D.isDigit(H)) z += W(), R = "decimalFraction";
+				else return K("numeric", V * Number(z));
 			},
 			decimalFraction: function() {
 				switch (H) {
@@ -471,11 +453,8 @@ var f = /* @__PURE__ */ c((/* @__PURE__ */ o(((e, t) => {
 						z += W(), R = "decimalExponent";
 						return;
 				}
-				if (D.isDigit(H)) {
-					z += W();
-					return;
-				}
-				return K("numeric", V * Number(z));
+				if (D.isDigit(H)) z += W();
+				else return K("numeric", V * Number(z));
 			},
 			decimalExponent: function() {
 				switch (H) {
@@ -484,39 +463,24 @@ var f = /* @__PURE__ */ c((/* @__PURE__ */ o(((e, t) => {
 						z += W(), R = "decimalExponentSign";
 						return;
 				}
-				if (D.isDigit(H)) {
-					z += W(), R = "decimalExponentInteger";
-					return;
-				}
-				throw Z(W());
+				if (D.isDigit(H)) z += W(), R = "decimalExponentInteger";
+				else throw Z(W());
 			},
 			decimalExponentSign: function() {
-				if (D.isDigit(H)) {
-					z += W(), R = "decimalExponentInteger";
-					return;
-				}
-				throw Z(W());
+				if (D.isDigit(H)) z += W(), R = "decimalExponentInteger";
+				else throw Z(W());
 			},
 			decimalExponentInteger: function() {
-				if (D.isDigit(H)) {
-					z += W();
-					return;
-				}
-				return K("numeric", V * Number(z));
+				if (D.isDigit(H)) z += W();
+				else return K("numeric", V * Number(z));
 			},
 			hexadecimal: function() {
-				if (D.isHexDigit(H)) {
-					z += W(), R = "hexadecimalInteger";
-					return;
-				}
-				throw Z(W());
+				if (D.isHexDigit(H)) z += W(), R = "hexadecimalInteger";
+				else throw Z(W());
 			},
 			hexadecimalInteger: function() {
-				if (D.isHexDigit(H)) {
-					z += W();
-					return;
-				}
-				return K("numeric", V * Number(z));
+				if (D.isHexDigit(H)) z += W();
+				else return K("numeric", V * Number(z));
 			},
 			string: function() {
 				switch (H) {
@@ -563,11 +527,8 @@ var f = /* @__PURE__ */ c((/* @__PURE__ */ o(((e, t) => {
 						B = W() === "\"", R = "string";
 						return;
 				}
-				if (D.isIdStartChar(H)) {
-					z += W(), R = "identifierName";
-					return;
-				}
-				throw Z(W());
+				if (D.isIdStartChar(H)) z += W(), R = "identifierName";
+				else throw Z(W());
 			},
 			afterPropertyName: function() {
 				if (H === ":") return K("punctuator", W());
@@ -683,11 +644,7 @@ var f = /* @__PURE__ */ c((/* @__PURE__ */ o(((e, t) => {
 			},
 			beforeArrayValue: function() {
 				if (P.type === "eof") throw Q();
-				if (P.type === "punctuator" && P.value === "]") {
-					X();
-					return;
-				}
-				Y();
+				P.type === "punctuator" && P.value === "]" ? X() : Y();
 			},
 			afterPropertyValue: function() {
 				if (P.type === "eof") throw Q();
@@ -837,16 +794,11 @@ var f = /* @__PURE__ */ c((/* @__PURE__ */ o(((e, t) => {
 								continue;
 							}
 						}
-						if (n[a]) {
-							r += n[a];
-							continue;
-						}
-						if (a < " ") {
+						if (n[a]) r += n[a];
+						else if (a < " ") {
 							var o = a.charCodeAt(0).toString(16);
 							r += "\\x" + ("00" + o).substring(o.length);
-							continue;
-						}
-						r += a;
+						} else r += a;
 					}
 					var s = c || Object.keys(t).reduce(function(e, n) {
 						return t[e] < t[n] ? e : n;
@@ -909,14 +861,12 @@ var f = /* @__PURE__ */ c((/* @__PURE__ */ o(((e, t) => {
 function p() {
 	return typeof window == "object";
 }
-//#endregion
-//#region src/utils/external.js
+// src/utils/external.js
 function m(e, t) {
 	if (t !== void 0) return t;
 	if (p()) return window[e];
 }
-//#endregion
-//#region src/addons/advance/cherry-codeblock-echarts-plugin.js
+// src/addons/advance/cherry-codeblock-echarts-plugin.js
 var h = class e {
 	static install(t, ...n) {
 		let r = m("echarts");
@@ -960,5 +910,4 @@ var h = class e {
 		}, 50), `<div style="${o}" class="cherry-echarts-codeblock-wrapper"></div>`;
 	}
 };
-//#endregion
 export { h as default };

@@ -1,4 +1,4 @@
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/typeof.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/typeof.js
 function e(t) {
 	"@babel/helpers - typeof";
 	return e = typeof Symbol == "function" && typeof Symbol.iterator == "symbol" ? function(e) {
@@ -7,8 +7,7 @@ function e(t) {
 		return e && typeof Symbol == "function" && e.constructor === Symbol && e !== Symbol.prototype ? "symbol" : typeof e;
 	}, e(t);
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/toPrimitive.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/toPrimitive.js
 function t(t, n) {
 	if (e(t) != "object" || !t) return t;
 	var r = t[Symbol.toPrimitive];
@@ -19,14 +18,12 @@ function t(t, n) {
 	}
 	return (n === "string" ? String : Number)(t);
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/toPropertyKey.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/toPropertyKey.js
 function n(n) {
 	var r = t(n, "string");
 	return e(r) == "symbol" ? r : r + "";
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/defineProperty.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/defineProperty.js
 function r(e, t, r) {
 	return (t = n(t)) in e ? Object.defineProperty(e, t, {
 		value: r,
@@ -35,8 +32,7 @@ function r(e, t, r) {
 		writable: !0
 	}) : e[t] = r, e;
 }
-//#endregion
-//#region src/core/SyntaxBase.js
+// src/core/SyntaxBase.js
 var i = !1, a = {
 	SEN: "sentence",
 	PAR: "paragraph",
@@ -102,8 +98,7 @@ var i = !1, a = {
 	mounted() {}
 };
 r(o, "HOOK_NAME", "default"), r(o, "HOOK_TYPE", a.DEFAULT);
-//#endregion
-//#region src/utils/lineFeed.js
+// src/utils/lineFeed.js
 function s(e, t, n = !1) {
 	if (!/^\n/.test(e)) return t;
 	if (n) {
@@ -112,8 +107,7 @@ function s(e, t, n = !1) {
 	}
 	return `\n\n${t}`;
 }
-//#endregion
-//#region src/utils/config.js
+// src/utils/config.js
 function c(e) {
 	return typeof localStorage < "u" && localStorage.getItem(`cherry-${e}`) !== null;
 }
@@ -121,8 +115,7 @@ function l() {
 	let e = "false";
 	return typeof localStorage < "u" && (e = localStorage.getItem("cherry-classicBr")), e === "true";
 }
-//#endregion
-//#region \0@oxc-project+runtime@0.143.0/helpers/esm/objectSpread2.js
+// \0@oxc-project+runtime@0.155.0/helpers/esm/objectSpread2.js
 function u(e, t) {
 	var n = Object.keys(e);
 	if (Object.getOwnPropertySymbols) {
@@ -144,8 +137,7 @@ function d(e) {
 	}
 	return e;
 }
-//#endregion
-//#region src/utils/sanitize.js
+// src/utils/sanitize.js
 var f = d(d(d(d(d(d({}, {
 	34: "&quot;",
 	38: "&amp;",
@@ -394,21 +386,10 @@ var f = d(d(d(d(d(d({}, {
 	9830: "&diams;"
 });
 Object.keys(f).map((e) => f[e].replace(/^&(\w+);$/g, (e, t) => t.toLowerCase()));
-var p = [
-	"h1|h2|h3|h4|h5|h6",
-	"ul|ol|li|dd|dl|dt",
-	"table|thead|tbody|tfoot|col|colgroup|th|td|tr",
-	"div|article|section|footer|aside|details|summary|code|audio|video|canvas|figure",
-	"address|center|cite|p|pre|blockquote|marquee|caption|figcaption|track|source|output|svg"
-].join("|"), m = [
-	"span|a|link|b|s|i|del|u|em|strong|sup|sub|kbd",
-	"nav|font|bdi|samp|map|area|small|time|bdo|var|wbr|meter|dfn",
-	"ruby|rt|rp|mark|q|progress|input|textarea|select|ins"
-].join("|");
-RegExp(`^(${p}|${m}|br|img|hr)( |$|/)`, "i");
-//#endregion
-//#region src/utils/LRUCache.js
-var h = class {
+var p = "h1|h2|h3|h4|h5|h6|ul|ol|li|dd|dl|dt|table|thead|tbody|tfoot|col|colgroup|th|td|tr|div|article|section|footer|aside|details|summary|code|audio|video|canvas|figure|address|center|cite|p|pre|blockquote|marquee|caption|figcaption|track|source|output|svg";
+RegExp(`^(${p}|span|a|link|b|s|i|del|u|em|strong|sup|sub|kbd|nav|font|bdi|samp|map|area|small|time|bdo|var|wbr|meter|dfn|ruby|rt|rp|mark|q|progress|input|textarea|select|ins|br|img|hr)( |$|/)`, "i");
+// src/utils/LRUCache.js
+var m = class {
 	constructor(e) {
 		this.capacity = e, this.cache = /* @__PURE__ */ new Map();
 	}
@@ -450,12 +431,12 @@ var h = class {
 	get size() {
 		return this.cache.size;
 	}
-}, g = 0, _ = class e extends o {
+}, h = 0, g = class e extends o {
 	static resetCacheCounter() {
-		g = 0;
+		h = 0;
 	}
 	constructor({ needCache: e, defaultCache: t = {} } = { needCache: !1 }) {
-		super({}), this.needCache = !!e, this.sign = "", e && (this.cache = new h(2e3), this.cacheKey = `~~C${g}`, g += 1), this.cacheData = {}, this.cacheDataMap = [];
+		super({}), this.needCache = !!e, this.sign = "", e && (this.cache = new m(2e3), this.cacheKey = `~~C${h}`, h += 1), this.cacheData = {}, this.cacheDataMap = [];
 	}
 	cacheAndGetData(e, t, n, r, i = !1) {
 		return this.cacheData[e] ? i && (this.cacheData[e] = t(e)) : (this.cacheDataMap.length > n && this.cacheDataMap.splice(r).forEach((e) => {
@@ -564,10 +545,9 @@ var h = class {
 		return !1;
 	}
 };
-r(_, "HOOK_TYPE", a.PAR), r(_, "IN_PARAGRAPH_CACHE_KEY_PREFIX", "!"), r(_, "IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX", "\\!");
-//#endregion
-//#region src/addons/advance/cherry-tapd-table-plugin.js
-var v = class extends _ {
+r(g, "HOOK_TYPE", a.PAR), r(g, "IN_PARAGRAPH_CACHE_KEY_PREFIX", "!"), r(g, "IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX", "\\!");
+// src/addons/advance/cherry-tapd-table-plugin.js
+var _ = class extends g {
 	constructor() {
 		super({ needCache: !0 }), this.cacheMap = {}, this.sentenceMakeFunc = null;
 	}
@@ -677,6 +657,5 @@ var v = class extends _ {
 		return {};
 	}
 };
-r(v, "HOOK_NAME", "tapdTable");
-//#endregion
-export { v as default };
+r(_, "HOOK_NAME", "tapdTable");
+export { _ as default };
