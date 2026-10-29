@@ -16,6 +16,7 @@
 import ParagraphBase from '@/core/ParagraphBase';
 import { compileRegExp } from '@/utils/regexp';
 import { escapeHTMLSpecialChar } from '@/utils/sanitize';
+import { parseFrontMatterContent } from '@/utils/frontMatter';
 
 export default class FrontMatter extends ParagraphBase {
   static HOOK_NAME = 'frontMatter';
@@ -28,25 +29,8 @@ export default class FrontMatter extends ParagraphBase {
     return str.replace(this.RULE.reg, (match, content) => {
       const lineCount = match.match(/\n/g)?.length ?? 0;
       const sign = `fontMatter${lineCount}`;
-      let frontmatter;
-      try {
-        // 优先按 JSON 格式解析
-        frontmatter = JSON.parse(content.trim());
-      } catch (error) {
-        // 按 k:v[\nk:v]* 格式解析
-        const lines = content.trim().split('\n');
-        frontmatter = {};
-        lines.forEach((line) => {
-          const [key, value] = line.split(':');
-          if (typeof key === 'string' && typeof value === 'string') {
-            if (key.length > 1024) {
-              // maximum key length 1024
-              return;
-            }
-            frontmatter[key.trim()] = value.trim();
-          }
-        });
-      }
+      // 解析 front-matter 内容（JSON 优先，k:v 多行兜底），逻辑由 utils/frontMatter 统一维护
+      const frontmatter = parseFrontMatterContent(content);
       // empty frontmatter, skip parse
       if (Object.keys(frontmatter).length <= 0) {
         return match;
