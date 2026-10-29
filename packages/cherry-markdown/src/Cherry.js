@@ -46,6 +46,7 @@ import { urlProcessorProxy } from './UrlCache';
 import { CherryStatic } from './CherryStatic';
 import { destroySearcherBridge, initSearcherBridge } from './toolbars/searcher/SearcherBridge';
 import { LIST_CONTENT } from '@/utils/regexp';
+import { getFrontMatterRegExp, parseFrontMatterContent, stringifyFrontMatter } from '@/utils/frontMatter';
 
 /** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
 /** @typedef {import('~types/editor').CM6Adapter} CM6AdapterType */
@@ -604,6 +605,86 @@ export default class Cherry extends CherryStatic {
    */
   setMarkdown(content, keepCursor = false) {
     return this.setValue(content, keepCursor);
+  }
+
+  /**
+   * 获取 Front Matter（文档顶部 `---` 包裹的元数据块）
+   *
+   * 支持两种常见格式：
+   *   1. JSON 格式：
+   *      ---
+   *      { "title": "cherry", "tags": ["md","tool"] }
+   *      ---
+   *   2. 简单 key:value 多行格式（优先推荐，可读性更好）：
+   *      ---
+   *      title: cherry
+   *      author: tencent
+   *      ---
+   *
+   * @returns {Record<string, any>} 解析后的对象；无 front-matter 或解析失败时返回 `{}`
+   */
+  getFrontMatter() {
+    const value = this.getValue();
+    const match = value.match(getFrontMatterRegExp());
+    if (!match) return {};
+    return parseFrontMatterContent(match[1]);
+  }
+
+  /**
+   * 设置 Front Matter（文档顶部 `---` 包裹的元数据块）
+   *
+   * 行为规则：
+   *  - 原文档已有 front-matter：替换为新的内容
+   *  - 原文档没有 front-matter：在文档开头插入
+   *  - data 为 `{}` 或空字符串：移除已存在的 front-matter
+   *  - data 为字符串：直接作为 front-matter 内容（不做额外转义），由调用方自行保证格式合法
+   *
+   * @param {Record<string, any>|string} data 元数据对象或 front-matter 内容字符串
+   * @param {{ keepCursor?: boolean, merge?: boolean }} [options]
+   *        keepCursor：覆盖内容后是否尝试保持光标位置，默认 false
+   *        merge：是否与现有 front-matter 合并（仅当 data 为对象时生效），默认 false
+   * @returns {Record<string, any>} 实际写入的 front-matter 对象（merge 后结果）
+   */
+  setFrontMatter(data, options = {}) {
+    const { keepCursor = false, merge = false } = options;
+    const current = this.getValue();
+    const reg = getFrontMatterRegExp();
+    const existingMatch = current.match(reg);
+
+    // 1) 规范化 data → finalObj（用于返回值 & 判断是否要移除）、serialized（真正写入的字符串）
+    /** @type {Record<string, any>} */
+    let finalObj = {};
+    let serialized = '';
+    if (typeof data === 'string') {
+      serialized = data.trim();
+      // 字符串场景，尝试解析一次用于返回值，解析失败不影响写入
+      finalObj = parseFrontMatterContent(serialized);
+    } else if (data && typeof data === 'object') {
+      finalObj = merge ? { ...this.getFrontMatter(), ...data } : { ...data };
+      serialized = stringifyFrontMatter(finalObj);
+    }
+
+    // 2) 组装新 markdown 文本
+    let next;
+    if (!serialized) {
+      // 空：若原本有 front-matter 则移除；否则无变化
+      if (existingMatch) {
+        next = current.slice(existingMatch[0].length);
+      } else {
+        return finalObj;
+      }
+    } else {
+      const block = `---\n${serialized}\n---\n`;
+      if (existingMatch) {
+        next = block + current.slice(existingMatch[0].length);
+      } else {
+        // 原文开头可能已有空行，避免产生多余空行
+        next = `${block}${current.replace(/^\s*\n/, '')}`;
+      }
+    }
+
+    this.setValue(next, keepCursor);
+    return finalObj;
   }
 
   /**

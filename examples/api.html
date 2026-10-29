@@ -315,6 +315,63 @@ alert(cherryObj.getFirstLineText());</textarea>
     </div>
 
     <div class="one-api">
+      <h2 class="one-api__name">getFrontMatter()</h2>
+      <p class="one-api__desc">
+        获取文档顶部 Front Matter（<code>---</code> 包裹的元数据块）<br>
+        支持两种格式：<br>
+        &nbsp;&nbsp;1. JSON 格式：<code>---\n{"title":"cherry"}\n---</code><br>
+        &nbsp;&nbsp;2. key:value 多行格式（推荐）：<code>---\ntitle: cherry\nauthor: tencent\n---</code><br>
+        返回值：解析后的对象，无 front-matter 或解析失败时返回 <code>{}</code>
+      </p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="4">
+// 先往文档顶部塞一段 front-matter 再读取
+cherryObj.setMarkdown('---\ntitle: cherry\nauthor: tencent\n---\n\n# Hello');
+console.log(cherryObj.getFrontMatter());
+alert(JSON.stringify(cherryObj.getFrontMatter(), null, 2));</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
+      <h2 class="one-api__name">setFrontMatter(data, options)</h2>
+      <p class="one-api__desc">
+        设置文档顶部 Front Matter<br>
+        <strong>data</strong>：元数据对象或 front-matter 内容字符串
+        <ul>
+          <li>对象（推荐）：全部为简单键时输出为 <code>k: v</code> 多行格式，否则回退到 JSON 格式</li>
+          <li>字符串：直接作为 front-matter 内容写入，由调用方保证格式合法</li>
+          <li>空对象 <code>{}</code> 或空字符串 <code>''</code>：移除已存在的 front-matter</li>
+        </ul>
+        <strong>options</strong>：
+        <ul>
+          <li><code>keepCursor</code>：覆盖内容后是否保持光标位置，默认 false</li>
+          <li><code>merge</code>：当 data 为对象时是否与现有 front-matter 合并，默认 false</li>
+        </ul>
+        <strong>行为</strong>：原文档已有 front-matter 则替换，没有则在开头插入<br>
+        <strong>返回值</strong>：实际写入的 front-matter 对象（合并后结果）
+      </p>
+      <div class="one-api__try">
+        <textarea id="setMarkdown" placeholder="输入内容" rows="12">
+// 1. 新建/覆盖 front-matter
+cherryObj.setFrontMatter({ title: 'cherry', author: 'tencent', tags: ['md', 'tool'] });
+
+// 2. 合并模式：保留原有字段，仅更新/新增 updateTime
+setTimeout(() => {
+  cherryObj.setFrontMatter({ updateTime: new Date().toISOString() }, { merge: true });
+  console.log('merged =>', cherryObj.getFrontMatter());
+}, 1000);
+
+// 3. 移除 front-matter
+setTimeout(() => {
+  cherryObj.setFrontMatter({});
+  console.log('removed =>', cherryObj.getFrontMatter());
+}, 2500);</textarea>
+        <a class="one-api__btn" onclick="dealClick(this, event)">试一试</a>
+      </div>
+    </div>
+
+    <div class="one-api">
       <h2 class="one-api__name">setDisable(isDisable:boolean, tips:string = '')</h2>
       <p class="one-api__desc">禁用/启用编辑器<br>isDisable=true 编辑器切换为只读，并在编辑器上覆盖一个蒙层，阻止一切交互<br>isDisable=false 恢复编辑器正常状态<br>tips 禁用时显示在蒙层上的提示文案</p>
       <div class="one-api__try">
