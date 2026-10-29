@@ -1343,6 +1343,83 @@ div[data-type='codeBlock'] {
   --panel-icon: var(--panel-success-icon, '\EA67');
 }
 
+/* ========== GFM Alerts（GitHub Flavored Markdown Alerts） ==========
+   语法：
+     > [!NOTE] / [!TIP] / [!IMPORTANT] / [!WARNING] / [!CAUTION]
+     > 正文内容...
+   复用 blockquote 结构，通过 .cherry-alert__xxx 修饰左边彩色竖条 + 标题图标，
+   视觉风格贴近 GitHub 原生 Alerts。 */
+.cherry-markdown blockquote.cherry-alert {
+  --alert-color: var(--alert-note-color, #0969da);
+  --alert-bg: var(--alert-note-bg, rgba(9, 105, 218, 0.06));
+  position: relative;
+  margin: 16px 0;
+  padding: 8px 16px;
+  color: inherit;
+  border-left: 4px solid var(--alert-color);
+  background: var(--alert-bg);
+  border-radius: 0 var(--radius-md, 6px) var(--radius-md, 6px) 0;
+}
+.cherry-markdown blockquote.cherry-alert > p {
+  margin: 4px 0;
+}
+.cherry-markdown blockquote.cherry-alert .cherry-alert--title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--alert-color);
+}
+.cherry-markdown blockquote.cherry-alert .cherry-alert--icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  font-family: 'ch-icon';
+  font-weight: normal;
+  font-size: 16px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+}
+.cherry-markdown blockquote.cherry-alert__note {
+  --alert-color: var(--alert-note-color, #0969da);
+  --alert-bg: var(--alert-note-bg, rgba(9, 105, 218, 0.06));
+}
+.cherry-markdown blockquote.cherry-alert__note .cherry-alert--icon::before {
+  content: var(--alert-note-icon, '\EA69'); /* info 图标 */
+}
+.cherry-markdown blockquote.cherry-alert__tip {
+  --alert-color: var(--alert-tip-color, #1a7f37);
+  --alert-bg: var(--alert-tip-bg, rgba(26, 127, 55, 0.06));
+}
+.cherry-markdown blockquote.cherry-alert__tip .cherry-alert--icon::before {
+  content: var(--alert-tip-icon, '\EA67'); /* success 图标 */
+}
+.cherry-markdown blockquote.cherry-alert__important {
+  --alert-color: var(--alert-important-color, #8250df);
+  --alert-bg: var(--alert-important-bg, rgba(130, 80, 223, 0.06));
+}
+.cherry-markdown blockquote.cherry-alert__important .cherry-alert--icon::before {
+  content: var(--alert-important-icon, '\EA6A'); /* primary 图标 */
+}
+.cherry-markdown blockquote.cherry-alert__warning {
+  --alert-color: var(--alert-warning-color, #9a6700);
+  --alert-bg: var(--alert-warning-bg, rgba(154, 103, 0, 0.08));
+}
+.cherry-markdown blockquote.cherry-alert__warning .cherry-alert--icon::before {
+  content: var(--alert-warning-icon, '\EA6B'); /* warning 图标 */
+}
+.cherry-markdown blockquote.cherry-alert__caution {
+  --alert-color: var(--alert-caution-color, #cf222e);
+  --alert-bg: var(--alert-caution-bg, rgba(207, 34, 46, 0.06));
+}
+.cherry-markdown blockquote.cherry-alert__caution .cherry-alert--icon::before {
+  content: var(--alert-caution-icon, '\EA68'); /* danger 图标 */
+}
+
 /* ========== Timeline 时间线 ========== */
 .cherry-markdown .cherry-timeline {
   margin: 20px 0;
