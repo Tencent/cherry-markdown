@@ -60,7 +60,7 @@
     "clean": "rimraf ./dist",
     "dev:demo": "node ./scripts/sync-cherry-prism.mjs && vp dev --config vite.demo.config.mjs",
     "preview:demo": "vp preview --config vite.demo.config.mjs",
-    "test": "vp run -F cherry-markdown build:engine && vp run -F cherry-markdown build:addons && node ./scripts/sync-cherry-prism.mjs && vp test run --config vitest.config.ts",
+    "test": "vp run -F cherry-markdown build:milkdown-runtime && node ./scripts/sync-cherry-prism.mjs && vp test run --config vitest.config.ts",
     "test:coverage": "COVERAGE_THRESHOLDS=true vp run test",
     "test:e2e": "playwright test --config playwright.config.ts",
     "test:e2e:matrix": "MILKDOWN_BROWSER_MATRIX=1 vp run test:e2e",

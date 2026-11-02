@@ -6,6 +6,7 @@ import { legacyUmdPlugin } from './legacy-umd.plugin.js';
 import { getBuildVersion } from './revision.js';
 import { prismLanguagePlugin } from './prism.plugin.js';
 import { createLibraryBuild } from '../../../build/library.mjs';
+import { buildArguments, selectBuilds } from './build-targets.js';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 const src = resolve(root, 'src');
@@ -94,7 +95,7 @@ const builds = [
   },
 ];
 
-for (const current of builds) {
+for (const current of selectBuilds(builds, buildArguments(import.meta.url))) {
   console.log(`[vite build] ${current.id}`);
   await build(
     createLibraryBuild(

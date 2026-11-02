@@ -65,6 +65,7 @@ Compatibility follows Cherry, rather than JSON5: standard JSON options use doubl
 Tests use the repository's Vite+ commands and configuration entry point. Run these commands from the workspace root:
 
 - `vp run test`: Cherry, MiniProgram and Milkdown unit tests, including the existing security regressions.
+- Milkdown unit tests prepare only Cherry's public Engine Core ESM and the table/code-block ECharts addon ESM entries through `vp run -F cherry-markdown build:milkdown-runtime`. They still exercise built Cherry runtime files rather than aliasing those imports to source. `build:engine`, `build:core` and `build:stream` select their own JS variants; the default Cherry `build` retains the complete release output matrix.
 - `vp run -F @cherry-markdown/milkdown test:coverage`: Milkdown unit tests with coverage thresholds enabled.
 - `vp run test:e2e:milkdown`: the complete Chromium interaction suite.
 - `vp run -F @cherry-markdown/milkdown test:e2e:matrix`: shared behavior, editing boundaries and table-chart parser regressions on Firefox, WebKit and touch Chromium. The file selection lives in `playwright.config.ts`, not workflow YAML.
@@ -79,3 +80,5 @@ Milkdown's measured unit-test baseline is 77.74% statements, 59.44% branches, 82
 The `milkdown-browser-consumer` job remains the aggregate check: it succeeds only when artifact preparation, both Chromium shards, the cross-browser matrix and packed-consumer validation succeed. Unit tests, browser regressions and packed-consumer checks run in separate jobs for diagnosis.
 
 The complete-manual round-trip fixture has a dedicated 30-second timeout for coverage on shared CI runners. Other unit tests retain the default timeout; no fixture or assertion is skipped. Declaration files are excluded from executable coverage to avoid uncovered-file parsing errors.
+
+Preview workflows build only their required packages: the playground builds Cherry, pkg-pr-new builds Cherry, MiniProgram and Milkdown, and the Tauri workflow builds Cherry before Tauri invokes the client frontend build. Full workspace builds and published-artifact checks remain in the Node compatibility matrix. Browser suites, packed-consumer scenarios and coverage settings are unchanged.
