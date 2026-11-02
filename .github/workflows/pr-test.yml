@@ -60,13 +60,17 @@ jobs:
         run: |
           vp run -F cherry-markdown build
           vp run -F @cherry-markdown/milkdown build:demo:prepared
+          vp run -F @cherry-markdown/milkdown prepare:ci-artifacts
       - uses: actions/upload-artifact@v4
         with:
-          name: milkdown-prepared-artifacts
-          path: |
-            packages/cherry-markdown/dist
-            packages/milkdown/dist
-            packages/milkdown/preview
+          name: milkdown-demo-artifacts
+          path: packages/milkdown/preview
+          if-no-files-found: error
+          retention-days: 5
+      - uses: actions/upload-artifact@v4
+        with:
+          name: milkdown-consumer-artifacts
+          path: packages/milkdown/artifacts/consumer
           if-no-files-found: error
           retention-days: 5
 
@@ -87,8 +91,10 @@ jobs:
           cache: true
       - uses: actions/download-artifact@v4
         with:
-          name: milkdown-prepared-artifacts
-          path: packages
+          name: milkdown-demo-artifacts
+          path: packages/milkdown/preview
+      - name: Verify demo artifact provenance
+        run: vp run -F @cherry-markdown/milkdown verify:demo-artifact
       - name: Install Chromium
         run: vp exec playwright install --with-deps chromium
       - name: Browser interactions
@@ -118,8 +124,10 @@ jobs:
           cache: true
       - uses: actions/download-artifact@v4
         with:
-          name: milkdown-prepared-artifacts
-          path: packages
+          name: milkdown-demo-artifacts
+          path: packages/milkdown/preview
+      - name: Verify demo artifact provenance
+        run: vp run -F @cherry-markdown/milkdown verify:demo-artifact
       - name: Install browsers
         run: vp exec playwright install --with-deps chromium firefox webkit
       - name: Shared behavior across browsers
@@ -149,26 +157,35 @@ jobs:
           cache: true
       - uses: actions/download-artifact@v4
         with:
-          name: milkdown-prepared-artifacts
-          path: packages
+          name: milkdown-consumer-artifacts
+          path: packages/milkdown/artifacts/consumer
       - name: Install Chromium
         run: vp exec playwright install --with-deps chromium
       - name: Verify packed consumers
-        run: vp run -F @cherry-markdown/milkdown test:consumer:prepared
+        run: vp run -F @cherry-markdown/milkdown test:consumer:ci
+      - name: Upload consumer diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: milkdown-consumer-diagnostics
+          path: packages/milkdown/artifacts/diagnostics
+          if-no-files-found: ignore
 
   # Keep the existing required check name and fail if any suite did not succeed.
   milkdown-browser-consumer:
     if: ${{ always() }}
-    needs: [milkdown-prepare, milkdown-browser, milkdown-browser-matrix, milkdown-consumer]
+    needs: [test, milkdown-prepare, milkdown-browser, milkdown-browser-matrix, milkdown-consumer]
     runs-on: ubuntu-latest
     steps:
       - name: Verify all Milkdown checks passed
         env:
+          UNIT_RESULT: ${{ needs.test.result }}
           PREPARE_RESULT: ${{ needs.milkdown-prepare.result }}
           BROWSER_RESULT: ${{ needs.milkdown-browser.result }}
           MATRIX_RESULT: ${{ needs.milkdown-browser-matrix.result }}
           CONSUMER_RESULT: ${{ needs.milkdown-consumer.result }}
         run: |
+          test "$UNIT_RESULT" = success
           test "$PREPARE_RESULT" = success
           test "$BROWSER_RESULT" = success
           test "$MATRIX_RESULT" = success
