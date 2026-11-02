@@ -305,6 +305,32 @@ const defaultConfig = {
         // chartRenderEngine: EChartsTableEngine,
         // externals: ['echarts'],
       },
+      /**
+       * 引用（blockquote）相关配置
+       * - gfmAlert：是否兼容 GitHub Flavored Markdown Alerts 语法
+       *     true  = 开启（默认）
+       *     false = 关闭
+       *     object = 开启并允许自定义类型/标题，例：
+       *       gfmAlert: {
+       *         types: {
+       *           note:      { title: '备注' },      // 覆写默认标题
+       *           tip:       { title: '提示' },
+       *           important: { title: '重要' },
+       *           warning:   { title: '警告' },
+       *           caution:   { title: '注意' },
+       *           // 允许扩展自定义类型（会生成 cherry-alert__success 样式钩子）
+       *           success:   { className: 'success', title: '成功' },
+       *         },
+       *       }
+       * 语法示例：
+       *   > [!NOTE]
+       *   > Useful information that users should know.
+       *   > [!WARNING]
+       *   > Critical content demanding immediate user attention.
+       */
+      blockquote: {
+        gfmAlert: true,
+      },
       space: false,
       inlineCode: {
         /**

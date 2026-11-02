@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.3.11
+
+### Patch Changes
+
+- fix: #1918 修复vscode plugin 报错的问题 [@sunsonliu](https://github.com/sunsonliu)([#1919](https://github.com/Tencent/cherry-markdown/pull/1919))([`9da8900`](https://github.com/Tencent/cherry-markdown/commit/9da89007361686d187b1b1639ef40bdb73ef4235))
+
 ## 0.3.2
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@cherry-markdown/milkdown",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "description": "WYSIWYG Milkdown editor for Cherry Markdown",
   "keywords": [
@@ -70,7 +70,7 @@
   },
   "peerDependencies": {
     "@milkdown/kit": "^7.21.3",
-    "cherry-markdown": "^0.11.11",
+    "cherry-markdown": "^0.11.12",
     "echarts": "^6.0.0",
     "mathlive": "^0.110.0",
     "mermaid": "^11.14.0"

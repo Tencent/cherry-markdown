@@ -1,5 +1,14 @@
 # Change Log
 
+## 0.11.12
+
+### Patch Changes
+
+- fix: 表格地图统一使用调用方注入的 ECharts 实例读取和注册地图，修复注入实例与全局实例不同时地图无法正确渲染的问题。未注入实例时保留原有全局 ECharts 行为。 [@RSS1102](https://github.com/RSS1102)([#1891](https://github.com/Tencent/cherry-markdown/pull/1891))([`2ebf8dc`](https://github.com/Tencent/cherry-markdown/commit/2ebf8dc9d484069690699bc705ad97349eadf297))
+- 修复构建迁移后 bash 等代码块高亮回退为 JavaScript 的问题，通过共享 Babel 适配层统一开发、测试和各发布产物的语言加载，恢复原有语言及别名支持，并补齐小程序独立构建及无浏览器全局变量环境的语言初始化，close #1912 [@RSS1102](https://github.com/RSS1102)([#1913](https://github.com/Tencent/cherry-markdown/pull/1913))([`6857c4a`](https://github.com/Tencent/cherry-markdown/commit/6857c4a04522a31dd4e12161d5165dc43596f69b))
+- 修复 UMD 构建最终转换后发布的 source map 未同步、源码定位错位的问题。 [@RSS1102](https://github.com/RSS1102)([#1914](https://github.com/Tencent/cherry-markdown/pull/1914))([`0017dc0`](https://github.com/Tencent/cherry-markdown/commit/0017dc0a3b75536073fdcbb7b5d4f7dae1506c67))
+- style: 优化图标，统一icon的尺寸 [@sunsonliu](https://github.com/sunsonliu)([#1915](https://github.com/Tencent/cherry-markdown/pull/1915))([`6f1bc3d`](https://github.com/Tencent/cherry-markdown/commit/6f1bc3de244478e9c0758192977ddcf6c2b45a88))
+
 ## 0.11.11
 
 ### Patch Changes
