@@ -60,9 +60,7 @@ test('editing and unlinking a formatted link always affect the whole link', asyn
   await expect(page.locator('.ProseMirror strong')).toHaveText('two');
   await links.last().click({ position: { x: 8, y: 8 } });
   await expect(page.getByRole('toolbar', { name: '链接', exact: true })).toBeVisible();
-  await page.keyboard.press('ControlOrMeta+k');
-  await form.getByRole('button', { name: '取消链接', exact: true }).click();
-  await form.getByRole('button', { name: '确认取消链接', exact: true }).click();
+  await page.getByRole('toolbar', { name: '链接', exact: true }).getByRole('button', { name: '取消链接' }).click();
   await expect(page.locator('.ProseMirror a')).toHaveCount(0);
   await expect(page.locator('.ProseMirror strong')).toHaveText('two');
 });

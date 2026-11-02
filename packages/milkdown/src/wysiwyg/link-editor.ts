@@ -8,6 +8,7 @@ import { cherryWysiwygConfigCtx } from './config.js';
 import {
   createContextBubble,
   createContextButton,
+  createContextFrame,
   placeContextBubble,
   preserveContextSelection,
   watchContextViewport,
@@ -19,6 +20,8 @@ interface LinkRange {
   mark?: Mark;
   anchor?: HTMLAnchorElement;
 }
+
+let linkEditorId = 0;
 
 function linkTargetAfter(doc: ProseNode, position: number) {
   const node = doc.nodeAt(position);
@@ -116,20 +119,24 @@ export const cherryLinkEditor = $prose((ctx) => {
       hrefPreview.className = 'cherry-milkdown-link-bubble__href';
       hrefPreview.target = '_blank';
       hrefPreview.rel = 'noopener noreferrer';
+      hrefPreview.textContent = '打开链接';
       const edit = iconButton('编辑链接', 'ch-icon-edit');
       edit.setAttribute('aria-haspopup', 'dialog');
-      const unlink = document.createElement('button');
-      unlink.type = 'button';
-      unlink.className = 'cherry-toolbar-button cherry-milkdown-link-editor__unlink';
-      unlink.textContent = '取消链接';
-      unlink.title = '取消链接';
-      unlink.setAttribute('aria-label', '取消链接');
+      const unlink = createContextButton(document, {
+        label: '取消链接',
+        icon: 'ch-icon-link',
+        contentClassName: 'cherry-milkdown-link-bubble__unlink-icon',
+      }).button;
+      const separator = () => {
+        const element = document.createElement('span');
+        element.className = 'cherry-milkdown-link-bubble__separator';
+        element.setAttribute('aria-hidden', 'true');
+        return element;
+      };
       const arrow = document.createElement('span');
       arrow.className = 'cherry-bubble-bottom';
-      // Keep destructive link actions in the editor panel. The compact
-      // inspector remains read-only (URL/copy/edit), matching Cherry's
-      // native link Bubble interaction and avoiding accidental unlinking.
-      inspector.append(arrow, hrefPreview, copy, edit);
+      // Unlink is a reversible mark operation, grouped separately from editing.
+      inspector.append(arrow, hrefPreview, separator(), copy, edit, separator(), unlink);
 
       const form = document.createElement('form');
       form.className = 'cherry-milkdown-context-form cherry-milkdown-link-editor';
@@ -166,7 +173,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       // the hidden link form as a document rendering error.
       error.setAttribute('role', 'status');
       error.setAttribute('aria-live', 'polite');
-      error.id = 'cherry-milkdown-link-editor-error';
+      error.id = `cherry-milkdown-link-editor-error-${++linkEditorId}`;
       hrefInput.setAttribute('aria-describedby', error.id);
 
       const targetLabel = document.createElement('label');
@@ -197,7 +204,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       confirm.type = 'submit';
       confirm.className = 'cherry-toolbar-button is-primary';
       confirm.textContent = '保存';
-      actions.append(unlink, cancel, confirm);
+      actions.append(cancel, confirm);
       form.append(textLabel, hrefLabel, targetLabel, error, actions);
 
       // These are UI overlays owned by this plugin, not editor content. Keep
@@ -208,7 +215,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       let active: LinkRange | undefined;
       let editorOpen = false;
       let uiVisible = false;
-      let unlinkPending = false;
+      let dismissedSelection: { from: number; to: number } | undefined;
       let disposed = false;
       let copyFeedbackTimer: number | undefined;
 
@@ -247,33 +254,24 @@ export const cherryLinkEditor = $prose((ctx) => {
       };
       const placeForm = () => {
         const anchor = active && anchorForRange(active);
-        const rect = anchor ? lastClientRect(anchor) : inspector.getBoundingClientRect();
+        const rect = anchor ? lastClientRect(anchor) : view.coordsAtPos(active?.from ?? view.state.selection.from);
         const width = Math.min(360, document.documentElement.clientWidth - 16);
+        form.style.width = `${width}px`;
         const left = Math.max(8, Math.min(rect.left, document.documentElement.clientWidth - width - 8));
         const below = rect.bottom + 8;
-        const top =
+        const preferredTop =
           below + form.offsetHeight <= document.documentElement.clientHeight - 8
             ? below
-            : Math.max(8, rect.top - form.offsetHeight - 8);
-        form.style.width = `${width}px`;
+            : rect.top - form.offsetHeight - 8;
+        const top = Math.max(8, Math.min(preferredTop, document.documentElement.clientHeight - form.offsetHeight - 8));
         form.style.left = `${left}px`;
         form.style.top = `${top}px`;
       };
+      const inspectorFrame = createContextFrame(placeInspector);
       const setUiVisible = (visible: boolean) => {
         if (uiVisible === visible) return;
         uiVisible = visible;
         notifyUi(visible);
-      };
-      const setUnlinkPending = (pending: boolean) => {
-        unlinkPending = pending;
-        unlink.textContent = pending ? '保留链接' : '取消链接';
-        unlink.title = pending ? '保留链接' : '取消链接';
-        unlink.setAttribute('aria-label', pending ? '保留链接' : '取消链接');
-        confirm.textContent = pending ? '确认取消链接' : '保存';
-        confirm.classList.toggle('is-danger', pending);
-        textInput.disabled = pending;
-        hrefInput.disabled = pending;
-        targetSelect.disabled = pending;
       };
       const hideInspector = () => {
         if (editorOpen) return;
@@ -285,7 +283,6 @@ export const cherryLinkEditor = $prose((ctx) => {
         const previous = active;
         editorOpen = false;
         form.hidden = true;
-        setUnlinkPending(false);
         error.hidden = true;
         error.textContent = '';
         edit.setAttribute('aria-expanded', 'false');
@@ -302,8 +299,8 @@ export const cherryLinkEditor = $prose((ctx) => {
         }
       };
       const open = (range: LinkRange) => {
+        dismissedSelection = undefined;
         active = { ...range, anchor: range.anchor ?? anchorForRange(range) };
-        setUnlinkPending(false);
         textInput.value = view.state.doc.textBetween(range.from, range.to, '', '');
         hrefInput.value = String(range.mark?.attrs.href ?? range.anchor?.getAttribute('href') ?? '');
         const currentTarget = String(linkTargetAfter(view.state.doc, range.to)?.node.attrs.target ?? '');
@@ -330,6 +327,8 @@ export const cherryLinkEditor = $prose((ctx) => {
       const showForSelection = () => {
         if (editorOpen) return;
         const { from, to } = view.state.selection;
+        if (dismissedSelection?.from === from && dismissedSelection.to === to) return hideInspector();
+        dismissedSelection = undefined;
         const domSelection = document.getSelection();
         const hasDocumentRange = Boolean(
           domSelection &&
@@ -348,9 +347,15 @@ export const cherryLinkEditor = $prose((ctx) => {
         active = range;
         const href = String(range.mark?.attrs.href ?? range.anchor?.getAttribute('href') ?? '');
         hrefPreview.href = href;
-        hrefPreview.textContent = href;
+        hrefPreview.title = href;
+        hrefPreview.setAttribute('aria-label', `打开链接：${href}`);
         inspector.hidden = false;
-        requestAnimationFrame(placeInspector);
+        inspectorFrame.schedule();
+      };
+      const selectionFrame = createContextFrame(showForSelection);
+      const onEditorPointer = () => {
+        dismissedSelection = undefined;
+        selectionFrame.schedule();
       };
       const preserveSelection = (event: PointerEvent) => {
         // Link inspection also owns pointer propagation, unlike formatting controls.
@@ -407,10 +412,6 @@ export const cherryLinkEditor = $prose((ctx) => {
       const onSubmit = (event: SubmitEvent) => {
         event.preventDefault();
         if (!active) return;
-        if (unlinkPending) {
-          removeLink();
-          return;
-        }
         const enteredHref = hrefInput.value.trim();
         const href = isValidScheme(enteredHref) ? sanitizeLinkHref(enteredHref) : null;
         const text = textInput.value.trim();
@@ -424,7 +425,7 @@ export const cherryLinkEditor = $prose((ctx) => {
         if (!linkType) return;
         const existingTarget = linkTargetAfter(view.state.doc, active.to);
         const desiredTarget = targetSelect.value;
-        const attrs = { ...(active.mark?.attrs ?? {}), href };
+        const attrs = { ...active.mark?.attrs, href };
         const link = linkType.create(attrs);
         let transaction = view.state.tr;
         const previousText = view.state.doc.textBetween(active.from, active.to, '', '');
@@ -470,6 +471,7 @@ export const cherryLinkEditor = $prose((ctx) => {
         const target = linkTargetAfter(view.state.doc, active.to);
         if (target) transaction = transaction.delete(target.position, target.position + target.node.nodeSize);
         close();
+        hideInspector();
         view.dispatch(transaction);
         view.focus();
       };
@@ -479,26 +481,31 @@ export const cherryLinkEditor = $prose((ctx) => {
         close({ restoreFocus: true });
       };
       const onCancel = () => close({ restoreFocus: true });
-      const onUnlink = () => {
-        setUnlinkPending(!unlinkPending);
-        confirm.focus({ preventScroll: true });
+      const onInspectorKeyDown = (event: KeyboardEvent) => {
+        if (event.key !== 'Escape') return;
+        event.preventDefault();
+        dismissedSelection = { from: view.state.selection.from, to: view.state.selection.to };
+        hideInspector();
+        view.focus();
       };
-      const hideForViewportChange = () => {
-        if (editorOpen) close();
-        active = undefined;
-        inspector.hidden = true;
-      };
+      // Keep unsaved fields and focus while their document anchor moves.
+      const viewportFrame = createContextFrame(() => {
+        if (editorOpen) placeForm();
+        else hideInspector();
+      });
 
       view.dom.addEventListener('cherry-milkdown:edit-link', onEditRequest);
+      view.dom.addEventListener('pointerdown', onEditorPointer);
       inspector.addEventListener('pointerdown', preserveSelection);
       const onCopy = () => {
         void copyLink();
       };
       copy.addEventListener('click', onCopy);
       edit.addEventListener('click', onEdit);
-      unlink.addEventListener('click', onUnlink);
+      unlink.addEventListener('click', removeLink);
+      inspector.addEventListener('keydown', onInspectorKeyDown);
       document.addEventListener('pointerdown', onOutsidePointer, true);
-      const releaseViewport = watchContextViewport(document, hideForViewportChange);
+      const releaseViewport = watchContextViewport(document, viewportFrame.schedule);
       form.addEventListener('submit', onSubmit);
       textInput.addEventListener('input', () => {
         error.hidden = true;
@@ -520,13 +527,18 @@ export const cherryLinkEditor = $prose((ctx) => {
           disposed = true;
           if (uiVisible) notifyUi(false);
           view.dom.removeEventListener('cherry-milkdown:edit-link', onEditRequest);
+          view.dom.removeEventListener('pointerdown', onEditorPointer);
           inspector.removeEventListener('pointerdown', preserveSelection);
           copy.removeEventListener('click', onCopy);
           edit.removeEventListener('click', onEdit);
-          unlink.removeEventListener('click', onUnlink);
+          unlink.removeEventListener('click', removeLink);
+          inspector.removeEventListener('keydown', onInspectorKeyDown);
           if (copyFeedbackTimer !== undefined) window.clearTimeout(copyFeedbackTimer);
           document.removeEventListener('pointerdown', onOutsidePointer, true);
           releaseViewport();
+          viewportFrame.cancel();
+          inspectorFrame.cancel();
+          selectionFrame.cancel();
           form.removeEventListener('submit', onSubmit);
           form.removeEventListener('keydown', onKeyDown);
           cancel.removeEventListener('click', onCancel);

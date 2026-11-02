@@ -1060,11 +1060,10 @@
 
 .cherry-milkdown-link-bubble__href {
   display: inline-flex;
-  flex: 1 1 160px;
+  flex: 0 0 auto;
   align-items: center;
   box-sizing: border-box;
   min-width: 0;
-  max-width: 280px;
   height: var(--bubble-btn-height, 40px);
   padding: var(--bubble-padding, 0 8px);
   overflow: hidden;
@@ -1077,10 +1076,39 @@
 .cherry-milkdown-link-bubble__href:hover,
 .cherry-milkdown-link-bubble__href:focus-visible {
   color: var(--toolbar-btn-hover-color, var(--md-link-color, #366ef4));
-  outline: none;
+  background: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
+  border-radius: var(--toolbar-btn-radius, 6px);
+}
+
+.cherry-milkdown .cherry-milkdown-link-bubble a:focus-visible,
+.cherry-milkdown .cherry-milkdown-link-bubble button:focus-visible {
+  outline: 2px solid var(--md-link-color, #366ef4);
+  outline-offset: -2px;
+}
+
+.cherry-milkdown-link-bubble__separator {
+  flex: 0 0 var(--border-width-1, 1px);
+  height: calc(var(--bubble-btn-height, 40px) * 0.5);
+  margin: 0 var(--spacing-xs, 4px);
+  background: var(--bubble-border, var(--base-border-color, #d8dce5));
+}
+
+.cherry-milkdown-link-bubble__unlink-icon {
+  position: relative;
+}
+
+/* Reuse Cherry's link glyph, with a current-color cancellation stroke. */
+.cherry-milkdown-link-bubble__unlink-icon::after {
+  position: absolute;
+  width: 18px;
+  border-top: 1px solid currentColor;
+  content: '';
+  transform: rotate(45deg);
 }
 
 .cherry-milkdown-link-editor {
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
   padding: calc(var(--cherry-milkdown-context-padding) * 1.5);
 }
 
