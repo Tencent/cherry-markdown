@@ -31,6 +31,7 @@ export default defineComponent({
     const draft = ref<ImageBedState>(cloneState(store.$state));
     // 专注模式 - 固定宽度草稿（px）；同样只在“保存”时提交
     const fixedWidthDraft = ref<number>(preferences.fixedWidthValue);
+    const explorerShowHiddenItemsDraft = ref<boolean>(preferences.explorerShowHiddenItems);
 
     // 每次弹窗打开时，用最新的 store 状态刷新草稿
     watch(
@@ -39,6 +40,7 @@ export default defineComponent({
         if (v) {
           draft.value = cloneState(store.$state);
           fixedWidthDraft.value = preferences.fixedWidthValue;
+          explorerShowHiddenItemsDraft.value = preferences.explorerShowHiddenItems;
           testResult.value = null;
         }
       },
@@ -66,6 +68,7 @@ export default defineComponent({
       const raw = Number(fixedWidthDraft.value);
       const px = Number.isFinite(raw) ? raw : FIXED_WIDTH_DEFAULT;
       preferences.setFixedWidthValue(Math.min(FIXED_WIDTH_MAX, Math.max(FIXED_WIDTH_MIN, Math.round(px))));
+      preferences.setExplorerShowHiddenItems(explorerShowHiddenItemsDraft.value);
       emit('close');
     };
 
@@ -130,6 +133,41 @@ export default defineComponent({
                                 { class: 'settings-field-hint' },
                                 `建议范围 ${FIXED_WIDTH_MIN} – ${FIXED_WIDTH_MAX}，默认 ${FIXED_WIDTH_DEFAULT}。仅在“固定宽度”模式下生效，100% 宽度不受影响。`,
                               ),
+                            ]),
+                          ]),
+                        ]),
+
+                        // ==== 资源管理器分节 ====
+                        h('section', { class: 'settings-section' }, [
+                          h('h4', { class: 'settings-section-title' }, '资源管理器'),
+                          h('p', { class: 'settings-section-desc' }, '控制左侧资源管理器中文件和目录的展示方式。'),
+                          h('div', { class: 'settings-form' }, [
+                            h('div', { class: 'settings-field' }, [
+                              h('span', { class: 'settings-field-label' }, '是否展示隐藏文件/目录'),
+                              h('div', { class: 'settings-radio-row' }, [
+                                h('label', { class: 'settings-radio-item' }, [
+                                  h('input', {
+                                    type: 'radio',
+                                    name: 'explorer-show-hidden-items',
+                                    checked: explorerShowHiddenItemsDraft.value,
+                                    onChange: () => {
+                                      explorerShowHiddenItemsDraft.value = true;
+                                    },
+                                  }),
+                                  h('span', '是'),
+                                ]),
+                                h('label', { class: 'settings-radio-item' }, [
+                                  h('input', {
+                                    type: 'radio',
+                                    name: 'explorer-show-hidden-items',
+                                    checked: !explorerShowHiddenItemsDraft.value,
+                                    onChange: () => {
+                                      explorerShowHiddenItemsDraft.value = false;
+                                    },
+                                  }),
+                                  h('span', '否'),
+                                ]),
+                              ]),
                             ]),
                           ]),
                         ]),

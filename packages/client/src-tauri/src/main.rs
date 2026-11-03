@@ -38,7 +38,10 @@ fn main() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_launch_file_path])
+        .invoke_handler(tauri::generate_handler![
+            get_launch_file_path,
+            utils::fs_attrs::check_hidden_attrs,
+        ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app, event| {
