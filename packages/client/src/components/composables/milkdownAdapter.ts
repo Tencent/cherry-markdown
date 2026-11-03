@@ -1,11 +1,10 @@
 import { tableBlock, tableBlockConfig } from '@milkdown/components/table-block';
-import { Editor, defaultValueCtx, editorViewOptionsCtx, rootCtx } from '@milkdown/kit/core';
+import { Editor, defaultValueCtx, editorViewCtx, editorViewOptionsCtx, rootCtx } from '@milkdown/kit/core';
 import { block } from '@milkdown/kit/plugin/block';
 import { clipboard } from '@milkdown/kit/plugin/clipboard';
 import { cursor } from '@milkdown/kit/plugin/cursor';
-import { history } from '@milkdown/kit/plugin/history';
+import { history, historyProviderPlugin } from '@milkdown/kit/plugin/history';
 import { indent } from '@milkdown/kit/plugin/indent';
-import { listener, listenerCtx } from '@milkdown/kit/plugin/listener';
 import { math } from '@milkdown/plugin-math';
 import { trailing } from '@milkdown/kit/plugin/trailing';
 import { upload, uploadConfig } from '@milkdown/kit/plugin/upload';
@@ -13,12 +12,13 @@ import { commonmark } from '@milkdown/kit/preset/commonmark';
 import { gfm } from '@milkdown/kit/preset/gfm';
 import type { Node } from '@milkdown/kit/prose/model';
 import { nord } from '@milkdown/theme-nord';
-import { getMarkdown, replaceAll } from '@milkdown/kit/utils';
+import { $prose, getMarkdown } from '@milkdown/kit/utils';
 import '@milkdown/theme-nord/style.css';
 import 'katex/dist/katex.min.css';
 import '../../styles/milkdown-plugins.css';
 
 import { attachBlockHandle } from './milkdown/blockHandle';
+import { clearHistory, documentChanges, writeMarkdown } from './milkdown/document';
 import { configureSelectionTooltip, selectionTooltip } from './milkdown/selectionTooltip';
 import { configureSlashMenu, slashMenu } from './milkdown/slashMenu';
 import { uploadImageFile } from './useImageBedUploader';
@@ -32,7 +32,7 @@ import { registerMilkdownAdapter, type MilkdownAdapter } from './useMilkdownEdit
  *  - plugin-history：撤销重做（Mod-Z / Mod-Shift-Z）
  *  - plugin-clipboard：Markdown 感知的复制粘贴
  *  - plugin-cursor：块级拖拽指示光标 & gap cursor
- *  - plugin-listener：内容变更事件回传
+ *  - documentChanges：按事务来源回传用户编辑
  *  - plugin-upload：文件拖入/粘贴 → 图床
  *  - plugin-indent：Tab 缩进
  *  - plugin-trailing：末尾自动补一个空段落，避免 caret 走投无路
@@ -52,58 +52,19 @@ let instance: Editor | null = null;
 let cachedMarkdown = '';
 let editorReady = false;
 let cleanupBlockHandle: (() => void) | null = null;
-/**
- * "程序性基线"：由 mount / setMarkdown 主动写入的原始 markdown。
- *
- * 用于在 markdownUpdated 回调里判断"这次事件是不是由我们自己的程序性写入引发的"。
- * 只要 Milkdown 序列化出来的 md === programmaticBaseline，就认为不是用户编辑。
- *
- * 这种"基于内容而非时序"的抑制方式比抑制窗口更稳健：
- *  - 不用担心 tableBlock / math 等 NodeView 在异步 microtask/task 里补 transaction
- *  - 不用担心 trailing 插件在打开时自动补空段落引发的"回声"事件
- *  - 用户真正编辑时，md 必然与 baseline 不同，能被正常识别
- *
- * 使用 Set 以支持"程序性 md → Milkdown 内部规范化后的 md"这种一次写入产生多次
- * 语义等价 md 的场景（比如末尾空行差异、trailing 补段落）。
- */
-const programmaticBaselines = new Set<string>();
-
-/**
- * 把一个 markdown 字符串标为"程序性基线"，同时把它的常见规范化变体也一并加入，
- * 覆盖 Milkdown 序列化后可能出现的末尾换行差异、trailing 空段落等。
- */
-function markProgrammatic(md: string): void {
-  programmaticBaselines.add(md);
-  // 常见规范化变体：trailing 换行 & 双换行 & 去尾换行
-  programmaticBaselines.add(md.replace(/\n+$/, ''));
-  programmaticBaselines.add(`${md.replace(/\n+$/, '')}\n`);
-  programmaticBaselines.add(`${md.replace(/\n+$/, '')}\n\n`);
-}
-
 const adapter: MilkdownAdapter = {
   async mount(initialMarkdown, onChange) {
-    // 若旧实例残留，先销毁，避免同一容器上双挂载
-    if (instance) {
-      await instance.destroy();
-      instance = null;
-    }
-
+    await adapter.destroy();
     cachedMarkdown = initialMarkdown;
-    editorReady = false;
-    // 把初始内容也标为"程序性基线"，避免 mount 完成后紧接着到来的
-    // trailing 补段落/其他插件规范化事件被误当作用户编辑。
-    programmaticBaselines.clear();
-    markProgrammatic(initialMarkdown);
 
     const root = document.getElementById('milkdown-editor');
     if (!root) {
-      console.warn('[MilkdownAdapter] #milkdown-editor 容器不存在，挂载中止');
-      return;
+      throw new Error('Milkdown editor container is missing.');
     }
     // 清理占位内容（骨架期 useMilkdownEditor 会写入未接入提示）
     root.innerHTML = '';
 
-    instance = await Editor.make()
+    const creating = Editor.make()
       .config((ctx) => {
         ctx.set(rootCtx, root);
         ctx.set(defaultValueCtx, initialMarkdown);
@@ -111,6 +72,7 @@ const adapter: MilkdownAdapter = {
         // 编辑区外观：铺满容器 & 允许滚动 + 添加根类名（供样式定位）
         ctx.update(editorViewOptionsCtx, (prev) => ({
           ...prev,
+          editable: () => editorReady,
           attributes: (state) => {
             const prevAttrs = typeof prev.attributes === 'function' ? prev.attributes(state) : prev.attributes;
             return {
@@ -119,21 +81,6 @@ const adapter: MilkdownAdapter = {
             };
           },
         }));
-
-        // 监听 markdown 更新 → 回传给 useMilkdownEditor
-        ctx.get(listenerCtx).markdownUpdated((_ctx, md, prevMd) => {
-          if (md === prevMd) return;
-          cachedMarkdown = md;
-          // 编辑器初始加载 defaultValueCtx 时 prevMd 为空，可能会触发一次"上升沿"，
-          // 借助 editorReady 屏蔽掉这次事件，避免误标记 unsaved。
-          if (!editorReady) return;
-          // 内容基线比对：如果这次 md 与我们最近一次程序性写入的内容完全相同
-          // （或是其常见规范化变体），说明这次事件不是用户编辑触发的（很可能是
-          // trailing 插件补空段落 / tableBlock NodeView 异步补 transaction 等）。
-          // 这类"回声"事件必须屏蔽，否则打开文件立刻会被标记为未保存。
-          if (programmaticBaselines.has(md)) return;
-          onChange();
-        });
 
         // 图床对接：把 ProseMirror 的 FileList → useImageBedUploader → image 节点
         ctx.update(uploadConfig.key, (prev) => ({
@@ -209,15 +156,30 @@ const adapter: MilkdownAdapter = {
       .use(history)
       .use(clipboard)
       .use(cursor)
-      .use(listener)
+      .use(
+        $prose(() =>
+          documentChanges(() => {
+            if (!editorReady || !instance) return;
+            cachedMarkdown = instance.action(getMarkdown());
+            onChange();
+          }),
+        ),
+      )
       .use(upload)
       .use(indent)
       .use(trailing)
       .use(math)
       .use(block)
       .use(selectionTooltip)
-      .use(slashMenu)
-      .create();
+      .use(slashMenu);
+    instance = creating;
+    try {
+      await creating.create();
+    } catch (error) {
+      instance = null;
+      await creating.destroy();
+      throw error;
+    }
 
     // 段落把手需要拿 ctx，只能在 editor 创建成功后再挂
     try {
@@ -230,6 +192,7 @@ const adapter: MilkdownAdapter = {
     }
 
     editorReady = true;
+    instance.action((ctx) => ctx.get(editorViewCtx).setProps({ editable: () => editorReady }));
   },
 
   async destroy() {
@@ -241,18 +204,13 @@ const adapter: MilkdownAdapter = {
       }
       cleanupBlockHandle = null;
     }
-    if (!instance) return;
-    try {
-      await instance.destroy();
-    } catch (e) {
-      console.warn('[MilkdownAdapter] destroy 异常:', e);
-    }
+    const previous = instance;
     instance = null;
-    cachedMarkdown = '';
     editorReady = false;
-    programmaticBaselines.clear();
-    const root = document.getElementById('milkdown-editor');
-    if (root) root.innerHTML = '';
+    cachedMarkdown = '';
+    if (!previous) return;
+    previous.action((ctx) => ctx.get(editorViewCtx).setProps({ editable: () => false }));
+    await previous.destroy();
   },
 
   getMarkdown() {
@@ -266,20 +224,17 @@ const adapter: MilkdownAdapter = {
   },
 
   setMarkdown(md) {
-    cachedMarkdown = md;
-    if (!instance || !editorReady) return;
-    // 把本次程序性写入的内容加入基线集合，让 markdownUpdated 回调能识别出
-    // 由 replaceAll 触发的（及后续 trailing/tableBlock 补事件等）都不是用户编辑。
-    //
-    // 注意：这里不 clear() 旧基线，而是追加。因为 replaceAll 前后可能会短暂经历
-    // 一次"prevMd → 空文档 → newMd"的中间状态，旧内容也需要短暂保留在集合中
-    // 避免中间态误触发脏标记。集合下次 mount/destroy 时会整体清空。
-    markProgrammatic(md);
-    try {
-      instance.action(replaceAll(md));
-    } catch (e) {
-      console.warn('[MilkdownAdapter] setMarkdown 异常:', e);
+    if (!instance || !editorReady) {
+      cachedMarkdown = md;
+      return;
     }
+    instance.action((ctx) => writeMarkdown(ctx, md));
+    cachedMarkdown = instance.action(getMarkdown());
+  },
+
+  clearUndoRedo() {
+    if (!instance || !editorReady) return;
+    instance.action((ctx) => clearHistory(ctx.get(editorViewCtx), historyProviderPlugin.plugin()));
   },
 };
 
