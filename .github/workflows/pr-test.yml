@@ -82,4 +82,5 @@ jobs:
           path: |
             packages/milkdown/playwright-report
             packages/milkdown/test-results
+            packages/client/test-results
           if-no-files-found: ignore

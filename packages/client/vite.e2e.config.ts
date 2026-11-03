@@ -1,14 +1,48 @@
-import { realpathSync } from 'node:fs';
+import { readFileSync, realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig, mergeConfig } from 'vite-plus';
 import clientConfig from './vite.config';
 import { prismLanguagePlugin } from '../cherry-markdown/build/prism.plugin.js';
+import { transformPrismLanguages } from '../cherry-markdown/build/prism.js';
 
 const workspace = resolve(import.meta.dirname, '../..');
-export default defineConfig(async (env) =>
-  mergeConfig(await (typeof clientConfig === 'function' ? clientConfig(env) : clientConfig), {
+export default defineConfig(async (env) => {
+  const codeBlock = resolve(workspace, 'packages/cherry-markdown/src/core/hooks/CodeBlock.js');
+  const transformed = await transformPrismLanguages(readFileSync(codeBlock, 'utf8'), codeBlock);
+  const prismImports = Array.from(
+    transformed?.code.matchAll(/['"](prismjs\/components\/[^'"]+)['"]/g) ?? [],
+    (match) => match[1],
+  );
+  return mergeConfig(await (typeof clientConfig === 'function' ? clientConfig(env) : clientConfig), {
     plugins: [prismLanguagePlugin()],
     define: { BUILD_ENV: '"production"', 'process.env.BUILD_VERSION': '"client-e2e"' },
+    // The scanner misses dependencies inside aliased Cherry source and the
+    // Prism imports injected by its transform. Prebundle them before tests load.
+    optimizeDeps: {
+      entries: ['e2e/index.html'],
+      include: [
+        'mermaid',
+        'pako',
+        '@codemirror/state',
+        '@codemirror/view',
+        '@codemirror/search',
+        '@codemirror/lang-markdown',
+        '@codemirror/commands',
+        '@codemirror/language',
+        '@codemirror/autocomplete',
+        '@lezer/highlight',
+        '@replit/codemirror-vim',
+        'fast-diff',
+        'virtual-dom/h',
+        'virtual-dom/patch',
+        'virtual-dom/diff',
+        'htmlparser2',
+        'mitt',
+        'json5',
+        'dompurify',
+        ...prismImports,
+      ],
+    },
     resolve: {
       alias: [
         { find: /^cherry-markdown$/, replacement: resolve(workspace, 'packages/cherry-markdown/src/index.js') },
@@ -25,5 +59,5 @@ export default defineConfig(async (env) =>
         ],
       },
     },
-  }),
-);
+  });
+});

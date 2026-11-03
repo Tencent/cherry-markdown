@@ -6,6 +6,9 @@ const test = base.extend<{ errors: string[] }>({
     async ({ page }, use) => {
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(error.message));
+      page.on('response', (response) => {
+        if (response.status() >= 400) errors.push(`HTTP ${response.status()}: ${response.url()}`);
+      });
       page.on('console', (message) => {
         if (message.type() === 'error') errors.push(message.text());
       });
