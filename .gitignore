@@ -5,7 +5,6 @@ coverage
 packages/milkdown/preview/
 packages/milkdown/test-results/
 packages/milkdown/playwright-report/
-packages/client/test-results/
 
 # local env files
 .env.local

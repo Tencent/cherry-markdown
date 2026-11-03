@@ -51,8 +51,7 @@ const readPersistedCherryTheme = (): CherryThemeName => {
 export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
   const toolbarVisible = ref(true);
   let editor: CherryEditorInstance | null = null;
-  let lastKnownMarkdown = '';
-  const setupTimers: number[] = [];
+  let skipNextChange = true;
   let statusPollTimer: number | undefined;
   let lastKnownEditorMode: EditorMode | null = null;
 
@@ -64,12 +63,12 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
   };
 
   const handleAfterChange = (): void => {
-    if (!editor) return;
     // 内容变更后同步刷新大图预览的图片列表
     getCurrentLightbox()?.refresh();
-    const markdown = editor.getMarkdown();
-    if (markdown === lastKnownMarkdown) return;
-    lastKnownMarkdown = markdown;
+    if (skipNextChange) {
+      skipNextChange = false;
+      return;
+    }
     onContentChanged();
   };
 
@@ -127,6 +126,9 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
   };
 
   const initEditor = (): void => {
+    // 每次 initEditor 都需要重置：切换引擎时会先 dispose 再 init，Cherry 首次挂载
+    // 会自发触发一次 afterChange，应当被忽略，避免误标记 unsaved。
+    skipNextChange = true;
     // 初始 toolbarVisible 先取持久化值，cherry 初始化后再以实际 DOM 为准校正
     let persistedToolbarVisible = true;
     let persistedEditorMode: EditorMode = 'edit&preview';
@@ -146,7 +148,6 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
     // 通过 unknown 显式桥接，避免 TS 结构兼容报错
     const editorInstance = instance as unknown as CherryEditorInstance;
     editor = editorInstance;
-    lastKnownMarkdown = editorInstance.getMarkdown();
     lastKnownEditorMode = persistedEditorMode;
     setEditorInstance(editorInstance);
     instance.on('afterChange', handleAfterChange);
@@ -170,30 +171,24 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
 
     // cherry 初始化时 defaultModel 已根据持久化值设置，但 toolbar 隐藏需要手动达成
     // （初始 defaultModel !== previewOnly 时 cherry 默认显示 toolbar）
-    setupTimers.push(
-      window.setTimeout(() => {
-        if (editor !== editorInstance) return;
-        // 以实际 DOM 为准校正 toolbarVisible（兼容 previewOnly 下 cherry 自行隐藏的行为）
-        const actualVisible = !document.querySelector('.cherry--no-toolbar');
-        if (persistedToolbarVisible !== actualVisible) {
-          // 需要切换到持久化的可见性状态
-          const toggleHandler = editorInstance.toolbar.toolbarHandlers.settings;
-          if (typeof toggleHandler === 'function') {
-            toggleHandler('toggleToolbar');
-          }
+    setTimeout(() => {
+      // 以实际 DOM 为准校正 toolbarVisible（兼容 previewOnly 下 cherry 自行隐藏的行为）
+      const actualVisible = !document.querySelector('.cherry--no-toolbar');
+      if (persistedToolbarVisible !== actualVisible) {
+        // 需要切换到持久化的可见性状态
+        const toggleHandler = editorInstance.toolbar.toolbarHandlers.settings;
+        if (typeof toggleHandler === 'function') {
+          toggleHandler('toggleToolbar');
         }
-        toolbarVisible.value = !document.querySelector('.cherry--no-toolbar');
-      }, 0),
-    );
+      }
+      toolbarVisible.value = !document.querySelector('.cherry--no-toolbar');
+    }, 0);
 
     // 初始化图片大图预览（viewerjs），延迟到 DOM 就绪后创建
-    setupTimers.push(
-      window.setTimeout(() => {
-        if (editor !== editorInstance) return;
-        const lightbox = useImageLightbox(editorInstance);
-        setCurrentLightbox(lightbox);
-      }, 0),
-    );
+    setTimeout(() => {
+      const lightbox = useImageLightbox(editorInstance);
+      setCurrentLightbox(lightbox);
+    }, 0);
 
     // 启动轻量轮询，捕获 cherry 内置按钮（如 toolbarRight 的 togglePreview、customMenuChangeModule 等）
     // 触发的模式切换，确保【双栏/纯编辑/纯预览】三种模式都能被记忆
@@ -201,9 +196,8 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
   };
 
   const setMarkdown = (markdown: string): void => {
-    lastKnownMarkdown = markdown;
+    skipNextChange = true;
     getEditor().setMarkdown(markdown);
-    lastKnownMarkdown = getEditor().getMarkdown();
   };
 
   /**
@@ -251,7 +245,6 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
   };
 
   const disposeEditor = (): void => {
-    setupTimers.splice(0).forEach((timer) => window.clearTimeout(timer));
     if (statusPollTimer) {
       window.clearInterval(statusPollTimer);
       statusPollTimer = undefined;
@@ -275,10 +268,13 @@ export function useCherryEditor({ onContentChanged }: UseCherryEditorOptions) {
     getCurrentLightbox()?.destroy();
     setCurrentLightbox(null);
     setEditorInstance(null);
-    const previous = editor;
     editor = null;
-    if (previous?.destroy) previous.destroy();
-    else previous?.wrapperDom?.remove();
+    // 清空 Cherry 注入到容器内的所有 DOM 节点。
+    // Cherry 没有官方 destroy()，且 cherryInstance() 每次调用都会 new Cherry() 并向
+    // #markdown-editor 追加一整套结构；如果切换引擎时不手动清空，再次切回 Cherry
+    // 会在同一容器内出现两套编辑器 DOM。
+    const container = document.getElementById('markdown-editor');
+    if (container) container.innerHTML = '';
   };
 
   return {

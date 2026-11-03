@@ -41,7 +41,6 @@ export interface CherryEditorInstance {
    * 在客户端切换文件后调用，避免撤销回到上一个文件的内容。
    */
   clearUndoRedo?(): void;
-  destroy?(): void;
   on(event: 'afterChange', handler: () => void): void;
   off(event: 'afterChange', handler: () => void): void;
 }

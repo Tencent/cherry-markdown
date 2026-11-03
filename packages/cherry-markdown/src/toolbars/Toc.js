@@ -33,15 +33,17 @@ export default class Toc {
 
   init() {
     this.drawDom();
-    this.onAfterChange = () => {
+    this.timer = setTimeout(() => {
+      this.updateTocList();
+      this.$switchModel(this.model);
+    }, 300);
+    this.$cherry.$event.on('afterChange', () => {
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
         this.updateTocList();
         this.$switchModel(this.model);
       }, 300);
-    };
-    this.onAfterChange();
-    this.$cherry.$event.on('afterChange', this.onAfterChange);
+    });
     this.$switchModel(this.getModelFromLocalStorage());
   }
 
@@ -126,22 +128,24 @@ export default class Toc {
       this.$switchModel('full');
       this.setModelToLocalStorage('full');
     });
-    this.onResize = () => this.$switchModel(this.model);
-    if (isBrowser()) window.addEventListener('resize', this.onResize);
-    this.onScroll = () => this.updateTocList(true);
-    this.$cherry.$event.on('onScroll', this.onScroll);
+    if (isBrowser()) {
+      window.addEventListener('resize', () => {
+        this.$switchModel(this.model);
+      });
+    }
+    this.$cherry.$event.on('onScroll', () => {
+      this.updateTocList(true);
+    });
     const scrollDom = this.$cherry.previewer.getDomCanScroll();
-    this.scrollTarget = scrollDom.nodeName === 'HTML' ? window : scrollDom;
-    this.scrollTarget.addEventListener('scroll', this.onScroll);
-  }
-
-  destroy() {
-    clearTimeout(this.timer);
-    this.$cherry.$event.off('afterChange', this.onAfterChange);
-    this.$cherry.$event.off('onScroll', this.onScroll);
-    if (isBrowser()) window.removeEventListener('resize', this.onResize);
-    this.scrollTarget.removeEventListener('scroll', this.onScroll);
-    this.tocDom.remove();
+    if (scrollDom.nodeName === 'HTML') {
+      window.addEventListener('scroll', () => {
+        this.updateTocList(true);
+      });
+    } else {
+      scrollDom.addEventListener('scroll', () => {
+        this.updateTocList(true);
+      });
+    }
   }
 
   $switchModel(model = 'pure') {

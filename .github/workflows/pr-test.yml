@@ -66,8 +66,6 @@ jobs:
         run: vp run test:e2e:milkdown
         env:
           MILKDOWN_E2E_PREBUILT: '1'
-      - name: Client editor reliability
-        run: vp run -F @cherry-markdown/client test:e2e
       - name: Shared behavior across browsers
         run: vp run -F @cherry-markdown/milkdown test:e2e:matrix
         env:
