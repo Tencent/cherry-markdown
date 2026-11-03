@@ -2,4 +2,4 @@
 'cherry-markdown': patch
 ---
 
-Cancel pending render, hash navigation and floating TOC updates when destroying an editor. Release the TOC's scroll and resize listeners, and make repeated destruction safe.
+修复编辑器销毁后延迟任务与目录监听未清理的问题：取消待执行的渲染、hash 跳转和悬浮目录更新，释放目录的滚动与窗口缩放监听，并支持重复调用销毁方法。
