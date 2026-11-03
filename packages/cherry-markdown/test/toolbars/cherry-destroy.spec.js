@@ -19,7 +19,10 @@ describe('Cherry destruction', () => {
     const toc = Object.create(Toc.prototype);
     toc.destroy = vi.fn();
     const cherry = Object.assign(Object.create(Cherry.prototype), {
-      noMountEl, cherryDom: mount, wrapperDom: wrapper, toc,
+      noMountEl,
+      cherryDom: mount,
+      wrapperDom: wrapper,
+      toc,
       timer: setTimeout(pendingRender, 100),
       autoScrollByHashTimer: setTimeout(pendingHash, 100),
       editor: { destroy: vi.fn() },
