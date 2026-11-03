@@ -2,7 +2,7 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'vite';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { afterEach, beforeEach, expect, it, vi } from 'vite-plus/test';
 
 vi.mock('vite', async (importOriginal) => ({
@@ -15,6 +15,7 @@ const main = new URL('../../build/vite.build.js', import.meta.url);
 const addons = new URL('../../build/addons.build.js', import.meta.url);
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const filenames = () => build.mock.calls.map(([config]) => config.build.lib.fileName()).sort();
+const scripts = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8')).scripts;
 
 async function run(entry, args) {
   const original = process.argv;
@@ -32,6 +33,28 @@ beforeEach(() => {
   vi.stubEnv('NODE_ENV', 'production');
 });
 afterEach(() => vi.unstubAllEnvs());
+
+it.each(['build:core', 'build:engine', 'build:stream'])(
+  'preserves the historical complete JS output of %s',
+  async (name) => {
+    const command = scripts[name].match(/^NODE_ENV=production node (\S+)(.*)$/);
+    expect(command).not.toBeNull();
+    expect(resolve(root, command[1])).toBe(fileURLToPath(main));
+    await run(main, command[2].trim().split(/\s+/).filter(Boolean));
+    expect(filenames()).toEqual([
+      'cherry-markdown.core.esm.js',
+      'cherry-markdown.core.js',
+      'cherry-markdown.engine.core.esm.js',
+      'cherry-markdown.engine.core.js',
+      'cherry-markdown.engine.esm.js',
+      'cherry-markdown.engine.js',
+      'cherry-markdown.esm.js',
+      'cherry-markdown.js',
+      'cherry-markdown.stream.esm.js',
+      'cherry-markdown.stream.js',
+    ]);
+  },
+);
 
 it('builds only the public Engine ESM needed by Milkdown', async () => {
   await run(main, ['--targets=engine-core-esm']);
