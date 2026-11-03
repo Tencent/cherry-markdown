@@ -44,19 +44,9 @@ pub fn is_path_hidden(path: &str) -> bool {
 
     #[cfg(target_os = "macos")]
     {
-        use std::os::unix::fs::MetadataExt;
-        // UF_HIDDEN = 0x00008000 —— Finder 用的隐藏标志
-        const UF_HIDDEN: u32 = 0x0000_8000;
-
-        // 1) BSD flags
-        if let Ok(meta) = std::fs::metadata(path) {
-            // 注意：MetadataExt 没有直接的 st_flags()，需通过 libc stat 读取
-            // 这里为了避免引入 libc 依赖，用更稳妥的 POSIX dotfile 规则覆盖主要场景；
-            // 若后续确有 UF_HIDDEN 需求，再按需引入 libc。
-            let _ = meta; // 占位，防止未使用警告
-        }
-        let _ = UF_HIDDEN;
-        // 2) POSIX dotfile
+        // macOS Finder also supports UF_HIDDEN, but std::fs::Metadata does not
+        // expose st_flags directly. Keep the POSIX dotfile rule here to avoid
+        // introducing a platform-specific dependency just for this setting.
         basename(path).starts_with('.')
     }
 
