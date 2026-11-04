@@ -13,8 +13,11 @@ export default defineConfig(async (env) => {
     transformed?.code.matchAll(/['"](prismjs\/components\/[^'"]+)['"]/g) ?? [],
     (match) => match[1],
   );
+  const cherryPackage = JSON.parse(readFileSync(resolve(workspace, 'packages/cherry-markdown/package.json'), 'utf8'));
+  const codeMirrorDeps = Object.keys(cherryPackage.dependencies).filter((name) => name.startsWith('@codemirror/'));
   return mergeConfig(await (typeof clientConfig === 'function' ? clientConfig(env) : clientConfig), {
     plugins: [prismLanguagePlugin()],
+    cacheDir: resolve(workspace, 'node_modules/.vite/client-e2e'),
     define: { BUILD_ENV: '"production"', 'process.env.BUILD_VERSION': '"client-e2e"' },
     // The scanner misses dependencies inside aliased Cherry source and the
     // Prism imports injected by its transform. Prebundle them before tests load.
@@ -23,13 +26,7 @@ export default defineConfig(async (env) => {
       include: [
         'mermaid',
         'pako',
-        '@codemirror/state',
-        '@codemirror/view',
-        '@codemirror/search',
-        '@codemirror/lang-markdown',
-        '@codemirror/commands',
-        '@codemirror/language',
-        '@codemirror/autocomplete',
+        ...codeMirrorDeps,
         '@lezer/highlight',
         '@replit/codemirror-vim',
         'fast-diff',
