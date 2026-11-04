@@ -53,6 +53,20 @@ test('applying a historical version can be undone and redone', async ({ page }) 
   await expect.poll(() => page.evaluate(() => window.clientEditor.getMarkdown().trim())).toBe('Earlier version');
 });
 
+test('Chromium composition survives a same-value external write', async ({ page, context }) => {
+  await page.evaluate(async () => {
+    await window.clientEditor.switch('milkdown');
+    window.clientEditor.setMarkdown('');
+  });
+  await page.locator('#milkdown-editor .ProseMirror').click();
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Input.imeSetComposition', { text: '中文', selectionStart: 2, selectionEnd: 2 });
+  await page.evaluate(() => window.clientEditor.setMarkdown(window.clientEditor.getMarkdown()));
+  await cdp.send('Input.insertText', { text: '中文' });
+  await expect.poll(() => page.evaluate(() => window.clientEditor.getMarkdown().trim())).toBe('中文');
+  await cdp.detach();
+});
+
 test('opening another file isolates undo/redo while edits in the new file remain undoable', async ({ page }) => {
   await page.evaluate(async () => {
     await window.clientEditor.switch('milkdown');
