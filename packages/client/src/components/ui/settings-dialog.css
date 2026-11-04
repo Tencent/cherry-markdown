@@ -8,6 +8,26 @@
   overflow-y: auto;
 }
 
+.settings-dialog .dialog-title {
+  position: sticky;
+  top: -24px;
+  z-index: 2;
+  margin: -24px -24px 16px;
+  padding: 24px 24px 12px;
+  border-bottom: 1px solid var(--color-border, #e0e0e0);
+  background: var(--dialog-bg, #fff);
+}
+
+.settings-dialog .dialog-actions {
+  position: sticky;
+  bottom: -24px;
+  z-index: 1;
+  margin: 20px -24px -24px;
+  padding: 14px 24px 24px;
+  border-top: 1px solid var(--color-border, #e0e0e0);
+  background: var(--dialog-bg, #fff);
+}
+
 .settings-section {
   margin-bottom: 16px;
 }
@@ -102,6 +122,27 @@
   font-size: 11px;
   color: var(--color-text-muted, #999);
   line-height: 1.4;
+}
+
+.settings-radio-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.settings-radio-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text, #333);
+  cursor: pointer;
+}
+
+.settings-radio-item input[type='radio'] {
+  accent-color: var(--color-accent, #1890ff);
+  cursor: pointer;
 }
 
 .settings-input {
