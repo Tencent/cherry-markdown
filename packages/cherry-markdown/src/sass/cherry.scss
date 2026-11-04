@@ -623,7 +623,8 @@
     }
   }
 
-  .cm-editor {
+  // 通过 editor.disableBuiltinCmStyle=true 可以关闭 cherry 对 CodeMirror 的默认样式覆盖
+  &:not(.cherry-editor--no-cm-style) .cm-editor {
     font-family: var(--font-family-sans);
     background-color: var(--base-editor-bg);
     color: var(--base-font-color);
@@ -794,6 +795,17 @@
       color: var(--full-width-color) !important;
       z-index: 3;
       cursor: pointer;
+    }
+  }
+
+  &.cherry-editor--no-cm-style .cm-editor {
+    .cm-header, .cm-strong {
+      font-weight: normal;
+      text-decoration: inherit;
+    }
+    .cm-link, .cm-url {
+      color: inherit;
+      text-decoration: inherit;
     }
   }
 }

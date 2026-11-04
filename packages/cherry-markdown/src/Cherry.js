@@ -938,7 +938,10 @@ export default class Cherry extends CherryStatic {
       name: this.options.editor.name ?? 'code',
     });
     textArea.textContent = this.options.value;
-    const editor = createElement('div', 'cherry-editor');
+    const editorClassName = this.options.editor?.disableBuiltinCmStyle
+      ? 'cherry-editor cherry-editor--no-cm-style'
+      : 'cherry-editor';
+    const editor = createElement('div', editorClassName);
     editor.appendChild(textArea);
 
     if (typeof this.options.fileUpload === 'function') {
