@@ -35,9 +35,10 @@ export function useEditorAdapter({ onContentChanged }: { onContentChanged: () =>
     if (!transitioning && mountedEngine) pendingMarkdown = editors[mountedEngine].getMarkdown();
     return pendingMarkdown ?? '';
   };
-  const setMarkdown = (markdown: string): void => {
+  const setMarkdown = (markdown: string, options?: { addToHistory?: boolean }): void => {
     pendingMarkdown = markdown;
-    if (!transitioning && mountedEngine) editors[mountedEngine].setMarkdown(markdown);
+    if (!transitioning && mountedEngine === 'milkdown') editors.milkdown.setMarkdown(markdown, options);
+    else if (!transitioning && mountedEngine === 'cherry') editors.cherry.setMarkdown(markdown);
   };
   const clearUndoRedo = (): void => {
     if (!transitioning && mountedEngine) editors[mountedEngine].clearUndoRedo();

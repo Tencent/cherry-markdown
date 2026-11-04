@@ -124,7 +124,7 @@ export default defineComponent({
                 toast.warning('当前文件已切换，忽略本次恢复');
                 return;
               }
-              editor.setMarkdown(versionContent);
+              editor.setMarkdown(versionContent, { addToHistory: true });
               unsavedGuard.setUnsavedChanges(true);
               updateEditorTitle(true);
               notifyInfo('已应用本地版本');
@@ -138,7 +138,7 @@ export default defineComponent({
     };
 
     const handleVersionApply = (content: string): void => {
-      editor.setMarkdown(content);
+      editor.setMarkdown(content, { addToHistory: true });
       unsavedGuard.setUnsavedChanges(true);
       updateEditorTitle(true);
       historyDialogVisible.value = false;
@@ -209,7 +209,8 @@ export default defineComponent({
         await appEvents.cleanupAll();
         return;
       }
-      await fileOperations.restoreInitialFile();
+      await fileOperations.restoreInitialFile(() => !unmounted);
+      if (unmounted) return;
       // 初次启动后：若已恢复的文件在本地存有更新版本，弹提示
       if (fileStore.currentFilePath) {
         await maybePromptRestore(fileStore.currentFilePath);

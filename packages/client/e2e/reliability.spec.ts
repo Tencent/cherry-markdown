@@ -38,6 +38,21 @@ test('real typing back to an earlier external value still marks the document cha
   await expect.poll(() => page.evaluate(() => window.clientEditor.changes())).toBeGreaterThan(before);
 });
 
+test('applying a historical version can be undone and redone', async ({ page }) => {
+  await page.evaluate(async () => {
+    await window.clientEditor.switch('milkdown');
+    window.clientEditor.setMarkdown('Current');
+    window.clientEditor.clearUndoRedo();
+    window.clientEditor.setMarkdown('Earlier version', { addToHistory: true });
+  });
+  const editor = page.locator('#milkdown-editor .ProseMirror');
+  await editor.click();
+  await page.keyboard.press('ControlOrMeta+z');
+  await expect.poll(() => page.evaluate(() => window.clientEditor.getMarkdown().trim())).toBe('Current');
+  await page.keyboard.press('ControlOrMeta+Shift+z');
+  await expect.poll(() => page.evaluate(() => window.clientEditor.getMarkdown().trim())).toBe('Earlier version');
+});
+
 test('opening another file isolates undo/redo while edits in the new file remain undoable', async ({ page }) => {
   await page.evaluate(async () => {
     await window.clientEditor.switch('milkdown');

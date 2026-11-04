@@ -5,7 +5,7 @@ export interface MilkdownAdapter {
   mount(initialMarkdown: string, onChange: () => void): Promise<void> | void;
   destroy(): void | Promise<void>;
   getMarkdown(): string;
-  setMarkdown(markdown: string): void;
+  setMarkdown(markdown: string, options?: { addToHistory?: boolean }): void;
   clearUndoRedo(): void;
   toggleToolbar?(): void;
 }
@@ -91,9 +91,9 @@ export function useMilkdownEditor({ onContentChanged }: { onContentChanged: () =
     mounted = false;
     return enqueue(release);
   };
-  const setMarkdown = (markdown: string): void => {
+  const setMarkdown = (markdown: string, options?: { addToHistory?: boolean }): void => {
     pendingMarkdown = markdown;
-    if (mounted) owned?.setMarkdown(markdown);
+    if (mounted) owned?.setMarkdown(markdown, options);
   };
   const clearUndoRedo = (): void => {
     if (mounted && owned) owned.clearUndoRedo();

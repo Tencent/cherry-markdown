@@ -223,12 +223,12 @@ const adapter: MilkdownAdapter = {
     }
   },
 
-  setMarkdown(md) {
+  setMarkdown(md, options) {
     if (!instance || !editorReady) {
       cachedMarkdown = md;
       return;
     }
-    instance.action((ctx) => writeMarkdown(ctx, md));
+    instance.action((ctx) => writeMarkdown(ctx, md, options?.addToHistory));
     cachedMarkdown = instance.action(getMarkdown());
   },
 

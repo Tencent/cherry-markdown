@@ -2,6 +2,7 @@ import { editorViewCtx, parserCtx } from '@milkdown/kit/core';
 import type { Ctx } from '@milkdown/kit/ctx';
 import { Plugin, PluginKey, type Transaction } from '@milkdown/kit/prose/state';
 import type { EditorView } from '@milkdown/kit/prose/view';
+import { closeHistory } from '@milkdown/kit/prose/history';
 
 const externalWrite = new PluginKey('client-external-markdown');
 
@@ -27,15 +28,15 @@ export function documentChanges(onChange: () => void) {
   });
 }
 
-export function writeMarkdown(ctx: Ctx, markdown: string) {
+export function writeMarkdown(ctx: Ctx, markdown: string, addToHistory = false) {
   const view = ctx.get(editorViewCtx);
   const doc = ctx.get(parserCtx)(markdown);
   if (!doc) throw new Error('Unable to parse Markdown.');
   view.dispatch(
-    view.state.tr
+    closeHistory(view.state.tr)
       .replaceWith(0, view.state.doc.content.size, doc.content)
       .setMeta(externalWrite, true)
-      .setMeta('addToHistory', false),
+      .setMeta('addToHistory', addToHistory),
   );
 }
 

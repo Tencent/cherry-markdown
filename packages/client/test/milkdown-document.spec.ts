@@ -44,12 +44,23 @@ async function create() {
     view,
     onChange,
     other,
-    write: (value: string) => editor.action((ctx) => writeMarkdown(ctx, value)),
+    write: (value: string, addToHistory = false) => editor.action((ctx) => writeMarkdown(ctx, value, addToHistory)),
     reset: () => clearHistory(view, historyProviderPlugin.plugin()),
   };
 }
 
 describe('client Milkdown document updates', () => {
+  it('allows an applied historical version to be undone and redone independently of earlier typing', async () => {
+    const { view, onChange, write } = await create();
+    view.dispatch(view.state.tr.insertText(' edited', 2));
+    write('restored', true);
+    expect(view.state.doc.textContent).toBe('restored');
+    expect(undo(view.state, view.dispatch)).toBe(true);
+    expect(view.state.doc.textContent).toBe('A edited');
+    expect(redo(view.state, view.dispatch)).toBe(true);
+    expect(view.state.doc.textContent).toBe('restored');
+    expect(onChange).toHaveBeenCalledTimes(3);
+  });
   it('keeps external writes and their trailing-node transactions silent, but reports immediate typing', async () => {
     const { view, onChange, write } = await create();
     write('---');
