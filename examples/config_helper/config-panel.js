@@ -125,6 +125,12 @@ export function createConfigPanel({ getState, defaultConfig, onChange, onLocate 
     return valueHtml;
   }
 
+  function findDefaultToolbarItem(toolbarPath, value) {
+    const defaultToolbar = toolbarPath.split('.').reduce((target, part) => target?.[part], defaultConfig);
+    if (!Array.isArray(defaultToolbar)) return value;
+    return defaultToolbar.find(entry => getToolbarItemKey(entry) === value) ?? value;
+  }
+
   function bindToolbarEvents(item, div, configState) {
     // 工具栏芯片（普通按钮toggle）
     div.querySelectorAll('.toolbar-chip:not(.separator-add-btn)').forEach(chip => {
@@ -139,7 +145,7 @@ export function createConfigPanel({ getState, defaultConfig, onChange, onLocate 
           // 移除所有该值的实例
           configState[key].value = arr.filter(entry => getToolbarItemKey(entry) !== val);
         } else {
-          const defaultItem = defaultConfig.toolbars.toolbar.find(entry => getToolbarItemKey(entry) === val);
+          const defaultItem = findDefaultToolbarItem(item.path, val);
           arr.push(defaultItem && typeof defaultItem === 'object' ? cloneConfigValue(defaultItem) : val);
         }
         commitConfigChange(item, div, { rerender: true });
@@ -402,9 +408,12 @@ export function createConfigPanel({ getState, defaultConfig, onChange, onLocate 
     'theme': '主题',
     'file': '文件',
     'panel': '信息面板',
+    'timeline': '时间线',
+    'justify': '对齐方式',
     'align': '对齐',
     'detail': '手风琴',
     'drawIo': 'DrawIo',
+    'publish': '发布',
     'wordCount': '字数统计',
     'cursorPosition': '光标位置',
     'changeLocale': '切换语言',

@@ -665,6 +665,12 @@ export interface CherryEditorOptions {
   codemirror?: object;
   /** 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal */
   writingStyle?: string;
+  /**
+   * 是否禁用 cherry 对 CodeMirror 编辑器（.cm-editor）的内置样式覆盖
+   * 为 true 时，cherry 不会向 .cm-editor 注入字体、颜色、背景等默认样式，
+   * 便于业务方完全自定义 CodeMirror 外观
+   */
+  disableBuiltinCmStyle?: boolean;
   editor?: EditorView;
   /** 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置 */
   keepDocumentScrollAfterInit?: boolean;
