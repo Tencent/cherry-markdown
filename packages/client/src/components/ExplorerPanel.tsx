@@ -1,5 +1,5 @@
-import { defineComponent, h, nextTick, ref } from 'vue';
-import { useDirectoryStore, useFileStore } from '../store';
+import { defineComponent, h, nextTick, ref, watch } from 'vue';
+import { useDirectoryStore, useFileStore, usePreferencesStore } from '../store';
 import { notifyInfo } from '../utils/notifications';
 import { loadDirectoryStructure, openDirectoryDialog } from './fileUtils';
 import { useFileManager } from './composables/useFileManager';
@@ -20,6 +20,7 @@ export default defineComponent({
   setup(_, { expose }) {
     const fileStore = useFileStore();
     const directoryStore = useDirectoryStore();
+    const preferences = usePreferencesStore();
     const nodes = ref<DirectoryNode[]>([]);
     const currentDirPath = ref<string | null>(null);
     const loading = ref(false);
@@ -45,13 +46,21 @@ export default defineComponent({
         };
       });
 
+    const filterHiddenNodes = (items: DirectoryNode[]): DirectoryNode[] =>
+      items
+        .filter((item) => preferences.explorerShowHiddenItems || !item.hidden)
+        .map((item) => ({
+          ...item,
+          children: item.children ? filterHiddenNodes(item.children) : item.children,
+        }));
+
     const loadTree = async (dirPath: string): Promise<void> => {
       loading.value = true;
       try {
         const tree = await loadDirectoryStructure(dirPath, 0, 8);
         if (tree.success && tree.data) {
           currentDirPath.value = dirPath;
-          nodes.value = applyExpandedState(tree.data);
+          nodes.value = filterHiddenNodes(applyExpandedState(tree.data));
           directoryStore.setCurrent(dirPath);
           directoryStore.upsertDirectory(dirPath, true);
         }
@@ -167,6 +176,13 @@ export default defineComponent({
 
     expose({ openDirectory, refreshDirectory, revealCurrentFile });
     void restore();
+
+    watch(
+      () => preferences.explorerShowHiddenItems,
+      () => {
+        if (currentDirPath.value) void loadTree(currentDirPath.value);
+      },
+    );
 
     const renderBody = () => {
       if (loading.value) {

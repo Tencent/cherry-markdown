@@ -1,3 +1,4 @@
+import { invoke } from '@tauri-apps/api/core';
 import { readDir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import type { DirectoryNode, FileOperationResult, DirectoryStructureResult } from './types';
@@ -88,6 +89,17 @@ export const isSupportedFile = (fileName: string): boolean => {
   return SUPPORTED_FILE_EXTENSIONS.includes(fileExtension || '');
 };
 
+const getHiddenFlags = async (paths: string[]): Promise<boolean[]> => {
+  if (!paths.length) return [];
+
+  try {
+    return await invoke<boolean[]>('check_hidden_attrs', { paths });
+  } catch (error) {
+    console.warn('读取文件隐藏属性失败:', error);
+    return paths.map(() => false);
+  }
+};
+
 // 递归加载目录结构（可配置最大深度，包含所有子目录与文件）
 export const loadDirectoryStructure = async (
   dirPath: string,
@@ -102,17 +114,21 @@ export const loadDirectoryStructure = async (
 
   try {
     const entries = await readDir(normalizedDir);
+    const fullPaths = entries.map((entry) => joinPath(normalizedDir, entry.name || ''));
+    const hiddenFlags = await getHiddenFlags(fullPaths);
 
     const children: DirectoryNode[] = [];
 
-    for (const entry of entries) {
-      const fullPath = joinPath(normalizedDir, entry.name || '');
+    for (const [index, entry] of entries.entries()) {
+      const fullPath = fullPaths[index];
+      const hidden = hiddenFlags[index] ?? false;
 
       if (entry.isDirectory) {
         const node: DirectoryNode = {
           path: fullPath,
           name: entry.name || '',
           type: 'directory',
+          hidden,
           expanded: false,
           children: [],
         };
@@ -129,6 +145,7 @@ export const loadDirectoryStructure = async (
             path: fullPath,
             name: entry.name || '',
             type: 'file',
+            hidden,
           });
         }
       }

@@ -188,6 +188,14 @@ export const CONFIG_CATEGORIES = [
         options: ['normal', 'typewriter', 'focus'],
       },
       {
+        key: 'editor.disableBuiltinCmStyle',
+        name: '禁用内置编辑器样式',
+        path: 'editor.disableBuiltinCmStyle',
+        type: 'boolean',
+        description: '是否禁用 cherry 对 CodeMirror 编辑器（.cm-editor）的内置样式覆盖；为 true 时，cherry 不会向 .cm-editor 注入字体、颜色、背景等默认样式，便于完全自定义 CodeMirror 外观',
+        inputType: 'toggle',
+      },
+      {
         key: 'editor.showFullWidthMark',
         name: '高亮全角符号',
         path: 'editor.showFullWidthMark',

@@ -564,6 +564,10 @@ const defaultConfig = {
       placeholder: '',
     },
     writingStyle: 'normal', // 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal
+    // 是否禁用 cherry 内置对 CodeMirror 编辑器（.cm-editor）的样式覆盖
+    // 为 true 时，cherry 不会向编辑器内部的 .cm-editor 注入字体、颜色、背景等默认样式，
+    // 方便业务方完全自定义 CodeMirror 外观
+    disableBuiltinCmStyle: false,
     keepDocumentScrollAfterInit: false, // 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置
     showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
     showSuggestList: true, // 是否显示联想框
