@@ -186,6 +186,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       hrefInput.setAttribute('aria-describedby', error.id);
 
       const targetLabel = document.createElement('label');
+      targetLabel.className = 'cherry-milkdown-link-editor__target';
       targetLabel.textContent = '打开方式';
       const targetSelect = document.createElement('select');
       targetSelect.className = 'cherry-milkdown-context-form__input';
@@ -264,7 +265,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       const placeForm = () => {
         const anchor = active && anchorForRange(active);
         const rect = anchor ? lastClientRect(anchor) : view.coordsAtPos(active?.from ?? view.state.selection.from);
-        const width = Math.min(360, document.documentElement.clientWidth - 16);
+        const width = Math.min(440, document.documentElement.clientWidth - 16);
         form.style.width = `${width}px`;
         const left = Math.max(8, Math.min(rect.left, document.documentElement.clientWidth - width - 8));
         const below = rect.bottom + 8;
