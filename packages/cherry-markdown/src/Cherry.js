@@ -242,7 +242,7 @@ export default class Cherry extends CherryStatic {
 
     // 如果配置了初始化后根据hash自动滚动
     if (this.options.autoScrollByHashAfterInit) {
-      setTimeout(this.scrollByHash.bind(this));
+      this.autoScrollByHashTimer = setTimeout(this.scrollByHash.bind(this));
     }
     // 强制进行一次渲染 // 不记得为啥要强制渲染了，先屏蔽了
     // this.editText(null, this.editor.editor);
@@ -274,6 +274,11 @@ export default class Cherry extends CherryStatic {
   }
 
   destroy() {
+    if (this.isDestroyed) return;
+    this.isDestroyed = true;
+    clearTimeout(this.timer);
+    clearTimeout(this.autoScrollByHashTimer);
+    if (this.toc instanceof Toc) this.toc.destroy();
     // 先销毁搜索面板桥接（解绑监听、清理面板 DOM）
     destroySearcherBridge(this);
 
@@ -933,7 +938,10 @@ export default class Cherry extends CherryStatic {
       name: this.options.editor.name ?? 'code',
     });
     textArea.textContent = this.options.value;
-    const editor = createElement('div', 'cherry-editor');
+    const editorClassName = this.options.editor?.disableBuiltinCmStyle
+      ? 'cherry-editor cherry-editor--no-cm-style'
+      : 'cherry-editor';
+    const editor = createElement('div', editorClassName);
     editor.appendChild(textArea);
 
     if (typeof this.options.fileUpload === 'function') {
