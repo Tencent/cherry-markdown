@@ -31,7 +31,8 @@ jobs:
 
       - run: vp install
 
-      - run: vp run build
+      - name: Build playground dependencies
+        run: vp run -F cherry-markdown build
 
       - name: Prepare playground
         run: |
