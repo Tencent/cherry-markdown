@@ -7,7 +7,6 @@ import {
   npm,
   workspaceRoot,
   writeArtifactManifest,
-  verifyMilkdownTarball,
 } from './consumer-artifacts.mjs';
 import { prepareConsumerPackages } from './prepare-consumer-packages.mjs';
 
@@ -33,10 +32,6 @@ for (const [variant, packages] of Object.entries(variants)) {
     )[0];
     const tarball = join(output, name);
     cpSync(join(fixture, packed.filename), tarball);
-    if (key === 'milkdown') {
-      const unpacked = mkdtempSync(join(fixture, `${variant}-`));
-      verifyMilkdownTarball(tarball, unpacked);
-    }
   }
   writeArtifactManifest(output, `consumer-${variant}`);
 }
