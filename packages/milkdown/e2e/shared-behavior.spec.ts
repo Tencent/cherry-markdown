@@ -62,7 +62,9 @@ test('link actions support keyboard dismissal and one-step unlink with undo', as
   const open = toolbar.getByRole('link');
   await expect(open).toHaveText('打开链接');
   await expect(open).toHaveAttribute('href', 'https://example.com');
-  await open.focus();
+  await page.keyboard.press('Alt+F10');
+  await expect(open).toBeFocused();
+  expect(await markdown(page)).toBe(source);
   await page.keyboard.press('Tab');
   await expect(toolbar.getByRole('button', { name: '复制链接' })).toBeFocused();
   await page.keyboard.press('Escape');
@@ -70,9 +72,8 @@ test('link actions support keyboard dismissal and one-step unlink with undo', as
   await expect(page.locator('.ProseMirror')).toBeFocused();
   expect(await markdown(page)).toBe(source);
 
-  await link.click({ position: { x: 8, y: 8 } });
-  await expect(toolbar).toBeVisible();
-  await open.focus();
+  await page.keyboard.press('Alt+F10');
+  await expect(open).toBeFocused();
   await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');
   await expect(toolbar.getByRole('button', { name: '编辑链接' })).toBeFocused();
@@ -86,6 +87,18 @@ test('link actions support keyboard dismissal and one-step unlink with undo', as
   expect(await markdown(page)).toBe(source);
   await page.keyboard.press('ControlOrMeta+Shift+z');
   await expect(page.locator('.ProseMirror a')).toHaveCount(0);
+});
+
+test('link action shortcut leaves ordinary text and Tab editing behavior intact', async ({ page }) => {
+  await setMarkdown(page, 'Plain text');
+  const paragraph = page.locator('.ProseMirror > p').first();
+  await paragraph.click();
+  const saved = await markdown(page);
+  await page.keyboard.press('Alt+F10');
+  await expect(page.locator('.ProseMirror')).toBeFocused();
+  expect(await markdown(page)).toBe(saved);
+  await page.keyboard.press('Tab');
+  expect(await paragraph.textContent()).toContain('  ');
 });
 
 test('unsaved link fields and focus survive document scrolling and viewport resizing', async ({ page }) => {

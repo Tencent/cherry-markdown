@@ -81,7 +81,7 @@ await cherryMilkdown({
 });
 ```
 
-Placing the caret in a link opens compact actions to open, copy, edit or unlink it, styled with Cherry theme tokens. Unlinking preserves text and other formatting and supports undo. Unsaved link fields survive scrolling and viewport resizing. Use `Ctrl/Cmd+K` to edit a link or add one to selected text.
+Placing the caret in a link opens compact actions to open, copy, edit or unlink it, styled with Cherry theme tokens. Press `Alt+F10` to focus the link actions, then use Tab to navigate and Escape to return to the editor; Tab retains its usual behavior in the editor. Unlinking preserves text and other formatting and supports undo. Unsaved link fields survive scrolling and viewport resizing. Use `Ctrl/Cmd+K` to edit a link or add one to selected text.
 
 ## Boundaries
 

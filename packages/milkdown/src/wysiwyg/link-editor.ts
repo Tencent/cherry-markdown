@@ -96,6 +96,13 @@ export const cherryLinkEditor = $prose((ctx) => {
     props: {
       handleKeyDown: (view, event) => {
         if (config.readonly) return false;
+        if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && event.key === 'F10') {
+          const { from, to } = view.state.selection;
+          if (from !== to || !linkAtRange(view, from)) return false;
+          event.preventDefault();
+          view.dom.dispatchEvent(new CustomEvent('cherry-milkdown:focus-link-actions', { bubbles: true }));
+          return true;
+        }
         if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'k') return false;
         const { from, to } = view.state.selection;
         const range = linkAtRange(view, from, to) ?? (from !== to ? { from, to } : undefined);
@@ -109,6 +116,8 @@ export const cherryLinkEditor = $prose((ctx) => {
       if (config.readonly) return {};
       const document = view.dom.ownerDocument;
       const inspector = createContextBubble(document, 'cherry-milkdown-link-bubble', '链接');
+      inspector.setAttribute('aria-keyshortcuts', 'Alt+F10');
+      inspector.title = 'Alt+F10 进入链接操作';
 
       const iconButton = (label: string, icon: string) => {
         return createContextButton(document, { label, icon }).button;
@@ -372,6 +381,11 @@ export const cherryLinkEditor = $prose((ctx) => {
         const range = (event as CustomEvent<LinkRange>).detail;
         if (range) open(range);
       };
+      const onFocusLinkActions = () => {
+        dismissedSelection = undefined;
+        showForSelection();
+        if (!inspector.hidden) hrefPreview.focus({ preventScroll: true });
+      };
       const onOutsidePointer = (event: PointerEvent) => {
         if (!(event.target instanceof Node) || form.contains(event.target) || inspector.contains(event.target)) return;
         if (editorOpen) close();
@@ -495,6 +509,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       });
 
       view.dom.addEventListener('cherry-milkdown:edit-link', onEditRequest);
+      view.dom.addEventListener('cherry-milkdown:focus-link-actions', onFocusLinkActions);
       view.dom.addEventListener('pointerdown', onEditorPointer);
       inspector.addEventListener('pointerdown', preserveSelection);
       const onCopy = () => {
@@ -527,6 +542,7 @@ export const cherryLinkEditor = $prose((ctx) => {
           disposed = true;
           if (uiVisible) notifyUi(false);
           view.dom.removeEventListener('cherry-milkdown:edit-link', onEditRequest);
+          view.dom.removeEventListener('cherry-milkdown:focus-link-actions', onFocusLinkActions);
           view.dom.removeEventListener('pointerdown', onEditorPointer);
           inspector.removeEventListener('pointerdown', preserveSelection);
           copy.removeEventListener('click', onCopy);
