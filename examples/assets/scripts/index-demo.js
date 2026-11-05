@@ -427,6 +427,7 @@ const basicConfig = {
   editor: {
     id: 'cherry-text',
     name: 'cherry-text',
+    // disableBuiltinCmStyle: true,
     autoSave2Textarea: false,
     defaultModel: 'edit&preview',
     showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》

@@ -9,6 +9,8 @@ interface PreferencesState {
   widthMode: WidthMode;
   /** 专注模式 - 固定宽度模式下的正文最大宽度（px），仅在 widthMode === 'fixed' 时生效 */
   fixedWidthValue: number;
+  /** Explorer: whether hidden files and directories are visible. */
+  explorerShowHiddenItems: boolean;
   editorMode: EditorMode;
   toolbarVisible: boolean;
   engine: EditorEngine;
@@ -25,6 +27,7 @@ const DEFAULT_STATE: PreferencesState = {
   focusMode: false,
   widthMode: 'fixed',
   fixedWidthValue: FIXED_WIDTH_DEFAULT,
+  explorerShowHiddenItems: true,
   editorMode: 'edit&preview',
   toolbarVisible: true,
   engine: 'cherry',
@@ -50,6 +53,10 @@ const loadFromStorage = (): PreferencesState => {
       focusMode: typeof parsed.focusMode === 'boolean' ? parsed.focusMode : DEFAULT_STATE.focusMode,
       widthMode: isWidthMode(parsed.widthMode) ? parsed.widthMode : DEFAULT_STATE.widthMode,
       fixedWidthValue: clampFixedWidth(parsed.fixedWidthValue),
+      explorerShowHiddenItems:
+        typeof parsed.explorerShowHiddenItems === 'boolean'
+          ? parsed.explorerShowHiddenItems
+          : DEFAULT_STATE.explorerShowHiddenItems,
       editorMode: isEditorMode(parsed.editorMode) ? parsed.editorMode : DEFAULT_STATE.editorMode,
       toolbarVisible: typeof parsed.toolbarVisible === 'boolean' ? parsed.toolbarVisible : DEFAULT_STATE.toolbarVisible,
       engine: isEditorEngine(parsed.engine) ? parsed.engine : DEFAULT_STATE.engine,
@@ -81,6 +88,10 @@ export const usePreferencesStore = defineStore('preferences', {
     },
     setFixedWidthValue(value: number) {
       this.fixedWidthValue = clampFixedWidth(value);
+      saveToStorage(this.$state);
+    },
+    setExplorerShowHiddenItems(value: boolean) {
+      this.explorerShowHiddenItems = value;
       saveToStorage(this.$state);
     },
     setEditorMode(mode: EditorMode) {
