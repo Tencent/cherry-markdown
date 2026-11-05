@@ -41,6 +41,7 @@ class CherryMarkdownPreview {
       vscode.workspace.onDidChangeTextDocument((event) => this.handleDocumentChange(event)),
       vscode.window.onDidChangeTextEditorVisibleRanges((event) => this.handleVisibleRangesChange(event)),
       vscode.workspace.onDidChangeConfiguration((event) => this.handleConfigurationChange(event)),
+      vscode.window.onDidChangeActiveColorTheme(() => void this.postEditorState('editor-change')),
     );
 
     void this.handleActiveEditorChange(vscode.window.activeTextEditor);
@@ -70,6 +71,7 @@ class CherryMarkdownPreview {
     this.panel = vscode.window.createWebviewPanel('cherrymarkdown.preview', title, vscode.ViewColumn.Two, {
       enableScripts: true,
       enableForms: false,
+      enableFindWidget: true,
       retainContextWhenHidden: false,
       localResourceRoots: this.getResourceRoots(),
     });
@@ -206,6 +208,9 @@ class CherryMarkdownPreview {
 
   private async handleConfigurationChange(event: vscode.ConfigurationChangeEvent): Promise<void> {
     if (!this.targetEditor) return;
+    if (this.panel && event.affectsConfiguration('cherryMarkdown', this.targetEditor.document.uri)) {
+      await this.postEditorState('editor-change');
+    }
     if (
       !this.panel &&
       event.affectsConfiguration('cherryMarkdown.Usage', this.targetEditor.document.uri) &&
@@ -282,6 +287,13 @@ class CherryMarkdownPreview {
   private async updateTheme(theme: string): Promise<void> {
     if (!this.targetEditor) return;
     await this.context.globalState.update(THEME_STATE_KEY, theme);
+    const configuration = vscode.workspace.getConfiguration('cherryMarkdown', this.targetEditor.document.uri);
+    if (configuration.get('ThemeMode') === 'vscode') {
+      const inspected = configuration.inspect('ThemeMode');
+      const target = inspected?.workspaceFolderValue !== undefined ? vscode.ConfigurationTarget.WorkspaceFolder
+        : inspected?.workspaceValue !== undefined ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
+      await configuration.update('ThemeMode', 'manual', target);
+    }
     await this.postEditorState('editor-change');
   }
 

@@ -6,6 +6,8 @@ const mockGetConfiguration = vi.hoisted(() => vi.fn());
 
 vi.mock('vscode', () => ({
   ConfigurationTarget: { Global: 1 },
+  ColorThemeKind: { Light: 1, Dark: 2, HighContrast: 3, HighContrastLight: 4 },
+  window: { activeColorTheme: { kind: 1 } },
   Uri: { file: (path: string) => ({ path }) },
   workspace: { getConfiguration: mockGetConfiguration },
 }));
@@ -76,6 +78,15 @@ describe('configuration normalization', () => {
     expect(config.getTheme({ get: vi.fn().mockReturnValue(undefined) })).toBe('green');
     expect(get).toHaveBeenCalledWith('Theme');
   });
+
+  test.each([[1, 'green'], [2, 'abyss'], [3, 'abyss'], [4, 'green']])(
+    'follows VS Code color theme kind %s', (kind, expected) => {
+      const settings: Record<string, string> = { ThemeMode: 'vscode', LightTheme: 'green', DarkTheme: 'abyss' };
+      getConfiguration.mockReturnValue({ get: (key: string) => settings[key] });
+      vi.mocked(vscode.window).activeColorTheme = { kind };
+      expect(config.getTheme({ get: vi.fn().mockReturnValue('red') })).toBe(expected);
+    },
+  );
 
   test('migrates the legacy theme into global state only once', async () => {
     const get = vi.fn().mockReturnValue('深色');

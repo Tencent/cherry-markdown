@@ -169,6 +169,48 @@
           },
           "default": [],
           "description": "%backfillImageProps.description%"
+        },
+        "cherryMarkdown.ThemeMode": {
+          "type": "string",
+          "default": "manual",
+          "enum": [
+            "manual",
+            "vscode"
+          ],
+          "description": "%themeMode.description%",
+          "scope": "resource"
+        },
+        "cherryMarkdown.LightTheme": {
+          "type": "string",
+          "default": "default",
+          "enum": [
+            "default",
+            "dark",
+            "gray",
+            "abyss",
+            "green",
+            "red",
+            "violet",
+            "blue"
+          ],
+          "description": "%lightTheme.description%",
+          "scope": "resource"
+        },
+        "cherryMarkdown.DarkTheme": {
+          "type": "string",
+          "default": "dark",
+          "enum": [
+            "default",
+            "dark",
+            "gray",
+            "abyss",
+            "green",
+            "red",
+            "violet",
+            "blue"
+          ],
+          "description": "%darkTheme.description%",
+          "scope": "resource"
         }
       }
     }

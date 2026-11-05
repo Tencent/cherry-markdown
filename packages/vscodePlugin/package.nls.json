@@ -26,5 +26,8 @@
   "backfillImageProps.enumDescriptions.isNotBorder": "Do not apply a border to the image",
   "backfillImageProps.enumDescriptions.isShadow": "Apply a shadow to the image",
   "backfillImageProps.enumDescriptions.isRadius": "Apply rounded corners to the image",
-  "backfillImageProps.description": "Image backfill properties for Cherry Markdown — configure borders, shadows, or rounded corners for images."
+  "backfillImageProps.description": "Image backfill properties for Cherry Markdown — configure borders, shadows, or rounded corners for images.",
+  "themeMode.description": "Choose a Cherry theme manually or follow the VS Code color theme. Selecting a theme in Cherry switches back to manual.",
+  "lightTheme.description": "Cherry theme used for light and high contrast light VS Code themes.",
+  "darkTheme.description": "Cherry theme used for dark and high contrast dark VS Code themes."
 }

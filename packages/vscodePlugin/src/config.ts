@@ -112,6 +112,12 @@ export function getUsageMode(resource?: vscode.Uri): UsageMode {
 }
 
 export function getTheme(globalState: Pick<vscode.Memento, 'get'>, resource?: vscode.Uri): CherryTheme {
+  const configuration = vscode.workspace.getConfiguration('cherryMarkdown', resource);
+  if (configuration.get('ThemeMode') === 'vscode') {
+    const kind = vscode.window.activeColorTheme.kind;
+    const dark = kind === vscode.ColorThemeKind.Dark || kind === vscode.ColorThemeKind.HighContrast;
+    return normalizeTheme(configuration.get(dark ? 'DarkTheme' : 'LightTheme', dark ? 'dark' : 'default'));
+  }
   const storedTheme = globalState.get<unknown>(THEME_STATE_KEY);
   if (storedTheme !== undefined) return normalizeTheme(storedTheme);
 

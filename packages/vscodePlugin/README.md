@@ -18,9 +18,11 @@ Open a Markdown file and run **Cherry Markdown: Preview in Cherry Markdown** fro
 
 By default, the preview opens automatically for active Markdown documents. Set `cherryMarkdown.Usage` to `only-manual` to open it only through the command.
 
+With focus in the preview, press **Ctrl+F** (**Cmd+F** on macOS) to search rendered content using the VS Code Webview find widget. Search follows the Webview’s visible rendered text: expand collapsed sections before searching; formula and diagram text may not be searchable.
+
 The preview follows the active Markdown document. When another file type has focus, visual editing is disabled so that changes cannot be written to the wrong document.
 
-Cherry Markdown's built-in theme menu controls the theme. The selected theme is stored in the extension's global state and restored when the preview opens again.
+Cherry Markdown's built-in theme menu controls the theme. The selected theme is stored in the extension's global state and restored when the preview opens again. Set `cherryMarkdown.ThemeMode` to `vscode` to follow VS Code's light or dark theme, including high-contrast variants. Configure the corresponding Cherry themes with `cherryMarkdown.LightTheme` and `cherryMarkdown.DarkTheme`. Choosing a theme from Cherry's menu returns to manual mode.
 
 ## Settings
 

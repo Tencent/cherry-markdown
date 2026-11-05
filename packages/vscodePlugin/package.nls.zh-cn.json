@@ -26,5 +26,8 @@
   "backfillImageProps.enumDescriptions.isNotBorder": "不为图像添加边框",
   "backfillImageProps.enumDescriptions.isShadow": "为图像添加阴影",
   "backfillImageProps.enumDescriptions.isRadius": "为图像添加圆角",
-  "backfillImageProps.description": "cherry-markdown 的图像修饰选项 — 可通过配置为图像添加边框、阴影或圆角。"
+  "backfillImageProps.description": "cherry-markdown 的图像修饰选项 — 可通过配置为图像添加边框、阴影或圆角。",
+  "themeMode.description": "手动选择 Cherry 主题，或跟随 VS Code 颜色主题。在 Cherry 中选择主题会切回手动模式。",
+  "lightTheme.description": "浅色及高对比度浅色 VS Code 主题使用的 Cherry 主题。",
+  "darkTheme.description": "深色及高对比度深色 VS Code 主题使用的 Cherry 主题。"
 }
