@@ -209,8 +209,7 @@ export default defineComponent({
         await appEvents.cleanupAll();
         return;
       }
-      await fileOperations.restoreInitialFile(() => !unmounted);
-      if (unmounted) return;
+      await fileOperations.restoreInitialFile();
       // 初次启动后：若已恢复的文件在本地存有更新版本，弹提示
       if (fileStore.currentFilePath) {
         await maybePromptRestore(fileStore.currentFilePath);

@@ -169,18 +169,16 @@ export function useAppFileOperations({
     }
   };
 
-  const openFilePath = async (filePath: string, isActive: () => boolean = () => true): Promise<FileOperationResult> => {
+  const openFilePath = async (filePath: string): Promise<FileOperationResult> => {
     if (isLoading.value) return { success: false, error: DIALOGS.CANCELLED_UNSAVED };
     if (!(await canLeaveCurrentFile())) {
       return { success: false, error: DIALOGS.CANCELLED_UNSAVED };
     }
-    if (!isActive()) return { success: false };
 
     isLoading.value = true;
     try {
       const normalizedPath = normalizePath(filePath);
       const markdown = await readTextFile(normalizedPath);
-      if (!isActive()) return { success: false };
       guardLargeFileForMilkdown(markdown);
       setMarkdown(markdown);
       // 切换文件后清空 undo/redo，避免撤销回上一个文件的内容
@@ -192,7 +190,6 @@ export function useAppFileOperations({
 
       return { success: true, path: normalizedPath };
     } catch (error) {
-      if (!isActive()) return { success: false };
       const message = `${MESSAGES.FILE.OPEN_FAILED}: ${error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR}`;
       notifyError(message);
       return { success: false, error: error instanceof Error ? error.message : MESSAGES.UNKNOWN_ERROR };
@@ -201,28 +198,25 @@ export function useAppFileOperations({
     }
   };
 
-  const tryLoadLaunchFile = async (isActive: () => boolean): Promise<boolean> => {
+  const tryLoadLaunchFile = async (): Promise<boolean> => {
     try {
       const rawPath = await invoke<string | null>('get_launch_file_path');
-      if (!isActive()) return false;
       if (!rawPath) return false;
 
-      const result = await openFilePath(rawPath, isActive);
+      const result = await openFilePath(rawPath);
       return result.success;
     } catch (error) {
-      if (!isActive()) return false;
       console.warn('加载启动文件失败:', error);
       return false;
     }
   };
 
-  const restoreLastOpenedFile = async (isActive: () => boolean): Promise<void> => {
+  const restoreLastOpenedFile = async (): Promise<void> => {
     if (!fileStore.currentFilePath) return;
 
     try {
       const normalizedPath = normalizePath(fileStore.currentFilePath);
       const markdown = await readTextFile(normalizedPath);
-      if (!isActive()) return;
       guardLargeFileForMilkdown(markdown);
       setMarkdown(markdown);
       // 启动恢复上次打开的文件后清空 undo/redo，避免出现无意义的历史栈
@@ -232,7 +226,6 @@ export function useAppFileOperations({
       }
       await markClean(normalizedPath);
     } catch (error) {
-      if (!isActive()) return;
       console.warn('恢复上次打开的文件失败:', error);
       fileStore.removeRecentFile(fileStore.currentFilePath);
       fileStore.setCurrentFilePath(null);
@@ -262,10 +255,10 @@ export function useAppFileOperations({
     }
   };
 
-  const restoreInitialFile = async (isActive: () => boolean = () => true): Promise<void> => {
-    const loadedFromLaunch = await tryLoadLaunchFile(isActive);
-    if (!loadedFromLaunch && isActive()) {
-      await restoreLastOpenedFile(isActive);
+  const restoreInitialFile = async (): Promise<void> => {
+    const loadedFromLaunch = await tryLoadLaunchFile();
+    if (!loadedFromLaunch) {
+      await restoreLastOpenedFile();
     }
   };
 

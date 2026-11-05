@@ -38,12 +38,12 @@ jobs:
             target: aarch64-apple-darwin
             platform_name: macos
             arch: arm64
-            args: '--target aarch64-apple-darwin --verbose'
+            args: '--target aarch64-apple-darwin'
           - platform: macos-latest
             target: x86_64-apple-darwin
             platform_name: macos
             arch: x64
-            args: '--target x86_64-apple-darwin --verbose'
+            args: '--target x86_64-apple-darwin'
           - platform: windows-latest
             target: x86_64-pc-windows-msvc
             platform_name: windows
