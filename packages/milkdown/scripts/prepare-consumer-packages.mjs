@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { npm } from './consumer-artifacts.mjs';
 import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
@@ -37,7 +38,7 @@ export function prepareConsumerPackages(fixture, env) {
     const staged = join(stagedRoot, 'packages', directory);
     const versionedManifest = readFileSync(join(staged, 'package.json'), 'utf8');
     const packed = JSON.parse(
-      execFileSync('npm', ['pack', source, '--json', '--pack-destination', fixture], {
+      npm(['pack', source, '--json', '--pack-destination', fixture], {
         cwd: fixture,
         env,
         encoding: 'utf8',

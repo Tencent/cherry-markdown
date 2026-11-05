@@ -91,7 +91,7 @@ jobs:
       - name: Build Cherry Markdown
         env:
           NODE_OPTIONS: --max-old-space-size=4096
-        run: vp run build
+        run: vp run -F cherry-markdown build
 
       - name: Build Tauri Client
         run: vp run -F @cherry-markdown/client tauri:build ${{ matrix.args }}

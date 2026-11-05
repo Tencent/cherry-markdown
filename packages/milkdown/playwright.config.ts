@@ -6,6 +6,8 @@ const port = Number(process.env.MILKDOWN_E2E_PORT ?? 4177);
 const packageRoot = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = resolve(packageRoot, '../..');
 const demoBuildScript = process.env.MILKDOWN_E2E_PREBUILT ? 'build:demo:prepared' : 'build:demo';
+// CI sets this only after building and restoring the demo from the same run.
+const demoIsPrebuilt = process.env.MILKDOWN_E2E_DEMO_PREBUILT === '1';
 const browserMatrix = Boolean(process.env.MILKDOWN_BROWSER_MATRIX);
 const sharedBehaviorTests = ['shared-behavior.spec.ts', 'editing-boundaries.spec.ts', 'table-chart-parser.spec.ts'];
 const browserProjects = browserMatrix
@@ -32,7 +34,7 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   webServer: {
-    command: `vp run -F @cherry-markdown/milkdown ${demoBuildScript} && vp preview --config packages/milkdown/vite.demo.config.mjs --host 127.0.0.1 --port ${port}`,
+    command: `${demoIsPrebuilt ? '' : `vp run -F @cherry-markdown/milkdown ${demoBuildScript} && `}vp preview --config packages/milkdown/vite.demo.config.mjs --host 127.0.0.1 --port ${port}`,
     cwd: workspaceRoot,
     url: `http://127.0.0.1:${port}/index.html`,
     reuseExistingServer: !process.env.CI,
