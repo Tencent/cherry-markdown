@@ -1,7 +1,21 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { checkArtifactManifest, checkPackageFiles } from './consumer-artifacts.mjs';
+import { allowUnpublishedMinimum, checkArtifactManifest, checkPackageFiles } from './consumer-artifacts.mjs';
+
+test('only pre-release checks may use the matching local Cherry when the registry returns E404', () => {
+  const lookup = { registryCode: 'E404', minimumVersion: '0.11.12', localVersion: '0.11.12' };
+  assert.equal(allowUnpublishedMinimum({ ...lookup, requirePublished: false }), true);
+  assert.throws(() => allowUnpublishedMinimum({ ...lookup, requirePublished: true }), /must be available in the registry/);
+  assert.throws(() => allowUnpublishedMinimum({ ...lookup, localVersion: '0.11.11' }), /must match planned Cherry/);
+  assert.equal(allowUnpublishedMinimum({ ...lookup, registryCode: 'E500' }), false);
+});
+
+test('the release entry requires a published Cherry while PR checks support planned versions', () => {
+  const { scripts } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+  assert.match(scripts['test:release:prepared'], /verify-consumer\.mjs\b[^&]*--require-published-cherry/);
+  assert.doesNotMatch(scripts['test:consumer:ci'], /--require-published-cherry/);
+});
 
 const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const files = [

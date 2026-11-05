@@ -7,6 +7,7 @@ import { parseArgs } from 'node:util';
 import { chromium } from '@playwright/test';
 import {
   artifactRoot,
+  allowUnpublishedMinimum,
   npm,
   workspaceRoot,
   verifyArtifactManifest,
@@ -14,7 +15,12 @@ import {
 } from './consumer-artifacts.mjs';
 
 const { values } = parseArgs({
-  options: { artifacts: { type: 'string' }, release: { type: 'boolean' }, 'expected-version': { type: 'string' } },
+  options: {
+    artifacts: { type: 'string' },
+    release: { type: 'boolean' },
+    'expected-version': { type: 'string' },
+    'require-published-cherry': { type: 'boolean' },
+  },
 });
 const variant = values.release ? 'release' : 'planned';
 if (!values.artifacts) {
@@ -290,10 +296,13 @@ if (published.status !== 0) {
   } catch {
     /* Report the original failure below. */
   }
-  if (registryError?.code !== 'E404')
+  if (!allowUnpublishedMinimum({
+    requirePublished: values['require-published-cherry'],
+    registryCode: registryError?.code,
+    minimumVersion: minimumCherry,
+    localVersion: cherryManifest.version,
+  }))
     throw new Error(`Registry lookup failed: ${published.stderr}`, { cause: published.error });
-  if (cherryManifest.version !== minimumCherry)
-    throw new Error(`Unpublished minimum ${minimumCherry} must match planned Cherry ${cherryManifest.version}.`);
   minimumSource = cherryTarball;
   minimumLabel = `planned minimum Cherry ${minimumCherry} (not yet published)`;
 } else if (JSON.parse(published.stdout) !== minimumCherry) {

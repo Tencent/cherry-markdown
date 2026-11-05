@@ -61,8 +61,29 @@ jobs:
         working-directory: ${{ inputs.package_dir }}
         run: cp ../../README*.md . || { echo "❌ Failed to copy README files" >&2; exit 1; }
 
+      - name: Verify Milkdown release tarball
+        if: inputs.package_name == '@cherry-markdown/milkdown'
+        run: |
+          vp run -F cherry-markdown build
+          vp exec playwright install --with-deps chromium
+          vp run -F @cherry-markdown/milkdown test:release:prepared --expected-version="${{ inputs.package_version }}"
+
+      - name: Upload verified Milkdown tarballs
+        if: inputs.package_name == '@cherry-markdown/milkdown'
+        uses: actions/upload-artifact@v4
+        with:
+          name: milkdown-release-tarballs-${{ inputs.package_version }}
+          path: packages/milkdown/artifacts/consumer/release
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Publish verified Milkdown tarball
+        if: inputs.publish_npm && inputs.package_name == '@cherry-markdown/milkdown'
+        working-directory: ${{ inputs.package_dir }}
+        run: npm publish ./artifacts/consumer/release/milkdown.tgz --access public --provenance --no-workspaces
+
       - name: Publish ${{ inputs.package_name }}
-        if: inputs.publish_npm
+        if: inputs.publish_npm && inputs.package_name != '@cherry-markdown/milkdown'
         working-directory: ${{ inputs.package_dir }}
         run: npm publish --access public --provenance --no-workspaces
 

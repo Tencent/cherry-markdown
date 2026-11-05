@@ -68,6 +68,7 @@
     "test:consumer": "vp run -F cherry-markdown build && vp run build && vp run test:consumer:prepared",
     "test:consumer:prepared": "node ./scripts/verify-consumer.mjs",
     "test:consumer:ci": "node ./scripts/verify-consumer.mjs --artifacts=./artifacts/consumer/planned && node ./scripts/verify-consumer.mjs --artifacts=./artifacts/consumer/release --release",
+    "test:release:prepared": "node ./scripts/prepare-ci-artifacts.mjs --release && node ./scripts/verify-consumer.mjs --artifacts=./artifacts/consumer/release --release --require-published-cherry",
     "test:artifacts": "node --test ./scripts/consumer-artifacts.test.mjs",
     "prepare:ci-artifacts": "vp run test:artifacts && node ./scripts/prepare-ci-artifacts.mjs --demo",
     "verify:demo-artifact": "node ./scripts/verify-ci-artifact.mjs",

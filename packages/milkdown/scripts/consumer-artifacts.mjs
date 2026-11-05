@@ -7,6 +7,15 @@ import { fileURLToPath } from 'node:url';
 export const workspaceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 export const artifactRoot = resolve(workspaceRoot, 'packages/milkdown/artifacts/consumer');
 
+export function allowUnpublishedMinimum({ requirePublished, registryCode, minimumVersion, localVersion }) {
+  if (registryCode !== 'E404') return false;
+  if (requirePublished)
+    throw new Error(`Cherry ${minimumVersion} must be available in the registry before publishing Milkdown.`);
+  if (localVersion !== minimumVersion)
+    throw new Error(`Unpublished minimum ${minimumVersion} must match planned Cherry ${localVersion}.`);
+  return true;
+}
+
 export function npm(args, options = {}) {
   if (process.platform !== 'win32') return execFileSync('npm', args, options);
   const cli = join(dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js');
