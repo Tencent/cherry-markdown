@@ -172,13 +172,14 @@
         },
         "cherryMarkdown.ThemeMode": {
           "type": "string",
-          "default": "manual",
+          "default": "vscode",
           "enum": [
             "manual",
             "vscode"
           ],
           "description": "%themeMode.description%",
-          "scope": "resource"
+          "scope": "resource",
+          "order": 1
         },
         "cherryMarkdown.LightTheme": {
           "type": "string",
@@ -194,7 +195,8 @@
             "blue"
           ],
           "description": "%lightTheme.description%",
-          "scope": "resource"
+          "scope": "resource",
+          "order": 2
         },
         "cherryMarkdown.DarkTheme": {
           "type": "string",
@@ -210,7 +212,8 @@
             "blue"
           ],
           "description": "%darkTheme.description%",
-          "scope": "resource"
+          "scope": "resource",
+          "order": 3
         }
       }
     }

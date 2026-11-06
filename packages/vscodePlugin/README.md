@@ -22,7 +22,7 @@ With focus in the preview, press **Ctrl+F** (**Cmd+F** on macOS) to search rende
 
 The preview follows the active Markdown document. When another file type has focus, visual editing is disabled so that changes cannot be written to the wrong document.
 
-Cherry Markdown's built-in theme menu controls the theme. The selected theme is stored in the extension's global state and restored when the preview opens again. Set `cherryMarkdown.ThemeMode` to `vscode` to follow VS Code's light or dark theme, including high-contrast variants. Configure the corresponding Cherry themes with `cherryMarkdown.LightTheme` and `cherryMarkdown.DarkTheme`. Choosing a theme from Cherry's menu returns to manual mode.
+By default, the preview follows VS Code's light or dark theme, including high-contrast variants. Configure the corresponding Cherry themes with `cherryMarkdown.LightTheme` and `cherryMarkdown.DarkTheme`. Set `cherryMarkdown.ThemeMode` to `manual` or choose a theme from Cherry's built-in theme menu to use a manual theme. The selected manual theme is stored in the extension's global state and restored when manual mode is used again.
 
 ## Settings
 

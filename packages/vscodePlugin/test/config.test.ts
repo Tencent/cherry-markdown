@@ -66,6 +66,27 @@ describe('configuration normalization', () => {
     expect(config.normalizeBackfillImageProps('isBorder')).toEqual([]);
   });
 
+  test('contributes theme settings in order and follows VS Code by default', async () => {
+    const manifest = await import('../package.json');
+    const settings = manifest.default.contributes.configuration.properties;
+    expect(settings['cherryMarkdown.ThemeMode'].default).toBe('vscode');
+    expect([
+      settings['cherryMarkdown.ThemeMode'].order,
+      settings['cherryMarkdown.LightTheme'].order,
+      settings['cherryMarkdown.DarkTheme'].order,
+    ]).toEqual([1, 2, 3]);
+  });
+
+  test('uses the contributed follow mode when no theme setting is configured', async () => {
+    const manifest = await import('../package.json');
+    const properties = manifest.default.contributes.configuration.properties;
+    getConfiguration.mockReturnValue({
+      get: (key: string) => properties[`cherryMarkdown.${key}` as keyof typeof properties]?.default,
+    });
+    vi.mocked(vscode.window).activeColorTheme = { kind: vscode.ColorThemeKind.Dark };
+    expect(config.getTheme({ get: vi.fn().mockReturnValue('green') })).toBe('dark');
+  });
+
   test('prefers the globally persisted Cherry theme', () => {
     const globalState = { get: vi.fn().mockReturnValue('dark') };
     expect(config.getTheme(globalState)).toBe('dark');
