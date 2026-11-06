@@ -4,7 +4,7 @@
 # Tauri 桌面客户端多平台构建，支持两种模式:
 #   - preview: PR 预览，产物上传为 artifact（保留 5 天）
 #   - release: 正式发布，产物上传到 GitHub Release
-# 平台: macOS (arm64/x64), Windows (x64), Linux (x64)
+# 平台: macOS (arm64/x64), Windows (x64/arm64), Linux (x64)
 # 产物: DMG, App, MSI, EXE, AppImage, Deb
 # =============================================================================
 
@@ -49,6 +49,11 @@ jobs:
             platform_name: windows
             arch: x64
             args: '--target x86_64-pc-windows-msvc'
+          - platform: windows-latest
+            target: aarch64-pc-windows-msvc
+            platform_name: windows
+            arch: arm64
+            args: '--target aarch64-pc-windows-msvc'
           - platform: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             platform_name: linux
