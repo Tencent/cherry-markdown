@@ -13,13 +13,18 @@
 }
 
 .action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: 1;
+  box-sizing: border-box;
   height: 72rpx;
+  padding: 0;
   border-radius: 8rpx;
   background: #1677ff;
   color: #ffffff;
   font-size: 28rpx;
-  line-height: 72rpx;
+  line-height: 1;
 }
 
 .secondary {
@@ -93,6 +98,16 @@
 
 .md-strike {
   text-decoration: line-through;
+}
+
+.md-sub {
+  vertical-align: sub;
+  font-size: 24rpx;
+}
+
+.md-sup {
+  vertical-align: super;
+  font-size: 24rpx;
 }
 
 .md-link {
