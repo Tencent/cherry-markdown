@@ -1,7 +1,7 @@
 # =============================================================================
 # PR 测试 — 单元测试、浏览器交互与打包消费验证
 #
-# 触发时机: 提交 PR 到 main 或 dev 分支时自动运行
+# 触发时机: 提交 PR 到 main 或 dev 分支，且修改相关包或共享构建配置时运行
 # 功能: 通过 Vite+ 统一调度各包测试；Milkdown 补充浏览器与消费验证
 # 保留现有 workflow/job 名称，兼容分支保护中的必需检查
 # =============================================================================
@@ -11,6 +11,21 @@ name: 'PR: Unit Test'
 on:
   pull_request:
     branches: [main, dev]
+    paths:
+      - 'packages/milkdown/**'
+      - 'packages/cherry-markdown/**'
+      # 共享依赖、构建输入和发布版本也会影响浏览器与消费验证。
+      - 'package.json'
+      - 'yarn.lock'
+      - '.node-version'
+      - '.npmrc'
+      - '.yarnrc*'
+      - 'tsconfig*.json'
+      - 'vite.config.*'
+      - 'build/**'
+      - 'examples/**'
+      - '.changeset/**'
+      - '.github/workflows/pr-test.yml'
 
 permissions:
   contents: read
@@ -20,25 +35,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  milkdown-changes:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      required: ${{ steps.changes.outputs.required }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Test Milkdown change detection
-        run: bash .github/scripts/test-milkdown-changes.sh
-      - name: Determine whether Milkdown checks are needed
-        id: changes
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: bash .github/scripts/milkdown-changes.sh "$BASE_SHA" "$HEAD_SHA" >> "$GITHUB_OUTPUT"
-
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -66,8 +62,6 @@ jobs:
           if-no-files-found: ignore
 
   milkdown-prepare:
-    needs: milkdown-changes
-    if: ${{ needs.milkdown-changes.outputs.required == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -162,32 +156,18 @@ jobs:
   # Keep the existing required check name and fail if any suite did not succeed.
   milkdown-browser-consumer:
     if: ${{ always() }}
-    needs: [test, milkdown-changes, milkdown-prepare, milkdown-browser, milkdown-consumer]
+    needs: [test, milkdown-prepare, milkdown-browser, milkdown-consumer]
     runs-on: ubuntu-latest
     steps:
       - name: Verify all Milkdown checks passed
         env:
           UNIT_RESULT: ${{ needs.test.result }}
-          CHANGES_RESULT: ${{ needs.milkdown-changes.result }}
-          MILKDOWN_REQUIRED: ${{ needs.milkdown-changes.outputs.required }}
           PREPARE_RESULT: ${{ needs.milkdown-prepare.result }}
           BROWSER_RESULT: ${{ needs.milkdown-browser.result }}
           CONSUMER_RESULT: ${{ needs.milkdown-consumer.result }}
         run: |
           set -eu
           test "$UNIT_RESULT" = success
-          test "$CHANGES_RESULT" = success
-          case "$MILKDOWN_REQUIRED" in
-            true)
-              test "$PREPARE_RESULT" = success
-              test "$BROWSER_RESULT" = success
-              test "$CONSUMER_RESULT" = success
-              ;;
-            false)
-              test "$PREPARE_RESULT" = skipped
-              test "$BROWSER_RESULT" = skipped
-              test "$CONSUMER_RESULT" = skipped
-              echo 'Milkdown browser and consumer checks skipped: changes are unrelated.'
-              ;;
-            *) echo 'Missing or invalid Milkdown change decision.' >&2; exit 1 ;;
-          esac
+          test "$PREPARE_RESULT" = success
+          test "$BROWSER_RESULT" = success
+          test "$CONSUMER_RESULT" = success
