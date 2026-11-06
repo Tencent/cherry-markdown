@@ -47,4 +47,10 @@ After installing Rust and the [Tauri platform prerequisites](https://v2.tauri.ap
 
 #### More
 
+### Editor regression tests
+
+Run `vp run test:client` from the workspace root for document notification, asynchronous lifecycle and file-history regressions. Run `vp run -F @cherry-markdown/client test:e2e` for Chromium checks with the real client adapters; install Chromium with Playwright first.
+
+The browser fixture uses the current Cherry source and the client editor adapters without a native Tauri shell. It checks immediate edits after programmatic writes, rapid engine changes, disposal during mounting and undo/redo across file boundaries. Both commands run in the PR test workflow. Changes to file loading must keep programmatic writes silent while preserving user notifications; clearing history must retain unrelated ProseMirror plugin state.
+
 - Now using [tauri v2.0](https://tauri.app/).

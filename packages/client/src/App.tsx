@@ -12,7 +12,7 @@ import ToastContainer from './components/ui/ToastContainer';
 import UnsavedChangesDialog from './components/ui/UnsavedChangesDialog';
 import VersionHistoryDialog from './components/ui/VersionHistoryDialog';
 import { useFileStore } from './store';
-import { notifyInfo } from './utils/notifications';
+import { notifyError, notifyInfo } from './utils/notifications';
 import { toast } from './components/composables/useToast';
 import './styles/app.css';
 
@@ -22,6 +22,7 @@ export default defineComponent({
     const fileStore = useFileStore();
     const unsavedGuard = useUnsavedGuard();
     const localVersioning = useLocalVersioning();
+    let unmounted = false;
 
     let updateEditorTitle: (unsaved?: boolean) => void = () => undefined;
     let updateWindowTitle: (path: string | null, unsaved?: boolean) => Promise<void> = async () => undefined;
@@ -123,7 +124,7 @@ export default defineComponent({
                 toast.warning('当前文件已切换，忽略本次恢复');
                 return;
               }
-              editor.setMarkdown(versionContent);
+              editor.setMarkdown(versionContent, { addToHistory: true });
               unsavedGuard.setUnsavedChanges(true);
               updateEditorTitle(true);
               notifyInfo('已应用本地版本');
@@ -137,7 +138,7 @@ export default defineComponent({
     };
 
     const handleVersionApply = (content: string): void => {
-      editor.setMarkdown(content);
+      editor.setMarkdown(content, { addToHistory: true });
       unsavedGuard.setUnsavedChanges(true);
       updateEditorTitle(true);
       historyDialogVisible.value = false;
@@ -190,10 +191,24 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      editor.initEditor();
+      try {
+        await editor.initEditor();
+      } catch (error) {
+        if (!unmounted) notifyError(`编辑器初始化失败：${error instanceof Error ? error.message : String(error)}`);
+      }
+      if (unmounted) return;
       appEvents.registerWindowEvents();
       await appEvents.registerTauriEvents();
+      if (unmounted) {
+        await appEvents.cleanupAll();
+        return;
+      }
       await windowLifecycle.mountWindowLifecycle();
+      if (unmounted) {
+        windowLifecycle.cleanupWindowLifecycle();
+        await appEvents.cleanupAll();
+        return;
+      }
       await fileOperations.restoreInitialFile();
       // 初次启动后：若已恢复的文件在本地存有更新版本，弹提示
       if (fileStore.currentFilePath) {
@@ -202,9 +217,13 @@ export default defineComponent({
     });
 
     onUnmounted(async () => {
+      unmounted = true;
       windowLifecycle.cleanupWindowLifecycle();
-      editor.disposeEditor();
-      await appEvents.cleanupAll();
+      try {
+        await editor.disposeEditor();
+      } finally {
+        await appEvents.cleanupAll();
+      }
     });
 
     return () =>

@@ -111,6 +111,34 @@ jobs:
             packages/milkdown/test-results
           if-no-files-found: ignore
 
+  client-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
+        with:
+          version-file: package.json
+          node-version-file: '.node-version'
+          cache: true
+      - name: Install dependencies
+        run: vp install
+      - name: Build Cherry styles
+        run: |
+          vp run -F cherry-markdown iconfont
+          vp run -F cherry-markdown build:styles
+      - name: Install Chromium
+        run: vp exec playwright install --with-deps chromium
+      - name: Client editor reliability
+        run: vp run -F @cherry-markdown/client test:e2e
+      - name: Upload client diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-browser-diagnostics
+          path: packages/client/test-results
+          if-no-files-found: ignore
+
   milkdown-browser-matrix:
     needs: milkdown-prepare
     runs-on: ubuntu-latest
@@ -174,19 +202,21 @@ jobs:
   # Keep the existing required check name and fail if any suite did not succeed.
   milkdown-browser-consumer:
     if: ${{ always() }}
-    needs: [test, milkdown-prepare, milkdown-browser, milkdown-browser-matrix, milkdown-consumer]
+    needs: [test, milkdown-prepare, milkdown-browser, milkdown-browser-matrix, milkdown-consumer, client-browser]
     runs-on: ubuntu-latest
     steps:
-      - name: Verify all Milkdown checks passed
+      - name: Verify all test checks passed
         env:
           UNIT_RESULT: ${{ needs.test.result }}
           PREPARE_RESULT: ${{ needs.milkdown-prepare.result }}
           BROWSER_RESULT: ${{ needs.milkdown-browser.result }}
           MATRIX_RESULT: ${{ needs.milkdown-browser-matrix.result }}
           CONSUMER_RESULT: ${{ needs.milkdown-consumer.result }}
+          CLIENT_RESULT: ${{ needs.client-browser.result }}
         run: |
           test "$UNIT_RESULT" = success
           test "$PREPARE_RESULT" = success
           test "$BROWSER_RESULT" = success
           test "$MATRIX_RESULT" = success
           test "$CONSUMER_RESULT" = success
+          test "$CLIENT_RESULT" = success

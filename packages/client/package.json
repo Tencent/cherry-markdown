@@ -8,7 +8,9 @@
     "build": "node ./scripts/sync-version.js && vue-tsc --noEmit && vp build",
     "tauri:build": "tauri build",
     "preview": "vp preview",
-    "version:sync": "node ./scripts/sync-version.js"
+    "version:sync": "node ./scripts/sync-version.js",
+    "test": "vp test run --config vitest.config.ts",
+    "test:e2e": "playwright test --config playwright.config.ts"
   },
   "dependencies": {
     "@codemirror/language": "^6.12.2",
