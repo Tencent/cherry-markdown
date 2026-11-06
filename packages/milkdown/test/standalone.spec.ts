@@ -185,11 +185,7 @@ describe('standalone contracts', () => {
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, 9)));
     view.focus();
-    view.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true, cancelable: true }));
-    const form = document.querySelector<HTMLFormElement>('.cherry-milkdown-link-editor')!;
-    expect(form.hidden).toBe(false);
-    form.querySelector<HTMLButtonElement>('[aria-label="取消链接"]')!.click();
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    document.querySelector<HTMLButtonElement>('.cherry-milkdown-link-bubble [aria-label="取消链接"]')!.click();
     expect(instance.getMarkdown().trimEnd()).toBe('Before **Link** after.');
     expect(document.querySelector('.cherry-link-target')).toBeNull();
     expect(undo(view.state, view.dispatch)).toBe(true);
@@ -198,6 +194,58 @@ describe('standalone contracts', () => {
     expect(document.querySelector('.ProseMirror strong')?.textContent).toBe('Link');
     expect(redo(view.state, view.dispatch)).toBe(true);
     expect(instance.getMarkdown().trimEnd()).toBe('Before **Link** after.');
+  });
+
+  it('gives each link form its own validation description', async () => {
+    await create('[first](https://one.example)');
+    await create('[second](https://two.example)');
+    const inputs = [...document.querySelectorAll<HTMLInputElement>('.cherry-milkdown-link-editor input[name="href"]')];
+    expect(inputs).toHaveLength(2);
+    const ids = inputs.map((input) => input.getAttribute('aria-describedby'));
+    expect(new Set(ids).size).toBe(2);
+    for (const input of inputs) {
+      const description = document.getElementById(input.getAttribute('aria-describedby')!);
+      expect(description?.closest('form')).toBe(input.closest('form'));
+    }
+  });
+
+  it('keeps a draft link edit in the viewport after its anchor scrolls offscreen', async () => {
+    const width = vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(360);
+    const height = vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(640);
+    try {
+      const instance = await create('[Link](https://example.com)');
+      const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+      const anchor = view.dom.querySelector('a')!;
+      vi.spyOn(anchor, 'getBoundingClientRect').mockReturnValue({
+        left: 10,
+        top: -200,
+        bottom: -180,
+        width: 50,
+      } as DOMRect);
+      view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, 2)));
+      view.focus();
+      view.dom.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true, cancelable: true }),
+      );
+      const form = document.querySelector<HTMLFormElement>('.cherry-milkdown-link-editor')!;
+      const input = form.querySelector<HTMLInputElement>('input[name="href"]')!;
+      input.value = './draft.md';
+      await vi.waitFor(() => expect(document.activeElement).toBe(input));
+      window.dispatchEvent(new Event('scroll'));
+      window.dispatchEvent(new Event('resize'));
+      await vi.waitFor(() => expect(form.style.top).toBe('8px'));
+      expect(form.hidden).toBe(false);
+      expect(form.style.width).toBe('344px');
+      expect(input.value).toBe('./draft.md');
+      expect(document.activeElement).toBe(input);
+      expect(instance.getMarkdown()).toBe('[Link](https://example.com)');
+      form.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+      expect(form.hidden).toBe(true);
+      expect(instance.getMarkdown()).toBe('[Link](https://example.com)');
+    } finally {
+      width.mockRestore();
+      height.mockRestore();
+    }
   });
 
   it('sanitizes configured fenced renderer strings on creation and hot updates', async () => {

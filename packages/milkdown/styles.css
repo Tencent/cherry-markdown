@@ -1060,11 +1060,10 @@
 
 .cherry-milkdown-link-bubble__href {
   display: inline-flex;
-  flex: 1 1 160px;
+  flex: 0 0 auto;
   align-items: center;
   box-sizing: border-box;
   min-width: 0;
-  max-width: 280px;
   height: var(--bubble-btn-height, 40px);
   padding: var(--bubble-padding, 0 8px);
   overflow: hidden;
@@ -1077,11 +1076,44 @@
 .cherry-milkdown-link-bubble__href:hover,
 .cherry-milkdown-link-bubble__href:focus-visible {
   color: var(--toolbar-btn-hover-color, var(--md-link-color, #366ef4));
-  outline: none;
+  background: var(--toolbar-btn-hover-bg, rgb(54 110 244 / 10%));
+  border-radius: var(--toolbar-btn-radius, 6px);
+}
+
+.cherry-milkdown .cherry-milkdown-link-bubble a:focus-visible,
+.cherry-milkdown .cherry-milkdown-link-bubble button:focus-visible {
+  outline: 2px solid var(--md-link-color, #366ef4);
+  outline-offset: -2px;
+}
+
+.cherry-milkdown-link-bubble__separator {
+  flex: 0 0 var(--border-width-1, 1px);
+  height: calc(var(--bubble-btn-height, 40px) * 0.5);
+  margin: 0 var(--spacing-xs, 4px);
+  background: var(--bubble-border, var(--base-border-color, #d8dce5));
+}
+
+.cherry-milkdown-link-bubble__unlink-icon {
+  position: relative;
+}
+
+/* Reuse Cherry's link glyph, with a current-color cancellation stroke. */
+.cherry-milkdown-link-bubble__unlink-icon::after {
+  position: absolute;
+  width: 18px;
+  border-top: 1px solid currentColor;
+  content: '';
+  transform: rotate(45deg);
 }
 
 .cherry-milkdown-link-editor {
-  padding: calc(var(--cherry-milkdown-context-padding) * 1.5);
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+  gap: 12px;
+  padding: 16px;
+  border-color: color-mix(in srgb, var(--base-font-color, #3f4654) 16%, var(--bubble-bg, #fff));
+  border-radius: 8px;
+  font-size: 14px;
 }
 
 .cherry-milkdown-link-editor[hidden] {
@@ -1090,13 +1122,48 @@
 
 .cherry-milkdown-link-editor label {
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr);
+  grid-template-columns: 72px minmax(0, 1fr);
   align-items: center;
-  gap: var(--cherry-milkdown-context-gap);
+  gap: 12px;
+}
+
+.cherry-milkdown-link-editor .cherry-milkdown-context-form__input {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border-color: color-mix(in srgb, var(--base-font-color, #3f4654) 20%, var(--bubble-bg, #fff));
+  border-radius: 7px;
+}
+
+.cherry-milkdown-link-editor .cherry-milkdown-context-form__input:focus {
+  border-color: var(--md-link-color, #366ef4);
+  outline-color: var(--md-link-color, #366ef4);
+}
+
+.cherry-milkdown-link-editor__target {
+  position: relative;
+}
+
+.cherry-milkdown-link-editor .cherry-milkdown-link-editor__target select {
+  appearance: none;
+  padding-right: 36px;
+}
+
+.cherry-milkdown-link-editor__target::after {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  content: '';
+  pointer-events: none;
+  transform: translateY(-70%) rotate(45deg);
 }
 
 .cherry-milkdown-link-editor__error {
-  margin: -2px 0 0 72px;
+  margin: -2px 0 0 84px;
   color: var(--error-color, #d54941);
   font-size: 12px;
   line-height: 18px;
@@ -1109,7 +1176,15 @@
 .cherry-milkdown-link-editor__actions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--cherry-milkdown-context-gap);
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.cherry-milkdown-link-editor__actions .cherry-toolbar-button {
+  min-width: 60px;
+  height: 36px;
+  min-height: 36px;
+  border-radius: 7px;
 }
 
 .cherry-milkdown .cherry-compound__title:focus::placeholder,

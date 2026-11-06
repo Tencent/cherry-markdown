@@ -334,9 +334,9 @@ test('link inspector exposes and updates both visible text and href', async ({ p
       return { width: rect.width, height: rect.height, center: rect.top + rect.height / 2 };
     }),
   );
-  expect(buttonBoxes.map(({ width }) => width)).toEqual([38, 38]);
-  expect(buttonBoxes.map(({ height }) => height)).toEqual([38, 38]);
-  await expect(inspector.locator('.cherry-milkdown-context-button__content')).toHaveCount(2);
+  expect(buttonBoxes.map(({ width }) => width)).toEqual([38, 38, 38]);
+  expect(buttonBoxes.map(({ height }) => height)).toEqual([38, 38, 38]);
+  await expect(inspector.locator('.cherry-milkdown-context-button__content')).toHaveCount(3);
   expect(
     await inspector.locator('.cherry-milkdown-context-button__content').evaluateAll((contents) =>
       contents.map((content) => {
@@ -347,11 +347,15 @@ test('link inspector exposes and updates both visible text and href', async ({ p
   ).toEqual([
     [32, 32],
     [32, 32],
+    [32, 32],
   ]);
   expect(
     Math.max(...buttonBoxes.map(({ center }) => center)) - Math.min(...buttonBoxes.map(({ center }) => center)),
   ).toBeLessThanOrEqual(0.5);
-  await expect(inspector.getByRole('link')).toHaveText('https://old.example/path');
+  await expect(inspector.getByRole('link')).toHaveText('打开链接');
+  await expect(inspector.getByRole('link')).toHaveAttribute('href', 'https://old.example/path');
+  await expect(inspector.getByRole('link')).toHaveAttribute('title', 'https://old.example/path');
+  await expect(inspector.locator('.cherry-milkdown-link-bubble__separator')).toHaveCount(2);
   await expect(page.getByRole('toolbar', { name: '文本格式' })).toBeHidden();
   await inspector.getByRole('button', { name: '复制链接' }).click();
   await expect(inspector.getByRole('button', { name: '已复制' })).toBeVisible();
@@ -362,12 +366,6 @@ test('link inspector exposes and updates both visible text and href', async ({ p
   await expect(dialog).toBeVisible();
   await expect(dialog).toHaveClass(/cherry-milkdown-context-form/);
   await expect(inspector).toBeHidden();
-  await expect(dialog.getByRole('button', { name: '取消链接' })).toBeVisible();
-  await dialog.getByRole('button', { name: '取消链接' }).click();
-  await expect(dialog.getByRole('button', { name: '保留链接' })).toBeVisible();
-  await expect(dialog.getByRole('button', { name: '确认取消链接' })).toBeVisible();
-  await dialog.getByRole('button', { name: '保留链接' }).click();
-  await expect(dialog.getByRole('button', { name: '取消链接' })).toBeVisible();
   await expect(dialog.getByRole('button', { name: '保存' })).toBeVisible();
   await expect(page.getByRole('toolbar', { name: '文本格式' })).toBeHidden();
   await expect(dialog.getByLabel('链接显示文本')).toHaveValue('Mermaid 讲解');
@@ -462,10 +460,7 @@ test('link inspector keeps adjacent links isolated and reports invalid input', a
   await links.first().click({ position: { x: 8, y: 8 } });
   await second.click({ position: { x: 8, y: 8 } });
   await expect(inspector).toBeVisible();
-  await inspector.getByRole('button', { name: '编辑链接' }).click();
-  await expect(dialog).toBeVisible();
-  await dialog.getByRole('button', { name: '取消链接' }).click();
-  await dialog.getByRole('button', { name: '确认取消链接' }).click();
+  await inspector.getByRole('button', { name: '取消链接' }).click();
   await expect(links).toHaveCount(1);
   await expect(links.first()).toHaveAttribute('href', 'https://one.example');
   expect(await markdown(page)).toContain('[first](https://one.example) second');
@@ -476,11 +471,7 @@ test('unlink removes Cherry target metadata atomically and supports undo/redo', 
   const paragraph = page.locator('.ProseMirror > p').first();
   const link = paragraph.locator('a');
   await link.click();
-  await page.getByRole('toolbar', { name: '链接' }).getByRole('button', { name: '编辑链接' }).click();
-  const dialog = page.getByRole('dialog', { name: '编辑链接' });
-  await dialog.getByRole('button', { name: '取消链接', exact: true }).click();
-  await expect(link).toHaveCount(1);
-  await dialog.getByRole('button', { name: '确认取消链接' }).click();
+  await page.getByRole('toolbar', { name: '链接' }).getByRole('button', { name: '取消链接' }).click();
   await expect(link).toHaveCount(0);
   await expect(paragraph.locator('strong')).toHaveText('Link');
   await expect(page.locator('.cherry-link-target')).toHaveCount(0);

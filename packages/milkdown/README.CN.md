@@ -52,6 +52,8 @@ export function Editor() {
 - 使用公式时，请在应用中额外引入 `mathlive/fonts.css`；基础样式不强制依赖可选的 MathLive peer。
 - `fileUpload`：可选的图片文件上传函数。选择文件后仅回填地址和图片属性，用户点击“保存”后才写入 Markdown。
 
+光标进入链接时显示“打开链接 / 复制 / 编辑 / 取消链接”操作条，外观跟随 Cherry 主题。按 `Alt+F10` 可将焦点移入链接操作条，再用 Tab 切换操作、Escape 返回编辑器；编辑器中的 Tab 原有行为不变。取消链接保留文字和其他格式，可通过撤销恢复；编辑表单在滚动和调整窗口大小时保留未保存输入。`Ctrl/Cmd+K` 可编辑当前链接或为选中文字添加链接。
+
 ```ts
 import { echarts, tableChart } from '@cherry-markdown/milkdown/echarts';
 await cherryMilkdown({ root: '#markdown', value: markdown, renderers: { echarts, tableChart } });
