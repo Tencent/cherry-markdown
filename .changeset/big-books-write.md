@@ -2,4 +2,4 @@
 'cherry-markdown': patch
 ---
 
-feat: 提供frontMatter读写API
+feat(frontMatter): 提供 frontMatter 读写 API
