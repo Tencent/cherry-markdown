@@ -3,7 +3,7 @@
 #
 # 触发时机: 提交 PR 到 main 或 dev 分支，且修改相关包或共享构建配置时运行
 # 功能: 通过 Vite+ 统一调度各包测试；Milkdown 补充浏览器与消费验证
-# 保留现有 workflow/job 名称，兼容分支保护中的必需检查
+# 保留现有 workflow 和汇总 job 名称
 # =============================================================================
 
 name: 'PR: Unit Test'
@@ -61,9 +61,9 @@ jobs:
             packages/milkdown/coverage
           if-no-files-found: ignore
 
-  milkdown-prepare:
+  milkdown:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
       - uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
@@ -72,102 +72,44 @@ jobs:
           node-version-file: '.node-version'
           cache: true
       - name: Build Cherry and Milkdown artifacts
+        id: build
         run: |
           vp run -F cherry-markdown build
           vp run -F @cherry-markdown/milkdown build:demo:prepared
           vp run -F @cherry-markdown/milkdown prepare:ci-artifacts
-      - uses: actions/upload-artifact@v4
-        with:
-          name: milkdown-demo-artifacts
-          path: packages/milkdown/preview
-          if-no-files-found: error
-          retention-days: 5
-      - uses: actions/upload-artifact@v4
-        with:
-          name: milkdown-consumer-artifacts
-          path: packages/milkdown/artifacts/consumer
-          if-no-files-found: error
-          retention-days: 5
-
-  milkdown-browser:
-    needs: milkdown-prepare
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2]
-    steps:
-      - uses: actions/checkout@v6
-      - uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
-        with:
-          version-file: package.json
-          node-version-file: '.node-version'
-          cache: true
-      - uses: actions/download-artifact@v4
-        with:
-          name: milkdown-demo-artifacts
-          path: packages/milkdown/preview
-      - name: Verify demo artifact provenance
-        run: vp run -F @cherry-markdown/milkdown verify:demo-artifact
       - name: Install Chromium
+        id: chromium
         run: vp exec playwright install --with-deps chromium
       - name: Browser interactions
-        run: vp run -F @cherry-markdown/milkdown test:e2e --fully-parallel --shard=${{ matrix.shard }}/2
+        run: vp run -F @cherry-markdown/milkdown test:e2e --fully-parallel --workers=2
         env:
           MILKDOWN_E2E_DEMO_PREBUILT: '1'
-      - name: Upload browser diagnostics
+      - name: Verify packed consumers
+        # 浏览器用例失败后仍验证消费场景，取消或准备失败时跳过。
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.chromium.outcome == 'success' }}
+        run: vp run -F @cherry-markdown/milkdown test:consumer:ci
+      - name: Upload Milkdown diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: milkdown-browser-diagnostics-${{ matrix.shard }}
+          name: milkdown-diagnostics
           path: |
             packages/milkdown/playwright-report
             packages/milkdown/test-results
-          if-no-files-found: ignore
-
-  milkdown-consumer:
-    needs: milkdown-prepare
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v6
-      - uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
-        with:
-          version-file: package.json
-          node-version-file: '.node-version'
-          cache: true
-      - uses: actions/download-artifact@v4
-        with:
-          name: milkdown-consumer-artifacts
-          path: packages/milkdown/artifacts/consumer
-      - name: Install Chromium
-        run: vp exec playwright install --with-deps chromium
-      - name: Verify packed consumers
-        run: vp run -F @cherry-markdown/milkdown test:consumer:ci
-      - name: Upload consumer diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: milkdown-consumer-diagnostics
-          path: packages/milkdown/artifacts/diagnostics
+            packages/milkdown/artifacts/diagnostics
           if-no-files-found: ignore
 
   # Keep the existing required check name and fail if any suite did not succeed.
   milkdown-browser-consumer:
     if: ${{ always() }}
-    needs: [test, milkdown-prepare, milkdown-browser, milkdown-consumer]
+    needs: [test, milkdown]
     runs-on: ubuntu-latest
     steps:
       - name: Verify all Milkdown checks passed
         env:
           UNIT_RESULT: ${{ needs.test.result }}
-          PREPARE_RESULT: ${{ needs.milkdown-prepare.result }}
-          BROWSER_RESULT: ${{ needs.milkdown-browser.result }}
-          CONSUMER_RESULT: ${{ needs.milkdown-consumer.result }}
+          MILKDOWN_RESULT: ${{ needs.milkdown.result }}
         run: |
           set -eu
           test "$UNIT_RESULT" = success
-          test "$PREPARE_RESULT" = success
-          test "$BROWSER_RESULT" = success
-          test "$CONSUMER_RESULT" = success
+          test "$MILKDOWN_RESULT" = success
