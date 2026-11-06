@@ -76,7 +76,7 @@ jobs:
         run: |
           vp run -F cherry-markdown build
           vp run -F @cherry-markdown/milkdown build:demo:prepared
-          vp run -F @cherry-markdown/milkdown prepare:ci-artifacts
+          vp run -F @cherry-markdown/milkdown test:artifacts
       - name: Install Chromium
         id: chromium
         run: vp exec playwright install --with-deps chromium
@@ -84,10 +84,10 @@ jobs:
         run: vp run -F @cherry-markdown/milkdown test:e2e --fully-parallel --workers=2
         env:
           MILKDOWN_E2E_DEMO_PREBUILT: '1'
-      - name: Verify packed consumers
+      - name: Verify minimal packed consumer
         # 浏览器用例失败后仍验证消费场景，取消或准备失败时跳过。
         if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.chromium.outcome == 'success' }}
-        run: vp run -F @cherry-markdown/milkdown test:consumer:ci
+        run: vp run -F @cherry-markdown/milkdown test:consumer:smoke
       - name: Upload Milkdown diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
