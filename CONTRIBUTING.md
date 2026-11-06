@@ -109,19 +109,22 @@ docs: update contribution workflow
 
 会进入发布包的改动，应在 `.changeset/<形容词-名词>.md` 中准确列出受影响的包和版本级别，并说明用户可见变化。纯文档、测试或内部 CI 改动通常不需要 changeset。
 
-提交信息记录一次提交，changeset 则供版本发布和生成 changelog 使用。两者各自填写：提交信息遵循上面的 Conventional Commits 约定；changeset 的 YAML 头部声明包及版本级别，正文首行使用 `type(scope): 中文描述`。英文冒号后保留一个空格；包名、代码标识和必要的技术术语可以保留原文。例如：
+提交信息记录一次提交，changeset 则供版本发布和生成 changelog 使用。两者各自填写：提交信息遵循上面的 Conventional Commits 约定；changeset 的 YAML 头部声明包及版本级别，正文首行使用 `type: 中文描述` 或 `type(scope): 中文描述`。英文冒号后保留一个空格；包名、代码标识和必要的技术术语可以保留原文。例如：
 
 ```md
 ---
 "cherry-markdown-vscode-plugin": minor
 ---
 
-feat(vscodePlugin): 支持跟随 VS Code 主题并在预览中搜索
+feat: 支持跟随 VS Code 主题并在预览中搜索
+
+  - 根据 VS Code 浅色或深色主题自动切换预览主题。
+  - 在预览中搜索并跳转到上一个或下一个匹配项。
 ```
 
-- `type` 描述变更性质，例如 `feat`、`fix`、`perf`、`refactor` 或 `docs`；`scope` 指明受影响的项目或功能。
+- `type` 描述变更性质，例如 `feat`、`fix`、`perf`、`refactor` 或 `docs`；`scope` 可选，确有助于区分受影响的项目或功能时再填写，避免与正文重复。
 - 版本级别 `patch`、`minor` 或 `major` 根据兼容性和项目发布约定选择，不由 `type` 自动决定。
-- 正文及补充说明使用中文，面向用户准确说明变更；需要补充细节时，可在首行后空一行再写说明或列表。
+- 正文及补充说明使用中文，面向用户准确说明变更。需要列出多项细节时，在首行后空一行，每个列表项前缩进两个空格，使用如上示例的二级列表，确保生成的 changelog 中细节归属于该变更。
 - 同一 changeset 可以在头部列出多个受影响的包及其各自的版本级别。无需把提交信息原文复制到 changeset，也不要手工编辑生成的 changelog。
 
 - PR 的目标分支通常是 `dev`；不要把无关的历史合并进功能分支。

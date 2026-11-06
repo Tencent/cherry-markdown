@@ -2,4 +2,4 @@
 'cherry-markdown': patch
 ---
 
-feat(syntax): 支持 GFM Alerts 语法
+feat: 支持 GFM Alerts 语法
