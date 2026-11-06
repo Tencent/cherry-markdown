@@ -74,6 +74,10 @@ export default defineConfig({
     // completely blank application.
     alias: [
       {
+        find: /^@cherry-markdown\/milkdown\/style\.css$/,
+        replacement: resolve(packageRoot, 'styles.css'),
+      },
+      {
         find: /^@cherry-markdown\/milkdown\/echarts$/,
         replacement: resolve(packageRoot, 'src/renderers/echarts.ts'),
       },

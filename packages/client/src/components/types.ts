@@ -16,6 +16,7 @@ export interface DirectoryNode {
   path: string;
   name: string;
   type: 'file' | 'directory';
+  hidden?: boolean;
   expanded?: boolean;
   children?: DirectoryNode[];
   lastModified?: number;

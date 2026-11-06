@@ -26,6 +26,14 @@
   background: var(--color-surface-hover);
 }
 
+.directory-node .directory-item.hidden > .directory-header {
+  opacity: 0.58;
+}
+
+.directory-node .directory-item.hidden > .directory-header:hover {
+  opacity: 0.72;
+}
+
 .directory-node .directory-icon {
   flex-shrink: 0;
   color: #ffb74d;
@@ -70,17 +78,27 @@
     color 0.18s ease;
   gap: 8px;
   border-radius: var(--radius-sm);
-  margin-left: 16px;
   color: var(--color-text);
+  user-select: none;
 }
 
 .directory-node .file-item:hover {
   background: var(--color-surface-hover);
 }
 
+.directory-node .file-item.hidden {
+  opacity: 0.58;
+}
+
+.directory-node .file-item.hidden:hover,
+.directory-node .file-item.hidden.active {
+  opacity: 0.72;
+}
+
 .directory-node .file-item.active {
   background: var(--color-accent-soft);
   color: var(--color-accent-strong);
+  user-select: text;
 }
 
 .directory-node .file-item.active::before {

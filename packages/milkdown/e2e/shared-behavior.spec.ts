@@ -52,6 +52,87 @@ test('link editing rejects encoded schemes using the Cherry policy without chang
   expect(await markdown(page)).toBe(saved);
 });
 
+test('link actions support keyboard dismissal and one-step unlink with undo', async ({ page }) => {
+  const source = 'Before [one **two** three](https://example.com){target=_blank} after.';
+  await setMarkdown(page, source);
+  const link = page.locator('.ProseMirror a').last();
+  await link.click({ position: { x: 8, y: 8 } });
+  const toolbar = page.getByRole('toolbar', { name: '链接', exact: true });
+  await expect(toolbar).toBeVisible();
+  const open = toolbar.getByRole('link');
+  await expect(open).toHaveText('打开链接');
+  await expect(open).toHaveAttribute('href', 'https://example.com');
+  await page.keyboard.press('Alt+F10');
+  await expect(open).toBeFocused();
+  expect(await markdown(page)).toBe(source);
+  await page.keyboard.press('Tab');
+  await expect(toolbar.getByRole('button', { name: '复制链接' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(toolbar).toBeHidden();
+  await expect(page.locator('.ProseMirror')).toBeFocused();
+  expect(await markdown(page)).toBe(source);
+
+  await page.keyboard.press('Alt+F10');
+  await expect(open).toBeFocused();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await expect(toolbar.getByRole('button', { name: '编辑链接' })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(toolbar.getByRole('button', { name: '取消链接' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.ProseMirror a')).toHaveCount(0);
+  await expect(page.locator('.ProseMirror strong')).toHaveText('two');
+  expect(await markdown(page)).not.toContain('{target=');
+  await page.keyboard.press('ControlOrMeta+z');
+  expect(await markdown(page)).toBe(source);
+  await page.keyboard.press('ControlOrMeta+Shift+z');
+  await expect(page.locator('.ProseMirror a')).toHaveCount(0);
+});
+
+test('link action shortcut leaves ordinary text and Tab editing behavior intact', async ({ page }) => {
+  await setMarkdown(page, 'Plain text');
+  const paragraph = page.locator('.ProseMirror > p').first();
+  await paragraph.click();
+  const saved = await markdown(page);
+  await page.keyboard.press('Alt+F10');
+  await expect(page.locator('.ProseMirror')).toBeFocused();
+  expect(await markdown(page)).toBe(saved);
+  await page.keyboard.press('Tab');
+  expect(await paragraph.textContent()).toContain('  ');
+});
+
+test('unsaved link fields and focus survive document scrolling and viewport resizing', async ({ page }) => {
+  await setMarkdown(
+    page,
+    ['[link](https://example.com)', ...Array.from({ length: 35 }, (_, i) => `Paragraph ${i}`)].join('\n\n'),
+  );
+  const saved = await markdown(page);
+  await page.locator('.ProseMirror a').click();
+  await page.getByRole('toolbar', { name: '链接', exact: true }).getByRole('button', { name: '编辑链接' }).click();
+  const form = page.getByRole('dialog', { name: '编辑链接' });
+  const input = form.getByLabel('链接地址');
+  await input.fill('./一个很长的相对路径/文档.md');
+  await page.evaluate(() => window.scrollBy(0, 100));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  await expect(form).toBeVisible();
+  await expect(input).toBeFocused();
+  await expect(input).toHaveValue('./一个很长的相对路径/文档.md');
+  await page.setViewportSize({ width: 360, height: 640 });
+  await expect(form).toBeVisible();
+  await expect(input).toBeFocused();
+  await expect(input).toHaveValue('./一个很长的相对路径/文档.md');
+  await expect
+    .poll(async () => {
+      const rect = await form.boundingBox();
+      return Boolean(rect && rect.x >= 8 && rect.x + rect.width <= 352 && rect.y >= 8 && rect.y + rect.height <= 632);
+    })
+    .toBe(true);
+  expect(await markdown(page)).toBe(saved);
+  await page.keyboard.press('Escape');
+  await expect(form).toBeHidden();
+  expect(await markdown(page)).toBe(saved);
+});
+
 test('typed and imported Cherry extensions share their grammar and retain undo', async ({ page }) => {
   for (const [source, type, text] of [
     ['!!red red!!', 'cherry_color', 'red'],

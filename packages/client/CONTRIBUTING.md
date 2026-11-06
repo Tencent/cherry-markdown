@@ -30,15 +30,16 @@ yarn dev:client
 
 ```
 
-- Build the client together with the current Cherry Markdown package.
+- Build the current Cherry Markdown package, then build the client frontend.
 
 ```shell
+yarn build:core
 yarn build:client
 ```
 
-The root command runs the package `tauri:dev` script through Vite+, which invokes the Tauri CLI. After installing Rust and the platform dependencies, it starts the native window and the Vite dev server configured in `src-tauri/tauri.conf.json`.
+`yarn dev:client` runs the package `tauri:dev` script through Vite+ and starts the native window and configured Vite dev server. `yarn build:client` runs the client `build` script, which checks types and builds frontend assets; it does not build the Cherry package or create a native installer. Build Cherry first when its current source is needed.
 
-For the native Tauri bundle, run:
+After installing Rust and the [Tauri platform prerequisites](https://v2.tauri.app/start/prerequisites/), build Cherry first if needed, then create the native Tauri bundle:
 
 ```shell
 ./node_modules/.bin/vp run -F @cherry-markdown/client tauri:build

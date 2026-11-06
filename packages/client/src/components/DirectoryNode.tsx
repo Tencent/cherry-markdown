@@ -26,7 +26,7 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const renderDirectory = (node: DirectoryNodeType, depth: number): VNode =>
-      h('div', { class: ['directory-item', { expanded: node.expanded }] }, [
+      h('div', { class: ['directory-item', { expanded: node.expanded, hidden: node.hidden }] }, [
         h(
           'div',
           {
@@ -55,7 +55,7 @@ export default defineComponent({
       h(
         'div',
         {
-          class: ['file-item', { active: node.path === props.currentFilePath }],
+          class: ['file-item', { active: node.path === props.currentFilePath, hidden: node.hidden }],
           'data-path': node.path,
           onClick: () => emit('openFile', node.path),
           onContextmenu: (event: MouseEvent) => {
