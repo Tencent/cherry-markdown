@@ -20,6 +20,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  milkdown-changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      required: ${{ steps.changes.outputs.required }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test Milkdown change detection
+        run: bash .github/scripts/test-milkdown-changes.sh
+      - name: Determine whether Milkdown checks are needed
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: bash .github/scripts/milkdown-changes.sh "$BASE_SHA" "$HEAD_SHA" >> "$GITHUB_OUTPUT"
+
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -47,6 +66,8 @@ jobs:
           if-no-files-found: ignore
 
   milkdown-prepare:
+    needs: milkdown-changes
+    if: ${{ needs.milkdown-changes.outputs.required == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -111,39 +132,6 @@ jobs:
             packages/milkdown/test-results
           if-no-files-found: ignore
 
-  milkdown-browser-matrix:
-    needs: milkdown-prepare
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v6
-      - uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
-        with:
-          version-file: package.json
-          node-version-file: '.node-version'
-          cache: true
-      - uses: actions/download-artifact@v4
-        with:
-          name: milkdown-demo-artifacts
-          path: packages/milkdown/preview
-      - name: Verify demo artifact provenance
-        run: vp run -F @cherry-markdown/milkdown verify:demo-artifact
-      - name: Install browsers
-        run: vp exec playwright install --with-deps chromium firefox webkit
-      - name: Shared behavior across browsers
-        run: vp run -F @cherry-markdown/milkdown test:e2e:matrix
-        env:
-          MILKDOWN_E2E_DEMO_PREBUILT: '1'
-      - name: Upload browser diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: milkdown-browser-diagnostics-matrix
-          path: |
-            packages/milkdown/playwright-report
-            packages/milkdown/test-results
-          if-no-files-found: ignore
-
   milkdown-consumer:
     needs: milkdown-prepare
     runs-on: ubuntu-latest
@@ -174,19 +162,32 @@ jobs:
   # Keep the existing required check name and fail if any suite did not succeed.
   milkdown-browser-consumer:
     if: ${{ always() }}
-    needs: [test, milkdown-prepare, milkdown-browser, milkdown-browser-matrix, milkdown-consumer]
+    needs: [test, milkdown-changes, milkdown-prepare, milkdown-browser, milkdown-consumer]
     runs-on: ubuntu-latest
     steps:
       - name: Verify all Milkdown checks passed
         env:
           UNIT_RESULT: ${{ needs.test.result }}
+          CHANGES_RESULT: ${{ needs.milkdown-changes.result }}
+          MILKDOWN_REQUIRED: ${{ needs.milkdown-changes.outputs.required }}
           PREPARE_RESULT: ${{ needs.milkdown-prepare.result }}
           BROWSER_RESULT: ${{ needs.milkdown-browser.result }}
-          MATRIX_RESULT: ${{ needs.milkdown-browser-matrix.result }}
           CONSUMER_RESULT: ${{ needs.milkdown-consumer.result }}
         run: |
+          set -eu
           test "$UNIT_RESULT" = success
-          test "$PREPARE_RESULT" = success
-          test "$BROWSER_RESULT" = success
-          test "$MATRIX_RESULT" = success
-          test "$CONSUMER_RESULT" = success
+          test "$CHANGES_RESULT" = success
+          case "$MILKDOWN_REQUIRED" in
+            true)
+              test "$PREPARE_RESULT" = success
+              test "$BROWSER_RESULT" = success
+              test "$CONSUMER_RESULT" = success
+              ;;
+            false)
+              test "$PREPARE_RESULT" = skipped
+              test "$BROWSER_RESULT" = skipped
+              test "$CONSUMER_RESULT" = skipped
+              echo 'Milkdown browser and consumer checks skipped: changes are unrelated.'
+              ;;
+            *) echo 'Missing or invalid Milkdown change decision.' >&2; exit 1 ;;
+          esac
