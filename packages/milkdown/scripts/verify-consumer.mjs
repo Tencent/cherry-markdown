@@ -14,12 +14,7 @@ import {
 } from './consumer-artifacts.mjs';
 
 const { values } = parseArgs({
-  options: {
-    artifacts: { type: 'string' },
-    release: { type: 'boolean' },
-    smoke: { type: 'boolean' },
-    'expected-version': { type: 'string' },
-  },
+  options: { artifacts: { type: 'string' }, release: { type: 'boolean' }, 'expected-version': { type: 'string' } },
 });
 const variant = values.release ? 'release' : 'planned';
 if (!values.artifacts) {
@@ -271,70 +266,67 @@ if (existsSync(join(fixture, 'node_modules/mathlive')))
 writeEntry();
 build('workspace Cherry, MathLive absent');
 await checkRuntime('workspace Cherry, MathLive absent', 'base');
-// PR smoke checks stop after one current-package build and browser probe.
-if (!values.smoke) {
-  const minimumCherry = manifest.peerDependencies['cherry-markdown'].match(/\d+\.\d+\.\d+/)?.[0];
-  if (!minimumCherry) throw new Error('Unable to identify the declared minimum Cherry version.');
-  let published;
-  try {
-    published = {
-      status: 0,
-      stdout: npm(['view', `cherry-markdown@${minimumCherry}`, 'version', '--json'], {
-        cwd: fixture,
-        env: childEnv,
-        encoding: 'utf8',
-      }),
-    };
-  } catch (error) {
-    published = { status: error.status, stdout: error.stdout?.toString(), stderr: error.stderr?.toString(), error };
-  }
-  let minimumSource = `cherry-markdown@${minimumCherry}`;
-  let minimumLabel = `published Cherry ${minimumCherry}`;
-  if (published.status !== 0) {
-    let registryError;
-    try {
-      registryError = JSON.parse(published.stdout).error;
-    } catch {
-      /* Report the original failure below. */
-    }
-    if (registryError?.code !== 'E404')
-      throw new Error(`Registry lookup failed: ${published.stderr}`, { cause: published.error });
-    if (cherryManifest.version !== minimumCherry)
-      throw new Error(`Unpublished minimum ${minimumCherry} must match planned Cherry ${cherryManifest.version}.`);
-    minimumSource = cherryTarball;
-    minimumLabel = `planned minimum Cherry ${minimumCherry} (not yet published)`;
-  } else if (JSON.parse(published.stdout) !== minimumCherry) {
-    throw new Error(`Registry did not resolve the declared minimum ${minimumCherry}.`);
-  }
-  run('npm', ['install', '--ignore-scripts', '--strict-peer-deps', '--no-audit', '--no-fund', minimumSource]);
-  build(`${minimumLabel}, MathLive absent`);
-  await checkRuntime(`${minimumLabel}, MathLive absent`, 'base');
-  run('npm', [
-    'install',
-    '--ignore-scripts',
-    '--strict-peer-deps',
-    '--no-audit',
-    '--no-fund',
-    `echarts@${manifest.peerDependencies.echarts}`,
-  ]);
-  writeEntry(true);
-  build(`${minimumLabel}, charts enabled`);
-  await checkRuntime(minimumLabel);
-  run('npm', ['install', '--ignore-scripts', '--strict-peer-deps', '--no-audit', '--no-fund', cherryTarball]);
-  build('workspace Cherry, charts enabled');
-  await checkRuntime('workspace Cherry');
-  run('npm', [
-    'install',
-    '--ignore-scripts',
-    '--strict-peer-deps',
-    '--no-audit',
-    '--no-fund',
-    `mermaid@${manifest.peerDependencies.mermaid}`,
-    `mathlive@${manifest.peerDependencies.mathlive}`,
-  ]);
-  writeEntry(false, true);
-  build('workspace Cherry, Mermaid and MathLive enabled');
-  await checkRuntime('workspace Cherry, Mermaid and MathLive enabled', 'capabilities');
+const minimumCherry = manifest.peerDependencies['cherry-markdown'].match(/\d+\.\d+\.\d+/)?.[0];
+if (!minimumCherry) throw new Error('Unable to identify the declared minimum Cherry version.');
+let published;
+try {
+  published = {
+    status: 0,
+    stdout: npm(['view', `cherry-markdown@${minimumCherry}`, 'version', '--json'], {
+      cwd: fixture,
+      env: childEnv,
+      encoding: 'utf8',
+    }),
+  };
+} catch (error) {
+  published = { status: error.status, stdout: error.stdout?.toString(), stderr: error.stderr?.toString(), error };
 }
+let minimumSource = `cherry-markdown@${minimumCherry}`;
+let minimumLabel = `published Cherry ${minimumCherry}`;
+if (published.status !== 0) {
+  let registryError;
+  try {
+    registryError = JSON.parse(published.stdout).error;
+  } catch {
+    /* Report the original failure below. */
+  }
+  if (registryError?.code !== 'E404')
+    throw new Error(`Registry lookup failed: ${published.stderr}`, { cause: published.error });
+  if (cherryManifest.version !== minimumCherry)
+    throw new Error(`Unpublished minimum ${minimumCherry} must match planned Cherry ${cherryManifest.version}.`);
+  minimumSource = cherryTarball;
+  minimumLabel = `planned minimum Cherry ${minimumCherry} (not yet published)`;
+} else if (JSON.parse(published.stdout) !== minimumCherry) {
+  throw new Error(`Registry did not resolve the declared minimum ${minimumCherry}.`);
+}
+run('npm', ['install', '--ignore-scripts', '--strict-peer-deps', '--no-audit', '--no-fund', minimumSource]);
+build(`${minimumLabel}, MathLive absent`);
+await checkRuntime(`${minimumLabel}, MathLive absent`, 'base');
+run('npm', [
+  'install',
+  '--ignore-scripts',
+  '--strict-peer-deps',
+  '--no-audit',
+  '--no-fund',
+  `echarts@${manifest.peerDependencies.echarts}`,
+]);
+writeEntry(true);
+build(`${minimumLabel}, charts enabled`);
+await checkRuntime(minimumLabel);
+run('npm', ['install', '--ignore-scripts', '--strict-peer-deps', '--no-audit', '--no-fund', cherryTarball]);
+build('workspace Cherry, charts enabled');
+await checkRuntime('workspace Cherry');
+run('npm', [
+  'install',
+  '--ignore-scripts',
+  '--strict-peer-deps',
+  '--no-audit',
+  '--no-fund',
+  `mermaid@${manifest.peerDependencies.mermaid}`,
+  `mathlive@${manifest.peerDependencies.mathlive}`,
+]);
+writeEntry(false, true);
+build('workspace Cherry, Mermaid and MathLive enabled');
+await checkRuntime('workspace Cherry, Mermaid and MathLive enabled', 'capabilities');
 verifyArtifactManifest(artifacts, `consumer-${variant}`);
 console.log(`Packed consumer checks passed; fixture retained: ${fixture}`);

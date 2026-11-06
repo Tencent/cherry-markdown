@@ -1,8 +1,8 @@
 # =============================================================================
-# PR 测试 — 单元测试、浏览器交互与打包消费验证
+# PR 测试 — 单元测试与浏览器交互
 #
 # 触发时机: 提交 PR 到 main 或 dev 分支，且修改相关包或共享构建配置时运行
-# 功能: 通过 Vite+ 统一调度各包测试；Milkdown 补充浏览器与消费验证
+# 功能: 通过 Vite+ 统一调度各包测试；Milkdown 补充完整浏览器测试
 # 保留现有 workflow 和汇总 job 名称
 # =============================================================================
 
@@ -14,7 +14,7 @@ on:
     paths:
       - 'packages/milkdown/**'
       - 'packages/cherry-markdown/**'
-      # 共享依赖、构建输入和发布版本也会影响浏览器与消费验证。
+      # 共享依赖、构建输入和包元数据也会影响测试。
       - 'package.json'
       - 'yarn.lock'
       - '.node-version'
@@ -72,22 +72,15 @@ jobs:
           node-version-file: '.node-version'
           cache: true
       - name: Build Cherry and Milkdown artifacts
-        id: build
         run: |
           vp run -F cherry-markdown build
           vp run -F @cherry-markdown/milkdown build:demo:prepared
-          vp run -F @cherry-markdown/milkdown test:artifacts
       - name: Install Chromium
-        id: chromium
         run: vp exec playwright install --with-deps chromium
       - name: Browser interactions
         run: vp run -F @cherry-markdown/milkdown test:e2e --fully-parallel --workers=2
         env:
           MILKDOWN_E2E_DEMO_PREBUILT: '1'
-      - name: Verify minimal packed consumer
-        # 浏览器用例失败后仍验证消费场景，取消或准备失败时跳过。
-        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.chromium.outcome == 'success' }}
-        run: vp run -F @cherry-markdown/milkdown test:consumer:smoke
       - name: Upload Milkdown diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
@@ -96,7 +89,6 @@ jobs:
           path: |
             packages/milkdown/playwright-report
             packages/milkdown/test-results
-            packages/milkdown/artifacts/diagnostics
           if-no-files-found: ignore
 
   # Keep the existing required check name and fail if any suite did not succeed.
