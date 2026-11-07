@@ -17,7 +17,7 @@
   "customUploader.url.description": "自定义上传器 URL",
   "customUploader.headers": "自定义上传器 HTTP 头",
   "customUploader.headers.description": "用于自定义上传器的 HTTP 头",
-  "customUploader.description": "配置 HTTP 上传器，将图像、视频或音频上传到你的服务器。",
+  "customUploader.description": "配置 HTTP 上传器，将图像、视频或音频上传到你的服务器。 地址和认证头整体取自同一配置层；仅支持现行 HTTP 二进制上传协议，不再自动迁移旧 PicGo 配置。",
   "backfillImageProps.enum.isBorder": "边框",
   "backfillImageProps.enum.isNotBorder": "无边框",
   "backfillImageProps.enum.isShadow": "阴影",

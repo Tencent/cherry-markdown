@@ -329,6 +329,8 @@ async function initializeCherry(state: EditorState, generation: number): Promise
 }
 
 async function applyEditorState(state: EditorState): Promise<void> {
+  const status = document.getElementById('webview-status');
+  if (status) status.textContent = state.uploadSettingsHint ?? '';
   stateGeneration += 1;
   const generation = stateGeneration;
   if (!cherry) {

@@ -4,8 +4,8 @@ import {
   getBackfillImageProps,
   getTheme,
   getUsageMode,
-  migrateImageUploadMode,
-  migrateTheme,
+  describeUploadConfiguration,
+  UploadConfigurationError,
   THEME_STATE_KEY,
 } from './config';
 import { DocumentUploadManager } from './documentUploads';
@@ -16,6 +16,7 @@ import { parseWebviewMessage } from './protocol';
 import { calculateTextReplacement } from './textEdit';
 import { getWebviewContent } from './webview';
 import type { DocumentUploadRequest } from './types/upload';
+import { showUploadConfigurationError } from './uploadConfigurationUi';
 
 const MAX_PNG_BYTES = 50 * 1024 * 1024;
 
@@ -69,6 +70,7 @@ class CherryMarkdownPreview {
       vscode.workspace.onDidCloseTextDocument((document) => this.uploads.documentChanged(document)),
       vscode.window.onDidChangeTextEditorVisibleRanges((event) => this.handleVisibleRangesChange(event)),
       vscode.workspace.onDidChangeConfiguration((event) => this.handleConfigurationChange(event)),
+      vscode.workspace.onDidGrantWorkspaceTrust(() => void this.postEditorState('editor-change')),
       vscode.window.onDidChangeActiveColorTheme(() => void this.postEditorState('editor-change')),
     );
 
@@ -348,8 +350,17 @@ class CherryMarkdownPreview {
       await this.uploads.start(file);
     } catch (error: unknown) {
       this.reportError('upload-file', error);
+      if (error instanceof UploadConfigurationError) {
+        await showUploadConfigurationError(error);
+        return;
+      }
       if (generation === this.panelGeneration && panel === this.panel) {
-        await this.postOperationError('upload-file', vscode.l10n.t('Upload failed.'), file.requestId, panel);
+        await this.postOperationError(
+          'upload-file',
+          vscode.l10n.t('Upload failed: {0}', error instanceof Error ? error.message : String(error)),
+          file.requestId,
+          panel,
+        );
       }
     }
   }
@@ -456,6 +467,7 @@ class CherryMarkdownPreview {
         editDisabled: vscode.l10n.t('The Markdown document is not active, so preview editing is disabled.'),
       },
       uploadImageProps: Object.fromEntries(getBackfillImageProps(document.uri).map((property) => [property, true])),
+      uploadSettingsHint: describeUploadConfiguration(document.uri),
     };
   }
 
@@ -514,8 +526,6 @@ export function activate(context: vscode.ExtensionContext): void {
   preview = new CherryMarkdownPreview(context, output);
   preview.register();
   context.subscriptions.push(output, preview);
-  void migrateTheme(context.globalState);
-  void migrateImageUploadMode(context.globalState);
 }
 
 export function deactivate(): void {

@@ -2,211 +2,208 @@ import { beforeEach, describe, expect, test, vi } from 'vite-plus/test';
 import * as vscode from 'vscode';
 import * as config from '../src/config';
 
-const mockGetConfiguration = vi.hoisted(() => vi.fn());
-
+const mock = vi.hoisted(() => ({ getConfiguration: vi.fn(), isTrusted: true }));
 vi.mock('vscode', () => ({
-  ConfigurationTarget: { Global: 1 },
   ColorThemeKind: { Light: 1, Dark: 2, HighContrast: 3, HighContrastLight: 4 },
   window: { activeColorTheme: { kind: 1 } },
+  l10n: { t: (text: string, ...args: unknown[]) => text.replace(/\{(\d+)\}/g, (_, i) => String(args[Number(i)])) },
   Uri: { file: (path: string) => ({ path }) },
-  workspace: { getConfiguration: mockGetConfiguration },
+  workspace: {
+    get isTrusted() {
+      return mock.isTrusted;
+    },
+    getConfiguration: mock.getConfiguration,
+  },
 }));
 
-const getConfiguration = mockGetConfiguration;
+type Layer = Record<string, unknown>;
+let user: Layer;
+let workspace: Layer;
+let folders: Record<string, Layer>;
+const defaults: Layer = {
+  ImageUploadMode: 'workspace',
+  AssetDirectory: '.cherry-assets',
+  ThemeMode: 'vscode',
+  LightTheme: 'default',
+  DarkTheme: 'dark',
+};
+const update = vi.fn();
+const a = vscode.Uri.file('/project-a/readme.md');
+const b = vscode.Uri.file('/project-b/readme.md');
+const uploader = (url: string, headers = {}) => ({ enable: true, url, headers });
 
 beforeEach(() => {
-  getConfiguration.mockReset();
-  getConfiguration.mockReturnValue({ get: vi.fn() });
+  user = {};
+  workspace = {};
+  folders = {};
+  mock.isTrusted = true;
+  update.mockReset();
+  mock.getConfiguration.mockImplementation((_section, resource) => ({
+    get: (key: string, fallback?: unknown) => {
+      const folder = folders[resource?.path] ?? {};
+      return mock.isTrusted
+        ? (folder[key] ?? workspace[key] ?? user[key] ?? defaults[key] ?? fallback)
+        : (user[key] ?? defaults[key] ?? fallback);
+    },
+    inspect: (key: string) => ({
+      defaultValue: defaults[key],
+      globalValue: user[key],
+      workspaceValue: workspace[key],
+      workspaceFolderValue: folders[resource?.path]?.[key],
+    }),
+    update,
+  }));
 });
 
-describe('configuration normalization', () => {
-  test.each([
-    ['active', 'active'],
-    ['Active', 'active'],
-    ['激活', 'active'],
-    ['Активный', 'active'],
-    ['only-manual', 'only-manual'],
-    ['仅手动', 'only-manual'],
-  ])('normalizes usage %s', (value, expected) => {
-    expect(config.normalizeUsage(value)).toBe(expected);
+describe('document-scoped upload configuration', () => {
+  test('folder → workspace → user → default, using the originating document URI', () => {
+    expect(config.getImageUploadMode(a)).toBe('workspace');
+    user.ImageUploadMode = 'data';
+    expect(config.getImageUploadMode(a)).toBe('data');
+    workspace.ImageUploadMode = 'remote';
+    expect(config.getImageUploadMode(a)).toBe('remote');
+    folders[a.path] = { ImageUploadMode: 'workspace', AssetDirectory: 'a-assets' };
+    folders[b.path] = { ImageUploadMode: 'data' };
+    expect(config.getImageUploadMode(a)).toBe('workspace');
+    expect(config.getAssetDirectory(a)).toBe('a-assets');
+    expect(config.getImageUploadMode(b)).toBe('data');
+    expect(mock.getConfiguration).toHaveBeenCalledWith('cherryMarkdown', b);
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  test('selects the uploader object as one unit and never sends global credentials to a folder endpoint', () => {
+    user.ImageUploadMode = 'remote';
+    user.CustomUploader = uploader('https://user.example/upload', { Authorization: 'user-secret' });
+    workspace.CustomUploader = uploader('https://workspace.example/upload');
+    folders[a.path] = { CustomUploader: uploader('https://folder.example/upload') };
+    expect(config.getUploadConfiguration(a)).toMatchObject({
+      mode: 'remote',
+      source: 'folder',
+      uploader: { url: 'https://folder.example/upload', headers: {} },
+    });
+    expect(config.getUploadConfiguration(b).uploader?.url).toBe('https://workspace.example/upload');
+  });
+
+  test.each(['wrong', '', null, false, {}, 'PicGoServer', '远程'])(
+    'rejects invalid explicit mode %j without fallback',
+    (value) => {
+      user.ImageUploadMode = 'data';
+      workspace.ImageUploadMode = value;
+      expect(() => config.getImageUploadMode(a)).toThrow(config.UploadConfigurationError);
+    },
+  );
+
+  test('detects retired keys only to block an upload, without converting or writing settings', () => {
+    workspace.UploadType = 'PicGoServer';
+    workspace.PicGoServer = 'https://legacy.example/upload';
+    expect(() => config.getUploadConfiguration(a)).toThrow('Legacy PicGo');
+    expect(update).not.toHaveBeenCalled();
+    expect(config).not.toHaveProperty('migrateImageUploadMode');
+    expect(config).not.toHaveProperty('migrateTheme');
+  });
+
+  test.each(['workspace', 'data', 'remote'])('ignores leftover retired keys with valid new mode %s', (mode) => {
+    user.ImageUploadMode = mode;
+    user.CustomUploader = uploader('https://current.example/upload');
+    workspace.UploadType = 'PicGoServer';
+    workspace.PicGoServer = 'https://legacy.example/upload';
+    expect(config.getUploadConfiguration(a).mode).toBe(mode);
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  test('Restricted Mode ignores workspace endpoints and permits user-level settings', () => {
+    mock.isTrusted = false;
+    user.ImageUploadMode = 'remote';
+    user.CustomUploader = uploader('https://user.example/upload');
+    workspace.ImageUploadMode = 'remote';
+    workspace.CustomUploader = uploader('https://untrusted.example/upload');
+    folders[a.path] = { CustomUploader: uploader('https://folder.example/upload') };
+    expect(config.getUploadConfiguration(a)).toMatchObject({
+      mode: 'remote',
+      source: 'user',
+      uploader: { url: 'https://user.example/upload' },
+    });
+  });
+
+  test('offers trust management instead of silently choosing workspace assets when project uploads are blocked', () => {
+    mock.isTrusted = false;
+    workspace.ImageUploadMode = 'remote';
+    workspace.CustomUploader = uploader('https://untrusted.example/upload');
+    expect(() => config.getUploadConfiguration(a)).toThrow('Restricted Mode');
+    mock.isTrusted = true;
+    expect(config.getUploadConfiguration(a).uploader?.url).toBe('https://untrusted.example/upload');
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  test('untrusted legacy endpoints never become user configuration', () => {
+    mock.isTrusted = false;
+    workspace.UploadType = 'PicGoServer';
+    workspace.PicGoServer = 'https://legacy.example/upload';
+    expect(() => config.getUploadConfiguration(a)).toThrow('Restricted Mode');
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  test.each([null, 'invalid'])('invalid explicit user uploader %j is not disguised as a trust error', (value) => {
+    mock.isTrusted = false;
+    user.ImageUploadMode = 'remote';
+    user.CustomUploader = value;
+    workspace.CustomUploader = uploader('https://untrusted.example/upload');
+    expect(() => config.getUploadConfiguration(a)).toThrow('CustomUploader');
   });
 
   test.each([
-    ['default', 'default'],
-    ['默认', 'default'],
-    ['Тёмная', 'dark'],
-    ['Green', 'green'],
-    ['红色', 'red'],
-  ])('normalizes theme %s', (value, expected) => {
-    expect(config.normalizeTheme(value)).toBe(expected);
+    { url: 'https://folder.example/upload' },
+    { enable: true, url: 'not-a-url' },
+    { enable: true, url: 'ftp://example/upload' },
+    { enable: true, url: 'https://example/upload', headers: { Authorization: 42 } },
+    { enable: true, url: 'https://example/upload', headers: { Authorization: 'x\r\ny' } },
+    { enable: true, url: 'https://example/upload', headers: null },
+  ])('rejects incomplete/invalid project uploader %j rather than falling back to user settings', (value) => {
+    user.ImageUploadMode = 'remote';
+    user.CustomUploader = uploader('https://user.example/upload');
+    workspace.CustomUploader = value;
+    expect(() => config.getUploadConfiguration(a)).toThrow(config.UploadConfigurationError);
   });
 
-  test.each([
-    ['workspace', 'workspace'],
-    ['工作区', 'workspace'],
-    ['data', 'data'],
-    ['Base64', 'data'],
-    ['remote', 'remote'],
-    ['自定义上传器', 'remote'],
-  ])('normalizes image upload mode %s', (value, expected) => {
-    expect(config.normalizeImageUploadMode(value)).toBe(expected);
+  test.each(['../outside', '/absolute', 'C:\\outside', '', null, {}])('rejects invalid asset directory %j', (value) => {
+    workspace.AssetDirectory = value;
+    expect(() => config.getUploadConfiguration(a)).toThrow('AssetDirectory');
   });
 
-  test('filters and deduplicates image properties', () => {
-    expect(config.normalizeBackfillImageProps(['Border', '边框', 'isRadius', 'invalid'])).toEqual([
-      'isBorder',
-      'isRadius',
-    ]);
+  test('shows upload origin and configuration source without exposing user info, query tokens or headers', () => {
+    user.ImageUploadMode = 'remote';
+    user.CustomUploader = uploader('https://name:password@example.com/upload?token=secret', {
+      Authorization: 'secret',
+    });
+    const hint = config.describeUploadConfiguration(a);
+    expect(hint).toBe('Upload: https://example.com (User)');
+    expect(hint).not.toMatch(/password|secret|Authorization/);
   });
 
+  test('all per-document upload settings declare resource scope', async () => {
+    const manifest = await import('../package.json');
+    const properties = manifest.default.contributes.configuration.properties;
+    for (const key of ['Usage', 'ImageUploadMode', 'AssetDirectory', 'CustomUploader', 'BackfillImageProps']) {
+      expect((properties as Record<string, { scope?: string }>)[`cherryMarkdown.${key}`].scope).toBe('resource');
+    }
+  });
+});
+
+describe('theme and image styles', () => {
+  test('follows VS Code by default and preserves stored manual selections without migrating legacy Theme', () => {
+    vi.mocked(vscode.window).activeColorTheme = { kind: 2 };
+    expect(config.getTheme({ get: () => 'green' } as never, a)).toBe('dark');
+    workspace.ThemeMode = 'manual';
+    workspace.Theme = 'red';
+    expect(config.getTheme({ get: () => 'green' } as never, a)).toBe('green');
+    expect(config.getTheme({ get: () => undefined } as never, a)).toBe('default');
+    expect(update).not.toHaveBeenCalled();
+  });
   test.each([
     ['isBorder', 'isNotBorder', 'isShadow', 'isRadius'],
     ['isNotBorder', 'isBorder', 'isShadow', 'isRadius'],
     ['无边框', '边框', '阴影', '圆角'],
-  ])('gives no-border precedence without dropping other image decorations: %j', (...properties) => {
-    expect(config.normalizeBackfillImageProps(properties)).toEqual(['isNotBorder', 'isShadow', 'isRadius']);
-  });
-
-  test('falls back for invalid values', () => {
-    expect(config.normalizeUsage(null)).toBe('active');
-    expect(config.normalizeTheme('unknown')).toBe('default');
-    expect(config.normalizeImageUploadMode({})).toBe('workspace');
-    expect(config.normalizeBackfillImageProps('isBorder')).toEqual([]);
-  });
-
-  test('contributes theme settings in order and follows VS Code by default', async () => {
-    const manifest = await import('../package.json');
-    const settings = manifest.default.contributes.configuration.properties;
-    expect(settings['cherryMarkdown.ThemeMode'].default).toBe('vscode');
-    expect([
-      settings['cherryMarkdown.ThemeMode'].order,
-      settings['cherryMarkdown.LightTheme'].order,
-      settings['cherryMarkdown.DarkTheme'].order,
-    ]).toEqual([1, 2, 3]);
-  });
-
-  test('uses the contributed follow mode when no theme setting is configured', async () => {
-    const manifest = await import('../package.json');
-    const properties = manifest.default.contributes.configuration.properties;
-    getConfiguration.mockReturnValue({
-      get: (key: string) => properties[`cherryMarkdown.${key}` as keyof typeof properties]?.default,
-    });
-    vi.mocked(vscode.window).activeColorTheme = { kind: vscode.ColorThemeKind.Dark };
-    expect(config.getTheme({ get: vi.fn().mockReturnValue('green') })).toBe('dark');
-  });
-
-  test('prefers the globally persisted Cherry theme', () => {
-    const globalState = { get: vi.fn().mockReturnValue('dark') };
-    expect(config.getTheme(globalState)).toBe('dark');
-  });
-
-  test('falls back to the legacy theme setting when global state is empty', () => {
-    const get = vi.fn().mockReturnValue('绿色');
-    getConfiguration.mockReturnValue({ get });
-
-    expect(config.getTheme({ get: vi.fn().mockReturnValue(undefined) })).toBe('green');
-    expect(get).toHaveBeenCalledWith('Theme');
-  });
-
-  test.each([[1, 'green'], [2, 'abyss'], [3, 'abyss'], [4, 'green']])(
-    'follows VS Code color theme kind %s', (kind, expected) => {
-      const settings: Record<string, string> = { ThemeMode: 'vscode', LightTheme: 'green', DarkTheme: 'abyss' };
-      getConfiguration.mockReturnValue({ get: (key: string) => settings[key] });
-      vi.mocked(vscode.window).activeColorTheme = { kind };
-      expect(config.getTheme({ get: vi.fn().mockReturnValue('red') })).toBe(expected);
-    },
-  );
-
-  test('migrates the legacy theme into global state only once', async () => {
-    const get = vi.fn().mockReturnValue('深色');
-    getConfiguration.mockReturnValue({ get });
-    const globalState = { get: vi.fn().mockReturnValue(undefined), update: vi.fn() };
-
-    await config.migrateTheme(globalState);
-
-    expect(globalState.update).toHaveBeenCalledWith(config.THEME_STATE_KEY, 'dark');
-
-    globalState.get.mockReturnValue('red');
-    await config.migrateTheme(globalState);
-    expect(globalState.update).toHaveBeenCalledTimes(1);
-  });
-
-  test('does not write a migration value when the legacy setting is absent', async () => {
-    getConfiguration.mockReturnValue({ get: vi.fn().mockReturnValue(undefined) });
-    const globalState = { get: vi.fn().mockReturnValue(undefined), update: vi.fn() };
-
-    await config.migrateTheme(globalState);
-
-    expect(globalState.update).not.toHaveBeenCalled();
-  });
-
-  test('migrates the legacy PicGo uploader explicitly', async () => {
-    const update = vi.fn();
-    const get = vi.fn((key: string) => {
-      if (key === 'UploadType') return 'PicGoServer';
-      if (key === 'PicGoServer') return 'https://picgo.example/upload';
-      return undefined;
-    });
-    getConfiguration.mockReturnValue({ get, update });
-    const globalState = { get: vi.fn().mockReturnValue(false), update: vi.fn() };
-
-    await config.migrateImageUploadMode(globalState);
-
-    expect(update).toHaveBeenCalledWith('ImageUploadMode', 'remote', 1);
-    expect(update).toHaveBeenCalledWith(
-      'CustomUploader',
-      { enable: true, url: 'https://picgo.example/upload', headers: {} },
-      1,
-    );
-    expect(globalState.update).toHaveBeenCalledWith(config.IMAGE_UPLOAD_MODE_MIGRATED_KEY, true);
-  });
-
-  test('reads configuration values with the document resource scope', () => {
-    const resource = vscode.Uri.file('/workspace/readme.md');
-    const get = vi.fn((key: string, fallback?: unknown) => {
-      if (key === 'Usage') return 'only-manual';
-      if (key === 'ImageUploadMode') return '远程';
-      if (key === 'CustomUploader') return { enable: true, url: 'https://upload.example' };
-      if (key === 'BackfillImageProps') return ['阴影'];
-      return fallback;
-    });
-    getConfiguration.mockReturnValue({ get });
-
-    expect(config.getUsageMode(resource)).toBe('only-manual');
-    expect(config.getImageUploadMode(resource)).toBe('remote');
-    expect(config.getCustomUploader(resource)).toEqual({ enable: true, url: 'https://upload.example' });
-    expect(config.getBackfillImageProps(resource)).toEqual(['isShadow']);
-    expect(getConfiguration).toHaveBeenCalledWith('cherryMarkdown', resource);
-  });
-
-  test('uses legacy upload mode when the new setting is only a contributed default', () => {
-    const get = vi.fn((key: string) => {
-      if (key === 'ImageUploadMode') return 'workspace';
-      if (key === 'UploadType') return 'data';
-      return undefined;
-    });
-    getConfiguration.mockReturnValue({
-      get,
-      inspect: vi.fn().mockReturnValue({
-        defaultValue: 'workspace',
-        globalValue: undefined,
-        workspaceValue: undefined,
-        workspaceFolderValue: undefined,
-      }),
-    });
-
-    expect(config.getImageUploadMode()).toBe('data');
-  });
-
-  test.each([
-    ['.cherry-assets', '.cherry-assets'],
-    ['assets/images', 'assets/images'],
-    ['../assets\\images/..', 'assets/images'],
-    ['', '.cherry-assets'],
-    [null, '.cherry-assets'],
-    [{ path: 'assets' }, '.cherry-assets'],
-  ])('normalizes asset directory %s', (value, expected) => {
-    getConfiguration.mockReturnValue({ get: vi.fn().mockReturnValue(value) });
-    expect(config.getAssetDirectory()).toBe(expected);
+  ])('keeps no-border priority: %j', (...values) => {
+    expect(config.normalizeBackfillImageProps(values)).toEqual(['isNotBorder', 'isShadow', 'isRadius']);
   });
 });

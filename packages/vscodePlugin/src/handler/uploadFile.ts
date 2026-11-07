@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { getAssetDirectory, getBackfillImageProps, getCustomUploader, getImageUploadMode } from '../config';
+import { getUploadConfiguration } from '../config';
 import type { UploadFileRequest, UploadFileResult } from '../types/upload';
 
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
@@ -146,7 +146,11 @@ function relativeAssetPath(document: vscode.Uri, asset: vscode.Uri): string {
 
 let workspaceUploadQueue: Promise<void> = Promise.resolve();
 
-async function saveWorkspaceAsset(fileInfo: UploadFileRequest, resource: vscode.Uri | undefined): Promise<string> {
+async function saveWorkspaceAsset(
+  fileInfo: UploadFileRequest,
+  resource: vscode.Uri | undefined,
+  directory: string,
+): Promise<string> {
   if (!resource) throw new Error('A Markdown document is required to save workspace assets.');
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(resource);
   if (!workspaceFolder) {
@@ -154,15 +158,19 @@ async function saveWorkspaceAsset(fileInfo: UploadFileRequest, resource: vscode.
   }
 
   const source = await readUploadFile(fileInfo);
-  const assetDirectory = vscode.Uri.joinPath(workspaceFolder.uri, ...getAssetDirectory(resource).split('/'));
+  const assetDirectory = vscode.Uri.joinPath(workspaceFolder.uri, ...directory.split('/'));
   await vscode.workspace.fs.createDirectory(assetDirectory);
   const assetUri = await nextAssetUri(assetDirectory, safeFileName(fileInfo));
   await vscode.workspace.fs.writeFile(assetUri, source);
   return relativeAssetPath(resource, assetUri);
 }
 
-function queueWorkspaceAssetSave(fileInfo: UploadFileRequest, resource: vscode.Uri | undefined): Promise<string> {
-  const task = workspaceUploadQueue.then(() => saveWorkspaceAsset(fileInfo, resource));
+function queueWorkspaceAssetSave(
+  fileInfo: UploadFileRequest,
+  resource: vscode.Uri | undefined,
+  directory: string,
+): Promise<string> {
+  const task = workspaceUploadQueue.then(() => saveWorkspaceAsset(fileInfo, resource, directory));
   workspaceUploadQueue = task.then(
     () => undefined,
     () => undefined,
@@ -175,17 +183,19 @@ export const uploadFileHandler = async (
   resource?: vscode.Uri,
 ): Promise<UploadFileResult> => {
   const { requestId, name = '', type = '' } = fileInfo;
-  const uploadMode = getImageUploadMode(resource);
+  // Validate the selected settings before reading bytes, copying assets or starting a network request.
+  const settings = getUploadConfiguration(resource);
+  const uploadMode = settings.mode;
   const result: UploadFileResult = { requestId, name, url: '' };
-  for (const property of getBackfillImageProps(resource)) result[property] = true;
+  for (const property of settings.backfillImageProps) result[property] = true;
 
   switch (uploadMode) {
     case 'workspace': {
-      result.url = await queueWorkspaceAssetSave(fileInfo, resource);
+      result.url = await queueWorkspaceAssetSave(fileInfo, resource, settings.assetDirectory);
       break;
     }
     case 'remote': {
-      const customUploader = getCustomUploader(resource);
+      const customUploader = settings.uploader;
       if (customUploader?.enable !== true || !customUploader.url) {
         throw new Error('Custom uploader is not configured.');
       }

@@ -19,5 +19,21 @@
   "The exported PNG is too large.": "Экспортированный PNG слишком велик.",
   "Saving Cherry Markdown PNG...": "Сохранение Cherry Markdown PNG...",
   "Image saved successfully.": "Изображение сохранено.",
-  "Unable to save the PNG.": "Не удалось сохранить PNG."
+  "Unable to save the PNG.": "Не удалось сохранить PNG.",
+  "Legacy PicGo upload settings are no longer supported. Configure ImageUploadMode and CustomUploader. The file was not uploaded.": "Старые настройки PicGo больше не поддерживаются. Настройте ImageUploadMode и CustomUploader. Файл не загружен.",
+  "Workspace upload settings are blocked in Restricted Mode. Configure user settings or review Workspace Trust. The file was not uploaded.": "Настройки загрузки проекта заблокированы в ограниченном режиме. Настройте пользовательские параметры или доверие рабочей области. Файл не загружен.",
+  "ImageUploadMode must be workspace, data, or remote. The file was not uploaded.": "ImageUploadMode должен быть workspace, data или remote. Файл не загружен.",
+  "AssetDirectory must be a relative directory inside the workspace. The file was not uploaded.": "AssetDirectory должен быть относительным каталогом внутри рабочей области. Файл не загружен.",
+  "CustomUploader must enable a valid HTTP or HTTPS URL and string headers. The file was not uploaded.": "CustomUploader должен быть включён и содержать корректный URL HTTP/HTTPS и строковые заголовки. Файл не загружен.",
+  "Open upload settings": "Открыть настройки загрузки",
+  "View configuration guide": "Открыть руководство",
+  "Manage Workspace Trust": "Управление доверием рабочей области",
+  "Folder": "Папка",
+  "Workspace": "Рабочая область",
+  "User": "Пользователь",
+  "Default": "По умолчанию",
+  "Base64 data": "Данные Base64",
+  "Upload: {0} ({1})": "Загрузка: {0} ({1})",
+  "Upload settings are invalid.": "Недопустимые настройки загрузки.",
+  "Upload failed: {0}": "Ошибка загрузки: {0}"
 }

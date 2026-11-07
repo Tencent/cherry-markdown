@@ -17,7 +17,7 @@
   "customUploader.url.description": "URL пользовательского загрузчика",
   "customUploader.headers": "HTTP-заголовки для пользовательского загрузчика",
   "customUploader.headers.description": "HTTP-заголовки для пользовательского загрузчика",
-  "customUploader.description": "Настройте HTTP-загрузчик для отправки изображений, видео или аудио на ваш сервер.",
+  "customUploader.description": "Настройте HTTP-загрузчик для отправки изображений, видео или аудио на ваш сервер. URL и заголовки выбираются из одного уровня настроек. Поддерживается только текущий протокол HTTP с двоичным телом; старые настройки PicGo не переносятся.",
   "backfillImageProps.enum.isBorder": "Граница",
   "backfillImageProps.enum.isNotBorder": "Без границы",
   "backfillImageProps.enum.isShadow": "Тень",

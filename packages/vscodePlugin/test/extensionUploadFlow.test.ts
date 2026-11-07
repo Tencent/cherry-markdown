@@ -63,6 +63,8 @@ vi.mock('../src/config', () => ({
   getTheme: () => 'default',
   getUsageMode: () => 'only-manual',
   getBackfillImageProps: () => [],
+  describeUploadConfiguration: () => 'Upload test',
+  UploadConfigurationError: class extends Error {},
   migrateImageUploadMode: async () => {},
   migrateTheme: async () => {},
   THEME_STATE_KEY: 'theme',
@@ -105,6 +107,7 @@ vi.mock('vscode', () => ({
     onDidChangeTextDocument: host.listen('document-change'),
     onDidCloseTextDocument: host.listen('document-close'),
     onDidChangeConfiguration: host.listen('configuration'),
+    onDidGrantWorkspaceTrust: host.listen('trust'),
     getWorkspaceFolder: () => undefined,
   },
 }));

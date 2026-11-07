@@ -36,7 +36,32 @@ By default, the preview follows VS Code's light or dark theme, including high-co
 | `cherryMarkdown.CustomUploader`     | object                        | disabled         | Configures a custom HTTP uploader for remote mode.                     |
 | `cherryMarkdown.BackfillImageProps` | array                         | `[]`             | Adds border, shadow, radius, or no-border metadata to inserted images. |
 
-Configuration values are stable across VS Code display languages. Existing theme values are migrated as a fallback, but theme changes are now stored in the extension's global state rather than exposed as a VS Code setting.
+Configuration values are stable across VS Code display languages. Manual theme selections are stored in the extension's global state. The extension does not automatically migrate, rewrite or delete settings.
+
+## Upload settings upgrade
+
+This release stops using the retired `cherryMarkdown.UploadType` and `cherryMarkdown.PicGoServer` settings. There is no legacy PicGo request adapter. Existing users must configure the current settings manually, for example:
+
+```json
+{
+  "cherryMarkdown.ImageUploadMode": "remote",
+  "cherryMarkdown.CustomUploader": {
+    "enable": true,
+    "url": "https://uploads.example.com/upload",
+    "headers": {}
+  }
+}
+```
+
+The endpoint must accept the file bytes as the HTTP POST body (`application/octet-stream` by default, with an `X-File-Name` header) and return a supported URL response such as `{ "url": "https://example.com/image.png" }`. An old PicGo endpoint is not automatically compatible with this protocol. Server errors are reported without silently switching to another uploader.
+
+With only retired settings present, attempting an upload shows an upgrade warning and sends no file. The warning offers **Open upload settings** and **View configuration guide**. Valid explicitly configured `ImageUploadMode` settings take precedence over retired settings, so leftover old keys do not repeatedly warn. This is a temporary detection-only notice, planned for removal in the next major release; it never performs migration or old-protocol uploads.
+
+Settings resolve per document: **workspace folder → workspace → user → default**. In a multi-root workspace, a folder's `.vscode/settings.json` applies only to documents in that folder. Folder settings that were previously ignored can now take effect; check the upload target and source shown at the bottom of the preview before uploading.
+
+`CustomUploader` is selected as a whole object from one scope. A folder-specific URL does not inherit user-level authentication headers. Missing required fields or an invalid explicit setting stop the upload rather than falling back to another destination. `AssetDirectory` must stay inside the workspace folder.
+
+In Restricted Mode, workspace and folder upload settings are ignored. User-level settings remain available. If no usable user-level configuration exists, the warning offers **Manage Workspace Trust**; this opens VS Code's native authorization UI and does not authorize or copy an endpoint automatically. Trusting a workspace enables more than just uploads. When trust is granted, the preview refreshes the selected configuration. Previously migrated global settings are not automatically removed because the extension cannot reliably distinguish them from intentional user settings.
 
 ## Upload security
 

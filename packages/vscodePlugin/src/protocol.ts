@@ -11,6 +11,7 @@ export interface EditorState {
   vscodeLanguage: string;
   labels: WebviewLabels;
   uploadImageProps?: BackfillImage;
+  uploadSettingsHint?: string;
 }
 
 export interface WebviewLabels {

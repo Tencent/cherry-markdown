@@ -87,7 +87,8 @@
             "%usage.enum.active%",
             "%usage.enum.only-manual%"
           ],
-          "description": "%usage.description%"
+          "description": "%usage.description%",
+          "scope": "resource"
         },
         "cherryMarkdown.ImageUploadMode": {
           "type": "string",
@@ -107,12 +108,14 @@
             "%imageUploadMode.enumDescriptions.data%",
             "%imageUploadMode.enumDescriptions.remote%"
           ],
-          "description": "%imageUploadMode.description%"
+          "description": "%imageUploadMode.description%",
+          "scope": "resource"
         },
         "cherryMarkdown.AssetDirectory": {
           "type": "string",
           "default": ".cherry-assets",
-          "description": "%assetDirectory.description%"
+          "description": "%assetDirectory.description%",
+          "scope": "resource"
         },
         "cherryMarkdown.CustomUploader": {
           "type": "object",
@@ -141,7 +144,9 @@
               }
             }
           },
-          "description": "%customUploader.description%"
+          "description": "%customUploader.description%",
+          "scope": "resource",
+          "additionalProperties": false
         },
         "cherryMarkdown.BackfillImageProps": {
           "type": "array",
@@ -168,7 +173,8 @@
             ]
           },
           "default": [],
-          "description": "%backfillImageProps.description%"
+          "description": "%backfillImageProps.description%",
+          "scope": "resource"
         },
         "cherryMarkdown.ThemeMode": {
           "type": "string",
@@ -223,7 +229,7 @@
     "vscode:prepublish": "vp build --mode extension && vp build --mode webview && vp test run test/package.test.ts",
     "typecheck": "tsc --noEmit",
     "test": "vp run test:unit && vp run test:integration",
-    "test:unit": "vp test run test/config.test.ts test/protocol.test.ts test/textEdit.test.ts test/upload.test.ts test/webview.test.ts test/mathjaxConfig.test.ts test/editState.test.ts test/documentUploads.test.ts test/webviewUploads.test.ts test/extensionUploadFlow.test.ts",
+    "test:unit": "vp test run test/config.test.ts test/protocol.test.ts test/textEdit.test.ts test/upload.test.ts test/webview.test.ts test/mathjaxConfig.test.ts test/editState.test.ts test/documentUploads.test.ts test/webviewUploads.test.ts test/extensionUploadFlow.test.ts test/uploadConfigurationUi.test.ts test/uploadConfigurationIntegration.test.ts",
     "test:package": "vp test run test/package.test.ts",
     "test:vsix": "vp test run test/vsix.test.ts",
     "test:integration": "vp run build && tsc && node out/test/runIntegrationTests.js",

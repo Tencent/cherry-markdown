@@ -48,7 +48,12 @@ vi.mock('vscode', () => ({
 }));
 
 vi.mock('../src/config', () => ({
-  getAssetDirectory: () => mockState.assetDirectory,
+  getUploadConfiguration: () => ({
+    mode: mockState.mode,
+    uploader: mockState.customUploader,
+    assetDirectory: mockState.assetDirectory,
+    backfillImageProps: [],
+  }),
   getBackfillImageProps: () => [],
   getCustomUploader: () => mockState.customUploader,
   getImageUploadMode: () => mockState.mode,
@@ -100,6 +105,18 @@ describe('image upload handler', () => {
     ]);
 
     expect(results.map(({ url }) => url)).toEqual(['./.cherry-assets/image.png', './.cherry-assets/image-1.png']);
+  });
+
+  test('a queued asset save retains the directory selected before settings change', async () => {
+    mockState.assetDirectory = 'selected-assets';
+    const result = uploadFileHandler(
+      { requestId: 30, name: 'queued.png', type: 'image/png', path: '', size: 3, base64: 'AQID' },
+      mockState.uri('/workspace/readme.md') as never,
+    );
+    mockState.assetDirectory = 'later-assets';
+    expect((await result).url).toBe('./selected-assets/queued.png');
+    expect(Array.from(mockState.files.get('/workspace/selected-assets/queued.png')!)).toEqual([1, 2, 3]);
+    expect(mockState.files.has('/workspace/later-assets/queued.png')).toBe(false);
   });
 
   test('sanitizes file names and configured asset directories', async () => {

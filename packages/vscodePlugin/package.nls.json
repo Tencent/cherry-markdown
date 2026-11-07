@@ -17,7 +17,7 @@
   "customUploader.url.description": "Custom uploader URL",
   "customUploader.headers": "Custom uploader HTTP headers",
   "customUploader.headers.description": "Custom uploader HTTP headers",
-  "customUploader.description": "Configure an HTTP uploader for images, videos, or audio.",
+  "customUploader.description": "Configure an HTTP uploader for images, videos, or audio. URL and headers come from one settings scope. Only the current binary HTTP protocol is supported; retired PicGo settings are not migrated.",
   "backfillImageProps.enum.isBorder": "Border",
   "backfillImageProps.enum.isNotBorder": "No border",
   "backfillImageProps.enum.isShadow": "Shadow",
