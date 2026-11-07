@@ -6,6 +6,8 @@ const mockGetConfiguration = vi.hoisted(() => vi.fn());
 
 vi.mock('vscode', () => ({
   ConfigurationTarget: { Global: 1 },
+  ColorThemeKind: { Light: 1, Dark: 2, HighContrast: 3, HighContrastLight: 4 },
+  window: { activeColorTheme: { kind: 1 } },
   Uri: { file: (path: string) => ({ path }) },
   workspace: { getConfiguration: mockGetConfiguration },
 }));
@@ -64,6 +66,27 @@ describe('configuration normalization', () => {
     expect(config.normalizeBackfillImageProps('isBorder')).toEqual([]);
   });
 
+  test('contributes theme settings in order and follows VS Code by default', async () => {
+    const manifest = await import('../package.json');
+    const settings = manifest.default.contributes.configuration.properties;
+    expect(settings['cherryMarkdown.ThemeMode'].default).toBe('vscode');
+    expect([
+      settings['cherryMarkdown.ThemeMode'].order,
+      settings['cherryMarkdown.LightTheme'].order,
+      settings['cherryMarkdown.DarkTheme'].order,
+    ]).toEqual([1, 2, 3]);
+  });
+
+  test('uses the contributed follow mode when no theme setting is configured', async () => {
+    const manifest = await import('../package.json');
+    const properties = manifest.default.contributes.configuration.properties;
+    getConfiguration.mockReturnValue({
+      get: (key: string) => properties[`cherryMarkdown.${key}` as keyof typeof properties]?.default,
+    });
+    vi.mocked(vscode.window).activeColorTheme = { kind: vscode.ColorThemeKind.Dark };
+    expect(config.getTheme({ get: vi.fn().mockReturnValue('green') })).toBe('dark');
+  });
+
   test('prefers the globally persisted Cherry theme', () => {
     const globalState = { get: vi.fn().mockReturnValue('dark') };
     expect(config.getTheme(globalState)).toBe('dark');
@@ -76,6 +99,15 @@ describe('configuration normalization', () => {
     expect(config.getTheme({ get: vi.fn().mockReturnValue(undefined) })).toBe('green');
     expect(get).toHaveBeenCalledWith('Theme');
   });
+
+  test.each([[1, 'green'], [2, 'abyss'], [3, 'abyss'], [4, 'green']])(
+    'follows VS Code color theme kind %s', (kind, expected) => {
+      const settings: Record<string, string> = { ThemeMode: 'vscode', LightTheme: 'green', DarkTheme: 'abyss' };
+      getConfiguration.mockReturnValue({ get: (key: string) => settings[key] });
+      vi.mocked(vscode.window).activeColorTheme = { kind };
+      expect(config.getTheme({ get: vi.fn().mockReturnValue('red') })).toBe(expected);
+    },
+  );
 
   test('migrates the legacy theme into global state only once', async () => {
     const get = vi.fn().mockReturnValue('深色');
