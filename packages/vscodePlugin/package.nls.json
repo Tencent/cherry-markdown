@@ -17,7 +17,7 @@
   "customUploader.url.description": "Custom uploader URL",
   "customUploader.headers": "Custom uploader HTTP headers",
   "customUploader.headers.description": "Custom uploader HTTP headers",
-  "customUploader.description": "Configure an HTTP uploader for images, videos, or audio. URL and headers come from one settings scope. Only the current binary HTTP protocol is supported; retired PicGo settings are not migrated.",
+  "customUploader.description": "Configure an HTTP uploader. URL, format and headers come from one settings scope. Old configuration keys are not migrated; PicGo 2.4.0+ is supported with multipart.",
   "backfillImageProps.enum.isBorder": "Border",
   "backfillImageProps.enum.isNotBorder": "No border",
   "backfillImageProps.enum.isShadow": "Shadow",
@@ -29,5 +29,7 @@
   "backfillImageProps.description": "Image backfill properties for Cherry Markdown — configure borders, shadows, or rounded corners for images.",
   "themeMode.description": "Choose a Cherry theme manually or follow the VS Code color theme. Selecting a theme in Cherry switches back to manual.",
   "lightTheme.description": "Cherry theme used for light and high contrast light VS Code themes.",
-  "darkTheme.description": "Cherry theme used for dark and high contrast dark VS Code themes."
+  "darkTheme.description": "Cherry theme used for dark and high contrast dark VS Code themes.",
+  "customUploader.format.description": "Request format: binary sends raw bytes (default); multipart sends a file form, supported by PicGo 2.4.0+.",
+  "customUploader.fieldName.description": "Multipart file field name (default: files, required by PicGo). Content-Type boundary and Content-Length are generated automatically."
 }

@@ -162,7 +162,7 @@ export function getImageUploadMode(resource?: vscode.Uri): ImageUploadMode {
     throw new UploadConfigurationError(
       'legacy',
       vscode.l10n.t(
-        'Legacy PicGo upload settings are no longer supported. Configure ImageUploadMode and CustomUploader. The file was not uploaded.',
+        'Legacy upload settings are no longer read. For PicGo 2.4.0+, configure ImageUploadMode=remote and CustomUploader with format=multipart and fieldName=files. The file was not uploaded.',
       ),
     );
   }
@@ -237,6 +237,19 @@ export function getUploadConfiguration(resource?: vscode.Uri) {
         'untrusted',
         vscode.l10n.t(
           'Workspace upload settings are blocked in Restricted Mode. Configure user settings or review Workspace Trust. The file was not uploaded.',
+        ),
+      );
+    }
+    if (
+      uploader &&
+      ((uploader.format !== undefined && uploader.format !== 'binary' && uploader.format !== 'multipart') ||
+        (uploader.fieldName !== undefined &&
+          (typeof uploader.fieldName !== 'string' || !/^[a-zA-Z0-9_.[\]-]{1,128}(?![\s\S])/.test(uploader.fieldName))))
+    ) {
+      throw new UploadConfigurationError(
+        'invalid',
+        vscode.l10n.t(
+          'CustomUploader format must be binary or multipart; fieldName must be a nonempty form field name. The file was not uploaded.',
         ),
       );
     }

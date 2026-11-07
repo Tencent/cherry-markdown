@@ -20,7 +20,6 @@
   "Saving Cherry Markdown PNG...": "Сохранение Cherry Markdown PNG...",
   "Image saved successfully.": "Изображение сохранено.",
   "Unable to save the PNG.": "Не удалось сохранить PNG.",
-  "Legacy PicGo upload settings are no longer supported. Configure ImageUploadMode and CustomUploader. The file was not uploaded.": "Старые настройки PicGo больше не поддерживаются. Настройте ImageUploadMode и CustomUploader. Файл не загружен.",
   "Workspace upload settings are blocked in Restricted Mode. Configure user settings or review Workspace Trust. The file was not uploaded.": "Настройки загрузки проекта заблокированы в ограниченном режиме. Настройте пользовательские параметры или доверие рабочей области. Файл не загружен.",
   "ImageUploadMode must be workspace, data, or remote. The file was not uploaded.": "ImageUploadMode должен быть workspace, data или remote. Файл не загружен.",
   "AssetDirectory must be a relative directory inside the workspace. The file was not uploaded.": "AssetDirectory должен быть относительным каталогом внутри рабочей области. Файл не загружен.",
@@ -35,5 +34,7 @@
   "Base64 data": "Данные Base64",
   "Upload: {0} ({1})": "Загрузка: {0} ({1})",
   "Upload settings are invalid.": "Недопустимые настройки загрузки.",
-  "Upload failed: {0}": "Ошибка загрузки: {0}"
+  "Upload failed: {0}": "Ошибка загрузки: {0}",
+  "Legacy upload settings are no longer read. For PicGo 2.4.0+, configure ImageUploadMode=remote and CustomUploader with format=multipart and fieldName=files. The file was not uploaded.": "Старые настройки загрузки больше не читаются. Для PicGo 2.4.0+ задайте ImageUploadMode=remote и CustomUploader с format=multipart и fieldName=files. Файл не загружен.",
+  "CustomUploader format must be binary or multipart; fieldName must be a nonempty form field name. The file was not uploaded.": "Формат CustomUploader должен быть binary или multipart; fieldName — непустое имя поля формы. Файл не загружен."
 }

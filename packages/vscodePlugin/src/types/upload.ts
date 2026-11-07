@@ -5,6 +5,8 @@ export type ImageUploadMode = 'workspace' | 'data' | 'remote';
 export interface CustomUploader {
   enable: boolean;
   url: string;
+  format?: 'binary' | 'multipart';
+  fieldName?: string;
   headers?: Record<string, string>;
 }
 

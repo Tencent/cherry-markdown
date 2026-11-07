@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { randomBytes } from 'crypto';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { getUploadConfiguration } from '../config';
-import type { UploadFileRequest, UploadFileResult } from '../types/upload';
+import type { CustomUploader, UploadFileRequest, UploadFileResult } from '../types/upload';
 
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
@@ -51,6 +52,13 @@ export function parseUploadResponse(data: unknown): string {
     candidates.push(data);
   } else if (data && typeof data === 'object') {
     const record = data as Record<string, unknown>;
+    if (record.success === false) {
+      throw new Error(
+        typeof record.message === 'string'
+          ? `Upload server rejected the file: ${record.message}`
+          : 'Upload server reported failure.',
+      );
+    }
     candidates.push(record.url);
     if (Array.isArray(record.result)) candidates.push(record.result[0]);
     if (typeof record.data === 'string') {
@@ -111,6 +119,28 @@ function safeFileName(fileInfo: UploadFileRequest): string {
   const sourceName = (fileInfo.name || path.posix.basename(fileInfo.path.replace(/\\/g, '/'))).trim();
   const fileName = path.posix.basename(sourceName).replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_');
   return fileName || 'image';
+}
+
+function encodeRemoteUpload(file: Uint8Array, fileInfo: UploadFileRequest, uploader: CustomUploader) {
+  const headers = normalizeHeaders(uploader.headers);
+  if (uploader.format !== 'multipart') {
+    if (!headers['Content-Type'] && !headers['content-type']) headers['Content-Type'] = 'application/octet-stream';
+    if (!headers['X-File-Name'] && !headers['x-file-name']) headers['X-File-Name'] = fileInfo.name;
+    return { body: Buffer.from(file), headers };
+  }
+  // Encode a single file, not a path or clipboard request. This also works across remote hosts.
+  const boundary = `cherry-${randomBytes(16).toString('hex')}`;
+  const mimeType = /^[\w!#$&^.+-]+\/[\w!#$&^.+-]+(?![\s\S])/.test(fileInfo.type)
+    ? fileInfo.type
+    : 'application/octet-stream';
+  const prefix = `--${boundary}\r\nContent-Disposition: form-data; name="${uploader.fieldName ?? 'files'}"; filename="${safeFileName(fileInfo)}"\r\nContent-Type: ${mimeType}\r\n\r\n`;
+  const body = Buffer.concat([Buffer.from(prefix), Buffer.from(file), Buffer.from(`\r\n--${boundary}--\r\n`)]);
+  // The encoder owns boundary and length; user headers must not corrupt the multipart framing.
+  for (const key of Object.keys(headers)) {
+    if (['content-type', 'content-length'].includes(key.toLowerCase())) delete headers[key];
+  }
+  headers['Content-Type'] = `multipart/form-data; boundary=${boundary}`;
+  return { body, headers };
 }
 
 function splitFileName(fileName: string): { stem: string; extension: string } {
@@ -201,17 +231,14 @@ export const uploadFileHandler = async (
       }
       const uploadUrl = parseHttpUrl(customUploader.url, 'Custom uploader URL');
       const file = await readUploadFile(fileInfo);
-      const headers = normalizeHeaders(customUploader.headers);
-      if (!headers['Content-Type'] && !headers['content-type']) {
-        headers['Content-Type'] = 'application/octet-stream';
-      }
-      if (!headers['X-File-Name'] && !headers['x-file-name']) headers['X-File-Name'] = name;
+      const { body, headers } = encodeRemoteUpload(file, fileInfo, customUploader);
 
-      const response = await axios.post<unknown>(uploadUrl.toString(), Buffer.from(file), {
+      const response = await axios.post<unknown>(uploadUrl.toString(), body, {
         headers,
         responseType: 'json',
         timeout: UPLOAD_TIMEOUT_MS,
-        maxBodyLength: MAX_UPLOAD_BYTES,
+        // The file has already passed the 50 MB limit; multipart adds a small envelope.
+        maxBodyLength: body.length,
         maxContentLength: MAX_RESPONSE_BYTES,
       });
       result.url = parseUploadResponse(response.data);

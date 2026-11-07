@@ -84,6 +84,31 @@ describe('document-scoped upload configuration', () => {
     expect(config.getUploadConfiguration(b).uploader?.url).toBe('https://workspace.example/upload');
   });
 
+  test.each([
+    { format: 'guess' },
+    { format: null },
+    { fieldName: '' },
+    { fieldName: 'files\n' },
+    { fieldName: 'files\r\nX-Evil: true' },
+    { fieldName: 'bad"name' },
+    { fieldName: null },
+  ])('rejects invalid request encoding settings %j before uploading', (value) => {
+    user.ImageUploadMode = 'remote';
+    user.CustomUploader = { ...uploader('https://example.test/upload'), ...value };
+    expect(() => config.getUploadConfiguration(a)).toThrow('format');
+  });
+
+  test('preserves multipart encoding with its selected uploader instead of inheriting another scope format', () => {
+    user.ImageUploadMode = 'remote';
+    user.CustomUploader = { ...uploader('https://user.example/upload'), format: 'multipart', fieldName: 'other' };
+    workspace.CustomUploader = uploader('https://workspace.example/upload');
+    expect(config.getUploadConfiguration(a).uploader).not.toHaveProperty('format');
+    folders[a.path] = {
+      CustomUploader: { ...uploader('http://127.0.0.1:36677/upload'), format: 'multipart', fieldName: 'files' },
+    };
+    expect(config.getUploadConfiguration(a).uploader).toMatchObject({ format: 'multipart', fieldName: 'files' });
+  });
+
   test.each(['wrong', '', null, false, {}, 'PicGoServer', '远程'])(
     'rejects invalid explicit mode %j without fallback',
     (value) => {
@@ -96,7 +121,7 @@ describe('document-scoped upload configuration', () => {
   test('detects retired keys only to block an upload, without converting or writing settings', () => {
     workspace.UploadType = 'PicGoServer';
     workspace.PicGoServer = 'https://legacy.example/upload';
-    expect(() => config.getUploadConfiguration(a)).toThrow('Legacy PicGo');
+    expect(() => config.getUploadConfiguration(a)).toThrow('Legacy upload');
     expect(update).not.toHaveBeenCalled();
     expect(config).not.toHaveProperty('migrateImageUploadMode');
     expect(config).not.toHaveProperty('migrateTheme');
@@ -183,6 +208,13 @@ describe('document-scoped upload configuration', () => {
   test('all per-document upload settings declare resource scope', async () => {
     const manifest = await import('../package.json');
     const properties = manifest.default.contributes.configuration.properties;
+    const uploaderProperties = properties['cherryMarkdown.CustomUploader'].properties;
+    expect(uploaderProperties.format).toMatchObject({ default: 'binary', enum: ['binary', 'multipart'] });
+    expect(uploaderProperties.fieldName.default).toBe('files');
+    const fieldNamePattern = new RegExp(uploaderProperties.fieldName.pattern);
+    expect(fieldNamePattern.test('files[]')).toBe(true);
+    expect(fieldNamePattern.test('files\r\n')).toBe(false);
+    expect(fieldNamePattern.test('files\n')).toBe(false);
     for (const key of ['Usage', 'ImageUploadMode', 'AssetDirectory', 'CustomUploader', 'BackfillImageProps']) {
       expect((properties as Record<string, { scope?: string }>)[`cherryMarkdown.${key}`].scope).toBe('resource');
     }

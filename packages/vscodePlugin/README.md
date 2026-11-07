@@ -40,7 +40,9 @@ Configuration values are stable across VS Code display languages. Manual theme s
 
 ## Upload settings upgrade
 
-This release stops using the retired `cherryMarkdown.UploadType` and `cherryMarkdown.PicGoServer` settings. There is no legacy PicGo request adapter. Existing users must configure the current settings manually, for example:
+This release stops reading the retired `cherryMarkdown.UploadType` and `cherryMarkdown.PicGoServer` settings. **PicGo remains supported through the current `CustomUploader` settings**, using multipart file uploads. Old settings are not migrated automatically; there is no path-list or clipboard protocol fallback.
+
+For an existing binary HTTP uploader, keep your current settings. Omitting `format` preserves the original binary request behavior:
 
 ```json
 {
@@ -53,9 +55,33 @@ This release stops using the retired `cherryMarkdown.UploadType` and `cherryMark
 }
 ```
 
-The endpoint must accept the file bytes as the HTTP POST body (`application/octet-stream` by default, with an `X-File-Name` header) and return a supported URL response such as `{ "url": "https://example.com/image.png" }`. An old PicGo endpoint is not automatically compatible with this protocol. Server errors are reported without silently switching to another uploader.
+With `format: "binary"` (the default), the endpoint must accept file bytes as the HTTP POST body (`application/octet-stream` by default, with an `X-File-Name` header). With `format: "multipart"`, the extension sends one file part; `fieldName` defaults to `files` and may be changed for other form-upload services. Field names may contain letters, digits, underscores, dots, hyphens and square brackets (1–128 characters).
 
-With only retired settings present, attempting an upload shows an upgrade warning and sends no file. The warning offers **Open upload settings** and **View configuration guide**. Valid explicitly configured `ImageUploadMode` settings take precedence over retired settings, so leftover old keys do not repeatedly warn. This is a temporary detection-only notice, planned for removal in the next major release; it never performs migration or old-protocol uploads.
+Both formats accept supported URL responses, including `{ "url": "https://example.com/image.png" }` and PicGo's `{ "success": true, "result": ["https://example.com/image.png"] }`. A response with `success: false` is rejected. The extension does not guess a format from the address or retry another protocol or endpoint after a failure.
+
+### PicGo configuration
+
+1. Use **PicGo 2.4.0 or newer**, configure your image host in PicGo, and keep PicGo running with its HTTP server enabled. Earlier versions without multipart support must be upgraded.
+2. Replace the retired VS Code settings with the following current settings. Use your actual PicGo server address if it differs from the default:
+
+```json
+{
+  "cherryMarkdown.ImageUploadMode": "remote",
+  "cherryMarkdown.CustomUploader": {
+    "enable": true,
+    "url": "http://127.0.0.1:36677/upload",
+    "format": "multipart",
+    "fieldName": "files",
+    "headers": {}
+  }
+}
+```
+
+PicGo requires the multipart field name `files`. Do not merely copy its `/upload` URL into a binary uploader: changing the URL or setting an `application/json` header does not change the request encoding. The extension generates the multipart `Content-Type` boundary and body length automatically; configured `Content-Type` and `Content-Length` headers are ignored in multipart mode. Other headers, such as `Authorization`, remain available. If your PicGo server requires a secret, add `"Authorization": "Bearer YOUR_PICGO_SERVER_SECRET"` inside `headers`, preferably in user settings.
+
+The file bytes are sent to PicGo, not a local path or clipboard command. In Remote SSH, containers or WSL, `127.0.0.1` refers to the extension host's network environment; ensure that it can reach the configured PicGo server. See the [official PicGo multipart API](https://docs.picgo.app/gui/guide/advance#upload-images-with-http-form-data).
+
+With only retired settings present, attempting an upload shows an upgrade warning and sends no file. It explicitly directs PicGo 2.4.0+ users to `ImageUploadMode=remote`, `format=multipart` and `fieldName=files`, with **Open upload settings** and **View configuration guide** actions. Valid explicitly configured `ImageUploadMode` settings take precedence over retired settings, so leftover old keys do not repeatedly warn. This is a temporary detection-only notice, planned for removal in the next major release; it never performs migration or old-protocol uploads.
 
 Settings resolve per document: **workspace folder → workspace → user → default**. In a multi-root workspace, a folder's `.vscode/settings.json` applies only to documents in that folder. Folder settings that were previously ignored can now take effect; check the upload target and source shown at the bottom of the preview before uploading.
 

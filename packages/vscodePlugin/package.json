@@ -142,6 +142,21 @@
               "additionalProperties": {
                 "type": "string"
               }
+            },
+            "format": {
+              "type": "string",
+              "enum": [
+                "binary",
+                "multipart"
+              ],
+              "default": "binary",
+              "description": "%customUploader.format.description%"
+            },
+            "fieldName": {
+              "type": "string",
+              "default": "files",
+              "pattern": "^[a-zA-Z0-9_.[\\]-]{1,128}(?![\\s\\S])",
+              "description": "%customUploader.fieldName.description%"
             }
           },
           "description": "%customUploader.description%",

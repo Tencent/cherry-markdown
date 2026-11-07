@@ -17,7 +17,7 @@
   "customUploader.url.description": "URL пользовательского загрузчика",
   "customUploader.headers": "HTTP-заголовки для пользовательского загрузчика",
   "customUploader.headers.description": "HTTP-заголовки для пользовательского загрузчика",
-  "customUploader.description": "Настройте HTTP-загрузчик для отправки изображений, видео или аудио на ваш сервер. URL и заголовки выбираются из одного уровня настроек. Поддерживается только текущий протокол HTTP с двоичным телом; старые настройки PicGo не переносятся.",
+  "customUploader.description": "Настройка HTTP-загрузчика. URL, формат и заголовки берутся из одного уровня настроек. Старые ключи не переносятся; PicGo 2.4.0+ поддерживается через multipart.",
   "backfillImageProps.enum.isBorder": "Граница",
   "backfillImageProps.enum.isNotBorder": "Без границы",
   "backfillImageProps.enum.isShadow": "Тень",
@@ -29,5 +29,7 @@
   "backfillImageProps.description": "Параметры оформления изображений в Cherry Markdown — настройте границы, тени и скругления для изображений.",
   "themeMode.description": "Выберите тему Cherry вручную или следуйте цветовой теме VS Code. Выбор темы Cherry включает ручной режим.",
   "lightTheme.description": "Тема Cherry для светлых и высококонтрастных светлых тем VS Code.",
-  "darkTheme.description": "Тема Cherry для тёмных и высококонтрастных тёмных тем VS Code."
+  "darkTheme.description": "Тема Cherry для тёмных и высококонтрастных тёмных тем VS Code.",
+  "customUploader.format.description": "Формат запроса: binary — байты файла (по умолчанию); multipart — файловая форма, поддерживаемая PicGo 2.4.0+.",
+  "customUploader.fieldName.description": "Имя поля файла multipart (по умолчанию files; требуется PicGo). Граница Content-Type и Content-Length создаются автоматически."
 }
