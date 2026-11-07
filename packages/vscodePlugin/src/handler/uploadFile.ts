@@ -85,6 +85,20 @@ function pathIsAbsolute(value: string): boolean {
 }
 
 async function readUploadFile(fileInfo: UploadFileRequest): Promise<Uint8Array> {
+  if (fileInfo.base64 !== undefined) {
+    if (
+      fileInfo.base64.length > Math.ceil(MAX_UPLOAD_BYTES / 3) * 4 ||
+      fileInfo.base64.length % 4 !== 0 ||
+      !/^[A-Za-z\d+/]*={0,2}$/.test(fileInfo.base64)
+    ) {
+      throw new Error('The upload file data is invalid.');
+    }
+    const bytes = Buffer.from(fileInfo.base64, 'base64');
+    if (bytes.length > MAX_UPLOAD_BYTES || bytes.length !== fileInfo.size) {
+      throw new Error('The upload file data does not match its size.');
+    }
+    return bytes;
+  }
   const file = await vscode.workspace.fs.readFile(await validateUploadFile(fileInfo));
   if (file.length > MAX_UPLOAD_BYTES) throw new Error('The upload file exceeds the 50 MB limit.');
   if (fileInfo.size > 0 && file.length !== fileInfo.size) {

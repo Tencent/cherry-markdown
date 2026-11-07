@@ -14,6 +14,18 @@ export interface UploadFileRequest {
   type: string;
   path: string;
   size: number;
+  /** File bytes from the sandboxed Webview, which does not expose local paths. */
+  base64?: string;
+}
+
+export interface DocumentUploadRequest extends UploadFileRequest {
+  documentUri: string;
+  placeholder: string;
+}
+
+export interface DocumentUploadResult extends UploadFileResult {
+  documentUri: string;
+  placeholder: string;
 }
 
 export interface UploadFileResult extends BackfillImage {

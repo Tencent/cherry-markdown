@@ -22,6 +22,8 @@ With focus in the preview, press **Ctrl+F** (**Cmd+F** on macOS) to search rende
 
 The preview follows the active Markdown document. When another file type has focus, visual editing is disabled so that changes cannot be written to the wrong document.
 
+Uploads insert a unique temporary Markdown URL at the original selection before starting. Once that placeholder is synchronized to VS Code, switching documents or closing the preview does not redirect the result: it replaces the placeholder in the original open document. Deleting, undoing or duplicating the placeholder, or closing the document, cancels automatic insertion. Upload results remain unsaved edits; the extension does not save the document automatically. Failed or cancelled uploads may leave a placeholder or an already-uploaded asset for manual cleanup.
+
 By default, the preview follows VS Code's light or dark theme, including high-contrast variants. Configure the corresponding Cherry themes with `cherryMarkdown.LightTheme` and `cherryMarkdown.DarkTheme`. Set `cherryMarkdown.ThemeMode` to `manual` or choose a theme from Cherry's built-in theme menu to use a manual theme. The selected manual theme is stored in the extension's global state and restored when manual mode is used again.
 
 ## Settings
