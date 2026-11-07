@@ -77,6 +77,46 @@ describe('Webview document uploads', () => {
     expect(f.messages).toContainEqual({ type: 'finish-upload', data: { placeholder } });
   });
 
+  test('a source state refresh before editor-ack starts the synchronized upload exactly once', () => {
+    const f = fixture();
+    f.uploads.start(f.file, f.callback);
+    f.uploads.synchronize(state.documentUri, f.text());
+    f.uploads.acknowledge(state.documentUri, f.text());
+    expect(f.messages).toHaveLength(1);
+    expect(f.messages[0]).toMatchObject({ type: 'upload-file', data: { documentUri: state.documentUri } });
+  });
+
+  test('a state refresh retains a synchronized upload until its file bytes are ready', async () => {
+    const f = fixture();
+    let resolveRead!: (data: ArrayBuffer) => void;
+    f.uploads.start(
+      {
+        ...f.file,
+        path: '',
+        arrayBuffer: () =>
+          new Promise<ArrayBuffer>((r) => {
+            resolveRead = r;
+          }),
+      },
+      f.callback,
+    );
+    f.uploads.synchronize(state.documentUri, f.text());
+    expect(f.messages).toEqual([]);
+    resolveRead(new Uint8Array([1, 2, 3]).buffer);
+    await Promise.resolve();
+    expect(f.messages).toEqual([
+      expect.objectContaining({ type: 'upload-file', data: expect.objectContaining({ base64: 'AQID' }) }),
+    ]);
+  });
+
+  test('a state refresh without the pending anchor still cancels its upload', () => {
+    const f = fixture();
+    f.uploads.start(f.file, f.callback);
+    f.uploads.synchronize(state.documentUri, 'external edit removed the anchor');
+    f.uploads.acknowledge(state.documentUri, f.text());
+    expect(f.messages).toEqual([]);
+  });
+
   test('A → B → A: replaces the unique anchor and retains new typing, rather than using the current selection', () => {
     const f = fixture();
     f.uploads.start(f.file, f.callback);

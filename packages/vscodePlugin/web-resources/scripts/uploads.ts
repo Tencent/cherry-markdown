@@ -84,6 +84,13 @@ export class DocumentUploads {
     }
   }
 
+  synchronize(documentUri: string, markdown: string): void {
+    // A document-state refresh can arrive before editor-ack after WorkspaceEdit.
+    // Its text is also authoritative: retain synchronized anchors while file bytes are still being read.
+    this.acknowledge(documentUri, markdown);
+    this.discardUnacknowledged(documentUri);
+  }
+
   applyResult(result: DocumentUploadResult): void {
     if (this.hooks.getState()?.documentUri === result.documentUri) {
       const markdown = replaceUploadPlaceholder(this.hooks.getMarkdown(), result.placeholder, result.url);

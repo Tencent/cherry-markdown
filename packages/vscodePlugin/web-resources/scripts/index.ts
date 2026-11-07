@@ -342,7 +342,8 @@ async function applyEditorState(state: EditorState): Promise<void> {
   await ensureMathJax(state.text);
   if (generation !== stateGeneration) return;
   if (!preserveUnacknowledgedEdit) {
-    if (editorState) uploads.discardUnacknowledged(editorState.documentUri);
+    if (editorState?.documentUri === state.documentUri) uploads.synchronize(state.documentUri, state.text);
+    else if (editorState) uploads.discardUnacknowledged(editorState.documentUri);
     const textChanged = editorState?.text !== state.text;
     editorState = state;
     editInFlight = undefined;
