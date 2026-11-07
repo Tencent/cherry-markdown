@@ -48,6 +48,8 @@ Configuration values are stable across VS Code display languages. Existing theme
 
 Authentication headers stored in settings are visible as plain text. Prefer user settings over workspace settings and avoid committing credentials to the repository.
 
+If both border and no-border image properties are selected, no-border takes precedence. Shadow and rounded corners remain enabled independently.
+
 ## Development
 
 From the repository root:

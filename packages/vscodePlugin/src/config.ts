@@ -104,7 +104,9 @@ export function normalizeBackfillImageProps(value: unknown): BackfillImageProp[]
   const normalized = value
     .map((item) => (typeof item === 'string' ? backfillPropAliases[item] : undefined))
     .filter((item): item is BackfillImageProp => item !== undefined);
-  return [...new Set(normalized)];
+  const properties = [...new Set(normalized)];
+  // Preserve the preview's original no-border precedence before generating Markdown decorations.
+  return properties.includes('isNotBorder') ? properties.filter((property) => property !== 'isBorder') : properties;
 }
 
 export function getUsageMode(resource?: vscode.Uri): UsageMode {
