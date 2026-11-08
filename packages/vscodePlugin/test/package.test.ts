@@ -17,9 +17,22 @@ const requiredFiles = [
   'web-resources/dist/index.css',
   'web-resources/scripts/index.css',
   'favicon.ico',
+  'docs/updates/upload-settings.en.md',
+  'docs/updates/upload-settings.zh-cn.md',
+  'docs/updates/upload-settings.ru.md',
 ].map((file) => file.replace(/^\.\//, ''));
 
 describe('VS Code extension build artifacts', () => {
+  test('provides a discoverable localized command for reopening the bundled update notes', () => {
+    expect(packageManifest.contributes.commands).toContainEqual({
+      command: 'cherrymarkdown.showUpdateNotes',
+      title: '%commands.showUpdateNotes.title%',
+    });
+    for (const locale of ['package.nls.json', 'package.nls.ru.json', 'package.nls.zh-cn.json']) {
+      const messages = JSON.parse(fs.readFileSync(path.join(packageRoot, locale), 'utf8'));
+      expect(messages['commands.showUpdateNotes.title']).toBeTruthy();
+    }
+  });
   test.each(requiredFiles)('contains %s', (relativePath) => {
     expect(fs.statSync(path.join(packageRoot, relativePath), { throwIfNoEntry: false })?.isFile()).toBe(true);
   });

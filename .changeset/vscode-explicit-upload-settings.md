@@ -2,9 +2,11 @@
 'cherry-markdown-vscode-plugin': minor
 ---
 
-feat(vscodePlugin): 统一上传配置并通过 multipart 支持 PicGo，停止读取旧配置键且不再自动迁移
+feat(vscodePlugin): 统一上传配置、支持 PicGo multipart，并为重要行为变化提供一次性更新说明
 
 上传配置按当前文档所属文件夹、工作区、用户、默认值的顺序读取。上传器地址和认证头整体取自同一层，避免项目地址混入全局认证信息。配置无效时阻止上传并提示修正，不静默切换上传目标。
+
+重要行为变化会显示一次性更新说明通知，可查看随插件打包的本地说明或打开上传设置，也可从命令面板重新查看。通知按重要变更标识记录，普通 patch、关闭通知和重载窗口不会重复提示；首次上线无法可靠区分新装和升级，因此首次启用都会提示一次。仅记录扩展内部通知状态，不迁移用户设置，上传时的配置错误提醒继续保留。
 
 `CustomUploader.format` 支持 `binary` 和 `multipart`，省略时仍使用原有的 `binary` 行为。PicGo 2.4.0+ 用户可设置 `ImageUploadMode=remote`、`format=multipart`、`fieldName=files` 继续上传；插件直接发送文件内容，自动生成表单边界和长度，不根据地址猜测协议，也不在失败后切换路线。
 

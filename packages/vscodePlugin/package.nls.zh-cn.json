@@ -31,5 +31,6 @@
   "lightTheme.description": "浅色及高对比度浅色 VS Code 主题使用的 Cherry 主题。",
   "darkTheme.description": "深色及高对比度深色 VS Code 主题使用的 Cherry 主题。",
   "customUploader.format.description": "请求格式：binary 直接发送文件字节（默认）；multipart 发送文件表单，支持 PicGo 2.4.0+。",
-  "customUploader.fieldName.description": "multipart 文件字段名（默认 files，PicGo 要求使用 files）。Content-Type 边界和 Content-Length 由插件自动生成。"
+  "customUploader.fieldName.description": "multipart 文件字段名（默认 files，PicGo 要求使用 files）。Content-Type 边界和 Content-Length 由插件自动生成。",
+  "commands.showUpdateNotes.title": "Cherry Markdown：查看更新说明"
 }

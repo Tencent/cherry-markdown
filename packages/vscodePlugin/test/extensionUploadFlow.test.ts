@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vite-plus/test';
 import { activate, deactivate } from '../src/extension';
 import type * as vscode from 'vscode';
+import { IMPORTANT_UPDATE_NOTICE_ID } from '../src/updateNotice';
 
 const host = vi.hoisted(() => {
   const callbacks = new Map<string, (...args: any[]) => any>();
@@ -139,7 +140,7 @@ async function setup() {
   activate({
     subscriptions: [],
     extensionUri: host.uri('/extension'),
-    globalState: {},
+    globalState: { get: () => [IMPORTANT_UPDATE_NOTICE_ID], update: vi.fn() },
   } as unknown as vscode.ExtensionContext);
   await host.callbacks.get('cherrymarkdown.preview')!();
   host.callbacks.get('message')!({ type: 'ready' });

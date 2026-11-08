@@ -17,6 +17,7 @@ import { calculateTextReplacement } from './textEdit';
 import { getWebviewContent } from './webview';
 import type { DocumentUploadRequest } from './types/upload';
 import { showUploadConfigurationError } from './uploadConfigurationUi';
+import { showImportantUpdateNotice, showUpdateNotes } from './updateNotice';
 
 const MAX_PNG_BYTES = 50 * 1024 * 1024;
 
@@ -526,6 +527,12 @@ export function activate(context: vscode.ExtensionContext): void {
   preview = new CherryMarkdownPreview(context, output);
   preview.register();
   context.subscriptions.push(output, preview);
+  context.subscriptions.push(
+    vscode.commands.registerCommand('cherrymarkdown.showUpdateNotes', () => showUpdateNotes(context)),
+  );
+  void showImportantUpdateNotice(context).catch((error: unknown) => {
+    output.appendLine(`[update-notice] ${error instanceof Error ? error.message : String(error)}`);
+  });
 }
 
 export function deactivate(): void {

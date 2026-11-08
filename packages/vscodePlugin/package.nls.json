@@ -31,5 +31,6 @@
   "lightTheme.description": "Cherry theme used for light and high contrast light VS Code themes.",
   "darkTheme.description": "Cherry theme used for dark and high contrast dark VS Code themes.",
   "customUploader.format.description": "Request format: binary sends raw bytes (default); multipart sends a file form, supported by PicGo 2.4.0+.",
-  "customUploader.fieldName.description": "Multipart file field name (default: files, required by PicGo). Content-Type boundary and Content-Length are generated automatically."
+  "customUploader.fieldName.description": "Multipart file field name (default: files, required by PicGo). Content-Type boundary and Content-Length are generated automatically.",
+  "commands.showUpdateNotes.title": "Cherry Markdown: View update notes"
 }

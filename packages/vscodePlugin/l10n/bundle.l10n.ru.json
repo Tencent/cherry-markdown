@@ -36,5 +36,7 @@
   "Upload settings are invalid.": "Недопустимые настройки загрузки.",
   "Upload failed: {0}": "Ошибка загрузки: {0}",
   "Legacy upload settings are no longer read. For PicGo 2.4.0+, configure ImageUploadMode=remote and CustomUploader with format=multipart and fieldName=files. The file was not uploaded.": "Старые настройки загрузки больше не читаются. Для PicGo 2.4.0+ задайте ImageUploadMode=remote и CustomUploader с format=multipart и fieldName=files. Файл не загружен.",
-  "CustomUploader format must be binary or multipart; fieldName must be a nonempty form field name. The file was not uploaded.": "Формат CustomUploader должен быть binary или multipart; fieldName — непустое имя поля формы. Файл не загружен."
+  "CustomUploader format must be binary or multipart; fieldName must be a nonempty form field name. The file was not uploaded.": "Формат CustomUploader должен быть binary или multipart; fieldName — непустое имя поля формы. Файл не загружен.",
+  "View update notes": "Просмотреть изменения",
+  "Cherry Markdown has important upload configuration changes. Existing binary upload settings stay unchanged. PicGo users should review the setup guide.": "В настройках загрузки Cherry Markdown есть важные изменения. Прежняя загрузка binary сохранена. Пользователям PicGo следует ознакомиться с новой инструкцией."
 }

@@ -31,5 +31,6 @@
   "lightTheme.description": "Тема Cherry для светлых и высококонтрастных светлых тем VS Code.",
   "darkTheme.description": "Тема Cherry для тёмных и высококонтрастных тёмных тем VS Code.",
   "customUploader.format.description": "Формат запроса: binary — байты файла (по умолчанию); multipart — файловая форма, поддерживаемая PicGo 2.4.0+.",
-  "customUploader.fieldName.description": "Имя поля файла multipart (по умолчанию files; требуется PicGo). Граница Content-Type и Content-Length создаются автоматически."
+  "customUploader.fieldName.description": "Имя поля файла multipart (по умолчанию files; требуется PicGo). Граница Content-Type и Content-Length создаются автоматически.",
+  "commands.showUpdateNotes.title": "Cherry Markdown: Просмотреть изменения"
 }

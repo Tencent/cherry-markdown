@@ -36,5 +36,7 @@
   "Upload settings are invalid.": "上传配置无效。",
   "Upload failed: {0}": "上传失败：{0}",
   "Legacy upload settings are no longer read. For PicGo 2.4.0+, configure ImageUploadMode=remote and CustomUploader with format=multipart and fieldName=files. The file was not uploaded.": "不再读取旧上传配置。PicGo 2.4.0+ 用户请配置 ImageUploadMode=remote，并在 CustomUploader 中设置 format=multipart、fieldName=files。本次文件未上传。",
-  "CustomUploader format must be binary or multipart; fieldName must be a nonempty form field name. The file was not uploaded.": "CustomUploader 的 format 必须为 binary 或 multipart，fieldName 必须为非空表单字段名。本次文件未上传。"
+  "CustomUploader format must be binary or multipart; fieldName must be a nonempty form field name. The file was not uploaded.": "CustomUploader 的 format 必须为 binary 或 multipart，fieldName 必须为非空表单字段名。本次文件未上传。",
+  "View update notes": "查看更新说明",
+  "Cherry Markdown has important upload configuration changes. Existing binary upload settings stay unchanged. PicGo users should review the setup guide.": "Cherry Markdown 上传配置有重要变化，原有 binary 上传保持不变。PicGo 用户请查看新的配置说明。"
 }

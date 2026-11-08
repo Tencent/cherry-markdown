@@ -40,6 +40,10 @@ Configuration values are stable across VS Code display languages. Manual theme s
 
 ## Upload settings upgrade
 
+An important-change notification appears once per VS Code profile, with **View update notes** and **Open upload settings** actions. Update notes are bundled in English, Simplified Chinese and Russian and open locally without a network request. You can reopen them using **Cherry Markdown: View update notes** in the Command Palette.
+
+The notice uses a stable important-change identifier, not the extension version: ordinary patch releases, window reloads and dismissing the notification do not repeat it. When this feature is first introduced, new installs cannot reliably be distinguished from upgrades, so both receive the notice once. Only notice state is recorded inside the extension; no user settings are migrated. Upload-time configuration warnings remain active independently.
+
 This release stops reading the retired `cherryMarkdown.UploadType` and `cherryMarkdown.PicGoServer` settings. **PicGo remains supported through the current `CustomUploader` settings**, using multipart file uploads. Old settings are not migrated automatically; there is no path-list or clipboard protocol fallback.
 
 For an existing binary HTTP uploader, keep your current settings. Omitting `format` preserves the original binary request behavior:
