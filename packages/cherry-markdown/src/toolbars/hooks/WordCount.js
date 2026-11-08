@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { readStorage, writeStorage } from '@/utils/storage';
 /**
  * 字数统计
  */
@@ -25,7 +24,7 @@ export default class wordCount extends MenuBase {
     this.noIcon = true;
     this.countEvent = new Event('count');
     // 强制转成数字
-    this.countState = Number(readStorage('cherry-wordCountState')) || 0;
+    this.countState = Number(localStorage.getItem('cherry-wordCountState')) || 0;
   }
 
   $dealEditorChange() {
@@ -88,7 +87,7 @@ export default class wordCount extends MenuBase {
       this.countState = 0;
     }
     // 转成string格式
-    writeStorage('cherry-wordCountState', String(this.countState));
+    localStorage.setItem('cherry-wordCountState', String(this.countState));
     this.btnDom.dispatchEvent(this.countEvent);
     return selection;
   }

@@ -356,10 +356,7 @@ export default class Toolbar {
             return `-Key${m1.toUpperCase()}`;
           })
           .replace(/-([0-9])$/g, '-Digit$1');
-        this.shortcutKeyMap[$key] = {
-          hookName: value,
-          aliasName: this.$cherry.locale[value] || value,
-        };
+        this.shortcutKeyMap[$key] = { hookName: value, aliasName: this.$cherry.locale[value] || value };
       });
     }
     if (this.$cherry.options.toolbars.shortcutKeySettings.isReplace) {
@@ -460,7 +457,7 @@ export default class Toolbar {
    */
   fireShortcutKey(evt) {
     // 如果禁用了快捷键，则不再触发快捷键事件
-    if (!isEnableShortcutKey(this.$cherry.nameSpace, this.$cherry)) {
+    if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
       return false;
     }
     const onKeyStack = getAllowedShortcutKey(evt);

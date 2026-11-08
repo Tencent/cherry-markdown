@@ -15,7 +15,6 @@
  */
 import { createElement } from '../utils/dom';
 import { isBrowser } from '../utils/env';
-import { readStorage, writeStorage } from '../utils/storage';
 /**
  * 悬浮目录
  */
@@ -47,11 +46,17 @@ export default class Toc {
   }
 
   getModelFromLocalStorage() {
-    return readStorage('cherry-toc-model') || this.defaultModel;
+    if (typeof localStorage === 'undefined') {
+      return this.defaultModel;
+    }
+    return localStorage.getItem('cherry-toc-model') || this.defaultModel;
   }
 
   setModelToLocalStorage(model) {
-    writeStorage('cherry-toc-model', model);
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+    localStorage.setItem('cherry-toc-model', model);
   }
 
   drawDom() {

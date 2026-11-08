@@ -16,14 +16,14 @@
 import ParagraphBase from '@/core/ParagraphBase';
 import { isBrowser } from '@/utils/env';
 import { compileRegExp } from '@/utils/regexp';
-import { resolveClassicBr } from '@/utils/config';
+import { getIsClassicBrFromLocal, testKeyInLocal } from '@/utils/config';
 
 export default class Br extends ParagraphBase {
   static HOOK_NAME = 'br';
 
   constructor(options) {
     super({ needCache: true });
-    this.classicBr = resolveClassicBr(options.globalConfig.classicBr);
+    this.classicBr = testKeyInLocal('classicBr') ? getIsClassicBrFromLocal() : options.globalConfig.classicBr;
   }
 
   beforeMakeHtml(str) {

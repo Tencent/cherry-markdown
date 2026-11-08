@@ -15,7 +15,6 @@
  */
 
 import { createElement } from '@/utils/dom';
-import { readStorage, writeStorage } from '@/utils/storage';
 
 const SAFE_AREA_MARGIN = 15;
 
@@ -71,14 +70,20 @@ const pasteHelper = {
    * 获取缓存中的复制粘贴类型
    */
   getTypeFromLocalStorage() {
-    return readStorage('cherry-paste-type') || 'md';
+    if (typeof localStorage === 'undefined') {
+      return 'md';
+    }
+    return localStorage.getItem('cherry-paste-type') || 'md';
   },
 
   /**
    * 记忆最近一次用户选择的粘贴类型
    */
   setTypeToLocalStorage(type) {
-    writeStorage('cherry-paste-type', type);
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+    localStorage.setItem('cherry-paste-type', type);
   },
 
   /**

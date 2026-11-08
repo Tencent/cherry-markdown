@@ -50,11 +50,7 @@ describe('toolbars/hooks Color', () => {
       bgColor: null,
       text: 'text',
     });
-    expect(color.parseAppliedColors('plain')).toEqual({
-      textColor: null,
-      bgColor: null,
-      text: 'plain',
-    });
+    expect(color.parseAppliedColors('plain')).toEqual({ textColor: null, bgColor: null, text: 'plain' });
 
     expect(color.buildStyleString('#111111', '#222222', 'text')).toBe('!!#111111 !!!#222222 text!!!!!');
     expect(color.buildStyleString(null, '#222222', 'text')).toBe('!!!#222222 text!!!');
@@ -168,11 +164,7 @@ describe('toolbars/hooks Color', () => {
     setRect(saturation, { left: 10, top: 10, width: 100, height: 50 });
     setRect(hue, { left: 0, top: 0, width: 120, height: 10 });
 
-    const saturationEvent = new MouseEvent('mousedown', {
-      clientX: 60,
-      clientY: 35,
-      bubbles: true,
-    });
+    const saturationEvent = new MouseEvent('mousedown', { clientX: 60, clientY: 35, bubbles: true });
     saturation.dispatchEvent(saturationEvent);
     expect(picker.isDragging).toBe('saturation');
     document.dispatchEvent(new MouseEvent('mousemove', { clientX: 100, clientY: 10 }));

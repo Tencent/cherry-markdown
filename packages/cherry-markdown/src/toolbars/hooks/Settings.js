@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { saveIsClassicBrToLocal, resolveClassicBr } from '@/utils/config';
+import { saveIsClassicBrToLocal, getIsClassicBrFromLocal, testKeyInLocal } from '@/utils/config';
 import ShortcutKeyConfigPanel from '@/toolbars/ShortcutKeyConfigPanel';
 import { getKeyCode, getStorageKeyMap, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
@@ -29,7 +29,9 @@ export default class Settings extends MenuBase {
     this.setName('settings', 'settings');
     this.updateMarkdown = false;
     this.engine = $cherry.engine;
-    const classicBr = resolveClassicBr(this.engine.$cherry.options.engine.global?.classicBr);
+    const classicBr = testKeyInLocal('classicBr')
+      ? getIsClassicBrFromLocal()
+      : this.engine.$cherry.options.engine.global?.classicBr;
     const { defaultModel } = $cherry.editor.options;
     const classicBrIconName = classicBr ? 'br' : 'normal';
     const classicBrName = classicBr ? 'classicBr' : 'normalBr';
@@ -38,16 +40,8 @@ export default class Settings extends MenuBase {
     this.instanceId = $cherry.instanceId;
     /** @type {import('@/toolbars/MenuBase').SubMenuConfigItem[]} */
     this.subMenuConfig = [
-      {
-        iconName: classicBrIconName,
-        name: classicBrName,
-        onclick: this.bindSubClick.bind(this, 'classicBr'),
-      },
-      {
-        iconName: previewIcon,
-        name: previewName,
-        onclick: this.bindSubClick.bind(this, 'previewClose'),
-      },
+      { iconName: classicBrIconName, name: classicBrName, onclick: this.bindSubClick.bind(this, 'classicBr') },
+      { iconName: previewIcon, name: previewName, onclick: this.bindSubClick.bind(this, 'previewClose') },
       { iconName: '', name: 'hide', onclick: this.bindSubClick.bind(this, 'toggleToolbar') },
     ];
     this.attachEventListeners();
@@ -111,11 +105,7 @@ export default class Settings extends MenuBase {
     } else {
       this.subMenuConfig = this.subMenuConfig.map((item) => {
         if (item.iconName === 'previewClose' || item.iconName === 'preview') {
-          return {
-            iconName: previewIcon,
-            name: previewName,
-            onclick: this.bindSubClick.bind(this, 'previewClose'),
-          };
+          return { iconName: previewIcon, name: previewName, onclick: this.bindSubClick.bind(this, 'previewClose') };
         }
         return item;
       });
@@ -144,11 +134,11 @@ export default class Settings extends MenuBase {
   onClick(selection, shortKey = '', callback) {
     const resolvedShortKey = this.matchShortcutKey(shortKey);
     if (resolvedShortKey === 'classicBr') {
-      const currentIsClassicBr =
-        this.classicBrOverride ?? resolveClassicBr(this.engine.$cherry.options.engine.global.classicBr);
+      const currentIsClassicBr = testKeyInLocal('classicBr')
+        ? getIsClassicBrFromLocal()
+        : this.engine.$cherry.options.engine.global.classicBr;
       const targetIsClassicBr = !currentIsClassicBr;
-      const saved = saveIsClassicBrToLocal(targetIsClassicBr);
-      this.classicBrOverride = saved ? undefined : targetIsClassicBr;
+      saveIsClassicBrToLocal(targetIsClassicBr);
       this.engine.$cherry.options.engine.global.classicBr = targetIsClassicBr;
       this.engine.hookCenter.hookList.paragraph.forEach((item) => {
         item.classicBr = targetIsClassicBr;

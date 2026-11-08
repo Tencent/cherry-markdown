@@ -15,7 +15,7 @@
  */
 import SyntaxBase, { HOOKS_TYPE_LIST } from './SyntaxBase';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';
-import { resolveClassicBr } from '@/utils/config';
+import { getIsClassicBrFromLocal, testKeyInLocal } from '@/utils/config';
 import { blockNames } from '@/utils/sanitize';
 import LRUCache from '../utils/LRUCache';
 
@@ -95,7 +95,7 @@ export default class ParagraphBase extends SyntaxBase {
     // 是否启用经典换行逻辑
     // true：一个换行会被忽略，两个以上连续换行会分割成段落，
     // false： 一个换行会转成<br>，两个连续换行会分割成段落，三个以上连续换行会转成<br>并分割段落
-    this.classicBr = resolveClassicBr(classicBr);
+    this.classicBr = testKeyInLocal('classicBr') ? getIsClassicBrFromLocal() : classicBr;
     this.removeBrAfterBlock = null;
     this.removeBrBeforeBlock = null;
     this.removeNewlinesBetweenTags = null;
