@@ -93,9 +93,14 @@ for (const item of cases) {
     expect.soft(Math.abs(initial!.height - native!.height)).toBeLessThanOrEqual(0.75);
     await actual.scrollIntoViewIfNeeded();
     const captureOrigin = (await actual.boundingBox())!;
-    // Capture inside the component, excluding a fractional final pixel that
-    // may contain its parent's shadow rather than the component itself.
-    const clip = { ...captureOrigin, width: Math.floor(captureOrigin.width), height: Math.floor(captureOrigin.height) };
+    // Leave one CSS pixel inside the bottom/right edge. At device scale 2,
+    // flooring the CSS size alone can still include a fractional physical
+    // pixel from the parent after the oracle is repositioned.
+    const clip = {
+      ...captureOrigin,
+      width: Math.max(1, Math.floor(captureOrigin.width) - 1),
+      height: Math.max(1, Math.floor(captureOrigin.height) - 1),
+    };
     const actualImage = PNG.sync.read(
       await page.screenshot({ clip, animations: 'disabled', path: info.outputPath('milkdown.png') }),
     );

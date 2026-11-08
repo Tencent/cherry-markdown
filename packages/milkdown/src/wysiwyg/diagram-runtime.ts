@@ -1,4 +1,5 @@
 import type { CherryEngineLike } from '../types.js';
+import { reportRendererError } from './renderer-cleanup.js';
 
 let mermaidRenderId = 0;
 let mermaidRenderQueue = Promise.resolve();
@@ -11,8 +12,16 @@ export const MERMAID_ALIGNMENT_CLASSES = [
   'cherry-mermaid-align-float-left',
 ];
 
-export function destroyCherryRenderedContent(engine: CherryEngineLike, container: Element) {
-  engine.destroyRenderedContent?.(container);
+export function destroyCherryRenderedContent(
+  engine: CherryEngineLike,
+  container: Element,
+  onError?: (error: unknown) => void,
+) {
+  try {
+    engine.destroyRenderedContent?.(container);
+  } catch (error) {
+    reportRendererError(error, onError);
+  }
 }
 
 export async function renderMermaid(source: string, signal?: AbortSignal, container?: HTMLElement) {

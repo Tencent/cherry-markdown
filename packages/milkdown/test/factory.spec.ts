@@ -1,6 +1,8 @@
-import { editorViewCtx } from '@milkdown/kit/core';
-import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
-import { DOMParser, DOMSerializer } from '@milkdown/kit/prose/model';
+import { editorStateCtx, editorViewCtx, parserCtx, serializerCtx } from '@milkdown/kit/core';
+import { NodeSelection, Plugin, PluginKey, TextSelection } from '@milkdown/kit/prose/state';
+import { isHistoryTransaction, undo } from '@milkdown/kit/prose/history';
+import { DOMParser, DOMSerializer, type Node as ProseMirrorNode } from '@milkdown/kit/prose/model';
+import { $prose } from '@milkdown/kit/utils';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
@@ -65,6 +67,948 @@ function replaceText(instance: CherryMilkdownInstance, before: string, after: st
 }
 
 describe('cherryMilkdown WYSIWYG', () => {
+  it('does not restore older source over a plugin edit appended to undo', async () => {
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          appendTransaction(transactions, _oldState, state) {
+            if (!transactions.some(isHistoryTransaction)) return null;
+            let end = -1;
+            state.doc.descendants((node, position) => {
+              if (end < 0 && node.isText && node.text === 'Edit here.') end = position + node.nodeSize;
+            });
+            return end < 0 ? null : state.tr.insertText('!', end);
+          },
+        }),
+    );
+    const source = 'Heading\n=======\n\n[Same][ref].[^note]\n\nEdit here.\n\n[ref]: https://example.com/path\n\n[^note]: Footnote text.\n';
+    const instance = await cherryMilkdown({ el: root(), value: source, plugins: [plugin] });
+    instances.push(instance);
+    const view = replaceText(instance, 'Edit here.', 'Changed.');
+    expect(instance.getMarkdown()).toContain('Changed.');
+    expect(undo(view.state, view.dispatch)).toBe(true);
+    expect(view.state.doc.textContent).toContain('Edit here.!');
+    expect(instance.getMarkdown()).toContain('Edit here.!');
+    expect(instance.getMarkdown()).not.toBe(source);
+  });
+
+  it('preserves a pending local edit when a plugin filters an external update', async () => {
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    const plugin = $prose(() => new Plugin({ filterTransaction: (transaction) => transaction.doc.textContent !== 'External' }));
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin], onChange, onError, debounce: 0 });
+    instances.push(instance);
+    const view = replaceText(instance, 'Before', 'Local');
+    instance.setMarkdown('External', { emit: false });
+    expect(view.state.doc.textContent).toBe('Local');
+    expect(instance.getMarkdown()).toBe('Local');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'Local' }));
+    expect(onChange).not.toHaveBeenCalledWith({ markdown: 'External' });
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringContaining('not applied') }), 'parse');
+  });
+
+  it('preserves original source formatting when a plugin filters an external update', async () => {
+    const plugin = $prose(() => new Plugin({ filterTransaction: (transaction) => transaction.doc.textContent !== 'External' }));
+    const instance = await cherryMilkdown({ el: root(), value: '* Item\r\n\r\n', plugins: [plugin] });
+    instances.push(instance);
+    instance.setMarkdown('External');
+    expect(instance.getMarkdown()).toBe('* Item\r\n\r\n');
+  });
+
+  it('keeps the Milkdown state context aligned when an appended transaction throws', async () => {
+    const onError = vi.fn();
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          appendTransaction: (_transactions, _oldState, state) => {
+            if (state.doc.textContent === 'External') throw new Error('Append failed');
+            return null;
+          },
+        }),
+    );
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin], onError });
+    instances.push(instance);
+    const view = replaceText(instance, 'Before', 'Local');
+    await Promise.resolve();
+    const previousState = view.state;
+    instance.setMarkdown('External');
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Append failed' }), 'parse');
+    expect(view.state).toBe(previousState);
+    expect(instance.editor.action((ctx) => ctx.get(editorStateCtx))).toBe(previousState);
+    expect(instance.getMarkdown()).toBe('Local');
+    replaceText(instance, 'Local', 'Continued');
+    expect(instance.getMarkdown()).toBe('Continued');
+    expect(instance.editor.action((ctx) => ctx.get(editorStateCtx))).toBe(view.state);
+  });
+
+  it('reconciles the live document after a plugin view throws during an external update', async () => {
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    let fail = true;
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          view: () => ({
+            update: (view) => {
+              if (fail && view.state.doc.textContent === 'External') {
+                fail = false;
+                throw new Error('Plugin view failed');
+              }
+            },
+          }),
+        }),
+    );
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin], onChange, onError });
+    instances.push(instance);
+    replaceText(instance, 'Before', 'Local');
+    instance.setMarkdown('External');
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    expect(view.state.doc.textContent).toBe('External');
+    expect(instance.getMarkdown()).toBe('External');
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Plugin view failed' }),
+      'parse',
+      expect.objectContaining({ getPreviousMarkdown: expect.any(Function) }),
+    );
+    const context = onError.mock.calls[0]?.[2] as { getPreviousMarkdown(): string };
+    expect(context.getPreviousMarkdown()).toBe('Local');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'External' }));
+  });
+
+  it.each([true, false])('reconciles plugin changes appended to an external update (emit: %s)', async (emit) => {
+    const onChange = vi.fn();
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          appendTransaction: (_transactions, _oldState, state) =>
+            state.doc.textContent === 'External' ? state.tr.insertText('!', state.doc.content.size - 1) : null,
+        }),
+    );
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin], onChange, debounce: 0 });
+    instances.push(instance);
+    instance.setMarkdown('External', { emit });
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    expect(view.state.doc.textContent).toBe('External!');
+    expect(instance.getMarkdown()).toBe('External!');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'External!' }));
+    expect(onChange).not.toHaveBeenCalledWith({ markdown: 'External' });
+  });
+
+  it('retains an empty paragraph appended by a plugin to an external update', async () => {
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          appendTransaction: (_transactions, _oldState, state) =>
+            state.doc.textContent === 'External' && state.doc.childCount === 1
+              ? state.tr.insert(state.doc.content.size, state.schema.nodes.paragraph.create())
+              : null,
+        }),
+    );
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin] });
+    instances.push(instance);
+    instance.setMarkdown('External', { emit: false });
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    expect(view.state.doc.childCount).toBe(2);
+    expect(instance.getMarkdown()).toBe('External\n\n');
+  });
+
+  it.each([true, false])('reconciles a document changed during final serialization (emit: %s)', async (emit) => {
+    const onChange = vi.fn();
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', onChange, debounce: 0 });
+    instances.push(instance);
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let calls = 0;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (++calls === 2) replaceText(instance, 'External', 'Latest');
+        return original(doc);
+      }),
+    );
+    instance.setMarkdown('External', { emit });
+    expect(instance.getMarkdown()).toBe('Latest');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'Latest' }));
+    expect(onChange).not.toHaveBeenCalledWith({ markdown: 'External' });
+  });
+
+  it('reconciles a newer local edit started by the serializer without publishing the old one', async () => {
+    const onChange = vi.fn();
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', onChange, debounce: 0 });
+    instances.push(instance);
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let reenter = true;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (reenter) {
+          reenter = false;
+          replaceText(instance, 'First', 'Latest');
+        }
+        return original(doc);
+      }),
+    );
+    const view = replaceText(instance, 'Before', 'First');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'Latest' }));
+    expect(view.state.doc.textContent).toBe('Latest');
+    expect(instance.getMarkdown()).toBe('Latest');
+    expect(onChange).not.toHaveBeenCalledWith({ markdown: 'First' });
+  });
+
+  it('does not overwrite a newer external update started by local serialization', async () => {
+    const onChange = vi.fn();
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', onChange, debounce: 0 });
+    instances.push(instance);
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let reenter = true;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (reenter) {
+          reenter = false;
+          instance.setMarkdown('Latest', { emit: false });
+        }
+        return original(doc);
+      }),
+    );
+    const view = replaceText(instance, 'Before', 'First');
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(view.state.doc.textContent).toBe('Latest');
+    expect(instance.getMarkdown()).toBe('Latest');
+    expect(onChange).not.toHaveBeenCalledWith({ markdown: 'First' });
+  });
+
+  it('recovers a local change after serialization fails without publishing an older notification', async () => {
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', onChange, onError, debounce: 250 });
+    instances.push(instance);
+    replaceText(instance, 'Before', 'First');
+    await Promise.resolve();
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, () => {
+        throw new Error('Serialization failed');
+      }),
+    );
+    replaceText(instance, 'First', 'Latest');
+    await vi.waitFor(() =>
+      expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Serialization failed' }), 'parse'),
+    );
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    expect(onChange).not.toHaveBeenCalled();
+    instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    expect(instance.getMarkdown()).toBe('Latest');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'Latest' }));
+  });
+
+  it('keeps a sibling editor and its pending notification independent during rollback', async () => {
+    const firstChanges = vi.fn();
+    const secondChanges = vi.fn();
+    const firstErrors = vi.fn();
+    const first = await cherryMilkdown({
+      el: root(),
+      value: 'First',
+      onChange: firstChanges,
+      onError: firstErrors,
+      debounce: 30,
+    });
+    const second = await cherryMilkdown({ el: root(), value: 'Second', onChange: secondChanges, debounce: 30 });
+    instances.push(first, second);
+    replaceText(first, 'First', 'First!');
+    replaceText(second, 'Second', 'Second?');
+    await Promise.resolve();
+    const original = first.editor.action((ctx) => ctx.get(serializerCtx));
+    let calls = 0;
+    first.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (++calls > 1) throw new Error('Serialization failed');
+        return original(doc);
+      }),
+    );
+    first.setMarkdown('External');
+    first.editor.action((ctx) => ctx.set(serializerCtx, original));
+    expect(first.getMarkdown()).toBe('First!');
+    expect(second.getMarkdown()).toBe('Second?');
+    expect(firstErrors).toHaveBeenCalledWith(expect.objectContaining({ message: 'Serialization failed' }), 'parse');
+    await vi.waitFor(() => expect(firstChanges).toHaveBeenCalledWith({ markdown: 'First!' }));
+    await vi.waitFor(() => expect(secondChanges).toHaveBeenCalledWith({ markdown: 'Second?' }));
+    await first.destroy();
+    replaceText(second, 'Second?', 'Still independent');
+    await vi.waitFor(() => expect(second.getMarkdown()).toBe('Still independent'));
+  });
+
+  it('serializes a no-op external update once and keeps its notification', async () => {
+    const onChange = vi.fn();
+    const instance = await cherryMilkdown({ el: root(), value: 'Same', onChange, debounce: 0 });
+    instances.push(instance);
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    const serializer = vi.fn(original);
+    instance.editor.action((ctx) => ctx.set(serializerCtx, serializer));
+    instance.setMarkdown('Same');
+    expect(serializer).toHaveBeenCalledOnce();
+    expect(instance.getMarkdown()).toBe('Same');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'Same' }));
+  });
+
+  it('keeps pending local notification when a no-op update cannot be serialized', async () => {
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', onChange, onError, debounce: 40 });
+    instances.push(instance);
+    const view = replaceText(instance, 'Before', 'Local');
+    await Promise.resolve();
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, () => {
+        throw new Error('Serialization failed');
+      }),
+    );
+    instance.setMarkdown('Local');
+    instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    expect(view.state.doc.textContent).toBe('Local');
+    expect(instance.getMarkdown()).toBe('Local');
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Serialization failed' }), 'parse');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'Local' }));
+  });
+
+  it('preserves a pending local edit when an external update cannot be serialized', async () => {
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', onChange, onError, debounce: 40 });
+    instances.push(instance);
+    const view = replaceText(instance, 'Before', 'Local');
+    await Promise.resolve();
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, () => {
+        throw new Error('Serialization failed');
+      }),
+    );
+    instance.setMarkdown('External');
+    instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Serialization failed' }), 'parse');
+    expect(view.state.doc.textContent).toBe('Local');
+    expect(instance.getMarkdown()).toBe('Local');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'Local' }));
+  });
+
+  it('preserves local input when serialization fails after an external transaction', async () => {
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', onChange, onError, debounce: 40 });
+    instances.push(instance);
+    const view = replaceText(instance, 'Before', 'Local');
+    await Promise.resolve();
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let calls = 0;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (++calls > 1) throw new Error('Post-transaction serialization failed');
+        return original(doc);
+      }),
+    );
+    instance.setMarkdown('External');
+    instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Post-transaction serialization failed' }),
+      'parse',
+    );
+    expect(view.state.doc.textContent).toBe('Local');
+    expect(instance.getMarkdown()).toBe('Local');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'Local' }));
+  });
+
+  it('restores plugin state and the Milkdown state context after a failed replacement', async () => {
+    const key = new PluginKey<number>('external-rollback-counter');
+    const plugin = $prose(() => new Plugin({ key, state: { init: () => 0, apply: (_tr, count) => count + 1 } }));
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin] });
+    instances.push(instance);
+    const view = replaceText(instance, 'Before', 'Local');
+    await Promise.resolve();
+    const previousState = view.state;
+    const previousCount = key.getState(previousState);
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let calls = 0;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (++calls > 1) throw new Error('Post-transaction serialization failed');
+        return original(doc);
+      }),
+    );
+    instance.setMarkdown('External');
+    instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    expect(view.state).toBe(previousState);
+    expect(key.getState(view.state)).toBe(previousCount);
+    expect(instance.editor.action((ctx) => ctx.get(editorStateCtx))).toBe(previousState);
+    expect(instance.getMarkdown()).toBe('Local');
+  });
+
+  it('does not roll back over a plugin document change after a failed replacement', async () => {
+    const onError = vi.fn();
+    const onChange = vi.fn();
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          appendTransaction: (_transactions, _oldState, state) => {
+            if (state.doc.textContent !== 'External') return null;
+            return state.tr.insertText('!', state.doc.content.size - 1);
+          },
+        }),
+    );
+    const instance = await cherryMilkdown({
+      el: root(),
+      value: 'Before',
+      plugins: [plugin],
+      onError,
+      onChange,
+      debounce: 0,
+    });
+    instances.push(instance);
+    const view = replaceText(instance, 'Before', 'Local');
+    await Promise.resolve();
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let calls = 0;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (++calls > 1) throw new Error('Post-transaction serialization failed');
+        return original(doc);
+      }),
+    );
+    instance.setMarkdown('External');
+    const context = onError.mock.calls[0]?.[2] as { getPreviousMarkdown(): string };
+    expect(context.getPreviousMarkdown()).toBe('Local');
+    await Promise.resolve();
+    instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Post-transaction serialization failed' }),
+      'parse',
+      expect.objectContaining({ getPreviousMarkdown: expect.any(Function) }),
+    );
+    expect(view.state.doc.textContent).toBe('External!');
+    expect(instance.getMarkdown()).toBe('External!');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'External!' }));
+    expect(onChange).not.toHaveBeenCalledWith({ markdown: 'Local' });
+  });
+
+  it('exposes the previous local document after a failed replacement with plugin changes', async () => {
+    const onError = vi.fn();
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          appendTransaction: (_transactions, _oldState, state) =>
+            state.doc.textContent === 'External' ? state.tr.insertText('!', state.doc.content.size - 1) : null,
+        }),
+    );
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin], onError });
+    instances.push(instance);
+    replaceText(instance, 'Before', 'Local');
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let broken = false;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (doc.textContent === 'External!') broken = true;
+        if (broken) throw new Error('Serialization failed');
+        return original(doc);
+      }),
+    );
+    instance.setMarkdown('External');
+    const context = onError.mock.calls[0]?.[2] as { getPreviousMarkdown(): string } | undefined;
+    expect(context).toBeDefined();
+    expect(context!.getPreviousMarkdown()).toBe('Local');
+    instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    expect(context!.getPreviousMarkdown()).toBe('Local');
+    expect(instance.getMarkdown()).toBe('External!');
+    await instance.destroy();
+    expect(context!.getPreviousMarkdown()).toBe('Local');
+  });
+
+  it('retains unsynchronized local input when serialization breaks after plugin changes', async () => {
+    const onError = vi.fn();
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          appendTransaction: (_transactions, _oldState, state) =>
+            state.doc.textContent === 'External' ? state.tr.insertText('!', state.doc.content.size - 1) : null,
+        }),
+    );
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin], onError });
+    instances.push(instance);
+    replaceText(instance, 'Before', 'Local');
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let broken = false;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (doc.textContent === 'External!') broken = true;
+        if (broken) throw new Error('Persistent serialization failure');
+        return original(doc);
+      }),
+    );
+    instance.setMarkdown('External');
+    const context = onError.mock.calls[0]?.[2] as { getPreviousMarkdown(): string };
+    expect(context.getPreviousMarkdown()).toBe('Local');
+    instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    expect(instance.getMarkdown()).toBe('External!');
+  });
+
+  it('reconciles a committed plugin update if source comparison serialization fails', async () => {
+    const onError = vi.fn();
+    const onChange = vi.fn();
+    const plugin = $prose(
+      () => new Plugin({
+        appendTransaction(_transactions, _oldState, state) {
+          if (state.doc.textContent !== 'External') return null;
+          let end = -1;
+          state.doc.descendants((node, position) => {
+            if (node.isText && node.text === 'External') end = position + node.nodeSize;
+          });
+          return end < 0 ? null : state.tr.insertText('!', end);
+        },
+      }),
+    );
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin], onError, onChange, debounce: 0 });
+    instances.push(instance);
+    replaceText(instance, 'Before', 'Local');
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    instance.editor.action((ctx) => ctx.set(serializerCtx, (doc) => {
+      if (doc.childCount === 1 && doc.firstChild?.type.name === 'bullet_list' && doc.textContent === 'External') {
+        throw new Error('Comparison serialization failed');
+      }
+      return original(doc);
+    }));
+    instance.setMarkdown('- External');
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    expect(view.state.doc.textContent).toBe('External!');
+    const context = onError.mock.calls[0]?.[2] as { getPreviousMarkdown(): string } | undefined;
+    expect(context?.getPreviousMarkdown()).toBe('Local');
+    instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    expect(instance.getMarkdown()).toContain('External!');
+    await vi.waitFor(() => expect(onChange).toHaveBeenLastCalledWith({ markdown: expect.stringContaining('External!') }));
+    expect(onChange).not.toHaveBeenCalledWith({ markdown: 'Local' });
+  });
+
+  it('keeps recovery snapshots independent across failures and destruction', async () => {
+    const onError = vi.fn();
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          appendTransaction: (_transactions, _oldState, state) =>
+            state.doc.textContent === 'External' ? state.tr.insertText('!', state.doc.content.size - 1) : null,
+        }),
+    );
+    const instance = await cherryMilkdown({ el: root(), value: 'First', plugins: [plugin], onError });
+    instances.push(instance);
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    const failAfterAppend = () => {
+      instance.editor.action((ctx) =>
+        ctx.set(serializerCtx, (doc) => {
+          if (doc.textContent === 'External!') throw new Error('Serialization failed');
+          return original(doc);
+        }),
+      );
+      instance.setMarkdown('External');
+      instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    };
+    failAfterAppend();
+    const first = onError.mock.calls[0]?.[2] as { getPreviousMarkdown(): string };
+    instance.setMarkdown('Second', { emit: false });
+    failAfterAppend();
+    const second = onError.mock.calls[1]?.[2] as { getPreviousMarkdown(): string };
+    expect(first.getPreviousMarkdown()).toBe('First');
+    expect(second.getPreviousMarkdown()).toBe('Second');
+    await instance.destroy();
+    expect(first.getPreviousMarkdown()).toBe('First');
+    expect(second.getPreviousMarkdown()).toBe('Second');
+  });
+
+  it('allows an application to restore the previous document from its error callback', async () => {
+    const onChange = vi.fn();
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          appendTransaction: (_transactions, _oldState, state) =>
+            state.doc.textContent === 'External' ? state.tr.insertText('!', state.doc.content.size - 1) : null,
+        }),
+    );
+    let recover: ((markdown: string) => void) | undefined;
+    const onError = vi.fn((_error, _phase, context: { getPreviousMarkdown(): string } | undefined) => {
+      if (context) recover?.(context.getPreviousMarkdown());
+    });
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin], onChange, onError, debounce: 0 });
+    instances.push(instance);
+    replaceText(instance, 'Before', 'Local');
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (doc.textContent === 'External!') throw new Error('Serialization failed');
+        return original(doc);
+      }),
+    );
+    recover = (markdown) => {
+      instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+      instance.setMarkdown(markdown);
+    };
+    instance.setMarkdown('External');
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(instance.getMarkdown()).toBe('Local');
+    expect(instance.editor.action((ctx) => ctx.get(editorViewCtx).state.doc.textContent)).toBe('Local');
+    await vi.waitFor(() => expect(onChange).toHaveBeenLastCalledWith({ markdown: 'Local' }));
+  });
+
+  it('does not apply an older external update when snapshot serialization triggers a newer one', async () => {
+    const onChange = vi.fn();
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', onChange, debounce: 0 });
+    instances.push(instance);
+    replaceText(instance, 'Before', 'Local');
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let reenter = true;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (reenter) {
+          reenter = false;
+          instance.setMarkdown('Latest');
+        }
+        return original(doc);
+      }),
+    );
+    instance.setMarkdown('External');
+    expect(instance.getMarkdown()).toBe('Latest');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'Latest' }));
+    expect(onChange).not.toHaveBeenCalledWith({ markdown: 'External' });
+  });
+
+  it('preserves source formatting in the recovered local document before notification', async () => {
+    const onError = vi.fn();
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          appendTransaction: (_transactions, _oldState, state) =>
+            state.doc.textContent === 'External' ? state.tr.insertText('!', state.doc.content.size - 1) : null,
+        }),
+    );
+    const instance = await cherryMilkdown({ el: root(), value: '* Item\r\n\r\n', plugins: [plugin], onError });
+    instances.push(instance);
+    replaceText(instance, 'Item', 'Item!');
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let broken = false;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (doc.textContent === 'External!') broken = true;
+        if (broken) throw new Error('Serialization failed');
+        return original(doc);
+      }),
+    );
+    instance.setMarkdown('External');
+    const context = onError.mock.calls[0]?.[2] as { getPreviousMarkdown(): string };
+    expect(context.getPreviousMarkdown()).toBe('* Item!\r\n\r\n');
+    instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    const current = instance.getMarkdown();
+    expect(context.getPreviousMarkdown()).toBe('* Item!\r\n\r\n');
+    expect(current.trim()).toBe('External!');
+    expect(instance.getMarkdown()).toBe(current);
+  });
+
+  it.each([false, true])('keeps a newer external update started during rollback (plugin throws: %s)', async (throws) => {
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    let instance: CherryMilkdownInstance;
+    let trigger = false;
+    const plugin = $prose(
+      (ctx) =>
+        new Plugin({
+          view: () => ({
+            update: (view) => {
+              if (trigger && view.state.doc.textContent === 'Local') {
+                trigger = false;
+                ctx.set(serializerCtx, original);
+                instance.setMarkdown('Latest');
+                if (throws) throw new Error('Obsolete rollback plugin error');
+              }
+            },
+          }),
+        }),
+    );
+    let original!: (doc: ProseMirrorNode) => string;
+    instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin], onChange, onError, debounce: 0 });
+    instances.push(instance);
+    replaceText(instance, 'Before', 'Local');
+    await Promise.resolve();
+    original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let calls = 0;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (++calls > 1) throw new Error('Post-transaction serialization failed');
+        return original(doc);
+      }),
+    );
+    trigger = true;
+    instance.setMarkdown('External');
+    expect(instance.getMarkdown()).toBe('Latest');
+    expect(onError).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'Latest' }));
+  });
+
+  it.each([false, true])('publishes a plugin document transaction during rollback (plugin throws: %s)', async (throws) => {
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    let trigger = false;
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          view: () => ({
+            update: (view) => {
+              if (trigger && view.state.doc.textContent === 'Local') {
+                trigger = false;
+                view.dispatch(view.state.tr.insertText('!', view.state.doc.content.size - 1));
+                if (throws) throw new Error('Plugin view failed during rollback');
+              }
+            },
+          }),
+        }),
+    );
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin], onChange, onError, debounce: 0 });
+    instances.push(instance);
+    const view = replaceText(instance, 'Before', 'Local');
+    await Promise.resolve();
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let calls = 0;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (++calls > 1) throw new Error('Post-transaction serialization failed');
+        return original(doc);
+      }),
+    );
+    trigger = true;
+    instance.setMarkdown('External');
+    instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    expect(onError).toHaveBeenCalledTimes(1);
+    const reported = onError.mock.calls[0][0] as Error;
+    if (throws) {
+      expect(reported.name).toBe('ExternalUpdateRollbackError');
+      expect((reported as Error & { errors: Error[] }).errors.map((error) => error.message)).toEqual([
+        'Post-transaction serialization failed',
+        'Plugin view failed during rollback',
+      ]);
+    } else expect(reported.message).toBe('Post-transaction serialization failed');
+    expect(view.state.doc.textContent).toBe('Local!');
+    expect(instance.getMarkdown()).toBe('Local!');
+    await vi.waitFor(() => expect(onChange).toHaveBeenLastCalledWith({ markdown: 'Local!' }));
+  });
+
+  it.each([false, true])('exposes local source if a rollback plugin replaces it (plugin throws: %s)', async (throws) => {
+    const onError = vi.fn();
+    let trigger = false;
+    const plugin = $prose(() => new Plugin({
+      view: () => ({ update: (view) => {
+        if (trigger && view.state.doc.textContent === 'Local') {
+          trigger = false;
+          view.dispatch(view.state.tr.insertText('Plugin', 1, view.state.doc.content.size - 1));
+          if (throws) throw new Error('Plugin failed');
+        }
+      } }),
+    }));
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin], onError });
+    instances.push(instance);
+    replaceText(instance, 'Before', 'Local');
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let externalCalls = 0;
+    instance.editor.action((ctx) => ctx.set(serializerCtx, (doc) => {
+      if (doc.textContent === 'External' && ++externalCalls > 1) throw new Error('Serialization failed');
+      return original(doc);
+    }));
+    trigger = true;
+    instance.setMarkdown('External');
+    const context = onError.mock.calls[0]?.[2] as { getPreviousMarkdown(): string } | undefined;
+    expect(context?.getPreviousMarkdown()).toBe('Local');
+    instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    expect(instance.getMarkdown()).toBe('Plugin');
+  });
+
+  it('retains a reentrant update snapshot after a plugin changes the document and serialization fails', async () => {
+    let instance: CherryMilkdownInstance;
+    let reenter = false;
+    const onError = vi.fn();
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          appendTransaction: (_transactions, _oldState, state) =>
+            state.doc.textContent === 'External' ? state.tr.insertText('!', state.doc.content.size - 1) : null,
+          view: () => ({
+            update: (view) => {
+              if (reenter && view.state.doc.textContent === 'Middle') {
+                reenter = false;
+                instance.setMarkdown('External');
+              }
+            },
+          }),
+        }),
+    );
+    instance = await cherryMilkdown({ el: root(), value: 'Old', plugins: [plugin], onError });
+    instances.push(instance);
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    instance.editor.action((ctx) => ctx.set(serializerCtx, (doc) => {
+      if (doc.textContent === 'External!') throw new Error('Serialization failed');
+      return original(doc);
+    }));
+    reenter = true;
+    instance.setMarkdown('Middle');
+    const context = onError.mock.calls[0]?.[2] as { getPreviousMarkdown(): string } | undefined;
+    expect(context).toBeDefined();
+    await instance.destroy();
+    expect(context!.getPreviousMarkdown()).toBe('Middle');
+  });
+
+  it('keeps a newer external update started synchronously by a plugin view', async () => {
+    const container = root();
+    let instance: CherryMilkdownInstance;
+    let reenter = false;
+    const onChange = vi.fn();
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          view: () => ({
+            update: (view) => {
+              if (reenter && view.state.doc.textContent.includes('Middle')) {
+                reenter = false;
+                instance.setMarkdown('Latest');
+              }
+            },
+          }),
+        }),
+    );
+    instance = await cherryMilkdown({ el: container, value: 'Old', plugins: [plugin], onChange, debounce: 0 });
+    instances.push(instance);
+    reenter = true;
+    instance.setMarkdown('Middle');
+    expect(instance.getMarkdown()).toBe('Latest');
+    expect(container.querySelector('.ProseMirror')?.textContent).toBe('Latest');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'Latest' }));
+    expect(onChange).not.toHaveBeenCalledWith({ markdown: 'Middle' });
+  });
+
+  it('does not emit an older external update after a reentrant silent replacement', async () => {
+    let instance: CherryMilkdownInstance;
+    let reenter = false;
+    const onChange = vi.fn();
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          view: () => ({
+            update: (view) => {
+              if (reenter && view.state.doc.textContent.includes('Middle')) {
+                reenter = false;
+                instance.setMarkdown('Latest', { emit: false });
+              }
+            },
+          }),
+        }),
+    );
+    instance = await cherryMilkdown({ el: root(), value: 'Old', plugins: [plugin], onChange, debounce: 0 });
+    instances.push(instance);
+    reenter = true;
+    instance.setMarkdown('Middle');
+    expect(instance.getMarkdown()).toBe('Latest');
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('keeps the applied update when a reentrant replacement cannot be parsed', async () => {
+    let instance: CherryMilkdownInstance;
+    let reenter = false;
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    const plugin = $prose(
+      (ctx) =>
+        new Plugin({
+          view: () => {
+            const parse = ctx.get(parserCtx);
+            ctx.set(parserCtx, (source) => {
+              if (source === 'Rejected') throw new Error('Invalid replacement');
+              return parse(source);
+            });
+            return {
+              update: (view) => {
+                if (reenter && view.state.doc.textContent.includes('Middle')) {
+                  reenter = false;
+                  instance.setMarkdown('Rejected');
+                }
+              },
+            };
+          },
+        }),
+    );
+    const container = root();
+    instance = await cherryMilkdown({ el: container, value: 'Old', plugins: [plugin], onChange, onError, debounce: 0 });
+    instances.push(instance);
+    reenter = true;
+    instance.setMarkdown('Middle');
+    expect(container.querySelector('.ProseMirror')?.textContent).toBe('Middle');
+    expect(instance.getMarkdown()).toBe('Middle');
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Invalid replacement' }), 'parse');
+    await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith({ markdown: 'Middle' }));
+  });
+
+  it('preserves the engine validation error if the create error reporter throws', async () => {
+    const container = root();
+    container.textContent = 'Consumer-owned';
+    const onError = vi.fn(() => {
+      throw new Error('Reporter failed');
+    });
+    await expect(cherryMilkdown({ el: container, engine: {}, onError })).rejects.toThrow(
+      'cherryMilkdown requires an engine with makeHtml(markdown).',
+    );
+    expect(onError).toHaveBeenCalledWith(expect.any(TypeError), 'create');
+    expect(container.textContent).toBe('Consumer-owned');
+    expect(container.querySelector('.ProseMirror')).toBeNull();
+  });
+
+  it('cleans up an initialized editor if baseline serialization fails', async () => {
+    const container = root();
+    const sibling = document.createElement('span');
+    sibling.textContent = 'Consumer-owned';
+    container.append(sibling);
+    const cleanup = vi.fn();
+    const onError = vi.fn();
+    const failure = new Error('Serializer failed');
+    const plugin = $prose(
+      (ctx) =>
+        new Plugin({
+          view() {
+            ctx.set(serializerCtx, () => {
+              throw failure;
+            });
+            return { destroy: cleanup };
+          },
+        }),
+    );
+    await expect(cherryMilkdown({ el: container, value: 'Text', plugins: [plugin], onError })).rejects.toThrow(failure);
+    expect(cleanup).toHaveBeenCalledOnce();
+    expect(onError).toHaveBeenCalledWith(failure, 'create');
+    expect(container.textContent).toBe('Consumer-owned');
+    expect(container.querySelector('.ProseMirror')).toBeNull();
+  });
+
+  it('preserves the creation failure and cleanup when its reporter throws', async () => {
+    const container = root();
+    container.textContent = 'Consumer-owned';
+    const failure = new Error('Serializer failed');
+    const cleanup = vi.fn();
+    const onError = vi.fn(() => {
+      throw new Error('Reporter failed');
+    });
+    const plugin = $prose(
+      (ctx) =>
+        new Plugin({
+          view() {
+            ctx.set(serializerCtx, () => {
+              throw failure;
+            });
+            return { destroy: cleanup };
+          },
+        }),
+    );
+    await expect(cherryMilkdown({ el: container, value: 'Text', plugins: [plugin], onError })).rejects.toBe(failure);
+    expect(onError).toHaveBeenCalledWith(failure, 'create');
+    expect(cleanup).toHaveBeenCalledOnce();
+    expect(container.textContent).toBe('Consumer-owned');
+    expect(container.querySelector('.ProseMirror')).toBeNull();
+  });
   it('does not emit an old draft after a silent API update', async () => {
     const onChange = vi.fn();
     const instance = await cherryMilkdown({ el: root(), value: 'Before', debounce: 10, onChange });
@@ -74,6 +1018,183 @@ describe('cherryMilkdown WYSIWYG', () => {
     await new Promise((resolve) => setTimeout(resolve, 30));
     expect(onChange).not.toHaveBeenCalled();
     expect(instance.getMarkdown()).toBe('Latest');
+  });
+
+  it('retains a synchronous edit when destroyed before change reconciliation', async () => {
+    const onChange = vi.fn();
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', debounce: 1000, onChange });
+    instances.push(instance);
+    replaceText(instance, 'Before', 'After');
+    const destruction = instance.destroy();
+    expect(instance.getMarkdown()).toBe('After');
+    await destruction;
+    expect(instance.getMarkdown()).toBe('After');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('snapshots a previously failed local edit when serialization recovers before destroy', async () => {
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', onChange, onError, debounce: 1000 });
+    instances.push(instance);
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, () => {
+        throw new Error('Serialization failed');
+      }),
+    );
+    replaceText(instance, 'Before', 'Latest');
+    await vi.waitFor(() => expect(onError).toHaveBeenCalled());
+    instance.editor.action((ctx) => ctx.set(serializerCtx, original));
+    await instance.destroy();
+    expect(instance.getMarkdown()).toBe('Latest');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('snapshots a newer local edit made during destroy serialization', async () => {
+    const onChange = vi.fn();
+    const instance = await cherryMilkdown({ el: root(), value: 'Before', onChange, debounce: 0 });
+    instances.push(instance);
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let reenter = true;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (reenter) {
+          reenter = false;
+          replaceText(instance, 'First', 'Latest');
+        }
+        return original(doc);
+      }),
+    );
+    replaceText(instance, 'Before', 'First');
+    await instance.destroy();
+    expect(instance.getMarkdown()).toBe('Latest');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('snapshots an external update when a plugin view destroys the editor during dispatch', async () => {
+    let instance: CherryMilkdownInstance;
+    let destruction: Promise<void> | undefined;
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          view: () => ({
+            update: (view) => {
+              if (view.state.doc.textContent === 'External') destruction = instance.destroy();
+            },
+          }),
+        }),
+    );
+    instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin] });
+    instances.push(instance);
+    instance.setMarkdown('External');
+    expect(destruction).toBeDefined();
+    await destruction;
+    expect(instance.getMarkdown()).toBe('External');
+  });
+
+  it('retains external source formatting when destroyed during its dispatch', async () => {
+    let instance: CherryMilkdownInstance;
+    let destruction: Promise<void> | undefined;
+    const plugin = $prose(
+      () =>
+        new Plugin({
+          view: () => ({
+            update: (view) => {
+              if (view.state.doc.textContent === 'Item') destruction = instance.destroy();
+            },
+          }),
+        }),
+    );
+    instance = await cherryMilkdown({ el: root(), value: 'Before', plugins: [plugin] });
+    instances.push(instance);
+    instance.setMarkdown('* Item\r\n\r\n');
+    await destruction;
+    expect(instance.getMarkdown()).toBe('* Item\r\n\r\n');
+  });
+
+  it('retains external source formatting when destroyed during final serialization', async () => {
+    const instance = await cherryMilkdown({ el: root(), value: 'Before' });
+    instances.push(instance);
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let calls = 0;
+    let destruction: Promise<void> | undefined;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        if (++calls === 2) destruction = instance.destroy();
+        return original(doc);
+      }),
+    );
+    instance.setMarkdown('* Item\r\n\r\n');
+    expect(destruction).toBeDefined();
+    await destruction;
+    expect(instance.getMarkdown()).toBe('* Item\r\n\r\n');
+  });
+
+  it('finishes destruction and reports a document that never stabilizes during the snapshot', async () => {
+    const container = root();
+    const onError = vi.fn();
+    const instance = await cherryMilkdown({ el: container, value: 'Before', onError });
+    instances.push(instance);
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let calls = 0;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        calls += 1;
+        const view = instance.editor.action((inner) => inner.get(editorViewCtx));
+        view.dispatch(view.state.tr.insertText('!', 1));
+        return original(doc);
+      }),
+    );
+    replaceText(instance, 'Before', 'First');
+    await instance.destroy();
+    expect(calls).toBe(5);
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Unable to snapshot a document that keeps changing during destruction.' }),
+      'parse',
+    );
+    expect(container.querySelector('.ProseMirror')).toBeNull();
+  });
+
+  it('shares teardown when the snapshot serializer reenters destroy', async () => {
+    const container = root();
+    const cleanup = vi.fn();
+    const instance = await cherryMilkdown({ el: container, value: 'Before', plugins: [() => async () => cleanup] });
+    instances.push(instance);
+    const original = instance.editor.action((ctx) => ctx.get(serializerCtx));
+    let nested: Promise<void> | undefined;
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, (doc) => {
+        nested ??= instance.destroy();
+        return original(doc);
+      }),
+    );
+    replaceText(instance, 'Before', 'After');
+    const outer = instance.destroy();
+    expect(nested).toBe(outer);
+    await outer;
+    expect(cleanup).toHaveBeenCalledOnce();
+    expect(instance.getMarkdown()).toBe('After');
+    expect(container.querySelector('.ProseMirror')).toBeNull();
+  });
+
+  it('finishes teardown even when snapshot serialization and its error reporter fail', async () => {
+    const container = root();
+    const failure = new Error('Serialization failed');
+    const onError = vi.fn(() => {
+      throw new Error('Reporter failed');
+    });
+    const instance = await cherryMilkdown({ el: container, value: 'Before', onError });
+    instances.push(instance);
+    replaceText(instance, 'Before', 'After');
+    instance.editor.action((ctx) =>
+      ctx.set(serializerCtx, () => {
+        throw failure;
+      }),
+    );
+    await expect(instance.destroy()).resolves.toBeUndefined();
+    expect(onError).toHaveBeenCalledWith(failure, 'parse');
+    expect(container.querySelector('.ProseMirror')).toBeNull();
   });
 
   it('keeps sibling DOM and isolated instances intact during destruction', async () => {
@@ -90,6 +1211,75 @@ describe('cherryMilkdown WYSIWYG', () => {
     expect(second.getMarkdown()).toBe('Two');
     second.setMarkdown('Independent');
     expect(second.getMarkdown()).toBe('Independent');
+  });
+
+  it('retains the public engine and last Markdown after destruction without mutating caller options', async () => {
+    const engine = { makeHtml: (markdown: string) => markdown };
+    const onError = vi.fn();
+    const options = { el: root(), value: 'Before', engine, onError };
+    const instance = await cherryMilkdown(options);
+    instances.push(instance);
+    replaceText(instance, 'Before', 'After');
+    await instance.destroy();
+    expect(instance.engine).toBe(engine);
+    expect(instance.getMarkdown()).toBe('After');
+    expect(options.engine).toBe(engine);
+    expect(options.onError).toBe(onError);
+    await expect(instance.destroy()).resolves.toBeUndefined();
+  });
+
+  it('waits for the same asynchronous cleanup on concurrent destroy calls', async () => {
+    const container = root();
+    let release!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const cleanup = vi.fn(async () => {
+      await pending;
+    });
+    const plugin = () => async () => cleanup;
+    const instance = await cherryMilkdown({ el: container, value: 'Text', plugins: [plugin] });
+    instances.push(instance);
+    const first = instance.destroy();
+    let secondFinished = false;
+    const second = instance.destroy().then(() => {
+      secondFinished = true;
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    try {
+      expect(cleanup).toHaveBeenCalledOnce();
+      expect(secondFinished).toBe(false);
+      expect(container.querySelector('.ProseMirror')).not.toBeNull();
+    } finally {
+      release();
+      await Promise.all([first, second]);
+    }
+    expect(container.querySelector('.ProseMirror')).toBeNull();
+  });
+
+  it('reports an asynchronous cleanup failure to every concurrent destroy caller', async () => {
+    const container = root();
+    let release!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const failure = new Error('Cleanup failed');
+    const cleanup = vi.fn(async () => {
+      await pending;
+      throw failure;
+    });
+    const instance = await cherryMilkdown({ el: container, value: 'Text', plugins: [() => async () => cleanup] });
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    const destroyView = vi.spyOn(view, 'destroy');
+    const results = Promise.allSettled([instance.destroy(), instance.destroy()]);
+    release();
+    expect(await results).toEqual([
+      { status: 'rejected', reason: failure },
+      { status: 'rejected', reason: failure },
+    ]);
+    expect(cleanup).toHaveBeenCalledOnce();
+    expect(destroyView).toHaveBeenCalledOnce();
+    expect(container.querySelector('.ProseMirror')).toBeNull();
   });
   it('keeps 50 rapid inline-code edits monotonic while public notifications stay debounced', async () => {
     const element = root();
@@ -203,6 +1393,48 @@ describe('cherryMilkdown WYSIWYG', () => {
     link?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true }));
     expect(open).toHaveBeenCalledWith('https://example.com/', '_blank', 'noopener');
     expect(instance.getMarkdown()).toContain('{target=\\_blank}');
+  });
+
+  it.each([
+    ['existing link', '[link](https://old.example)', 'Prefix\n\n[link](https://old.example)', true],
+    ['plain selection', 'link', 'Prefix\n\nlink', true],
+    ['changed link', '[link](https://old.example)', '[link](https://new.example)', false],
+    ['ambiguous selection', 'link', 'link\n\nlink', false],
+    [
+      'duplicate link',
+      '[link](https://old.example)',
+      '[link](https://old.example)\n\n[link](https://old.example)',
+      false,
+    ],
+  ] as const)('preserves only a safe %s after an external update', async (_name, value, replacement, keepOpen) => {
+    const element = root();
+    const instance = await cherryMilkdown({ el: element, value });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let from = -1;
+    let linkMark: ReturnType<typeof view.state.schema.marks.link.create> | undefined;
+    view.state.doc.descendants((node, position) => {
+      if (node.isText && node.text === 'link') {
+        from = position;
+        linkMark = view.state.schema.marks.link.isInSet(node.marks);
+      }
+    });
+    expect(from).toBeGreaterThanOrEqual(0);
+    view.dom.dispatchEvent(
+      new CustomEvent('cherry-milkdown:edit-link', { bubbles: true, detail: { from, to: from + 4, mark: linkMark } }),
+    );
+    const form = element.querySelector<HTMLFormElement>('.cherry-milkdown-link-editor')!;
+    const href = form.querySelector<HTMLInputElement>('input[name="href"]')!;
+    href.value = 'https://edited.example';
+    instance.setMarkdown(replacement);
+    expect(form.hidden).toBe(!keepOpen);
+    if (keepOpen) {
+      expect(href.value).toBe('https://edited.example');
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      expect(instance.getMarkdown()).toBe('Prefix\n\n[link](https://edited.example)');
+    } else {
+      expect(instance.getMarkdown()).toBe(replacement);
+    }
   });
 
   it('edits Cherry typography directly while preserving its Markdown mark', async () => {
@@ -696,6 +1928,158 @@ describe('cherryMilkdown WYSIWYG', () => {
     expect(toggle?.getAttribute('aria-expanded')).toBe('false');
   });
 
+  it.each([false, true])(
+    'does not commit an engine result after synchronous editor destruction (throws: %s)',
+    async (throws) => {
+      const element = root();
+      let instance: CherryMilkdownInstance | undefined;
+      let destruction: Promise<void> | undefined;
+      let destroyDuringRender = false;
+      const engine = {
+        makeHtml: () => {
+          if (destroyDuringRender) {
+            destroyDuringRender = false;
+            destruction = instance!.destroy();
+            if (throws) throw new Error('stale engine error');
+            return '<div>stale result</div>';
+          }
+          return '<div>initial result</div>';
+        },
+      };
+      instance = await cherryMilkdown({ el: element, value: '<div>\nInitial\n</div>', engine });
+      instances.push(instance);
+      destroyDuringRender = true;
+      instance.setMarkdown('<div>\nUpdated\n</div>');
+      expect(destruction).toBeDefined();
+      expect(element.textContent).not.toContain('stale result');
+      expect(element.querySelector('.cherry-embed__preview')?.textContent).toBe('initial result');
+      await destruction;
+    },
+  );
+
+  it.each([
+    ['emoji', ':smile:', ':heart:', '.cherry-embed--cherry_emoji .cherry-embed__preview'],
+    [
+      'native block',
+      ':::business-card\nInitial\n:::',
+      ':::business-card\nUpdated\n:::',
+      '.cherry-embed--cherry_native_block .cherry-embed__preview',
+    ],
+  ])('does not commit a stale %s after the engine destroys the editor', async (_label, initial, updated, selector) => {
+    const element = root();
+    let instance: CherryMilkdownInstance | undefined;
+    let destruction: Promise<void> | undefined;
+    let destroyDuringRender = false;
+    const engine = {
+      makeHtml: () => {
+        if (destroyDuringRender) {
+          destroyDuringRender = false;
+          destruction = instance!.destroy();
+          return '<span>stale result</span>';
+        }
+        return '<span>initial result</span>';
+      },
+    };
+    instance = await cherryMilkdown({ el: element, value: initial, engine });
+    instances.push(instance);
+    expect(element.querySelector(selector)?.textContent).toBe('initial result');
+    destroyDuringRender = true;
+    instance.setMarkdown(updated);
+    expect(destruction).toBeDefined();
+    expect(element.querySelector(selector)?.textContent).toBe('initial result');
+    await destruction;
+  });
+
+  it.each([false, true])(
+    'keeps the editor usable when an image engine render throws (reporter throws: %s)',
+    async (reporterThrows) => {
+      const element = root();
+      const failure = new Error('Image rendering failed');
+      const onError = vi.fn(() => {
+        if (reporterThrows) throw new Error('Reporter failed');
+      });
+      let fail = true;
+      const engine = {
+        makeHtml: () => {
+          if (fail) throw failure;
+          return '<img src="https://example.com/recovered.png">';
+        },
+      };
+      const instance = await cherryMilkdown({
+        el: element,
+        value: 'Text\n\n![picture](https://example.com/original.png)',
+        engine,
+        onError,
+      });
+      instances.push(instance);
+      expect(onError).toHaveBeenCalledWith(failure, 'render');
+      expect(element.querySelector<HTMLImageElement>('.ProseMirror img:not(.ProseMirror-separator)')?.src).toBe(
+        'https://example.com/original.png',
+      );
+      fail = false;
+      instance.setMarkdown('Updated\n\n![picture](https://example.com/updated.png)');
+      expect(instance.getMarkdown()).toContain('Updated');
+      expect(element.querySelector<HTMLImageElement>('.ProseMirror img:not(.ProseMirror-separator)')?.src).toBe(
+        'https://example.com/recovered.png',
+      );
+    },
+  );
+
+  it.each(['javascript:alert(1)', 'JaVa\nscript:alert(1)', 'data:text/html,unsafe'])(
+    'does not restore an unsafe image source when the engine fails: %s',
+    async (src) => {
+      const element = root();
+      const engine = {
+        makeHtml: () => {
+          throw new Error('Image rendering failed');
+        },
+      };
+      const instance = await cherryMilkdown({ el: element, value: 'Text', engine });
+      instances.push(instance);
+      const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+      const image = view.state.schema.nodes.image.create({ src, alt: 'unsafe' });
+      view.dispatch(view.state.tr.insert(1, image));
+      expect(element.querySelector<HTMLImageElement>('.ProseMirror img[alt="unsafe"]')?.hasAttribute('src')).toBe(
+        false,
+      );
+    },
+  );
+
+  it('keeps an image data URL in the fallback when the engine does not render an image', async () => {
+    const element = root();
+    const instance = await cherryMilkdown({ el: element, value: 'Text', engine: { makeHtml: () => '<span></span>' } });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    const src = 'data:image/png;base64,iVBORw0KGgo=';
+    view.dispatch(view.state.tr.insert(1, view.state.schema.nodes.image.create({ src, alt: 'safe' })));
+    expect(element.querySelector<HTMLImageElement>('.ProseMirror img[alt="safe"]')?.getAttribute('src')).toBe(src);
+  });
+
+  it('does not replace image presentation after its engine synchronously destroys the editor', async () => {
+    const element = root();
+    let instance: CherryMilkdownInstance | undefined;
+    let destruction: Promise<void> | undefined;
+    let destroyDuringRender = false;
+    const engine = {
+      makeHtml: () => {
+        if (destroyDuringRender) {
+          destroyDuringRender = false;
+          destruction = instance!.destroy();
+          return '<img src="https://example.com/stale.png">';
+        }
+        return '<img src="https://example.com/initial.png">';
+      },
+    };
+    instance = await cherryMilkdown({ el: element, value: '![initial](https://example.com/initial.png)', engine });
+    instances.push(instance);
+    const image = element.querySelector('img')!;
+    destroyDuringRender = true;
+    instance.setMarkdown('![updated](https://example.com/updated.png)');
+    expect(destruction).toBeDefined();
+    expect(image.getAttribute('src')).toBe('https://example.com/initial.png');
+    await destruction;
+  });
+
   it('uses the sanitized Cherry engine shell for HTML and keeps source editing next to the selected node', async () => {
     const element = root();
     const makeHtml = vi.fn(
@@ -723,6 +2107,30 @@ describe('cherryMilkdown WYSIWYG', () => {
     expect(element.querySelector('.cherry-embed__source code')).not.toBeNull();
     expect(element.querySelector('.cherry-embed textarea')).toBeNull();
     expect((window as typeof window & { __bad?: boolean }).__bad).toBeUndefined();
+  });
+
+  it('sanitizes custom engine image and emoji output while retaining image presentation', async () => {
+    const element = root();
+    const makeHtml = vi.fn(
+      () =>
+        '<img class="custom-image" data-src="https://example.com/image.png" style="width:42px" onerror="window.__bad=true">',
+    );
+    const instance = await cherryMilkdown({
+      el: element,
+      value: '![picture](https://example.com/image.png)\n\n:smile:',
+      engine: { makeHtml },
+    });
+    instances.push(instance);
+    const image = element.querySelector<HTMLImageElement>('.ProseMirror > p img.custom-image');
+    const emoji = element.querySelector<HTMLImageElement>('.cherry-embed--cherry_emoji img');
+    expect(image).not.toBeNull();
+    expect(image?.getAttribute('alt')).toBe('picture');
+    expect(image?.getAttribute('data-src')).toBe('https://example.com/image.png');
+    expect(image?.style.width).toBe('42px');
+    expect(image?.hasAttribute('onerror')).toBe(false);
+    expect(emoji).not.toBeNull();
+    expect(emoji?.hasAttribute('onerror')).toBe(false);
+    expect(instance.getMarkdown()).toBe('![picture](https://example.com/image.png)\n\n:smile:');
   });
 
   it('keeps unknown business directives intact and edits them in the native Cherry shell', async () => {

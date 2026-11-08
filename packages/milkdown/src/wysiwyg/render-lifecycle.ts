@@ -14,10 +14,11 @@ interface RenderScope {
 }
 
 /** One pending revision and one committed preview, independent of NodeView DOM. */
-export function createRenderLifecycle(onError?: (error: unknown) => void) {
+export function createRenderLifecycle(onError?: (error: unknown) => void, isOwnerDestroyed?: () => boolean) {
   let pending: RenderScope | undefined;
   let active: RenderScope | undefined;
   let destroyed = false;
+  let generation = 0;
   const release = (scope: RenderScope | undefined) => {
     if (!scope) return;
     try {
@@ -27,6 +28,7 @@ export function createRenderLifecycle(onError?: (error: unknown) => void) {
     }
   };
   const clear = () => {
+    generation += 1;
     const previousPending = pending;
     const previousActive = active;
     pending = undefined;
@@ -40,12 +42,15 @@ export function createRenderLifecycle(onError?: (error: unknown) => void) {
       return Boolean(active);
     },
     begin() {
-      release(pending);
+      const version = ++generation;
+      const previousPending = pending;
+      pending = undefined;
+      release(previousPending);
       const controller = new AbortController();
       const scope: RenderScope = { controller, cleanup: createRendererCleanup(controller.signal, onError) };
-      pending = scope;
-      if (destroyed) release(scope);
-      const current = () => !destroyed && pending === scope && !controller.signal.aborted;
+      if (destroyed || isOwnerDestroyed?.() || version !== generation) release(scope);
+      else pending = scope;
+      const current = () => !destroyed && !isOwnerDestroyed?.() && pending === scope && !controller.signal.aborted;
       const revision = {
         signal: controller.signal,
         current,
@@ -53,9 +58,14 @@ export function createRenderLifecycle(onError?: (error: unknown) => void) {
         /** DOM ownership stays with the caller; retain only resources needing teardown. */
         commit(apply: () => void, retain = true) {
           if (!current()) return false;
-          release(active);
+          const previousActive = active;
           active = undefined;
+          release(previousActive);
+          // Cleanup belongs to consumer code and can start a newer revision or
+          // destroy the editor synchronously. Never commit the superseded one.
+          if (!current()) return false;
           apply();
+          if (!current()) return false;
           pending = undefined;
           if (retain) active = scope;
           else release(scope);
@@ -66,7 +76,9 @@ export function createRenderLifecycle(onError?: (error: unknown) => void) {
           if (!current()) return false;
           pending = undefined;
           release(scope);
-          return true;
+          // Abort handlers and cleanup can synchronously start a newer render
+          // or destroy the owner. Its failure must not overwrite that state.
+          return !destroyed && !isOwnerDestroyed?.() && version === generation;
         },
         settle(result: CherryVisualRendererResult | Promise<CherryVisualRendererResult>, options: RenderResultOptions) {
           return Promise.resolve(result)
@@ -87,7 +99,13 @@ export function createRenderLifecycle(onError?: (error: unknown) => void) {
     clear,
     destroy() {
       destroyed = true;
-      clear();
+      try {
+        clear();
+      } finally {
+        // Existing scopes own the reporter needed for late cleanup. The
+        // destroyed lifecycle itself no longer needs to retain it.
+        onError = undefined;
+      }
     },
   };
 }

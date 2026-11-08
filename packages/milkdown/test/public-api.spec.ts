@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 import defaultExport, {
   cherryMilkdown,
+  ExternalUpdateRollbackError,
   type CherryDiagramRenderContext,
   type CherryEngineInput,
   type CherryEngineLike,
@@ -38,8 +39,30 @@ describe('public API compatibility contract', () => {
   it('keeps the documented runtime entry points available', () => {
     expect(defaultExport).toBe(cherryMilkdown);
     expect(cherryMilkdown).toBeTypeOf('function');
+    const error = new ExternalUpdateRollbackError('serialization', 'rollback');
+    expect(error).toBeInstanceOf(Error);
+    expect(error.errors).toEqual(['serialization', 'rollback']);
+    expectTypeOf(error.errors).toEqualTypeOf<readonly [unknown, unknown]>();
     expect(echarts).toBeTypeOf('function');
     expect(tableChart).toBeTypeOf('function');
+  });
+
+  it.each([
+    ['code', echarts, '{"series":[]}'],
+    ['table', tableChart, '| :line: | Value |\n| --- | --- |\n| A | 1 |'],
+  ] as const)('does not mount a %s chart after its lazy loading is cancelled', async (_kind, renderer, source) => {
+    const container = document.createElement('div');
+    const controller = new AbortController();
+    const pending = renderer({
+      container,
+      source,
+      syntax: 'echarts',
+      engine: { makeHtml: () => '' },
+      signal: controller.signal,
+    });
+    controller.abort();
+    await expect(pending).resolves.toBeUndefined();
+    expect(container.childElementCount).toBe(0);
   });
 
   it('keeps the published subpath exports stable', () => {

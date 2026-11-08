@@ -84,6 +84,20 @@ describe('external updates across composition completion', () => {
     await vi.waitFor(() => expect(instance.getMarkdown()).toBe('新前缀\n\n开始：你好结束'));
   });
 
+  it('preserves both consecutive composition commits before the queued external update', async () => {
+    const onChange = vi.fn();
+    const { instance, view } = await create({ onChange });
+    instance.setMarkdown('远程前缀\n\n开始：结束', { emit: false });
+    view.dispatch(view.state.tr.insertText('你'));
+    view.dom.dispatchEvent(new CompositionEvent('compositionend', { data: '你', bubbles: true }));
+    view.dom.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    view.dispatch(view.state.tr.insertText('好'));
+    view.dom.dispatchEvent(new CompositionEvent('compositionend', { data: '好', bubbles: true }));
+    await vi.waitFor(() => expect(instance.getMarkdown()).toBe('远程前缀\n\n开始：你好结束'));
+    expect(view.state.selection.$from.parentOffset).toBe(5);
+    await vi.waitFor(() => expect(onChange).toHaveBeenLastCalledWith({ markdown: '远程前缀\n\n开始：你好结束' }));
+  });
+
   it.each([false, true])(
     'keeps local input on a conflict, including when the error reporter throws (%s)',
     async (throws) => {

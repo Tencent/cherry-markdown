@@ -55,6 +55,26 @@ function headingId(node: ProseNode, usedIds: Map<string, number>) {
   return occurrence === 1 ? baseId : `${baseId}-#${occurrence}`;
 }
 
+function decodeFragment(fragment: string) {
+  try {
+    return decodeURIComponent(fragment);
+  } catch {
+    // A literal percent or incomplete escape can be part of an existing URL.
+    // Keep it usable as a literal heading ID rather than throwing during navigation.
+    return fragment;
+  }
+}
+
+function encodeFragment(fragment: string) {
+  try {
+    return encodeURIComponent(fragment);
+  } catch {
+    // An unpaired UTF-16 surrogate cannot be represented in a URL. Keep the
+    // heading and TOC label, but do not create a link to a different ID.
+    return undefined;
+  }
+}
+
 function navigateToHeading(view: EditorView, id: string) {
   const target = Array.from(view.dom.querySelectorAll<HTMLElement>('[id]')).find((element) => element.id === id);
   if (!target) return false;
@@ -112,7 +132,9 @@ function renderToc(view: EditorView) {
     const level = Number(node.attrs.level ?? 1);
     link.className = `level-${level}`;
     const id = headingId(node, usedIds);
-    link.setAttribute('href', id ? `#${encodeURIComponent(id)}` : '#');
+    const encoded = encodeFragment(id);
+    if (encoded !== undefined) link.setAttribute('href', `#${encoded}`);
+    else link.setAttribute('aria-disabled', 'true');
     link.target = '_self';
     link.textContent = node.textContent;
     item.append(link);
@@ -231,7 +253,7 @@ class SourceLeafView implements NodeView {
     if (!(link instanceof HTMLAnchorElement)) return;
     event.preventDefault();
     event.stopPropagation();
-    const id = decodeURIComponent(link.hash.slice(1));
+    const id = decodeFragment(link.hash.slice(1));
     if (!id) return;
     if (!navigateToHeading(this.view, id)) return;
     try {
@@ -317,7 +339,7 @@ export const cherryLinkTargetClickPlugin = $prose(
             event.preventDefault();
             if (!/^(?:https?:|mailto:|tel:)/i.test(rawHref)) {
               if (event.metaKey || event.ctrlKey) return true;
-              const id = decodeURIComponent(link.hash.slice(1));
+              const id = decodeFragment(link.hash.slice(1));
               if (!id || !navigateToHeading(view, id)) return true;
               try {
                 window.location.hash = encodeURIComponent(id);
@@ -337,7 +359,7 @@ export const cherryLinkTargetClickPlugin = $prose(
       },
       view: (view) => {
         const restoreHash = () => {
-          const id = decodeURIComponent(window.location.hash.slice(1));
+          const id = decodeFragment(window.location.hash.slice(1));
           if (id) navigateToHeading(view, id);
         };
         const restoreTimer = setTimeout(restoreHash, 350);

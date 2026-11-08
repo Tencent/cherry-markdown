@@ -16,7 +16,14 @@ import {
   cherryLinkTargetSchema,
   cherryFootnoteReferenceSchema,
 } from './nodes/node-schemas.js';
-import { cherryFootnoteDefinitionView, cherryFootnoteNavigationPlugin } from './nodes/footnotes.js';
+import {
+  cherryFootnoteDefinitionView,
+  cherryFootnoteReferenceView,
+  cherryFootnoteNumbers,
+  cherryFootnoteNavigationPlugin,
+  cherryFootnoteGapSchema,
+  cherryFootnoteGapEditing,
+} from './nodes/footnotes.js';
 import { cherryCompoundItemView, cherryPanelView, cherryDetailView } from './nodes/compound.js';
 import {
   cherryTocView,
@@ -48,8 +55,12 @@ export {
   cherryEmojiSchema,
   cherryLinkTargetSchema,
   cherryFootnoteReferenceSchema,
+  cherryFootnoteGapSchema,
   cherryFootnoteDefinitionView,
+  cherryFootnoteReferenceView,
+  cherryFootnoteNumbers,
   cherryFootnoteNavigationPlugin,
+  cherryFootnoteGapEditing,
   cherryCompoundItemView,
   cherryPanelView,
   cherryDetailView,
@@ -80,6 +91,7 @@ export const cherryStructureSchemas = [
   cherryEmojiSchema,
   cherryLinkTargetSchema,
   cherryFootnoteReferenceSchema,
+  cherryFootnoteGapSchema,
 ];
 
 export const cherryStructureViews: MilkdownPlugin[] = [
@@ -96,7 +108,10 @@ export const cherryStructureViews: MilkdownPlugin[] = [
   cherryEmojiView,
   cherryLinkTargetView,
   cherryFootnoteDefinitionView,
+  cherryFootnoteReferenceView,
+  cherryFootnoteNumbers,
   cherryFootnoteNavigationPlugin,
+  cherryFootnoteGapEditing,
   cherryLinkTargetClickPlugin,
   cherryTocRefreshPlugin,
 ];

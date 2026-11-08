@@ -16,6 +16,33 @@ export function withEditableTail(document: ProseMirrorNode): ProseMirrorNode {
   return tail ? document.copy(document.content.append(Fragment.from(tail))) : document;
 }
 
+/** Remove a known editor-only tail for source serialization, not from the view. */
+export function withoutEditableTail(document: ProseMirrorNode, parsed: ProseMirrorNode): ProseMirrorNode {
+  const tail = createEditableTail(parsed);
+  if (!tail || document.childCount < 2 || !document.lastChild?.eq(tail)) return document;
+  if (document.child(document.childCount - 2).type !== parsed.lastChild?.type) return document;
+  return document.copy(document.content.cut(0, document.content.size - tail.nodeSize));
+}
+
+/** Compare parsed source to the live document, ignoring only generated heading IDs. */
+export function sameSourceDocument(parsed: ProseMirrorNode, live: ProseMirrorNode): boolean {
+  const compare = (left: ProseMirrorNode, right: ProseMirrorNode): boolean => {
+    if (left.type !== right.type || left.childCount !== right.childCount || left.text !== right.text) return false;
+    if (left.type.name === 'heading' && left.attrs.id !== right.attrs.id) {
+      if (left.attrs.id) return false;
+      const { id: _leftId, ...leftAttrs } = left.attrs;
+      const { id: _rightId, ...rightAttrs } = right.attrs;
+      if (JSON.stringify(leftAttrs) !== JSON.stringify(rightAttrs)) return false;
+      if (left.marks.length !== right.marks.length || !left.marks.every((mark, index) => mark.eq(right.marks[index]!)))
+        return false;
+    } else if (!left.sameMarkup(right)) return false;
+    for (let index = 0; index < left.childCount; index += 1)
+      if (!compare(left.child(index), right.child(index))) return false;
+    return true;
+  };
+  return compare(withEditableTail(parsed), live);
+}
+
 /** One structure-checked update, shared by ordinary writes and IME rebasing. */
 export function createDocumentUpdate(before: ProseMirrorNode, next: ProseMirrorNode): Transform {
   const update = new Transform(before);

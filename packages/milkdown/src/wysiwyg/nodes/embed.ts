@@ -8,7 +8,7 @@ import { readMermaidLayout } from '../../native-layout.js';
 import { sanitizedEngineFragment } from '../html-sanitizer.js';
 import { createNodeAction, readEditableSource, selectEditableSource } from '../node-view-utils.js';
 import { readTableChartDescriptor, tableChartDescriptorSource } from '../table-chart-render-engine.js';
-import { reportRendererError } from '../renderer-cleanup.js';
+import { createRenderErrorReporter, reportRendererError } from '../renderer-cleanup.js';
 import { createRenderLifecycle, type RenderRevision } from '../render-lifecycle.js';
 import { CHERRY_THEME_CHANGE } from '../theme.js';
 import {
@@ -32,6 +32,7 @@ class EmbedView implements NodeView {
   private readonly rendering;
   private visibilityObserver?: IntersectionObserver;
   private renderActivated = false;
+  private hasDiagramPreview = false;
   private destroyed = false;
   private sourceOpen = false;
   private sourceEditing = false;
@@ -47,7 +48,7 @@ class EmbedView implements NodeView {
     this.node = node;
     this.view = view;
     this.getPos = getPos;
-    this.rendering = createRenderLifecycle((error) => config.onError?.(error, 'render'));
+    this.rendering = createRenderLifecycle(createRenderErrorReporter(config.onError), config.isDestroyed);
     this.dom = document.createElement(node.isInline ? 'span' : 'figure');
     this.dom.className = `cherry-embed cherry-embed--${node.type.name}`;
     this.syncDiagramPresentation();
@@ -140,7 +141,11 @@ class EmbedView implements NodeView {
     this.source.removeEventListener('blur', this.handleSourceBlur);
     this.source.removeEventListener('keydown', selectEditableSource);
     if (this.timer) clearTimeout(this.timer);
-    destroyCherryRenderedContent(this.config.engine, this.preview);
+    this.cleanupPreview();
+  }
+
+  private cleanupPreview() {
+    destroyCherryRenderedContent(this.config.engine, this.preview, (error) => this.config.onError?.(error, 'render'));
   }
 
   private scheduleRender() {
@@ -291,12 +296,15 @@ class EmbedView implements NodeView {
 
   private render() {
     const revision = this.rendering.begin();
+    if (!revision.current()) return;
     if (this.node.type.name === 'cherry_emoji') {
       revision.commit(() => {
         try {
-          this.preview.innerHTML = this.config.engine.makeHtml(String(this.node.attrs.source));
+          const html = this.config.engine.makeHtml(String(this.node.attrs.source));
+          if (!revision.current()) return;
+          this.preview.replaceChildren(sanitizedEngineFragment(html));
         } catch {
-          this.preview.textContent = String(this.node.attrs.source);
+          if (revision.current()) this.preview.textContent = String(this.node.attrs.source);
         }
       }, false);
       return;
@@ -304,13 +312,15 @@ class EmbedView implements NodeView {
     if (this.node.type.name.startsWith('cherry_html')) {
       revision.commit(() => {
         try {
-          destroyCherryRenderedContent(this.config.engine, this.preview);
+          this.cleanupPreview();
+          if (!revision.current()) return;
           const html = this.config.engine.makeHtml(String(this.node.attrs.source));
+          if (!revision.current()) return;
           this.preview.replaceChildren(
             sanitizedEngineFragment(html, this.node.isInline, this.node.type.name.startsWith('cherry_html')),
           );
         } catch {
-          this.preview.textContent = String(this.node.attrs.source);
+          if (revision.current()) this.preview.textContent = String(this.node.attrs.source);
         }
       }, false);
       return;
@@ -328,6 +338,7 @@ class EmbedView implements NodeView {
         : undefined);
     if (!renderer) {
       revision.commit(() => {
+        this.hasDiagramPreview = false;
         this.preview.textContent = `${diagramType} · 请配置 renderers.${diagramType}`;
       }, false);
       return;
@@ -352,20 +363,26 @@ class EmbedView implements NodeView {
       }),
       {
         prepare: (result) => {
-          if (typeof result === 'string') container.replaceChildren(sanitizedEngineFragment(result));
+          if (typeof result === 'string') {
+            container.replaceChildren(sanitizedEngineFragment(result, false, false, { allowRendererStyles: true }));
+          }
         },
         commit: () => {
           this.preview.replaceWith(container);
           this.preview = container;
+          this.hasDiagramPreview = true;
           staging.remove();
         },
         retain: (result) => typeof result === 'function',
         failure: (error) => {
           this.preview.dataset.renderError = 'true';
-          this.preview.querySelector('[role="alert"]')?.remove();
+          this.preview.querySelector('.cherry-embed__render-error')?.remove();
           const status = document.createElement('p');
+          status.className = 'cherry-embed__render-error';
           status.setAttribute('role', 'alert');
-          status.textContent = '图表暂时无法渲染，请检查源码。';
+          status.textContent = this.hasDiagramPreview
+            ? '图表更新失败，当前显示的是上一次成功渲染的结果。'
+            : '图表暂时无法渲染，请检查源码。';
           this.preview.append(status);
           reportRendererError(error, (cause) => this.config.onError?.(cause, 'render'));
         },
@@ -403,10 +420,12 @@ class EmbedView implements NodeView {
     } catch {
       container.textContent = String(this.node.attrs.source);
     }
+    if (!revision.current()) return;
     const mounts = Array.from(container.querySelectorAll<HTMLElement>('[data-cherry-milkdown-table-chart]'));
     if (!renderer || mounts.length === 0) {
       revision.commit(() => {
-        destroyCherryRenderedContent(this.config.engine, this.preview);
+        this.cleanupPreview();
+        if (!revision.current()) return;
         this.preview.replaceWith(container);
         this.preview = container;
       }, false);
@@ -417,6 +436,11 @@ class EmbedView implements NodeView {
     this.mountStaging(staging);
     revision.addCleanup(() => staging.remove());
     const renders = mounts.map(async (mount) => {
+      // NodeViews can render during a ProseMirror transaction. Run consumer
+      // callbacks after it completes, and skip siblings invalidated by an
+      // earlier callback's synchronous document update.
+      await Promise.resolve();
+      if (!revision.current()) return;
       const descriptor = readTableChartDescriptor(mount);
       if (!descriptor) throw new TypeError('Invalid Cherry table-chart descriptor.');
       const result = await renderer({
@@ -427,7 +451,7 @@ class EmbedView implements NodeView {
         signal: revision.signal,
       });
       if (typeof result === 'string' && !revision.signal.aborted) {
-        mount.replaceChildren(sanitizedEngineFragment(result));
+        mount.replaceChildren(sanitizedEngineFragment(result, false, false, { allowRendererStyles: true }));
       }
       if (typeof result === 'function') revision.addCleanup(result);
     });
@@ -435,7 +459,8 @@ class EmbedView implements NodeView {
       Promise.all(renders).then(() => undefined),
       {
         commit: () => {
-          destroyCherryRenderedContent(this.config.engine, this.preview);
+          this.cleanupPreview();
+          if (!revision.current()) return;
           this.preview.replaceWith(container);
           this.preview = container;
           staging.remove();
