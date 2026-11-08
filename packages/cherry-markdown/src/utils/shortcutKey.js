@@ -1,4 +1,8 @@
+import { readStorage, writeStorage, removeStorage } from '@/utils/storage';
 import { isBrowser } from './env';
+
+// Keep a failed preference write local to the current editor.
+const shortcutKeyOverrides = new WeakMap();
 
 // 检测是否是 Mac 平台
 export const mac = typeof navigator !== 'undefined' ? /Mac/.test(navigator.platform) : false;
@@ -171,14 +175,20 @@ export const keyStackIsModifierkeys = (keyStack) => {
   return (includeShiftKey || includeAltKey) && !keyStack.includes(META_KEY) && !keyStack.includes(CONTROL_KEY);
 };
 
-export const setDisableShortcutKey = (nameSpace, value = 'disable') => {
+export const setDisableShortcutKey = (nameSpace, value = 'disable', cherry) => {
   if (!isBrowser()) return;
-  window.localStorage.setItem(`${nameSpace}-disable-cherry-shortcut-key`, value);
+  const key = `${nameSpace}-disable-cherry-shortcut-key`;
+  const saved = writeStorage(key, value);
+  if (cherry) {
+    if (saved && readStorage(key) === value) shortcutKeyOverrides.delete(cherry);
+    else shortcutKeyOverrides.set(cherry, value);
+  }
 };
 
-export const isEnableShortcutKey = (nameSpace) => {
+export const isEnableShortcutKey = (nameSpace, cherry) => {
   if (!isBrowser()) return true;
-  const disableShortcutKeyStorage = window.localStorage.getItem(`${nameSpace}-disable-cherry-shortcut-key`);
+  const disableShortcutKeyStorage =
+    (cherry && shortcutKeyOverrides.get(cherry)) ?? readStorage(`${nameSpace}-disable-cherry-shortcut-key`);
   if (disableShortcutKeyStorage === 'disable') {
     return false;
   }
@@ -192,7 +202,7 @@ export const isEnableShortcutKey = (nameSpace) => {
  */
 export const clearStorageKeyMap = (nameSpace) => {
   if (!isBrowser()) return;
-  window.localStorage.removeItem(`${nameSpace}-cherry-shortcut-keymap`);
+  removeStorage(`${nameSpace}-cherry-shortcut-keymap`);
 };
 
 /**
@@ -206,7 +216,7 @@ export const storageKeyMap = (nameSpace, keyMap) => {
     throw new Error('keyMap must be a object');
   }
   if (!isBrowser()) return;
-  window.localStorage.setItem(`${nameSpace}-cherry-shortcut-keymap`, JSON.stringify(keyMap));
+  writeStorage(`${nameSpace}-cherry-shortcut-keymap`, JSON.stringify(keyMap));
 };
 
 /**
@@ -216,7 +226,7 @@ export const storageKeyMap = (nameSpace, keyMap) => {
  */
 export const getStorageKeyMap = (nameSpace) => {
   if (!isBrowser()) return null;
-  const shortcutKeyMapStorage = window.localStorage.getItem(`${nameSpace}-cherry-shortcut-keymap`);
+  const shortcutKeyMapStorage = readStorage(`${nameSpace}-cherry-shortcut-keymap`);
   if (shortcutKeyMapStorage) {
     try {
       /** @type {import('@/toolbars/MenuBase').HookShortcutKeyMap} */

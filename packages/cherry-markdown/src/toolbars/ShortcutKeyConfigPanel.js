@@ -60,7 +60,7 @@ export default class ShortcutKeyConfigPanel {
     this.handleDbClick = (/** @type {MouseEvent} */ e) => {
       if (!(e.target instanceof HTMLElement)) return;
       // 如果快捷键被禁用，不处理双击事件
-      if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
+      if (!isEnableShortcutKey(this.$cherry.nameSpace, this.$cherry)) {
         return;
       }
       // 找到最近的快捷键项
@@ -129,14 +129,14 @@ export default class ShortcutKeyConfigPanel {
       if (this.editingItem) {
         this.cancelEdit(this.editingItem);
       }
-      const isEnabled = isEnableShortcutKey(this.$cherry.nameSpace);
+      const isEnabled = isEnableShortcutKey(this.$cherry.nameSpace, this.$cherry);
       if (!isEnabled) {
-        setDisableShortcutKey(this.$cherry.nameSpace, 'enable');
+        setDisableShortcutKey(this.$cherry.nameSpace, 'enable', this.$cherry);
         this.dom.classList.remove('disable');
         this.$cherry.editor.disableShortcut(false);
         this.updateTipText(this.activeTab === 'static' ? 'static' : 'default');
       } else {
-        setDisableShortcutKey(this.$cherry.nameSpace, 'disable');
+        setDisableShortcutKey(this.$cherry.nameSpace, 'disable', this.$cherry);
         this.dom.classList.add('disable');
         this.$cherry.editor.disableShortcut(true);
         this.updateTipText();
@@ -155,7 +155,7 @@ export default class ShortcutKeyConfigPanel {
       if (this.editingItem) {
         this.cancelEdit(this.editingItem);
       }
-      setDisableShortcutKey(this.$cherry.nameSpace, 'enable');
+      setDisableShortcutKey(this.$cherry.nameSpace, 'enable', this.$cherry);
       this.dom.classList.remove('disable');
       this.$cherry.editor.disableShortcut(false);
       this.$cherry.toolbar.shortcutKeyMap = {};
@@ -263,7 +263,7 @@ export default class ShortcutKeyConfigPanel {
     if (!(tipElement instanceof HTMLElement)) return;
 
     // 如果快捷键被禁用，显示禁用状态提示
-    if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
+    if (!isEnableShortcutKey(this.$cherry.nameSpace, this.$cherry)) {
       tipElement.innerHTML = this.$cherry.locale.disabledShortcutTip;
       return;
     }
@@ -401,7 +401,7 @@ export default class ShortcutKeyConfigPanel {
       this.dom.innerHTML = this.generateShortcutKeyConfigPanelHtmlStr();
       // 实例化后，将容器插入到富文本编辑器中，默认隐藏
       this.dom.style.display = 'none';
-      if (!isEnableShortcutKey(this.$cherry.nameSpace)) {
+      if (!isEnableShortcutKey(this.$cherry.nameSpace, this.$cherry)) {
         this.dom.classList.add('disable');
       }
       this.$cherry.wrapperDom.append(this.dom);
@@ -483,9 +483,11 @@ export default class ShortcutKeyConfigPanel {
       <div class="cherry-shortcut-key-config-panel-inner">
         <div class="shortcut-panel-settings">
           <btn class="shortcut-settings-btn j-shortcut-settings-disable-btn"><i class="ch-icon ${
-            !isEnableShortcutKey(this.$cherry.nameSpace) ? 'ch-icon-command' : 'ch-icon-cherry-table-delete'
+            !isEnableShortcutKey(this.$cherry.nameSpace, this.$cherry)
+              ? 'ch-icon-command'
+              : 'ch-icon-cherry-table-delete'
           }"></i> ${
-            !isEnableShortcutKey(this.$cherry.nameSpace)
+            !isEnableShortcutKey(this.$cherry.nameSpace, this.$cherry)
               ? this.$cherry.locale.enableShortcut
               : this.$cherry.locale.disableShortcut
           }</btn>
@@ -529,7 +531,10 @@ export default class ShortcutKeyConfigPanel {
       { name: this.$cherry.locale.shortcutStatic9, key: 'Control+Shift+←' },
       { name: this.$cherry.locale.shortcutStatic10, key: 'Control+Shift+→' },
       { name: this.$cherry.locale.shortcutStatic11, key: 'Control+Backspace' },
-      { name: this.$cherry.locale.shortcutStatic13, key: `Control+${this.$cherry.locale.leftMouseButton}` },
+      {
+        name: this.$cherry.locale.shortcutStatic13,
+        key: `Control+${this.$cherry.locale.leftMouseButton}`,
+      },
       { name: this.$cherry.locale.shortcutStatic14, key: 'Control+Shift+L' },
       { name: this.$cherry.locale.shortcutStatic17, key: 'Control+Z' },
       { name: this.$cherry.locale.shortcutStatic18, key: 'Control+Y' },
@@ -545,7 +550,10 @@ export default class ShortcutKeyConfigPanel {
       { name: this.$cherry.locale.shortcutStatic9, key: 'Control+Shift+←' },
       { name: this.$cherry.locale.shortcutStatic10, key: 'Control+Shift+→' },
       { name: this.$cherry.locale.shortcutStatic11, key: 'Alt+Backspace' },
-      { name: this.$cherry.locale.shortcutStatic13, key: `Meta+${this.$cherry.locale.leftMouseButton}` },
+      {
+        name: this.$cherry.locale.shortcutStatic13,
+        key: `Meta+${this.$cherry.locale.leftMouseButton}`,
+      },
       { name: this.$cherry.locale.shortcutStatic14, key: 'Meta+Shift+L' },
       { name: this.$cherry.locale.shortcutStatic17, key: 'Meta+Z' },
       { name: this.$cherry.locale.shortcutStatic18, key: 'Meta+Y' },

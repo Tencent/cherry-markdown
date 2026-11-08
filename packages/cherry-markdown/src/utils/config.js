@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { readStorage, writeStorage } from './storage';
 
 /**
  * 用于 mergeWith 的 customizer
@@ -31,10 +32,7 @@ export function customizer(objValue, srcValue) {
  * @param {string} key
  */
 export function testKeyInLocal(key) {
-  if (typeof localStorage !== 'undefined') {
-    return localStorage.getItem(`cherry-${key}`) !== null;
-  }
-  return false;
+  return readStorage(`cherry-${key}`) !== null;
 }
 
 /**
@@ -42,20 +40,19 @@ export function testKeyInLocal(key) {
  * @param {boolean} isClassicBr
  */
 export function saveIsClassicBrToLocal(isClassicBr) {
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem('cherry-classicBr', isClassicBr ? 'true' : 'false');
-  }
+  return writeStorage('cherry-classicBr', isClassicBr ? 'true' : 'false');
 }
 
 /**
  * 是否经典换行
  */
+export function resolveClassicBr(configuredValue) {
+  const stored = readStorage('cherry-classicBr');
+  return stored === null ? configuredValue : stored === 'true';
+}
+
 export function getIsClassicBrFromLocal() {
-  let ret = 'false';
-  if (typeof localStorage !== 'undefined') {
-    ret = localStorage.getItem('cherry-classicBr');
-  }
-  return ret === 'true';
+  return readStorage('cherry-classicBr') === 'true';
 }
 
 /**
@@ -63,16 +60,11 @@ export function getIsClassicBrFromLocal() {
  * @param {string} theme
  */
 function saveThemeToLocal(nameSpace, theme) {
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(`${nameSpace}-theme`, theme);
-  }
+  writeStorage(`${nameSpace}-theme`, theme);
 }
 
 export function testHasLocal(nameSpace, key) {
-  if (typeof localStorage !== 'undefined') {
-    return !!localStorage.getItem(`${nameSpace}-${key}`);
-  }
-  return false;
+  return !!readStorage(`${nameSpace}-${key}`);
 }
 
 /**
@@ -81,12 +73,8 @@ export function testHasLocal(nameSpace, key) {
  */
 export function getThemeFromLocal(fullClass = false, nameSpace = 'cherry') {
   let ret = 'default';
-  if (typeof localStorage !== 'undefined') {
-    const localTheme = localStorage.getItem(`${nameSpace}-theme`);
-    if (localTheme) {
-      ret = localTheme;
-    }
-  }
+  const localTheme = readStorage(`${nameSpace}-theme`);
+  if (localTheme) ret = localTheme;
   return fullClass ? `theme__${ret}` : ret;
 }
 
@@ -111,9 +99,7 @@ export function changeTheme($cherry, theme = '') {
  * @param {string} codeTheme
  */
 function saveCodeThemeToLocal(nameSpace, codeTheme) {
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(`${nameSpace}-codeTheme`, codeTheme);
-  }
+  writeStorage(`${nameSpace}-codeTheme`, codeTheme);
 }
 
 /**
@@ -123,12 +109,8 @@ function saveCodeThemeToLocal(nameSpace, codeTheme) {
  */
 export function getCodeThemeFromLocal(nameSpace = 'cherry') {
   let res = 'default';
-  if (typeof localStorage !== 'undefined') {
-    const localTheme = localStorage.getItem(`${nameSpace}-codeTheme`);
-    if (localTheme) {
-      res = localTheme;
-    }
-  }
+  const localTheme = readStorage(`${nameSpace}-codeTheme`);
+  if (localTheme) res = localTheme;
   return res;
 }
 
@@ -154,12 +136,8 @@ export function changeCodeTheme($cherry, codeTheme) {
  */
 export function getCodeWrapFromLocal(nameSpace = 'cherry', defaultWrap = true) {
   let res = defaultWrap ? 'wrap' : 'nowrap';
-  if (typeof localStorage !== 'undefined') {
-    const localTheme = localStorage.getItem(`${nameSpace}-codeWrap`);
-    if (localTheme) {
-      res = localTheme;
-    }
-  }
+  const localTheme = readStorage(`${nameSpace}-codeWrap`);
+  if (localTheme) res = localTheme;
   return res;
 }
 
@@ -169,7 +147,5 @@ export function getCodeWrapFromLocal(nameSpace = 'cherry', defaultWrap = true) {
  * @param {string} wrap
  */
 export function saveCodeWrapToLocal(nameSpace, wrap) {
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(`${nameSpace}-codeWrap`, wrap);
-  }
+  writeStorage(`${nameSpace}-codeWrap`, wrap);
 }

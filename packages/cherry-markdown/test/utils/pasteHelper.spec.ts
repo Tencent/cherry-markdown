@@ -203,7 +203,11 @@ describe('utils/pasteHelper', () => {
 
   it('positions the paste bubble above or below the selection and updates scroll offset', () => {
     const editorView = createMockEditorView('markdown');
-    Object.defineProperty(editorView.scrollDOM, 'scrollTop', { configurable: true, value: 12, writable: true });
+    Object.defineProperty(editorView.scrollDOM, 'scrollTop', {
+      configurable: true,
+      value: 12,
+      writable: true,
+    });
     const selection = document.createElement('span');
     selection.className = 'cm-selectionBackground';
     Object.defineProperty(selection, 'getBoundingClientRect', {
@@ -271,7 +275,11 @@ describe('utils/pasteHelper', () => {
     expect(pasteHelper.bubbleDom.style.bottom).toBe('');
 
     pasteHelper.bubbleDom.dataset.scrollTop = '30';
-    Object.defineProperty(editorView.scrollDOM, 'scrollTop', { configurable: true, value: 6, writable: true });
+    Object.defineProperty(editorView.scrollDOM, 'scrollTop', {
+      configurable: true,
+      value: 6,
+      writable: true,
+    });
     pasteHelper.updatePositionWhenScroll();
     expect(pasteHelper.bubbleDom.style.marginTop).toBe('24px');
   });
