@@ -5,6 +5,14 @@ describe('settings classic line break', () => {
   beforeEach(() => localStorage.clear());
   afterEach(() => localStorage.clear());
 
+  it('reads a changed local preference each time', () => {
+    const settings = Object.create(Settings.prototype);
+    settings.engine = { $cherry: { options: { engine: { global: { classicBr: true } } } } };
+    expect(settings.getClassicBr()).toBe(true);
+    localStorage.setItem('cherry-classicBr', 'false');
+    expect(settings.getClassicBr()).toBe(false);
+  });
+
   it.each([
     [true, null, false],
     [false, null, true],
@@ -13,7 +21,8 @@ describe('settings classic line break', () => {
   ])('toggles the effective mode with config %s and stored value %s', (configured, stored, expected) => {
     if (stored !== null) localStorage.setItem('cherry-classicBr', stored);
     const wrapperDom = document.createElement('div');
-    wrapperDom.innerHTML = '<div class="cherry-dropdown"><span><i class="ch-icon-normal"></i><span></span></span></div>';
+    wrapperDom.innerHTML =
+      '<div class="cherry-dropdown"><span><i class="ch-icon-normal"></i><span></span></span></div>';
     const paragraph = { classicBr: configured };
     const cherry = {
       wrapperDom,

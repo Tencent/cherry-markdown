@@ -29,9 +29,7 @@ export default class Settings extends MenuBase {
     this.setName('settings', 'settings');
     this.updateMarkdown = false;
     this.engine = $cherry.engine;
-    const classicBr = testKeyInLocal('classicBr')
-      ? getIsClassicBrFromLocal()
-      : this.engine.$cherry.options.engine.global?.classicBr;
+    const classicBr = this.getClassicBr();
     const { defaultModel } = $cherry.editor.options;
     const classicBrIconName = classicBr ? 'br' : 'normal';
     const classicBrName = classicBr ? 'classicBr' : 'normalBr';
@@ -58,6 +56,12 @@ export default class Settings extends MenuBase {
     //     shortcutKey: 'Ctrl-0',
     //   },
     // ];
+  }
+
+  getClassicBr() {
+    return testKeyInLocal('classicBr')
+      ? getIsClassicBrFromLocal()
+      : this.engine.$cherry.options.engine.global?.classicBr;
   }
 
   /**
@@ -134,10 +138,7 @@ export default class Settings extends MenuBase {
   onClick(selection, shortKey = '', callback) {
     const resolvedShortKey = this.matchShortcutKey(shortKey);
     if (resolvedShortKey === 'classicBr') {
-      const currentIsClassicBr = testKeyInLocal('classicBr')
-        ? getIsClassicBrFromLocal()
-        : this.engine.$cherry.options.engine.global.classicBr;
-      const targetIsClassicBr = !currentIsClassicBr;
+      const targetIsClassicBr = !this.getClassicBr();
       saveIsClassicBrToLocal(targetIsClassicBr);
       this.engine.$cherry.options.engine.global.classicBr = targetIsClassicBr;
       this.engine.hookCenter.hookList.paragraph.forEach((item) => {
