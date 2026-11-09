@@ -46,6 +46,14 @@ describe('Webview document uploads', () => {
     vi.stubGlobal('crypto', { randomUUID: () => placeholder.slice('cherry-upload:'.length) });
   });
 
+  test('a failed result clears only the temporary URL in the latest Webview text', () => {
+    const f = fixture();
+    f.uploads.start(f.file, f.callback);
+    f.edit(`${f.text()} typed during upload`);
+    f.uploads.applyResult({ ...f.result, url: '' });
+    expect(f.text()).toBe('before ![image]() typed during upload');
+  });
+
   test('inserts the placeholder synchronously and uploads only after the source document acknowledges it', () => {
     const f = fixture();
     f.uploads.start(f.file, f.callback);

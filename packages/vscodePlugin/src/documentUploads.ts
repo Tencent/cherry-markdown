@@ -36,21 +36,40 @@ export class DocumentUploadManager {
     if (this.pending.has(request.placeholder)) return;
     const pending: PendingUpload = { document };
     this.pending.set(request.placeholder, pending);
+    let result: UploadFileResult;
     try {
-      const result = await this.host.upload(request, document.uri);
-      if (this.pending.get(request.placeholder) !== pending) return;
-      if (document.isClosed || findUploadPlaceholder(document.getText(), request.placeholder) === undefined) {
-        this.pending.delete(request.placeholder);
-        return;
-      }
-      pending.result = { ...result, documentUri: request.documentUri, placeholder: request.placeholder };
-      // The active Webview merges into its latest text so in-flight typing is preserved.
-      if (this.host.isPreviewing(document) && (await this.host.publish(pending.result))) return;
-      await this.finish(request.placeholder);
+      result = await this.host.upload(request, document.uri);
     } catch (error) {
-      this.pending.delete(request.placeholder);
+      // Clear only the temporary URL, retaining the image label and any surrounding edits.
+      await this.complete(request, pending, {
+        requestId: request.requestId,
+        name: request.name,
+        url: '',
+      });
       throw error;
     }
+    await this.complete(request, pending, result);
+  }
+
+  private async complete(
+    request: DocumentUploadRequest,
+    pending: PendingUpload,
+    result: UploadFileResult,
+  ): Promise<void> {
+    if (this.pending.get(request.placeholder) !== pending) return;
+    const { document } = pending;
+    if (document.isClosed || findUploadPlaceholder(document.getText(), request.placeholder) === undefined) {
+      this.pending.delete(request.placeholder);
+      return;
+    }
+    pending.result = {
+      ...result,
+      documentUri: request.documentUri,
+      placeholder: request.placeholder,
+    };
+    // The active Webview merges into its latest text so in-flight typing is preserved.
+    if (this.host.isPreviewing(document) && (await this.host.publish(pending.result))) return;
+    await this.finish(request.placeholder);
   }
 
   async finish(placeholder: string): Promise<void> {
