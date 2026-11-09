@@ -162,7 +162,7 @@ export function getImageUploadMode(resource?: vscode.Uri): ImageUploadMode {
     throw new UploadConfigurationError(
       'legacy',
       vscode.l10n.t(
-        'Legacy upload settings are no longer read. For PicGo 2.4.0+, configure ImageUploadMode=remote and CustomUploader with format=multipart and fieldName=files. The file was not uploaded.',
+        'Legacy upload settings are no longer read. Set ImageUploadMode to workspace (local files), data (Base64), or remote (HTTP with CustomUploader). For PicGo 2.4.0+, use remote with format=multipart and fieldName=files. The file was not uploaded.',
       ),
     );
   }

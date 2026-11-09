@@ -127,6 +127,15 @@ describe('document-scoped upload configuration', () => {
     expect(config).not.toHaveProperty('migrateTheme');
   });
 
+  test.each(['workspace', 'Base64', 'PicGoServer'])(
+    'retired mode %s explains all replacement modes without migrating',
+    (mode) => {
+      workspace.UploadType = mode;
+      expect(() => config.getUploadConfiguration(a)).toThrow('workspace (local files), data (Base64), or remote');
+      expect(update).not.toHaveBeenCalled();
+    },
+  );
+
   test.each(['workspace', 'data', 'remote'])('ignores leftover retired keys with valid new mode %s', (mode) => {
     user.ImageUploadMode = mode;
     user.CustomUploader = uploader('https://current.example/upload');
