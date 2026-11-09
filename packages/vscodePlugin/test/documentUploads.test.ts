@@ -68,6 +68,53 @@ function fixture() {
 }
 
 describe('document-bound uploads', () => {
+  test('failed upload clears its URL in A after switching to B, preserving labels and edits', async () => {
+    const f = fixture();
+    f.upload.mockRejectedValue(new Error('Upload rejected'));
+    f.activate(f.b);
+    f.a.text = `new prefix\n${markdown}\nnew suffix`;
+    await expect(f.manager.start(f.request)).rejects.toThrow('Upload rejected');
+    expect(f.a.text).toBe('new prefix\nbefore ![image]() after\nnew suffix');
+    expect(f.b.text).toBe('B untouched');
+  });
+
+  test('failed upload uses the existing Webview merge path for an active document', async () => {
+    const f = fixture();
+    f.upload.mockRejectedValue(new Error('Upload rejected'));
+    await expect(f.manager.start(f.request)).rejects.toThrow('Upload rejected');
+    expect(f.publish).toHaveBeenCalledWith(expect.objectContaining({ placeholder, url: '' }));
+    expect(f.replace).not.toHaveBeenCalled();
+    f.activate(f.b);
+    await f.manager.finishInactive();
+    expect(f.a.text).toBe('before ![image]() after');
+  });
+
+  test.each(['deleted', 'duplicated', 'closed'] as const)(
+    'failed upload leaves a %s target untouched',
+    async (reason) => {
+      const f = fixture();
+      let rejectUpload!: (error: Error) => void;
+      f.upload.mockImplementation(
+        () =>
+          new Promise((_, reject) => {
+            rejectUpload = reject;
+          }),
+      );
+      const task = f.manager.start(f.request);
+      const rejected = expect(task).rejects.toThrow('Upload rejected');
+      if (reason === 'deleted') f.a.text = 'user removed the image';
+      if (reason === 'duplicated') f.a.text += markdown;
+      if (reason === 'closed') f.a.isClosed = true;
+      f.manager.documentChanged(f.a);
+      const text = f.a.text;
+      rejectUpload(new Error('Upload rejected'));
+      await rejected;
+      expect(f.a.text).toBe(text);
+      expect(f.publish).not.toHaveBeenCalled();
+      expect(f.replace).not.toHaveBeenCalled();
+    },
+  );
+
   test('A → B: finishes only in A, using its captured remote URI and latest anchor position', async () => {
     const f = fixture();
     const task = f.manager.start(f.request);
