@@ -236,7 +236,12 @@ describe('image upload handler', () => {
     );
   });
 
-  test.each([undefined, 'image', 'files[]'])('sends a real multipart file in field %s', async (fieldName) => {
+  test.each([
+    [undefined, 'image.png'],
+    ['image', 'image.png'],
+    ['files[]', 'image.png'],
+    ['files', '测试图片.png'],
+  ] as const)('sends a real multipart file in field %s named %s', async (fieldName, fileName) => {
     mockState.mode = 'remote';
     mockState.customUploader = {
       enable: true,
@@ -248,7 +253,7 @@ describe('image upload handler', () => {
     vi.mocked(axios.post).mockResolvedValue({ data: { success: true, result: ['https://cdn.example/picgo.png'] } });
     const result = await uploadFileHandler({
       requestId: 40,
-      name: 'image.png',
+      name: fileName,
       type: 'image/png',
       path: '',
       base64: 'AQID',
@@ -258,7 +263,7 @@ describe('image upload handler', () => {
     const [, body, options] = vi.mocked(axios.post).mock.calls[0];
     const headers = options!.headers as Record<string, string>;
     expect(headers.Authorization).toBe('Bearer test-token');
-    expect(headers['Content-Type']).toMatch(/^multipart\/form-data; boundary=cherry-/);
+    expect(headers['Content-Type']).toMatch(/^multipart\/form-data; boundary=.+$/);
     expect(headers).not.toHaveProperty('cOnTeNt-TyPe');
     expect(headers).not.toHaveProperty('CONTENT-LENGTH');
     expect(options!.maxBodyLength).toBe((body as Buffer).length);
@@ -266,7 +271,7 @@ describe('image upload handler', () => {
     const form = await new Response(new Uint8Array(body as Buffer), { headers }).formData();
     expect([...form.keys()]).toEqual([fieldName ?? 'files']);
     const file = form.get(fieldName ?? 'files') as File;
-    expect(file.name).toBe('image.png');
+    expect(file.name).toBe(fileName);
     expect(file.type).toBe('image/png');
     expect(Array.from(new Uint8Array(await file.arrayBuffer()))).toEqual([1, 2, 3]);
   });

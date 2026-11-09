@@ -17,6 +17,7 @@ const requiredFiles = [
   'web-resources/dist/index.css',
   'web-resources/scripts/index.css',
   'favicon.ico',
+  'THIRD_PARTY_NOTICES.txt',
   'docs/updates/upload-settings.en.md',
   'docs/updates/upload-settings.zh-cn.md',
   'docs/updates/upload-settings.ru.md',
@@ -47,6 +48,17 @@ describe('VS Code extension build artifacts', () => {
 
     expect(webviewBundle).not.toMatch(runtimeImport);
     expect(webviewBundle).toContain('Cherry Markdown');
+  });
+
+  test('bundles the multipart encoder and declares a direct patched dependency with its notices', () => {
+    const extension = fs.readFileSync(path.join(packageRoot, manifest.main), 'utf8');
+    expect(extension).not.toMatch(/require\s*\(\s*['"]form-data['"]\s*\)/);
+    const metadata = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
+    expect(metadata.devDependencies['form-data']).toBe('^4.0.6');
+    const notices = fs.readFileSync(path.join(packageRoot, 'THIRD_PARTY_NOTICES.txt'), 'utf8');
+    expect(notices).toContain('form-data@4.0.6');
+    expect(notices).toContain('Felix Geisendörfer');
+    expect(notices).toContain('Permission is hereby granted');
   });
 
   test('keeps theme ownership inside Cherry Markdown', () => {

@@ -33,6 +33,7 @@ describe('VSIX archive', () => {
       expect.arrayContaining([
         'extension/package.json',
         'extension/dist/extension.js',
+        'extension/third_party_notices.txt',
         'extension/web-resources/dist/index.js',
         'extension/web-resources/dist/index.css',
         'extension/web-resources/dist/mathjax.js',

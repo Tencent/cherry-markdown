@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { randomBytes } from 'crypto';
+import FormData from 'form-data';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { getUploadConfiguration } from '../config';
@@ -129,18 +129,21 @@ function encodeRemoteUpload(file: Uint8Array, fileInfo: UploadFileRequest, uploa
     return { body: Buffer.from(file), headers };
   }
   // Encode a single file, not a path or clipboard request. This also works across remote hosts.
-  const boundary = `cherry-${randomBytes(16).toString('hex')}`;
+  const form = new FormData();
   const mimeType = /^[\w!#$&^.+-]+\/[\w!#$&^.+-]+(?![\s\S])/.test(fileInfo.type)
     ? fileInfo.type
     : 'application/octet-stream';
-  const prefix = `--${boundary}\r\nContent-Disposition: form-data; name="${uploader.fieldName ?? 'files'}"; filename="${safeFileName(fileInfo)}"\r\nContent-Type: ${mimeType}\r\n\r\n`;
-  const body = Buffer.concat([Buffer.from(prefix), Buffer.from(file), Buffer.from(`\r\n--${boundary}--\r\n`)]);
+  form.append(uploader.fieldName ?? 'files', Buffer.from(file), {
+    filename: safeFileName(fileInfo),
+    contentType: mimeType,
+    knownLength: file.length,
+  });
   // The encoder owns boundary and length; user headers must not corrupt the multipart framing.
   for (const key of Object.keys(headers)) {
     if (['content-type', 'content-length'].includes(key.toLowerCase())) delete headers[key];
   }
-  headers['Content-Type'] = `multipart/form-data; boundary=${boundary}`;
-  return { body, headers };
+  headers['Content-Type'] = form.getHeaders()['content-type'];
+  return { body: form.getBuffer(), headers };
 }
 
 function splitFileName(fileName: string): { stem: string; extension: string } {
