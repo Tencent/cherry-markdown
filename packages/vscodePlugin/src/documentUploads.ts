@@ -51,27 +51,6 @@ export class DocumentUploadManager {
     await this.complete(request, pending, result);
   }
 
-  private async complete(
-    request: DocumentUploadRequest,
-    pending: PendingUpload,
-    result: UploadFileResult,
-  ): Promise<void> {
-    if (this.pending.get(request.placeholder) !== pending) return;
-    const { document } = pending;
-    if (document.isClosed || findUploadPlaceholder(document.getText(), request.placeholder) === undefined) {
-      this.pending.delete(request.placeholder);
-      return;
-    }
-    pending.result = {
-      ...result,
-      documentUri: request.documentUri,
-      placeholder: request.placeholder,
-    };
-    // The active Webview merges into its latest text so in-flight typing is preserved.
-    if (this.host.isPreviewing(document) && (await this.host.publish(pending.result))) return;
-    await this.finish(request.placeholder);
-  }
-
   async finish(placeholder: string): Promise<void> {
     await this.host.enqueue(async () => {
       const pending = this.pending.get(placeholder);
@@ -104,5 +83,26 @@ export class DocumentUploadManager {
         this.pending.delete(placeholder);
       }
     }
+  }
+  private async complete(
+    request: DocumentUploadRequest,
+    pending: PendingUpload,
+    result: UploadFileResult,
+  ): Promise<void> {
+    const current = this.pending.get(request.placeholder);
+    if (current !== pending) return;
+    const { document } = pending;
+    if (document.isClosed || findUploadPlaceholder(document.getText(), request.placeholder) === undefined) {
+      this.pending.delete(request.placeholder);
+      return;
+    }
+    current.result = {
+      ...result,
+      documentUri: request.documentUri,
+      placeholder: request.placeholder,
+    };
+    // The active Webview merges into its latest text so in-flight typing is preserved.
+    if (this.host.isPreviewing(document) && (await this.host.publish(current.result))) return;
+    await this.finish(request.placeholder);
   }
 }

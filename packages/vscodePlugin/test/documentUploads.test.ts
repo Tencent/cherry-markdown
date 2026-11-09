@@ -106,7 +106,7 @@ describe('document-bound uploads', () => {
       if (reason === 'duplicated') f.a.text += markdown;
       if (reason === 'closed') f.a.isClosed = true;
       f.manager.documentChanged(f.a);
-      const text = f.a.text;
+      const { text } = f.a;
       rejectUpload(new Error('Upload rejected'));
       await rejected;
       expect(f.a.text).toBe(text);
