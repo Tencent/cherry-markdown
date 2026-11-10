@@ -15,7 +15,7 @@
  */
 import ParagraphBase from '@/core/ParagraphBase';
 import Prism from 'prismjs';
-import { escapeHTMLSpecialChar } from '@/utils/sanitize';
+import { escapeHTMLAttribute, escapeHTMLSpecialChar } from '@/utils/sanitize';
 import { getTableRule, getCodeBlockRule } from '@/utils/regexp';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 
@@ -270,7 +270,7 @@ export default class CodeBlock extends ParagraphBase {
    * @param {string} lang
    */
   wrapCode($code, lang) {
-    return `<code class="language-${lang}">${$code}</code>`;
+    return `<code class="language-${escapeHTMLAttribute(lang)}">${$code}</code>`;
   }
 
   /**
@@ -299,7 +299,9 @@ export default class CodeBlock extends ParagraphBase {
       cacheCode = this.renderLineNumber(cacheCode);
     }
     const needUnExpand = this.expandCode && $code.match(/\n/g)?.length > 10; // 是否需要收起代码块
-    const codeHtml = `<pre class="language-${lang}">${this.wrapCode(cacheCode, lang)}</pre>`;
+    const safeLang = escapeHTMLAttribute(lang);
+    const safeOldLang = escapeHTMLAttribute(oldLang);
+    const codeHtml = `<pre class="language-${safeLang}">${this.wrapCode(cacheCode, lang)}</pre>`;
     cacheCode = `<div
         data-sign="${sign}"
         data-type="codeBlock"
@@ -308,7 +310,7 @@ export default class CodeBlock extends ParagraphBase {
         data-copy-code="${this.copyCode}"
         data-expand-code="${this.expandCode}"
         data-change-lang="${this.changeLang}"
-        data-lang="${oldLang}"
+        data-lang="${safeOldLang}"
         style="position:relative"
         class="${needUnExpand ? 'cherry-code-unExpand' : 'cherry-code-expand'}"
       >

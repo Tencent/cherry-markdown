@@ -3,6 +3,7 @@ import {
   convertHTMLNumberToName,
   encodeURIComponentRFC3986,
   encodeURIOnce,
+  escapeHTMLAttribute,
   escapeHTMLSpecialChar,
   escapeHTMLSpecialCharOnce,
   escapeHTMLEntitiesWithoutSemicolon,
@@ -41,6 +42,13 @@ describe('utils/sanitize', () => {
     expect(convertHTMLNumberToName('&#60;&#169;&#999999;')).toBe('&lt;&copy;&#999999;');
     expect(unescapeHTMLNumberEntities('&#65;&#99999999;')).toBe('A&#99999999;');
     expect(unescapeHTMLHexEntities('&#x41;&#x110000;')).toBe('A&#x110000;');
+  });
+
+  it('escapes attribute boundaries without touching entities', () => {
+    expect(escapeHTMLAttribute(123 as never)).toBe('');
+    expect(escapeHTMLAttribute('<img src="x">')).toBe('&lt;img src=&quot;x&quot;&gt;');
+    expect(escapeHTMLAttribute("a'b")).toBe('a&#x27;b');
+    expect(escapeHTMLAttribute('f&ouml;')).toBe('f&ouml;');
   });
 
   it('validates schemes after decoding numeric entities', () => {

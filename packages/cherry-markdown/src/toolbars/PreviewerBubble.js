@@ -384,6 +384,9 @@ export default class PreviewerBubble {
         if (!this.beginChangeDrawioImg(target)) {
           return;
         }
+        if (!this.previewer.$cherry.options.drawioIframeUrl) {
+          return;
+        }
         const xmlData = decodeURI(target.getAttribute('data-xml'));
         drawioDialog(
           this.previewer.$cherry.options.drawioIframeUrl,

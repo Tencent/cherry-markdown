@@ -35,7 +35,8 @@ const dialog = {
   },
 
   postMessage(messageName, value = '') {
-    this.iframeDom?.contentWindow?.postMessage({ eventName: messageName, value }, '*');
+    const targetOrigin = this.iframeOrigin || window.location.origin;
+    this.iframeDom?.contentWindow?.postMessage({ eventName: messageName, value }, targetOrigin);
   },
 
   resetStyle() {
@@ -97,6 +98,16 @@ const dialog = {
 
   draw(params, onReady, onSubmit) {
     const { iframeSrc, iframeStyle, title } = params;
+    if (!iframeSrc) {
+      return;
+    }
+    let expectedOrigin;
+    try {
+      expectedOrigin = new URL(iframeSrc, window.location.href).origin;
+    } catch {
+      return;
+    }
+    this.iframeOrigin = expectedOrigin;
     this.onSubmit = onSubmit;
     this.onReady = onReady;
 
@@ -108,20 +119,34 @@ const dialog = {
       this.open();
       return;
     }
-    // 添加通信事件
+    // 添加通信事件：只接受来自 draw.io iframe 且 origin 匹配的消息
     window.addEventListener('message', (event) => {
+      if (event.source !== this.iframeDom?.contentWindow || event.origin !== this.iframeOrigin) {
+        return;
+      }
       // @ts-ignore
       if (!event.data || !event.data.eventName) {
         return;
       }
       // @ts-ignore
       switch (event.data.eventName) {
-        case 'getData:success':
-          // @ts-ignore
-          this.onSubmit(event.data.value);
+        case 'getData:success': {
+          const { value } = event.data;
+          if (
+            !value ||
+            typeof value !== 'object' ||
+            typeof value.xmlData !== 'string' ||
+            typeof value.base64 !== 'string'
+          ) {
+            break;
+          }
+          this.onSubmit(value);
           this.close();
+          break;
+        }
         case 'ready':
           this.onReady();
+          break;
       }
     });
     // 构造页面元素
@@ -208,7 +233,7 @@ export function drawioDialog(iframeSrc = '', iframeStyle = '', xml = '', callbac
       dialog.postMessage('setData', xml);
     },
     (data) => {
-      callback(data);
+      callback?.(data);
     },
   );
 }

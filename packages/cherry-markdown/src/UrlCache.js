@@ -84,7 +84,9 @@ export default class UrlCache {
     const cherryInnerLinkRegex = /cherry-inner:\/\/([0-9a-f]+)/gi;
     const $html = html.replace(cherryInnerLinkRegex, (match) => {
       const originalUrl = UrlCache.get(match);
-      return typeof originalUrl === 'string' ? originalUrl : match;
+      // restoreAll 发生在 DOMPurify 之后；只阻止恢复值闭合双引号属性，
+      // 不转义 & 以免改变 URL 中的查询参数和字符实体语义
+      return typeof originalUrl === 'string' ? originalUrl.replace(/"/g, '&quot;') : match;
     });
     return $html;
   }

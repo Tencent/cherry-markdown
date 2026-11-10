@@ -15,6 +15,7 @@
  */
 import ParagraphBase from '@/core/ParagraphBase';
 import { compileRegExp } from '@/utils/regexp';
+import { escapeHTMLSpecialChar } from '@/utils/sanitize';
 
 export default class Footnote extends ParagraphBase {
   static HOOK_NAME = 'footnote';
@@ -48,21 +49,23 @@ export default class Footnote extends ParagraphBase {
       return this.footnoteMap[key];
     }
     const $key = key.replace(/"/g, "'");
+    // 回调仍接收原值；拼进 HTML 时转义尖括号与 &，保留引号以兼容既有标题展示
+    const safeKey = escapeHTMLSpecialChar($key, true);
     const num = this.footnote.length + 1;
     const fn = {};
     const refNumberContent = this.config.refNumber.render(num, $key) || `[${num}]`;
     const refNumberClass = this.config.refNumber?.appendClass || '';
     const refNumberLinkContent = this.config.refList?.listItem?.render(num, $key, note, () => {
       const refNumberContent = this.config.refNumber.render(num, $key) || `[${num}]`;
-      return `<a href="#fnref:${num}" id="fn:${num}" title="${$key}" class="footnote-ref ${refNumberClass}">${refNumberContent}</a>`;
+      return `<a href="#fnref:${num}" id="fn:${num}" title="${safeKey}" class="footnote-ref ${refNumberClass}">${refNumberContent}</a>`;
     });
-    fn.fnref = `<a href="#fnref:${num}" id="fn:${num}" title="${$key}" class="footnote-ref ${refNumberClass}">${refNumberContent}</a>`;
+    fn.fnref = `<a href="#fnref:${num}" id="fn:${num}" title="${safeKey}" class="footnote-ref ${refNumberClass}">${refNumberContent}</a>`;
     fn.num = num;
     fn.note = refNumberLinkContent || fn.fnref + note.trim();
     fn.note = this.$engine.makeHtmlForFootnote(fn.note);
     const refNumberBubble = this.config.bubbleCard ? 'cherry-show-bubble-card' : '';
     const refNumberFinalClass = `footnote ${refNumberClass} ${refNumberBubble}`.replace(/ {2,}/g, ' ');
-    fn.fn = `<sup class="cherry-footnote-number"><a href="#fn:${num}" id="fnref:${num}" title="${$key}" data-index="${num}" data-key="${$key}" class="${refNumberFinalClass}">${refNumberContent}</a></sup>`;
+    fn.fn = `<sup class="cherry-footnote-number"><a href="#fn:${num}" id="fnref:${num}" title="${safeKey}" data-index="${num}" data-key="${safeKey}" class="${refNumberFinalClass}">${refNumberContent}</a></sup>`;
     this.footnote.push(fn);
     const replaceKey = `\0~fn#${num - 1}#\0`;
     this.footnoteMap[key] = replaceKey;

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import ParagraphBase from '@/core/ParagraphBase';
+import { escapeHTMLSpecialChar, isValidScheme } from '@/utils/sanitize';
 /**
  * AI 流式输出场景，自动闭合语法，避免语法被截断，涉及语法：
  * - 加粗、斜体
@@ -124,7 +125,10 @@ export default class AiFlowAutoClose extends ParagraphBase {
     }
     return str.replace(/([^[]*?)\[([^\n\]]*?)(\]\([^)]*|\]|)$/, (whole, before, content, url) => {
       const urlFix = url ? url.replace(/^(\]\(|\])/, '') : '';
-      return `${before}<a href="${urlFix}">${content}</a>`;
+      if (!isValidScheme(urlFix)) {
+        return `${before}<span>${escapeHTMLSpecialChar(content)}</span>`;
+      }
+      return `${before}<a href="${escapeHTMLSpecialChar(urlFix)}">${escapeHTMLSpecialChar(content)}</a>`;
     });
   }
 

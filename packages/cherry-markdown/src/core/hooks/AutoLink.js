@@ -308,6 +308,8 @@ export default class AutoLink extends SyntaxBase {
    * @param {string} url src链接
    * @param {string} [text] 展示的链接文本，不传默认使用url
    * @returns 渲染的a标签
+   * @remarks `engine.syntax.autoLink.attrRender` 的返回值会被原样插入 `<a>` 标签，
+   * 宿主必须保证它是可信的 HTML 属性片段并自行转义（该标签随后仍会经过 DOMPurify 净化）。
    */
   renderLink(url, text) {
     let linkText = text?.replace(/CHERRYFLOWSESSIONCURSOR/g, '');

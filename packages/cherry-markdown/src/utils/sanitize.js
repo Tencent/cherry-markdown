@@ -399,6 +399,19 @@ export function escapeHTMLSpecialChar(content, enableQuote) {
   return content.replace(/[<>&"']/g, (char) => escapeMap[char] || char);
 }
 
+/**
+ * 属性上下文的最小转义：只转义会闭合属性或形成标签的字符，保留 `&` 及其字符实体语义。
+ * 仅用于已确认处于属性值内的场景（如代码块语言名）；文本节点请使用 escapeHTMLSpecialChar。
+ * @param {string} content 待转义的字符串
+ * @returns {string}
+ */
+export function escapeHTMLAttribute(content) {
+  if (typeof content !== 'string') {
+    return '';
+  }
+  return content.replace(/["'<>]/g, (char) => escapeMap[char] || char);
+}
+
 export function unescapeHTMLSpecialChar(content) {
   if (typeof content !== 'string') {
     return '';
@@ -445,15 +458,46 @@ export function unescapeHTMLHexEntities(html) {
   });
 }
 
+// HTML 命名实体中可用于拼装 URL 的部分，协议校验前必须一并解码，
+// 否则 `javascript&colon;...` / `java&Tab;script:...` 会绕过协议检查。
+const schemeEntityMap = {
+  colon: ':',
+  Colon: ':',
+  tab: '\t',
+  Tab: '\t',
+  newline: '\n',
+  NewLine: '\n',
+  sol: '/',
+  Sol: '/',
+  amp: '&',
+};
+
+function decodeSchemeEntities(url) {
+  let decoded = url;
+  // 解码两轮：HtmlBlock 会先把 `&colon;` 转义成 `&amp;colon;`，
+  // 单轮解码无法还原这种双重编码后的协议名
+  for (let i = 0; i < 2; i += 1) {
+    decoded = unescapeHTMLHexEntities(unescapeHTMLNumberEntities(decoded)).replace(
+      /&(\w+);?/g,
+      (match, name) => schemeEntityMap[name] ?? match,
+    );
+  }
+  return decoded;
+}
+
 export function isValidScheme(url) {
-  const regex = /^\s*([\w\W]+?)(?=:)/i;
-  const match = unescapeHTMLHexEntities(unescapeHTMLNumberEntities(url)).match(regex);
+  if (typeof url !== 'string') {
+    return true;
+  }
+  // 解码实体并去掉空白/控制字符后再提取协议，避免用实体或控制字符拆分协议名
+  const normalized = decodeSchemeEntities(url).replace(/[\s\x00-\x1f]/g, '');
+  const match = normalized.match(/^([a-z][a-z0-9+.-]*):/i);
   if (!match) {
     return true;
   }
   const SCHEME_BLACKLIST = ['javascript', 'vbscript', 'data'];
-  const scheme = match[1].replace(/[\s\x00-\x1f]/g, ''); // 协议中间可能会出现空白字符或控制字符绕过检查
-  if (SCHEME_BLACKLIST.indexOf(scheme.toLowerCase()) !== -1) {
+  const scheme = match[1].toLowerCase();
+  if (SCHEME_BLACKLIST.indexOf(scheme) !== -1) {
     return false;
   }
   return true;

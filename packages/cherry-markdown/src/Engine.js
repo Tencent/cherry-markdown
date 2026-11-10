@@ -321,7 +321,9 @@ export default class Engine {
     });
     $md = $md.replace(imgDrawioXmlReg, (whole, m1, m2) => {
       const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
-      this.cachedBigData[cacheKey] = m2;
+      // data-xml 会被还原到属性值上下文中，缓存时先按属性上下文转义，
+      // 避免 DOMPurify 之后还原的内容闭合属性并注入事件属性
+      this.cachedBigData[cacheKey] = escapeHTMLSpecialChar(m2);
       return `${m1}${cacheKey}}`;
     });
 
@@ -342,6 +344,10 @@ export default class Engine {
   }
 
   /**
+   * 还原缓存的大文本。
+   * 注意：本方法在 DOMPurify（HtmlBlock.afterMakeHtml）之后执行，与 CodeBlock.restoreCache、
+   * UrlCache.restoreAll、LinkFormatter.afterMakeHtml 同属「净化后写回点」。
+   * 写入这里的内容必须先按上下文转义，否则会绕过净化直接进入最终 HTML。
    * @param {string} md
    */
   $deCacheBigData(md) {
