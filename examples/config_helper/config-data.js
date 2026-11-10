@@ -7,29 +7,29 @@
 // 所有可用的工具栏按钮（'|' 为分割线，可多次使用）
 export const TOOLBAR_BUTTONS = [
   'bold', 'italic', 'strikethrough', 'sub', 'sup',
-  'header', 'list', 'ol', 'ul', 'checklist', 'insert',
+  'header', 'h1', 'h2', 'h3', 'list', 'ol', 'ul', 'checklist', 'insert',
   'graph', 'size', 'color', 'quote', 'quickTable',
   'togglePreview', 'code', 'inlineCode', 'codeTheme', 'export',
   'settings', 'fullScreen', 'undo', 'redo', 'underline',
   'switchModel', 'image', 'audio', 'video', 'br',
   'hr', 'formula', 'link', 'table', 'toc',
   'proTable', 'pdf', 'word', 'ruby', 'theme',
-  'file', 'panel', 'align', 'detail', 'drawIo',
-  'wordCount', 'cursorPosition', 'changeLocale', 'shortcutKey', 'search', '|'
+  'file', 'panel', 'timeline', 'justify', 'align', 'detail', 'drawIo',
+  'publish', 'mobilePreview', 'copy', 'wordCount', 'cursorPosition', 'changeLocale', 'shortcutKey', 'search', '|'
 ];
 
 // 顶部右对齐工具栏按钮（'|' 为分割线，可多次使用）
 export const TOOLBAR_RIGHT_BUTTONS = [
   'bold', 'italic', 'strikethrough', 'sub', 'sup',
-  'header', 'list', 'ol', 'ul', 'checklist',
+  'header', 'h1', 'h2', 'h3', 'list', 'ol', 'ul', 'checklist', 'insert',
   'graph', 'size', 'color', 'quote', 'quickTable',
   'togglePreview', 'code', 'inlineCode', 'codeTheme', 'export',
   'settings', 'fullScreen', 'undo', 'redo', 'underline',
   'switchModel', 'image', 'audio', 'video', 'br',
   'hr', 'formula', 'link', 'table', 'toc',
   'proTable', 'pdf', 'word', 'ruby', 'theme',
-  'file', 'panel', 'align', 'detail', 'drawIo',
-  'mobilePreview', 'copy', 
+  'file', 'panel', 'timeline', 'justify', 'align', 'detail', 'drawIo',
+  'publish', 'mobilePreview', 'copy',
   'wordCount', 'cursorPosition', 'changeLocale', 'shortcutKey', 'search', '|'
 ];
 
@@ -43,18 +43,18 @@ export const BUBBLE_BUTTONS = [
 
 // 浮动工具栏按钮（'|' 为分割线，可多次使用）
 export const FLOAT_BUTTONS = [
-  'header', 'list', 'ol', 'ul', 'checklist',
-  'graph', 'quote', 'quickTable', 'code', 
+  'header', 'h1', 'h2', 'h3', 'list', 'ol', 'ul', 'checklist',
+  'graph', 'quote', 'quickTable', 'code',
   'image', 'audio', 'video', 'br',
   'hr', 'formula', 'link', 'table', 'toc',
   'proTable', 'pdf', 'word', 'theme',
-  'file', 'panel', 'align', 'detail', 'drawIo',
+  'file', 'panel', 'timeline', 'justify', 'align', 'detail', 'drawIo',
   '|'
 ];
 
 // 侧边栏按钮（'|' 为分割线，可多次使用）
 export const SIDEBAR_BUTTONS = [
-  'togglePreview', 'export', 'settings', 'fullScreen', 'switchModel', 'mobilePreview', 'copy', 'theme', 'wordCount', 'changeLocale', 'shortcutKey', 'search', '|'
+  'togglePreview', 'export', 'settings', 'fullScreen', 'switchModel', 'mobilePreview', 'copy', 'theme', 'wordCount', 'cursorPosition', 'changeLocale', 'shortcutKey', 'search', '|'
 ];
 
 // 配置分类定义
@@ -116,7 +116,7 @@ export const CONFIG_CATEGORIES = [
         type: 'string',
         description: '编辑器界面语言',
         inputType: 'select',
-        options: ['zh_CN', 'en_US', 'zh_TW'],
+        options: ['zh_CN', 'en_US', 'ru_RU'],
       },
       {
         key: 'nameSpace',
@@ -186,6 +186,14 @@ export const CONFIG_CATEGORIES = [
         description: '书写风格：normal 普通 | typewriter 打字机（光标始终在屏幕中间）| focus 专注（当前行高亮）',
         inputType: 'select',
         options: ['normal', 'typewriter', 'focus'],
+      },
+      {
+        key: 'editor.disableBuiltinCmStyle',
+        name: '禁用内置编辑器样式',
+        path: 'editor.disableBuiltinCmStyle',
+        type: 'boolean',
+        description: '是否禁用 cherry 对 CodeMirror 编辑器（.cm-editor）的内置样式覆盖；为 true 时，cherry 不会向 .cm-editor 注入字体、颜色、背景等默认样式，便于完全自定义 CodeMirror 外观',
+        inputType: 'toggle',
       },
       {
         key: 'editor.showFullWidthMark',
@@ -351,6 +359,8 @@ export const CONFIG_CATEGORIES = [
         description: '自动识别并转换 URL 为可点击链接',
         inputType: 'toggle',
         subItems: [
+          { key: 'target', name: '打开方式', type: 'select', options: ['', '_blank', '_self', '_parent', '_top'] },
+          { key: 'rel', name: 'rel 属性', type: 'string' },
           { key: 'enableShortLink', name: '启用短链接', type: 'boolean' },
           { key: 'shortLinkLength', name: '短链接长度', type: 'number', min: 1 },
         ],
@@ -376,6 +386,7 @@ export const CONFIG_CATEGORIES = [
         inputType: 'toggle',
         subItems: [
           { key: 'enableChart', name: '启用图表渲染', type: 'boolean' },
+          { key: 'selfClosing', name: '自动闭合', type: 'boolean' },
         ],
       },
       {
@@ -407,7 +418,8 @@ export const CONFIG_CATEGORIES = [
           { key: 'selfClosing', name: '自动闭合', type: 'boolean' },
           { key: 'indentedCodeBlock', name: '缩进代码块', type: 'boolean' },
         ],
-      },      {
+      },
+      {
         key: 'engine.syntax.emoji',
         name: 'Emoji 表情',
         path: 'engine.syntax.emoji',
@@ -427,6 +439,7 @@ export const CONFIG_CATEGORIES = [
         inputType: 'toggle',
         subItems: [
           { key: 'allowWhitespace', name: '允许首尾空格', type: 'boolean' },
+          { key: 'selfClosing', name: '自动闭合', type: 'boolean' },
         ],
       },
       {
@@ -448,8 +461,10 @@ export const CONFIG_CATEGORIES = [
         description: '块级数学公式渲染配置',
         inputType: 'toggle',
         subItems: [
+          { key: 'selfClosing', name: '自动闭合', type: 'boolean' },
           { key: 'engine', name: '渲染引擎', type: 'select', options: ['MathJax', 'katex'] },
           { key: 'plugins', name: '加载插件', type: 'boolean' },
+          { key: 'TeXDelimiter', name: '支持 TeX 界定符', type: 'boolean' },
         ],
       },
       {
@@ -460,7 +475,9 @@ export const CONFIG_CATEGORIES = [
         description: '行内数学公式渲染配置',
         inputType: 'toggle',
         subItems: [
+          { key: 'selfClosing', name: '自动闭合', type: 'boolean' },
           { key: 'engine', name: '渲染引擎', type: 'select', options: ['MathJax', 'katex'] },
+          { key: 'TeXDelimiter', name: '支持 TeX 界定符', type: 'boolean' },
         ],
       },
       {
@@ -484,6 +501,7 @@ export const CONFIG_CATEGORIES = [
         inputType: 'toggle',
         subItems: [
           { key: 'anchorStyle', name: '锚点样式', type: 'select', options: ['default', 'autonumber', 'none'] },
+          { key: 'selfClosing', name: '自动闭合', type: 'boolean' },
           { key: 'strict', name: '严格模式', type: 'boolean' },
         ],
       },
@@ -519,7 +537,48 @@ export const CONFIG_CATEGORIES = [
         inputType: 'toggle',
         subItems: [
           { key: 'target', name: '打开方式', type: 'select', options: ['', '_blank', '_self', '_parent', '_top'] },
+          { key: 'rel', name: 'rel 属性', type: 'string' },
           { key: 'selfClosing', name: '自动闭合', type: 'boolean' },
+        ],
+      },
+      {
+        key: 'engine.syntax.blockquote',
+        name: '引用块',
+        path: 'engine.syntax.blockquote',
+        type: 'object',
+        description: '引用块解析配置，支持 GitHub Flavored Markdown Alerts',
+        inputType: 'toggle',
+        subItems: [
+          { key: 'gfmAlert', name: '启用 GFM Alerts', type: 'boolean' },
+        ],
+      },
+      {
+        key: 'engine.syntax.panel',
+        name: '信息面板',
+        path: 'engine.syntax.panel',
+        type: 'object',
+        description: '对齐、信息面板、多列、选项卡和时间线语法配置',
+        inputType: 'toggle',
+        subItems: [
+          { key: 'enableJustify', name: '启用旧版对齐语法', type: 'boolean' },
+          { key: 'enableAlign', name: '启用对齐语法', type: 'boolean' },
+          { key: 'enablePanel', name: '启用信息面板', type: 'boolean' },
+          { key: 'enableCols', name: '启用多列排版', type: 'boolean' },
+          { key: 'enableTabs', name: '启用选项卡', type: 'boolean' },
+          { key: 'enableTimeline', name: '启用时间线', type: 'boolean' },
+        ],
+      },
+      {
+        key: 'engine.syntax.plantuml',
+        name: 'PlantUML',
+        path: 'engine.syntax.plantuml',
+        type: 'object',
+        description: 'PlantUML 图表渲染配置',
+        inputType: 'toggle',
+        subItems: [
+          { key: 'useHex', name: '使用 HEX 编码', type: 'boolean' },
+          { key: 'type', name: '输出格式', type: 'select', options: ['svg', 'png', 'txt', 'uml'] },
+          { key: 'baseUrl', name: '服务地址', type: 'string' },
         ],
       },
     ],
@@ -624,7 +683,7 @@ export const CONFIG_CATEGORIES = [
         type: 'string',
         description: '代码块的高亮主题',
         inputType: 'select',
-        options: ['default', 'dark', 'light', 'monokai', 'github', 'tomorrow', 'solarized-light', 'solarized-dark'],
+        options: ['default', 'dark', 'light', 'one-light', 'one-dark', 'vs-light', 'vs-dark', 'solarized-light', 'tomorrow-night', 'okaidia', 'twilight', 'coy'],
       },
       {
         key: 'themeSettings.inlineCodeTheme',

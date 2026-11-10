@@ -305,6 +305,32 @@ const defaultConfig = {
         // chartRenderEngine: EChartsTableEngine,
         // externals: ['echarts'],
       },
+      /**
+       * 引用（blockquote）相关配置
+       * - gfmAlert：是否兼容 GitHub Flavored Markdown Alerts 语法
+       *     true  = 开启（默认）
+       *     false = 关闭
+       *     object = 开启并允许自定义类型/标题，例：
+       *       gfmAlert: {
+       *         types: {
+       *           note:      { title: '备注' },      // 覆写默认标题
+       *           tip:       { title: '提示' },
+       *           important: { title: '重要' },
+       *           warning:   { title: '警告' },
+       *           caution:   { title: '注意' },
+       *           // 允许扩展自定义类型（会生成 cherry-alert__success 样式钩子）
+       *           success:   { className: 'success', title: '成功' },
+       *         },
+       *       }
+       * 语法示例：
+       *   > [!NOTE]
+       *   > Useful information that users should know.
+       *   > [!WARNING]
+       *   > Critical content demanding immediate user attention.
+       */
+      blockquote: {
+        gfmAlert: true,
+      },
       space: false,
       inlineCode: {
         /**
@@ -538,6 +564,10 @@ const defaultConfig = {
       placeholder: '',
     },
     writingStyle: 'normal', // 书写风格，normal 普通 | typewriter 打字机 | focus 专注，默认normal
+    // 是否禁用 cherry 内置对 CodeMirror 编辑器（.cm-editor）的样式覆盖
+    // 为 true 时，cherry 不会向编辑器内部的 .cm-editor 注入字体、颜色、背景等默认样式，
+    // 方便业务方完全自定义 CodeMirror 外观
+    disableBuiltinCmStyle: false,
     keepDocumentScrollAfterInit: false, // 在初始化后是否保持网页的滚动，true：保持滚动；false：网页自动滚动到cherry初始化的位置
     showFullWidthMark: true, // 是否高亮全角符号 ·|￥|、|：|“|”|【|】|（|）|《|》
     showSuggestList: true, // 是否显示联想框

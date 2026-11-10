@@ -4,14 +4,14 @@
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-  function _typeof$378(o) {
+  function _typeof$380(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$378 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$380 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$378(o);
+    }, _typeof$380(o);
   }
   var __create = Object.create;
   var __defProp$2 = Object.defineProperty;
@@ -48,7 +48,7 @@
     return target;
   };
   var __copyProps$1 = function __copyProps(to, from, except, desc) {
-    if (from && _typeof$378(from) === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
+    if (from && _typeof$380(from) === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
       key = keys[i];
       if (!__hasOwnProp.call(to, key) && key !== except) __defProp$2(to, key, {
         get: function (k) {
@@ -103,31 +103,31 @@
     if (typeof require !== "undefined") return require.apply(this, arguments);
     throw Error("Calling `require` for \"" + x + "\" in an environment that doesn't expose the `require` function. See https://rolldown.rs/in-depth/bundling-cjs#require-external-modules for more details.");
   });
-  function _typeof$377(o) {
+  function _typeof$379(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$377 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$379 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$377(o);
+    }, _typeof$379(o);
   }
   function isPlainObject$1(value) {
-    if (value === null || _typeof$377(value) !== "object") return false;
+    if (value === null || _typeof$379(value) !== "object") return false;
     var proto = Object.getPrototypeOf(value);
     return proto === Object.prototype || proto === null;
   }
-  function _typeof$376(o) {
+  function _typeof$378(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$376 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$378 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$376(o);
+    }, _typeof$378(o);
   }
   function mergeWithDeep(target, source, customizer) {
-    if (source === null || source === void 0 || _typeof$376(source) !== "object") return;
+    if (source === null || source === void 0 || _typeof$378(source) !== "object") return;
     var keys = Object.keys(source);
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
@@ -150,22 +150,22 @@
     if (typeof args[args.length - 1] === "function") customizer = args.pop();
     for (var i = 0; i < args.length; i++) {
       var source = args[i];
-      if (source !== null && source !== void 0 && _typeof$376(source) === "object") mergeWithDeep(object, source, customizer);
+      if (source !== null && source !== void 0 && _typeof$378(source) === "object") mergeWithDeep(object, source, customizer);
     }
     return object;
   }
-  function _typeof$375(o) {
+  function _typeof$377(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$375 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$377 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$375(o);
+    }, _typeof$377(o);
   }
   function cloneDeep$1(value) {
     var stack = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : new WeakMap();
-    if (value === null || _typeof$375(value) !== "object") return value;
+    if (value === null || _typeof$377(value) !== "object") return value;
     if (typeof value === "function") return value;
     if (stack.has(value)) return stack.get(value);
     if (value instanceof Date) return new Date(value.getTime());
@@ -265,7 +265,7 @@
   function _createForOfIteratorHelper$174(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$249(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$248(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -314,7 +314,7 @@
     return o = _getPrototypeOf$160(o), _possibleConstructorReturn$160(t, _isNativeReflectConstruct$163() ? Reflect.construct(o, e || [], _getPrototypeOf$160(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$160(t, e) {
-    if (e && ("object" == _typeof$374(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$376(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$160(t);
   }
@@ -371,34 +371,34 @@
       return t.__proto__ = e, t;
     }, _setPrototypeOf$165(t, e);
   }
-  function _typeof$374(o) {
+  function _typeof$376(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$374 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$376 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$374(o);
+    }, _typeof$376(o);
   }
-  function _slicedToArray$95(r, e) {
-    return _arrayWithHoles$97(r) || _iterableToArrayLimit$95(r, e) || _unsupportedIterableToArray$249(r, e) || _nonIterableRest$97();
+  function _slicedToArray$94(r, e) {
+    return _arrayWithHoles$96(r) || _iterableToArrayLimit$94(r, e) || _unsupportedIterableToArray$248(r, e) || _nonIterableRest$96();
   }
-  function _nonIterableRest$97() {
+  function _nonIterableRest$96() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$249(r, a) {
+  function _unsupportedIterableToArray$248(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$249(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$248(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$249(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$248(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$249(r, a) {
+  function _arrayLikeToArray$248(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit$95(r, l) {
+  function _iterableToArrayLimit$94(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -425,7 +425,7 @@
       return a;
     }
   }
-  function _arrayWithHoles$97(r) {
+  function _arrayWithHoles$96(r) {
     if (Array.isArray(r)) return r;
   }
   function _classCallCheck$286(a, n) {
@@ -444,14 +444,14 @@
   }
   function _toPropertyKey$329(t) {
     var i = _toPrimitive$329(t, "string");
-    return "symbol" == _typeof$374(i) ? i : i + "";
+    return "symbol" == _typeof$376(i) ? i : i + "";
   }
   function _toPrimitive$329(t, r) {
-    if ("object" != _typeof$374(t) || !t) return t;
+    if ("object" != _typeof$376(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$374(i)) return i;
+      if ("object" != _typeof$376(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -1116,7 +1116,7 @@
       }, {
         key: "replace",
         value: function replace(from, to, text) {
-          var _clip2 = _slicedToArray$95(clip(this, from, to), 2);
+          var _clip2 = _slicedToArray$94(clip(this, from, to), 2);
           from = _clip2[0];
           to = _clip2[1];
           var parts = [];
@@ -1134,7 +1134,7 @@
         key: "slice",
         value: function slice(from) {
           var to = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : this.length;
-          var _clip4 = _slicedToArray$95(clip(this, from, to), 2);
+          var _clip4 = _slicedToArray$94(clip(this, from, to), 2);
           from = _clip4[0];
           to = _clip4[1];
           var parts = [];
@@ -1252,7 +1252,7 @@
         key: "replace",
         value: function replace(from, to, text) {
           if (!(text instanceof TextLeaf)) return _superPropGet$18(TextLeaf, "replace", this, 3)([from, to, text]);
-          var _clip6 = _slicedToArray$95(clip(this, from, to), 2);
+          var _clip6 = _slicedToArray$94(clip(this, from, to), 2);
           from = _clip6[0];
           to = _clip6[1];
           var lines = appendText(this.text, appendText(text.text, sliceText(this.text, 0, from)), to);
@@ -1265,7 +1265,7 @@
         value: function sliceString(from) {
           var to = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : this.length;
           var lineSep = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : "\n";
-          var _clip8 = _slicedToArray$95(clip(this, from, to), 2);
+          var _clip8 = _slicedToArray$94(clip(this, from, to), 2);
           from = _clip8[0];
           to = _clip8[1];
           var result = "";
@@ -1378,7 +1378,7 @@
       }, {
         key: "replace",
         value: function replace(from, to, text) {
-          var _clip0 = _slicedToArray$95(clip(this, from, to), 2);
+          var _clip0 = _slicedToArray$94(clip(this, from, to), 2);
           from = _clip0[0];
           to = _clip0[1];
           if (text.lines < this.lines) for (var i = 0, pos = 0; i < this.children.length; i++) {
@@ -1403,7 +1403,7 @@
         value: function sliceString(from) {
           var to = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : this.length;
           var lineSep = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : "\n";
-          var _clip10 = _slicedToArray$95(clip(this, from, to), 2);
+          var _clip10 = _slicedToArray$94(clip(this, from, to), 2);
           from = _clip10[0];
           to = _clip10[1];
           var result = "";
@@ -1434,7 +1434,7 @@
         value: function scanIdentical(other, dir) {
           if (!(other instanceof TextNode)) return 0;
           var length = 0;
-          var _ref2 = _slicedToArray$95(dir > 0 ? [0, 0, this.children.length, other.children.length] : [this.children.length - 1, other.children.length - 1, -1, -1], 4),
+          var _ref2 = _slicedToArray$94(dir > 0 ? [0, 0, this.children.length, other.children.length] : [this.children.length - 1, other.children.length - 1, -1, -1], 4),
             iA = _ref2[0],
             iB = _ref2[1],
             eA = _ref2[2],
@@ -3895,37 +3895,37 @@
     }();
   });
   function _toConsumableArray$88(r) {
-    return _arrayWithoutHoles$88(r) || _iterableToArray$89(r) || _unsupportedIterableToArray$248(r) || _nonIterableSpread$88();
+    return _arrayWithoutHoles$88(r) || _iterableToArray$89(r) || _unsupportedIterableToArray$247(r) || _nonIterableSpread$88();
   }
   function _nonIterableSpread$88() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$248(r, a) {
+  function _unsupportedIterableToArray$247(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$248(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$247(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$248(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$247(r, a) : void 0;
     }
   }
   function _iterableToArray$89(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles$88(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$248(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$247(r);
   }
-  function _arrayLikeToArray$248(r, a) {
+  function _arrayLikeToArray$247(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _typeof$373(o) {
+  function _typeof$375(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$373 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$375 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$373(o);
+    }, _typeof$375(o);
   }
   function _classCallCheck$285(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -3943,14 +3943,14 @@
   }
   function _toPropertyKey$328(t) {
     var i = _toPrimitive$328(t, "string");
-    return "symbol" == _typeof$373(i) ? i : i + "";
+    return "symbol" == _typeof$375(i) ? i : i + "";
   }
   function _toPrimitive$328(t, r) {
-    if ("object" != _typeof$373(t) || !t) return t;
+    if ("object" != _typeof$375(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$373(i)) return i;
+      if ("object" != _typeof$375(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -3982,7 +3982,7 @@
               });
             }).reduce(function (a, b) {
               return a.concat(b);
-            }), value, target);else if (value && _typeof$373(value) == "object") {
+            }), value, target);else if (value && _typeof$375(value) == "object") {
               if (!isAt) throw new RangeError("The value of a property (" + prop + ") should be a primitive value.");
               render(splitSelector(prop), value, local, keyframes);
             } else if (value != null) local.push(prop.replace(/_.*/, "").replace(/[A-Z]/g, function (l) {
@@ -4176,21 +4176,21 @@
     }
     for (var code in base) if (!shift.hasOwnProperty(code)) shift[code] = base[code];
   });
-  function _typeof$372(o) {
+  function _typeof$374(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$372 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$374 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$372(o);
+    }, _typeof$374(o);
   }
   function crelt() {
     var elt = arguments[0];
     if (typeof elt == "string") elt = document.createElement(elt);
     var i = 1,
       next = arguments[1];
-    if (next && _typeof$372(next) == "object" && next.nodeType == null && !Array.isArray(next)) {
+    if (next && _typeof$374(next) == "object" && next.nodeType == null && !Array.isArray(next)) {
       for (var name in next) if (Object.prototype.hasOwnProperty.call(next, name)) {
         var value = next[name];
         if (typeof value == "string") elt.setAttribute(name, value);else if (value != null) elt[name] = value;
@@ -4204,7 +4204,7 @@
     if (typeof child == "string") elt.appendChild(document.createTextNode(child));else if (child == null) {} else if (child.nodeType != null) elt.appendChild(child);else if (Array.isArray(child)) for (var i = 0; i < child.length; i++) add$3(elt, child[i]);else throw new RangeError("Unsupported child node: " + child);
   }
   var init_crelt = __esmMin$1(function () {});
-  function ownKeys$73(e, r) {
+  function ownKeys$74(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -4214,12 +4214,12 @@
     }
     return t;
   }
-  function _objectSpread$73(e) {
+  function _objectSpread$74(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$73(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$74(Object(t), !0).forEach(function (r) {
         _defineProperty$150(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$73(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$74(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -4234,7 +4234,7 @@
     }) : e[r] = t, e;
   }
   function _toConsumableArray$87(r) {
-    return _arrayWithoutHoles$87(r) || _iterableToArray$88(r) || _unsupportedIterableToArray$247(r) || _nonIterableSpread$87();
+    return _arrayWithoutHoles$87(r) || _iterableToArray$88(r) || _unsupportedIterableToArray$246(r) || _nonIterableSpread$87();
   }
   function _nonIterableSpread$87() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -4243,12 +4243,12 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles$87(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$247(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$246(r);
   }
   function _createForOfIteratorHelper$173(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$247(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$246(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -4293,14 +4293,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$247(r, a) {
+  function _unsupportedIterableToArray$246(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$247(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$246(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$247(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$246(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$247(r, a) {
+  function _arrayLikeToArray$246(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -4328,7 +4328,7 @@
     return o = _getPrototypeOf$159(o), _possibleConstructorReturn$159(t, _isNativeReflectConstruct$162() ? Reflect.construct(o, e || [], _getPrototypeOf$159(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$159(t, e) {
-    if (e && ("object" == _typeof$371(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$373(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$159(t);
   }
@@ -4366,14 +4366,14 @@
       return t.__proto__ = e, t;
     }, _setPrototypeOf$164(t, e);
   }
-  function _typeof$371(o) {
+  function _typeof$373(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$371 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$373 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$371(o);
+    }, _typeof$373(o);
   }
   function _classCallCheck$284(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -4391,14 +4391,14 @@
   }
   function _toPropertyKey$327(t) {
     var i = _toPrimitive$327(t, "string");
-    return "symbol" == _typeof$371(i) ? i : i + "";
+    return "symbol" == _typeof$373(i) ? i : i + "";
   }
   function _toPrimitive$327(t, r) {
-    if ("object" != _typeof$371(t) || !t) return t;
+    if ("object" != _typeof$373(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$371(i)) return i;
+      if ("object" != _typeof$373(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -6876,7 +6876,7 @@
     };
   }
   function gutter(config) {
-    return [gutters(), activeGutters.of(_objectSpread$73(_objectSpread$73({}, defaults$12), config))];
+    return [gutters(), activeGutters.of(_objectSpread$74(_objectSpread$74({}, defaults$12), config))];
   }
   function gutters(config) {
     var result = [gutterView];
@@ -16446,20 +16446,20 @@
       })
     }));
   });
-  function _typeof$370(o) {
+  function _typeof$372(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$370 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$372 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$370(o);
+    }, _typeof$372(o);
   }
   function _callSuper$158(t, o, e) {
     return o = _getPrototypeOf$158(o), _possibleConstructorReturn$158(t, _isNativeReflectConstruct$161() ? Reflect.construct(o, e || [], _getPrototypeOf$158(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$158(t, e) {
-    if (e && ("object" == _typeof$370(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$372(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$158(t);
   }
@@ -16497,13 +16497,13 @@
       return t.__proto__ = e, t;
     }, _setPrototypeOf$163(t, e);
   }
-  function _slicedToArray$93(r, e) {
-    return _arrayWithHoles$95(r) || _iterableToArrayLimit$93(r, e) || _unsupportedIterableToArray$246(r, e) || _nonIterableRest$95();
+  function _slicedToArray$92(r, e) {
+    return _arrayWithHoles$94(r) || _iterableToArrayLimit$92(r, e) || _unsupportedIterableToArray$245(r, e) || _nonIterableRest$94();
   }
-  function _nonIterableRest$95() {
+  function _nonIterableRest$94() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit$93(r, l) {
+  function _iterableToArrayLimit$92(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -16530,13 +16530,13 @@
       return a;
     }
   }
-  function _arrayWithHoles$95(r) {
+  function _arrayWithHoles$94(r) {
     if (Array.isArray(r)) return r;
   }
   function _createForOfIteratorHelper$172(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$246(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$245(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -16581,14 +16581,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$246(r, a) {
+  function _unsupportedIterableToArray$245(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$246(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$245(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$246(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$245(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$246(r, a) {
+  function _arrayLikeToArray$245(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -16606,14 +16606,14 @@
   }
   function _toPropertyKey$326(t) {
     var i = _toPrimitive$326(t, "string");
-    return "symbol" == _typeof$370(i) ? i : i + "";
+    return "symbol" == _typeof$372(i) ? i : i + "";
   }
   function _toPrimitive$326(t, r) {
-    if ("object" != _typeof$370(t) || !t) return t;
+    if ("object" != _typeof$372(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$370(i)) return i;
+      if ("object" != _typeof$372(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -17382,7 +17382,7 @@
             _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
-              var _step5$value = _slicedToArray$93(_step5.value, 2),
+              var _step5$value = _slicedToArray$92(_step5.value, 2),
                 prop = _step5$value[0],
                 value = _step5$value[1];
               this.props[typeof prop == "number" ? prop : prop.id] = value;
@@ -18654,19 +18654,19 @@
       }]);
     }();
   });
-  function _typeof$369(o) {
+  function _typeof$371(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$369 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$371 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$369(o);
+    }, _typeof$371(o);
   }
   function _createForOfIteratorHelper$171(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$245(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$244(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -18711,14 +18711,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$245(r, a) {
+  function _unsupportedIterableToArray$244(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$245(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$244(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$245(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$244(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$245(r, a) {
+  function _arrayLikeToArray$244(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -18739,14 +18739,14 @@
   }
   function _toPropertyKey$325(t) {
     var i = _toPrimitive$325(t, "string");
-    return "symbol" == _typeof$369(i) ? i : i + "";
+    return "symbol" == _typeof$371(i) ? i : i + "";
   }
   function _toPrimitive$325(t, r) {
-    if ("object" != _typeof$369(t) || !t) return t;
+    if ("object" != _typeof$371(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$369(i)) return i;
+      if ("object" != _typeof$371(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -19359,13 +19359,13 @@
       class: "tok-punctuation"
     }]);
   });
-  function _slicedToArray$92(r, e) {
-    return _arrayWithHoles$94(r) || _iterableToArrayLimit$92(r, e) || _unsupportedIterableToArray$244(r, e) || _nonIterableRest$94();
+  function _slicedToArray$91(r, e) {
+    return _arrayWithHoles$93(r) || _iterableToArrayLimit$91(r, e) || _unsupportedIterableToArray$243(r, e) || _nonIterableRest$93();
   }
-  function _nonIterableRest$94() {
+  function _nonIterableRest$93() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit$92(r, l) {
+  function _iterableToArrayLimit$91(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -19392,10 +19392,10 @@
       return a;
     }
   }
-  function _arrayWithHoles$94(r) {
+  function _arrayWithHoles$93(r) {
     if (Array.isArray(r)) return r;
   }
-  function ownKeys$72(e, r) {
+  function ownKeys$73(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -19405,12 +19405,12 @@
     }
     return t;
   }
-  function _objectSpread$72(e) {
+  function _objectSpread$73(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$72(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$73(Object(t), !0).forEach(function (r) {
         _defineProperty$149(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$72(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$73(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -19428,7 +19428,7 @@
     return o = _getPrototypeOf$157(o), _possibleConstructorReturn$157(t, _isNativeReflectConstruct$160() ? Reflect.construct(o, e || [], _getPrototypeOf$157(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$157(t, e) {
-    if (e && ("object" == _typeof$368(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$370(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$157(t);
   }
@@ -19466,19 +19466,19 @@
       return t.__proto__ = e, t;
     }, _setPrototypeOf$162(t, e);
   }
-  function _typeof$368(o) {
+  function _typeof$370(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$368 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$370 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$368(o);
+    }, _typeof$370(o);
   }
   function _createForOfIteratorHelper$170(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$244(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$243(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -19523,14 +19523,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$244(r, a) {
+  function _unsupportedIterableToArray$243(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$244(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$243(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$244(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$243(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$244(r, a) {
+  function _arrayLikeToArray$243(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -19551,14 +19551,14 @@
   }
   function _toPropertyKey$324(t) {
     var i = _toPrimitive$324(t, "string");
-    return "symbol" == _typeof$368(i) ? i : i + "";
+    return "symbol" == _typeof$370(i) ? i : i + "";
   }
   function _toPrimitive$324(t, r) {
-    if ("object" != _typeof$368(t) || !t) return t;
+    if ("object" != _typeof$370(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$368(i)) return i;
+      if ("object" != _typeof$370(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -19920,7 +19920,7 @@
   }
   function foldGutter() {
     var config = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
-    var fullConfig = _objectSpread$72(_objectSpread$72({}, foldGutterDefaults), config);
+    var fullConfig = _objectSpread$73(_objectSpread$73({}, foldGutterDefaults), config);
     var canFold = new FoldMarker(fullConfig, true),
       canUnfold = new FoldMarker(fullConfig, false);
     var _markers = ViewPlugin.fromClass(function () {
@@ -19965,7 +19965,7 @@
       initialSpacer: function initialSpacer() {
         return new FoldMarker(fullConfig, false);
       },
-      domEventHandlers: _objectSpread$72(_objectSpread$72({}, domEventHandlers), {}, {
+      domEventHandlers: _objectSpread$73(_objectSpread$73({}, domEventHandlers), {}, {
         click: function click(view, line, event) {
           if (domEventHandlers.click && domEventHandlers.click(view, line, event)) return true;
           var folded = findFold(view.state, line.from, line.to);
@@ -20159,7 +20159,7 @@
     };
   }
   function defaultCopyState(state) {
-    if (_typeof$368(state) != "object") return state;
+    if (_typeof$370(state) != "object") return state;
     var newState = {};
     for (var prop in state) {
       var val = state[prop];
@@ -22024,7 +22024,7 @@
     byTag = Object.create(null);
     defaultTable = Object.create(null);
     for (_i$2 = 0, _arr = [["variable", "variableName"], ["variable-2", "variableName.special"], ["string-2", "string.special"], ["def", "variableName.definition"], ["tag", "tagName"], ["attribute", "attributeName"], ["type", "typeName"], ["builtin", "variableName.standard"], ["qualifier", "modifier"], ["error", "invalid"], ["header", "heading"], ["property", "propertyName"]]; _i$2 < _arr.length; _i$2++) {
-      _arr$_i = _slicedToArray$92(_arr[_i$2], 2), legacyName = _arr$_i[0], name$2 = _arr$_i[1];
+      _arr$_i = _slicedToArray$91(_arr[_i$2], 2), legacyName = _arr$_i[0], name$2 = _arr$_i[1];
       defaultTable[legacyName] = createTokenType(noTokens, name$2);
     }
     TokenTable = function () {
@@ -22113,7 +22113,7 @@
     return o = _getPrototypeOf$156(o), _possibleConstructorReturn$156(t, _isNativeReflectConstruct$159() ? Reflect.construct(o, e || [], _getPrototypeOf$156(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$156(t, e) {
-    if (e && ("object" == _typeof$367(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$369(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$156(t);
   }
@@ -22152,7 +22152,7 @@
     }, _setPrototypeOf$161(t, e);
   }
   function _toConsumableArray$86(r) {
-    return _arrayWithoutHoles$86(r) || _iterableToArray$87(r) || _unsupportedIterableToArray$243(r) || _nonIterableSpread$86();
+    return _arrayWithoutHoles$86(r) || _iterableToArray$87(r) || _unsupportedIterableToArray$242(r) || _nonIterableSpread$86();
   }
   function _nonIterableSpread$86() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -22161,9 +22161,9 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles$86(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$243(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$242(r);
   }
-  function ownKeys$71(e, r) {
+  function ownKeys$72(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -22173,12 +22173,12 @@
     }
     return t;
   }
-  function _objectSpread$71(e) {
+  function _objectSpread$72(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$71(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$72(Object(t), !0).forEach(function (r) {
         _defineProperty$148(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$71(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$72(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -22192,13 +22192,13 @@
       writable: !0
     }) : e[r] = t, e;
   }
-  function _slicedToArray$91(r, e) {
-    return _arrayWithHoles$93(r) || _iterableToArrayLimit$91(r, e) || _unsupportedIterableToArray$243(r, e) || _nonIterableRest$93();
+  function _slicedToArray$90(r, e) {
+    return _arrayWithHoles$92(r) || _iterableToArrayLimit$90(r, e) || _unsupportedIterableToArray$242(r, e) || _nonIterableRest$92();
   }
-  function _nonIterableRest$93() {
+  function _nonIterableRest$92() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit$91(r, l) {
+  function _iterableToArrayLimit$90(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -22225,13 +22225,13 @@
       return a;
     }
   }
-  function _arrayWithHoles$93(r) {
+  function _arrayWithHoles$92(r) {
     if (Array.isArray(r)) return r;
   }
   function _createForOfIteratorHelper$169(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$243(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$242(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -22276,26 +22276,26 @@
       }
     };
   }
-  function _unsupportedIterableToArray$243(r, a) {
+  function _unsupportedIterableToArray$242(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$243(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$242(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$243(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$242(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$243(r, a) {
+  function _arrayLikeToArray$242(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _typeof$367(o) {
+  function _typeof$369(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$367 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$369 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$367(o);
+    }, _typeof$369(o);
   }
   function _classCallCheck$280(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -22313,14 +22313,14 @@
   }
   function _toPropertyKey$323(t) {
     var i = _toPrimitive$323(t, "string");
-    return "symbol" == _typeof$367(i) ? i : i + "";
+    return "symbol" == _typeof$369(i) ? i : i + "";
   }
   function _toPrimitive$323(t, r) {
-    if ("object" != _typeof$367(t) || !t) return t;
+    if ("object" != _typeof$369(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$367(i)) return i;
+      if ("object" != _typeof$369(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -22406,7 +22406,7 @@
         label: o
       } : o;
     });
-    var _ref2 = _slicedToArray$91(options.every(function (o) {
+    var _ref2 = _slicedToArray$90(options.every(function (o) {
         return /^\w+$/.test(o.label);
       }) ? [/\w*$/, /\w+$/] : prefixMatch(options), 2),
       validFor = _ref2[0],
@@ -22452,7 +22452,7 @@
     var main = state.selection.main,
       fromOff = from - main.from,
       toOff = to - main.from;
-    return _objectSpread$71(_objectSpread$71({}, state.changeByRange(function (range) {
+    return _objectSpread$72(_objectSpread$72({}, state.changeByRange(function (range) {
       if (range != main && from != to && state.sliceDoc(range.from + fromOff, range.from + toOff) != state.sliceDoc(from, to)) return {
         range: range
       };
@@ -23135,7 +23135,7 @@
                   var matched = !_option2.displayLabel ? match.matched : getMatch ? getMatch(_option2, match.matched) : [];
                   var _score2 = match.score + (_option2.boost || 0);
                   addOption(new Option$3(_option2, a.source, matched, _score2));
-                  if (_typeof$367(_option2.section) == "object" && _option2.section.rank === "dynamic") {
+                  if (_typeof$369(_option2.section) == "object" && _option2.section.rank === "dynamic") {
                     var name = _option2.section.name;
                     if (!dynamicSectionScore) dynamicSectionScore = Object.create(null);
                     dynamicSectionScore[name] = Math.max(_score2, dynamicSectionScore[name] || -1e9);
@@ -23226,7 +23226,7 @@
     }, {
       key: "map",
       value: function map(changes) {
-        return new CompletionDialog(this.options, this.attrs, _objectSpread$71(_objectSpread$71({}, this.tooltip), {}, {
+        return new CompletionDialog(this.options, this.attrs, _objectSpread$72(_objectSpread$72({}, this.tooltip), {}, {
           pos: changes.mapPos(this.tooltip.pos)
         }), this.timestamp, this.selected, this.disabled);
       }
@@ -23517,7 +23517,7 @@
       return a.source == option.source;
     });
     if (!(result instanceof ActiveResult)) return false;
-    if (typeof apply == "string") view.dispatch(_objectSpread$71(_objectSpread$71({}, insertCompletionText(view.state, apply, result.from, result.to)), {}, {
+    if (typeof apply == "string") view.dispatch(_objectSpread$72(_objectSpread$72({}, insertCompletionText(view.state, apply, result.from, result.to)), {}, {
       annotations: pickedCompletion.of(option.completion)
     }));else apply(view, option.completion, result.from, result.to);
     return true;
@@ -23816,7 +23816,7 @@
       }
     }
   });
-  var windows = (typeof navigator === "undefined" ? "undefined" : _typeof$367(navigator)) == "object" && /Win/.test(navigator.platform);
+  var windows = (typeof navigator === "undefined" ? "undefined" : _typeof$369(navigator)) == "object" && /Win/.test(navigator.platform);
   Prec.highest(EditorView.domEventHandlers({
     keydown: function keydown(event, view) {
       var field = view.state.field(completionState, false);
@@ -24318,7 +24318,7 @@
     return state.facet(snippetKeymap);
   }));
   function snippetCompletion(template, completion) {
-    return _objectSpread$71(_objectSpread$71({}, completion), {}, {
+    return _objectSpread$72(_objectSpread$72({}, completion), {}, {
       apply: snippet$1(template)
     });
   }
@@ -24407,7 +24407,7 @@
   function config$4(state, pos) {
     return state.languageDataAt("closeBrackets", pos)[0] || defaults$11;
   }
-  var android$1 = (typeof navigator === "undefined" ? "undefined" : _typeof$367(navigator)) == "object" && /Android\b/.test(navigator.userAgent);
+  var android$1 = (typeof navigator === "undefined" ? "undefined" : _typeof$369(navigator)) == "object" && /Android\b/.test(navigator.userAgent);
   var inputHandler = EditorView.inputHandler.of(function (view, from, to, insert) {
     if ((android$1 ? view.composing : view.compositionStarted) || view.state.readOnly) return false;
     var sel = view.state.selection.main;
@@ -24688,7 +24688,7 @@
     return o = _getPrototypeOf$155(o), _possibleConstructorReturn$155(t, _isNativeReflectConstruct$158() ? Reflect.construct(o, e || [], _getPrototypeOf$155(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$155(t, e) {
-    if (e && ("object" == _typeof$366(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$368(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$155(t);
   }
@@ -24727,7 +24727,7 @@
     }, _setPrototypeOf$160(t, e);
   }
   function _toConsumableArray$85(r) {
-    return _arrayWithoutHoles$85(r) || _iterableToArray$86(r) || _unsupportedIterableToArray$242(r) || _nonIterableSpread$85();
+    return _arrayWithoutHoles$85(r) || _iterableToArray$86(r) || _unsupportedIterableToArray$241(r) || _nonIterableSpread$85();
   }
   function _nonIterableSpread$85() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -24736,12 +24736,12 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles$85(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$242(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$241(r);
   }
   function _createForOfIteratorHelper$168(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$242(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$241(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -24786,14 +24786,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$242(r, a) {
+  function _unsupportedIterableToArray$241(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$242(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$241(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$242(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$241(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$242(r, a) {
+  function _arrayLikeToArray$241(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -24806,14 +24806,14 @@
       writable: !0
     }) : e[r] = t, e;
   }
-  function _typeof$366(o) {
+  function _typeof$368(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$366 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$368 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$366(o);
+    }, _typeof$368(o);
   }
   function _classCallCheck$279(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -24831,14 +24831,14 @@
   }
   function _toPropertyKey$322(t) {
     var i = _toPrimitive$322(t, "string");
-    return "symbol" == _typeof$366(i) ? i : i + "";
+    return "symbol" == _typeof$368(i) ? i : i + "";
   }
   function _toPrimitive$322(t, r) {
-    if ("object" != _typeof$366(t) || !t) return t;
+    if ("object" != _typeof$368(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$366(i)) return i;
+      if ("object" != _typeof$368(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -26952,7 +26952,7 @@
   };
   init_dist$6();
   function _toConsumableArray$84(r) {
-    return _arrayWithoutHoles$84(r) || _iterableToArray$85(r) || _unsupportedIterableToArray$241(r) || _nonIterableSpread$84();
+    return _arrayWithoutHoles$84(r) || _iterableToArray$85(r) || _unsupportedIterableToArray$240(r) || _nonIterableSpread$84();
   }
   function _nonIterableSpread$84() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -26961,13 +26961,13 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles$84(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$241(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$240(r);
   }
   function _callSuper$154(t, o, e) {
     return o = _getPrototypeOf$154(o), _possibleConstructorReturn$154(t, _isNativeReflectConstruct$157() ? Reflect.construct(o, e || [], _getPrototypeOf$154(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$154(t, e) {
-    if (e && ("object" == _typeof$365(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$367(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$154(t);
   }
@@ -27005,13 +27005,13 @@
       return t.__proto__ = e, t;
     }, _setPrototypeOf$159(t, e);
   }
-  function _slicedToArray$90(r, e) {
-    return _arrayWithHoles$92(r) || _iterableToArrayLimit$90(r, e) || _unsupportedIterableToArray$241(r, e) || _nonIterableRest$92();
+  function _slicedToArray$89(r, e) {
+    return _arrayWithHoles$91(r) || _iterableToArrayLimit$89(r, e) || _unsupportedIterableToArray$240(r, e) || _nonIterableRest$91();
   }
-  function _nonIterableRest$92() {
+  function _nonIterableRest$91() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit$90(r, l) {
+  function _iterableToArrayLimit$89(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -27038,13 +27038,13 @@
       return a;
     }
   }
-  function _arrayWithHoles$92(r) {
+  function _arrayWithHoles$91(r) {
     if (Array.isArray(r)) return r;
   }
   function _createForOfIteratorHelper$167(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$241(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$240(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -27089,26 +27089,26 @@
       }
     };
   }
-  function _unsupportedIterableToArray$241(r, a) {
+  function _unsupportedIterableToArray$240(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$241(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$240(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$241(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$240(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$241(r, a) {
+  function _arrayLikeToArray$240(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _typeof$365(o) {
+  function _typeof$367(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$365 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$367 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$365(o);
+    }, _typeof$367(o);
   }
   function _classCallCheck$278(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -27126,14 +27126,14 @@
   }
   function _toPropertyKey$321(t) {
     var i = _toPrimitive$321(t, "string");
-    return "symbol" == _typeof$365(i) ? i : i + "";
+    return "symbol" == _typeof$367(i) ? i : i + "";
   }
   function _toPrimitive$321(t, r) {
-    if ("object" != _typeof$365(t) || !t) return t;
+    if ("object" != _typeof$367(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$365(i)) return i;
+      if ("object" != _typeof$367(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -28155,7 +28155,7 @@
         var newStacks = this.stacks = [];
         var stopped, stoppedTokens;
         if (this.bigReductionCount > 300 && stacks.length == 1) {
-          var s = _slicedToArray$90(stacks, 1)[0];
+          var s = _slicedToArray$89(stacks, 1)[0];
           while (s.forceReduce() && s.stack.length && s.stack[s.stack.length - 2] >= this.lastBigReductionStart);
           this.bigReductionCount = this.lastBigReductionSize = 0;
         }
@@ -28709,7 +28709,7 @@
   function _createForOfIteratorHelper$166(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$240(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$239(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n2 = 0,
           F = function F() {};
@@ -28754,14 +28754,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$240(r, a) {
+  function _unsupportedIterableToArray$239(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$240(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$239(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$240(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$239(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$240(r, a) {
+  function _arrayLikeToArray$239(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -29419,7 +29419,7 @@
   function _createForOfIteratorHelper$165(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$239(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$238(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -29464,30 +29464,30 @@
       }
     };
   }
-  function _unsupportedIterableToArray$239(r, a) {
+  function _unsupportedIterableToArray$238(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$239(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$238(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$239(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$238(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$239(r, a) {
+  function _arrayLikeToArray$238(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _typeof$364(o) {
+  function _typeof$366(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$364 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$366 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$364(o);
+    }, _typeof$366(o);
   }
   var _properties = null;
   function properties() {
-    if (!_properties && (typeof document === "undefined" ? "undefined" : _typeof$364(document)) == "object" && document.body) {
+    if (!_properties && (typeof document === "undefined" ? "undefined" : _typeof$366(document)) == "object" && document.body) {
       var style = document.body.style,
         names = [],
         seen = new Set();
@@ -29998,19 +29998,19 @@
   init_dist$8();
   init_dist$7();
   init_dist$6();
-  function _typeof$363(o) {
+  function _typeof$365(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$363 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$365 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$363(o);
+    }, _typeof$365(o);
   }
   function _createForOfIteratorHelper$164(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$238(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$237(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -30055,14 +30055,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$238(r, a) {
+  function _unsupportedIterableToArray$237(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$238(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$237(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$238(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$237(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$238(r, a) {
+  function _arrayLikeToArray$237(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -30344,7 +30344,7 @@
     for (var ch = tree === null || tree === void 0 ? void 0 : tree.firstChild; ch; ch = ch.nextSibling) if (ch.name == "JSXIdentifier" || ch.name == "JSXBuiltin" || ch.name == "JSXNamespacedName" || ch.name == "JSXMemberExpression") return doc.sliceString(ch.from, Math.min(ch.to, max));
     return "";
   }
-  var android = (typeof navigator === "undefined" ? "undefined" : _typeof$363(navigator)) == "object" && /Android\b/.test(navigator.userAgent);
+  var android = (typeof navigator === "undefined" ? "undefined" : _typeof$365(navigator)) == "object" && /Android\b/.test(navigator.userAgent);
   var autoCloseTags$1 = EditorView.inputHandler.of(function (view, from, to, text, defaultInsert) {
     if ((android ? view.composing : view.compositionStarted) || view.state.readOnly || from != to || text != ">" && text != "/" || !javascriptLanguage.isActiveAt(view.state, from, -1)) return false;
     var base = defaultInsert(),
@@ -30398,16 +30398,16 @@
   init_dist$7();
   init_dist$8();
   init_dist$4();
-  function _typeof$362(o) {
+  function _typeof$364(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$362 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$364 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$362(o);
+    }, _typeof$364(o);
   }
-  function ownKeys$70(e, r) {
+  function ownKeys$71(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -30417,12 +30417,12 @@
     }
     return t;
   }
-  function _objectSpread$70(e) {
+  function _objectSpread$71(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$70(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$71(Object(t), !0).forEach(function (r) {
         _defineProperty$146(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$70(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$71(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -30449,14 +30449,14 @@
   }
   function _toPropertyKey$320(t) {
     var i = _toPrimitive$320(t, "string");
-    return "symbol" == _typeof$362(i) ? i : i + "";
+    return "symbol" == _typeof$364(i) ? i : i + "";
   }
   function _toPrimitive$320(t, r) {
-    if ("object" != _typeof$362(t) || !t) return t;
+    if ("object" != _typeof$364(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$362(i)) return i;
+      if ("object" != _typeof$364(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -30467,7 +30467,7 @@
   function _createForOfIteratorHelper$163(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$237(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$236(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -30512,14 +30512,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$237(r, a) {
+  function _unsupportedIterableToArray$236(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$237(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$236(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$237(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$236(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$237(r, a) {
+  function _arrayLikeToArray$236(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -31103,8 +31103,8 @@
   }
   var Schema = _createClass$277(function Schema(extraTags, extraAttrs) {
     _classCallCheck$277(this, Schema);
-    this.tags = _objectSpread$70(_objectSpread$70({}, Tags), extraTags);
-    this.globalAttrs = _objectSpread$70(_objectSpread$70({}, GlobalAttrs), extraAttrs);
+    this.tags = _objectSpread$71(_objectSpread$71({}, Tags), extraTags);
+    this.globalAttrs = _objectSpread$71(_objectSpread$71({}, GlobalAttrs), extraAttrs);
     this.allTags = Object.keys(this.tags);
     this.globalAttrNames = Object.keys(this.globalAttrs);
   });
@@ -31478,14 +31478,14 @@
   init_dist$7();
   init_dist$4();
   init_dist$6();
-  function _typeof$361(o) {
+  function _typeof$363(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$361 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$363 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$361(o);
+    }, _typeof$363(o);
   }
   function _classCallCheck$276(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -31503,14 +31503,14 @@
   }
   function _toPropertyKey$319(t) {
     var i = _toPrimitive$319(t, "string");
-    return "symbol" == _typeof$361(i) ? i : i + "";
+    return "symbol" == _typeof$363(i) ? i : i + "";
   }
   function _toPrimitive$319(t, r) {
-    if ("object" != _typeof$361(t) || !t) return t;
+    if ("object" != _typeof$363(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$361(i)) return i;
+      if ("object" != _typeof$363(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -31995,7 +31995,7 @@
     }
   });
   function _toConsumableArray$83(r) {
-    return _arrayWithoutHoles$83(r) || _iterableToArray$84(r) || _unsupportedIterableToArray$236(r) || _nonIterableSpread$83();
+    return _arrayWithoutHoles$83(r) || _iterableToArray$84(r) || _unsupportedIterableToArray$235(r) || _nonIterableSpread$83();
   }
   function _nonIterableSpread$83() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -32004,13 +32004,13 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles$83(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$236(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$235(r);
   }
   function _callSuper$153(t, o, e) {
     return o = _getPrototypeOf$153(o), _possibleConstructorReturn$153(t, _isNativeReflectConstruct$156() ? Reflect.construct(o, e || [], _getPrototypeOf$153(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$153(t, e) {
-    if (e && ("object" == _typeof$360(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$362(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$153(t);
   }
@@ -32051,7 +32051,7 @@
   function _createForOfIteratorHelper$162(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$236(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$235(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -32096,25 +32096,25 @@
       }
     };
   }
-  function _slicedToArray$89(r, e) {
-    return _arrayWithHoles$91(r) || _iterableToArrayLimit$89(r, e) || _unsupportedIterableToArray$236(r, e) || _nonIterableRest$91();
+  function _slicedToArray$88(r, e) {
+    return _arrayWithHoles$90(r) || _iterableToArrayLimit$88(r, e) || _unsupportedIterableToArray$235(r, e) || _nonIterableRest$90();
   }
-  function _nonIterableRest$91() {
+  function _nonIterableRest$90() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$236(r, a) {
+  function _unsupportedIterableToArray$235(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$236(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$235(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$236(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$235(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$236(r, a) {
+  function _arrayLikeToArray$235(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit$89(r, l) {
+  function _iterableToArrayLimit$88(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -32141,17 +32141,17 @@
       return a;
     }
   }
-  function _arrayWithHoles$91(r) {
+  function _arrayWithHoles$90(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof$360(o) {
+  function _typeof$362(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$360 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$362 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$360(o);
+    }, _typeof$362(o);
   }
   function _classCallCheck$275(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -32169,14 +32169,14 @@
   }
   function _toPropertyKey$318(t) {
     var i = _toPrimitive$318(t, "string");
-    return "symbol" == _typeof$360(i) ? i : i + "";
+    return "symbol" == _typeof$362(i) ? i : i + "";
   }
   function _toPrimitive$318(t, r) {
-    if ("object" != _typeof$360(t) || !t) return t;
+    if ("object" != _typeof$362(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$360(i)) return i;
+      if ("object" != _typeof$362(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -32649,7 +32649,7 @@
           return;
         }
         var startLine = state.doc.lineAt(state.selection.main.head);
-        var _match = _slicedToArray$89(match, 5),
+        var _match = _slicedToArray$88(match, 5),
           sign = _match[1],
           ln = _match[2],
           cl = _match[3],
@@ -33463,14 +33463,14 @@
     });
     searchExtensions = [searchState, Prec.low(searchHighlighter), baseTheme];
   });
-  function _typeof$359(o) {
+  function _typeof$361(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$359 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$361 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$359(o);
+    }, _typeof$361(o);
   }
   function _classCallCheck$274(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -33488,14 +33488,14 @@
   }
   function _toPropertyKey$317(t) {
     var i = _toPrimitive$317(t, "string");
-    return "symbol" == _typeof$359(i) ? i : i + "";
+    return "symbol" == _typeof$361(i) ? i : i + "";
   }
   function _toPrimitive$317(t, r) {
-    if ("object" != _typeof$359(t) || !t) return t;
+    if ("object" != _typeof$361(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$359(i)) return i;
+      if ("object" != _typeof$361(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -33503,7 +33503,7 @@
   function _createForOfIteratorHelper$161(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$235(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$234(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -33548,14 +33548,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$235(r, a) {
+  function _unsupportedIterableToArray$234(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$235(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$234(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$235(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$234(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$235(r, a) {
+  function _arrayLikeToArray$234(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -35312,25 +35312,25 @@
   });
   init_dist$3();
   init_dist$2();
-  function _slicedToArray$88(r, e) {
-    return _arrayWithHoles$90(r) || _iterableToArrayLimit$88(r, e) || _unsupportedIterableToArray$234(r, e) || _nonIterableRest$90();
+  function _slicedToArray$87(r, e) {
+    return _arrayWithHoles$89(r) || _iterableToArrayLimit$87(r, e) || _unsupportedIterableToArray$233(r, e) || _nonIterableRest$89();
   }
-  function _nonIterableRest$90() {
+  function _nonIterableRest$89() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$234(r, a) {
+  function _unsupportedIterableToArray$233(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$234(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$233(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$234(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$233(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$234(r, a) {
+  function _arrayLikeToArray$233(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit$88(r, l) {
+  function _iterableToArrayLimit$87(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -35357,7 +35357,7 @@
       return a;
     }
   }
-  function _arrayWithHoles$90(r) {
+  function _arrayWithHoles$89(r) {
     if (Array.isArray(r)) return r;
   }
   var htmlParser = {
@@ -35672,7 +35672,7 @@
                 values[3] = parseInt(values[3].trim(), 10);
                 bgColor = "#".concat(values[1].toString(16)).concat(values[2].toString(16)).concat(values[3].toString(16));
               }
-            } else bgColor = _slicedToArray$88(color, 2)[1];
+            } else bgColor = _slicedToArray$87(color, 2)[1];
             return bgColor;
           }
           return "";
@@ -36157,25 +36157,25 @@
       return function () {};
     }
   });
-  function _slicedToArray$87(r, e) {
-    return _arrayWithHoles$89(r) || _iterableToArrayLimit$87(r, e) || _unsupportedIterableToArray$233(r, e) || _nonIterableRest$89();
+  function _slicedToArray$86(r, e) {
+    return _arrayWithHoles$88(r) || _iterableToArrayLimit$86(r, e) || _unsupportedIterableToArray$232(r, e) || _nonIterableRest$88();
   }
-  function _nonIterableRest$89() {
+  function _nonIterableRest$88() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$233(r, a) {
+  function _unsupportedIterableToArray$232(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$233(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$232(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$233(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$232(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$233(r, a) {
+  function _arrayLikeToArray$232(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit$87(r, l) {
+  function _iterableToArrayLimit$86(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -36202,7 +36202,7 @@
       return a;
     }
   }
-  function _arrayWithHoles$89(r) {
+  function _arrayWithHoles$88(r) {
     if (Array.isArray(r)) return r;
   }
   function handleUploadMulti(editor) {
@@ -36244,7 +36244,7 @@
     input.style.display = "none";
     input.accept = accept;
     input.addEventListener("change", function (event) {
-      var file = _slicedToArray$87(event.target.files, 1)[0];
+      var file = _slicedToArray$86(event.target.files, 1)[0];
       editor.$cherry.options.callback.fileUpload(file, function (url) {
         var params = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
         if (typeof url !== "string" || !url) return;
@@ -36296,16 +36296,16 @@
       after = _params$after === void 0 ? "" : _params$after;
     return "".concat(before).concat(type, "[").concat(name).concat(style, "](").concat(url, ")").concat(poster).concat(after);
   }
-  function _typeof$358(o) {
+  function _typeof$360(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$358 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$360 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$358(o);
+    }, _typeof$360(o);
   }
-  function ownKeys$69(e, r) {
+  function ownKeys$70(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -36315,12 +36315,12 @@
     }
     return t;
   }
-  function _objectSpread$69(e) {
+  function _objectSpread$70(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$69(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$70(Object(t), !0).forEach(function (r) {
         _defineProperty$145(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$69(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$70(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -36336,14 +36336,14 @@
   }
   function _toPropertyKey$316(t) {
     var i = _toPrimitive$316(t, "string");
-    return "symbol" == _typeof$358(i) ? i : i + "";
+    return "symbol" == _typeof$360(i) ? i : i + "";
   }
   function _toPrimitive$316(t, r) {
-    if ("object" != _typeof$358(t) || !t) return t;
+    if ("object" != _typeof$360(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$358(i)) return i;
+      if ("object" != _typeof$360(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -36401,7 +36401,7 @@
     var beginSource = "(?:^|\\n)(\\n*((?:>[\\t ]*)*)(?:[^\\S\\n]*))(`{3,})([^`]*?)\\n";
     var contentSource = "([\\w\\W]*?)";
     var endSource = "[^\\S\\n]*\\3[ \\t]*(?=$|\\n+)";
-    return _objectSpread$69(_objectSpread$69({}, {
+    return _objectSpread$70(_objectSpread$70({}, {
       begin: new RegExp(beginSource),
       content: new RegExp(contentSource),
       end: new RegExp(endSource),
@@ -36551,7 +36551,7 @@
   }
   init_dist$8();
   init_dist$4();
-  function ownKeys$68(e, r) {
+  function ownKeys$69(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -36561,12 +36561,12 @@
     }
     return t;
   }
-  function _objectSpread$68(e) {
+  function _objectSpread$69(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$68(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$69(Object(t), !0).forEach(function (r) {
         _defineProperty$144(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$68(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$69(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -36581,7 +36581,7 @@
     }) : e[r] = t, e;
   }
   function _toConsumableArray$82(r) {
-    return _arrayWithoutHoles$82(r) || _iterableToArray$83(r) || _unsupportedIterableToArray$232(r) || _nonIterableSpread$82();
+    return _arrayWithoutHoles$82(r) || _iterableToArray$83(r) || _unsupportedIterableToArray$231(r) || _nonIterableSpread$82();
   }
   function _nonIterableSpread$82() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -36590,12 +36590,12 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles$82(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$232(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$231(r);
   }
   function _createForOfIteratorHelper$160(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$232(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$231(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -36640,26 +36640,26 @@
       }
     };
   }
-  function _unsupportedIterableToArray$232(r, a) {
+  function _unsupportedIterableToArray$231(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$232(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$231(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$232(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$231(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$232(r, a) {
+  function _arrayLikeToArray$231(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _typeof$357(o) {
+  function _typeof$359(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$357 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$359 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$357(o);
+    }, _typeof$359(o);
   }
   function _classCallCheck$273(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -36677,14 +36677,14 @@
   }
   function _toPropertyKey$315(t) {
     var i = _toPrimitive$315(t, "string");
-    return "symbol" == _typeof$357(i) ? i : i + "";
+    return "symbol" == _typeof$359(i) ? i : i + "";
   }
   function _toPrimitive$315(t, r) {
-    if ("object" != _typeof$357(t) || !t) return t;
+    if ("object" != _typeof$359(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$357(i)) return i;
+      if ("object" != _typeof$359(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -36876,13 +36876,13 @@
         return edit.from < to && edit.to > from;
       });
     }).map(function (edit) {
-      return _objectSpread$68(_objectSpread$68({}, edit), {}, {
+      return _objectSpread$69(_objectSpread$69({}, edit), {}, {
         from: structural.changes.mapPos(edit.from, 1),
         to: structural.changes.mapPos(edit.to, -1)
       });
     });
     var changes = ChangeSet.of(edits, structural.changes.newLength, state.lineBreak);
-    return _objectSpread$68(_objectSpread$68({}, structural), {}, {
+    return _objectSpread$69(_objectSpread$69({}, structural), {}, {
       changes: structural.changes.compose(changes),
       selection: structural.selection.map(changes)
     });
@@ -37024,16 +37024,16 @@
     }));
     return true;
   };
-  function _typeof$356(o) {
+  function _typeof$358(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$356 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$358 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$356(o);
+    }, _typeof$358(o);
   }
-  function ownKeys$67(e, r) {
+  function ownKeys$68(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -37043,12 +37043,12 @@
     }
     return t;
   }
-  function _objectSpread$67(e) {
+  function _objectSpread$68(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$67(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$68(Object(t), !0).forEach(function (r) {
         _defineProperty$143(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$67(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$68(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -37064,14 +37064,14 @@
   }
   function _toPropertyKey$314(t) {
     var i = _toPrimitive$314(t, "string");
-    return "symbol" == _typeof$356(i) ? i : i + "";
+    return "symbol" == _typeof$358(i) ? i : i + "";
   }
   function _toPrimitive$314(t, r) {
-    if ("object" != _typeof$356(t) || !t) return t;
+    if ("object" != _typeof$358(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$356(i)) return i;
+      if ("object" != _typeof$358(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -37087,7 +37087,7 @@
         return false;
       } : _ref$continueCustomLi;
     return markdownKeymap.map(function (binding) {
-      return binding.key === "Enter" ? _objectSpread$67(_objectSpread$67({}, binding), {}, {
+      return binding.key === "Enter" ? _objectSpread$68(_objectSpread$68({}, binding), {}, {
         run: function run(view) {
           return interceptEnter(view) || continueCustomList(view) || cherryInsertNewlineContinueMarkup(view);
         }
@@ -37670,7 +37670,7 @@
   function _createForOfIteratorHelper$159(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$231(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$230(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -37715,26 +37715,26 @@
       }
     };
   }
-  function _unsupportedIterableToArray$231(r, a) {
+  function _unsupportedIterableToArray$230(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$231(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$230(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$231(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$230(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$231(r, a) {
+  function _arrayLikeToArray$230(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _typeof$355(o) {
+  function _typeof$357(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$355 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$357 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$355(o);
+    }, _typeof$357(o);
   }
   function _classCallCheck$272(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -37752,14 +37752,14 @@
   }
   function _toPropertyKey$313(t) {
     var i = _toPrimitive$313(t, "string");
-    return "symbol" == _typeof$355(i) ? i : i + "";
+    return "symbol" == _typeof$357(i) ? i : i + "";
   }
   function _toPrimitive$313(t, r) {
-    if ("object" != _typeof$355(t) || !t) return t;
+    if ("object" != _typeof$357(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$355(i)) return i;
+      if ("object" != _typeof$357(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -39508,7 +39508,7 @@
           return cm.operation(function () {
             cm.curOp.isVimOp = true;
             try {
-              if (_typeof$355(command) != "object") return;
+              if (_typeof$357(command) != "object") return;
               if (command.type == "keyToKey") doKeyToKey(cm, command.toKeys, command);else commandDispatcher.processCommand(cm, vim, command);
             } catch (e) {
               cm.state.vim = void 0;
@@ -41317,7 +41317,7 @@
       return ret;
     }
     function offsetCursor(cur, offsetLine, offsetCh) {
-      if (_typeof$355(offsetLine) === "object") {
+      if (_typeof$357(offsetLine) === "object") {
         offsetCh = offsetLine.ch;
         offsetLine = offsetLine.line;
       }
@@ -42419,7 +42419,7 @@
       for (var i = 1; i < arguments.length; i++) {
         var a = arguments[i];
         if (!a) continue;
-        if (_typeof$355(a) !== "object") a = document.createTextNode(a);
+        if (_typeof$357(a) !== "object") a = document.createTextNode(a);
         if (a.nodeType) n.appendChild(a);else for (var key in a) {
           if (!Object.prototype.hasOwnProperty.call(a, key)) continue;
           if (key[0] === "$") n.style[key.slice(1)] = a[key];else if (typeof a[key] == "function") n[key] = a[key];else n.setAttribute(key, a[key]);
@@ -43658,7 +43658,7 @@
       Object.keys(state).forEach(function (key) {
         if (key == "insertEnd") return;
         var o = state[key];
-        if (Array.isArray(o)) o = o.slice();else if (o && _typeof$355(o) == "object" && o.constructor != Object) o = cloneVimState(o);
+        if (Array.isArray(o)) o = o.slice();else if (o && _typeof$357(o) == "object" && o.constructor != Object) o = cloneVimState(o);
         n[key] = o;
       });
       if (state.sel) n.sel = {
@@ -44258,7 +44258,7 @@
       }, {
         key: "setCursor",
         value: function setCursor(line, ch) {
-          if (_typeof$355(line) === "object") {
+          if (_typeof$357(line) === "object") {
             ch = line.ch;
             line = line.line;
           }
@@ -45494,18 +45494,18 @@
   init_dist$4();
   init_dist$5();
   var import_diff$1 = __toESM$1(require_diff$2(), 1);
-  function _typeof$354(o) {
+  function _typeof$356(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$354 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$356 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$354(o);
+    }, _typeof$356(o);
   }
   var _excluded$3 = ["codemirror"];
   function _toConsumableArray$81(r) {
-    return _arrayWithoutHoles$81(r) || _iterableToArray$82(r) || _unsupportedIterableToArray$230(r) || _nonIterableSpread$81();
+    return _arrayWithoutHoles$81(r) || _iterableToArray$82(r) || _unsupportedIterableToArray$229(r) || _nonIterableSpread$81();
   }
   function _nonIterableSpread$81() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -45514,7 +45514,7 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles$81(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$230(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$229(r);
   }
   function _objectWithoutProperties$3(e, t) {
     if (null == e) return {};
@@ -45536,13 +45536,13 @@
     }
     return t;
   }
-  function _slicedToArray$86(r, e) {
-    return _arrayWithHoles$88(r) || _iterableToArrayLimit$86(r, e) || _unsupportedIterableToArray$230(r, e) || _nonIterableRest$88();
+  function _slicedToArray$85(r, e) {
+    return _arrayWithHoles$87(r) || _iterableToArrayLimit$85(r, e) || _unsupportedIterableToArray$229(r, e) || _nonIterableRest$87();
   }
-  function _nonIterableRest$88() {
+  function _nonIterableRest$87() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit$86(r, l) {
+  function _iterableToArrayLimit$85(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -45569,14 +45569,14 @@
       return a;
     }
   }
-  function _arrayWithHoles$88(r) {
+  function _arrayWithHoles$87(r) {
     if (Array.isArray(r)) return r;
   }
   function _callSuper$152(t, o, e) {
     return o = _getPrototypeOf$152(o), _possibleConstructorReturn$152(t, _isNativeReflectConstruct$155() ? Reflect.construct(o, e || [], _getPrototypeOf$152(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$152(t, e) {
-    if (e && ("object" == _typeof$354(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$356(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$152(t);
   }
@@ -45614,7 +45614,7 @@
       return t.__proto__ = e, t;
     }, _setPrototypeOf$157(t, e);
   }
-  function ownKeys$66(e, r) {
+  function ownKeys$67(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -45624,12 +45624,12 @@
     }
     return t;
   }
-  function _objectSpread$66(e) {
+  function _objectSpread$67(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$66(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$67(Object(t), !0).forEach(function (r) {
         _defineProperty$142(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$66(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$67(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -45753,7 +45753,7 @@
   function _createForOfIteratorHelper$158(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$230(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$229(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -45798,14 +45798,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$230(r, a) {
+  function _unsupportedIterableToArray$229(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$230(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$229(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$230(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$229(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$230(r, a) {
+  function _arrayLikeToArray$229(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -45826,14 +45826,14 @@
   }
   function _toPropertyKey$312(t) {
     var i = _toPrimitive$312(t, "string");
-    return "symbol" == _typeof$354(i) ? i : i + "";
+    return "symbol" == _typeof$356(i) ? i : i + "";
   }
   function _toPrimitive$312(t, r) {
-    if ("object" != _typeof$354(t) || !t) return t;
+    if ("object" != _typeof$356(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$354(i)) return i;
+      if ("object" != _typeof$356(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -46551,7 +46551,7 @@
       value: function markText(from, to, options) {
         this.markIdCounter += 1;
         var markId = "mark_".concat(this.markIdCounter);
-        var markAttributes = _objectSpread$66(_objectSpread$66({}, options.title ? {
+        var markAttributes = _objectSpread$67(_objectSpread$67({}, options.title ? {
           title: options.title
         } : {}), {}, {
           "data-mark-id": markId
@@ -46859,7 +46859,7 @@
         _this4.collectMarkItems(base64Reg, "cm-url base64", allMarkItems, existingMarksSet);
         _this4.collectMarkItems(imgDrawioXmlReg, "cm-url drawio", allMarkItems, existingMarksSet);
         if (_this4.$cherry.options.editor.maxUrlLength > 10) {
-          var _createUrlReg2 = _slicedToArray$86(createUrlReg(_this4.$cherry.options.editor.maxUrlLength), 2),
+          var _createUrlReg2 = _slicedToArray$85(createUrlReg(_this4.$cherry.options.editor.maxUrlLength), 2),
             protocolUrlPattern = _createUrlReg2[0],
             wwwUrlPattern = _createUrlReg2[1];
           _this4.collectMarkItems(protocolUrlPattern, "cm-url url-truncated", allMarkItems, existingMarksSet);
@@ -47899,7 +47899,7 @@
         var changes = [];
         var pos = 0;
         for (var i = 0; i < diffs.length; i++) {
-          var _diffs$i = _slicedToArray$86(diffs[i], 2),
+          var _diffs$i = _slicedToArray$85(diffs[i], 2),
             op = _diffs$i[0],
             text = _diffs$i[1];
           if (op === import_diff$1.default.EQUAL) pos += text.length;else if (op === import_diff$1.default.DELETE) {
@@ -48108,14 +48108,14 @@
     }]);
   }();
   _defineProperty$142(Editor, "TYPEWRITER_ANCHOR_RATIO", .4);
-  function _typeof$353(o) {
+  function _typeof$355(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$353 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$355 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$353(o);
+    }, _typeof$355(o);
   }
   function _classCallCheck$270(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -48141,14 +48141,14 @@
   }
   function _toPropertyKey$311(t) {
     var i = _toPrimitive$311(t, "string");
-    return "symbol" == _typeof$353(i) ? i : i + "";
+    return "symbol" == _typeof$355(i) ? i : i + "";
   }
   function _toPrimitive$311(t, r) {
-    if ("object" != _typeof$353(t) || !t) return t;
+    if ("object" != _typeof$355(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$353(i)) return i;
+      if ("object" != _typeof$355(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -48345,16 +48345,16 @@
   function saveCodeWrapToLocal(nameSpace, wrap) {
     if (typeof localStorage !== "undefined") localStorage.setItem("".concat(nameSpace, "-codeWrap"), wrap);
   }
-  function _typeof$352(o) {
+  function _typeof$354(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$352 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$354 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$352(o);
+    }, _typeof$354(o);
   }
-  function ownKeys$65(e, r) {
+  function ownKeys$66(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -48364,12 +48364,12 @@
     }
     return t;
   }
-  function _objectSpread$65(e) {
+  function _objectSpread$66(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$65(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$66(Object(t), !0).forEach(function (r) {
         _defineProperty$140(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$65(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$66(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -48385,14 +48385,14 @@
   }
   function _toPropertyKey$310(t) {
     var i = _toPrimitive$310(t, "string");
-    return "symbol" == _typeof$352(i) ? i : i + "";
+    return "symbol" == _typeof$354(i) ? i : i + "";
   }
   function _toPrimitive$310(t, r) {
-    if ("object" != _typeof$352(t) || !t) return t;
+    if ("object" != _typeof$354(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$352(i)) return i;
+      if ("object" != _typeof$354(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -48411,7 +48411,7 @@
     quot: "\"",
     apos: "'"
   };
-  var htmlEntitiesMap = _objectSpread$65(_objectSpread$65(_objectSpread$65(_objectSpread$65(_objectSpread$65(_objectSpread$65({}, {
+  var htmlEntitiesMap = _objectSpread$66(_objectSpread$66(_objectSpread$66(_objectSpread$66(_objectSpread$66(_objectSpread$66({}, {
     34: "&quot;",
     38: "&amp;",
     39: "&apos;",
@@ -48704,6 +48704,12 @@
       return escapeMap[char] || char;
     });
   }
+  function escapeHTMLAttribute(content) {
+    if (typeof content !== "string") return "";
+    return content.replace(/["'<>]/g, function (char) {
+      return escapeMap[char] || char;
+    });
+  }
   function unescapeHTMLSpecialChar(content) {
     if (typeof content !== "string") return "";
     return content.replace(/&(\w+);?/g, function (escaped, name) {
@@ -48740,25 +48746,45 @@
       }
     });
   }
+  var schemeEntityMap = {
+    colon: ":",
+    Colon: ":",
+    tab: "	",
+    Tab: "	",
+    newline: "\n",
+    NewLine: "\n",
+    sol: "/",
+    Sol: "/",
+    amp: "&"
+  };
+  function decodeSchemeEntities(url) {
+    var decoded = url;
+    for (var i = 0; i < 2; i += 1) decoded = unescapeHTMLHexEntities(unescapeHTMLNumberEntities(decoded)).replace(/&(\w+);?/g, function (match, name) {
+      var _schemeEntityMap$name;
+      return (_schemeEntityMap$name = schemeEntityMap[name]) !== null && _schemeEntityMap$name !== void 0 ? _schemeEntityMap$name : match;
+    });
+    return decoded;
+  }
   function isValidScheme(url) {
-    var match = unescapeHTMLHexEntities(unescapeHTMLNumberEntities(url)).match(/^\s*([\w\W]+?)(?=:)/i);
+    if (typeof url !== "string") return true;
+    var match = decodeSchemeEntities(url).replace(/[\s\x00-\x1f]/g, "").match(/^([a-z][a-z0-9+.-]*):/i);
     if (!match) return true;
     var SCHEME_BLACKLIST = ["javascript", "vbscript", "data"];
-    var scheme = match[1].replace(/[\s\x00-\x1f]/g, "");
-    if (SCHEME_BLACKLIST.indexOf(scheme.toLowerCase()) !== -1) return false;
+    var scheme = match[1].toLowerCase();
+    if (SCHEME_BLACKLIST.indexOf(scheme) !== -1) return false;
     return true;
   }
   function encodeURIOnce(str) {
     return encodeURI(str).replace(/%25/g, "%");
   }
-  function _typeof$351(o) {
+  function _typeof$353(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$351 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$353 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$351(o);
+    }, _typeof$353(o);
   }
   function _classCallCheck$269(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -48776,14 +48802,14 @@
   }
   function _toPropertyKey$309(t) {
     var i = _toPrimitive$309(t, "string");
-    return "symbol" == _typeof$351(i) ? i : i + "";
+    return "symbol" == _typeof$353(i) ? i : i + "";
   }
   function _toPrimitive$309(t, r) {
-    if ("object" != _typeof$351(t) || !t) return t;
+    if ("object" != _typeof$353(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$351(i)) return i;
+      if ("object" != _typeof$353(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -48856,14 +48882,14 @@
       }
     }]);
   }();
-  function _typeof$350(o) {
+  function _typeof$352(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$350 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$352 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$350(o);
+    }, _typeof$352(o);
   }
   function _classCallCheck$268(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -48883,7 +48909,7 @@
     return o = _getPrototypeOf$151(o), _possibleConstructorReturn$151(t, _isNativeReflectConstruct$154() ? Reflect.construct(o, e || [], _getPrototypeOf$151(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$151(t, e) {
-    if (e && ("object" == _typeof$350(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$352(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$151(t);
   }
@@ -48931,14 +48957,14 @@
   }
   function _toPropertyKey$308(t) {
     var i = _toPrimitive$308(t, "string");
-    return "symbol" == _typeof$350(i) ? i : i + "";
+    return "symbol" == _typeof$352(i) ? i : i + "";
   }
   function _toPrimitive$308(t, r) {
-    if ("object" != _typeof$350(t) || !t) return t;
+    if ("object" != _typeof$352(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$350(i)) return i;
+      if ("object" != _typeof$352(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -49192,14 +49218,14 @@
   }
   function _toPropertyKey$307(t) {
     var i = _toPrimitive$307(t, "string");
-    return "symbol" == _typeof$349(i) ? i : i + "";
+    return "symbol" == _typeof$351(i) ? i : i + "";
   }
   function _toPrimitive$307(t, r) {
-    if ("object" != _typeof$349(t) || !t) return t;
+    if ("object" != _typeof$351(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$349(i)) return i;
+      if ("object" != _typeof$351(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -49208,7 +49234,7 @@
     return o = _getPrototypeOf$150(o), _possibleConstructorReturn$150(t, _isNativeReflectConstruct$153() ? Reflect.construct(o, e || [], _getPrototypeOf$150(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$150(t, e) {
-    if (e && ("object" == _typeof$349(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$351(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$150(t);
   }
@@ -49282,17 +49308,17 @@
       return t.__proto__ || Object.getPrototypeOf(t);
     }, _getPrototypeOf$150(t);
   }
-  function _typeof$349(o) {
+  function _typeof$351(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$349 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$351 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$349(o);
+    }, _typeof$351(o);
   }
   var $expectTarget = function $expectTarget(target, Constructor) {
-    if (!Array.isArray(target) && _typeof$349(target) !== Constructor.name.toLowerCase() || !Array.isArray(target) && Constructor.name.toLowerCase() === "array") throw new TypeError("parameter given must be ".concat(Constructor.name));
+    if (!Array.isArray(target) && _typeof$351(target) !== Constructor.name.toLowerCase() || !Array.isArray(target) && Constructor.name.toLowerCase() === "array") throw new TypeError("parameter given must be ".concat(Constructor.name));
     return true;
   };
   var $expectInherit = function $expectInherit(target, parent) {
@@ -49300,7 +49326,7 @@
     return true;
   };
   var $expectInstance = function $expectInstance(target) {
-    if (_typeof$349(target) !== "object") throw new Error("the hook must be a instance, not a class");
+    if (_typeof$351(target) !== "object") throw new Error("the hook must be a instance, not a class");
     return true;
   };
   var NestedError = function (_Error) {
@@ -49321,14 +49347,14 @@
       }
     }]);
   }(_wrapNativeSuper$10(Error));
-  function _typeof$348(o) {
+  function _typeof$350(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$348 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$350 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$348(o);
+    }, _typeof$350(o);
   }
   function _classCallCheck$266(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -49346,14 +49372,14 @@
   }
   function _toPropertyKey$306(t) {
     var i = _toPrimitive$306(t, "string");
-    return "symbol" == _typeof$348(i) ? i : i + "";
+    return "symbol" == _typeof$350(i) ? i : i + "";
   }
   function _toPrimitive$306(t, r) {
-    if ("object" != _typeof$348(t) || !t) return t;
+    if ("object" != _typeof$350(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$348(i)) return i;
+      if ("object" != _typeof$350(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -49499,16 +49525,16 @@
       }
     }]);
   }();
-  function _typeof$347(o) {
+  function _typeof$349(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$347 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$349 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$347(o);
+    }, _typeof$349(o);
   }
-  function ownKeys$64(e, r) {
+  function ownKeys$65(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -49518,12 +49544,12 @@
     }
     return t;
   }
-  function _objectSpread$64(e) {
+  function _objectSpread$65(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$64(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$65(Object(t), !0).forEach(function (r) {
         _defineProperty$138(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$64(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$65(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -49539,41 +49565,41 @@
   }
   function _toPropertyKey$305(t) {
     var i = _toPrimitive$305(t, "string");
-    return "symbol" == _typeof$347(i) ? i : i + "";
+    return "symbol" == _typeof$349(i) ? i : i + "";
   }
   function _toPrimitive$305(t, r) {
-    if ("object" != _typeof$347(t) || !t) return t;
+    if ("object" != _typeof$349(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$347(i)) return i;
+      if ("object" != _typeof$349(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
   }
   function _toConsumableArray$80(r) {
-    return _arrayWithoutHoles$80(r) || _iterableToArray$81(r) || _unsupportedIterableToArray$229(r) || _nonIterableSpread$80();
+    return _arrayWithoutHoles$80(r) || _iterableToArray$81(r) || _unsupportedIterableToArray$228(r) || _nonIterableSpread$80();
   }
   function _nonIterableSpread$80() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
   function _arrayWithoutHoles$80(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$229(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$228(r);
   }
   function _toArray$3(r) {
-    return _arrayWithHoles$87(r) || _iterableToArray$81(r) || _unsupportedIterableToArray$229(r) || _nonIterableRest$87();
+    return _arrayWithHoles$86(r) || _iterableToArray$81(r) || _unsupportedIterableToArray$228(r) || _nonIterableRest$86();
   }
-  function _nonIterableRest$87() {
+  function _nonIterableRest$86() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$229(r, a) {
+  function _unsupportedIterableToArray$228(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$229(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$228(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$229(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$228(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$229(r, a) {
+  function _arrayLikeToArray$228(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -49581,7 +49607,7 @@
   function _iterableToArray$81(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithHoles$87(r) {
+  function _arrayWithHoles$86(r) {
     if (Array.isArray(r)) return r;
   }
   function replaceStringByBuffer(str, buffer) {
@@ -49612,13 +49638,13 @@
       if (continuousMatch && args.index === lastIndex - rollbackLength) {
         var _args2 = _toArray$3(args),
           match = _args2[0],
-          restArgs = _arrayLikeToArray$229(_args2).slice(2);
+          restArgs = _arrayLikeToArray$228(_args2).slice(2);
         replaceBuffer.push({
           begin: replaceInfo.begin + rollbackLength,
           length: replaceInfo.length - rollbackLength,
           replacedText: replacer.apply(void 0, [match.slice(rollbackLength), ""].concat(_toConsumableArray$80(restArgs)))
         });
-      } else replaceBuffer.push(_objectSpread$64(_objectSpread$64({}, replaceInfo), {}, {
+      } else replaceBuffer.push(_objectSpread$65(_objectSpread$65({}, replaceInfo), {}, {
         replacedText: replacer.apply(void 0, _toConsumableArray$80(args))
       }));
       lastIndex = regex.lastIndex;
@@ -49627,14 +49653,14 @@
     regex.lastIndex = 0;
     return replaceStringByBuffer(str, replaceBuffer);
   }
-  function _typeof$346(o) {
+  function _typeof$348(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$346 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$348 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$346(o);
+    }, _typeof$348(o);
   }
   function _classCallCheck$265(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -49654,7 +49680,7 @@
     return o = _getPrototypeOf$149(o), _possibleConstructorReturn$149(t, _isNativeReflectConstruct$152() ? Reflect.construct(o, e || [], _getPrototypeOf$149(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$149(t, e) {
-    if (e && ("object" == _typeof$346(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$348(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$149(t);
   }
@@ -49702,14 +49728,14 @@
   }
   function _toPropertyKey$304(t) {
     var i = _toPrimitive$304(t, "string");
-    return "symbol" == _typeof$346(i) ? i : i + "";
+    return "symbol" == _typeof$348(i) ? i : i + "";
   }
   function _toPrimitive$304(t, r) {
-    if ("object" != _typeof$346(t) || !t) return t;
+    if ("object" != _typeof$348(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$346(i)) return i;
+      if ("object" != _typeof$348(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -49745,14 +49771,14 @@
     }]);
   }(SyntaxBase);
   _defineProperty$137(Color$4, "HOOK_NAME", "fontColor");
-  function _typeof$345(o) {
+  function _typeof$347(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$345 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$347 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$345(o);
+    }, _typeof$347(o);
   }
   function _classCallCheck$264(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -49772,7 +49798,7 @@
     return o = _getPrototypeOf$148(o), _possibleConstructorReturn$148(t, _isNativeReflectConstruct$151() ? Reflect.construct(o, e || [], _getPrototypeOf$148(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$148(t, e) {
-    if (e && ("object" == _typeof$345(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$347(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$148(t);
   }
@@ -49820,14 +49846,14 @@
   }
   function _toPropertyKey$303(t) {
     var i = _toPrimitive$303(t, "string");
-    return "symbol" == _typeof$345(i) ? i : i + "";
+    return "symbol" == _typeof$347(i) ? i : i + "";
   }
   function _toPrimitive$303(t, r) {
-    if ("object" != _typeof$345(t) || !t) return t;
+    if ("object" != _typeof$347(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$345(i)) return i;
+      if ("object" != _typeof$347(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -49863,14 +49889,14 @@
     }]);
   }(SyntaxBase);
   _defineProperty$136(BackgroundColor, "HOOK_NAME", "bgColor");
-  function _typeof$344(o) {
+  function _typeof$346(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$344 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$346 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$344(o);
+    }, _typeof$346(o);
   }
   function _classCallCheck$263(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -49890,7 +49916,7 @@
     return o = _getPrototypeOf$147(o), _possibleConstructorReturn$147(t, _isNativeReflectConstruct$150() ? Reflect.construct(o, e || [], _getPrototypeOf$147(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$147(t, e) {
-    if (e && ("object" == _typeof$344(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$346(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$147(t);
   }
@@ -49938,14 +49964,14 @@
   }
   function _toPropertyKey$302(t) {
     var i = _toPrimitive$302(t, "string");
-    return "symbol" == _typeof$344(i) ? i : i + "";
+    return "symbol" == _typeof$346(i) ? i : i + "";
   }
   function _toPrimitive$302(t, r) {
-    if ("object" != _typeof$344(t) || !t) return t;
+    if ("object" != _typeof$346(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$344(i)) return i;
+      if ("object" != _typeof$346(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -49982,16 +50008,16 @@
     }]);
   }(SyntaxBase);
   _defineProperty$135(Size$2, "HOOK_NAME", "fontSize");
-  function _typeof$343(o) {
+  function _typeof$345(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$343 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$345 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$343(o);
+    }, _typeof$345(o);
   }
-  function ownKeys$63(e, r) {
+  function ownKeys$64(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -50001,12 +50027,12 @@
     }
     return t;
   }
-  function _objectSpread$63(e) {
+  function _objectSpread$64(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$63(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$64(Object(t), !0).forEach(function (r) {
         _defineProperty$134(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$63(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$64(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -50030,7 +50056,7 @@
     return o = _getPrototypeOf$146(o), _possibleConstructorReturn$146(t, _isNativeReflectConstruct$149() ? Reflect.construct(o, e || [], _getPrototypeOf$146(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$146(t, e) {
-    if (e && ("object" == _typeof$343(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$345(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$146(t);
   }
@@ -50078,14 +50104,14 @@
   }
   function _toPropertyKey$301(t) {
     var i = _toPrimitive$301(t, "string");
-    return "symbol" == _typeof$343(i) ? i : i + "";
+    return "symbol" == _typeof$345(i) ? i : i + "";
   }
   function _toPrimitive$301(t, r) {
-    if ("object" != _typeof$343(t) || !t) return t;
+    if ("object" != _typeof$345(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$343(i)) return i;
+      if ("object" != _typeof$345(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -50118,11 +50144,11 @@
           config: void 0
         }).config;
         var ret = {};
-        if (!!config.needWhitespace) ret = _objectSpread$63(_objectSpread$63({}, ret), {}, {
+        if (!!config.needWhitespace) ret = _objectSpread$64(_objectSpread$64({}, ret), {}, {
           begin: "(^|[\\s])\\~T\\~T",
           end: "\\~T\\~T(?=\\s|$)",
           content: "([\\w\\W]+?)"
-        });else ret = _objectSpread$63(_objectSpread$63({}, ret), {}, {
+        });else ret = _objectSpread$64(_objectSpread$64({}, ret), {}, {
           begin: "(^|[^\\\\])\\~T\\~T",
           end: "\\~T\\~T",
           content: "([\\w\\W]+?)"
@@ -50133,14 +50159,14 @@
     }]);
   }(SyntaxBase);
   _defineProperty$134(Strikethrough$1, "HOOK_NAME", "strikethrough");
-  function _typeof$342(o) {
+  function _typeof$344(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$342 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$344 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$342(o);
+    }, _typeof$344(o);
   }
   function _classCallCheck$261(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -50160,7 +50186,7 @@
     return o = _getPrototypeOf$145(o), _possibleConstructorReturn$145(t, _isNativeReflectConstruct$148() ? Reflect.construct(o, e || [], _getPrototypeOf$145(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$145(t, e) {
-    if (e && ("object" == _typeof$342(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$344(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$145(t);
   }
@@ -50208,14 +50234,14 @@
   }
   function _toPropertyKey$300(t) {
     var i = _toPrimitive$300(t, "string");
-    return "symbol" == _typeof$342(i) ? i : i + "";
+    return "symbol" == _typeof$344(i) ? i : i + "";
   }
   function _toPrimitive$300(t, r) {
-    if ("object" != _typeof$342(t) || !t) return t;
+    if ("object" != _typeof$344(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$342(i)) return i;
+      if ("object" != _typeof$344(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -50251,14 +50277,14 @@
     }]);
   }(SyntaxBase);
   _defineProperty$133(Sup$1, "HOOK_NAME", "sup");
-  function _typeof$341(o) {
+  function _typeof$343(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$341 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$343 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$341(o);
+    }, _typeof$343(o);
   }
   function _classCallCheck$260(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -50278,7 +50304,7 @@
     return o = _getPrototypeOf$144(o), _possibleConstructorReturn$144(t, _isNativeReflectConstruct$147() ? Reflect.construct(o, e || [], _getPrototypeOf$144(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$144(t, e) {
-    if (e && ("object" == _typeof$341(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$343(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$144(t);
   }
@@ -50326,14 +50352,14 @@
   }
   function _toPropertyKey$299(t) {
     var i = _toPrimitive$299(t, "string");
-    return "symbol" == _typeof$341(i) ? i : i + "";
+    return "symbol" == _typeof$343(i) ? i : i + "";
   }
   function _toPrimitive$299(t, r) {
-    if ("object" != _typeof$341(t) || !t) return t;
+    if ("object" != _typeof$343(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$341(i)) return i;
+      if ("object" != _typeof$343(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -56892,34 +56918,34 @@
       }
     });
   })(Prism);
-  function _typeof$340(o) {
+  function _typeof$342(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$340 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$342 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$340(o);
+    }, _typeof$342(o);
   }
-  function _slicedToArray$85(r, e) {
-    return _arrayWithHoles$86(r) || _iterableToArrayLimit$85(r, e) || _unsupportedIterableToArray$228(r, e) || _nonIterableRest$86();
+  function _slicedToArray$84(r, e) {
+    return _arrayWithHoles$85(r) || _iterableToArrayLimit$84(r, e) || _unsupportedIterableToArray$227(r, e) || _nonIterableRest$85();
   }
-  function _nonIterableRest$86() {
+  function _nonIterableRest$85() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$228(r, a) {
+  function _unsupportedIterableToArray$227(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$228(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$227(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$228(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$227(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$228(r, a) {
+  function _arrayLikeToArray$227(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit$85(r, l) {
+  function _iterableToArrayLimit$84(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -56946,7 +56972,7 @@
       return a;
     }
   }
-  function _arrayWithHoles$86(r) {
+  function _arrayWithHoles$85(r) {
     if (Array.isArray(r)) return r;
   }
   function _classCallCheck$259(a, n) {
@@ -56967,7 +56993,7 @@
     return o = _getPrototypeOf$143(o), _possibleConstructorReturn$143(t, _isNativeReflectConstruct$146() ? Reflect.construct(o, e || [], _getPrototypeOf$143(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$143(t, e) {
-    if (e && ("object" == _typeof$340(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$342(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$143(t);
   }
@@ -57015,14 +57041,14 @@
   }
   function _toPropertyKey$298(t) {
     var i = _toPrimitive$298(t, "string");
-    return "symbol" == _typeof$340(i) ? i : i + "";
+    return "symbol" == _typeof$342(i) ? i : i + "";
   }
   function _toPrimitive$298(t, r) {
-    if ("object" != _typeof$340(t) || !t) return t;
+    if ("object" != _typeof$342(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$340(i)) return i;
+      if ("object" != _typeof$342(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -57195,7 +57221,7 @@
         var pureLang = lang.replace(allMarkersRegex, "").trim();
         var sizeAttrs = "";
         if ((sizes === null || sizes === void 0 ? void 0 : sizes.length) > 0) {
-          var _sizes = _slicedToArray$85(sizes, 2),
+          var _sizes = _slicedToArray$84(sizes, 2),
             width = _sizes[0],
             height = _sizes[1];
           if (width) sizeAttrs = "width:".concat(width.slice(1), ";");
@@ -57228,7 +57254,7 @@
     }, {
       key: "wrapCode",
       value: function wrapCode($code, lang) {
-        return "<code class=\"language-".concat(lang, "\">").concat($code, "</code>");
+        return "<code class=\"language-".concat(escapeHTMLAttribute(lang), "\">").concat($code, "</code>");
       }
     }, {
       key: "renderCodeBlock",
@@ -57245,8 +57271,10 @@
           cacheCode = this.renderLineNumber(cacheCode);
         }
         var needUnExpand = this.expandCode && ((_$code$match = $code.match(/\n/g)) === null || _$code$match === void 0 ? void 0 : _$code$match.length) > 10;
-        var codeHtml = "<pre class=\"language-".concat(lang, "\">").concat(this.wrapCode(cacheCode, lang), "</pre>");
-        cacheCode = "<div\n        data-sign=\"".concat(sign, "\"\n        data-type=\"codeBlock\"\n        data-lines=\"").concat(lines, "\" \n        data-edit-code=\"").concat(this.editCode, "\" \n        data-copy-code=\"").concat(this.copyCode, "\"\n        data-expand-code=\"").concat(this.expandCode, "\"\n        data-change-lang=\"").concat(this.changeLang, "\"\n        data-lang=\"").concat(oldLang, "\"\n        style=\"position:relative\"\n        class=\"").concat(needUnExpand ? "cherry-code-unExpand" : "cherry-code-expand", "\"\n      >\n      ").concat(this.customWrapperRender(oldLang, cacheCode, codeHtml), "\n      ");
+        var safeLang = escapeHTMLAttribute(lang);
+        var safeOldLang = escapeHTMLAttribute(oldLang);
+        var codeHtml = "<pre class=\"language-".concat(safeLang, "\">").concat(this.wrapCode(cacheCode, lang), "</pre>");
+        cacheCode = "<div\n        data-sign=\"".concat(sign, "\"\n        data-type=\"codeBlock\"\n        data-lines=\"").concat(lines, "\" \n        data-edit-code=\"").concat(this.editCode, "\" \n        data-copy-code=\"").concat(this.copyCode, "\"\n        data-expand-code=\"").concat(this.expandCode, "\"\n        data-change-lang=\"").concat(this.changeLang, "\"\n        data-lang=\"").concat(safeOldLang, "\"\n        style=\"position:relative\"\n        class=\"").concat(needUnExpand ? "cherry-code-unExpand" : "cherry-code-expand", "\"\n      >\n      ").concat(this.customWrapperRender(oldLang, cacheCode, codeHtml), "\n      ");
         if (needUnExpand && $lang !== "mermaid") cacheCode += "<div class=\"cherry-mask-code-block\">\n        <div class=\"expand-btn \">\n          <i class=\"ch-icon ch-icon-expand\"></i>\n        </div>\n      </div>";
         cacheCode += "</div>";
         return cacheCode;
@@ -57366,7 +57394,7 @@
             var prefix = match.match(/^\s*/g);
             return "".concat(prefix, "~D~D\n").concat($code, "~D~D");
           }
-          var _this4$appendMermaid2 = _slicedToArray$85(_this4.appendMermaid($code, $lang), 2);
+          var _this4$appendMermaid2 = _slicedToArray$84(_this4.appendMermaid($code, $lang), 2);
           $code = _this4$appendMermaid2[0];
           $lang = _this4$appendMermaid2[1];
           var $oldLang = $lang;
@@ -57475,14 +57503,14 @@
   }(ParagraphBase);
   _defineProperty$131(CodeBlock, "HOOK_NAME", "codeBlock");
   _defineProperty$131(CodeBlock, "inlineCodeCache", {});
-  function _typeof$339(o) {
+  function _typeof$341(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$339 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$341 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$339(o);
+    }, _typeof$341(o);
   }
   function _classCallCheck$258(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -57502,7 +57530,7 @@
     return o = _getPrototypeOf$142(o), _possibleConstructorReturn$142(t, _isNativeReflectConstruct$145() ? Reflect.construct(o, e || [], _getPrototypeOf$142(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$142(t, e) {
-    if (e && ("object" == _typeof$339(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$341(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$142(t);
   }
@@ -57550,14 +57578,14 @@
   }
   function _toPropertyKey$297(t) {
     var i = _toPrimitive$297(t, "string");
-    return "symbol" == _typeof$339(i) ? i : i + "";
+    return "symbol" == _typeof$341(i) ? i : i + "";
   }
   function _toPrimitive$297(t, r) {
-    if ("object" != _typeof$339(t) || !t) return t;
+    if ("object" != _typeof$341(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$339(i)) return i;
+      if ("object" != _typeof$341(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -57655,34 +57683,34 @@
     var lo = xxHash32(input, SEED_LO);
     return toHex8(xxHash32(input, SEED_HI ^ input.length | 0)) + toHex8(lo);
   }
-  function _typeof$338(o) {
+  function _typeof$340(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$338 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$340 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$338(o);
+    }, _typeof$340(o);
   }
-  function _slicedToArray$84(r, e) {
-    return _arrayWithHoles$85(r) || _iterableToArrayLimit$84(r, e) || _unsupportedIterableToArray$227(r, e) || _nonIterableRest$85();
+  function _slicedToArray$83(r, e) {
+    return _arrayWithHoles$84(r) || _iterableToArrayLimit$83(r, e) || _unsupportedIterableToArray$226(r, e) || _nonIterableRest$84();
   }
-  function _nonIterableRest$85() {
+  function _nonIterableRest$84() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$227(r, a) {
+  function _unsupportedIterableToArray$226(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$227(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$226(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$227(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$226(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$227(r, a) {
+  function _arrayLikeToArray$226(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit$84(r, l) {
+  function _iterableToArrayLimit$83(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -57709,7 +57737,7 @@
       return a;
     }
   }
-  function _arrayWithHoles$85(r) {
+  function _arrayWithHoles$84(r) {
     if (Array.isArray(r)) return r;
   }
   function _classCallCheck$257(a, n) {
@@ -57728,14 +57756,14 @@
   }
   function _toPropertyKey$296(t) {
     var i = _toPrimitive$296(t, "string");
-    return "symbol" == _typeof$338(i) ? i : i + "";
+    return "symbol" == _typeof$340(i) ? i : i + "";
   }
   function _toPrimitive$296(t, r) {
-    if ("object" != _typeof$338(t) || !t) return t;
+    if ("object" != _typeof$340(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$338(i)) return i;
+      if ("object" != _typeof$340(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -57771,7 +57799,7 @@
       key: "get",
       value: function get(innerUrl) {
         var _innerUrl$match;
-        var urlSign = _slicedToArray$84((_innerUrl$match = innerUrl.match(cherryInnerLinkRegex)) !== null && _innerUrl$match !== void 0 ? _innerUrl$match : [], 2)[1];
+        var urlSign = _slicedToArray$83((_innerUrl$match = innerUrl.match(cherryInnerLinkRegex)) !== null && _innerUrl$match !== void 0 ? _innerUrl$match : [], 2)[1];
         if (!urlSign) return;
         return urlCache[urlSign];
       }
@@ -57779,7 +57807,7 @@
       key: "replace",
       value: function replace(innerUrl, newUrl) {
         var _innerUrl$match2;
-        var urlSign = _slicedToArray$84((_innerUrl$match2 = innerUrl.match(cherryInnerLinkRegex)) !== null && _innerUrl$match2 !== void 0 ? _innerUrl$match2 : [], 2)[1];
+        var urlSign = _slicedToArray$83((_innerUrl$match2 = innerUrl.match(cherryInnerLinkRegex)) !== null && _innerUrl$match2 !== void 0 ? _innerUrl$match2 : [], 2)[1];
         if (!urlSign) return;
         urlCache[urlSign] = newUrl;
         return innerUrl;
@@ -57789,7 +57817,7 @@
       value: function restoreAll(html) {
         return html.replace(/cherry-inner:\/\/([0-9a-f]+)/gi, function (match) {
           var originalUrl = UrlCache.get(match);
-          return typeof originalUrl === "string" ? originalUrl : match;
+          return typeof originalUrl === "string" ? originalUrl.replace(/"/g, "&quot;") : match;
         });
       }
     }, {
@@ -57799,14 +57827,14 @@
       }
     }]);
   }();
-  function _typeof$337(o) {
+  function _typeof$339(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$337 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$339 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$337(o);
+    }, _typeof$339(o);
   }
   function _classCallCheck$256(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -57826,7 +57854,7 @@
     return o = _getPrototypeOf$141(o), _possibleConstructorReturn$141(t, _isNativeReflectConstruct$144() ? Reflect.construct(o, e || [], _getPrototypeOf$141(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$141(t, e) {
-    if (e && ("object" == _typeof$337(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$339(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$141(t);
   }
@@ -57874,14 +57902,14 @@
   }
   function _toPropertyKey$295(t) {
     var i = _toPrimitive$295(t, "string");
-    return "symbol" == _typeof$337(i) ? i : i + "";
+    return "symbol" == _typeof$339(i) ? i : i + "";
   }
   function _toPrimitive$295(t, r) {
-    if ("object" != _typeof$337(t) || !t) return t;
+    if ("object" != _typeof$339(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$337(i)) return i;
+      if ("object" != _typeof$339(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -57971,14 +57999,14 @@
     }]);
   }(SyntaxBase);
   _defineProperty$129(Link$2, "HOOK_NAME", "link");
-  function _typeof$336(o) {
+  function _typeof$338(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$336 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$338 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$336(o);
+    }, _typeof$338(o);
   }
   function _classCallCheck$255(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -57998,7 +58026,7 @@
     return o = _getPrototypeOf$140(o), _possibleConstructorReturn$140(t, _isNativeReflectConstruct$143() ? Reflect.construct(o, e || [], _getPrototypeOf$140(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$140(t, e) {
-    if (e && ("object" == _typeof$336(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$338(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$140(t);
   }
@@ -58046,14 +58074,14 @@
   }
   function _toPropertyKey$294(t) {
     var i = _toPrimitive$294(t, "string");
-    return "symbol" == _typeof$336(i) ? i : i + "";
+    return "symbol" == _typeof$338(i) ? i : i + "";
   }
   function _toPrimitive$294(t, r) {
-    if ("object" != _typeof$336(t) || !t) return t;
+    if ("object" != _typeof$338(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$336(i)) return i;
+      if ("object" != _typeof$338(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -58134,14 +58162,14 @@
     }]);
   }(ParagraphBase);
   _defineProperty$128(LinkFormatter, "HOOK_NAME", "linkFormatter");
-  function _typeof$335(o) {
+  function _typeof$337(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$335 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$337 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$335(o);
+    }, _typeof$337(o);
   }
   function _classCallCheck$254(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -58161,7 +58189,7 @@
     return o = _getPrototypeOf$139(o), _possibleConstructorReturn$139(t, _isNativeReflectConstruct$142() ? Reflect.construct(o, e || [], _getPrototypeOf$139(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$139(t, e) {
-    if (e && ("object" == _typeof$335(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$337(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$139(t);
   }
@@ -58209,14 +58237,14 @@
   }
   function _toPropertyKey$293(t) {
     var i = _toPrimitive$293(t, "string");
-    return "symbol" == _typeof$335(i) ? i : i + "";
+    return "symbol" == _typeof$337(i) ? i : i + "";
   }
   function _toPrimitive$293(t, r) {
-    if ("object" != _typeof$335(t) || !t) return t;
+    if ("object" != _typeof$337(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$335(i)) return i;
+      if ("object" != _typeof$337(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -58307,14 +58335,14 @@
     }]);
   }(SyntaxBase);
   _defineProperty$127(Emphasis, "HOOK_NAME", "fontEmphasis");
-  function _typeof$334(o) {
+  function _typeof$336(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$334 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$336 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$334(o);
+    }, _typeof$336(o);
   }
   function _classCallCheck$253(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -58334,7 +58362,7 @@
     return o = _getPrototypeOf$138(o), _possibleConstructorReturn$138(t, _isNativeReflectConstruct$141() ? Reflect.construct(o, e || [], _getPrototypeOf$138(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$138(t, e) {
-    if (e && ("object" == _typeof$334(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$336(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$138(t);
   }
@@ -58382,14 +58410,14 @@
   }
   function _toPropertyKey$292(t) {
     var i = _toPrimitive$292(t, "string");
-    return "symbol" == _typeof$334(i) ? i : i + "";
+    return "symbol" == _typeof$336(i) ? i : i + "";
   }
   function _toPrimitive$292(t, r) {
-    if ("object" != _typeof$334(t) || !t) return t;
+    if ("object" != _typeof$336(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$334(i)) return i;
+      if ("object" != _typeof$336(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -58439,34 +58467,34 @@
     }]);
   }(ParagraphBase);
   _defineProperty$126(Paragraph, "HOOK_NAME", "normalParagraph");
-  function _typeof$333(o) {
+  function _typeof$335(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$333 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$335 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$333(o);
+    }, _typeof$335(o);
   }
-  function _slicedToArray$83(r, e) {
-    return _arrayWithHoles$84(r) || _iterableToArrayLimit$83(r, e) || _unsupportedIterableToArray$226(r, e) || _nonIterableRest$84();
+  function _slicedToArray$82(r, e) {
+    return _arrayWithHoles$83(r) || _iterableToArrayLimit$82(r, e) || _unsupportedIterableToArray$225(r, e) || _nonIterableRest$83();
   }
-  function _nonIterableRest$84() {
+  function _nonIterableRest$83() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$226(r, a) {
+  function _unsupportedIterableToArray$225(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$226(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$225(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$226(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$225(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$226(r, a) {
+  function _arrayLikeToArray$225(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit$83(r, l) {
+  function _iterableToArrayLimit$82(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -58493,7 +58521,7 @@
       return a;
     }
   }
-  function _arrayWithHoles$84(r) {
+  function _arrayWithHoles$83(r) {
     if (Array.isArray(r)) return r;
   }
   function _classCallCheck$252(a, n) {
@@ -58514,7 +58542,7 @@
     return o = _getPrototypeOf$137(o), _possibleConstructorReturn$137(t, _isNativeReflectConstruct$140() ? Reflect.construct(o, e || [], _getPrototypeOf$137(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$137(t, e) {
-    if (e && ("object" == _typeof$333(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$335(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$137(t);
   }
@@ -58581,14 +58609,14 @@
   }
   function _toPropertyKey$291(t) {
     var i = _toPrimitive$291(t, "string");
-    return "symbol" == _typeof$333(i) ? i : i + "";
+    return "symbol" == _typeof$335(i) ? i : i + "";
   }
   function _toPrimitive$291(t, r) {
-    if ("object" != _typeof$333(t) || !t) return t;
+    if ("object" != _typeof$335(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$333(i)) return i;
+      if ("object" != _typeof$335(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -58668,7 +58696,7 @@
         var anchorID;
         if (idMatch !== null) {
           html = html.substring(0, idMatch.index);
-          anchorID = _slicedToArray$83(idMatch, 2)[1];
+          anchorID = _slicedToArray$82(idMatch, 2)[1];
         }
         var headerTextRaw = this.$parseTitleText(html);
         if (!anchorID) anchorID = this.generateIDNoDup(headerTextRaw.replace(/~fn#([0-9]+)#/g, ""));
@@ -58766,14 +58794,14 @@
     }]);
   }(ParagraphBase);
   _defineProperty$125(Header$1, "HOOK_NAME", "header");
-  function _typeof$332(o) {
+  function _typeof$334(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$332 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$334 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$332(o);
+    }, _typeof$334(o);
   }
   function _classCallCheck$251(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -58793,7 +58821,7 @@
     return o = _getPrototypeOf$136(o), _possibleConstructorReturn$136(t, _isNativeReflectConstruct$139() ? Reflect.construct(o, e || [], _getPrototypeOf$136(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$136(t, e) {
-    if (e && ("object" == _typeof$332(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$334(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$136(t);
   }
@@ -58841,14 +58869,14 @@
   }
   function _toPropertyKey$290(t) {
     var i = _toPrimitive$290(t, "string");
-    return "symbol" == _typeof$332(i) ? i : i + "";
+    return "symbol" == _typeof$334(i) ? i : i + "";
   }
   function _toPrimitive$290(t, r) {
-    if ("object" != _typeof$332(t) || !t) return t;
+    if ("object" != _typeof$334(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$332(i)) return i;
+      if ("object" != _typeof$334(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -58884,19 +58912,19 @@
     }]);
   }(ParagraphBase);
   _defineProperty$124(Transfer, "HOOK_NAME", "transfer");
-  function _typeof$331(o) {
+  function _typeof$333(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$331 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$333 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$331(o);
+    }, _typeof$333(o);
   }
   function _createForOfIteratorHelper$157(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$225(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$224(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -58941,25 +58969,25 @@
       }
     };
   }
-  function _slicedToArray$82(r, e) {
-    return _arrayWithHoles$83(r) || _iterableToArrayLimit$82(r, e) || _unsupportedIterableToArray$225(r, e) || _nonIterableRest$83();
+  function _slicedToArray$81(r, e) {
+    return _arrayWithHoles$82(r) || _iterableToArrayLimit$81(r, e) || _unsupportedIterableToArray$224(r, e) || _nonIterableRest$82();
   }
-  function _nonIterableRest$83() {
+  function _nonIterableRest$82() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$225(r, a) {
+  function _unsupportedIterableToArray$224(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$225(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$224(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$225(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$224(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$225(r, a) {
+  function _arrayLikeToArray$224(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit$82(r, l) {
+  function _iterableToArrayLimit$81(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -58986,10 +59014,10 @@
       return a;
     }
   }
-  function _arrayWithHoles$83(r) {
+  function _arrayWithHoles$82(r) {
     if (Array.isArray(r)) return r;
   }
-  function ownKeys$62(e, r) {
+  function ownKeys$63(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -58999,12 +59027,12 @@
     }
     return t;
   }
-  function _objectSpread$62(e) {
+  function _objectSpread$63(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$62(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$63(Object(t), !0).forEach(function (r) {
         _defineProperty$123(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$62(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$63(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -59028,7 +59056,7 @@
     return o = _getPrototypeOf$135(o), _possibleConstructorReturn$135(t, _isNativeReflectConstruct$138() ? Reflect.construct(o, e || [], _getPrototypeOf$135(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$135(t, e) {
-    if (e && ("object" == _typeof$331(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$333(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$135(t);
   }
@@ -59076,14 +59104,14 @@
   }
   function _toPropertyKey$289(t) {
     var i = _toPrimitive$289(t, "string");
-    return "symbol" == _typeof$331(i) ? i : i + "";
+    return "symbol" == _typeof$333(i) ? i : i + "";
   }
   function _toPrimitive$289(t, r) {
-    if ("object" != _typeof$331(t) || !t) return t;
+    if ("object" != _typeof$333(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$331(i)) return i;
+      if ("object" != _typeof$333(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -59109,9 +59137,9 @@
       _this.chartRenderEngine = null;
       _this.selfClosing = selfClosing;
       if (enableChart === true) try {
-        _this.chartRenderEngine = new ChartRenderEngine(_objectSpread$62(_objectSpread$62(_objectSpread$62({}, externals && requiredPackages instanceof Array && requiredPackages.reduce(function (acc, pkg) {
+        _this.chartRenderEngine = new ChartRenderEngine(_objectSpread$63(_objectSpread$63(_objectSpread$63({}, externals && requiredPackages instanceof Array && requiredPackages.reduce(function (acc, pkg) {
           delete chartEngineOptions[pkg];
-          return _objectSpread$62(_objectSpread$62({}, acc), {}, _defineProperty$123({}, pkg, externals[pkg]));
+          return _objectSpread$63(_objectSpread$63({}, acc), {}, _defineProperty$123({}, pkg, externals[pkg]));
         }, {})), {}, {
           renderer: "svg",
           width: 500,
@@ -59140,7 +59168,7 @@
         if (typeof this.chartRenderEngine.isValid === "function" && !this.chartRenderEngine.isValid()) return null;
         var CHART_REGEX = /^:(\w+):(?:[ ]*{(.*?)}[ ]*)?$/;
         if (!CHART_REGEX.test(cell)) return null;
-        var _match = _slicedToArray$82(cell.match(CHART_REGEX), 3),
+        var _match = _slicedToArray$81(cell.match(CHART_REGEX), 3),
           chartType = _match[1],
           options = _match[2];
         return {
@@ -59331,26 +59359,26 @@
     }]);
   }(ParagraphBase);
   _defineProperty$123(Table$1, "HOOK_NAME", "table");
-  function _typeof$330(o) {
+  function _typeof$332(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$330 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$332 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$330(o);
+    }, _typeof$332(o);
   }
   function isBrowser() {
-    return (typeof window === "undefined" ? "undefined" : _typeof$330(window)) === "object";
+    return (typeof window === "undefined" ? "undefined" : _typeof$332(window)) === "object";
   }
-  function _typeof$329(o) {
+  function _typeof$331(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$329 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$331 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$329(o);
+    }, _typeof$331(o);
   }
   function _classCallCheck$249(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -59370,7 +59398,7 @@
     return o = _getPrototypeOf$134(o), _possibleConstructorReturn$134(t, _isNativeReflectConstruct$137() ? Reflect.construct(o, e || [], _getPrototypeOf$134(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$134(t, e) {
-    if (e && ("object" == _typeof$329(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$331(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$134(t);
   }
@@ -59418,14 +59446,14 @@
   }
   function _toPropertyKey$288(t) {
     var i = _toPrimitive$288(t, "string");
-    return "symbol" == _typeof$329(i) ? i : i + "";
+    return "symbol" == _typeof$331(i) ? i : i + "";
   }
   function _toPrimitive$288(t, r) {
-    if ("object" != _typeof$329(t) || !t) return t;
+    if ("object" != _typeof$331(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$329(i)) return i;
+      if ("object" != _typeof$331(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -59478,14 +59506,14 @@
     }]);
   }(ParagraphBase);
   _defineProperty$122(Br$1, "HOOK_NAME", "br");
-  function _typeof$328(o) {
+  function _typeof$330(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$328 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$330 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$328(o);
+    }, _typeof$330(o);
   }
   function _classCallCheck$248(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -59505,7 +59533,7 @@
     return o = _getPrototypeOf$133(o), _possibleConstructorReturn$133(t, _isNativeReflectConstruct$136() ? Reflect.construct(o, e || [], _getPrototypeOf$133(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$133(t, e) {
-    if (e && ("object" == _typeof$328(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$330(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$133(t);
   }
@@ -59553,14 +59581,14 @@
   }
   function _toPropertyKey$287(t) {
     var i = _toPrimitive$287(t, "string");
-    return "symbol" == _typeof$328(i) ? i : i + "";
+    return "symbol" == _typeof$330(i) ? i : i + "";
   }
   function _toPrimitive$287(t, r) {
-    if ("object" != _typeof$328(t) || !t) return t;
+    if ("object" != _typeof$330(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$328(i)) return i;
+      if ("object" != _typeof$330(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -59602,25 +59630,25 @@
     }]);
   }(ParagraphBase);
   _defineProperty$121(Hr$1, "HOOK_NAME", "hr");
-  function _slicedToArray$81(r, e) {
-    return _arrayWithHoles$82(r) || _iterableToArrayLimit$81(r, e) || _unsupportedIterableToArray$224(r, e) || _nonIterableRest$82();
+  function _slicedToArray$80(r, e) {
+    return _arrayWithHoles$81(r) || _iterableToArrayLimit$80(r, e) || _unsupportedIterableToArray$223(r, e) || _nonIterableRest$81();
   }
-  function _nonIterableRest$82() {
+  function _nonIterableRest$81() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$224(r, a) {
+  function _unsupportedIterableToArray$223(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$224(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$223(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$224(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$223(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$224(r, a) {
+  function _arrayLikeToArray$223(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit$81(r, l) {
+  function _iterableToArrayLimit$80(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -59647,7 +59675,7 @@
       return a;
     }
   }
-  function _arrayWithHoles$82(r) {
+  function _arrayWithHoles$81(r) {
     if (Array.isArray(r)) return r;
   }
   var imgAltHelper = {
@@ -59655,7 +59683,7 @@
       var info = alt.match(/#([0-9]+(px|em|pt|pc|in|mm|cm|ex|%)|auto)/g);
       if (!info) return "";
       var extendAttrs = "";
-      var _info = _slicedToArray$81(info, 2),
+      var _info = _slicedToArray$80(info, 2),
         width = _info[0],
         height = _info[1];
       if (width) extendAttrs = "width:".concat(width.replace(/[ #]*/g, ""), ";");
@@ -59723,16 +59751,16 @@
       }
     }
   };
-  function _typeof$327(o) {
+  function _typeof$329(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$327 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$329 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$327(o);
+    }, _typeof$329(o);
   }
-  function ownKeys$61(e, r) {
+  function ownKeys$62(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -59742,12 +59770,12 @@
     }
     return t;
   }
-  function _objectSpread$61(e) {
+  function _objectSpread$62(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$61(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$62(Object(t), !0).forEach(function (r) {
         _defineProperty$120(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$61(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$62(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -59771,7 +59799,7 @@
     return o = _getPrototypeOf$132(o), _possibleConstructorReturn$132(t, _isNativeReflectConstruct$135() ? Reflect.construct(o, e || [], _getPrototypeOf$132(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$132(t, e) {
-    if (e && ("object" == _typeof$327(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$329(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$132(t);
   }
@@ -59819,14 +59847,14 @@
   }
   function _toPropertyKey$286(t) {
     var i = _toPrimitive$286(t, "string");
-    return "symbol" == _typeof$327(i) ? i : i + "";
+    return "symbol" == _typeof$329(i) ? i : i + "";
   }
   function _toPrimitive$286(t, r) {
-    if ("object" != _typeof$327(t) || !t) return t;
+    if ("object" != _typeof$329(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$327(i)) return i;
+      if ("object" != _typeof$329(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -59928,7 +59956,7 @@
           end: "({[^{}]+?})?"
         };
         if (extendMedia) {
-          var extend = _objectSpread$61({}, ret);
+          var extend = _objectSpread$62({}, ret);
           extend.begin = isLookbehindSupported() ? "((?<!\\\\))!(".concat(extendMedia.tag.join("|"), ")") : "(^|[^\\\\])!(".concat(extendMedia.tag.join("|"), ")");
           extend.end = "({poster=(.*)})?";
           ret.regExtend = compileRegExp(extend, "g");
@@ -59939,7 +59967,7 @@
     }]);
   }(SyntaxBase);
   _defineProperty$120(Image$2, "HOOK_NAME", "image");
-  function ownKeys$60(e, r) {
+  function ownKeys$61(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -59949,12 +59977,12 @@
     }
     return t;
   }
-  function _objectSpread$60(e) {
+  function _objectSpread$61(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$60(Object(t), !0).forEach(function (r) {
+      r % 2 ? ownKeys$61(Object(t), !0).forEach(function (r) {
         _defineProperty$119(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$60(Object(t)).forEach(function (r) {
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$61(Object(t)).forEach(function (r) {
         Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
@@ -59964,7 +59992,7 @@
     return o = _getPrototypeOf$131(o), _possibleConstructorReturn$131(t, _isNativeReflectConstruct$134() ? Reflect.construct(o, e || [], _getPrototypeOf$131(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$131(t, e) {
-    if (e && ("object" == _typeof$326(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$328(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$131(t);
   }
@@ -60023,14 +60051,14 @@
   }
   function _toPropertyKey$285(t) {
     var i = _toPrimitive$285(t, "string");
-    return "symbol" == _typeof$326(i) ? i : i + "";
+    return "symbol" == _typeof$328(i) ? i : i + "";
   }
   function _toPrimitive$285(t, r) {
-    if ("object" != _typeof$326(t) || !t) return t;
+    if ("object" != _typeof$328(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$326(i)) return i;
+      if ("object" != _typeof$328(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -60038,19 +60066,19 @@
   function _classCallCheck$246(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
   }
-  function _typeof$326(o) {
+  function _typeof$328(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$326 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$328 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$326(o);
+    }, _typeof$328(o);
   }
   var INDENT_SPACE_NUM = 4;
   var TAB_SPACE_NUM = 4;
   function attrsToAttributeString(object) {
-    if (_typeof$326(object) !== "object" && Object.keys(object).length < 1) return "";
+    if (_typeof$328(object) !== "object" && Object.keys(object).length < 1) return "";
     var attrs = [""];
     Object.keys(object).forEach(function (key) {
       attrs.push("".concat(key, "=\"").concat(object[key], "\""));
@@ -60125,7 +60153,7 @@
       value: function addNode(node, current, parent, last) {
         if (node.type === "blank") this.tree[last].strs.push(node.strs[0]);else {
           this.tree[parent].children.push(current);
-          this.tree[current] = _objectSpread$60(_objectSpread$60({}, node), {}, {
+          this.tree[current] = _objectSpread$61(_objectSpread$61({}, node), {}, {
             parent: parent
           });
         }
@@ -60247,14 +60275,35 @@
     }]);
   }(ParagraphBase);
   _defineProperty$119(List$2, "HOOK_NAME", "list");
-  function _typeof$325(o) {
+  function ownKeys$60(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function (r) {
+        return Object.getOwnPropertyDescriptor(e, r).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread$60(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys$60(Object(t), !0).forEach(function (r) {
+        _defineProperty$118(e, r, t[r]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$60(Object(t)).forEach(function (r) {
+        Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
+      });
+    }
+    return e;
+  }
+  function _typeof$327(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$325 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$327 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$325(o);
+    }, _typeof$327(o);
   }
   function _classCallCheck$245(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -60274,7 +60323,7 @@
     return o = _getPrototypeOf$130(o), _possibleConstructorReturn$130(t, _isNativeReflectConstruct$133() ? Reflect.construct(o, e || [], _getPrototypeOf$130(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$130(t, e) {
-    if (e && ("object" == _typeof$325(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$327(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$130(t);
   }
@@ -60322,45 +60371,123 @@
   }
   function _toPropertyKey$284(t) {
     var i = _toPrimitive$284(t, "string");
-    return "symbol" == _typeof$325(i) ? i : i + "";
+    return "symbol" == _typeof$327(i) ? i : i + "";
   }
   function _toPrimitive$284(t, r) {
-    if ("object" != _typeof$325(t) || !t) return t;
+    if ("object" != _typeof$327(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$325(i)) return i;
+      if ("object" != _typeof$327(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
   }
+  var DEFAULT_GFM_ALERT_TYPES = {
+    note: {
+      className: "note",
+      title: "Note"
+    },
+    tip: {
+      className: "tip",
+      title: "Tip"
+    },
+    important: {
+      className: "important",
+      title: "Important"
+    },
+    warning: {
+      className: "warning",
+      title: "Warning"
+    },
+    caution: {
+      className: "caution",
+      title: "Caution"
+    }
+  };
   var Blockquote = function (_ParagraphBase) {
     function Blockquote() {
+      var _this;
+      var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
       _classCallCheck$245(this, Blockquote);
-      return _callSuper$130(this, Blockquote, [{
+      _this = _callSuper$130(this, Blockquote, [{
         needCache: true
       }]);
+      var gfmAlertConfig = (options.config || {}).gfmAlert;
+      if (gfmAlertConfig === false) {
+        _this.enableGfmAlert = false;
+        _this.gfmAlertTypes = {};
+      } else {
+        _this.enableGfmAlert = true;
+        var userTypes = gfmAlertConfig && _typeof$327(gfmAlertConfig) === "object" && gfmAlertConfig.types ? gfmAlertConfig.types : {};
+        _this.gfmAlertTypes = {};
+        Object.keys(DEFAULT_GFM_ALERT_TYPES).forEach(function (key) {
+          _this.gfmAlertTypes[key] = _objectSpread$60(_objectSpread$60({}, DEFAULT_GFM_ALERT_TYPES[key]), userTypes[key] || {});
+        });
+        Object.keys(userTypes).forEach(function (key) {
+          var k = String(key).toLowerCase();
+          if (!_this.gfmAlertTypes[k]) _this.gfmAlertTypes[k] = _objectSpread$60({
+            className: k,
+            title: userTypes[key].title || key
+          }, userTypes[key]);
+        });
+      }
+      return _this;
     }
     _inherits$132(Blockquote, _ParagraphBase);
     return _createClass$245(Blockquote, [{
+      key: "$parseGfmAlert",
+      value: function $parseGfmAlert(rawContent) {
+        if (!this.enableGfmAlert) return {
+          alertType: null,
+          alertTitle: "",
+          content: rawContent
+        };
+        var match = rawContent.match(/^\s*\[!([A-Za-z]+)\][ \t]*\r?\n?/);
+        if (!match) return {
+          alertType: null,
+          alertTitle: "",
+          content: rawContent
+        };
+        var type = match[1].toLowerCase();
+        var typeConf = this.gfmAlertTypes[type];
+        if (!typeConf) return {
+          alertType: null,
+          alertTitle: "",
+          content: rawContent
+        };
+        return {
+          alertType: typeConf.className || type,
+          alertTitle: typeConf.title || match[1],
+          content: rawContent.slice(match[0].length)
+        };
+      }
+    }, {
       key: "handleMatch",
       value: function handleMatch(str, sentenceMakeFunc) {
-        var _this = this;
+        var _this2 = this;
         return str.replace(this.RULE.reg, function (match, lines, content) {
-          var lineCount = _this.getLineCount(match, lines);
-          var sign = _this.$engine.hash(match);
-          var testHasCache = _this.testHasCache(sign);
-          if (testHasCache !== false) return _this.getCacheWithSpace(testHasCache, match);
-          var handledHtml = "<blockquote data-sign=\"".concat(sign, "_").concat(lineCount, "\" data-lines=\"").concat(lineCount, "\">");
+          var lineCount = _this2.getLineCount(match, lines);
+          var sign = _this2.$engine.hash(match);
+          var testHasCache = _this2.testHasCache(sign);
+          if (testHasCache !== false) return _this2.getCacheWithSpace(testHasCache, match);
           var htmlDomTest = content.split(/\n</);
           var after = "";
           if (htmlDomTest.length > 1) after = "\n<".concat(htmlDomTest.slice(1).join("\n<"));
           var $content = htmlDomTest[0].replace(/^([ \t]*>)/gm, "");
-          handledHtml += _this.cacheAndGetData($content, function ($content) {
-            return _this.$engine.makeHtmlForBlockquote($content).replace(/(<h[1-6]\s)/g, "$1data-in-blockquote=\"true\" ");
+          var _this2$$parseGfmAlert = _this2.$parseGfmAlert($content),
+            alertType = _this2$$parseGfmAlert.alertType,
+            alertTitle = _this2$$parseGfmAlert.alertTitle,
+            strippedContent = _this2$$parseGfmAlert.content;
+          var alertClass = alertType ? " class=\"cherry-alert cherry-alert__".concat(alertType, "\"") : "";
+          var alertDataAttr = alertType ? " data-alert-type=\"".concat(alertType, "\"") : "";
+          var handledHtml = "<blockquote".concat(alertClass, " data-sign=\"").concat(sign, "_").concat(lineCount, "\" data-lines=\"").concat(lineCount, "\"").concat(alertDataAttr, ">");
+          if (alertType) handledHtml += "<p class=\"cherry-alert--title cherry-alert--title__".concat(alertType, "\"><span class=\"cherry-alert--icon\"></span>").concat(alertTitle, "</p>");
+          handledHtml += _this2.cacheAndGetData(strippedContent, function ($content) {
+            return _this2.$engine.makeHtmlForBlockquote($content).replace(/(<h[1-6]\s)/g, "$1data-in-blockquote=\"true\" ");
           }, 2e3, -300);
           handledHtml += "</blockquote>";
-          return "".concat(_this.getCacheWithSpace(_this.pushCache(handledHtml, sign, lineCount), match)).concat(after);
+          return "".concat(_this2.getCacheWithSpace(_this2.pushCache(handledHtml, sign, lineCount), match)).concat(after);
         });
       }
     }, {
@@ -60382,14 +60509,14 @@
     }]);
   }(ParagraphBase);
   _defineProperty$118(Blockquote, "HOOK_NAME", "blockquote");
-  function _typeof$324(o) {
+  function _typeof$326(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$324 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$326 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$324(o);
+    }, _typeof$326(o);
   }
   function _classCallCheck$244(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -60409,7 +60536,7 @@
     return o = _getPrototypeOf$129(o), _possibleConstructorReturn$129(t, _isNativeReflectConstruct$132() ? Reflect.construct(o, e || [], _getPrototypeOf$129(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$129(t, e) {
-    if (e && ("object" == _typeof$324(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$326(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$129(t);
   }
@@ -60457,14 +60584,14 @@
   }
   function _toPropertyKey$283(t) {
     var i = _toPrimitive$283(t, "string");
-    return "symbol" == _typeof$324(i) ? i : i + "";
+    return "symbol" == _typeof$326(i) ? i : i + "";
   }
   function _toPrimitive$283(t, r) {
-    if ("object" != _typeof$324(t) || !t) return t;
+    if ("object" != _typeof$326(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$324(i)) return i;
+      if ("object" != _typeof$326(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -60472,7 +60599,7 @@
   function _createForOfIteratorHelper$156(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$223(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$222(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -60517,14 +60644,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$223(r, a) {
+  function _unsupportedIterableToArray$222(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$223(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$222(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$223(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$222(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$223(r, a) {
+  function _arrayLikeToArray$222(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -60771,14 +60898,14 @@
       return "\\".concat(match);
     });
   };
-  function _typeof$323(o) {
+  function _typeof$325(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$323 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$325 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$323(o);
+    }, _typeof$325(o);
   }
   function _classCallCheck$243(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -60798,7 +60925,7 @@
     return o = _getPrototypeOf$128(o), _possibleConstructorReturn$128(t, _isNativeReflectConstruct$131() ? Reflect.construct(o, e || [], _getPrototypeOf$128(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$128(t, e) {
-    if (e && ("object" == _typeof$323(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$325(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$128(t);
   }
@@ -60846,14 +60973,14 @@
   }
   function _toPropertyKey$282(t) {
     var i = _toPrimitive$282(t, "string");
-    return "symbol" == _typeof$323(i) ? i : i + "";
+    return "symbol" == _typeof$325(i) ? i : i + "";
   }
   function _toPrimitive$282(t, r) {
-    if ("object" != _typeof$323(t) || !t) return t;
+    if ("object" != _typeof$325(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$323(i)) return i;
+      if ("object" != _typeof$325(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -61015,14 +61142,14 @@
     }]);
   }(ParagraphBase);
   _defineProperty$116(MathBlock, "HOOK_NAME", "mathBlock");
-  function _typeof$322(o) {
+  function _typeof$324(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$322 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$324 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$322(o);
+    }, _typeof$324(o);
   }
   function _classCallCheck$242(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -61042,7 +61169,7 @@
     return o = _getPrototypeOf$127(o), _possibleConstructorReturn$127(t, _isNativeReflectConstruct$130() ? Reflect.construct(o, e || [], _getPrototypeOf$127(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$127(t, e) {
-    if (e && ("object" == _typeof$322(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$324(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$127(t);
   }
@@ -61090,14 +61217,14 @@
   }
   function _toPropertyKey$281(t) {
     var i = _toPrimitive$281(t, "string");
-    return "symbol" == _typeof$322(i) ? i : i + "";
+    return "symbol" == _typeof$324(i) ? i : i + "";
   }
   function _toPrimitive$281(t, r) {
-    if ("object" != _typeof$322(t) || !t) return t;
+    if ("object" != _typeof$324(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$322(i)) return i;
+      if ("object" != _typeof$324(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -61311,35 +61438,35 @@
     }]);
   }(ParagraphBase);
   _defineProperty$115(InlineMath, "HOOK_NAME", "inlineMath");
-  function _typeof$321(o) {
+  function _typeof$323(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$321 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$323 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$321(o);
+    }, _typeof$323(o);
   }
   function _toConsumableArray$79(r) {
-    return _arrayWithoutHoles$79(r) || _iterableToArray$80(r) || _unsupportedIterableToArray$222(r) || _nonIterableSpread$79();
+    return _arrayWithoutHoles$79(r) || _iterableToArray$80(r) || _unsupportedIterableToArray$221(r) || _nonIterableSpread$79();
   }
   function _nonIterableSpread$79() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$222(r, a) {
+  function _unsupportedIterableToArray$221(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$222(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$221(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$222(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$221(r, a) : void 0;
     }
   }
   function _iterableToArray$80(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles$79(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$222(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$221(r);
   }
-  function _arrayLikeToArray$222(r, a) {
+  function _arrayLikeToArray$221(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -61362,7 +61489,7 @@
     return o = _getPrototypeOf$126(o), _possibleConstructorReturn$126(t, _isNativeReflectConstruct$129() ? Reflect.construct(o, e || [], _getPrototypeOf$126(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$126(t, e) {
-    if (e && ("object" == _typeof$321(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$323(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$126(t);
   }
@@ -61429,14 +61556,14 @@
   }
   function _toPropertyKey$280(t) {
     var i = _toPrimitive$280(t, "string");
-    return "symbol" == _typeof$321(i) ? i : i + "";
+    return "symbol" == _typeof$323(i) ? i : i + "";
   }
   function _toPrimitive$280(t, r) {
-    if ("object" != _typeof$321(t) || !t) return t;
+    if ("object" != _typeof$323(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$321(i)) return i;
+      if ("object" != _typeof$323(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -61663,14 +61790,14 @@
     }]);
   }(ParagraphBase);
   _defineProperty$114(Toc$2, "HOOK_NAME", "toc");
-  function _typeof$320(o) {
+  function _typeof$322(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$320 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$322 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$320(o);
+    }, _typeof$322(o);
   }
   function _classCallCheck$240(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -61690,7 +61817,7 @@
     return o = _getPrototypeOf$125(o), _possibleConstructorReturn$125(t, _isNativeReflectConstruct$128() ? Reflect.construct(o, e || [], _getPrototypeOf$125(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$125(t, e) {
-    if (e && ("object" == _typeof$320(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$322(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$125(t);
   }
@@ -61738,14 +61865,14 @@
   }
   function _toPropertyKey$279(t) {
     var i = _toPrimitive$279(t, "string");
-    return "symbol" == _typeof$320(i) ? i : i + "";
+    return "symbol" == _typeof$322(i) ? i : i + "";
   }
   function _toPrimitive$279(t, r) {
-    if ("object" != _typeof$320(t) || !t) return t;
+    if ("object" != _typeof$322(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$320(i)) return i;
+      if ("object" != _typeof$322(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -61791,21 +61918,22 @@
           _this2 = this;
         if (this.footnoteMap[key]) return this.footnoteMap[key];
         var $key = key.replace(/"/g, "'");
+        var safeKey = escapeHTMLSpecialChar($key, true);
         var num = this.footnote.length + 1;
         var fn = {};
         var refNumberContent = this.config.refNumber.render(num, $key) || "[".concat(num, "]");
         var refNumberClass = ((_this$config$refNumbe = this.config.refNumber) === null || _this$config$refNumbe === void 0 ? void 0 : _this$config$refNumbe.appendClass) || "";
         var refNumberLinkContent = (_this$config$refList = this.config.refList) === null || _this$config$refList === void 0 || (_this$config$refList = _this$config$refList.listItem) === null || _this$config$refList === void 0 ? void 0 : _this$config$refList.render(num, $key, note, function () {
           var refNumberContent = _this2.config.refNumber.render(num, $key) || "[".concat(num, "]");
-          return "<a href=\"#fnref:".concat(num, "\" id=\"fn:").concat(num, "\" title=\"").concat($key, "\" class=\"footnote-ref ").concat(refNumberClass, "\">").concat(refNumberContent, "</a>");
+          return "<a href=\"#fnref:".concat(num, "\" id=\"fn:").concat(num, "\" title=\"").concat(safeKey, "\" class=\"footnote-ref ").concat(refNumberClass, "\">").concat(refNumberContent, "</a>");
         });
-        fn.fnref = "<a href=\"#fnref:".concat(num, "\" id=\"fn:").concat(num, "\" title=\"").concat($key, "\" class=\"footnote-ref ").concat(refNumberClass, "\">").concat(refNumberContent, "</a>");
+        fn.fnref = "<a href=\"#fnref:".concat(num, "\" id=\"fn:").concat(num, "\" title=\"").concat(safeKey, "\" class=\"footnote-ref ").concat(refNumberClass, "\">").concat(refNumberContent, "</a>");
         fn.num = num;
         fn.note = refNumberLinkContent || fn.fnref + note.trim();
         fn.note = this.$engine.makeHtmlForFootnote(fn.note);
         var refNumberBubble = this.config.bubbleCard ? "cherry-show-bubble-card" : "";
         var refNumberFinalClass = "footnote ".concat(refNumberClass, " ").concat(refNumberBubble).replace(/ {2,}/g, " ");
-        fn.fn = "<sup class=\"cherry-footnote-number\"><a href=\"#fn:".concat(num, "\" id=\"fnref:").concat(num, "\" title=\"").concat($key, "\" data-index=\"").concat(num, "\" data-key=\"").concat($key, "\" class=\"").concat(refNumberFinalClass, "\">").concat(refNumberContent, "</a></sup>");
+        fn.fn = "<sup class=\"cherry-footnote-number\"><a href=\"#fn:".concat(num, "\" id=\"fnref:").concat(num, "\" title=\"").concat(safeKey, "\" data-index=\"").concat(num, "\" data-key=\"").concat(safeKey, "\" class=\"").concat(refNumberFinalClass, "\">").concat(refNumberContent, "</a></sup>");
         this.footnote.push(fn);
         var replaceKey = "\0~fn#".concat(num - 1, "#\0");
         this.footnoteMap[key] = replaceKey;
@@ -61890,38 +62018,38 @@
     }]);
   }(ParagraphBase);
   _defineProperty$113(Footnote, "HOOK_NAME", "footnote");
-  function _typeof$319(o) {
+  function _typeof$321(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$319 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$321 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$319(o);
+    }, _typeof$321(o);
   }
   function _toConsumableArray$78(r) {
-    return _arrayWithoutHoles$78(r) || _iterableToArray$79(r) || _unsupportedIterableToArray$221(r) || _nonIterableSpread$78();
+    return _arrayWithoutHoles$78(r) || _iterableToArray$79(r) || _unsupportedIterableToArray$220(r) || _nonIterableSpread$78();
   }
   function _nonIterableSpread$78() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
   function _arrayWithoutHoles$78(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$221(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$220(r);
   }
   function _toArray$2(r) {
-    return _arrayWithHoles$81(r) || _iterableToArray$79(r) || _unsupportedIterableToArray$221(r) || _nonIterableRest$81();
+    return _arrayWithHoles$80(r) || _iterableToArray$79(r) || _unsupportedIterableToArray$220(r) || _nonIterableRest$80();
   }
-  function _nonIterableRest$81() {
+  function _nonIterableRest$80() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$221(r, a) {
+  function _unsupportedIterableToArray$220(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$221(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$220(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$221(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$220(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$221(r, a) {
+  function _arrayLikeToArray$220(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -61929,7 +62057,7 @@
   function _iterableToArray$79(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithHoles$81(r) {
+  function _arrayWithHoles$80(r) {
     if (Array.isArray(r)) return r;
   }
   function _classCallCheck$239(a, n) {
@@ -61950,7 +62078,7 @@
     return o = _getPrototypeOf$124(o), _possibleConstructorReturn$124(t, _isNativeReflectConstruct$127() ? Reflect.construct(o, e || [], _getPrototypeOf$124(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$124(t, e) {
-    if (e && ("object" == _typeof$319(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$321(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$124(t);
   }
@@ -61998,14 +62126,14 @@
   }
   function _toPropertyKey$278(t) {
     var i = _toPrimitive$278(t, "string");
-    return "symbol" == _typeof$319(i) ? i : i + "";
+    return "symbol" == _typeof$321(i) ? i : i + "";
   }
   function _toPrimitive$278(t, r) {
-    if ("object" != _typeof$319(t) || !t) return t;
+    if ("object" != _typeof$321(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$319(i)) return i;
+      if ("object" != _typeof$321(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -62039,7 +62167,7 @@
       value: function pushCommentReferenceCache(key, cache) {
         var _cache$split2 = _toArray$2(cache.split(/[ ]+/g)),
           url = _cache$split2[0],
-          args = _arrayLikeToArray$221(_cache$split2).slice(1);
+          args = _arrayLikeToArray$220(_cache$split2).slice(1);
         var unwrappedUrl = this.unwrapUrl(url);
         if (!isValidScheme(unwrappedUrl)) return;
         var innerUrl = UrlCache.set(encodeURIOnce(unwrappedUrl));
@@ -62098,7 +62226,7 @@
   }(ParagraphBase);
   _defineProperty$112(CommentReference, "HOOK_NAME", "commentReference");
   function _toConsumableArray$77(r) {
-    return _arrayWithoutHoles$77(r) || _iterableToArray$78(r) || _unsupportedIterableToArray$220(r) || _nonIterableSpread$77();
+    return _arrayWithoutHoles$77(r) || _iterableToArray$78(r) || _unsupportedIterableToArray$219(r) || _nonIterableSpread$77();
   }
   function _nonIterableSpread$77() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -62107,24 +62235,24 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles$77(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$220(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$219(r);
   }
-  function _typeof$318(o) {
+  function _typeof$320(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$318 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$320 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$318(o);
+    }, _typeof$320(o);
   }
-  function _slicedToArray$80(r, e) {
-    return _arrayWithHoles$80(r) || _iterableToArrayLimit$80(r, e) || _unsupportedIterableToArray$220(r, e) || _nonIterableRest$80();
+  function _slicedToArray$79(r, e) {
+    return _arrayWithHoles$79(r) || _iterableToArrayLimit$79(r, e) || _unsupportedIterableToArray$219(r, e) || _nonIterableRest$79();
   }
-  function _nonIterableRest$80() {
+  function _nonIterableRest$79() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit$80(r, l) {
+  function _iterableToArrayLimit$79(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e,
@@ -62151,13 +62279,13 @@
       return a;
     }
   }
-  function _arrayWithHoles$80(r) {
+  function _arrayWithHoles$79(r) {
     if (Array.isArray(r)) return r;
   }
   function _createForOfIteratorHelper$155(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$220(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$219(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -62202,14 +62330,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$220(r, a) {
+  function _unsupportedIterableToArray$219(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$220(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$219(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$220(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$219(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$220(r, a) {
+  function _arrayLikeToArray$219(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -62276,11 +62404,11 @@
       _step;
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var _step$value = _slicedToArray$80(_step.value, 2),
+        var _step$value = _slicedToArray$79(_step.value, 2),
           property = _step$value[0],
           value = _step$value[1];
         if (objectHasOwnProperty(object, property)) {
-          if (arrayIsArray(value)) newObject[property] = cleanArray(value);else if (value && _typeof$318(value) === "object" && value.constructor === Object) newObject[property] = clone$3(value);else newObject[property] = value;
+          if (arrayIsArray(value)) newObject[property] = cleanArray(value);else if (value && _typeof$320(value) === "object" && value.constructor === Object) newObject[property] = clone$3(value);else newObject[property] = value;
         }
       }
     } catch (err) {
@@ -62291,7 +62419,7 @@
     return newObject;
   }
   function stringifyValue(value) {
-    switch (_typeof$318(value)) {
+    switch (_typeof$320(value)) {
       case "string":
         return value;
       case "number":
@@ -62479,7 +62607,7 @@
     var _parseConfig = function _parseConfig() {
       var cfg = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
       if (CONFIG && CONFIG === cfg) return;
-      if (!cfg || _typeof$318(cfg) !== "object") cfg = {};
+      if (!cfg || _typeof$320(cfg) !== "object") cfg = {};
       cfg = clone$3(cfg);
       PARSER_MEDIA_TYPE = SUPPORTED_PARSER_MEDIA_TYPES.indexOf(cfg.PARSER_MEDIA_TYPE) === -1 ? DEFAULT_PARSER_MEDIA_TYPE : cfg.PARSER_MEDIA_TYPE;
       transformCaseFunc = PARSER_MEDIA_TYPE === "application/xhtml+xml" ? stringToString : stringToLowerCase;
@@ -62491,7 +62619,7 @@
       FORBID_CONTENTS = objectHasOwnProperty(cfg, "FORBID_CONTENTS") && arrayIsArray(cfg.FORBID_CONTENTS) ? addToSet({}, cfg.FORBID_CONTENTS, transformCaseFunc) : DEFAULT_FORBID_CONTENTS;
       FORBID_TAGS = objectHasOwnProperty(cfg, "FORBID_TAGS") && arrayIsArray(cfg.FORBID_TAGS) ? addToSet({}, cfg.FORBID_TAGS, transformCaseFunc) : clone$3({});
       FORBID_ATTR = objectHasOwnProperty(cfg, "FORBID_ATTR") && arrayIsArray(cfg.FORBID_ATTR) ? addToSet({}, cfg.FORBID_ATTR, transformCaseFunc) : clone$3({});
-      USE_PROFILES = objectHasOwnProperty(cfg, "USE_PROFILES") ? cfg.USE_PROFILES && _typeof$318(cfg.USE_PROFILES) === "object" ? clone$3(cfg.USE_PROFILES) : cfg.USE_PROFILES : false;
+      USE_PROFILES = objectHasOwnProperty(cfg, "USE_PROFILES") ? cfg.USE_PROFILES && _typeof$320(cfg.USE_PROFILES) === "object" ? clone$3(cfg.USE_PROFILES) : cfg.USE_PROFILES : false;
       ALLOW_ARIA_ATTR = cfg.ALLOW_ARIA_ATTR !== false;
       ALLOW_DATA_ATTR = cfg.ALLOW_DATA_ATTR !== false;
       ALLOW_UNKNOWN_PROTOCOLS = cfg.ALLOW_UNKNOWN_PROTOCOLS || false;
@@ -62509,9 +62637,9 @@
       IN_PLACE = cfg.IN_PLACE || false;
       IS_ALLOWED_URI$1 = isRegex(cfg.ALLOWED_URI_REGEXP) ? cfg.ALLOWED_URI_REGEXP : IS_ALLOWED_URI;
       NAMESPACE = typeof cfg.NAMESPACE === "string" ? cfg.NAMESPACE : HTML_NAMESPACE;
-      MATHML_TEXT_INTEGRATION_POINTS = objectHasOwnProperty(cfg, "MATHML_TEXT_INTEGRATION_POINTS") && cfg.MATHML_TEXT_INTEGRATION_POINTS && _typeof$318(cfg.MATHML_TEXT_INTEGRATION_POINTS) === "object" ? clone$3(cfg.MATHML_TEXT_INTEGRATION_POINTS) : addToSet({}, ["mi", "mo", "mn", "ms", "mtext"]);
-      HTML_INTEGRATION_POINTS = objectHasOwnProperty(cfg, "HTML_INTEGRATION_POINTS") && cfg.HTML_INTEGRATION_POINTS && _typeof$318(cfg.HTML_INTEGRATION_POINTS) === "object" ? clone$3(cfg.HTML_INTEGRATION_POINTS) : addToSet({}, ["annotation-xml"]);
-      var customElementHandling = objectHasOwnProperty(cfg, "CUSTOM_ELEMENT_HANDLING") && cfg.CUSTOM_ELEMENT_HANDLING && _typeof$318(cfg.CUSTOM_ELEMENT_HANDLING) === "object" ? clone$3(cfg.CUSTOM_ELEMENT_HANDLING) : create$3(null);
+      MATHML_TEXT_INTEGRATION_POINTS = objectHasOwnProperty(cfg, "MATHML_TEXT_INTEGRATION_POINTS") && cfg.MATHML_TEXT_INTEGRATION_POINTS && _typeof$320(cfg.MATHML_TEXT_INTEGRATION_POINTS) === "object" ? clone$3(cfg.MATHML_TEXT_INTEGRATION_POINTS) : addToSet({}, ["mi", "mo", "mn", "ms", "mtext"]);
+      HTML_INTEGRATION_POINTS = objectHasOwnProperty(cfg, "HTML_INTEGRATION_POINTS") && cfg.HTML_INTEGRATION_POINTS && _typeof$320(cfg.HTML_INTEGRATION_POINTS) === "object" ? clone$3(cfg.HTML_INTEGRATION_POINTS) : addToSet({}, ["annotation-xml"]);
+      var customElementHandling = objectHasOwnProperty(cfg, "CUSTOM_ELEMENT_HANDLING") && cfg.CUSTOM_ELEMENT_HANDLING && _typeof$320(cfg.CUSTOM_ELEMENT_HANDLING) === "object" ? clone$3(cfg.CUSTOM_ELEMENT_HANDLING) : create$3(null);
       CUSTOM_ELEMENT_HANDLING = create$3(null);
       if (objectHasOwnProperty(customElementHandling, "tagNameCheck") && isRegexOrFunction(customElementHandling.tagNameCheck)) CUSTOM_ELEMENT_HANDLING.tagNameCheck = customElementHandling.tagNameCheck;
       if (objectHasOwnProperty(customElementHandling, "attributeNameCheck") && isRegexOrFunction(customElementHandling.attributeNameCheck)) CUSTOM_ELEMENT_HANDLING.attributeNameCheck = customElementHandling.attributeNameCheck;
@@ -62814,7 +62942,7 @@
             _removeAttribute(name, currentNode);
             return 0;
           }
-          if (trustedTypesPolicy && _typeof$318(trustedTypes) === "object" && typeof trustedTypes.getAttributeType === "function") {
+          if (trustedTypesPolicy && _typeof$320(trustedTypes) === "object" && typeof trustedTypes.getAttributeType === "function") {
             if (namespaceURI) ;else switch (trustedTypes.getAttributeType(lcTag, lcName)) {
               case "TrustedHTML":
                 value = trustedTypesPolicy.createHTML(value);
@@ -63034,7 +63162,7 @@
       return typeof window === "undefined" ? null : window;
     };
     _createTrustedTypesPolicy = function _createTrustedTypesPolicy(trustedTypes, purifyHostElement) {
-      if (_typeof$318(trustedTypes) !== "object" || typeof trustedTypes.createPolicy !== "function") return null;
+      if (_typeof$320(trustedTypes) !== "object" || typeof trustedTypes.createPolicy !== "function") return null;
       var suffix = null;
       var ATTR_NAME = "data-tt-policy-suffix";
       if (purifyHostElement && purifyHostElement.hasAttribute(ATTR_NAME)) suffix = purifyHostElement.getAttribute(ATTR_NAME);
@@ -63070,14 +63198,14 @@
   });
   init_purify_es();
   var sanitizer = purify(window);
-  function _typeof$317(o) {
+  function _typeof$319(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$317 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$319 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$317(o);
+    }, _typeof$319(o);
   }
   function _classCallCheck$238(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -63097,7 +63225,7 @@
     return o = _getPrototypeOf$123(o), _possibleConstructorReturn$123(t, _isNativeReflectConstruct$125() ? Reflect.construct(o, e || [], _getPrototypeOf$123(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$123(t, e) {
-    if (e && ("object" == _typeof$317(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$319(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$123(t);
   }
@@ -63145,14 +63273,14 @@
   }
   function _toPropertyKey$277(t) {
     var i = _toPrimitive$277(t, "string");
-    return "symbol" == _typeof$317(i) ? i : i + "";
+    return "symbol" == _typeof$319(i) ? i : i + "";
   }
   function _toPrimitive$277(t, r) {
-    if ("object" != _typeof$317(t) || !t) return t;
+    if ("object" != _typeof$319(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$317(i)) return i;
+      if ("object" != _typeof$319(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -65094,37 +65222,37 @@
     }
   };
   function _toConsumableArray$76(r) {
-    return _arrayWithoutHoles$76(r) || _iterableToArray$77(r) || _unsupportedIterableToArray$219(r) || _nonIterableSpread$76();
+    return _arrayWithoutHoles$76(r) || _iterableToArray$77(r) || _unsupportedIterableToArray$218(r) || _nonIterableSpread$76();
   }
   function _nonIterableSpread$76() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$219(r, a) {
+  function _unsupportedIterableToArray$218(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$219(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$218(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$219(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$218(r, a) : void 0;
     }
   }
   function _iterableToArray$77(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles$76(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$219(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$218(r);
   }
-  function _arrayLikeToArray$219(r, a) {
+  function _arrayLikeToArray$218(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _typeof$316(o) {
+  function _typeof$318(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$316 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$318 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$316(o);
+    }, _typeof$318(o);
   }
   function ownKeys$59(e, r) {
     var t = Object.keys(e);
@@ -65165,7 +65293,7 @@
     return o = _getPrototypeOf$122(o), _possibleConstructorReturn$122(t, _isNativeReflectConstruct$124() ? Reflect.construct(o, e || [], _getPrototypeOf$122(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$122(t, e) {
-    if (e && ("object" == _typeof$316(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$318(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$122(t);
   }
@@ -65213,14 +65341,14 @@
   }
   function _toPropertyKey$276(t) {
     var i = _toPrimitive$276(t, "string");
-    return "symbol" == _typeof$316(i) ? i : i + "";
+    return "symbol" == _typeof$318(i) ? i : i + "";
   }
   function _toPrimitive$276(t, r) {
-    if ("object" != _typeof$316(t) || !t) return t;
+    if ("object" != _typeof$318(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$316(i)) return i;
+      if ("object" != _typeof$318(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -65260,7 +65388,7 @@
         resourceURL: "https://github.githubassets.com/images/icons/emoji/unicode/${code}.png?v8",
         emojis: _objectSpread$59({}, gfmUnicode.emojis)
       };
-      if (_typeof$316(config) !== "object") return _possibleConstructorReturn$122(_this);
+      if (_typeof$318(config) !== "object") return _possibleConstructorReturn$122(_this);
       var useUnicode = config.useUnicode,
         customResourceURL = config.customResourceURL,
         customRenderer = config.customRenderer,
@@ -65309,14 +65437,14 @@
     }]);
   }(SyntaxBase);
   _defineProperty$110(Emoji, "HOOK_NAME", "emoji");
-  function _typeof$315(o) {
+  function _typeof$317(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$315 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$317 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$315(o);
+    }, _typeof$317(o);
   }
   function _classCallCheck$236(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -65336,7 +65464,7 @@
     return o = _getPrototypeOf$121(o), _possibleConstructorReturn$121(t, _isNativeReflectConstruct$123() ? Reflect.construct(o, e || [], _getPrototypeOf$121(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$121(t, e) {
-    if (e && ("object" == _typeof$315(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$317(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$121(t);
   }
@@ -65384,14 +65512,14 @@
   }
   function _toPropertyKey$275(t) {
     var i = _toPrimitive$275(t, "string");
-    return "symbol" == _typeof$315(i) ? i : i + "";
+    return "symbol" == _typeof$317(i) ? i : i + "";
   }
   function _toPrimitive$275(t, r) {
-    if ("object" != _typeof$315(t) || !t) return t;
+    if ("object" != _typeof$317(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$315(i)) return i;
+      if ("object" != _typeof$317(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -65422,14 +65550,14 @@
     }]);
   }(SyntaxBase);
   _defineProperty$109(Underline$1, "HOOK_NAME", "underline");
-  function _typeof$314(o) {
+  function _typeof$316(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$314 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$316 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$314(o);
+    }, _typeof$316(o);
   }
   function _classCallCheck$235(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -65449,7 +65577,7 @@
     return o = _getPrototypeOf$120(o), _possibleConstructorReturn$120(t, _isNativeReflectConstruct$122() ? Reflect.construct(o, e || [], _getPrototypeOf$120(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$120(t, e) {
-    if (e && ("object" == _typeof$314(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$316(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$120(t);
   }
@@ -65497,14 +65625,14 @@
   }
   function _toPropertyKey$274(t) {
     var i = _toPrimitive$274(t, "string");
-    return "symbol" == _typeof$314(i) ? i : i + "";
+    return "symbol" == _typeof$316(i) ? i : i + "";
   }
   function _toPrimitive$274(t, r) {
-    if ("object" != _typeof$314(t) || !t) return t;
+    if ("object" != _typeof$316(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$314(i)) return i;
+      if ("object" != _typeof$316(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -65550,14 +65678,14 @@
   var codePreviewLangSelectList = allCodeLangPrismSupport.filter(function (item, index) {
     return allCodeLangPrismSupport.indexOf(item) === index;
   });
-  function _typeof$313(o) {
+  function _typeof$315(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$313 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$315 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$313(o);
+    }, _typeof$315(o);
   }
   function ownKeys$58(e, r) {
     var t = Object.keys(e);
@@ -65590,14 +65718,14 @@
   }
   function _toPropertyKey$273(t) {
     var i = _toPrimitive$273(t, "string");
-    return "symbol" == _typeof$313(i) ? i : i + "";
+    return "symbol" == _typeof$315(i) ? i : i + "";
   }
   function _toPrimitive$273(t, r) {
-    if ("object" != _typeof$313(t) || !t) return t;
+    if ("object" != _typeof$315(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$313(i)) return i;
+      if ("object" != _typeof$315(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -65605,7 +65733,7 @@
   function _createForOfIteratorHelper$154(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$218(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$217(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -65650,14 +65778,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$218(r, a) {
+  function _unsupportedIterableToArray$217(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$218(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$217(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$218(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$217(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$218(r, a) {
+  function _arrayLikeToArray$217(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -65938,19 +66066,19 @@
       return item.keyword.startsWith(keyword[0]);
     });
   }
-  function _typeof$312(o) {
+  function _typeof$314(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$312 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$314 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$312(o);
+    }, _typeof$314(o);
   }
   function _createForOfIteratorHelper$153(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray$217(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray$216(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0,
           F = function F() {};
@@ -65995,14 +66123,14 @@
       }
     };
   }
-  function _unsupportedIterableToArray$217(r, a) {
+  function _unsupportedIterableToArray$216(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$217(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$216(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$217(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$216(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray$217(r, a) {
+  function _arrayLikeToArray$216(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -66025,7 +66153,7 @@
     return o = _getPrototypeOf$119(o), _possibleConstructorReturn$119(t, _isNativeReflectConstruct$121() ? Reflect.construct(o, e || [], _getPrototypeOf$119(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$119(t, e) {
-    if (e && ("object" == _typeof$312(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$314(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$119(t);
   }
@@ -66073,14 +66201,14 @@
   }
   function _toPropertyKey$272(t) {
     var i = _toPrimitive$272(t, "string");
-    return "symbol" == _typeof$312(i) ? i : i + "";
+    return "symbol" == _typeof$314(i) ? i : i + "";
   }
   function _toPrimitive$272(t, r) {
-    if ("object" != _typeof$312(t) || !t) return t;
+    if ("object" != _typeof$314(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$312(i)) return i;
+      if ("object" != _typeof$314(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -66368,7 +66496,7 @@
         var _this6 = this;
         this.tryCreatePanel();
         var defaultValue = suggestList.map(function (suggest, idx) {
-          if (_typeof$312(suggest) === "object" && suggest !== null) {
+          if (_typeof$314(suggest) === "object" && suggest !== null) {
             var renderContent = suggest.label;
             if (suggest !== null && suggest !== void 0 && suggest.icon) renderContent = "<i class=\"ch-icon ch-icon-".concat(suggest.icon, "\"></i>").concat(renderContent);
             return _this6.renderPanelItem(renderContent, false);
@@ -66380,7 +66508,7 @@
         this.$suggesterPanel.innerHTML = "";
         if (typeof defaultValue === "string") this.$suggesterPanel.innerHTML = defaultValue;else if (Array.isArray(defaultValue) && defaultValue.length > 0) defaultValue.forEach(function (item) {
           _this6.$suggesterPanel.appendChild(item);
-        });else if (_typeof$312(defaultValue) === "object" && defaultValue.nodeType === 1) this.$suggesterPanel.appendChild(defaultValue);
+        });else if (_typeof$314(defaultValue) === "object" && defaultValue.nodeType === 1) this.$suggesterPanel.appendChild(defaultValue);
       }
     }, {
       key: "renderPanelItem",
@@ -66527,7 +66655,7 @@
         if (optionItem) {
           var _this$editor6;
           var result = "";
-          if (_typeof$312(optionItem) === "object" && optionItem !== null && typeof optionItem.value === "string") result = optionItem.value;else if (_typeof$312(optionItem) === "object" && optionItem !== null && typeof optionItem.value === "function") result = optionItem.value();else result = " ".concat(this.keyword).concat(optionItem, " ");
+          if (_typeof$314(optionItem) === "object" && optionItem !== null && typeof optionItem.value === "string") result = optionItem.value;else if (_typeof$314(optionItem) === "object" && optionItem !== null && typeof optionItem.value === "function") result = optionItem.value();else result = " ".concat(this.keyword).concat(optionItem, " ");
           if (result.endsWith(" ") && (_this$editor6 = this.editor) !== null && _this$editor6 !== void 0 && (_this$editor6 = _this$editor6.editor) !== null && _this$editor6 !== void 0 && _this$editor6.state && cursorTo !== null) {
             var doc = this.editor.editor.state.doc;
             var currentDocLength = doc === null || doc === void 0 ? void 0 : doc.length;
@@ -66692,14 +66820,14 @@
       }
     }]);
   }();
-  function _typeof$311(o) {
+  function _typeof$313(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$311 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$313 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$311(o);
+    }, _typeof$313(o);
   }
   function _classCallCheck$233(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -66719,7 +66847,7 @@
     return o = _getPrototypeOf$118(o), _possibleConstructorReturn$118(t, _isNativeReflectConstruct$120() ? Reflect.construct(o, e || [], _getPrototypeOf$118(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$118(t, e) {
-    if (e && ("object" == _typeof$311(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$313(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$118(t);
   }
@@ -66767,14 +66895,14 @@
   }
   function _toPropertyKey$271(t) {
     var i = _toPrimitive$271(t, "string");
-    return "symbol" == _typeof$311(i) ? i : i + "";
+    return "symbol" == _typeof$313(i) ? i : i + "";
   }
   function _toPrimitive$271(t, r) {
-    if ("object" != _typeof$311(t) || !t) return t;
+    if ("object" != _typeof$313(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$311(i)) return i;
+      if ("object" != _typeof$313(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -66805,35 +66933,35 @@
     }]);
   }(SyntaxBase);
   _defineProperty$105(Ruby$1, "HOOK_NAME", "ruby");
-  function _typeof$310(o) {
+  function _typeof$312(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$310 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$312 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$310(o);
+    }, _typeof$312(o);
   }
   function _toConsumableArray$75(r) {
-    return _arrayWithoutHoles$75(r) || _iterableToArray$76(r) || _unsupportedIterableToArray$216(r) || _nonIterableSpread$75();
+    return _arrayWithoutHoles$75(r) || _iterableToArray$76(r) || _unsupportedIterableToArray$215(r) || _nonIterableSpread$75();
   }
   function _nonIterableSpread$75() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray$216(r, a) {
+  function _unsupportedIterableToArray$215(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$216(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray$215(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$216(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$215(r, a) : void 0;
     }
   }
   function _iterableToArray$76(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles$75(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray$216(r);
+    if (Array.isArray(r)) return _arrayLikeToArray$215(r);
   }
-  function _arrayLikeToArray$216(r, a) {
+  function _arrayLikeToArray$215(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -66856,7 +66984,7 @@
     return o = _getPrototypeOf$117(o), _possibleConstructorReturn$117(t, _isNativeReflectConstruct$119() ? Reflect.construct(o, e || [], _getPrototypeOf$117(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$117(t, e) {
-    if (e && ("object" == _typeof$310(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$312(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$117(t);
   }
@@ -66904,14 +67032,14 @@
   }
   function _toPropertyKey$270(t) {
     var i = _toPrimitive$270(t, "string");
-    return "symbol" == _typeof$310(i) ? i : i + "";
+    return "symbol" == _typeof$312(i) ? i : i + "";
   }
   function _toPrimitive$270(t, r) {
-    if ("object" != _typeof$310(t) || !t) return t;
+    if ("object" != _typeof$312(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$310(i)) return i;
+      if ("object" != _typeof$312(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -67266,14 +67394,14 @@
     }]);
   }(ParagraphBase);
   _defineProperty$104(Panel$1, "HOOK_NAME", "panel");
-  function _typeof$309(o) {
+  function _typeof$311(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$309 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$311 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$309(o);
+    }, _typeof$311(o);
   }
   function _classCallCheck$231(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -67293,7 +67421,7 @@
     return o = _getPrototypeOf$116(o), _possibleConstructorReturn$116(t, _isNativeReflectConstruct$118() ? Reflect.construct(o, e || [], _getPrototypeOf$116(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$116(t, e) {
-    if (e && ("object" == _typeof$309(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$311(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$116(t);
   }
@@ -67341,14 +67469,14 @@
   }
   function _toPropertyKey$269(t) {
     var i = _toPrimitive$269(t, "string");
-    return "symbol" == _typeof$309(i) ? i : i + "";
+    return "symbol" == _typeof$311(i) ? i : i + "";
   }
   function _toPrimitive$269(t, r) {
-    if ("object" != _typeof$309(t) || !t) return t;
+    if ("object" != _typeof$311(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$309(i)) return i;
+      if ("object" != _typeof$311(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -67436,62 +67564,55 @@
     }]);
   }(ParagraphBase);
   _defineProperty$103(Detail$1, "HOOK_NAME", "detail");
-  function _typeof$308(o) {
+  function _typeof$310(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$308 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$310 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$308(o);
+    }, _typeof$310(o);
   }
-  function _slicedToArray$79(r, e) {
-    return _arrayWithHoles$79(r) || _iterableToArrayLimit$79(r, e) || _unsupportedIterableToArray$215(r, e) || _nonIterableRest$79();
+  function getFrontMatterRegExp() {
+    return /^[ \t]*-{3}[ \t]*\r?\n([\s\S]*?)\r?\n[ \t]*-{3}[ \t]*(?:\r?\n|$)/;
   }
-  function _nonIterableRest$79() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  function parseFrontMatterContent(content) {
+    var trimmed = (content || "").trim();
+    if (!trimmed) return {};
+    try {
+      var obj = JSON.parse(trimmed);
+      if (obj && _typeof$310(obj) === "object" && !Array.isArray(obj)) return obj;
+    } catch (e) {}
+    var result = {};
+    trimmed.split("\n").forEach(function (line) {
+      var idx = line.indexOf(":");
+      if (idx <= 0) return;
+      var key = line.slice(0, idx).trim();
+      var value = line.slice(idx + 1).trim();
+      if (!key || key.length > 1024) return;
+      result[key] = value;
+    });
+    return result;
   }
-  function _unsupportedIterableToArray$215(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray$215(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$215(r, a) : void 0;
-    }
+  function stringifyFrontMatter(data) {
+    var keys = Object.keys(data || {});
+    if (keys.length === 0) return "";
+    if (keys.every(function (k) {
+      var v = data[k];
+      return v === null || ["string", "number", "boolean"].includes(_typeof$310(v));
+    })) return keys.map(function (k) {
+      return "".concat(k, ": ").concat(data[k] === null ? "" : String(data[k]));
+    }).join("\n");
+    return JSON.stringify(data, null, 2);
   }
-  function _arrayLikeToArray$215(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
-  }
-  function _iterableToArrayLimit$79(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e,
-        n,
-        i,
-        u,
-        a = [],
-        f = !0,
-        o = !1;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = !1;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0);
-      } catch (r) {
-        o = !0, n = r;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles$79(r) {
-    if (Array.isArray(r)) return r;
+  function _typeof$309(o) {
+    "@babel/helpers - typeof";
+
+    return _typeof$309 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+      return typeof o;
+    } : function (o) {
+      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+    }, _typeof$309(o);
   }
   function _classCallCheck$230(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -67511,7 +67632,7 @@
     return o = _getPrototypeOf$115(o), _possibleConstructorReturn$115(t, _isNativeReflectConstruct$117() ? Reflect.construct(o, e || [], _getPrototypeOf$115(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$115(t, e) {
-    if (e && ("object" == _typeof$308(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$309(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$115(t);
   }
@@ -67559,14 +67680,14 @@
   }
   function _toPropertyKey$268(t) {
     var i = _toPrimitive$268(t, "string");
-    return "symbol" == _typeof$308(i) ? i : i + "";
+    return "symbol" == _typeof$309(i) ? i : i + "";
   }
   function _toPrimitive$268(t, r) {
-    if ("object" != _typeof$308(t) || !t) return t;
+    if ("object" != _typeof$309(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$308(i)) return i;
+      if ("object" != _typeof$309(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -67587,22 +67708,7 @@
           var _match$match$length, _match$match;
           var lineCount = (_match$match$length = (_match$match = match.match(/\n/g)) === null || _match$match === void 0 ? void 0 : _match$match.length) !== null && _match$match$length !== void 0 ? _match$match$length : 0;
           var sign = "fontMatter".concat(lineCount);
-          var frontmatter;
-          try {
-            frontmatter = JSON.parse(content.trim());
-          } catch (error) {
-            var lines = content.trim().split("\n");
-            frontmatter = {};
-            lines.forEach(function (line) {
-              var _line$split2 = _slicedToArray$79(line.split(":"), 2),
-                key = _line$split2[0],
-                value = _line$split2[1];
-              if (typeof key === "string" && typeof value === "string") {
-                if (key.length > 1024) return;
-                frontmatter[key.trim()] = value.trim();
-              }
-            });
-          }
+          var frontmatter = parseFrontMatterContent(content);
           if (Object.keys(frontmatter).length <= 0) return match;
           if ("font-size" in frontmatter || "fontSize" in frontmatter) _this.$engine.$cherry.previewer.getDom().style.fontSize = frontmatter["font-size"] || frontmatter.fontSize;
           var html = "<p data-sign=\"".concat(sign, "\" data-type=\"frontMatter\" data-lines=\"").concat(lineCount, "\" data-content=\"").concat(escapeHTMLSpecialChar(JSON.stringify(frontmatter)), "\"></p>");
@@ -67629,14 +67735,14 @@
     }]);
   }(ParagraphBase);
   _defineProperty$102(FrontMatter, "HOOK_NAME", "frontMatter");
-  function _typeof$307(o) {
+  function _typeof$308(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$307 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$308 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$307(o);
+    }, _typeof$308(o);
   }
   function _classCallCheck$229(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -67656,7 +67762,7 @@
     return o = _getPrototypeOf$114(o), _possibleConstructorReturn$114(t, _isNativeReflectConstruct$116() ? Reflect.construct(o, e || [], _getPrototypeOf$114(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$114(t, e) {
-    if (e && ("object" == _typeof$307(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$308(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$114(t);
   }
@@ -67704,14 +67810,14 @@
   }
   function _toPropertyKey$267(t) {
     var i = _toPrimitive$267(t, "string");
-    return "symbol" == _typeof$307(i) ? i : i + "";
+    return "symbol" == _typeof$308(i) ? i : i + "";
   }
   function _toPrimitive$267(t, r) {
-    if ("object" != _typeof$307(t) || !t) return t;
+    if ("object" != _typeof$308(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$307(i)) return i;
+      if ("object" != _typeof$308(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -67743,14 +67849,14 @@
     }]);
   }(SyntaxBase);
   _defineProperty$101(Space, "HOOK_NAME", "space");
-  function _typeof$306(o) {
+  function _typeof$307(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$306 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$307 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$306(o);
+    }, _typeof$307(o);
   }
   function _classCallCheck$228(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -67770,7 +67876,7 @@
     return o = _getPrototypeOf$113(o), _possibleConstructorReturn$113(t, _isNativeReflectConstruct$115() ? Reflect.construct(o, e || [], _getPrototypeOf$113(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$113(t, e) {
-    if (e && ("object" == _typeof$306(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$307(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$113(t);
   }
@@ -67818,14 +67924,14 @@
   }
   function _toPropertyKey$266(t) {
     var i = _toPrimitive$266(t, "string");
-    return "symbol" == _typeof$306(i) ? i : i + "";
+    return "symbol" == _typeof$307(i) ? i : i + "";
   }
   function _toPrimitive$266(t, r) {
-    if ("object" != _typeof$306(t) || !t) return t;
+    if ("object" != _typeof$307(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$306(i)) return i;
+      if ("object" != _typeof$307(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -67893,7 +67999,8 @@
         if (!!this.$cherry.options.engine.syntax.link && (_this$$cherry$options = this.$cherry.options.engine.syntax.link) !== null && _this$$cherry$options !== void 0 && _this$$cherry$options.selfClosing || this.$cherry.options.engine.global.flowSessionContext) {} else return str;
         return str.replace(/([^[]*?)\[([^\n\]]*?)(\]\([^)]*|\]|)$/, function (whole, before, content, url) {
           var urlFix = url ? url.replace(/^(\]\(|\])/, "") : "";
-          return "".concat(before, "<a href=\"").concat(urlFix, "\">").concat(content, "</a>");
+          if (!isValidScheme(urlFix)) return "".concat(before, "<span>").concat(escapeHTMLSpecialChar(content), "</span>");
+          return "".concat(before, "<a href=\"").concat(escapeHTMLSpecialChar(urlFix), "\">").concat(escapeHTMLSpecialChar(content), "</a>");
         });
       }
     }, {
@@ -67913,14 +68020,14 @@
   }(ParagraphBase);
   _defineProperty$100(AiFlowAutoClose, "HOOK_NAME", "aiFlowAutoClose");
   var hooksConfig = [FrontMatter, CodeBlock, InlineCode$1, LinkFormatter, InlineMath, MathBlock, Transfer, AiFlowAutoClose, HtmlBlock, Footnote, CommentReference, Br$1, Table$1, Toc$2, Blockquote, Header$1, Hr$1, List$2, Detail$1, Panel$1, Paragraph, Emoji, Image$2, Link$2, AutoLink, Emphasis, BackgroundColor, Color$4, Size$2, Sub$1, Sup$1, Ruby$1, Strikethrough$1, Underline$1, HighLight, Suggester, Space];
-  function _typeof$305(o) {
+  function _typeof$306(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$305 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$306 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$305(o);
+    }, _typeof$306(o);
   }
   function _classCallCheck$227(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -67946,14 +68053,14 @@
   }
   function _toPropertyKey$265(t) {
     var i = _toPrimitive$265(t, "string");
-    return "symbol" == _typeof$305(i) ? i : i + "";
+    return "symbol" == _typeof$306(i) ? i : i + "";
   }
   function _toPrimitive$265(t, r) {
-    if ("object" != _typeof$305(t) || !t) return t;
+    if ("object" != _typeof$306(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$305(i)) return i;
+      if ("object" != _typeof$306(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -68053,14 +68160,14 @@
     BinTrieFlags[BinTrieFlags["BRANCH_LENGTH"] = 8064] = "BRANCH_LENGTH";
     BinTrieFlags[BinTrieFlags["JUMP_TABLE"] = 127] = "JUMP_TABLE";
   })(BinTrieFlags$1 || (BinTrieFlags$1 = {}));
-  function _typeof$304(o) {
+  function _typeof$305(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$304 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$305 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$304(o);
+    }, _typeof$305(o);
   }
   function _classCallCheck$226(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -68078,14 +68185,14 @@
   }
   function _toPropertyKey$264(t) {
     var i = _toPrimitive$264(t, "string");
-    return "symbol" == _typeof$304(i) ? i : i + "";
+    return "symbol" == _typeof$305(i) ? i : i + "";
   }
   function _toPrimitive$264(t, r) {
-    if ("object" != _typeof$304(t) || !t) return t;
+    if ("object" != _typeof$305(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$304(i)) return i;
+      if ("object" != _typeof$305(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -68370,14 +68477,14 @@
   }
   getDecoder$1(htmlDecodeTree);
   getDecoder$1(xmlDecodeTree);
-  function _typeof$303(o) {
+  function _typeof$304(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$303 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$304 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$303(o);
+    }, _typeof$304(o);
   }
   function _classCallCheck$225(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -68395,14 +68502,14 @@
   }
   function _toPropertyKey$263(t) {
     var i = _toPrimitive$263(t, "string");
-    return "symbol" == _typeof$303(i) ? i : i + "";
+    return "symbol" == _typeof$304(i) ? i : i + "";
   }
   function _toPrimitive$263(t, r) {
-    if ("object" != _typeof$303(t) || !t) return t;
+    if ("object" != _typeof$304(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$303(i)) return i;
+      if ("object" != _typeof$304(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -69040,14 +69147,14 @@
       }
     }]);
   }();
-  function _typeof$302(o) {
+  function _typeof$303(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$302 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$303 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$302(o);
+    }, _typeof$303(o);
   }
   function _classCallCheck$224(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -69065,14 +69172,14 @@
   }
   function _toPropertyKey$262(t) {
     var i = _toPrimitive$262(t, "string");
-    return "symbol" == _typeof$302(i) ? i : i + "";
+    return "symbol" == _typeof$303(i) ? i : i + "";
   }
   function _toPrimitive$262(t, r) {
-    if ("object" != _typeof$302(t) || !t) return t;
+    if ("object" != _typeof$303(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$302(i)) return i;
+      if ("object" != _typeof$303(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -69436,14 +69543,14 @@
   ElementType.Tag;
   ElementType.CDATA;
   ElementType.Doctype;
-  function _typeof$301(o) {
+  function _typeof$302(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$301 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$302 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$301(o);
+    }, _typeof$302(o);
   }
   function ownKeys$57(e, r) {
     var t = Object.keys(e);
@@ -69478,7 +69585,7 @@
     return o = _getPrototypeOf$112(o), _possibleConstructorReturn$112(t, _isNativeReflectConstruct$114() ? Reflect.construct(o, e || [], _getPrototypeOf$112(t).constructor) : o.apply(t, e));
   }
   function _possibleConstructorReturn$112(t, e) {
-    if (e && ("object" == _typeof$301(e) || "function" == typeof e)) return e;
+    if (e && ("object" == _typeof$302(e) || "function" == typeof e)) return e;
     if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
     return _assertThisInitialized$112(t);
   }
@@ -69532,14 +69639,14 @@
   }
   function _toPropertyKey$261(t) {
     var i = _toPrimitive$261(t, "string");
-    return "symbol" == _typeof$301(i) ? i : i + "";
+    return "symbol" == _typeof$302(i) ? i : i + "";
   }
   function _toPrimitive$261(t, r) {
-    if ("object" != _typeof$301(t) || !t) return t;
+    if ("object" != _typeof$302(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$301(i)) return i;
+      if ("object" != _typeof$302(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -69827,14 +69934,14 @@
     }
     return children;
   }
-  function _typeof$300(o) {
+  function _typeof$301(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$300 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$301 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$300(o);
+    }, _typeof$301(o);
   }
   function _classCallCheck$222(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -69852,14 +69959,14 @@
   }
   function _toPropertyKey$260(t) {
     var i = _toPrimitive$260(t, "string");
-    return "symbol" == _typeof$300(i) ? i : i + "";
+    return "symbol" == _typeof$301(i) ? i : i + "";
   }
   function _toPrimitive$260(t, r) {
-    if ("object" != _typeof$300(t) || !t) return t;
+    if ("object" != _typeof$301(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$300(i)) return i;
+      if ("object" != _typeof$301(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -69882,7 +69989,7 @@
         elementCB = options;
         options = defaultOpts;
       }
-      if (_typeof$300(callback) === "object") {
+      if (_typeof$301(callback) === "object") {
         options = callback;
         callback = void 0;
       }
@@ -70027,14 +70134,14 @@
     if (codePoint >= 55296 && codePoint <= 57343 || codePoint > 1114111) return 65533;
     return (_a = decodeMap.get(codePoint)) !== null && _a !== void 0 ? _a : codePoint;
   }
-  function _typeof$299(o) {
+  function _typeof$300(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$299 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$300 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$299(o);
+    }, _typeof$300(o);
   }
   function _classCallCheck$221(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -70052,14 +70159,14 @@
   }
   function _toPropertyKey$259(t) {
     var i = _toPrimitive$259(t, "string");
-    return "symbol" == _typeof$299(i) ? i : i + "";
+    return "symbol" == _typeof$300(i) ? i : i + "";
   }
   function _toPrimitive$259(t, r) {
-    if ("object" != _typeof$299(t) || !t) return t;
+    if ("object" != _typeof$300(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$299(i)) return i;
+      if ("object" != _typeof$300(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -70705,14 +70812,14 @@
     }
     if (mathBlock.engine === "katex" || inlineMath.engine === "katex") setupKatex(engine, resolvedSyntax);
   }
-  function _typeof$295(o) {
+  function _typeof$296(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$295 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$296 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$295(o);
+    }, _typeof$296(o);
   }
   function _classCallCheck$220(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -70730,14 +70837,14 @@
   }
   function _toPropertyKey$257(t) {
     var i = _toPrimitive$257(t, "string");
-    return "symbol" == _typeof$295(i) ? i : i + "";
+    return "symbol" == _typeof$296(i) ? i : i + "";
   }
   function _toPrimitive$257(t, r) {
-    if ("object" != _typeof$295(t) || !t) return t;
+    if ("object" != _typeof$296(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$295(i)) return i;
+      if ("object" != _typeof$296(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -70990,7 +71097,7 @@
         });
         $md = $md.replace(imgDrawioXmlReg, function (whole, m1, m2) {
           var cacheKey = "bigDataBegin".concat(_this5.hash(m2), "bigDataEnd");
-          _this5.cachedBigData[cacheKey] = m2;
+          _this5.cachedBigData[cacheKey] = escapeHTMLSpecialChar(m2);
           return "".concat(m1).concat(cacheKey, "}");
         });
         var tmpArr = $md.split(/\n/);
@@ -72039,14 +72146,14 @@
   var import_h = __toESM$1(require_h(), 1);
   var import_diff = __toESM$1(require_diff(), 1);
   var import_patch = __toESM$1(require_patch(), 1);
-  function _typeof$294(o) {
+  function _typeof$295(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$294 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$295 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$294(o);
+    }, _typeof$295(o);
   }
   function _classCallCheck$219(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -72064,14 +72171,14 @@
   }
   function _toPropertyKey$256(t) {
     var i = _toPrimitive$256(t, "string");
-    return "symbol" == _typeof$294(i) ? i : i + "";
+    return "symbol" == _typeof$295(i) ? i : i + "";
   }
   function _toPrimitive$256(t, r) {
-    if ("object" != _typeof$294(t) || !t) return t;
+    if ("object" != _typeof$295(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$294(i)) return i;
+      if ("object" != _typeof$295(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -79592,14 +79699,14 @@
       this.updateBubbleButs();
     }
   };
-  function _typeof$293(o) {
+  function _typeof$294(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$293 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$294 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$293(o);
+    }, _typeof$294(o);
   }
   function ownKeys$55(e, r) {
     var t = Object.keys(e);
@@ -79632,14 +79739,14 @@
   }
   function _toPropertyKey$255(t) {
     var i = _toPrimitive$255(t, "string");
-    return "symbol" == _typeof$293(i) ? i : i + "";
+    return "symbol" == _typeof$294(i) ? i : i + "";
   }
   function _toPrimitive$255(t, r) {
-    if ("object" != _typeof$293(t) || !t) return t;
+    if ("object" != _typeof$294(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$293(i)) return i;
+      if ("object" != _typeof$294(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -80030,14 +80137,14 @@
     if (figure.querySelector(".cherry-mermaid-source-toolbar-panel.active[data-mode=\"source\"]")) return false;
     return hasMermaidRenderedContent(getMermaidPreviewRoot(figure));
   }
-  function _typeof$292(o) {
+  function _typeof$293(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$292 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$293 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$292(o);
+    }, _typeof$293(o);
   }
   function _classCallCheck$218(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -80055,14 +80162,14 @@
   }
   function _toPropertyKey$254(t) {
     var i = _toPrimitive$254(t, "string");
-    return "symbol" == _typeof$292(i) ? i : i + "";
+    return "symbol" == _typeof$293(i) ? i : i + "";
   }
   function _toPrimitive$254(t, r) {
-    if ("object" != _typeof$292(t) || !t) return t;
+    if ("object" != _typeof$293(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$292(i)) return i;
+      if ("object" != _typeof$293(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -80350,14 +80457,14 @@
       }
     }]);
   }();
-  function _typeof$291(o) {
+  function _typeof$292(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$291 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$292 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$291(o);
+    }, _typeof$292(o);
   }
   function _slicedToArray$78(r, e) {
     return _arrayWithHoles$78(r) || _iterableToArrayLimit$78(r, e) || _unsupportedIterableToArray$213(r, e) || _nonIterableRest$78();
@@ -80479,14 +80586,14 @@
   }
   function _toPropertyKey$253(t) {
     var i = _toPrimitive$253(t, "string");
-    return "symbol" == _typeof$291(i) ? i : i + "";
+    return "symbol" == _typeof$292(i) ? i : i + "";
   }
   function _toPrimitive$253(t, r) {
-    if ("object" != _typeof$291(t) || !t) return t;
+    if ("object" != _typeof$292(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$291(i)) return i;
+      if ("object" != _typeof$292(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -82057,14 +82164,14 @@
       }
     }]);
   }();
-  function _typeof$290(o) {
+  function _typeof$291(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$290 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$291 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$290(o);
+    }, _typeof$291(o);
   }
   function _classCallCheck$216(a, n) {
     if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
@@ -82090,14 +82197,14 @@
   }
   function _toPropertyKey$252(t) {
     var i = _toPrimitive$252(t, "string");
-    return "symbol" == _typeof$290(i) ? i : i + "";
+    return "symbol" == _typeof$291(i) ? i : i + "";
   }
   function _toPrimitive$252(t, r) {
-    if ("object" != _typeof$290(t) || !t) return t;
+    if ("object" != _typeof$291(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$290(i)) return i;
+      if ("object" != _typeof$291(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -82407,14 +82514,14 @@
   init_dist$7();
   init_dist$8();
   init_dist$2();
-  function _typeof$289(o) {
+  function _typeof$290(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$289 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof$290 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$289(o);
+    }, _typeof$290(o);
   }
   function _toConsumableArray$74(r) {
     return _arrayWithoutHoles$74(r) || _iterableToArray$75(r) || _unsupportedIterableToArray$212(r) || _nonIterableSpread$74();
@@ -82464,14 +82571,14 @@
   }
   function _toPropertyKey$251(t) {
     var i = _toPrimitive$251(t, "string");
-    return "symbol" == _typeof$289(i) ? i : i + "";
+    return "symbol" == _typeof$290(i) ? i : i + "";
   }
   function _toPrimitive$251(t, r) {
-    if ("object" != _typeof$289(t) || !t) return t;
+    if ("object" != _typeof$290(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof$289(i)) return i;
+      if ("object" != _typeof$290(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -82873,6 +82980,15 @@
       }
     }]);
   }();
+  function _typeof$289(o) {
+    "@babel/helpers - typeof";
+
+    return _typeof$289 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+      return typeof o;
+    } : function (o) {
+      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+    }, _typeof$289(o);
+  }
   var clamp$1 = function clamp(num, min, max) {
     return Math.min(Math.max(num, min), max);
   };
@@ -82888,10 +83004,11 @@
     postMessage: function postMessage(messageName) {
       var _this$iframeDom;
       var value = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : "";
+      var targetOrigin = this.iframeOrigin || window.location.origin;
       (_this$iframeDom = this.iframeDom) === null || _this$iframeDom === void 0 || (_this$iframeDom = _this$iframeDom.contentWindow) === null || _this$iframeDom === void 0 || _this$iframeDom.postMessage({
         eventName: messageName,
         value: value
-      }, "*");
+      }, targetOrigin);
     },
     resetStyle: function resetStyle() {
       var dom = this.dom;
@@ -82945,6 +83062,14 @@
       var iframeSrc = params.iframeSrc,
         iframeStyle = params.iframeStyle,
         title = params.title;
+      if (!iframeSrc) return;
+      var expectedOrigin;
+      try {
+        expectedOrigin = new URL(iframeSrc, window.location.href).origin;
+      } catch (_unused) {
+        return;
+      }
+      this.iframeOrigin = expectedOrigin;
       this.onSubmit = onSubmit;
       this.onReady = onReady;
       if (this.dom) {
@@ -82953,11 +83078,16 @@
         return;
       }
       window.addEventListener("message", function (event) {
+        var _this2$iframeDom;
+        if (event.source !== ((_this2$iframeDom = _this2.iframeDom) === null || _this2$iframeDom === void 0 ? void 0 : _this2$iframeDom.contentWindow) || event.origin !== _this2.iframeOrigin) return;
         if (!event.data || !event.data.eventName) return;
         switch (event.data.eventName) {
           case "getData:success":
-            _this2.onSubmit(event.data.value);
+            var value = event.data.value;
+            if (!value || _typeof$289(value) !== "object" || typeof value.xmlData !== "string" || typeof value.base64 !== "string") break;
+            _this2.onSubmit(value);
             _this2.close();
+            break;
           case "ready":
             _this2.onReady();
         }
@@ -83014,7 +83144,7 @@
     dialog.draw(dialogParam, function () {
       dialog.postMessage("setData", xml);
     }, function (data) {
-      callback(data);
+      callback === null || callback === void 0 || callback(data);
     });
   }
   function debounce$2(func) {
@@ -83886,6 +84016,7 @@
         if (target instanceof HTMLImageElement) {
           if (target.tagName === "IMG" && target.getAttribute("data-type") === "drawio" && this.$cherry.status.editor === "show" && this.$hasEditor()) {
             if (!this.beginChangeDrawioImg(target)) return;
+            if (!this.previewer.$cherry.options.drawioIframeUrl) return;
             var xmlData = decodeURI(target.getAttribute("data-xml"));
             drawioDialog(this.previewer.$cherry.options.drawioIframeUrl, this.previewer.$cherry.options.drawioIframeStyle, xmlData, function (newData) {
               var xmlData = newData.xmlData,
@@ -91661,14 +91792,13 @@
   }
   var Settings$1 = function (_MenuBase) {
     function Settings($cherry) {
-      var _this$engine$$cherry$;
       var _this;
       _classCallCheck$178(this, Settings);
       _this = _callSuper$83(this, Settings, [$cherry]);
       _this.setName("settings", "settings");
       _this.updateMarkdown = false;
       _this.engine = $cherry.engine;
-      var classicBr = testKeyInLocal("classicBr") ? getIsClassicBrFromLocal() : (_this$engine$$cherry$ = _this.engine.$cherry.options.engine.global) === null || _this$engine$$cherry$ === void 0 ? void 0 : _this$engine$$cherry$.classicBr;
+      var classicBr = _this.getClassicBr();
       var defaultModel = $cherry.editor.options.defaultModel;
       var classicBrIconName = classicBr ? "br" : "normal";
       var classicBrName = classicBr ? "classicBr" : "normalBr";
@@ -91698,6 +91828,12 @@
     }
     _inherits$85(Settings, _MenuBase);
     return _createClass$178(Settings, [{
+      key: "getClassicBr",
+      value: function getClassicBr() {
+        var _this$engine$$cherry$;
+        return testKeyInLocal("classicBr") ? getIsClassicBrFromLocal() : (_this$engine$$cherry$ = this.engine.$cherry.options.engine.global) === null || _this$engine$$cherry$ === void 0 ? void 0 : _this$engine$$cherry$.classicBr;
+      }
+    }, {
       key: "getSubMenuConfig",
       value: function getSubMenuConfig() {
         return this.subMenuConfig;
@@ -91750,7 +91886,7 @@
         arguments.length > 2 && arguments[2];
         var resolvedShortKey = this.matchShortcutKey(shortKey);
         if (resolvedShortKey === "classicBr") {
-          var targetIsClassicBr = !getIsClassicBrFromLocal();
+          var targetIsClassicBr = !this.getClassicBr();
           saveIsClassicBrToLocal(targetIsClassicBr);
           this.engine.$cherry.options.engine.global.classicBr = targetIsClassicBr;
           this.engine.hookCenter.hookList.paragraph.forEach(function (item) {
@@ -100202,17 +100338,15 @@
       value: function init() {
         var _this = this;
         this.drawDom();
-        this.timer = setTimeout(function () {
-          _this.updateTocList();
-          _this.$switchModel(_this.model);
-        }, 300);
-        this.$cherry.$event.on("afterChange", function () {
+        this.onAfterChange = function () {
           clearTimeout(_this.timer);
           _this.timer = setTimeout(function () {
             _this.updateTocList();
             _this.$switchModel(_this.model);
           }, 300);
-        });
+        };
+        this.onAfterChange();
+        this.$cherry.$event.on("afterChange", this.onAfterChange);
         this.$switchModel(this.getModelFromLocalStorage());
       }
     }, {
@@ -100279,18 +100413,27 @@
           _this2.$switchModel("full");
           _this2.setModelToLocalStorage("full");
         });
-        if (isBrowser()) window.addEventListener("resize", function () {
-          _this2.$switchModel(_this2.model);
-        });
-        this.$cherry.$event.on("onScroll", function () {
-          _this2.updateTocList(true);
-        });
+        this.onResize = function () {
+          return _this2.$switchModel(_this2.model);
+        };
+        if (isBrowser()) window.addEventListener("resize", this.onResize);
+        this.onScroll = function () {
+          return _this2.updateTocList(true);
+        };
+        this.$cherry.$event.on("onScroll", this.onScroll);
         var scrollDom = this.$cherry.previewer.getDomCanScroll();
-        if (scrollDom.nodeName === "HTML") window.addEventListener("scroll", function () {
-          _this2.updateTocList(true);
-        });else scrollDom.addEventListener("scroll", function () {
-          _this2.updateTocList(true);
-        });
+        this.scrollTarget = scrollDom.nodeName === "HTML" ? window : scrollDom;
+        this.scrollTarget.addEventListener("scroll", this.onScroll);
+      }
+    }, {
+      key: "destroy",
+      value: function destroy() {
+        clearTimeout(this.timer);
+        this.$cherry.$event.off("afterChange", this.onAfterChange);
+        this.$cherry.$event.off("onScroll", this.onScroll);
+        if (isBrowser()) window.removeEventListener("resize", this.onResize);
+        this.scrollTarget.removeEventListener("scroll", this.onScroll);
+        this.tocDom.remove();
       }
     }, {
       key: "$switchModel",
@@ -100963,6 +101106,9 @@
           enableChart: false,
           selfClosing: false
         },
+        blockquote: {
+          gfmAlert: true
+        },
         space: false,
         inlineCode: {
           showColor: true,
@@ -101081,6 +101227,7 @@
         placeholder: ""
       },
       writingStyle: "normal",
+      disableBuiltinCmStyle: false,
       keepDocumentScrollAfterInit: false,
       showFullWidthMark: true,
       showSuggestList: true,
@@ -104595,7 +104742,7 @@
           _this2.status.editor = "show";
         });
         this.switchModel(this.options.editor.defaultModel, this.options.toolbars.showToolbar);
-        if (this.options.autoScrollByHashAfterInit) setTimeout(this.scrollByHash.bind(this));
+        if (this.options.autoScrollByHashAfterInit) this.autoScrollByHashTimer = setTimeout(this.scrollByHash.bind(this));
         this.createToc();
         this.restoreDocumentScroll();
       }
@@ -104617,6 +104764,11 @@
     }, {
       key: "destroy",
       value: function destroy() {
+        if (this.isDestroyed) return;
+        this.isDestroyed = true;
+        clearTimeout(this.timer);
+        clearTimeout(this.autoScrollByHashTimer);
+        if (this.toc instanceof Toc) this.toc.destroy();
         destroySearcherBridge(this);
         if (this.editor) this.editor.destroy();
         if (this.noMountEl) this.cherryDom.remove();else this.wrapperDom.remove();
@@ -104839,6 +104991,43 @@
         return this.setValue(content, keepCursor);
       }
     }, {
+      key: "getFrontMatter",
+      value: function getFrontMatter() {
+        var match = this.getValue().match(getFrontMatterRegExp());
+        if (!match) return {};
+        return parseFrontMatterContent(match[1]);
+      }
+    }, {
+      key: "setFrontMatter",
+      value: function setFrontMatter(data) {
+        var options = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+        var _options$keepCursor = options.keepCursor,
+          keepCursor = _options$keepCursor === void 0 ? false : _options$keepCursor,
+          _options$merge = options.merge,
+          merge = _options$merge === void 0 ? false : _options$merge;
+        var current = this.getValue();
+        var reg = getFrontMatterRegExp();
+        var existingMatch = current.match(reg);
+        var finalObj = {};
+        var serialized = "";
+        if (typeof data === "string") {
+          serialized = data.trim();
+          finalObj = parseFrontMatterContent(serialized);
+        } else if (data && _typeof$200(data) === "object") {
+          finalObj = merge ? _objectSpread$51(_objectSpread$51({}, this.getFrontMatter()), data) : _objectSpread$51({}, data);
+          serialized = stringifyFrontMatter(finalObj);
+        }
+        var next;
+        if (!serialized) {
+          if (existingMatch) next = current.slice(existingMatch[0].length);else return finalObj;
+        } else {
+          var block = "---\n".concat(serialized, "\n---\n");
+          if (existingMatch) next = block + current.slice(existingMatch[0].length);else next = "".concat(block).concat(current.replace(/^\s*\n/, ""));
+        }
+        this.setValue(next, keepCursor);
+        return finalObj;
+      }
+    }, {
       key: "createWrapper",
       value: function createWrapper() {
         var mainTheme = "";
@@ -105014,13 +105203,13 @@
     }, {
       key: "createEditor",
       value: function createEditor() {
-        var _this$options$editor$, _this$options$editor$2;
+        var _this$options$editor$, _this$options$editor$2, _this$options$editor;
         var textArea = createElement("textarea", "", {
           id: (_this$options$editor$ = this.options.editor.id) !== null && _this$options$editor$ !== void 0 ? _this$options$editor$ : "code",
           name: (_this$options$editor$2 = this.options.editor.name) !== null && _this$options$editor$2 !== void 0 ? _this$options$editor$2 : "code"
         });
         textArea.textContent = this.options.value;
-        var editor = createElement("div", "cherry-editor");
+        var editor = createElement("div", (_this$options$editor = this.options.editor) !== null && _this$options$editor !== void 0 && _this$options$editor.disableBuiltinCmStyle ? "cherry-editor cherry-editor--no-cm-style" : "cherry-editor");
         editor.appendChild(textArea);
         if (typeof this.options.fileUpload === "function") this.options.callback.fileUpload = this.options.fileUpload;
         this.editor = new Editor(_objectSpread$51({

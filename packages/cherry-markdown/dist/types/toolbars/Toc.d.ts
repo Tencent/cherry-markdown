@@ -12,6 +12,7 @@ export default class Toc {
     position: any;
     cssText: any;
     init(): void;
+    onAfterChange: () => void;
     timer: number;
     getModelFromLocalStorage(): any;
     setModelToLocalStorage(model: any): void;
@@ -21,6 +22,10 @@ export default class Toc {
     tocListDom: HTMLDivElement;
     tocDom: HTMLDivElement;
     bindClickEvent(): void;
+    onResize: () => void;
+    onScroll: () => void;
+    scrollTarget: any;
+    destroy(): void;
     $switchModel(model?: string): void;
     model: string;
     $getClosestNode(node: any, targetNodeName: any): any;

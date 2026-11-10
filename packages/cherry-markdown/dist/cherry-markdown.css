@@ -4252,6 +4252,96 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --panel-icon: var(--panel-success-icon, '\EA67');
 }
 
+/* ========== GFM Alerts（GitHub Flavored Markdown Alerts） ==========
+   语法：
+     > [!NOTE] / [!TIP] / [!IMPORTANT] / [!WARNING] / [!CAUTION]
+     > 正文内容...
+   复用 blockquote 结构，通过 .cherry-alert__xxx 修饰左边彩色竖条 + 标题图标，
+   视觉风格贴近 GitHub 原生 Alerts。 */
+.cherry-markdown blockquote.cherry-alert {
+  --alert-color: var(--alert-note-color, #0969da);
+  --alert-bg: var(--alert-note-bg, rgba(9, 105, 218, 0.06));
+  position: relative;
+  margin: 16px 0;
+  padding: 8px 16px;
+  color: inherit;
+  border-left: 4px solid var(--alert-color);
+  background: var(--alert-bg);
+  border-radius: 0 var(--radius-md, 6px) var(--radius-md, 6px) 0;
+}
+
+.cherry-markdown blockquote.cherry-alert > p {
+  margin: 4px 0;
+}
+
+.cherry-markdown blockquote.cherry-alert .cherry-alert--title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--alert-color);
+}
+
+.cherry-markdown blockquote.cherry-alert .cherry-alert--icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  font-family: "ch-icon";
+  font-weight: normal;
+  font-size: 16px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.cherry-markdown blockquote.cherry-alert__note {
+  --alert-color: var(--alert-note-color, #0969da);
+  --alert-bg: var(--alert-note-bg, rgba(9, 105, 218, 0.06));
+}
+
+.cherry-markdown blockquote.cherry-alert__note .cherry-alert--icon::before {
+  content: var(--alert-note-icon, "\ea69"); /* info 图标 */
+}
+
+.cherry-markdown blockquote.cherry-alert__tip {
+  --alert-color: var(--alert-tip-color, #1a7f37);
+  --alert-bg: var(--alert-tip-bg, rgba(26, 127, 55, 0.06));
+}
+
+.cherry-markdown blockquote.cherry-alert__tip .cherry-alert--icon::before {
+  content: var(--alert-tip-icon, "\ea67"); /* success 图标 */
+}
+
+.cherry-markdown blockquote.cherry-alert__important {
+  --alert-color: var(--alert-important-color, #8250df);
+  --alert-bg: var(--alert-important-bg, rgba(130, 80, 223, 0.06));
+}
+
+.cherry-markdown blockquote.cherry-alert__important .cherry-alert--icon::before {
+  content: var(--alert-important-icon, "\ea6a"); /* primary 图标 */
+}
+
+.cherry-markdown blockquote.cherry-alert__warning {
+  --alert-color: var(--alert-warning-color, #9a6700);
+  --alert-bg: var(--alert-warning-bg, rgba(154, 103, 0, 0.08));
+}
+
+.cherry-markdown blockquote.cherry-alert__warning .cherry-alert--icon::before {
+  content: var(--alert-warning-icon, "\ea6b"); /* warning 图标 */
+}
+
+.cherry-markdown blockquote.cherry-alert__caution {
+  --alert-color: var(--alert-caution-color, #cf222e);
+  --alert-bg: var(--alert-caution-bg, rgba(207, 34, 46, 0.06));
+}
+
+.cherry-markdown blockquote.cherry-alert__caution .cherry-alert--icon::before {
+  content: var(--alert-caution-icon, "\ea68"); /* danger 图标 */
+}
+
 /* ========== Timeline 时间线 ========== */
 .cherry-markdown .cherry-timeline {
   margin: 20px 0;
@@ -6480,42 +6570,42 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   pointer-events: none;
   z-index: 11;
 }
-.cherry-editor .cm-editor {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor {
   font-family: var(--font-family-sans);
   background-color: var(--base-editor-bg);
   color: var(--base-font-color);
 }
-.cherry-editor .cm-editor textarea {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor textarea {
   font-size: var(--md-paragraph-line-height);
 }
-.cherry-editor .cm-editor .cm-scroller span,
-.cherry-editor .cm-editor .cm-scroller .cm-variable-2,
-.cherry-editor .cm-editor .cm-scroller .cm-string,
-.cherry-editor .cm-editor .cm-scroller .cm-strong,
-.cherry-editor .cm-editor .cm-scroller .cm-em,
-.cherry-editor .cm-editor .cm-scroller .cm-meta {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-scroller span,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-scroller .cm-variable-2,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-scroller .cm-string,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-scroller .cm-strong,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-scroller .cm-em,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-scroller .cm-meta {
   color: var(--base-font-color);
 }
-.cherry-editor .cm-editor .cm-scroller .cm-image-marker,
-.cherry-editor .cm-editor .cm-scroller .cm-quote,
-.cherry-editor .cm-editor .cm-scroller .cm-header,
-.cherry-editor .cm-editor .cm-scroller .cm-atom {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-scroller .cm-image-marker,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-scroller .cm-quote,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-scroller .cm-header,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-scroller .cm-atom {
   color: var(--editor-header-color);
 }
-.cherry-editor .cm-editor .cm-scroller .cm-url {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-scroller .cm-url {
   color: var(--editor-url-color);
 }
-.cherry-editor .cm-editor .cm-scroller .cm-comment,
-.cherry-editor .cm-editor .cm-scroller .cm-url {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-scroller .cm-comment,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-scroller .cm-url {
   color: var(--editor-comment-color);
 }
-.cherry-editor .cm-editor .cm-lineWrapping {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-lineWrapping {
   padding: 15px 34px;
 }
-.cherry-editor .cm-editor .cm-lineWrapping .long-text,
-.cherry-editor .cm-editor .cm-lineWrapping .drawio,
-.cherry-editor .cm-editor .cm-lineWrapping .base64,
-.cherry-editor .cm-editor .cm-lineWrapping .url-truncated {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-lineWrapping .long-text,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-lineWrapping .drawio,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-lineWrapping .base64,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-lineWrapping .url-truncated {
   display: inline-block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -6525,97 +6615,105 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   color: darkmagenta !important;
   font-size: var(--font-size-xs) !important;
 }
-.cherry-editor .cm-editor .cm-lineWrapping .url-truncated {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-lineWrapping .url-truncated {
   max-width: 200px;
 }
-.cherry-editor .cm-editor .cm-lineWrapping .cm-invalidchar[title=\\u200b] {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-lineWrapping .cm-invalidchar[title=\\u200b] {
   display: none;
 }
-.cherry-editor .cm-editor .cm-header {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-header {
   color: var(--editor-header-color);
 }
-.cherry-editor .cm-editor .cm-header.cm-meta {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-header.cm-meta {
   opacity: 0.5;
 }
-.cherry-editor .cm-editor .cm-header.cm-header-1 {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-header.cm-header-1 {
   font-size: 2em;
 }
-.cherry-editor .cm-editor .cm-header.cm-header-2 {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-header.cm-header-2 {
   font-size: 1.5em;
 }
-.cherry-editor .cm-editor .cm-header.cm-header-3 {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-header.cm-header-3 {
   font-size: 1.25em;
 }
-.cherry-editor .cm-editor .cm-header.cm-header-4 {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-header.cm-header-4 {
   font-size: 1em;
 }
-.cherry-editor .cm-editor .cm-header.cm-header-5 {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-header.cm-header-5 {
   font-size: 0.875em;
 }
-.cherry-editor .cm-editor .cm-header.cm-header-6 {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-header.cm-header-6 {
   font-size: 0.85em;
 }
-.cherry-editor .cm-editor .cm-line.cm-frontmatter .cm-header,
-.cherry-editor .cm-editor .cm-line.cm-frontmatter .cm-header-1,
-.cherry-editor .cm-editor .cm-line.cm-frontmatter .cm-header-2,
-.cherry-editor .cm-editor .cm-line.cm-frontmatter .cm-header-3,
-.cherry-editor .cm-editor .cm-line.cm-frontmatter .cm-header-4,
-.cherry-editor .cm-editor .cm-line.cm-frontmatter .cm-header-5,
-.cherry-editor .cm-editor .cm-line.cm-frontmatter .cm-header-6, .cherry-editor .cm-editor .cm-line.cm-frontmatter.cm-header, .cherry-editor .cm-editor .cm-line.cm-frontmatter.cm-header-1, .cherry-editor .cm-editor .cm-line.cm-frontmatter.cm-header-2, .cherry-editor .cm-editor .cm-line.cm-frontmatter.cm-header-3, .cherry-editor .cm-editor .cm-line.cm-frontmatter.cm-header-4, .cherry-editor .cm-editor .cm-line.cm-frontmatter.cm-header-5, .cherry-editor .cm-editor .cm-line.cm-frontmatter.cm-header-6 {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter .cm-header,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter .cm-header-1,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter .cm-header-2,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter .cm-header-3,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter .cm-header-4,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter .cm-header-5,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter .cm-header-6, .cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter.cm-header, .cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter.cm-header-1, .cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter.cm-header-2, .cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter.cm-header-3, .cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter.cm-header-4, .cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter.cm-header-5, .cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-line.cm-frontmatter.cm-header-6 {
   font-size: var(--font-size-md) !important;
   font-weight: normal !important;
   color: var(--base-font-color) !important;
   text-decoration: none !important;
 }
-.cherry-editor .cm-editor .cm-string {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-string {
   color: var(--editor-string-color);
 }
-.cherry-editor .cm-editor .cm-comment {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-comment {
   color: var(--editor-comment-color);
   font-family: var(--font-family-mono);
   font-size: 0.9em;
 }
-.cherry-editor .cm-editor .cm-whitespace,
-.cherry-editor .cm-editor .cm-tab {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-whitespace,
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-tab {
   font-family: var(--font-family-mono);
   font-size: 0.9em;
 }
-.cherry-editor .cm-editor .cm-quote {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-quote {
   color: var(--editor-quote-color);
 }
-.cherry-editor .cm-editor .cm-link {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-link {
   text-decoration: underline;
   color: var(--editor-link-color);
 }
-.cherry-editor .cm-editor .cm-header {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-header {
   text-decoration: none;
 }
-.cherry-editor .cm-editor .cm-url {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-url {
   color: var(--editor-url-color);
   font-family: var(--font-family-mono);
   font-size: 0.9em;
   text-decoration: none;
 }
-.cherry-editor .cm-editor .cm-url-bracket {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-url-bracket {
   color: #3b82f6;
   font-weight: bold;
   background-color: rgba(59, 130, 246, 0.1);
   border-radius: 2px;
   padding: 0 1px;
 }
-.cherry-editor .cm-editor .cm-variable-2 {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-variable-2 {
   color: var(--editor-v2-color);
 }
-.cherry-editor .cm-editor .cm-variable-3 {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-variable-3 {
   color: var(--editor-v3-color);
 }
-.cherry-editor .cm-editor .cm-keyword {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-keyword {
   color: var(--editor-keyword-color);
 }
-.cherry-editor .cm-editor .cm-fullWidth {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-fullWidth {
   color: var(--full-width-color) !important;
   z-index: 3;
   cursor: pointer;
+}
+.cherry-editor.cherry-editor--no-cm-style .cm-editor .cm-header, .cherry-editor.cherry-editor--no-cm-style .cm-editor .cm-strong {
+  font-weight: normal;
+  text-decoration: inherit;
+}
+.cherry-editor.cherry-editor--no-cm-style .cm-editor .cm-link, .cherry-editor.cherry-editor--no-cm-style .cm-editor .cm-url {
+  color: inherit;
+  text-decoration: inherit;
 }
 
 .cherry-drag {
@@ -7740,6 +7838,17 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
   --panel-success-title-color: var(--oc-green-2);
   --panel-success-body-bg: linear-gradient(145deg, rgba(34, 197, 94, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
   --panel-success-body-color: var(--oc-green-3);
+  /* ========== GFM Alerts 相关变量覆盖（暗色模式下提升对比度） ========== */
+  --alert-note-color: var(--oc-blue-3);
+  --alert-note-bg: rgba(59, 130, 246, 0.1);
+  --alert-tip-color: var(--oc-green-3);
+  --alert-tip-bg: rgba(34, 197, 94, 0.1);
+  --alert-important-color: var(--oc-violet-3);
+  --alert-important-bg: rgba(139, 92, 246, 0.1);
+  --alert-warning-color: var(--oc-yellow-3);
+  --alert-warning-bg: rgba(234, 179, 8, 0.1);
+  --alert-caution-color: var(--oc-red-3);
+  --alert-caution-bg: rgba(239, 68, 68, 0.1);
 }
 
 /*

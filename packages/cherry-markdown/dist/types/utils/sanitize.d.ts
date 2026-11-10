@@ -1,5 +1,12 @@
 export function escapeHTMLEntitiesWithoutSemicolon(content: any): string;
 export function escapeHTMLSpecialChar(content: any, enableQuote: any): string;
+/**
+ * 属性上下文的最小转义：只转义会闭合属性或形成标签的字符，保留 `&` 及其字符实体语义。
+ * 仅用于已确认处于属性值内的场景（如代码块语言名）；文本节点请使用 escapeHTMLSpecialChar。
+ * @param {string} content 待转义的字符串
+ * @returns {string}
+ */
+export function escapeHTMLAttribute(content: string): string;
 export function unescapeHTMLSpecialChar(content: any): string;
 export function escapeHTMLSpecialCharOnce(content: any, enableQuote: any): string;
 export function convertHTMLNumberToName(html: any): any;

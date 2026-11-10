@@ -1344,6 +1344,7 @@ export default class Cherry extends CherryStatic {
     cherryDom: HTMLElement;
     nameSpace: string;
     wrapperDom: HTMLDivElement;
+    autoScrollByHashTimer: number;
     /**
      * 记忆页面的滚动高度，在cherry初始化后恢复到这个高度
      */
@@ -1356,6 +1357,7 @@ export default class Cherry extends CherryStatic {
      */
     restoreDocumentScroll(): void;
     destroy(): void;
+    isDestroyed: boolean;
     on(eventName: any, callback: any): void;
     off(eventName: any, callback: any): void;
     createToc(): void;
@@ -2114,6 +2116,42 @@ export default class Cherry extends CherryStatic {
      * @param {boolean} [keepCursor=false] 是否保持光标位置
      */
     setMarkdown(content: string, keepCursor?: boolean): void;
+    /**
+     * 获取 Front Matter（文档顶部 `---` 包裹的元数据块）
+     *
+     * 支持两种常见格式：
+     *   1. JSON 格式：
+     *      ---
+     *      { "title": "cherry", "tags": ["md","tool"] }
+     *      ---
+     *   2. 简单 key:value 多行格式（优先推荐，可读性更好）：
+     *      ---
+     *      title: cherry
+     *      author: tencent
+     *      ---
+     *
+     * @returns {Record<string, any>} 解析后的对象；无 front-matter 或解析失败时返回 `{}`
+     */
+    getFrontMatter(): Record<string, any>;
+    /**
+     * 设置 Front Matter（文档顶部 `---` 包裹的元数据块）
+     *
+     * 行为规则：
+     *  - 原文档已有 front-matter：替换为新的内容
+     *  - 原文档没有 front-matter：在文档开头插入
+     *  - data 为 `{}` 或空字符串：移除已存在的 front-matter
+     *  - data 为字符串：直接作为 front-matter 内容（不做额外转义），由调用方自行保证格式合法
+     *
+     * @param {Record<string, any>|string} data 元数据对象或 front-matter 内容字符串
+     * @param {{ keepCursor?: boolean, merge?: boolean }} [options]
+     *        keepCursor：覆盖内容后是否尝试保持光标位置，默认 false
+     *        merge：是否与现有 front-matter 合并（仅当 data 为对象时生效），默认 false
+     * @returns {Record<string, any>} 实际写入的 front-matter 对象（merge 后结果）
+     */
+    setFrontMatter(data: Record<string, any> | string, options?: {
+        keepCursor?: boolean;
+        merge?: boolean;
+    }): Record<string, any>;
     /**
      * @private
      * @returns

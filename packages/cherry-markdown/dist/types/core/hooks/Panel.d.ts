@@ -53,7 +53,7 @@ export default class Panel extends ParagraphBase {
      */
     $splitCols(str: string, fixedColCount: number): string[];
     $getTitle(name: any): any;
-    $getTargetType(name: any): "left" | "right" | "center" | "primary" | "info" | "warning" | "danger" | "success" | "justify" | "cols" | "tabs" | "timeline";
+    $getTargetType(name: any): "left" | "right" | "center" | "warning" | "primary" | "info" | "danger" | "success" | "justify" | "cols" | "tabs" | "timeline";
     /**
      * 按行首的 `::` 标记拆分各个节点（timeline/tabs 共用）
      * 与 cols 不同，这里的 `::` 是行首标记（后面直接跟首行内容），并非独占一行的分隔符

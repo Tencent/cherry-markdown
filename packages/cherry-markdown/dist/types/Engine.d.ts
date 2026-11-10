@@ -73,6 +73,10 @@ export default class Engine {
     $dealParagraph(md: any): any;
     $cacheBigData(md: any): any;
     /**
+     * 还原缓存的大文本。
+     * 注意：本方法在 DOMPurify（HtmlBlock.afterMakeHtml）之后执行，与 CodeBlock.restoreCache、
+     * UrlCache.restoreAll、LinkFormatter.afterMakeHtml 同属「净化后写回点」。
+     * 写入这里的内容必须先按上下文转义，否则会绕过净化直接进入最终 HTML。
      * @param {string} md
      */
     $deCacheBigData(md: string): string;

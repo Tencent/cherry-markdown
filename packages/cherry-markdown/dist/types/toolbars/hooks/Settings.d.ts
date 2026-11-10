@@ -15,6 +15,7 @@ export default class Settings extends MenuBase {
             aliasName: string;
         };
     };
+    getClassicBr(): any;
     /**
      * 获取子菜单数组
      * @returns {Array} 返回子菜单
