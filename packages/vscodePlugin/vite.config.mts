@@ -13,7 +13,7 @@ const extensionConfig: UserConfig = {
   },
   ssr: {
     target: 'node',
-    noExternal: ['axios'],
+    noExternal: ['axios', 'form-data'],
   },
   build: {
     target: 'node16',

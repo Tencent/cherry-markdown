@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vite-plus/test';
 import { activate, deactivate } from '../src/extension';
 import type * as vscode from 'vscode';
+import { IMPORTANT_UPDATE_NOTICE_ID } from '../src/updateNotice';
 
 const host = vi.hoisted(() => {
   const callbacks = new Map<string, (...args: any[]) => any>();
@@ -63,6 +64,8 @@ vi.mock('../src/config', () => ({
   getTheme: () => 'default',
   getUsageMode: () => 'only-manual',
   getBackfillImageProps: () => [],
+  describeUploadConfiguration: () => 'Upload test',
+  UploadConfigurationError: class extends Error {},
   migrateImageUploadMode: async () => {},
   migrateTheme: async () => {},
   THEME_STATE_KEY: 'theme',
@@ -105,6 +108,7 @@ vi.mock('vscode', () => ({
     onDidChangeTextDocument: host.listen('document-change'),
     onDidCloseTextDocument: host.listen('document-close'),
     onDidChangeConfiguration: host.listen('configuration'),
+    onDidGrantWorkspaceTrust: host.listen('trust'),
     getWorkspaceFolder: () => undefined,
   },
 }));
@@ -136,7 +140,7 @@ async function setup() {
   activate({
     subscriptions: [],
     extensionUri: host.uri('/extension'),
-    globalState: {},
+    globalState: { get: () => [IMPORTANT_UPDATE_NOTICE_ID], update: vi.fn() },
   } as unknown as vscode.ExtensionContext);
   await host.callbacks.get('cherrymarkdown.preview')!();
   host.callbacks.get('message')!({ type: 'ready' });

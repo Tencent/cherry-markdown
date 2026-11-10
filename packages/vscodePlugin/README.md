@@ -36,7 +36,62 @@ By default, the preview follows VS Code's light or dark theme, including high-co
 | `cherryMarkdown.CustomUploader`     | object                        | disabled         | Configures a custom HTTP uploader for remote mode.                     |
 | `cherryMarkdown.BackfillImageProps` | array                         | `[]`             | Adds border, shadow, radius, or no-border metadata to inserted images. |
 
-Configuration values are stable across VS Code display languages. Existing theme values are migrated as a fallback, but theme changes are now stored in the extension's global state rather than exposed as a VS Code setting.
+Configuration values are stable across VS Code display languages. Manual theme selections are stored in the extension's global state. The extension does not automatically migrate, rewrite or delete settings.
+
+## Upload settings upgrade
+
+An important-change notification appears once per VS Code profile, with **View update notes** and **Open upload settings** actions. Update notes are bundled in English, Simplified Chinese and Russian and open locally without a network request. You can reopen them using **Cherry Markdown: View update notes** in the Command Palette.
+
+The notice uses a stable important-change identifier, not the extension version: ordinary patch releases, window reloads and dismissing the notification do not repeat it. When this feature is first introduced, new installs cannot reliably be distinguished from upgrades, so both receive the notice once. Only notice state is recorded inside the extension; no user settings are migrated. Upload-time configuration warnings remain active independently.
+
+This release stops reading the retired `cherryMarkdown.UploadType` and `cherryMarkdown.PicGoServer` settings. **PicGo remains supported through the current `CustomUploader` settings**, using multipart file uploads. Old settings are not migrated automatically; there is no path-list or clipboard protocol fallback.
+
+For an existing binary HTTP uploader, keep your current settings. Omitting `format` preserves the original binary request behavior:
+
+```json
+{
+  "cherryMarkdown.ImageUploadMode": "remote",
+  "cherryMarkdown.CustomUploader": {
+    "enable": true,
+    "url": "https://uploads.example.com/upload",
+    "headers": {}
+  }
+}
+```
+
+With `format: "binary"` (the default), the endpoint must accept file bytes as the HTTP POST body (`application/octet-stream` by default, with an `X-File-Name` header). With `format: "multipart"`, the extension sends one file part; `fieldName` defaults to `files` and may be changed for other form-upload services. Field names may contain letters, digits, underscores, dots, hyphens and square brackets (1–128 characters).
+
+Both formats accept supported URL responses, including `{ "url": "https://example.com/image.png" }` and PicGo's `{ "success": true, "result": ["https://example.com/image.png"] }`. A response with `success: false` is rejected. The extension does not guess a format from the address or retry another protocol or endpoint after a failure.
+
+### PicGo configuration
+
+1. Use **PicGo 2.4.0 or newer**, configure your image host in PicGo, and keep PicGo running with its HTTP server enabled. Earlier versions without multipart support must be upgraded.
+2. Replace the retired VS Code settings with the following current settings. Use your actual PicGo server address if it differs from the default:
+
+```json
+{
+  "cherryMarkdown.ImageUploadMode": "remote",
+  "cherryMarkdown.CustomUploader": {
+    "enable": true,
+    "url": "http://127.0.0.1:36677/upload",
+    "format": "multipart",
+    "fieldName": "files",
+    "headers": {}
+  }
+}
+```
+
+PicGo requires the multipart field name `files`. Do not merely copy its `/upload` URL into a binary uploader: changing the URL or setting an `application/json` header does not change the request encoding. The extension generates the multipart `Content-Type` boundary and body length automatically; configured `Content-Type` and `Content-Length` headers are ignored in multipart mode. Other headers, such as `Authorization`, remain available. If your PicGo server requires a secret, add `"Authorization": "Bearer YOUR_PICGO_SERVER_SECRET"` inside `headers`, preferably in user settings.
+
+The file bytes are sent to PicGo, not a local path or clipboard command. In Remote SSH, containers or WSL, `127.0.0.1` refers to the extension host's network environment; ensure that it can reach the configured PicGo server. See the [official PicGo multipart API](https://docs.picgo.app/gui/guide/advance#upload-images-with-http-form-data).
+
+With only retired settings present, attempting an upload shows an upgrade warning and sends no file. It explicitly directs PicGo 2.4.0+ users to `ImageUploadMode=remote`, `format=multipart` and `fieldName=files`, with **Open upload settings** and **View configuration guide** actions. Valid explicitly configured `ImageUploadMode` settings take precedence over retired settings, so leftover old keys do not repeatedly warn. This is a temporary detection-only notice, planned for removal in the next major release; it never performs migration or old-protocol uploads.
+
+Settings resolve per document: **workspace folder → workspace → user → default**. In a multi-root workspace, a folder's `.vscode/settings.json` applies only to documents in that folder. Folder settings that were previously ignored can now take effect; check the upload target and source shown at the bottom of the preview before uploading.
+
+`CustomUploader` is selected as a whole object from one scope. A folder-specific URL does not inherit user-level authentication headers. Missing required fields or an invalid explicit setting stop the upload rather than falling back to another destination. `AssetDirectory` must stay inside the workspace folder.
+
+In Restricted Mode, workspace and folder upload settings are ignored. User-level settings remain available. If no usable user-level configuration exists, the warning offers **Manage Workspace Trust**; this opens VS Code's native authorization UI and does not authorize or copy an endpoint automatically. Trusting a workspace enables more than just uploads. When trust is granted, the preview refreshes the selected configuration. Previously migrated global settings are not automatically removed because the extension cannot reliably distinguish them from intentional user settings.
 
 ## Upload security
 

@@ -17,7 +17,7 @@
   "customUploader.url.description": "自定义上传器 URL",
   "customUploader.headers": "自定义上传器 HTTP 头",
   "customUploader.headers.description": "用于自定义上传器的 HTTP 头",
-  "customUploader.description": "配置 HTTP 上传器，将图像、视频或音频上传到你的服务器。",
+  "customUploader.description": "配置 HTTP 上传器。地址、格式和请求头整体取自同一层设置。旧配置键不自动迁移；PicGo 2.4.0+ 可使用 multipart 上传。",
   "backfillImageProps.enum.isBorder": "边框",
   "backfillImageProps.enum.isNotBorder": "无边框",
   "backfillImageProps.enum.isShadow": "阴影",
@@ -29,5 +29,8 @@
   "backfillImageProps.description": "cherry-markdown 的图像修饰选项 — 可通过配置为图像添加边框、阴影或圆角。",
   "themeMode.description": "手动选择 Cherry 主题，或跟随 VS Code 颜色主题。在 Cherry 中选择主题会切回手动模式。",
   "lightTheme.description": "浅色及高对比度浅色 VS Code 主题使用的 Cherry 主题。",
-  "darkTheme.description": "深色及高对比度深色 VS Code 主题使用的 Cherry 主题。"
+  "darkTheme.description": "深色及高对比度深色 VS Code 主题使用的 Cherry 主题。",
+  "customUploader.format.description": "请求格式：binary 直接发送文件字节（默认）；multipart 发送文件表单，支持 PicGo 2.4.0+。",
+  "customUploader.fieldName.description": "multipart 文件字段名（默认 files，PicGo 要求使用 files）。Content-Type 边界和 Content-Length 由插件自动生成。",
+  "commands.showUpdateNotes.title": "Cherry Markdown：查看更新说明"
 }

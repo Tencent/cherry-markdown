@@ -1,8 +1,9 @@
 import axios from 'axios';
+import FormData from 'form-data';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { getAssetDirectory, getBackfillImageProps, getCustomUploader, getImageUploadMode } from '../config';
-import type { UploadFileRequest, UploadFileResult } from '../types/upload';
+import { getUploadConfiguration } from '../config';
+import type { CustomUploader, UploadFileRequest, UploadFileResult } from '../types/upload';
 
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
@@ -51,6 +52,13 @@ export function parseUploadResponse(data: unknown): string {
     candidates.push(data);
   } else if (data && typeof data === 'object') {
     const record = data as Record<string, unknown>;
+    if (record.success === false) {
+      throw new Error(
+        typeof record.message === 'string'
+          ? `Upload server rejected the file: ${record.message}`
+          : 'Upload server reported failure.',
+      );
+    }
     candidates.push(record.url);
     if (Array.isArray(record.result)) candidates.push(record.result[0]);
     if (typeof record.data === 'string') {
@@ -113,6 +121,31 @@ function safeFileName(fileInfo: UploadFileRequest): string {
   return fileName || 'image';
 }
 
+function encodeRemoteUpload(file: Uint8Array, fileInfo: UploadFileRequest, uploader: CustomUploader) {
+  const headers = normalizeHeaders(uploader.headers);
+  if (uploader.format !== 'multipart') {
+    if (!headers['Content-Type'] && !headers['content-type']) headers['Content-Type'] = 'application/octet-stream';
+    if (!headers['X-File-Name'] && !headers['x-file-name']) headers['X-File-Name'] = fileInfo.name;
+    return { body: Buffer.from(file), headers };
+  }
+  // Encode a single file, not a path or clipboard request. This also works across remote hosts.
+  const form = new FormData();
+  const mimeType = /^[\w!#$&^.+-]+\/[\w!#$&^.+-]+(?![\s\S])/.test(fileInfo.type)
+    ? fileInfo.type
+    : 'application/octet-stream';
+  form.append(uploader.fieldName ?? 'files', Buffer.from(file), {
+    filename: safeFileName(fileInfo),
+    contentType: mimeType,
+    knownLength: file.length,
+  });
+  // The encoder owns boundary and length; user headers must not corrupt the multipart framing.
+  for (const key of Object.keys(headers)) {
+    if (['content-type', 'content-length'].includes(key.toLowerCase())) delete headers[key];
+  }
+  headers['Content-Type'] = form.getHeaders()['content-type'];
+  return { body: form.getBuffer(), headers };
+}
+
 function splitFileName(fileName: string): { stem: string; extension: string } {
   const parsed = path.posix.parse(fileName);
   return { stem: parsed.name || 'image', extension: parsed.ext };
@@ -146,7 +179,11 @@ function relativeAssetPath(document: vscode.Uri, asset: vscode.Uri): string {
 
 let workspaceUploadQueue: Promise<void> = Promise.resolve();
 
-async function saveWorkspaceAsset(fileInfo: UploadFileRequest, resource: vscode.Uri | undefined): Promise<string> {
+async function saveWorkspaceAsset(
+  fileInfo: UploadFileRequest,
+  resource: vscode.Uri | undefined,
+  directory: string,
+): Promise<string> {
   if (!resource) throw new Error('A Markdown document is required to save workspace assets.');
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(resource);
   if (!workspaceFolder) {
@@ -154,15 +191,19 @@ async function saveWorkspaceAsset(fileInfo: UploadFileRequest, resource: vscode.
   }
 
   const source = await readUploadFile(fileInfo);
-  const assetDirectory = vscode.Uri.joinPath(workspaceFolder.uri, ...getAssetDirectory(resource).split('/'));
+  const assetDirectory = vscode.Uri.joinPath(workspaceFolder.uri, ...directory.split('/'));
   await vscode.workspace.fs.createDirectory(assetDirectory);
   const assetUri = await nextAssetUri(assetDirectory, safeFileName(fileInfo));
   await vscode.workspace.fs.writeFile(assetUri, source);
   return relativeAssetPath(resource, assetUri);
 }
 
-function queueWorkspaceAssetSave(fileInfo: UploadFileRequest, resource: vscode.Uri | undefined): Promise<string> {
-  const task = workspaceUploadQueue.then(() => saveWorkspaceAsset(fileInfo, resource));
+function queueWorkspaceAssetSave(
+  fileInfo: UploadFileRequest,
+  resource: vscode.Uri | undefined,
+  directory: string,
+): Promise<string> {
+  const task = workspaceUploadQueue.then(() => saveWorkspaceAsset(fileInfo, resource, directory));
   workspaceUploadQueue = task.then(
     () => undefined,
     () => undefined,
@@ -175,33 +216,32 @@ export const uploadFileHandler = async (
   resource?: vscode.Uri,
 ): Promise<UploadFileResult> => {
   const { requestId, name = '', type = '' } = fileInfo;
-  const uploadMode = getImageUploadMode(resource);
+  // Validate the selected settings before reading bytes, copying assets or starting a network request.
+  const settings = getUploadConfiguration(resource);
+  const uploadMode = settings.mode;
   const result: UploadFileResult = { requestId, name, url: '' };
-  for (const property of getBackfillImageProps(resource)) result[property] = true;
+  for (const property of settings.backfillImageProps) result[property] = true;
 
   switch (uploadMode) {
     case 'workspace': {
-      result.url = await queueWorkspaceAssetSave(fileInfo, resource);
+      result.url = await queueWorkspaceAssetSave(fileInfo, resource, settings.assetDirectory);
       break;
     }
     case 'remote': {
-      const customUploader = getCustomUploader(resource);
+      const customUploader = settings.uploader;
       if (customUploader?.enable !== true || !customUploader.url) {
         throw new Error('Custom uploader is not configured.');
       }
       const uploadUrl = parseHttpUrl(customUploader.url, 'Custom uploader URL');
       const file = await readUploadFile(fileInfo);
-      const headers = normalizeHeaders(customUploader.headers);
-      if (!headers['Content-Type'] && !headers['content-type']) {
-        headers['Content-Type'] = 'application/octet-stream';
-      }
-      if (!headers['X-File-Name'] && !headers['x-file-name']) headers['X-File-Name'] = name;
+      const { body, headers } = encodeRemoteUpload(file, fileInfo, customUploader);
 
-      const response = await axios.post<unknown>(uploadUrl.toString(), Buffer.from(file), {
+      const response = await axios.post<unknown>(uploadUrl.toString(), body, {
         headers,
         responseType: 'json',
         timeout: UPLOAD_TIMEOUT_MS,
-        maxBodyLength: MAX_UPLOAD_BYTES,
+        // The file has already passed the 50 MB limit; multipart adds a small envelope.
+        maxBodyLength: body.length,
         maxContentLength: MAX_RESPONSE_BYTES,
       });
       result.url = parseUploadResponse(response.data);

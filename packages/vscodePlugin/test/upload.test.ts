@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vite-plus/test';
 import axios from 'axios';
 import { parseUploadResponse, uploadFileHandler } from '../src/handler/uploadFile';
+import type { CustomUploader } from '../src/types/upload';
 
 const mockState = vi.hoisted(() => {
   const files = new Map<string, Uint8Array>([['/tmp/image.png', new Uint8Array([1, 2, 3])]]);
@@ -31,7 +32,7 @@ const mockState = vi.hoisted(() => {
     uri,
     workspace,
     mode: 'workspace',
-    customUploader: undefined as { enable: boolean; url: string; headers?: Record<string, string> } | undefined,
+    customUploader: undefined as CustomUploader | undefined,
     assetDirectory: '.cherry-assets',
   };
 });
@@ -48,7 +49,12 @@ vi.mock('vscode', () => ({
 }));
 
 vi.mock('../src/config', () => ({
-  getAssetDirectory: () => mockState.assetDirectory,
+  getUploadConfiguration: () => ({
+    mode: mockState.mode,
+    uploader: mockState.customUploader,
+    assetDirectory: mockState.assetDirectory,
+    backfillImageProps: [],
+  }),
   getBackfillImageProps: () => [],
   getCustomUploader: () => mockState.customUploader,
   getImageUploadMode: () => mockState.mode,
@@ -100,6 +106,18 @@ describe('image upload handler', () => {
     ]);
 
     expect(results.map(({ url }) => url)).toEqual(['./.cherry-assets/image.png', './.cherry-assets/image-1.png']);
+  });
+
+  test('a queued asset save retains the directory selected before settings change', async () => {
+    mockState.assetDirectory = 'selected-assets';
+    const result = uploadFileHandler(
+      { requestId: 30, name: 'queued.png', type: 'image/png', path: '', size: 3, base64: 'AQID' },
+      mockState.uri('/workspace/readme.md') as never,
+    );
+    mockState.assetDirectory = 'later-assets';
+    expect((await result).url).toBe('./selected-assets/queued.png');
+    expect(Array.from(mockState.files.get('/workspace/selected-assets/queued.png')!)).toEqual([1, 2, 3]);
+    expect(mockState.files.has('/workspace/later-assets/queued.png')).toBe(false);
   });
 
   test('sanitizes file names and configured asset directories', async () => {
@@ -186,11 +204,12 @@ describe('image upload handler', () => {
     ).rejects.toThrow('Only images');
   });
 
-  test('uploads binary data through the configured HTTP uploader', async () => {
+  test.each([undefined, 'binary'] as const)('uploads binary data with format %s', async (format) => {
     mockState.mode = 'remote';
     mockState.customUploader = {
       enable: true,
       url: 'https://upload.example.test/images',
+      format,
       headers: { Authorization: 'Bearer token' },
     };
     vi.mocked(axios.post).mockResolvedValue({ data: { data: { url: 'https://cdn.example/image.png' } } });
@@ -215,6 +234,75 @@ describe('image upload handler', () => {
         }),
       }),
     );
+  });
+
+  test.each([
+    [undefined, 'image.png'],
+    ['image', 'image.png'],
+    ['files[]', 'image.png'],
+    ['files', '测试图片.png'],
+  ] as const)('sends a real multipart file in field %s named %s', async (fieldName, fileName) => {
+    mockState.mode = 'remote';
+    mockState.customUploader = {
+      enable: true,
+      url: 'http://127.0.0.1:36677/upload',
+      format: 'multipart',
+      fieldName,
+      headers: { Authorization: 'Bearer test-token', 'cOnTeNt-TyPe': 'application/json', 'CONTENT-LENGTH': '1' },
+    };
+    vi.mocked(axios.post).mockResolvedValue({ data: { success: true, result: ['https://cdn.example/picgo.png'] } });
+    const result = await uploadFileHandler({
+      requestId: 40,
+      name: fileName,
+      type: 'image/png',
+      path: '',
+      base64: 'AQID',
+      size: 3,
+    });
+    expect(result.url).toBe('https://cdn.example/picgo.png');
+    const [, body, options] = vi.mocked(axios.post).mock.calls[0];
+    const headers = options!.headers as Record<string, string>;
+    expect(headers.Authorization).toBe('Bearer test-token');
+    expect(headers['Content-Type']).toMatch(/^multipart\/form-data; boundary=.+$/);
+    expect(headers).not.toHaveProperty('cOnTeNt-TyPe');
+    expect(headers).not.toHaveProperty('CONTENT-LENGTH');
+    expect(options!.maxBodyLength).toBe((body as Buffer).length);
+    // Parse the encoded body with the runtime's independent standards-based form parser.
+    const form = await new Response(new Uint8Array(body as Buffer), { headers }).formData();
+    expect([...form.keys()]).toEqual([fieldName ?? 'files']);
+    const file = form.get(fieldName ?? 'files') as File;
+    expect(file.name).toBe(fileName);
+    expect(file.type).toBe('image/png');
+    expect(Array.from(new Uint8Array(await file.arrayBuffer()))).toEqual([1, 2, 3]);
+  });
+
+  test('multipart filenames and media types cannot inject part headers', async () => {
+    mockState.mode = 'remote';
+    mockState.customUploader = { enable: true, url: 'https://example.test/upload', format: 'multipart' };
+    vi.mocked(axios.post).mockResolvedValue({ data: { success: true, result: ['https://cdn.example/image.png'] } });
+    await uploadFileHandler({
+      requestId: 41,
+      name: 'bad"\r\nname.png',
+      type: 'image/png\r\nX-Injected: yes',
+      path: '',
+      base64: 'AQID',
+      size: 3,
+    });
+    const [, body, options] = vi.mocked(axios.post).mock.calls[0];
+    const form = await new Response(new Uint8Array(body as Buffer), {
+      headers: options!.headers as Record<string, string>,
+    }).formData();
+    const file = form.get('files') as File;
+    expect(file.name).toBe('bad___name.png');
+    expect(file.type).toBe('application/octet-stream');
+    expect((body as Buffer).toString()).not.toContain('X-Injected');
+  });
+
+  test('PicGo failure responses cannot be mistaken for a successful URL', () => {
+    expect(() =>
+      parseUploadResponse({ success: false, result: ['https://example.test/not-uploaded'], message: 'Upload denied' }),
+    ).toThrow('Upload denied');
+    expect(() => parseUploadResponse({ success: false, result: [] })).toThrow('reported failure');
   });
 
   test.each([
