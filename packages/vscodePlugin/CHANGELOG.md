@@ -1,5 +1,34 @@
 # Change Log
 
+## 0.4.0
+
+### Minor Changes
+
+- feat(vscodePlugin): 统一上传配置、支持 PicGo multipart，并为重要行为变化提供一次性更新说明
+
+  - 上传配置按当前文档所属文件夹、工作区、用户、默认值的顺序读取。上传器地址和认证头整体取自同一层，避免项目地址混入全局认证信息。
+  - 配置无效时阻止上传并提示修正，不静默切换上传目标。
+  - 重要行为变化会显示一次性更新说明通知，可查看随插件打包的本地说明或打开上传设置，也可从命令面板重新查看。通知按重要变更标识记录，普通 patch、关闭通知和重载窗口不会重复提示；首次上线无法可靠区分新装和升级，因此首次启用都会提示一次。
+  - 仅记录扩展内部通知状态，不迁移用户设置，上传时的配置错误提醒继续保留。
+  - `CustomUploader.format` 支持 `binary` 和 `multipart`，省略时仍使用原有的 `binary` 行为。
+  - PicGo 2.4.0+ 用户可设置 `ImageUploadMode=remote`、`format=multipart`、`fieldName=files` 继续上传；插件直接发送文件内容，自动生成表单边界和长度，不根据地址猜测协议，也不在失败后切换路线。
+  - 停止使用旧 `UploadType`、`PicGoServer` 选择上传方式和地址，不提供旧路径列表或剪贴板协议适配。
+  - 仅有旧配置时，上传提醒会说明本地、Base64、远程三种新模式，并提供 PicGo 配置示例，可打开设置或配置说明；此过渡提醒计划在下一个 major 版本移除。不会自动修改或清理用户已有设置。
+  - 受限模式只允许用户级上传设置；用户可通过 VS Code 原生工作区信任界面授权，再使用项目配置。预览显示当前上传目标和配置来源。
+  - 原有手动主题继续保存在扩展状态中，不再自动读取或迁移已移除的旧主题设置。 [@RSS1102](https://github.com/RSS1102)([#1943](https://github.com/Tencent/cherry-markdown/pull/1943))([`59de6c1`](https://github.com/Tencent/cherry-markdown/commit/59de6c1c6525dbd0b907df457e7cad512ca84b13))
+
+- feat(vscodePlugin): 支持跟随 VS Code 主题并在预览中搜索 [@RSS1102](https://github.com/RSS1102)([#1938](https://github.com/Tencent/cherry-markdown/pull/1938))([`37e4600`](https://github.com/Tencent/cherry-markdown/commit/37e4600c57c32b225954fc9da0909e972107eee5))
+
+### Patch Changes
+
+- fix(vscodePlugin): 将上传结果绑定到原文档的唯一占位，避免切换文档后误插入其他文件
+
+  - 上传期间切换或关闭预览时，仍可更新尚未关闭的原文档；占位被删除、撤销或复制，或原文档已关闭时取消自动插入。
+  - 支持从 Webview 传递文件内容，不再要求浏览器文件对象提供本地路径。
+  - 修改保留为未保存编辑，不自动写入磁盘。
+  - 同时选择图片“边框”和“无边框”时，继续优先使用“无边框”，并保留阴影、圆角等其他样式。
+  - 上传失败时清空原文档中仍唯一存在的临时图片 URL，保留图片名称和周围编辑；已撤销、复制或关闭的目标不再修改。 [@RSS1102](https://github.com/RSS1102)([#1942](https://github.com/Tencent/cherry-markdown/pull/1942))([`ac4950f`](https://github.com/Tencent/cherry-markdown/commit/ac4950fe499d3f5ab5379d96c9618bd202722795))
+
 ## 0.3.11
 
 ### Patch Changes
