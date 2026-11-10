@@ -417,15 +417,39 @@ function unescapeHTMLHexEntities(html) {
     }
   });
 }
+var schemeEntityMap = {
+  colon: ':',
+  Colon: ':',
+  tab: '	',
+  Tab: '	',
+  newline: '\n',
+  NewLine: '\n',
+  sol: '/',
+  Sol: '/',
+  amp: '&',
+};
+function decodeSchemeEntities(url) {
+  let decoded = url;
+  for (let i = 0; i < 2; i += 1) {
+    decoded = unescapeHTMLHexEntities(unescapeHTMLNumberEntities(decoded)).replace(
+      /&(\w+);?/g,
+      (match, name) => schemeEntityMap[name] ?? match,
+    );
+  }
+  return decoded;
+}
 function isValidScheme(url) {
-  const regex = /^\s*([\w\W]+?)(?=:)/i;
-  const match = unescapeHTMLHexEntities(unescapeHTMLNumberEntities(url)).match(regex);
+  if (typeof url !== 'string') {
+    return true;
+  }
+  const normalized = decodeSchemeEntities(url).replace(/[\s\x00-\x1f]/g, '');
+  const match = normalized.match(/^([a-z][a-z0-9+.-]*):/i);
   if (!match) {
     return true;
   }
   const SCHEME_BLACKLIST = ['javascript', 'vbscript', 'data'];
-  const scheme = match[1].replace(/[\s\x00-\x1f]/g, '');
-  if (SCHEME_BLACKLIST.indexOf(scheme.toLowerCase()) !== -1) {
+  const scheme = match[1].toLowerCase();
+  if (SCHEME_BLACKLIST.indexOf(scheme) !== -1) {
     return false;
   }
   return true;
