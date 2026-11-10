@@ -1,5 +1,16 @@
 # Change Log
 
+## 0.11.13
+
+### Patch Changes
+
+- feat: 提供 frontMatter 读写 API [@sunsonliu](https://github.com/sunsonliu)([#1928](https://github.com/Tencent/cherry-markdown/pull/1928))([`1be27df`](https://github.com/Tencent/cherry-markdown/commit/1be27df42044f0871a408518e53490b4341d1dce))
+- fix(cherry-markdown): 修复经典换行配置首次切换不生效的问题 [@RSS1102](https://github.com/RSS1102)([#1945](https://github.com/Tencent/cherry-markdown/pull/1945))([`2318517`](https://github.com/Tencent/cherry-markdown/commit/23185172a985e0f10714dba70921e6806c9d854a))
+- fix: 修复编辑器销毁后延迟任务与目录监听未清理的问题：取消待执行的渲染、hash 跳转和悬浮目录更新，释放目录的滚动与窗口缩放监听，并支持重复调用销毁方法。 [@RSS1102](https://github.com/RSS1102)([#1932](https://github.com/Tencent/cherry-markdown/pull/1932))([`1e76861`](https://github.com/Tencent/cherry-markdown/commit/1e76861a0a8d1cc2f7982e92312b792340f6b895))
+- feat: 支持 GFM Alerts 语法 [@sunsonliu](https://github.com/sunsonliu)([#1927](https://github.com/Tencent/cherry-markdown/pull/1927))([`8112362`](https://github.com/Tencent/cherry-markdown/commit/81123621dee47c07fa6c85fa67c96d8eee855164))
+- fix(cherry-markdown): 加固渲染缓存还原后的 HTML 转义，并完善 URL 协议与消息来源校验 [@RSS1102](https://github.com/RSS1102)([`b2cc414`](https://github.com/Tencent/cherry-markdown/commit/b2cc4149a20989acc3e7dba842c2c21eab235825))
+- feat: 支持配置编辑区不使用特殊样式（#1892） [@sunsonliu](https://github.com/sunsonliu)([#1935](https://github.com/Tencent/cherry-markdown/pull/1935))([`464480b`](https://github.com/Tencent/cherry-markdown/commit/464480b59e31f58f452a3a5e483abd2213c5c205))
+
 ## 0.11.12
 
 ### Patch Changes

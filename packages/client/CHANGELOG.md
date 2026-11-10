@@ -1,5 +1,14 @@
 # @cherry-markdown/client
 
+## 0.5.3
+
+### Patch Changes
+
+- feat: 支持配置是否显示隐藏文件（#1930） [@sunsonliu](https://github.com/sunsonliu)([#1931](https://github.com/Tencent/cherry-markdown/pull/1931))([`839ce69`](https://github.com/Tencent/cherry-markdown/commit/839ce6927601684f5bd70918d6bb240176288dec))
+- feat: 提供 Windows ARM64 安装包 [@sunsonliu](https://github.com/sunsonliu)([#1939](https://github.com/Tencent/cherry-markdown/pull/1939))([`9223b0d`](https://github.com/Tencent/cherry-markdown/commit/9223b0daabf3dbe48a3abc5c6e052cb5f4c8a4a7))
+- Updated dependencies [[`1be27df`](https://github.com/Tencent/cherry-markdown/commit/1be27df42044f0871a408518e53490b4341d1dce), [`2318517`](https://github.com/Tencent/cherry-markdown/commit/23185172a985e0f10714dba70921e6806c9d854a), [`1e76861`](https://github.com/Tencent/cherry-markdown/commit/1e76861a0a8d1cc2f7982e92312b792340f6b895), [`8112362`](https://github.com/Tencent/cherry-markdown/commit/81123621dee47c07fa6c85fa67c96d8eee855164), [`b2cc414`](https://github.com/Tencent/cherry-markdown/commit/b2cc4149a20989acc3e7dba842c2c21eab235825), [`464480b`](https://github.com/Tencent/cherry-markdown/commit/464480b59e31f58f452a3a5e483abd2213c5c205)]:
+  - cherry-markdown@0.11.13
+
 ## 0.5.2
 
 ### Patch Changes

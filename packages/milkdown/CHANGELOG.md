@@ -1,5 +1,14 @@
 # @cherry-markdown/milkdown
 
+## 0.0.2
+
+### Patch Changes
+
+- feat: 优化链接浮层，支持直接打开、复制、编辑和取消链接，外观跟随 Cherry 主题。支持使用 Alt+F10 进入链接操作条，同时保留编辑器原有的 Tab 行为。调整链接编辑表单样式；取消链接可一次撤销，滚动或调整窗口时保留未保存的表单内容。 [@RSS1102](https://github.com/RSS1102)([#1929](https://github.com/Tencent/cherry-markdown/pull/1929))([`44f6e87`](https://github.com/Tencent/cherry-markdown/commit/44f6e87b5f115acd910764f78e6e2ce6d5ea5ca1))
+- fix(milkdown): 同步 Cherry 的 URL 协议校验，阻止通过字符实体编码绕过危险协议检查 [@RSS1102](https://github.com/RSS1102)([#1947](https://github.com/Tencent/cherry-markdown/pull/1947))([`372b561`](https://github.com/Tencent/cherry-markdown/commit/372b561e4e0ca46be5ff938973b745c244c928ba))
+- Updated dependencies [[`1be27df`](https://github.com/Tencent/cherry-markdown/commit/1be27df42044f0871a408518e53490b4341d1dce), [`2318517`](https://github.com/Tencent/cherry-markdown/commit/23185172a985e0f10714dba70921e6806c9d854a), [`1e76861`](https://github.com/Tencent/cherry-markdown/commit/1e76861a0a8d1cc2f7982e92312b792340f6b895), [`8112362`](https://github.com/Tencent/cherry-markdown/commit/81123621dee47c07fa6c85fa67c96d8eee855164), [`b2cc414`](https://github.com/Tencent/cherry-markdown/commit/b2cc4149a20989acc3e7dba842c2c21eab235825), [`464480b`](https://github.com/Tencent/cherry-markdown/commit/464480b59e31f58f452a3a5e483abd2213c5c205)]:
+  - cherry-markdown@0.11.13
+
 ## 0.0.1
 
 ### Patch Changes
