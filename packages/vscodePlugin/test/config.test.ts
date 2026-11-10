@@ -59,6 +59,14 @@ describe('configuration normalization', () => {
     ]);
   });
 
+  test.each([
+    ['isBorder', 'isNotBorder', 'isShadow', 'isRadius'],
+    ['isNotBorder', 'isBorder', 'isShadow', 'isRadius'],
+    ['无边框', '边框', '阴影', '圆角'],
+  ])('gives no-border precedence without dropping other image decorations: %j', (...properties) => {
+    expect(config.normalizeBackfillImageProps(properties)).toEqual(['isNotBorder', 'isShadow', 'isRadius']);
+  });
+
   test('falls back for invalid values', () => {
     expect(config.normalizeUsage(null)).toBe('active');
     expect(config.normalizeTheme('unknown')).toBe('default');

@@ -1,5 +1,6 @@
 import type { CherryTheme } from './config';
-import type { UploadFileRequest, UploadFileResult } from './types/upload';
+import type { BackfillImage, DocumentUploadRequest, DocumentUploadResult } from './types/upload';
+import { UPLOAD_PLACEHOLDER_PATTERN } from './uploadAnchor';
 
 export interface EditorState {
   text: string;
@@ -9,6 +10,7 @@ export interface EditorState {
   resourceUri: string;
   vscodeLanguage: string;
   labels: WebviewLabels;
+  uploadImageProps?: BackfillImage;
 }
 
 export interface WebviewLabels {
@@ -26,7 +28,7 @@ export type ExtensionToWebviewMessage =
   | { cmd: 'editor-scroll'; data: number }
   | { cmd: 'disable-edit'; data: Record<string, never> }
   | { cmd: 'enable-edit'; data: Record<string, never> }
-  | { cmd: 'upload-file-result'; data: UploadFileResult }
+  | { cmd: 'upload-file-result'; data: DocumentUploadResult }
   | { cmd: 'operation-error'; data: { operation: string; message: string; requestId?: number } };
 
 export type WebviewToExtensionMessage =
@@ -38,7 +40,8 @@ export type WebviewToExtensionMessage =
       data: { documentUri: string; baseVersion: number; requestId: number; markdown: string };
     }
   | { type: 'show-message'; data: string }
-  | { type: 'upload-file'; data: UploadFileRequest }
+  | { type: 'upload-file'; data: DocumentUploadRequest }
+  | { type: 'finish-upload'; data: { placeholder: string } }
   | { type: 'open-url'; data: string }
   | { type: 'export-png'; data: string };
 
@@ -53,16 +56,24 @@ function isFiniteNonNegativeNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0;
 }
 
-function isUploadFileRequest(value: unknown): value is UploadFileRequest {
+function isUploadFileRequest(value: unknown): value is DocumentUploadRequest {
   return (
     isRecord(value) &&
     isFiniteNonNegativeNumber(value.requestId) &&
+    typeof value.documentUri === 'string' &&
+    value.documentUri.length > 0 &&
+    value.documentUri.length <= 32_768 &&
+    typeof value.placeholder === 'string' &&
+    UPLOAD_PLACEHOLDER_PATTERN.test(value.placeholder) &&
     typeof value.name === 'string' &&
     value.name.length <= 1024 &&
     typeof value.type === 'string' &&
     typeof value.path === 'string' &&
     value.path.length <= 32_768 &&
-    isFiniteNonNegativeNumber(value.size)
+    isFiniteNonNegativeNumber(value.size) &&
+    value.size <= 50 * 1024 * 1024 &&
+    (value.base64 === undefined ||
+      (typeof value.base64 === 'string' && value.base64.length <= Math.ceil((50 * 1024 * 1024) / 3) * 4))
   );
 }
 
@@ -107,6 +118,12 @@ export function parseWebviewMessage(value: unknown): WebviewToExtensionMessage |
         : undefined;
     case 'upload-file':
       return isUploadFileRequest(value.data) ? { type: value.type, data: value.data } : undefined;
+    case 'finish-upload':
+      return isRecord(value.data) &&
+        typeof value.data.placeholder === 'string' &&
+        UPLOAD_PLACEHOLDER_PATTERN.test(value.data.placeholder)
+        ? { type: value.type, data: { placeholder: value.data.placeholder } }
+        : undefined;
     case 'export-png':
       return typeof value.data === 'string' &&
         value.data.length <= MAX_PNG_MESSAGE_LENGTH &&

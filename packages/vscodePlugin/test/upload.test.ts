@@ -145,6 +145,39 @@ describe('image upload handler', () => {
     expect(result.url).toBe('data:image/png;base64,AQID');
   });
 
+  test('accepts Webview file bytes without a local path in workspace mode', async () => {
+    const result = await uploadFileHandler(
+      {
+        requestId: 20,
+        name: 'image.png',
+        type: 'image/png',
+        path: '',
+        size: 3,
+        base64: 'AQID',
+      },
+      mockState.uri('/workspace/readme.md') as never,
+    );
+    expect(result.url).toBe('./.cherry-assets/image.png');
+    expect(Array.from(mockState.files.get('/workspace/.cherry-assets/image.png')!)).toEqual([1, 2, 3]);
+  });
+
+  test.each([
+    { base64: 'not base64', size: 3 },
+    { base64: 'AQID', size: 2 },
+    { base64: 'AQID', size: 4 },
+  ])('rejects malformed or mismatched Webview bytes %j', async (data) => {
+    mockState.mode = 'data';
+    await expect(
+      uploadFileHandler({
+        requestId: 21,
+        name: 'image.png',
+        type: 'image/png',
+        path: '',
+        ...data,
+      }),
+    ).rejects.toThrow('file data');
+  });
+
   test('rejects Base64 uploads for non-image files', async () => {
     mockState.mode = 'data';
 

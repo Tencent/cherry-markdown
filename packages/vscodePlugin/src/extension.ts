@@ -1,12 +1,21 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { getTheme, getUsageMode, migrateImageUploadMode, migrateTheme, THEME_STATE_KEY } from './config';
+import {
+  getBackfillImageProps,
+  getTheme,
+  getUsageMode,
+  migrateImageUploadMode,
+  migrateTheme,
+  THEME_STATE_KEY,
+} from './config';
+import { DocumentUploadManager } from './documentUploads';
 import { isPreviewEditEnabled } from './editState';
 import { uploadFileHandler } from './handler/uploadFile';
 import type { EditorState, ExtensionToWebviewMessage } from './protocol';
 import { parseWebviewMessage } from './protocol';
 import { calculateTextReplacement } from './textEdit';
 import { getWebviewContent } from './webview';
+import type { DocumentUploadRequest } from './types/upload';
 
 const MAX_PNG_BYTES = 50 * 1024 * 1024;
 
@@ -28,6 +37,24 @@ class CherryMarkdownPreview {
   private pendingWebviewText: string | undefined;
   private editQueue: Promise<void> = Promise.resolve();
   private panelGeneration = 0;
+  private readonly uploads = new DocumentUploadManager({
+    findDocument: (uri) => vscode.workspace.textDocuments.find((document) => document.uri.toString() === uri),
+    upload: uploadFileHandler,
+    isPreviewing: (document) =>
+      Boolean(this.panel?.visible && this.webviewReady && sameUri(document.uri, this.targetEditor?.document.uri)),
+    publish: (result) => this.postMessage({ cmd: 'upload-file-result', data: result }),
+    replace: async (document, offset, length, url) => {
+      const target = document as vscode.TextDocument;
+      const edit = new vscode.WorkspaceEdit();
+      edit.replace(target.uri, new vscode.Range(target.positionAt(offset), target.positionAt(offset + length)), url);
+      return vscode.workspace.applyEdit(edit);
+    },
+    enqueue: (operation) => {
+      const task = this.editQueue.then(operation);
+      this.editQueue = task.catch((error: unknown) => this.reportError('upload-file', error));
+      return task;
+    },
+  });
 
   constructor(
     private readonly context: vscode.ExtensionContext,
@@ -39,6 +66,7 @@ class CherryMarkdownPreview {
       vscode.commands.registerCommand('cherrymarkdown.preview', () => this.show(true)),
       vscode.window.onDidChangeActiveTextEditor((editor) => this.handleActiveEditorChange(editor)),
       vscode.workspace.onDidChangeTextDocument((event) => this.handleDocumentChange(event)),
+      vscode.workspace.onDidCloseTextDocument((document) => this.uploads.documentChanged(document)),
       vscode.window.onDidChangeTextEditorVisibleRanges((event) => this.handleVisibleRangesChange(event)),
       vscode.workspace.onDidChangeConfiguration((event) => this.handleConfigurationChange(event)),
       vscode.window.onDidChangeActiveColorTheme(() => void this.postEditorState('editor-change')),
@@ -84,6 +112,10 @@ class CherryMarkdownPreview {
     this.panel.onDidChangeViewState(
       async ({ webviewPanel }) => {
         if (webviewPanel.visible && this.webviewReady) await this.postEditorState('editor-change');
+        if (!webviewPanel.visible) {
+          this.webviewReady = false;
+          await this.uploads.finishInactive();
+        }
       },
       undefined,
       this.context.subscriptions,
@@ -100,6 +132,7 @@ class CherryMarkdownPreview {
     this.webviewReady = false;
     this.pendingWebviewText = undefined;
     this.suppressEditorScroll = false;
+    void this.uploads.finishInactive().catch((error: unknown) => this.reportError('upload-file', error));
   }
 
   private registerWebviewMessages(): void {
@@ -144,6 +177,11 @@ class CherryMarkdownPreview {
         case 'upload-file':
           void this.uploadFile(message.data);
           break;
+        case 'finish-upload':
+          void this.uploads
+            .finish(message.data.placeholder)
+            .catch((error: unknown) => this.reportError('upload-file', error));
+          break;
         case 'open-url':
           void this.openUrl(message.data);
           break;
@@ -160,6 +198,7 @@ class CherryMarkdownPreview {
 
     if (editor.document.languageId === 'markdown') {
       this.targetEditor = editor;
+      void this.uploads.finishInactive().catch((error: unknown) => this.reportError('upload-file', error));
       if (this.panel) {
         this.updateResourceRoots();
         await this.postMessage({ cmd: 'enable-edit', data: {} });
@@ -184,6 +223,7 @@ class CherryMarkdownPreview {
   }
 
   private async handleDocumentChange(event: vscode.TextDocumentChangeEvent): Promise<void> {
+    this.uploads.documentChanged(event.document);
     if (!this.targetEditor || !sameUri(event.document.uri, this.targetEditor.document.uri)) return;
     if (this.pendingWebviewText === event.document.getText()) {
       this.pendingWebviewText = undefined;
@@ -290,21 +330,22 @@ class CherryMarkdownPreview {
     const configuration = vscode.workspace.getConfiguration('cherryMarkdown', this.targetEditor.document.uri);
     if (configuration.get('ThemeMode') === 'vscode') {
       const inspected = configuration.inspect('ThemeMode');
-      const target = inspected?.workspaceFolderValue !== undefined ? vscode.ConfigurationTarget.WorkspaceFolder
-        : inspected?.workspaceValue !== undefined ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
+      const target =
+        inspected?.workspaceFolderValue !== undefined
+          ? vscode.ConfigurationTarget.WorkspaceFolder
+          : inspected?.workspaceValue !== undefined
+            ? vscode.ConfigurationTarget.Workspace
+            : vscode.ConfigurationTarget.Global;
       await configuration.update('ThemeMode', 'manual', target);
     }
     await this.postEditorState('editor-change');
   }
 
-  private async uploadFile(file: Parameters<typeof uploadFileHandler>[0]): Promise<void> {
+  private async uploadFile(file: DocumentUploadRequest): Promise<void> {
     const { panel } = this;
     const generation = this.panelGeneration;
     try {
-      const result = await uploadFileHandler(file, this.targetEditor?.document.uri);
-      if (generation === this.panelGeneration && panel === this.panel) {
-        await this.postMessage({ cmd: 'upload-file-result', data: result }, panel);
-      }
+      await this.uploads.start(file);
     } catch (error: unknown) {
       this.reportError('upload-file', error);
       if (generation === this.panelGeneration && panel === this.panel) {
@@ -414,6 +455,7 @@ class CherryMarkdownPreview {
         savePng: vscode.l10n.t('Save as PNG'),
         editDisabled: vscode.l10n.t('The Markdown document is not active, so preview editing is disabled.'),
       },
+      uploadImageProps: Object.fromEntries(getBackfillImageProps(document.uri).map((property) => [property, true])),
     };
   }
 

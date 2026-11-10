@@ -9,6 +9,7 @@ import type {
   WebviewToExtensionMessage,
 } from '../../src/protocol';
 import type { UploadFileResult } from '../../src/types/upload';
+import { DocumentUploads } from './uploads';
 
 interface PersistedState {
   editMode?: boolean;
@@ -29,7 +30,8 @@ interface CherryInstance {
   };
   onChange(callback: (value: string | { markdown?: string }) => void): void;
   setTheme(theme: CherryTheme): void;
-  setValue(value: string): void;
+  setValue(value: string, keepCursor?: boolean): void;
+  getValue(): string;
   editor?: {
     getCursor(): { line: number; ch: number };
     setCursor(line: number, ch: number): void;
@@ -69,14 +71,21 @@ let editorState: EditorState | undefined;
 let suppressEditMessage = false;
 let suppressThemeMessage = false;
 let editRequestId = 0;
-let uploadRequestId = 0;
-  let editInFlight: { requestId: number; markdown: string } | undefined;
-  let pendingMarkdown: string | undefined;
-  let stateGeneration = 0;
+let editInFlight: { requestId: number; markdown: string } | undefined;
+let pendingMarkdown: string | undefined;
+let stateGeneration = 0;
 let editDebounceTimer: ReturnType<typeof setTimeout> | undefined;
 let suppressScrollMessages = false;
 let suppressScrollMessagesTimer: ReturnType<typeof setTimeout> | undefined;
-const uploadCallbacks = new Map<number, UploadCallback | undefined>();
+const uploads = new DocumentUploads({
+  getState: () => editorState,
+  getMarkdown: () => cherry?.getValue() ?? '',
+  setMarkdown: (markdown) => {
+    cherry?.setValue(markdown, true);
+    scheduleEditorChange(markdown);
+  },
+  postMessage: (message) => vscode.postMessage(message),
+});
 
 /**
  * 在侧边栏增加编辑/预览入口
@@ -136,7 +145,11 @@ function setEditMode(enabled: boolean) {
   markdown.className = editEnabled ? 'markdown-edit-preview' : 'markdown-preview-only';
   pen.className = editEnabled ? `${pen.className.replace(' active', '')} active` : pen.className.replace(' active', '');
   pen.innerHTML = `<i class="ch-icon ${editEnabled ? 'ch-icon-pen-fill' : 'ch-icon-pen'}"></i>`;
-  vscode.setState({ ...vscode.getState(), editMode: editEnabled, scrollTop: cherry?.previewer.getDom().scrollTop || 0 });
+  vscode.setState({
+    ...vscode.getState(),
+    editMode: editEnabled,
+    scrollTop: cherry?.previewer.getDom().scrollTop || 0,
+  });
 }
 
 /** 处理 a 链接跳转问题 */
@@ -212,16 +225,7 @@ function createBasicConfig(state: EditorState): Record<string, unknown> {
         'detail',
         '|',
         {
-          insert: [
-            'image',
-            'link',
-            'hr',
-            'br',
-            'code',
-            'formula',
-            'toc',
-            'table',
-          ],
+          insert: ['image', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table'],
         },
         'togglePreview',
       ],
@@ -251,19 +255,7 @@ function createBasicConfig(state: EditorState): Record<string, unknown> {
     keydown: [],
     callback: {
       fileUpload: (file: UploadFileWithPath, callback?: UploadCallback) => {
-        uploadRequestId += 1;
-        const requestId = uploadRequestId;
-        uploadCallbacks.set(requestId, callback);
-        vscode.postMessage({
-          type: 'upload-file',
-          data: {
-            requestId,
-            name: file.name,
-            path: file.path || '',
-            size: file.size,
-            type: file.type,
-          },
-        });
+        uploads.start(file, callback);
       },
       changeString2Pinyin: window.pinyin,
       beforeImageMounted(_srcProp: unknown, srcValue: string) {
@@ -350,6 +342,8 @@ async function applyEditorState(state: EditorState): Promise<void> {
   await ensureMathJax(state.text);
   if (generation !== stateGeneration) return;
   if (!preserveUnacknowledgedEdit) {
+    if (editorState?.documentUri === state.documentUri) uploads.synchronize(state.documentUri, state.text);
+    else if (editorState) uploads.discardUnacknowledged(editorState.documentUri);
     const textChanged = editorState?.text !== state.text;
     editorState = state;
     editInFlight = undefined;
@@ -404,12 +398,11 @@ function sendPendingEditorChange() {
   });
 }
 
-function acknowledgeEditorChange(
-  data: Extract<ExtensionToWebviewMessage, { cmd: 'editor-ack' }>['data'],
-): void {
+function acknowledgeEditorChange(data: Extract<ExtensionToWebviewMessage, { cmd: 'editor-ack' }>['data']): void {
   if (!editorState || editInFlight?.requestId !== data.requestId) return;
   editorState.documentVersion = data.documentVersion;
   editorState.text = data.text;
+  uploads.acknowledge(editorState.documentUri, data.text);
   editInFlight = undefined;
   if (pendingMarkdown !== undefined && pendingMarkdown !== data.text) {
     scheduleEditorChange(pendingMarkdown);
@@ -479,23 +472,6 @@ function postScrollMessage(line: number): void {
   vscode.postMessage({ type: 'preview-scroll', data: line });
 }
 
-function applyUploadResult(data: UploadFileResult): void {
-  if (!cherry) return;
-  const { requestId, url, ...rest } = data;
-  const callback = uploadCallbacks.get(requestId);
-  uploadCallbacks.delete(requestId);
-  callback?.(url, rest);
-  const images = cherry.previewer.getDom().querySelectorAll('img');
-  images.forEach((image) => {
-    if (image.getAttribute('src') !== url) return;
-    image.classList.remove('ch-image-border', 'ch-image-no-border', 'ch-image-shadow', 'ch-image-radius');
-    if (rest.isNotBorder) image.classList.add('ch-image-no-border');
-    else if (rest.isBorder) image.classList.add('ch-image-border');
-    if (rest.isShadow) image.classList.add('ch-image-shadow');
-    if (rest.isRadius) image.classList.add('ch-image-radius');
-  });
-}
-
 let scrollTimeout: ReturnType<typeof setTimeout> | undefined;
 window.addEventListener('message', (event: MessageEvent<ExtensionToWebviewMessage>) => {
   const { cmd, data } = event.data;
@@ -524,17 +500,13 @@ window.addEventListener('message', (event: MessageEvent<ExtensionToWebviewMessag
       window.isDisableEdit = false;
       break;
     case 'upload-file-result':
-      if (cherry) applyUploadResult(data);
+      uploads.applyResult(data);
       break;
     case 'operation-error':
       if (data?.operation === 'editor-change') {
         editInFlight = undefined;
         pendingMarkdown = undefined;
         clearTimeout(editDebounceTimer);
-      }
-      if (data?.operation === 'upload-file') {
-        if (data.requestId === undefined) uploadCallbacks.clear();
-        else uploadCallbacks.delete(data.requestId);
       }
       vscode.postMessage({ type: 'show-message', data: data?.message || 'Cherry Markdown operation failed.' });
       break;
