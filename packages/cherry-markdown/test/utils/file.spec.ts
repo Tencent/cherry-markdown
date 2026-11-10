@@ -1,10 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import {
+  getImageCaptionText,
   handleDropType,
   handleFileUploadCallback,
   handleParams,
   handleUpload,
   handleUploadMulti,
+  resolveImageName,
+  stripFileExtension,
 } from '../../src/utils/file';
 
 interface UploadParams {
@@ -27,6 +30,7 @@ interface UploadEditor {
   $cherry: {
     options: {
       multipleFileSelection?: boolean;
+      imageCaption?: boolean | string | ((imageName: string, url: string) => string);
       callback: {
         fileUpload: (file: File, callback: UploadCallback) => void;
         fileUploadMulti: (files: File[], callback: MultiUploadCallback) => void;
@@ -211,3 +215,106 @@ describe('utils/file', () => {
     expect(replaceSelection).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * #1767 上传/插入图片后自动追加图片名称
+ * https://github.com/Tencent/cherry-markdown/issues/1767
+ */
+describe('utils/file imageCaption', () => {
+  afterEach(() => {
+    latestInput = undefined;
+    vi.restoreAllMocks();
+  });
+
+  const imageFile = () => new File(['x'], 'demo photo.png', { type: 'image/png' });
+
+  it('keeps the historical output when imageCaption is off', () => {
+    expect(getImageCaptionText(false, 'demo photo', '/photo')).toBe('');
+    expect(getImageCaptionText(undefined, 'demo photo', '/photo')).toBe('');
+    expect(handleDropType(imageFile(), '/photo')).toBe('![demo photo.png](/photo)');
+    expect(handleFileUploadCallback('/photo', {}, imageFile())).toBe('![demo photo.png](/photo)');
+  });
+
+  it('strips the file extension so the caption is the image name', () => {
+    expect(stripFileExtension('demo photo.png')).toBe('demo photo');
+    expect(stripFileExtension('archive.tar.gz')).toBe('archive.tar');
+    expect(stripFileExtension('noext')).toBe('noext');
+  });
+
+  it('prefers the uploader-provided name over the raw file name', () => {
+    expect(resolveImageName('demo photo.png', {})).toBe('demo photo');
+    expect(resolveImageName('demo photo.png', { name: '自定义标题' })).toBe('自定义标题');
+  });
+
+  it('appends the image name as its own paragraph when imageCaption is true', () => {
+    expect(handleDropType(imageFile(), '/photo', true)).toBe('![demo photo.png](/photo)\n\ndemo photo');
+    expect(handleFileUploadCallback('/photo', {}, imageFile(), true)).toBe(
+      '![demo photo.png](/photo)\n\ndemo photo',
+    );
+    expect(handleFileUploadCallback('/photo', { name: '自定义标题' }, imageFile(), true)).toBe(
+      '![自定义标题](/photo)\n\n自定义标题',
+    );
+  });
+
+  it('uses a string option as the caption prefix', () => {
+    expect(getImageCaptionText('图片: ', 'demo photo', '/photo')).toBe('\n\n图片: demo photo');
+    expect(handleDropType(imageFile(), '/photo', '图片: ')).toBe('![demo photo.png](/photo)\n\n图片: demo photo');
+  });
+
+  it('supports a custom caption function and skips empty results', () => {
+    const fn = vi.fn((name: string, url: string) => `（来源：${url}）${name}`);
+    expect(handleDropType(imageFile(), '/photo', fn)).toBe('![demo photo.png](/photo)\n\n（来源：/photo）demo photo');
+    expect(fn).toHaveBeenCalledWith('demo photo', '/photo');
+    expect(getImageCaptionText(() => '', 'demo photo', '/photo')).toBe('');
+    expect(getImageCaptionText(() => '   ', 'demo photo', '/photo')).toBe('');
+  });
+
+  it('never appends a caption to video, audio or other files', () => {
+    expect(handleFileUploadCallback('/clip', {}, new File(['x'], 'clip.mp4', { type: 'video/mp4' }), true)).toBe(
+      '!video[clip.mp4](/clip)',
+    );
+    expect(handleFileUploadCallback('/sound', {}, new File(['x'], 'sound.mp3', { type: 'audio/mpeg' }), true)).toBe(
+      '!audio[sound.mp3](/sound)',
+    );
+    expect(handleFileUploadCallback('/doc', {}, new File(['x'], 'doc.pdf', { type: 'application/pdf' }), true)).toBe(
+      '[doc.pdf](/doc)',
+    );
+    expect(handleDropType(new File(['x'], 'notes.txt', { type: 'text/plain' }), '/notes', true)).toBe(
+      '[notes.txt](/notes)',
+    );
+  });
+
+  it('appends the caption in the default single-file upload replacement', () => {
+    const fileUpload = vi.fn((_file: File, callback: UploadCallback) => callback('/uploaded'));
+    const fileUploadMulti = vi.fn<UploadEditor['$cherry']['options']['callback']['fileUploadMulti']>();
+    const { editor, replaceSelection } = createEditor(fileUpload, fileUploadMulti);
+    editor.$cherry.options.imageCaption = true;
+    captureInput();
+
+    handleUpload(editor, 'image', 'image/*');
+    dispatchFile(imageFile());
+
+    expect(replaceSelection).toHaveBeenLastCalledWith('![demo photo.png](/uploaded)\n\ndemo photo');
+  });
+
+  it('appends the caption for every image in the default multi-file replacement', () => {
+    const fileUpload = vi.fn<UploadEditor['$cherry']['options']['callback']['fileUpload']>();
+    const fileUploadMulti = vi.fn((_files: File[], callback: MultiUploadCallback) => {
+      callback([
+        { url: '/one', params: { name: '一号图' } },
+        { url: '/two', file: new File(['x'], 'two.png', { type: 'image/png' }) },
+      ]);
+    });
+    const { editor, replaceSelection } = createEditor(fileUpload, fileUploadMulti, true);
+    editor.$cherry.options.imageCaption = '图片: ';
+    captureInput();
+
+    handleUploadMulti(editor, 'image', 'image/*');
+    dispatchFile(imageFile());
+
+    expect(replaceSelection).toHaveBeenCalledWith(
+      '![demo photo.png](/one)\n\n图片: 一号图\n![two.png](/two)\n\n图片: two\n',
+    );
+  });
+});
+

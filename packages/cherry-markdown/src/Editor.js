@@ -1653,7 +1653,13 @@ export default class Editor {
           if (typeof url !== 'string') {
             return;
           }
-          const mdStr = `${this.fileUploadCount > 1 ? '\n' : ''}${handleFileUploadCallback(url, params, file)}`;
+          // #1767 粘贴图片后可以按配置在图片后面追加图片名称
+          const mdStr = `${this.fileUploadCount > 1 ? '\n' : ''}${handleFileUploadCallback(
+            url,
+            params,
+            file,
+            this.$cherry.options.imageCaption,
+          )}`;
           // 插入内容
           editorView.dispatch({
             changes: {
@@ -1803,7 +1809,8 @@ export default class Editor {
           const file = item?.file || uploadFiles[k];
           const origIdx = uploadOrigIdx[k];
           if (typeof url === 'string' && url && file) {
-            orderedSegments[origIdx] = `${handleDropType(file, url)}\n`;
+            // #1767 拖拽图片后可以按配置在图片后面追加图片名称
+            orderedSegments[origIdx] = `${handleDropType(file, url, this.$cherry.options.imageCaption)}\n`;
           } else {
             orderedSegments[origIdx] = '';
           }

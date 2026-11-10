@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import MenuBase from '@/toolbars/MenuBase';
-import { handleUpload, handleParams, handleUploadMulti } from '@/utils/file';
+import { handleUpload, handleParams, handleUploadMulti, getImageCaptionText, resolveImageName } from '@/utils/file';
 import { getKeyCode, getPlatformControlKey } from '@/utils/shortcutKey';
 /**
  * 插入图片
@@ -47,6 +47,7 @@ export default class Image extends MenuBase {
     if (multiple) {
       if (this.hasCacheOnce()) {
         const arr = this.getAndCleanCacheOnce();
+        const imageCaption = this.$cherry.options.imageCaption;
         let res = '';
         for (const { url, params } of arr) {
           const begin = '![';
@@ -55,7 +56,9 @@ export default class Image extends MenuBase {
             this.setLessSelection(begin, end);
           });
           const finalName = params.name ? params.name : name;
-          res += `${begin}${finalName}${handleParams(params)}${end}\n`;
+          // #1767 上传图片后可以按配置在图片后面追加图片名称
+          const caption = getImageCaptionText(imageCaption, resolveImageName(params?.name, params), url);
+          res += `${begin}${finalName}${handleParams(params)}${end}${caption}\n`;
         }
         return res;
       }
@@ -76,7 +79,9 @@ export default class Image extends MenuBase {
         this.setLessSelection(begin, end);
       });
       const finalName = params.name ? params.name : name;
-      return `${begin}${finalName}${handleParams(params)}${end}`;
+      // #1767 上传图片后可以按配置在图片后面追加图片名称
+      const caption = getImageCaptionText(this.$cherry.options.imageCaption, resolveImageName(name, params), url);
+      return `${begin}${finalName}${handleParams(params)}${end}${caption}`;
     }
     // 插入图片，调用上传文件逻辑
     handleUpload(this.editor, 'image', accept, (name, url, params) => {
