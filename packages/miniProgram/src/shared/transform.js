@@ -154,6 +154,15 @@ function isCursorAttrs(attrs = {}) {
 }
 
 /**
+ * Cherry renders its slash underline syntax as a styled span.
+ * @param {Record<string, string>} attrs
+ * @returns {boolean}
+ */
+function isUnderlineAttrs(attrs = {}) {
+  return /(?:^|;)\s*text-decoration\s*:\s*underline\s*(?:;|$)/i.test(attrs.style || '');
+}
+
+/**
  * @param {Record<string, string>} attrs
  * @returns {boolean}
  */
@@ -623,6 +632,9 @@ function nodeToInline(node) {
     case 'sup':
       return [{ type: 'sup', attrs, children }];
     case 'span':
+      if (isUnderlineAttrs(attrs)) {
+        return [{ type: 'underline', attrs, children }];
+      }
       return Object.keys(attrs).length > 0 ? [{ type: 'span', attrs, children }] : children;
     default:
       return children;
