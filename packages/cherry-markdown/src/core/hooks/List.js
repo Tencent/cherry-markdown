@@ -254,10 +254,15 @@ export default class List extends ParagraphBase {
   }
 
   rule() {
+    // panel(:) / detail(+) 的结束标记必须能中断列表匹配。
+    // 否则紧贴列表的结束标记会被当作列表项内容吞掉，
+    // 导致 panel/detail 语法整体匹配失败、预览区泄漏 ::: / +++ 源码。
+    // 该分支为零宽前瞻，结束标记本身留在原文中交给 Panel / Detail 处理。
+    const closingFence = '(?=\\n[ \\t]*(?:\\:{3}|\\+{3})[ \\t]*(?:~0|$|\\n))';
     const ret = {
-      begin: '(?:^|\n)(\n*)(([ ]{0,3}([*+-]|\\d+[.]|en-[a-z]\\.|[a-z]\\.|[I一二三四五六七八九十]+\\.)[ \\t]+)',
+      begin: '(?:^|\\n)(\\n*)(([ ]{0,3}([*+-]|\\d+[.]|en-[a-z]\\.|[a-z]\\.|[I一二三四五六七八九十]+\\.)[ \\t]+)',
       content: '([^\\r]+?)',
-      end: '(~0|\\n{2,}(?=\\S)(?![ \\t]*(?:[*+-]|\\d+[.]|en-[a-z]\\.|[a-z]\\.|[I一二三四五六七八九十]+\\.)[ \\t]+)))',
+      end: '(' + closingFence + '|~0|\\n{2,}(?=\\S)(?![ \\t]*(?:[*+-]|\\d+[.]|en-[a-z]\\.|[a-z]\\.|[I一二三四五六七八九十]+\\.)[ \\t]+)))',
     };
     ret.reg = new RegExp(ret.begin + ret.content + ret.end, 'gm');
     return ret;
