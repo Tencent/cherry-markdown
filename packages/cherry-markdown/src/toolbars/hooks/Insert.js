@@ -15,6 +15,7 @@
  */
 import MenuBase from '@/toolbars/MenuBase';
 import BubbleTableMenu from '@/toolbars/BubbleTable';
+import { getImageCaptionText, resolveImageName } from '@/utils/file';
 /**
  * "插入"按钮
  */
@@ -54,7 +55,12 @@ export default class Insert extends MenuBase {
         let code = '';
         if (type === 'image') {
           // 如果是图片，则返回固定的图片markdown源码
-          code = `![${file.name}](${url})`;
+          // #1767 上传图片后可以按配置在图片后面追加图片名称
+          code = `![${file.name}](${url})${getImageCaptionText(
+            this.$cherry.options.imageCaption,
+            resolveImageName(file.name),
+            url,
+          )}`;
         } else if (type === 'video') {
           // 如果是视频，则返回固定的视频markdown源码
           code = `!video[${file.name}](${url})`;
