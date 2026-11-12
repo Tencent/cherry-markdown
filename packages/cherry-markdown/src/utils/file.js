@@ -42,12 +42,13 @@ export function handleUploadMulti(editor, type = 'image', accept = '*', callback
         return callback(arr);
       }
       let code = '';
+      const imageCaption = editor.$cherry.options.imageCaption;
       // 遍历上传结果数组 arr，而不是原始文件数组 files
       arr.forEach((item, index) => {
-        const { url } = item;
+        const { url, params } = item;
         // 使用 arr 中对应的 file 信息，如果没有则回退到 files
         const file = item.file || files[index];
-        code += `${handleType(type, file, url)}\n`;
+        code += `${handleType(type, file, url, imageCaption, params)}\n`;
       });
       // 替换选中区域 - CodeMirror 6
       editor.editor.replaceSelection(code);
@@ -82,7 +83,7 @@ export function handleUpload(editor, type = 'image', accept = '*', callback = nu
         return callback(file.name, url, params);
       }
       let code = '';
-      code = handleType(type, file, url);
+      code = handleType(type, file, url, editor.$cherry.options.imageCaption, params);
       // 替换选中区域 - CodeMirror 6
       editor.editor.replaceSelection(code);
     });
@@ -95,12 +96,14 @@ export function handleUpload(editor, type = 'image', accept = '*', callback = nu
  * @param type 文件类型
  * @param file 文件
  * @param url 路径
+ * @param {boolean|string|Function} [imageCaption] 是否在图片后面追加图片名称
+ * @param {object} [params] 上传回调返回的参数
  * @returns string
  */
-const handleType = (type, file, url) => {
+const handleType = (type, file, url, imageCaption, params) => {
   if (type === 'image') {
     // 如果是图片，则返回固定的图片markdown源码
-    return `![${file.name}](${url})`;
+    return `![${file.name}](${url})${getImageCaptionText(imageCaption, resolveImageName(file.name, params), url)}`;
   }
   if (type === 'video') {
     // 如果是视频，则返回固定的视频markdown源码
@@ -121,12 +124,13 @@ const handleType = (type, file, url) => {
  * （文本/Markdown 文件由调用方直接读取内容插入，不会走到此函数）
  * @param {File} file 被拖拽的文件
  * @param {string} url 上传后返回的文件地址
+ * @param {boolean|string|Function} [imageCaption] 是否在图片后面追加图片名称
  * @returns {string} 写入编辑器的 markdown 代码片段
  */
-export const handleDropType = (file, url) => {
+export const handleDropType = (file, url, imageCaption) => {
   if (/^image\//i.test(file.type)) {
     // 如果是图片，则返回固定的图片markdown源码
-    return `![${file.name}](${url})`;
+    return `![${file.name}](${url})${getImageCaptionText(imageCaption, resolveImageName(file.name), url)}`;
   }
   // 其他文件返回超链接
   return `[${file.name}](${url})`;
@@ -163,10 +167,11 @@ export function handleParams(params) {
   return ret.join(' ');
 }
 
-export function handleFileUploadCallback(url, params, file) {
+export function handleFileUploadCallback(url, params, file, imageCaption) {
   const name = params?.name ?? file.name;
   let type = '';
   let poster = '';
+  const isImage = /image/i.test(file.type);
   if (/video/i.test(file.type)) {
     type = '!video';
     poster = params?.poster ? `{poster=${params.poster}}` : '';
@@ -174,10 +179,64 @@ export function handleFileUploadCallback(url, params, file) {
   if (/audio/i.test(file.type)) {
     type = '!audio';
   }
-  if (/image/i.test(file.type)) {
+  if (isImage) {
     type = '!';
   }
   const style = type ? handleParams(params) : '';
   const { before = '', after = '' } = params;
-  return `${before}${type}[${name}${style}](${url})${poster}${after}`;
+  const caption = isImage ? getImageCaptionText(imageCaption, resolveImageName(file.name, params), url) : '';
+  return `${before}${type}[${name}${style}](${url})${poster}${after}${caption}`;
+}
+
+/**
+ * 去掉文件名的扩展名，用于生成图片名称
+ * @param {string} name 文件名
+ * @returns {string}
+ */
+export function stripFileExtension(name) {
+  return String(name ?? '').replace(/\.[^./\\]+$/, '');
+}
+
+/**
+ * 解析图片名称：上传回调返回的 params.name 优先（调用方可以自定义标题），
+ * 否则使用去掉扩展名的文件名
+ * @param {string} fileName 原始文件名
+ * @param {object} [params] 上传回调返回的参数
+ * @returns {string}
+ */
+export function resolveImageName(fileName, params) {
+  const uploaderName = params?.name;
+  if (typeof uploaderName === 'string' && uploaderName.trim() !== '') {
+    return uploaderName.trim();
+  }
+  return stripFileExtension(fileName).trim();
+}
+
+/**
+ * 根据 imageCaption 配置生成「图片名称」追加文本（#1767）
+ * 图片名称会作为独立的一段追加在图片语法后面
+ * @param {boolean|string|Function} imageCaption 配置项
+ *   - true：追加图片名称
+ *   - string：作为前缀，例如 '图片: ' -> '图片: 图片名称'
+ *   - Function(imageName, url)：返回要追加的文本，返回空串则不追加
+ * @param {string} imageName 图片名称
+ * @param {string} url 图片地址
+ * @returns {string} 需要追加到图片语法后面的文本，空串表示不追加
+ */
+export function getImageCaptionText(imageCaption, imageName, url) {
+  if (!imageCaption) {
+    return '';
+  }
+  let text = '';
+  if (typeof imageCaption === 'function') {
+    text = imageCaption(imageName, url);
+  } else if (typeof imageCaption === 'string') {
+    text = `${imageCaption}${imageName}`;
+  } else {
+    text = imageName;
+  }
+  if (typeof text !== 'string' || text.trim() === '') {
+    return '';
+  }
+  return `\n\n${text.trim()}`;
 }

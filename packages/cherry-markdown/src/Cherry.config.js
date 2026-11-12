@@ -854,6 +854,14 @@ const defaultConfig = {
     file: '*',
   },
   /**
+   * 上传/插入图片后，是否在图片语法后面自动追加一段图片名称（#1767）
+   *  - false（默认）：不追加，与历史行为一致
+   *  - true：追加图片名称，优先使用上传回调返回的 params.name，否则使用去掉扩展名的文件名
+   *  - string：作为前缀，例如 '图片: ' 会追加「图片: 图片名称」
+   *  - Function(imageName, url)：自定义追加内容，返回空串则不追加
+   */
+  imageCaption: false,
+  /**
    * 上传文件的时候是否开启多选
    */
   multipleFileSelection: {
