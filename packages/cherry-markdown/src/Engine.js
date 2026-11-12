@@ -444,18 +444,19 @@ export default class Engine {
     return $md;
   }
 
-  makeHtmlForBlockquote(md) {
+  makeHtmlForMe(md, name) {
     let $md = md;
     $md = this.$dealParagraph($md);
-    $md = this.$fireHookAction($md, 'paragraph', 'afterMakeHtml', { before: 'blockquote' });
+    $md = this.$fireHookAction($md, 'paragraph', 'afterMakeHtml', { before: name });
     return $md;
   }
 
+  makeHtmlForBlockquote(md) {
+    return this.makeHtmlForMe(md, 'blockquote');
+  }
+
   makeHtmlForFootnote(md) {
-    let $md = md;
-    $md = this.$dealParagraph($md);
-    $md = this.$fireHookAction($md, 'paragraph', 'afterMakeHtml', { before: 'footnote' });
-    return $md;
+    return this.makeHtmlForMe(md, 'footnote');
   }
 
   mounted() {

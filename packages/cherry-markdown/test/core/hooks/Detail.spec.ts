@@ -13,6 +13,11 @@ function createDetail() {
     value: {
       hash: (value: string) => hashHex(value),
       htmlWhiteListAppend: '',
+      // 在单测中最小化模拟引擎的 makeHtmlForMe：
+      // - 对普通文本，仅应用与 sentenceMake 等价的行内规则（**x** -> <strong>x</strong>）
+      // - 占位符 (~~Cxx..._Ln$) 与已经是 HTML 的块级片段保持原样
+      // - 块级/行间换行交由 Detail.$getDetailHtml 自身的 paragraphProcessor 处理
+      makeHtmlForMe: (md: string) => md.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
     },
   });
   return hook;
