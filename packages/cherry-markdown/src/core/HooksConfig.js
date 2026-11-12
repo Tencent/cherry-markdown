@@ -88,9 +88,9 @@ const hooksConfig = [
   Blockquote,
   Header, // 处理标题, 传入strict属性严格要求ATX风格标题#后带空格
   Hr,
-  List,
   Detail,
   Panel,
+  List,
   Paragraph, // 普通段落
 
   // 行内Hook

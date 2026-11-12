@@ -95,15 +95,18 @@ export default class Detail extends ParagraphBase {
       if (str.trim() === '') {
         return '';
       }
-      // 调用行内语法，获得段落的签名和对应html内容
-      const { html } = sentenceMakeFunc(str);
-      let domName = 'p';
-      // 如果包含html块级标签（比如div、blockquote等），则当前段落外层用div包裹，反之用p包裹
+      // 手风琴 body 作为"容器内容"，走一遍剩余的段落级语法（List/Table/Hr/Header 等），
+      // 以便 `+++ ... +++` 内部可以正确渲染列表、表格等块级语法。
+      const html = this.$engine.makeHtmlForMe(str, 'detail');
+      // 如果包含html块级标签（比如 p、div、blockquote 等），说明 html 已经是渲染后的块级结构，
+      // 此时块级标签之间残留的 \n 仅是分隔符，不应被 $cleanParagraph 转成 <br>，
+      // 直接去除这些 \n 后用 div 包裹即可
       const isContainBlockTest = new RegExp(`<(${blockNames})[^>]*>`, 'i');
       if (isContainBlockTest.test(html)) {
-        domName = 'div';
+        return `<div>${html.replace(/\n+/g, '')}</div>`;
       }
-      return `<${domName}>${this.$cleanParagraph(html)}</${domName}>`;
+      // 纯文本段落（无块级标签）才走 $cleanParagraph 处理用户手动换行 -> <br>
+      return `<p>${this.$cleanParagraph(html)}</p>`;
     };
     ret += `<summary>${sentenceMakeFunc(title).html}</summary>`;
     let $body = '';
