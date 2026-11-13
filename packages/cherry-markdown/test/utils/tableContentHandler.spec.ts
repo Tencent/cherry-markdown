@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vite-plus/test';
+import CherryEngine from '../../src/index.engine.core';
 import TableHandler from '../../src/utils/tableContentHandler';
 
 type TableCode = { code: string; offset: number; type: string };
@@ -417,7 +418,7 @@ describe('utils/tableContentHandler', () => {
 
       expect(handler.$getTdOffset(tableCode, false, 0, 1)).toEqual({
         preLine: 2,
-        preCh: 6,
+        preCh: 7,
         plusCh: 3,
         currentTd: 'bar',
       });
@@ -433,6 +434,66 @@ describe('utils/tableContentHandler', () => {
         plusCh: 0,
         currentTd: '',
       });
+    });
+  });
+
+  describe('editing rendered table cells', () => {
+    it.each([
+      ['A \\| B', '| ', ' |', ''],
+      ['A \\\\| B', '| ', ' |', ''],
+      ['A \\\\\\| B', '| ', ' |', ''],
+      ['`A \\| B`', '| ', ' |', ''],
+      ['A \\| B', '| ', '', ''],
+      ['A \\| B', '', ' |', ''],
+      ['A \\| B', '', '', ''],
+      ['foo', '', '', ''],
+      ['A \\| B', '| ', ' |', '> '],
+    ])('edits the cell after %s with borders %j / %j and quote %j', (firstCell, start, end, quote) => {
+      const tableRows = ['Name | Count', '--- | ---', `${firstCell} | 2`]
+        .map((row) => `${quote}${start}${row}${end}`)
+        .join('\n');
+      const tableCode = quote ? `# Table\n\n${tableRows}` : tableRows;
+      const previewerDom = document.createElement('div');
+      previewerDom.innerHTML = new CherryEngine().makeHtml(tableCode);
+      const wrapper = document.createElement('div');
+      wrapper.appendChild(previewerDom);
+      const target = previewerDom.querySelectorAll('td')[1] as HTMLTableCellElement;
+      const { codeMirror, $cherry } = createHandler(tableCode);
+      const handler = new TableHandler(
+        'click',
+        target,
+        document.createElement('div'),
+        previewerDom,
+        codeMirror,
+        target.closest('table'),
+        $cherry,
+      );
+      handler.showBubble();
+      const textarea = handler.tableEditor.editorDom.inputDom;
+      expect(textarea.value).toBe('2');
+
+      textarea.value = '3';
+      handler.emit('keyup', { target: textarea });
+
+      expect(codeMirror.doc.toString()).toBe(tableCode.replace(' | 2', ' | 3'));
+    });
+
+    it.each([true, false])('replaces the whole escaped cell in the header: %s', (isTHead) => {
+      const tableCode = '| A \\| B | Count |\n| --- | --- |\n| C \\| D | 2 |';
+      const handler = createHandler(tableCode);
+      seedMarkdownTable(handler, tableCode);
+      Object.assign(handler.tableEditor.info, { isTHead, tdIndex: 0 });
+      handler.$setSelection(0, 'td');
+      const textarea = document.createElement('textarea');
+      textarea.value = 'updated';
+      const event = new KeyboardEvent('keyup');
+      Object.defineProperty(event, 'target', { value: textarea });
+
+      handler.$onInputChange(event);
+
+      expect(handler.codeMirror.doc.toString()).toBe(
+        tableCode.replace(isTHead ? 'A \\| B' : 'C \\| D', 'updated'),
+      );
     });
   });
 
