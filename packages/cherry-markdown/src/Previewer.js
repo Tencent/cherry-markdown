@@ -1316,7 +1316,11 @@ export default class Previewer {
    * 获取有滚动条的dom
    */
   getDomCanScroll(currentDom = this.getDomContainer()) {
-    if (currentDom.scrollHeight > currentDom.clientHeight || currentDom.clientHeight < window.innerHeight) {
+    // 内容溢出且自身有滚动机制（overflow 非 visible）才算真正的滚动容器；
+    // overflow:visible 时滚动被委托给祖先，需继续向上找（issue #1568：
+    // 全页布局中溢出的中间层没有滚动条，滚动条实际在 window 上，
+    // 之前会把监听绑到不滚动的元素导致悬浮目录失效）。
+    if (currentDom.scrollHeight > currentDom.clientHeight && this.$isScrollable(currentDom)) {
       return currentDom;
     }
     if (currentDom.parentElement) {
@@ -1329,6 +1333,19 @@ export default class Previewer {
       }
       return this.getDomCanScroll(currentDom.parentElement);
     }
+  }
+
+  /**
+   * 元素是否自身具备滚动机制（可产生滚动条）
+   * @param {Element} dom 目标元素
+   * @return {boolean} overflow-y 为 auto/scroll/overlay 时视为可滚动
+   */
+  $isScrollable(dom) {
+    if (typeof window === 'undefined' || typeof window.getComputedStyle !== 'function') {
+      return true;
+    }
+    const { overflowY } = window.getComputedStyle(dom);
+    return overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay';
   }
 
   scrollToHeadByIndex(index) {
