@@ -1,14 +1,24 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { Schema } from '@milkdown/kit/prose/model';
-import { createDocumentUpdate, rebaseCompositionUpdate, withEditableTail } from '../src/document-update';
+import { EditorState, Plugin, PluginKey } from '@milkdown/kit/prose/state';
+import { history, undo } from '@milkdown/kit/prose/history';
+import {
+  createDocumentUpdate,
+  rebaseCompositionUpdate,
+  sameSourceDocument,
+  withEditableTail,
+  withoutEditableTail,
+} from '../src/document-update';
 
 const schema = new Schema({
   nodes: {
     doc: { content: 'block+' },
     paragraph: { group: 'block', content: 'text*' },
+    heading: { group: 'block', content: 'text*', attrs: { id: { default: '' }, level: { default: 1 } } },
     diagram: { group: 'block', atom: true, attrs: { source: { default: '' } } },
     text: { group: 'inline' },
   },
+  marks: { strong: {} },
 });
 const document = (...paragraphs: string[]) =>
   schema.node(
@@ -18,6 +28,103 @@ const document = (...paragraphs: string[]) =>
   );
 
 describe('external document updates', () => {
+  it('compares source documents including content, attributes and real trailing paragraphs', () => {
+    const heading = (id: string, level = 1) => schema.node('heading', { id, level }, schema.text('Title'));
+    const parsed = schema.node('doc', null, [heading(''), schema.node('diagram', { source: 'x' })]);
+    const live = schema.node('doc', null, [
+      heading('title'),
+      schema.node('diagram', { source: 'x' }),
+      schema.node('paragraph'),
+    ]);
+    expect(sameSourceDocument(parsed, live)).toBe(true);
+    const explicit = schema.node('doc', null, [heading('explicit'), schema.node('diagram', { source: 'x' })]);
+    expect(sameSourceDocument(explicit, live)).toBe(false);
+    expect(
+      sameSourceDocument(
+        parsed,
+        schema.node('doc', null, [
+          heading('title', 2),
+          schema.node('diagram', { source: 'x' }),
+          schema.node('paragraph'),
+        ]),
+      ),
+    ).toBe(false);
+    expect(
+      sameSourceDocument(
+        parsed,
+        schema.node('doc', null, [
+          heading('title'),
+          schema.node('diagram', { source: 'changed' }),
+          schema.node('paragraph'),
+        ]),
+      ),
+    ).toBe(false);
+    expect(
+      sameSourceDocument(
+        parsed,
+        schema.node('doc', null, [
+          heading('title'),
+          schema.node('diagram', { source: 'x' }),
+          schema.node('paragraph'),
+          schema.node('paragraph'),
+        ]),
+      ),
+    ).toBe(false);
+    const bold = schema.node('doc', null, [
+      schema.node('paragraph', null, schema.text('Text', [schema.mark('strong')])),
+    ]);
+    expect(sameSourceDocument(bold, document('Text'))).toBe(false);
+  });
+  it('can map a reversal around a separate plugin append without discarding it', () => {
+    const result = rebaseCompositionUpdate(document('External'), document('External!'), document('Local'));
+    expect(result?.doc.eq(document('Local!'))).toBe(true);
+  });
+
+  it('rejects a reversal that overlaps a plugin edit instead of guessing', () => {
+    const result = rebaseCompositionUpdate(document('External'), document('Exchanged'), document('Local'));
+    expect(result).toBeUndefined();
+  });
+
+  it('keeps local undo when a separate plugin append is mapped onto the prior state', () => {
+    let state = EditorState.create({ doc: document('Before'), plugins: [history()] });
+    state = state.apply(state.tr.insertText('Local', 1, 7));
+    const rebased = rebaseCompositionUpdate(document('External'), state.doc, document('External!'));
+    expect(rebased?.doc.eq(document('Local!'))).toBe(true);
+    const transaction = state.tr;
+    rebased!.steps.forEach((step) => transaction.step(step));
+    state = state.apply(transaction.setMeta('addToHistory', false));
+    expect(
+      undo(state, (tr) => {
+        state = state.apply(tr);
+      }),
+    ).toBe(true);
+    expect(state.doc.eq(document('Before!'))).toBe(true);
+  });
+
+  it('cannot reconstruct arbitrary plugin state from document differences alone', () => {
+    const key = new PluginKey<number>('plugin-transaction-state');
+    const plugin = new Plugin({
+      key,
+      state: { init: () => 0, apply: (tr, count) => count + (tr.getMeta('plugin-edit') ? 1 : 0) },
+      appendTransaction: (_transactions, _oldState, next) =>
+        next.doc.textContent === 'External'
+          ? next.tr.insertText('!', next.doc.content.size - 1).setMeta('plugin-edit', true)
+          : null,
+    });
+    const previous = EditorState.create({ doc: document('Local'), plugins: [plugin] });
+    const external = createDocumentUpdate(previous.doc, document('External'));
+    const transaction = previous.tr;
+    external.steps.forEach((step) => transaction.step(step));
+    const applied = previous.apply(transaction);
+    expect(applied.doc.eq(document('External!'))).toBe(true);
+    expect(key.getState(applied)).toBe(1);
+    const rebased = rebaseCompositionUpdate(document('External'), previous.doc, applied.doc);
+    const replay = previous.tr;
+    rebased!.steps.forEach((step) => replay.step(step));
+    const restored = previous.apply(replay.setMeta('addToHistory', false));
+    expect(restored.doc.eq(document('Local!'))).toBe(true);
+    expect(key.getState(restored)).toBe(0);
+  });
   it.each([
     ['unchanged', document('Same'), document('Same')],
     ['repeated-text insertion', document('aaa'), document('aaaa')],
@@ -35,6 +142,23 @@ describe('external document updates', () => {
     expect(normalized.lastChild?.type.name).toBe('paragraph');
     expect(withEditableTail(normalized)).toBe(normalized);
     expect(withEditableTail(document('Text')).childCount).toBe(1);
+  });
+
+  it('removes only a known unchanged editor tail for serialization', () => {
+    const atom = schema.node('doc', null, schema.node('diagram', { source: 'A-->B' }));
+    const normalized = withEditableTail(atom);
+    expect(withoutEditableTail(normalized, atom).eq(atom)).toBe(true);
+    expect(withoutEditableTail(normalized, document('Text'))).toBe(normalized);
+    const editedTail = schema.node('doc', null, [atom.firstChild!, schema.node('paragraph', null, schema.text('new'))]);
+    expect(withoutEditableTail(editedTail, atom)).toBe(editedTail);
+    const extraEmpty = schema.node('doc', null, [atom.firstChild!, schema.node('paragraph'), schema.node('paragraph')]);
+    expect(withoutEditableTail(extraEmpty, atom)).toBe(extraEmpty);
+    const otherBlock = schema.node('doc', null, [
+      schema.node('paragraph', null, schema.text('new')),
+      schema.node('paragraph'),
+    ]);
+    expect(withoutEditableTail(otherBlock, atom)).toBe(otherBlock);
+    expect(normalized.childCount).toBe(2);
   });
 });
 

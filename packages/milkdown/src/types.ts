@@ -32,11 +32,11 @@ export interface CherryMilkdownFileUploadParams {
 }
 
 export interface CherryMilkdownFileUploadContext {
-  /** Aborted when the picker is replaced, closed, or the editor is destroyed. */
+  /** Aborted when the picker is replaced, closed, manually overridden, or the editor is destroyed. */
   signal: AbortSignal;
 }
 
-/** Cherry-compatible upload callback. The editor never owns storage or networking. */
+/** Cherry-compatible upload callback. Storage and networking remain application-owned; return the upload promise to report failures. */
 export type CherryMilkdownFileUpload = (
   file: File,
   callback: (url: string, params?: CherryMilkdownFileUploadParams) => void,
@@ -44,6 +44,11 @@ export type CherryMilkdownFileUpload = (
 ) => void | Promise<void>;
 
 export type CherryMilkdownTheme = 'default' | 'dark' | 'abyss' | 'green' | 'red' | 'gray' | 'violet' | 'blue';
+
+export interface CherryMilkdownErrorContext {
+  /** Read the previous local document. An uncached snapshot requires an active editor and a working serializer. */
+  getPreviousMarkdown(): string;
+}
 
 export interface CherryMilkdownOptions {
   /** Standalone host. Cherry editor and Previewer instances are not created. */
@@ -70,7 +75,7 @@ export interface CherryMilkdownOptions {
    */
   renderers?: Record<string, CherryVisualRenderer>;
   onChange?: (result: CherryMilkdownChange) => void;
-  onError?: (error: unknown, phase: CherryMilkdownErrorPhase) => void;
+  onError?: (error: unknown, phase: CherryMilkdownErrorPhase, context?: CherryMilkdownErrorContext) => void;
 }
 
 export interface CherryMilkdownInstance {

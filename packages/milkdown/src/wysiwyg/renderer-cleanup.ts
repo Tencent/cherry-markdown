@@ -1,3 +1,10 @@
+import type { CherryWysiwygConfig } from './config.js';
+
+/** Keep the reporter outside the NodeView constructor's retained scope. */
+export function createRenderErrorReporter(onError: CherryWysiwygConfig['onError']) {
+  return (error: unknown) => onError?.(error, 'render');
+}
+
 /** Error notifications must never interrupt another renderer's teardown. */
 export function reportRendererError(error: unknown, onError?: (error: unknown) => void) {
   try {

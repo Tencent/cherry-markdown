@@ -1,6 +1,24 @@
 import { findCherryInlineMatches, parseTableChart, transformCherryWysiwygTree } from '../src/wysiwyg';
 
 describe('Cherry WYSIWYG markdown transform', () => {
+  it('uses the first parsed result for a Cherry panel body', () => {
+    const source = ':::info\nInside\n:::';
+    const tree = {
+      type: 'root',
+      children: [{ type: 'paragraph', position: { start: { offset: 0 }, end: { offset: source.length } }, children: [] }],
+    };
+    let calls = 0;
+    transformCherryWysiwygTree(tree, source, (body) => {
+      if (body !== 'Inside') return [];
+      calls += 1;
+      return calls === 1 ? [{ type: 'paragraph', children: [{ type: 'text', value: 'Inside' }] }] : [];
+    });
+    expect(calls).toBe(1);
+    expect(tree.children[0]).toMatchObject({
+      type: 'cherryPanel',
+      children: [{ type: 'paragraph', children: [{ value: 'Inside' }] }],
+    });
+  });
   it('converts Cherry inline syntax into editable semantic marks', () => {
     const matches = findCherryInlineMatches(
       '!!red color!! !!!#fff background!!! !18 size! ^^sub^^ ^sup^ {字|zi} /under/ ==mark== :smile:',

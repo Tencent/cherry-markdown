@@ -78,6 +78,7 @@ export const cherryTextBubble = $prose((ctx) => {
       host.append(bubble);
       let linkUiOpen = false;
       let dismissedSelection: { from: number; to: number } | undefined;
+      let selectingPointer: number | undefined;
 
       const hide = () => {
         bubble.hidden = true;
@@ -86,7 +87,8 @@ export const cherryTextBubble = $prose((ctx) => {
         const { from, to } = view.state.selection;
         if (dismissedSelection?.from === from && dismissedSelection.to === to) return hide();
         dismissedSelection = undefined;
-        if (linkUiOpen || !view.hasFocus() || !supportsTextFormatting(view.state)) return hide();
+        if (selectingPointer !== undefined || linkUiOpen || !view.hasFocus() || !supportsTextFormatting(view.state))
+          return hide();
         const selection = document.getSelection();
         if (
           !selection ||
@@ -132,10 +134,28 @@ export const cherryTextBubble = $prose((ctx) => {
         else update();
       };
       const onScroll = () => hide();
+      const onPointerDown = (event: PointerEvent) => {
+        if (!event.isPrimary || event.button !== 0) return;
+        selectingPointer = event.pointerId;
+        hide();
+      };
+      const onPointerEnd = (event: PointerEvent) => {
+        if (event.pointerId !== selectingPointer) return;
+        selectingPointer = undefined;
+        update();
+      };
+      const onWindowBlur = () => {
+        selectingPointer = undefined;
+        hide();
+      };
 
       bubble.addEventListener('pointerdown', preserveContextSelection);
       actions.forEach(({ button }) => button.addEventListener('click', onClick));
       view.dom.addEventListener('cherry-milkdown:link-ui-change', onLinkUi);
+      view.dom.addEventListener('pointerdown', onPointerDown, true);
+      document.addEventListener('pointerup', onPointerEnd, true);
+      document.addEventListener('pointercancel', onPointerEnd, true);
+      document.defaultView?.addEventListener('blur', onWindowBlur);
       const releaseViewport = watchContextViewport(document, onScroll, hide);
 
       return {
@@ -145,6 +165,10 @@ export const cherryTextBubble = $prose((ctx) => {
           bubble.removeEventListener('pointerdown', preserveContextSelection);
           actions.forEach(({ button }) => button.removeEventListener('click', onClick));
           view.dom.removeEventListener('cherry-milkdown:link-ui-change', onLinkUi);
+          view.dom.removeEventListener('pointerdown', onPointerDown, true);
+          document.removeEventListener('pointerup', onPointerEnd, true);
+          document.removeEventListener('pointercancel', onPointerEnd, true);
+          document.defaultView?.removeEventListener('blur', onWindowBlur);
           releaseViewport();
           bubble.remove();
         },

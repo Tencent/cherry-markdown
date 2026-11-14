@@ -101,6 +101,7 @@ export default defineConfig({
     rolldownOptions: {
       input: {
         index: resolve(examplesRoot, 'index.html'),
+        uploadHarness: resolve(examplesRoot, 'upload-harness.html'),
       },
     },
   },

@@ -1,4 +1,4 @@
-export { cherryMilkdown, cherryMilkdown as default } from './editor.js';
+export { cherryMilkdown, cherryMilkdown as default, ExternalUpdateRollbackError } from './editor.js';
 
 export type {
   CherryEngineLike,
@@ -6,6 +6,7 @@ export type {
   CherryDiagramRenderContext,
   CherryMilkdownChange,
   CherryMilkdownErrorPhase,
+  CherryMilkdownErrorContext,
   CherryMilkdownFileUpload,
   CherryMilkdownFileUploadContext,
   CherryMilkdownFileUploadParams,
