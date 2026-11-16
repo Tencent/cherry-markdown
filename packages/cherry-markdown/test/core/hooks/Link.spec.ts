@@ -90,8 +90,17 @@ describe('core/hooks/Link', () => {
 
     expect(hook.makeHtml('[text][undefinedref]')).toBe('[text][undefinedref]');
     expect(hook.makeHtml('\\[text](https://example.com)')).toBe('\\[text](https://example.com)');
+    const sentenceMakeFunc = (md: string) => ({ sign: '', html: md });
     expect(
-      hook.toHtml('[invalid\\](https://example.com)', '', 'invalid\\', 'https://example.com', undefined, undefined),
+      hook.toHtml(
+        sentenceMakeFunc,
+        '[invalid\\](https://example.com)',
+        '',
+        'invalid\\',
+        'https://example.com',
+        undefined,
+        undefined,
+      ),
     ).toBe('[invalid\\](https://example.com)');
   });
 
@@ -157,8 +166,11 @@ describe('core/hooks/Link', () => {
 
   it.each(['javascript:alert(1)', 'data:text/html,test'])('renders unsafe %s URLs as text', (url) => {
     const hook = createLinkHook();
+    const sentenceMakeFunc = (md: string) => ({ sign: '', html: md });
 
-    expect(hook.toHtml(`[text](${url})`, '', 'text', url, undefined, undefined)).toBe('<span>text</span>');
+    expect(hook.toHtml(sentenceMakeFunc, `[text](${url})`, '', 'text', url, undefined, undefined)).toBe(
+      '<span>text</span>',
+    );
   });
 
   it('keeps standard Markdown conversion stable', () => {
