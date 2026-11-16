@@ -2530,7 +2530,7 @@ exports[`engine > CommonMark-418 1`] = `
 `;
 
 exports[`engine > CommonMark-419 1`] = `
-"<p data-sign="c87edd266570c5831" data-type="p" data-lines="1"><em>foo <a href="/url"></a></em><a href="/url">bar<em></em></a></p>
+"<p data-sign="c87edd266570c5831" data-type="p" data-lines="1"><em>foo <a href="/url"><em>bar</em></a></em></p>
 "
 `;
 
@@ -2810,18 +2810,18 @@ exports[`engine > CommonMark-474 1`] = `
 `;
 
 exports[`engine > CommonMark-475 1`] = `
-"<p data-sign="8a7d4bb637746ee41" data-type="p" data-lines="1"><em><img src="foo" title="</em>"></em></p><em>
-</em>"
+"<p data-sign="37a4246fb1e60f4e1" data-type="p" data-lines="1">*<img src="foo" title="*"></p>
+"
 `;
 
 exports[`engine > CommonMark-476 1`] = `
-"<p data-sign="f8f894d56f8b88f11" data-type="p" data-lines="1"><strong><a href="</strong>"></a></strong></p><strong><a href="</strong>">
-</a></strong>"
+"<p data-sign="b58677c0df9852631" data-type="p" data-lines="1">**<a href="**"></a></p><a href="**">
+</a>"
 `;
 
 exports[`engine > CommonMark-477 1`] = `
-"<p data-sign="f246ec6ec7ff81de1" data-type="p" data-lines="1"><strong><a href="</strong>"></a></strong></p><strong><a href="</strong>">
-</a></strong>"
+"<p data-sign="4fe87742fc1a49fc1" data-type="p" data-lines="1">__<a href="__"></a></p><a href="__">
+</a>"
 `;
 
 exports[`engine > CommonMark-478 1`] = `
@@ -2835,12 +2835,12 @@ exports[`engine > CommonMark-479 1`] = `
 `;
 
 exports[`engine > CommonMark-480 1`] = `
-"<p data-sign="939ec4b7634008001" data-type="p" data-lines="1">**a<a href="https://foo.bar/?q=**" title="https://foo.bar/?q=**">https://foo.bar/?q=**</a></p>
+"<p data-sign="939ec4b7634008001" data-type="p" data-lines="1"><strong>a&lt;<a href="https://foo.bar/?q=" title="https://foo.bar/?q=">https://foo.bar/?q=</a></strong>&gt;</p>
 "
 `;
 
 exports[`engine > CommonMark-481 1`] = `
-"<p data-sign="896f0e0e8fa0ea4e1" data-type="p" data-lines="1">__a<a href="https://foo.bar/?q=__" title="https://foo.bar/?q=__">https://foo.bar/?q=__</a></p>
+"<p data-sign="896f0e0e8fa0ea4e1" data-type="p" data-lines="1"><strong>a&lt;<a href="https://foo.bar/?q=" title="https://foo.bar/?q=">https://foo.bar/?q=</a></strong>&gt;</p>
 "
 `;
 
@@ -3015,7 +3015,7 @@ exports[`engine > CommonMark-515 1`] = `
 `;
 
 exports[`engine > CommonMark-516 1`] = `
-"<p data-sign="7adfd4754204b5e71" data-type="p" data-lines="1"><a href="/uri">link <em>foo **bar</em>* <code>#</code>*</a></p>
+"<p data-sign="7adfd4754204b5e71" data-type="p" data-lines="1"><a href="/uri">link <em>foo *<em>bar</em></em> <code>#</code>*</a></p>
 "
 `;
 
@@ -3091,7 +3091,7 @@ exports[`engine > CommonMark-529 1`] = `
 `;
 
 exports[`engine > CommonMark-530 1`] = `
-"<p data-sign="30131415642457e01" data-type="p" data-lines="1"><a href="/uri">link <em>foo **bar</em>* <code>#</code>*</a></p>
+"<p data-sign="30131415642457e01" data-type="p" data-lines="1"><a href="/uri">link <em>foo *<em>bar</em></em> <code>#</code>*</a></p>
 
 <p data-sign="br2" data-type="br" data-lines="2">&nbsp;</p>
 "
@@ -3232,21 +3232,21 @@ exports[`engine > CommonMark-552 1`] = `
 `;
 
 exports[`engine > CommonMark-553 1`] = `
-"<p data-sign="2804db6b4471fe521" data-type="p" data-lines="1"><a href="/url" title="title">foo</a>[]</p>
+"<p data-sign="8506488153a3faf51" data-type="p" data-lines="1"><a href="/url" title="title">foo</a></p>
 
 <p data-sign="br2" data-type="br" data-lines="2">&nbsp;</p>
 "
 `;
 
 exports[`engine > CommonMark-554 1`] = `
-"<p data-sign="8fb4910bbae14c3e1" data-type="p" data-lines="1"><a href="/url" title="title"><em>foo</em> bar</a>[]</p>
+"<p data-sign="321fde8dd0bc4d711" data-type="p" data-lines="1"><a href="/url" title="title"><em>foo</em> bar</a></p>
 
 <p data-sign="br2" data-type="br" data-lines="2">&nbsp;</p>
 "
 `;
 
 exports[`engine > CommonMark-555 1`] = `
-"<p data-sign="bb2b6a8bc61241e71" data-type="p" data-lines="1"><a href="/url" title="title">Foo</a>[]</p>
+"<p data-sign="a754eecdf682c1791" data-type="p" data-lines="1"><a href="/url" title="title">Foo</a></p>
 
 <p data-sign="br2" data-type="br" data-lines="2">&nbsp;</p>
 "
@@ -3321,7 +3321,7 @@ exports[`engine > CommonMark-565 1`] = `
 `;
 
 exports[`engine > CommonMark-566 1`] = `
-"<p data-sign="35ec3cbc6fe9771c1" data-type="p" data-lines="1"><a href="/url1">foo</a>[]</p>
+"<p data-sign="ac030f76cb76cac41" data-type="p" data-lines="1"><a href="/url1">foo</a></p>
 
 <p data-sign="br2" data-type="br" data-lines="2">&nbsp;</p>
 "
@@ -3385,7 +3385,7 @@ exports[`engine > CommonMark-575 1`] = `
 `;
 
 exports[`engine > CommonMark-576 1`] = `
-"<p data-sign="dced8f8b0f73f3d41" data-type="p" data-lines="1"><img src="train.jpg" alt="foo <em>bar</em>" title="train &amp; tracks">[]</p>
+"<p data-sign="32d274aea2c6796c1" data-type="p" data-lines="1"><img src="train.jpg" alt="foo <em>bar</em>" title="train &amp; tracks"></p>
 
 <p data-sign="br2" data-type="br" data-lines="2">&nbsp;</p>
 "
@@ -3433,21 +3433,21 @@ exports[`engine > CommonMark-583 1`] = `
 `;
 
 exports[`engine > CommonMark-584 1`] = `
-"<p data-sign="68cca224871187451" data-type="p" data-lines="1"><img src="/url" alt="foo" title="title">[]</p>
+"<p data-sign="b4e4e92853c0f8b31" data-type="p" data-lines="1"><img src="/url" alt="foo" title="title"></p>
 
 <p data-sign="br2" data-type="br" data-lines="2">&nbsp;</p>
 "
 `;
 
 exports[`engine > CommonMark-585 1`] = `
-"<p data-sign="187d2f4cb7c4da121" data-type="p" data-lines="1"><img src="/url" alt="<em>foo</em> bar" title="title">[]</p>
+"<p data-sign="839acb45ee76c5e01" data-type="p" data-lines="1"><img src="/url" alt="<em>foo</em> bar" title="title"></p>
 
 <p data-sign="br2" data-type="br" data-lines="2">&nbsp;</p>
 "
 `;
 
 exports[`engine > CommonMark-586 1`] = `
-"<p data-sign="2ff49bc8f667943e1" data-type="p" data-lines="1"><img src="/url" alt="Foo" title="title">[]</p>
+"<p data-sign="f659a540a6e1d22e1" data-type="p" data-lines="1"><img src="/url" alt="Foo" title="title"></p>
 
 <p data-sign="br2" data-type="br" data-lines="2">&nbsp;</p>
 "
@@ -3683,7 +3683,7 @@ exports[`engine > CommonMark-630 1`] = `
 `;
 
 exports[`engine > CommonMark-631 1`] = `
-"<p data-sign="c2ce24874407122d1" data-type="p" data-lines="1">foo <a href="%5c*"></a></p><a href="%5c*">
+"<p data-sign="3506843f143c720c1" data-type="p" data-lines="1">foo <a href="%5c*"></a></p><a href="%5c*">
 </a>"
 `;
 

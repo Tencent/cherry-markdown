@@ -114,7 +114,7 @@ export default class Link extends SyntaxBase {
     return match;
   }
 
-  makeHtml(str, sentenceMakeFunc) {
+  makeHtml(str, sentenceMakeFunc = (md) => ({ sign: '', html: md })) {
     if (isLookbehindSupported()) {
       return str.replace(this.RULE.reg, this.toHtml.bind(this, sentenceMakeFunc));
     }
