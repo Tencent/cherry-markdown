@@ -124,6 +124,11 @@ export default class HtmlBlock extends ParagraphBase {
         wholeStr = wholeStr.replace(/ src="[^"]+"/, ` src="${processedURL}"`);
       });
 
+      wholeStr = wholeStr.replace(/([^\s]+)="([^"\n]+)"/g, (all, attrName, attrValue) => {
+        attrValue = attrValue.replace(/\*/g, '&#42;').replace(/_/g, '&#95;');
+        return `${attrName}="${attrValue}"`;
+      });
+
       // 到达此分支的包含被尖括号包裹的AutoLink语法以及在白名单内的HTML标签
       // 没有被AutoLink解析并渲染的标签会被DOMPurify过滤掉，正常情况下不会出现遗漏
       // 临时替换完整的HTML标签首尾为$#60;和$#62;，供下一步剔除损坏的HTML标签
