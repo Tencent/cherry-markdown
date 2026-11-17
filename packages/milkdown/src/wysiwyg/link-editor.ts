@@ -1,7 +1,8 @@
 import type { Mark, Node as ProseNode } from '@milkdown/kit/prose/model';
 import { Plugin, TextSelection } from '@milkdown/kit/prose/state';
 import type { EditorView } from '@milkdown/kit/prose/view';
-import { copyToClip, isValidScheme } from '../generated/cherry-helpers.js';
+import { isValidScheme } from '../generated/cherry-helpers.js';
+import { copyText } from './copy.js';
 import { sanitizeLinkHref } from '@milkdown/kit/preset/commonmark';
 import { $prose } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
@@ -32,6 +33,29 @@ function sameLinkMark(left: Mark, right: Mark) {
   if (left.type !== right.type) return false;
   const keys = new Set([...Object.keys(left.attrs), ...Object.keys(right.attrs)]);
   return [...keys].every((key) => left.attrs[key] === right.attrs[key]);
+}
+
+function countMatchingLinks(doc: ProseNode, mark: Mark) {
+  let count = 0;
+  doc.descendants((node) => {
+    if (!node.isTextblock) return;
+    let inLink = false;
+    node.forEach((child) => {
+      const childMark = child.isText ? mark.type.isInSet(child.marks) : undefined;
+      const matches = Boolean(childMark && sameLinkMark(mark, childMark));
+      if (matches && !inLink) count += 1;
+      inLink = matches;
+    });
+    return false;
+  });
+  return count;
+}
+
+function containsUniqueText(doc: ProseNode, text: string) {
+  if (!text) return false;
+  const content = doc.textBetween(0, doc.content.size, '\n', '\ufffc');
+  const index = content.indexOf(text);
+  return index >= 0 && index === content.lastIndexOf(text);
 }
 
 function linkAtRange(view: EditorView, from: number, to = from): LinkRange | undefined {
@@ -104,7 +128,24 @@ export const cherryLinkEditor = $prose((ctx) => {
           return true;
         }
         if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'k') return false;
-        const { from, to } = view.state.selection;
+        let { from, to } = view.state.selection;
+        const selection = view.dom.ownerDocument.getSelection();
+        if (
+          selection &&
+          selection.anchorNode &&
+          selection.focusNode &&
+          view.dom.contains(selection.anchorNode) &&
+          view.dom.contains(selection.focusNode)
+        ) {
+          try {
+            const anchor = view.posAtDOM(selection.anchorNode, selection.anchorOffset);
+            const head = view.posAtDOM(selection.focusNode, selection.focusOffset);
+            from = Math.min(anchor, head);
+            to = Math.max(anchor, head);
+          } catch {
+            // The selection can be detached while the editor updates; use its state in that case.
+          }
+        }
         const range = linkAtRange(view, from, to) ?? (from !== to ? { from, to } : undefined);
         if (!range) return false;
         event.preventDefault();
@@ -226,8 +267,28 @@ export const cherryLinkEditor = $prose((ctx) => {
       let editorOpen = false;
       let uiVisible = false;
       let dismissedSelection: { from: number; to: number } | undefined;
+      let dismissedByOutsidePointer = false;
       let disposed = false;
+      const copyOwner = new AbortController();
       let copyFeedbackTimer: number | undefined;
+      let copyRevision = 0;
+
+      const setCopyFeedback = (state: 'success' | 'error' | 'idle') => {
+        copy.classList.toggle('is-success', state === 'success');
+        copy.classList.toggle('is-error', state === 'error');
+        copyIcon?.classList.toggle('ch-icon-copy', state === 'idle');
+        copyIcon?.classList.toggle('ch-icon-ok', state === 'success');
+        copyIcon?.classList.toggle('ch-icon-warning', state === 'error');
+        const label = { success: '已复制', error: '复制失败', idle: '复制链接' }[state];
+        copy.title = label;
+        copy.setAttribute('aria-label', label);
+      };
+      const resetCopyFeedback = () => {
+        copyRevision += 1;
+        if (copyFeedbackTimer !== undefined) window.clearTimeout(copyFeedbackTimer);
+        copyFeedbackTimer = undefined;
+        setCopyFeedback('idle');
+      };
 
       const notifyUi = (open: boolean) => {
         view.dom.dispatchEvent(new CustomEvent('cherry-milkdown:link-ui-change', { bubbles: true, detail: { open } }));
@@ -254,6 +315,8 @@ export const cherryLinkEditor = $prose((ctx) => {
         const current = active;
         const anchor = current && anchorForRange(current);
         if (!anchor) {
+          resetCopyFeedback();
+          active = undefined;
           inspector.hidden = true;
           return;
         }
@@ -285,6 +348,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       };
       const hideInspector = () => {
         if (editorOpen) return;
+        resetCopyFeedback();
         active = undefined;
         inspector.hidden = true;
       };
@@ -309,6 +373,8 @@ export const cherryLinkEditor = $prose((ctx) => {
         }
       };
       const open = (range: LinkRange) => {
+        resetCopyFeedback();
+        dismissedByOutsidePointer = false;
         dismissedSelection = undefined;
         active = { ...range, anchor: range.anchor ?? anchorForRange(range) };
         textInput.value = view.state.doc.textBetween(range.from, range.to, '', '');
@@ -336,6 +402,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       };
       const showForSelection = () => {
         if (editorOpen) return;
+        if (dismissedByOutsidePointer) return hideInspector();
         const { from, to } = view.state.selection;
         if (dismissedSelection?.from === from && dismissedSelection.to === to) return hideInspector();
         dismissedSelection = undefined;
@@ -354,18 +421,43 @@ export const cherryLinkEditor = $prose((ctx) => {
         if (from !== to || hasDocumentRange) return hideInspector();
         const range = linkAtRange(view, from, to);
         if (!range) return hideInspector();
-        active = range;
+        const previousHref = String(active?.mark?.attrs.href ?? active?.anchor?.getAttribute('href') ?? '');
         const href = String(range.mark?.attrs.href ?? range.anchor?.getAttribute('href') ?? '');
-        hrefPreview.href = href;
-        hrefPreview.title = href;
-        hrefPreview.setAttribute('aria-label', `打开链接：${href}`);
+        if (active && (active.from !== range.from || active.to !== range.to || previousHref !== href)) {
+          resetCopyFeedback();
+        }
+        active = range;
+        const safeHref = isValidScheme(href) ? sanitizeLinkHref(href) : '';
+        if (safeHref) {
+          hrefPreview.textContent = '打开链接';
+          hrefPreview.href = safeHref;
+          hrefPreview.title = safeHref;
+          hrefPreview.setAttribute('aria-label', `打开链接：${safeHref}`);
+          hrefPreview.removeAttribute('aria-disabled');
+          hrefPreview.removeAttribute('tabindex');
+        } else {
+          hrefPreview.textContent = '无法打开';
+          hrefPreview.removeAttribute('href');
+          hrefPreview.title = '链接地址不安全，无法打开';
+          hrefPreview.setAttribute('aria-label', '链接地址不安全，无法打开');
+          hrefPreview.setAttribute('aria-disabled', 'true');
+          hrefPreview.tabIndex = -1;
+        }
         inspector.hidden = false;
         inspectorFrame.schedule();
       };
       const selectionFrame = createContextFrame(showForSelection);
-      const onEditorPointer = () => {
+      const onEditorPointer = (event: PointerEvent) => {
+        const target = event.target;
+        // A delayed selection update from the previous tap must not reopen
+        // the inspector over the next paragraph. A link tap explicitly reopens it.
+        if (dismissedByOutsidePointer && !(target instanceof Element && target.closest('a[href]'))) return;
+        dismissedByOutsidePointer = false;
         dismissedSelection = undefined;
         selectionFrame.schedule();
+      };
+      const onEditorKeyDown = () => {
+        dismissedByOutsidePointer = false;
       };
       const preserveSelection = (event: PointerEvent) => {
         // Link inspection also owns pointer propagation, unlike formatting controls.
@@ -383,40 +475,40 @@ export const cherryLinkEditor = $prose((ctx) => {
         if (range) open(range);
       };
       const onFocusLinkActions = () => {
+        dismissedByOutsidePointer = false;
         dismissedSelection = undefined;
         showForSelection();
-        if (!inspector.hidden) hrefPreview.focus({ preventScroll: true });
+        if (!inspector.hidden) (hrefPreview.hasAttribute('href') ? hrefPreview : copy).focus({ preventScroll: true });
       };
       const onOutsidePointer = (event: PointerEvent) => {
         if (!(event.target instanceof Node) || form.contains(event.target) || inspector.contains(event.target)) return;
         if (editorOpen) close();
+        if (!view.dom.contains(event.target)) {
+          dismissedByOutsidePointer = true;
+          // Clicking blank page space does not always blur contenteditable,
+          // especially on Firefox and touch layouts. Dismiss explicitly and
+          // keep it closed until a link tap or keyboard interaction.
+          dismissedSelection = { from: view.state.selection.from, to: view.state.selection.to };
+          hideInspector();
+          return;
+        }
         queueMicrotask(() => {
           if (!view.hasFocus()) {
-            active = undefined;
-            inspector.hidden = true;
+            hideInspector();
           }
         });
       };
       const copyLink = async () => {
         const href = String(active?.mark?.attrs.href ?? active?.anchor?.getAttribute('href') ?? '');
         if (!href) return;
-        const setCopyFeedback = (state: 'success' | 'error' | 'idle') => {
-          copy.classList.toggle('is-success', state === 'success');
-          copy.classList.toggle('is-error', state === 'error');
-          copyIcon?.classList.toggle('ch-icon-copy', state === 'idle');
-          copyIcon?.classList.toggle('ch-icon-ok', state === 'success');
-          copyIcon?.classList.toggle('ch-icon-warning', state === 'error');
-          const label = { success: '已复制', error: '复制失败', idle: '复制链接' }[state];
-          copy.title = label;
-          copy.setAttribute('aria-label', label);
-        };
-        if (copyFeedbackTimer !== undefined) window.clearTimeout(copyFeedbackTimer);
+        resetCopyFeedback();
+        const revision = copyRevision;
         try {
-          await copyToClip(href);
-          if (disposed) return;
+          const copied = await copyText(href, copyOwner.signal);
+          if (!copied || disposed || revision !== copyRevision) return;
           setCopyFeedback('success');
         } catch {
-          if (disposed) return;
+          if (disposed || revision !== copyRevision) return;
           setCopyFeedback('error');
         }
         copyFeedbackTimer = window.setTimeout(() => {
@@ -512,6 +604,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       view.dom.addEventListener('cherry-milkdown:edit-link', onEditRequest);
       view.dom.addEventListener('cherry-milkdown:focus-link-actions', onFocusLinkActions);
       view.dom.addEventListener('pointerdown', onEditorPointer);
+      view.dom.addEventListener('keydown', onEditorKeyDown);
       inspector.addEventListener('pointerdown', preserveSelection);
       const onCopy = () => {
         void copyLink();
@@ -536,15 +629,60 @@ export const cherryLinkEditor = $prose((ctx) => {
 
       return {
         update: (_view, previousState) => {
-          if (active && !previousState.doc.eq(view.state.doc)) close();
+          if (active && !previousState.doc.eq(view.state.doc)) {
+            const previous = previousState.doc;
+            const current = view.state.doc;
+            const start = previous.content.findDiffStart(current.content);
+            const end = previous.content.findDiffEnd(current.content);
+            const target = linkTargetAfter(previous, active.to);
+            const protectedEnd = active.to + (target?.node.nodeSize ?? 0);
+            const delta = start !== null && end && end.a <= active.from ? end.b - end.a : 0;
+            const outside = start !== null && end && (end.a <= active.from || start >= protectedEnd);
+            const from = active.from + delta;
+            const to = active.to + delta;
+            const mappedLink =
+              outside && editorOpen && from >= 0 && to <= current.content.size
+                ? linkAtRange(view, from, to)
+                : undefined;
+            const selectedText = !active.mark && previous.textBetween(active.from, active.to, '\n', '\ufffc');
+            const candidate = active.mark
+              ? mappedLink
+              : outside &&
+                  editorOpen &&
+                  from >= 0 &&
+                  to <= current.content.size &&
+                  !mappedLink &&
+                  selectedText &&
+                  containsUniqueText(previous, selectedText) &&
+                  containsUniqueText(current, selectedText)
+                ? { from, to }
+                : undefined;
+            const currentTarget = candidate && linkTargetAfter(current, candidate.to);
+            if (
+              candidate &&
+              candidate.from === from &&
+              candidate.to === to &&
+              (!active.mark ||
+                countMatchingLinks(previous, active.mark) === countMatchingLinks(current, active.mark)) &&
+              previous.slice(active.from, active.to).eq(current.slice(from, to)) &&
+              ((!target && !currentTarget) || (target && currentTarget && target.node.eq(currentTarget.node)))
+            ) {
+              active = candidate;
+              viewportFrame.schedule();
+            } else {
+              close();
+            }
+          }
           showForSelection();
         },
         destroy: () => {
           disposed = true;
+          copyOwner.abort();
           if (uiVisible) notifyUi(false);
           view.dom.removeEventListener('cherry-milkdown:edit-link', onEditRequest);
           view.dom.removeEventListener('cherry-milkdown:focus-link-actions', onFocusLinkActions);
           view.dom.removeEventListener('pointerdown', onEditorPointer);
+          view.dom.removeEventListener('keydown', onEditorKeyDown);
           inspector.removeEventListener('pointerdown', preserveSelection);
           copy.removeEventListener('click', onCopy);
           edit.removeEventListener('click', onEdit);

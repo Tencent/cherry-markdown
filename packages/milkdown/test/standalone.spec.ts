@@ -75,6 +75,76 @@ describe('standalone contracts', () => {
     await expect(instance.destroy()).resolves.toBeUndefined();
   });
 
+  it('reports a late renderer cleanup failure after editor destruction', async () => {
+    let finish!: (cleanup: () => void) => void;
+    const renderer = vi.fn(() => new Promise<() => void>((resolve) => { finish = resolve; }));
+    const onError = vi.fn();
+    const instance = await create('```custom-chart\ncontent\n```', { renderers: { 'custom-chart': renderer }, onError });
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledOnce());
+    await instance.destroy();
+    finish(() => { throw new Error('Late cleanup failed'); });
+    await vi.waitFor(() => expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Late cleanup failed' }), 'render'));
+  });
+
+  it('reports a late table renderer cleanup failure after editor destruction', async () => {
+    let finish!: (cleanup: () => void) => void;
+    const renderer = vi.fn(() => new Promise<() => void>((resolve) => { finish = resolve; }));
+    const onError = vi.fn();
+    const instance = await create('| :line: | Value |\n| --- | --- |\n| A | 1 |', { renderers: { tableChart: renderer }, onError });
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledOnce());
+    await instance.destroy();
+    finish(() => { throw new Error('Late table cleanup failed'); });
+    await vi.waitFor(() => expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Late table cleanup failed' }), 'render'));
+  });
+
+  it.each([false, true])('isolates a custom Engine cleanup failure even when reporting throws (%s)', async (throws) => {
+    const onError = vi.fn(() => {
+      if (throws) throw new Error('Error reporter failed');
+    });
+    const cleanup = vi.fn();
+    const engine = {
+      makeHtml: (source: string) => source,
+      destroyRenderedContent: vi.fn(() => {
+        throw new Error('Engine cleanup failed');
+      }),
+    };
+    const renderer = vi.fn(({ container }: { container: HTMLElement }) => {
+      container.textContent = 'chart';
+      return cleanup;
+    });
+    const instance = await create('```business-chart\nFirst\n```\n\n```business-chart\nSecond\n```', {
+      engine,
+      renderers: { 'business-chart': renderer },
+      onError,
+    });
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(2));
+    await expect(instance.destroy()).resolves.toBeUndefined();
+    expect(cleanup).toHaveBeenCalledTimes(2);
+    expect(engine.destroyRenderedContent).toHaveBeenCalledTimes(2);
+    expect(onError).toHaveBeenCalledTimes(2);
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Engine cleanup failed' }), 'render');
+  });
+
+  it('preserves a newer document requested by an Engine cleanup error callback', async () => {
+    let instance!: CherryMilkdownInstance;
+    const engine = {
+      makeHtml: (source: string) => source,
+      destroyRenderedContent: () => {
+        throw new Error('Engine cleanup failed');
+      },
+    };
+    const onError = vi.fn(() => instance.setMarkdown('Latest', { emit: false }));
+    instance = await create('```business-chart\nFirst\n```', {
+      engine,
+      renderers: { 'business-chart': () => '<span>chart</span>' },
+      onError,
+    });
+    await vi.waitFor(() => expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('chart'));
+    instance.setMarkdown('Middle', { emit: false });
+    await vi.waitFor(() => expect(instance.getMarkdown()).toBe('Latest'));
+    expect(document.querySelector('.ProseMirror')?.textContent).toBe('Latest');
+  });
+
   it('refreshes only the themed instance and preserves an open Mermaid source editor', async () => {
     const renderer = vi.fn(({ container }: { container: HTMLElement }) => {
       container.innerHTML = '<svg></svg>';
@@ -123,6 +193,46 @@ describe('standalone contracts', () => {
       expect.objectContaining({ syntax: 'line', source: expect.stringContaining(':line:{"title":"Nested"}') }),
     );
     expect(document.querySelector('.cherry-panel-cols__2cols')).not.toBeNull();
+  });
+
+  it('does not start sibling nested charts after the renderer replaces their document', async () => {
+    const calls: Array<{ source: string; aborted: boolean }> = [];
+    let instance!: CherryMilkdownInstance;
+    const renderer = ({ source, signal }: { source: string; signal: AbortSignal }) => {
+      calls.push({ source, aborted: signal.aborted });
+      if (calls.length === 1) instance.setMarkdown('Replacement', { emit: false });
+    };
+    const chart = (title: string) =>
+      [`| :line:{"title":"${title}"} | Jan |`, '| --- | --- |', '| Sales | 1 |'].join('\n');
+    // Configure the renderer at creation, then trigger the nested block after
+    // the public instance is available to the callback.
+    instance = await create('Start', { renderers: { tableChart: renderer } });
+    instance.setMarkdown(['::: 2cols', chart('First'), '::', chart('Second'), ':::'].join('\n'));
+    await vi.waitFor(() => expect(calls.length).toBeGreaterThan(0));
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.aborted).toBe(false);
+    expect(instance.getMarkdown()).toBe('Replacement');
+  });
+
+  it('does not start sibling nested charts after a renderer requests editor destruction', async () => {
+    let instance!: CherryMilkdownInstance;
+    let destruction: Promise<void> | undefined;
+    const calls: string[] = [];
+    const cleanup = vi.fn();
+    const renderer = ({ source }: { source: string }) => {
+      calls.push(source);
+      if (calls.length === 1) destruction = instance.destroy();
+      return cleanup;
+    };
+    const chart = (title: string) =>
+      [`| :line:{"title":"${title}"} | Jan |`, '| --- | --- |', '| Sales | 1 |'].join('\n');
+    instance = await create('Start', { renderers: { tableChart: renderer } });
+    instance.setMarkdown(['::: 2cols', chart('First'), '::', chart('Second'), ':::'].join('\n'));
+    await vi.waitFor(() => expect(destruction).toBeDefined());
+    await destruction;
+    expect(calls).toHaveLength(1);
+    expect(cleanup).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('[data-render-pending]')).toBeNull();
   });
 
   it('cleans completed nested renderers when a sibling chart fails', async () => {
@@ -189,8 +299,7 @@ describe('standalone contracts', () => {
     expect(instance.getMarkdown().trimEnd()).toBe('Before **Link** after.');
     expect(document.querySelector('.cherry-link-target')).toBeNull();
     expect(undo(view.state, view.dispatch)).toBe(true);
-    expect(instance.getMarkdown()).toContain('[Link](https://example.com)');
-    expect(instance.getMarkdown()).toContain('{target=_blank}');
+    expect(instance.getMarkdown()).toBe('Before [**Link**](https://example.com){target=_blank} after.');
     expect(document.querySelector('.ProseMirror strong')?.textContent).toBe('Link');
     expect(redo(view.state, view.dispatch)).toBe(true);
     expect(instance.getMarkdown().trimEnd()).toBe('Before **Link** after.');
@@ -252,7 +361,8 @@ describe('standalone contracts', () => {
     const instance = await create('```business-chart\nfirst\n```', {
       renderers: {
         'business-chart': ({ source }: { source: string }) =>
-          `<img src="image.png" onerror="alert(1)"><script>alert(1)</script><p>${source}</p>`,
+          `<img src="image.png" onerror="alert(1)"><script>alert(1)</script><p>${source}</p>` +
+          '<svg><a><animate attributeName="href" values="javascript:alert(1)"/><text>Chart</text></a></svg>',
       },
     });
     for (const source of ['first', 'second']) {
@@ -260,6 +370,8 @@ describe('standalone contracts', () => {
       await vi.waitFor(() => expect(document.querySelector('.cherry-embed__preview p')?.textContent).toBe(source));
       expect(document.querySelector('.cherry-embed__preview img')?.hasAttribute('onerror')).toBe(false);
       expect(document.querySelector('.cherry-embed__preview script')).toBeNull();
+      expect(document.querySelector('.cherry-embed__preview svg animate')).toBeNull();
+      expect(document.querySelector('.cherry-embed__preview svg text')?.textContent).toBe('Chart');
     }
   });
 
@@ -289,6 +401,26 @@ describe('standalone contracts', () => {
     await vi.waitFor(() => expect(document.querySelector('[data-chart="valid"]')).not.toBeNull());
     expect(document.querySelector('[data-render-error]')).toBeNull();
   });
+
+  it.each(['echarts', 'mermaid'])(
+    'labels the previous %s preview after a failed redraw and clears it on recovery',
+    async (syntax) => {
+      const onError = vi.fn();
+      const renderer = ({ source }: { source: string }) => {
+        if (source === 'broken') throw new Error('Invalid diagram');
+        return `<span data-test-preview>${source}</span>`;
+      };
+      const instance = await create(`\`\`\`${syntax}\nold\n\`\`\``, { renderers: { [syntax]: renderer }, onError });
+      await vi.waitFor(() => expect(document.querySelector('[data-test-preview]')?.textContent).toBe('old'));
+      instance.setMarkdown(`\`\`\`${syntax}\nbroken\n\`\`\``);
+      await vi.waitFor(() => expect(onError).toHaveBeenCalled());
+      expect(document.querySelector('[data-test-preview]')?.textContent).toBe('old');
+      expect(document.querySelector('.cherry-embed__preview [role="alert"]')?.textContent).toContain('上一次成功渲染');
+      instance.setMarkdown(`\`\`\`${syntax}\nfixed\n\`\`\``);
+      await vi.waitFor(() => expect(document.querySelector('[data-test-preview]')?.textContent).toBe('fixed'));
+      expect(document.querySelector('.cherry-embed__preview [role="alert"]')).toBeNull();
+    },
+  );
 
   it('prevents a late diagram renderer from overwriting a newer chart', async () => {
     let completeOld: (() => void) | undefined;
@@ -401,6 +533,25 @@ describe('standalone contracts', () => {
     instance.setMarkdown(value.replace('Broken', 'Repaired'));
     await vi.waitFor(() => expect(document.querySelector('[data-chart="repaired"]')).not.toBeNull());
     expect(document.querySelector('[role="alert"], [data-render-error]')).toBeNull();
+  });
+
+  it('warns when a failed table chart redraw leaves the previous chart visible', async () => {
+    const onError = vi.fn();
+    const renderer = ({ source }: { source: string }) => {
+      if (source.includes('Broken')) throw new Error('Invalid table chart');
+      return `<span data-chart>${source.includes('Fixed') ? 'Fixed' : 'Original'}</span>`;
+    };
+    const value = '| :line:{} | A |\n| --- | --- |\n| Original | 1 |';
+    const instance = await create(value, { renderers: { tableChart: renderer }, onError });
+    await vi.waitFor(() => expect(document.querySelector('[data-chart]')?.textContent).toBe('Original'));
+    instance.setMarkdown(value.replace('Original', 'Broken'));
+    await vi.waitFor(() => expect(onError).toHaveBeenCalled());
+    expect(document.querySelector('[data-chart]')?.textContent).toBe('Original');
+    expect(document.querySelector('.cherry-table-chart [role="alert"]')).not.toBeNull();
+    expect(instance.getMarkdown()).toContain('Broken');
+    instance.setMarkdown(value.replace('Original', 'Fixed'));
+    await vi.waitFor(() => expect(document.querySelector('[data-chart]')?.textContent).toBe('Fixed'));
+    expect(document.querySelector('.cherry-table-chart [role="alert"]')).toBeNull();
   });
 
   it('recognizes table chart options containing an external URL', async () => {

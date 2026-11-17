@@ -573,6 +573,8 @@ test('Mermaid renders and source editing stays open without text Bubble', async 
   await setMarkdown(page, '```mermaid\ngraph LR\n A-->B\n```');
   await expect(page.locator('.cherry-embed__preview svg')).toBeVisible();
   const node = page.locator('.cherry-embed--cherry_diagram');
+  await expect(node.locator('svg foreignObject').filter({ hasText: 'A' }).first()).toBeVisible();
+  await expect(node.locator('svg foreignObject').filter({ hasText: 'B' }).first()).toBeVisible();
   const toggle = page.getByRole('button', { name: '在节点内编辑源码', exact: true });
   await expect(node.locator('.cherry-embed__controls')).toHaveText('源码');
   await expect(node.locator('.cherry-embed__type')).toHaveCount(0);
@@ -735,9 +737,7 @@ test('image controls update Cherry-compatible layout directives without Cherry U
   expect(new Set(sourceControlRects.map(({ height }) => height)).size).toBe(1);
   await expect(source.getByRole('button', { name: '选择图片' })).toBeVisible();
   await page.evaluate(() => window.dispatchEvent(new Event('scroll')));
-  await expect(source).toBeHidden();
-  await expect(toolbar).toBeVisible();
-  await toolbar.getByRole('button', { name: '编辑图片' }).click();
+  await expect(source).toBeVisible();
   await source.locator('input[type="file"]').setInputFiles({
     name: 'replacement.png',
     mimeType: 'image/png',
@@ -1037,7 +1037,8 @@ test('invalid Mermaid source recovers locally without leaving a stale global err
   await node.getByRole('button', { name: '在节点内编辑源码', exact: true }).click();
   const source = node.locator('.cherry-embed__source code');
   await source.fill('invalid diagram');
-  await expect(node.getByRole('alert')).toBeVisible();
+  await expect(node.getByRole('alert')).toContainText('上一次成功渲染');
+  await expect(node.locator('.cherry-embed__preview svg')).toBeVisible();
   await source.fill('graph LR\n A-->C');
   await expect(node.locator('svg')).toBeVisible();
   await expect(page.locator('[role="alert"], [data-render-error="true"]')).toHaveCount(0);

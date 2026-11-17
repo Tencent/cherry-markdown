@@ -13,8 +13,9 @@ export type CherryDiagramRenderContext = CherryVisualRenderContext;
 
 /**
  * Renderers should prefer mounting DOM into `container`. String results are
- * sanitized before insertion; return a cleanup callback when resources need
- * to be released.
+ * sanitized before insertion, but embedded stylesheets are preserved for
+ * diagram compatibility and can affect the host page. Register only trusted
+ * renderers; return a cleanup callback when resources need to be released.
  */
 export type CherryVisualRendererResult = void | string | (() => void);
 export type CherryVisualRenderer = (

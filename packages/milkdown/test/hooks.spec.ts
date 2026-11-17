@@ -1,5 +1,6 @@
 import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core.esm.js';
 import { editorViewCtx } from '@milkdown/kit/core';
+import { redo, undo } from '@milkdown/kit/prose/history';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
@@ -155,6 +156,89 @@ describe('Cherry built-in hook fixtures', () => {
     expect(flowHeading?.outerHTML).toContain('cherry-footnote-number');
     expect(flowHeading?.textContent).not.toContain('^');
   }, 30_000);
+
+  it.each([
+    '`[^fake]` and actual[^real].\n\n[^real]: Footnote.\n',
+    '```text\n[^fake]\n```\n\nActual[^real].\n\n[^real]: Footnote.\n',
+    'Second[^b], first[^a], again[^b].\n\n[^a]: First.\n\n[^b]: Second.\n',
+    '\\[^real] and actual[^real].\n\n[^real]: Footnote.\n',
+  ])('numbers actual footnotes consistently with Cherry: %s', async (source) => {
+    const root = document.createElement('div');
+    document.body.append(root);
+    const instance = await cherryMilkdown({ el: root, value: source });
+    instances.push(instance);
+    const cherry = document.createElement('div');
+    cherry.innerHTML = new CherryEngine({}).makeHtml(source);
+    const references = (element: Element) =>
+      [...element.querySelectorAll('a.footnote[data-key]')].map((link) => [link.getAttribute('data-key'), link.textContent]);
+    expect(references(cherry).length).toBeGreaterThan(0);
+    expect(references(root)).toEqual(references(cherry));
+  });
+
+  it('updates remaining footnote numbering when an earlier reference is deleted', async () => {
+    const source = 'First[^a] and second[^b].\n\n[^a]: A.\n\n[^b]: B.\n';
+    const root = document.createElement('div');
+    document.body.append(root);
+    const instance = await cherryMilkdown({ el: root, value: source });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    let from = -1;
+    view.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'cherry_footnote_reference' && node.attrs.label === 'a') from = pos;
+    });
+    expect(from).toBeGreaterThanOrEqual(0);
+    view.dispatch(view.state.tr.delete(from, from + 1));
+    const cherry = document.createElement('div');
+    cherry.innerHTML = new CherryEngine({}).makeHtml(instance.getMarkdown());
+    const expected = cherry.querySelector('a.footnote[data-key="b"]')?.textContent;
+    expect(expected).toBe('[1]');
+    expect(root.querySelector('a.footnote[data-key="b"]')?.textContent).toBe(expected);
+    expect(root.querySelector('[data-type="footnote_definition"][data-label="b"] a.footnote-ref')?.textContent).toBe('[1]');
+    const orphan = root.querySelector('[data-type="footnote_definition"][data-label="a"] a.footnote-ref');
+    expect(orphan?.textContent).toBe('[^a]');
+    expect(orphan?.hasAttribute('href')).toBe(false);
+    expect(undo(view.state, view.dispatch)).toBe(true);
+    expect(root.querySelector('a.footnote[data-key="b"]')?.textContent).toBe('[2]');
+    expect(redo(view.state, view.dispatch)).toBe(true);
+    expect(root.querySelector('a.footnote[data-key="b"]')?.textContent).toBe('[1]');
+  });
+
+  it('keeps a shared footnote number until its last reference is removed', async () => {
+    const root = document.createElement('div');
+    document.body.append(root);
+    const instance = await cherryMilkdown({
+      el: root,
+      value: 'First[^a] again[^a] then[^b].\n\n[^a]: A.\n\n[^b]: B.\n',
+    });
+    instances.push(instance);
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    const deleteFirstA = () => {
+      let from = -1;
+      view.state.doc.descendants((node, pos) => {
+        if (from < 0 && node.type.name === 'cherry_footnote_reference' && node.attrs.label === 'a') from = pos;
+      });
+      expect(from).toBeGreaterThanOrEqual(0);
+      view.dispatch(view.state.tr.delete(from, from + 1));
+    };
+    deleteFirstA();
+    expect(root.querySelector('a.footnote[data-key="b"]')?.textContent).toBe('[2]');
+    deleteFirstA();
+    expect(root.querySelector('a.footnote[data-key="b"]')?.textContent).toBe('[1]');
+  });
+
+  it('keeps Cherry self-closing footnote references editable', async () => {
+    const source = 'Unfinished[^draft].';
+    const engineOptions = { engine: { syntax: { footnote: { selfClosing: true } } } };
+    const root = document.createElement('div');
+    document.body.append(root);
+    const instance = await cherryMilkdown({ el: root, value: source, engineOptions });
+    instances.push(instance);
+    const cherry = document.createElement('div');
+    cherry.innerHTML = new CherryEngine(engineOptions).makeHtml(source);
+    expect(cherry.querySelector('.cherry-footnote-number')).not.toBeNull();
+    expect(root.querySelector('.cherry-footnote-number')).not.toBeNull();
+    expect(instance.getMarkdown()).toBe(source);
+  });
 
   it('renders GFM footnote references as inline nodes instead of literal heading text', async () => {
     const root = document.createElement('div');

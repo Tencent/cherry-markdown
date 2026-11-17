@@ -6,7 +6,7 @@ import { EXTERNAL_MARKDOWN_UPDATE } from '../document-update.js';
 import { cherryWysiwygConfigCtx, type CherryWysiwygConfig } from './config.js';
 import { sanitizedEngineFragment } from './html-sanitizer.js';
 import type { CherryVisualRendererResult } from './types.js';
-import { reportRendererError } from './renderer-cleanup.js';
+import { createRenderErrorReporter, reportRendererError } from './renderer-cleanup.js';
 import { createRenderLifecycle } from './render-lifecycle.js';
 import { tableChartCellType } from './table-chart.js';
 
@@ -126,7 +126,7 @@ class TableChartPreview {
     private readonly dom: HTMLElement,
     private readonly config: CherryWysiwygConfig,
   ) {
-    this.rendering = createRenderLifecycle((error) => config.onError?.(error, 'render'));
+    this.rendering = createRenderLifecycle(createRenderErrorReporter(config.onError), config.isDestroyed);
     const { preview, mount } = createChartPreview();
     // Reserve the same figure (including Cherry's margins) as the rendered
     // chart, so lazy ECharts loading cannot move a cell between mouse clicks.
@@ -162,6 +162,7 @@ class TableChartPreview {
     if (!renderer) return;
     this.timer = undefined;
     const revision = this.rendering.begin();
+    if (!revision.current()) return;
 
     // Render the next revision outside document flow. The current chart stays
     // visible until the replacement succeeds, preventing cell edits from
@@ -190,7 +191,9 @@ class TableChartPreview {
 
     void revision.settle(result, {
       prepare: (value) => {
-        if (typeof value === 'string') mount.replaceChildren(sanitizedEngineFragment(value));
+        if (typeof value === 'string') {
+          mount.replaceChildren(sanitizedEngineFragment(value, false, false, { allowRendererStyles: true }));
+        }
       },
       commit: () => {
         this.preview.replaceWith(nextPreview);
@@ -204,9 +207,14 @@ class TableChartPreview {
   private reportError(error: unknown) {
     if (this.destroyed) return;
     this.preview.dataset.renderError = 'true';
-    if (!this.rendering.hasActive) {
-      const status = document.createElement('p');
-      status.setAttribute('role', 'alert');
+    this.preview.querySelector('.cherry-table-chart__error')?.remove();
+    const status = document.createElement('p');
+    status.className = 'cherry-table-chart__error';
+    status.setAttribute('role', 'alert');
+    if (this.rendering.hasActive) {
+      status.textContent = '图表更新失败，当前显示的是上一次成功渲染的结果。';
+      this.preview.append(status);
+    } else {
       status.textContent = '图表暂时无法渲染，请检查表格内容。';
       this.preview.replaceChildren(status);
     }

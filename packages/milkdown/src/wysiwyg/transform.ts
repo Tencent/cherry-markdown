@@ -53,10 +53,10 @@ const FRONTMATTER_PATTERN = /^(?:\uFEFF)?---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?=
 
 // The Markdown parser owns literal boundaries, including indented/unclosed
 // code, longer closing fences and code nested in lists or blockquotes.
-function literalRanges(tree: MarkdownNode, source: string) {
+function literalRanges(tree: MarkdownNode, source: string, includeInline = false) {
   const ranges: Array<{ from: number; to: number }> = [];
   const visit = (node: MarkdownNode) => {
-    if (node.type === 'code' || node.type === 'html') {
+    if (node.type === 'code' || node.type === 'html' || (includeInline && node.type === 'inlineCode')) {
       const range = nodeRange(node);
       if (range) {
         const lineStart = source.lastIndexOf('\n', range.from - 1) + 1;
@@ -223,7 +223,8 @@ function parseChildren(body: string, parse: ParseMarkdown): MarkdownNode[] {
   // ProseMirror forbids empty text nodes.  An empty compound item still needs
   // a legal block so its title/actions remain editable, but the paragraph must
   // have no text child rather than a synthetic `text('')` node.
-  return parse(body).length ? parse(body) : [{ type: 'paragraph', children: [] }];
+  const nodes = parse(body);
+  return nodes.length ? nodes : [{ type: 'paragraph', children: [] }];
 }
 
 function offsetPositions(nodes: MarkdownNode[], offset: number) {
@@ -299,7 +300,7 @@ function parseDetail(source: string, parse: ParseMarkdown): MarkdownNode {
   const lines = source.split(/\r?\n/);
   const header = (lines.shift() ?? '+++ Detail').trim();
   lines.pop();
-  const firstOpen = /^\+\+\+-/.test(header);
+  const firstOpen = header.startsWith('+++-');
   const firstTitle = header.replace(/^\+\+\+-?\s*/, '');
   const body = lines.join('\n');
   const segments = body.split(/^\s*(\+\+-?\s+[^\n]+)\s*$/gm);
@@ -318,7 +319,7 @@ function parseDetail(source: string, parse: ParseMarkdown): MarkdownNode {
       type: 'cherryCompoundItem',
       role: 'detail-item',
       label: itemHeader.replace(/^\+\+-?\s*/, ''),
-      open: /^\+\+-/.test(itemHeader),
+      open: itemHeader.startsWith('++-'),
       children: parseChildren((segments[index + 1] ?? '').trim(), parse),
     });
   }
@@ -445,7 +446,9 @@ function replaceRootBlocks(
     }
     const omitSyntheticEmptyParagraphs = (nodes: MarkdownNode[]) =>
       nodes.filter(
-        (node) => node.type !== 'paragraph' || Boolean(node.value?.length) || Boolean(node.children?.length),
+        (node) =>
+          node.type !== 'cherryFootnoteGap' &&
+          (node.type !== 'paragraph' || Boolean(node.value?.length) || Boolean(node.children?.length)),
       );
     const fallback = () =>
       originalChildren.filter((node) => {
@@ -606,12 +609,17 @@ function transformInline(node: MarkdownNode, source: string, root = false) {
  * footnote AST node. Normalize that boundary here, after all segment merging,
  * so a parser quirk cannot leak into the editor document.
  */
-function normalizeFootnoteReferences(tree: MarkdownNode, source: string) {
+function collectFootnoteNumbers(source: string, protectedRanges: Array<{ from: number; to: number }>) {
   const numbers = new Map<string, number>();
   for (const match of source.matchAll(/\[\^([^\]\n]+)\](?!:)/g)) {
+    if (containsOffset(protectedRanges, match.index)) continue;
     const label = String(match[1] ?? '');
     if (!numbers.has(label)) numbers.set(label, numbers.size + 1);
   }
+  return numbers;
+}
+
+function normalizeFootnoteReferences(tree: MarkdownNode, numbers: Map<string, number>) {
   if (!numbers.size) return;
 
   const skipped = new Set([
@@ -679,7 +687,7 @@ function relocateFootnoteDefinitions(tree: MarkdownNode) {
   for (const child of tree.children) {
     if (child.type === 'footnoteDefinition') {
       definitions.push(child);
-      if (!inDefinitionGroup) body.push({ type: 'paragraph', children: [] });
+      if (!inDefinitionGroup) body.push({ type: 'cherryFootnoteGap', children: [] });
       inDefinitionGroup = true;
       continue;
     }
@@ -695,8 +703,9 @@ export function transformCherryWysiwygTree(
   parse: ParseMarkdown = () => [],
   options: ParseMarkdownOptions = {},
 ) {
+  const footnoteNumbers = collectFootnoteNumbers(source, literalRanges(tree, source, true));
   replaceRootBlocks(tree, source, parse, options.supplementalDefinitions ?? true, options.sourceBlockTypes ?? []);
-  normalizeFootnoteReferences(tree, source);
+  normalizeFootnoteReferences(tree, footnoteNumbers);
   relocateFootnoteDefinitions(tree);
   transformInline(tree, source, true);
   return tree;

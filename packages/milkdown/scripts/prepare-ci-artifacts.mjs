@@ -2,12 +2,7 @@ import { cpSync, mkdirSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import {
-  artifactRoot,
-  npm,
-  workspaceRoot,
-  writeArtifactManifest,
-} from './consumer-artifacts.mjs';
+import { artifactRoot, npm, verifyCherryTarball, workspaceRoot, writeArtifactManifest } from './consumer-artifacts.mjs';
 import { prepareConsumerPackages } from './prepare-consumer-packages.mjs';
 
 const { values } = parseArgs({ options: { release: { type: 'boolean' }, demo: { type: 'boolean' } } });
@@ -31,6 +26,7 @@ for (const [variant, packages] of Object.entries(variants)) {
       npm(['pack', packages[key], '--json', '--pack-destination', fixture], { cwd: fixture, env, encoding: 'utf8' }),
     )[0];
     const tarball = join(output, name);
+    if (key === 'cherry-markdown') verifyCherryTarball(join(fixture, packed.filename));
     cpSync(join(fixture, packed.filename), tarball);
   }
   writeArtifactManifest(output, `consumer-${variant}`);

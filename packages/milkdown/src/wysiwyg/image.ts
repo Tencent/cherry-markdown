@@ -4,6 +4,8 @@ import type { NodeView } from '@milkdown/kit/prose/view';
 import { $view } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
 import type { CherryWysiwygConfig } from './config.js';
+import { isSafeImageSource, sanitizedEngineFragment } from './html-sanitizer.js';
+import { reportRendererError } from './renderer-cleanup.js';
 
 function imageMarkdown(node: ProseNode) {
   const alt = String(node.attrs.alt ?? '').replace(/[\r\n[\]\\]/g, (character) => `&#${character.charCodeAt(0)};`);
@@ -20,9 +22,8 @@ function imageMarkdown(node: ProseNode) {
 }
 
 export function cherryImagePresentation(node: ProseNode, config: CherryWysiwygConfig) {
-  const template = document.createElement('template');
-  template.innerHTML = config.engine.makeHtml(imageMarkdown(node));
-  const rendered = template.content.querySelector('img');
+  const fragment = sanitizedEngineFragment(config.engine.makeHtml(imageMarkdown(node)));
+  const rendered = fragment.querySelector('img');
   if (!rendered) return undefined;
   // Titles are already parsed text. Sending quoted text through a second
   // Markdown parse can discard the entire Cherry presentation.
@@ -33,6 +34,8 @@ export function cherryImagePresentation(node: ProseNode, config: CherryWysiwygCo
 
 class CherryImageView implements NodeView {
   dom: HTMLImageElement;
+  private generation = 0;
+  private destroyed = false;
 
   constructor(
     private node: ProseNode,
@@ -61,16 +64,31 @@ class CherryImageView implements NodeView {
     return true;
   }
 
+  destroy() {
+    this.destroyed = true;
+    this.generation += 1;
+  }
+
   private render() {
+    const generation = ++this.generation;
+    const node = this.node;
+    let presentation: ReturnType<typeof cherryImagePresentation>;
+    try {
+      presentation = cherryImagePresentation(node, this.config);
+    } catch (error) {
+      if (this.destroyed || this.config.isDestroyed?.() || generation !== this.generation) return;
+      reportRendererError(error, (cause) => this.config.onError?.(cause, 'render'));
+    }
+    if (this.destroyed || this.config.isDestroyed?.() || generation !== this.generation) return;
     const selected = this.dom.classList.contains('ProseMirror-selectednode');
     for (const attribute of Array.from(this.dom.attributes)) this.dom.removeAttribute(attribute.name);
-    const presentation = cherryImagePresentation(this.node, this.config);
     if (presentation) {
       for (const [name, value] of presentation) this.dom.setAttribute(name, value);
     } else {
-      this.dom.src = String(this.node.attrs.src ?? '');
-      this.dom.alt = String(this.node.attrs.alt ?? '');
-      if (this.node.attrs.title) this.dom.title = String(this.node.attrs.title);
+      const src = String(node.attrs.src ?? '');
+      if (isSafeImageSource(src)) this.dom.src = src;
+      this.dom.alt = String(node.attrs.alt ?? '');
+      if (node.attrs.title) this.dom.title = String(node.attrs.title);
     }
     this.dom.contentEditable = 'false';
     this.dom.draggable = true;

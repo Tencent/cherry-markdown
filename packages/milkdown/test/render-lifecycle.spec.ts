@@ -32,6 +32,65 @@ describe('shared preview revision lifecycle', () => {
     lifecycle.destroy();
   });
 
+  it('does not commit an obsolete revision when active cleanup starts a newer render', async () => {
+    const lifecycle = createRenderLifecycle();
+    let newest: ReturnType<typeof lifecycle.begin> | undefined;
+    await lifecycle.begin().settle(() => {
+      newest = lifecycle.begin();
+    }, callbacks());
+    const outdated = lifecycle.begin();
+    const outdatedHooks = callbacks();
+    await outdated.settle(undefined, outdatedHooks);
+    expect(outdatedHooks.commit).not.toHaveBeenCalled();
+    expect(newest?.current()).toBe(true);
+    const newestHooks = callbacks();
+    await newest!.settle(undefined, newestHooks);
+    expect(newestHooks.commit).toHaveBeenCalledOnce();
+    lifecycle.destroy();
+  });
+
+  it('does not commit when active cleanup destroys the lifecycle', async () => {
+    const lifecycle = createRenderLifecycle();
+    await lifecycle.begin().settle(() => lifecycle.destroy(), callbacks());
+    const hooks = callbacks();
+    await lifecycle.begin().settle(undefined, hooks);
+    expect(hooks.commit).not.toHaveBeenCalled();
+    expect(lifecycle.hasActive).toBe(false);
+  });
+
+  it('does not supersede a render started by pending cleanup', async () => {
+    const lifecycle = createRenderLifecycle();
+    let newest: ReturnType<typeof lifecycle.begin> | undefined;
+    const first = lifecycle.begin();
+    first.addCleanup(() => {
+      newest = lifecycle.begin();
+    });
+    const outdated = lifecycle.begin();
+    expect(outdated.current()).toBe(false);
+    expect(outdated.signal.aborted).toBe(true);
+    expect(newest?.current()).toBe(true);
+    const hooks = callbacks();
+    await newest!.settle(undefined, hooks);
+    expect(hooks.commit).toHaveBeenCalledOnce();
+    lifecycle.destroy();
+  });
+
+  it('keeps a newer render started while a commit is applying', async () => {
+    const lifecycle = createRenderLifecycle();
+    const previous = lifecycle.begin();
+    let newest: ReturnType<typeof lifecycle.begin> | undefined;
+    expect(
+      previous.commit(() => {
+        newest = lifecycle.begin();
+      }),
+    ).toBe(false);
+    expect(newest?.current()).toBe(true);
+    const hooks = callbacks();
+    await newest!.settle(undefined, hooks);
+    expect(hooks.commit).toHaveBeenCalledOnce();
+    lifecycle.destroy();
+  });
+
   it('never commits an older result and immediately releases its late cleanup', async () => {
     const lifecycle = createRenderLifecycle();
     const result = deferred();
@@ -97,6 +156,32 @@ describe('shared preview revision lifecycle', () => {
     await settled;
     expect(hooks.failure).not.toHaveBeenCalled();
     lifecycle.destroy();
+  });
+
+  it('does not report an obsolete failure when abort starts a newer revision', async () => {
+    const lifecycle = createRenderLifecycle();
+    const old = lifecycle.begin();
+    let newer: ReturnType<typeof lifecycle.begin> | undefined;
+    old.signal.addEventListener('abort', () => {
+      newer = lifecycle.begin();
+    });
+    const hooks = callbacks();
+    await old.settle(Promise.reject(new Error('Obsolete failure')), hooks);
+    expect(newer?.current()).toBe(true);
+    expect(hooks.failure).not.toHaveBeenCalled();
+    await newer!.settle(undefined, callbacks());
+    lifecycle.destroy();
+  });
+
+  it('does not report an obsolete failure when abort destroys the lifecycle', async () => {
+    const lifecycle = createRenderLifecycle();
+    const revision = lifecycle.begin();
+    revision.signal.addEventListener('abort', () => lifecycle.destroy());
+    const hooks = callbacks();
+    await revision.settle(Promise.reject(new Error('Obsolete failure')), hooks);
+    expect(hooks.failure).not.toHaveBeenCalled();
+    expect(revision.signal.aborted).toBe(true);
+    expect(lifecycle.hasActive).toBe(false);
   });
 
   it('destroy cancels pending and active resources, including late nested results', async () => {
@@ -169,6 +254,21 @@ describe('shared preview revision lifecycle', () => {
     expect(report).toHaveBeenCalledOnce();
   });
 
+  it('reports a sibling cleanup arriving after a failed render and destruction', async () => {
+    const report = vi.fn();
+    const lifecycle = createRenderLifecycle(report);
+    const revision = lifecycle.begin();
+    const hooks = callbacks();
+    await revision.settle(Promise.reject(new Error('One renderer failed')), hooks);
+    expect(hooks.failure).toHaveBeenCalledOnce();
+    lifecycle.destroy();
+    const lateFailure = new Error('Late sibling cleanup failed');
+    revision.addCleanup(() => {
+      throw lateFailure;
+    });
+    expect(report).toHaveBeenCalledWith(lateFailure);
+  });
+
   it('does not reactivate rendering after destruction', async () => {
     const lifecycle = createRenderLifecycle();
     lifecycle.destroy();
@@ -181,5 +281,21 @@ describe('shared preview revision lifecycle', () => {
     expect(cleanup).toHaveBeenCalledOnce();
     expect(hooks.commit).not.toHaveBeenCalled();
     expect(hooks.failure).not.toHaveBeenCalled();
+  });
+
+  it('stops current and new revisions when the owner requests destruction', async () => {
+    let ownerDestroyed = false;
+    const lifecycle = createRenderLifecycle(undefined, () => ownerDestroyed);
+    const pending = lifecycle.begin();
+    const hooks = callbacks();
+    ownerDestroyed = true;
+    expect(pending.current()).toBe(false);
+    await pending.settle(undefined, hooks);
+    expect(hooks.commit).not.toHaveBeenCalled();
+    const late = lifecycle.begin();
+    expect(late.current()).toBe(false);
+    expect(late.signal.aborted).toBe(true);
+    lifecycle.destroy();
+    expect(pending.signal.aborted).toBe(true);
   });
 });

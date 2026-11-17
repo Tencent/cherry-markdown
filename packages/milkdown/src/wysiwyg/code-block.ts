@@ -1,4 +1,4 @@
-import { copyToClip } from '../generated/cherry-helpers.js';
+import { copyText } from './copy.js';
 import { codeBlockSchema } from '@milkdown/kit/preset/commonmark';
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
 import { NodeSelection, Plugin, TextSelection } from '@milkdown/kit/prose/state';
@@ -88,7 +88,9 @@ class CherryCodeBlockView implements NodeView {
   private readonly copy: HTMLButtonElement;
   private readonly pre: HTMLPreElement;
   private disposed = false;
+  private readonly copyOwner = new AbortController();
   private copyTimer?: ReturnType<typeof setTimeout>;
+  private copyRevision = 0;
 
   constructor(
     node: ProseNode,
@@ -140,6 +142,7 @@ class CherryCodeBlockView implements NodeView {
 
   update(node: ProseNode) {
     if (node.type !== this.node.type) return false;
+    if (node.textContent !== this.node.textContent) this.resetCopyFeedback();
     this.node = node;
     this.sync();
     return true;
@@ -165,6 +168,7 @@ class CherryCodeBlockView implements NodeView {
 
   destroy() {
     this.disposed = true;
+    this.copyOwner.abort();
     if (this.copyTimer) clearTimeout(this.copyTimer);
     this.language.removeEventListener('change', this.updateLanguage);
     this.copy.removeEventListener('click', this.copyCode);
@@ -262,13 +266,22 @@ class CherryCodeBlockView implements NodeView {
     void this.copySource();
   };
 
+  private resetCopyFeedback() {
+    this.copyRevision += 1;
+    if (this.copyTimer) clearTimeout(this.copyTimer);
+    this.copyTimer = undefined;
+    this.copy.textContent = '复制';
+  }
+
   private async copySource() {
+    this.resetCopyFeedback();
+    const revision = this.copyRevision;
     try {
-      await copyToClip(this.node.textContent);
-      if (this.disposed) return;
+      const copied = await copyText(this.node.textContent, this.copyOwner.signal);
+      if (!copied || this.disposed || revision !== this.copyRevision) return;
       this.copy.textContent = '已复制';
     } catch {
-      if (this.disposed) return;
+      if (this.disposed || revision !== this.copyRevision) return;
       this.copy.textContent = '复制失败';
     }
     if (this.copyTimer) clearTimeout(this.copyTimer);

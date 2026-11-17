@@ -6,6 +6,7 @@ import { build } from 'esbuild';
 import ts from 'typescript';
 import { format } from 'prettier';
 import { isLookbehindSupported } from '../../cherry-markdown/src/utils/regexp.js';
+import { extractImagePattern } from './extract-image-pattern.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const cherry = resolve(root, '../cherry-markdown/src');
@@ -60,15 +61,7 @@ for (const [key, method] of Object.entries({
   alignment: '$getAlignment',
 })) {
   const body = methodBody(imagePath, method);
-  const source = ts.createSourceFile('method.js', body, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
-  let pattern;
-  const visit = (node) => {
-    if (!pattern && ts.isRegularExpressionLiteral(node)) pattern = node.getText(source);
-    ts.forEachChild(node, visit);
-  };
-  visit(source);
-  if (!pattern) throw new Error(`Missing Cherry image pattern: ${method}`);
-  imagePatterns[key] = pattern;
+  imagePatterns[key] = extractImagePattern(body, method);
 }
 const banner = '// Generated from Tencent Cherry Markdown (Apache-2.0) by sync-cherry-helpers.mjs. Do not edit.\n';
 const outputs = {

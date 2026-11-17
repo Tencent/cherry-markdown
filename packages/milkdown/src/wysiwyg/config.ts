@@ -18,6 +18,8 @@ export interface CherryWysiwygConfig {
   fileUpload?: CherryMilkdownFileUpload;
   renderers?: Record<string, CherryVisualRenderer>;
   onError?: (error: unknown, phase: CherryMilkdownErrorPhase) => void;
+  /** Stops asynchronous work as soon as editor destruction is requested. */
+  isDestroyed?: () => boolean;
 }
 
 const fallbackConfig: CherryWysiwygConfig = {

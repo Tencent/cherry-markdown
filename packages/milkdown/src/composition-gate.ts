@@ -13,15 +13,17 @@ export function createCompositionGate<T = undefined>(surface: HTMLElement, captu
   const end = () => {
     composing = false;
     // Commit after the browser's final input and ProseMirror's DOM observer.
+    // Repeated end events must not leave an older frame alive when a new
+    // composition starts and cancels the latest one.
+    if (frame !== undefined) cancelAnimationFrame(frame);
     frame = requestAnimationFrame(() => {
       frame = undefined;
       const update = pending;
       pending = undefined;
-      try {
-        update?.();
-      } finally {
-        snapshot = undefined;
-      }
+      // An update can synchronously start a new composition. Release the old
+      // snapshot first so the new session captures and retains its own state.
+      snapshot = undefined;
+      update?.();
     });
   };
   surface.addEventListener('compositionstart', start, true);

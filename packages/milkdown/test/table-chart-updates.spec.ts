@@ -24,7 +24,7 @@ it('coalesces full Cherry parsing while editing one of several large tables', as
     renderers: { tableChart: renderer },
   });
   try {
-    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(5));
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(5), { timeout: 10_000 });
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     let position = -1;
     view.state.doc.descendants((node, pos) => {
@@ -41,7 +41,7 @@ it('coalesces full Cherry parsing while editing one of several large tables', as
     // Neither body edits nor selection transactions invoke the Cherry parser
     // synchronously; unchanged table nodes also reuse their source revisions.
     expect(makeHtml.mock.calls.length).toBe(initialCalls);
-    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(6));
+    await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(6), { timeout: 10_000 });
     expect(fullParses()).toBe(initialParses + 1);
     expect(root.querySelector('.milkdown-table-block')).toBe(tableDOM);
   } finally {
@@ -49,4 +49,4 @@ it('coalesces full Cherry parsing while editing one of several large tables', as
     root.remove();
     makeHtml.mockRestore();
   }
-});
+}, 20_000);

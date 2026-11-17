@@ -167,6 +167,9 @@ test('Panel and Tabs text selection never drags or duplicates the containing blo
     await page.mouse.down();
     await page.mouse.move(box!.x + box!.width - 2, box!.y + box!.height / 2, { steps: 8 });
     await page.mouse.up();
+    await page.evaluate(
+      () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+    );
     return page.evaluate(() => window.getSelection()?.toString().trim() ?? '');
   };
 

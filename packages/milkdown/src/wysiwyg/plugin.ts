@@ -6,6 +6,8 @@ import type { Node as ProseMirrorNode } from '@milkdown/kit/prose/model';
 import { $prose, $remark } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
 import { cherryCodeBlock } from './code-block.js';
+import { cherryCompoundSelection } from './compound-selection.js';
+import { cherryPointerCaret } from './pointer-caret.js';
 import { cherryImageView } from './image.js';
 import { cherryImageControls } from './image-controls.js';
 import { cherryLinkEditor } from './link-editor.js';
@@ -391,6 +393,8 @@ export const cherryWysiwyg: MilkdownPlugin[] = [
   cherryImageControls,
   ...cherryStructureSchemas,
   ...cherryStructureViews,
+  cherryCompoundSelection,
+  cherryPointerCaret,
   cherryLinkEditor,
   cherryTextBubble,
   cherryTaskListToggle,

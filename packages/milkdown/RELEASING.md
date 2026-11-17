@@ -70,6 +70,8 @@
 
 先构建 Cherry 和 Milkdown，再运行 `yarn workspace @cherry-markdown/milkdown test:consumer:prepared`。
 
+当前 PR 工作流中的 `milkdown-browser-consumer` 是单元测试和浏览器测试的汇总检查，名称不表示已执行消费者安装或发布包验证。即使该检查通过，发布前仍需单独运行上述消费验证并检查结果。
+
 消费验证在临时工作区执行真实的 Changesets version，打包带有计划版本及依赖范围的两个包，检查 npm 安装、类型、Vite 构建与浏览器图表运行，包括注入 ECharts 注册的地图。最低 Cherry 版本已发布时，还验证 registry 中该版本；若 registry 明确返回 E404，则要求计划 tarball 的版本恰好等于最低版本，并明确报告尚未发布。其他 registry 错误直接失败。整个过程不改动原工作区版本，不向 npm 发布。
 
 PR 合并到 dev 后仍需进入 main 的常规发布流程。首发阶段的消费验证属于发布前检查，不会代替本地 npm publish。
