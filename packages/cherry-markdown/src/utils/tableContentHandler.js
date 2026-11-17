@@ -15,6 +15,20 @@
  */
 import { getTableRule, getCodeBlockRule } from '@/utils/regexp';
 
+const splitTableRow = (row) => {
+  const cells = [];
+  let start = 0;
+  for (let index = 0; index < row.length; index++) {
+    // Match the renderer's escaped-pipe rule while preserving source offsets.
+    if (row[index] === '|' && row[index - 1] !== '\\') {
+      cells.push(row.slice(start, index));
+      start = index + 1;
+    }
+  }
+  cells.push(row.slice(start));
+  return cells;
+};
+
 /**
  * 用于在表格上出现编辑区，并提供拖拽行列的功能
  */
@@ -360,7 +374,7 @@ export default class TableHandler {
   $getTdOffset(tableCode, isTHead, trIndex, tdIndex, isInBlock = false) {
     const codes = tableCode.split(/\n/);
     const targetTr = isTHead ? 0 : trIndex + 2;
-    const tds = codes[targetTr].split(/\|/);
+    const tds = splitTableRow(codes[targetTr]);
     const needPlus1 = /^\s*$/.test(tds[0]);
     const targetTd = needPlus1 ? tdIndex + 1 : tdIndex;
     const current = tds[targetTd];
@@ -373,7 +387,7 @@ export default class TableHandler {
     // 当前单元格为空时，尝试选中单元格的"中间"位置
     const leadingSpaces =
       trimmedContent.length > 0 ? current.match(/^\s*/)[0].length : Math.floor(current.match(/^\s*/)[0].length / 2);
-    const basePreCh = needPlus1 ? pre.join('|').length + 1 : pre.join('|').length;
+    const basePreCh = pre.join('|').length + (targetTd > 0 ? 1 : 0);
     const actualPreCh = basePreCh + leadingSpaces;
     return {
       preLine: targetTr,
@@ -407,13 +421,13 @@ export default class TableHandler {
       originalLine = codes[nextLineIndex];
       quoteMatch = originalLine.match(/^(?:>+\s*)+/);
       cleanLine = originalLine.replace(/^(?:>+\s*)+/, '');
-      tds = cleanLine.split(/\|/);
+      tds = splitTableRow(cleanLine);
     } else {
       // 如果没有下一行，使用当前行的数据
       originalLine = codes[targetTr];
       quoteMatch = originalLine.match(/^(?:>+\s*)+/);
       cleanLine = originalLine.replace(/^(?:>+\s*)+/, '');
-      tds = cleanLine.split(/\|/);
+      tds = splitTableRow(cleanLine);
     }
     const needPlus1 = /^\s*$/.test(tds[0]);
     const targetTd = needPlus1 ? tdIndex + 1 : tdIndex;

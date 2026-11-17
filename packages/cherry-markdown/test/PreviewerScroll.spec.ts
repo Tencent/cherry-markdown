@@ -80,6 +80,35 @@ describe('Previewer line positioning and highlighting', () => {
     expect(getTop).toHaveBeenNthCalledWith(2, 9, 0.25);
     expect(animate).toHaveBeenNthCalledWith(2, 240);
   });
+  it('skips overflowing ancestors without their own scrollbar and lands on the scrolling container', () => {
+    // issue #1568：overflow:visible 的中间层虽然 scrollHeight > clientHeight，
+    // 但滚动实际委托给了祖先；必须跳过它们找到真正带滚动条的元素。
+    const { previewer, previewerDom } = createPreviewer();
+    // 结构：previewerDom > appContent(仅溢出) 挂在 scroller(overflow auto) 内
+    const appContent = document.createElement('div');
+    const scroller = document.createElement('div');
+    scroller.style.overflowY = 'auto';
+    appContent.appendChild(previewerDom);
+    scroller.appendChild(appContent);
+    document.body.appendChild(scroller);
+    defineDimension(previewerDom, 'scrollHeight', 3839);
+    defineDimension(previewerDom, 'clientHeight', 3839);
+    defineDimension(appContent, 'scrollHeight', 4189);
+    defineDimension(appContent, 'clientHeight', 693);
+    defineDimension(scroller, 'scrollHeight', 4189);
+    defineDimension(scroller, 'clientHeight', 693);
+    expect(previewer.getDomCanScroll(previewerDom)).toBe(scroller);
+    document.body.removeChild(scroller);
+  });
+
+  it('still returns the container itself when it is the scroll host', () => {
+    const { previewer, previewerDom } = createPreviewer();
+    previewerDom.style.overflowY = 'auto';
+    defineDimension(previewerDom, 'scrollHeight', 4097);
+    defineDimension(previewerDom, 'clientHeight', 693);
+
+    expect(previewer.getDomCanScroll(previewerDom)).toBe(previewerDom);
+  });
 });
 
 describe('Previewer scroll synchronization', () => {
@@ -169,6 +198,8 @@ describe('Previewer scroll synchronization', () => {
 
   it('uses the preview element or its nearest scrollable ancestor', () => {
     const { previewer, previewerDom, wrapperDom } = createPreviewer();
+    previewerDom.style.overflowY = 'auto';
+    wrapperDom.style.overflowY = 'auto';
     defineDimension(previewerDom, 'scrollHeight', window.innerHeight);
     defineDimension(previewerDom, 'clientHeight', window.innerHeight);
     defineDimension(wrapperDom, 'scrollHeight', 400);
@@ -198,6 +229,7 @@ describe('Previewer scroll synchronization', () => {
 
   it('scrolls to an absolute top with the requested browser behavior', () => {
     const { previewer, previewerDom } = createPreviewer();
+    previewerDom.style.overflowY = 'auto';
     const scrollTo = vi.fn();
     Reflect.set(previewerDom, 'scrollTo', scrollTo);
     defineDimension(previewerDom, 'scrollHeight', 300);
@@ -227,6 +259,7 @@ describe('Previewer anchor scrolling', () => {
       return 1;
     });
     const { previewer, previewerDom } = createPreviewer();
+    previewerDom.style.overflowY = 'auto';
     const scrollTo = vi.fn();
     Reflect.set(previewerDom, 'scrollTo', scrollTo);
     defineDimension(previewerDom, 'scrollHeight', 500);
@@ -261,6 +294,7 @@ describe('Previewer anchor scrolling', () => {
       return 1;
     });
     const { previewer, previewerDom } = createPreviewer();
+    previewerDom.style.overflowY = 'auto';
     const scrollTo = vi.fn();
     Reflect.set(previewerDom, 'scrollTo', scrollTo);
     defineDimension(previewerDom, 'scrollHeight', 500);
@@ -288,6 +322,7 @@ describe('Previewer anchor scrolling', () => {
       return 1;
     });
     const { previewer, previewerDom } = createPreviewer();
+    previewerDom.style.overflowY = 'auto';
     const scrollTo = vi.fn();
     Reflect.set(previewerDom, 'scrollTo', scrollTo);
     defineDimension(previewerDom, 'scrollHeight', 500);
