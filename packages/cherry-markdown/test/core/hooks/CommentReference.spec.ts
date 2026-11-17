@@ -52,6 +52,20 @@ describe('core/hooks/CommentReference', () => {
     expect(hook.getCommentReferenceCache('docs')).toBeNull();
   });
 
+  // issue #1955: 折叠引用链接 [text][] 应该复用 [text] 的定义，不能把 [] 残留在输出里
+  // https://spec.commonmark.org/0.31.2/#collapsed-reference-link
+  it('expands collapsed references like [text][] and drops the empty brackets', () => {
+    const hook = createCommentReference();
+    const markdown = 'See [Docs][].\n\n[Docs]: http://example.com/';
+    const transformed = hook.beforeMakeHtml(markdown);
+    const restored = hook.afterMakeHtml(transformed);
+
+    expect(restored).toContain('[Docs](http://example.com/)');
+    expect(restored).not.toContain('Docs][]');
+    expect(restored).not.toContain('Docs]()');
+    expect(hook.getCommentReferenceCache('docs')).toBeNull();
+  });
+
   it('leaves input without definitions unchanged and makeHtml is transparent', () => {
     const hook = createCommentReference();
     const markdown = 'An unresolved [reference][missing].';
