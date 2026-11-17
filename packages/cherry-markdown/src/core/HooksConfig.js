@@ -98,7 +98,6 @@ const hooksConfig = [
   Emoji,
   Image,
   Link,
-  AutoLink,
   Emphasis,
   BackgroundColor,
   Color,
@@ -109,6 +108,7 @@ const hooksConfig = [
   Strikethrough,
   Underline,
   HighLight,
+  AutoLink,
   Suggester,
   Space,
 ];

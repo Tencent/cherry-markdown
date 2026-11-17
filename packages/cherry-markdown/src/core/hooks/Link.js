@@ -74,7 +74,7 @@ export default class Link extends SyntaxBase {
   }
 
   /**
-   *
+   * @param {Function} sentenceMakeFunc 行内语法处理函数
    * @param {string} match 匹配的完整字符串
    * @param {string} leadingChar 正则分组一：前置字符
    * @param {string} text 正则分组二：链接文字
@@ -83,7 +83,7 @@ export default class Link extends SyntaxBase {
    * @param {string|undefined} target 正则分组五：新窗口打开
    * @returns
    */
-  toHtml(match, leadingChar, text, link, title, target) {
+  toHtml(sentenceMakeFunc, match, leadingChar, text, link, title, target) {
     const { isValid, coreText, extraLeadingChar } = this.checkBrackets(text);
     if (!isValid) return match;
     let attrs = title && title.trim() !== '' ? ` title="${e(title.replace(/["']/g, ''))}"` : '';
@@ -95,7 +95,7 @@ export default class Link extends SyntaxBase {
     // 链接内的 ~D / \[ / \] / \( / \) 已由 LinkFormatter 在段落阶段做过预转义并会在 afterMakeHtml 还原，
     // 因此此处 link 与 coreText 拿到的都是原始待渲染内容，直接使用即可。
     let processedURL = link.trim();
-    const processedText = coreText;
+    const processedText = sentenceMakeFunc(coreText).html;
     // text可能是html标签，依赖htmlBlock进行处理
     if (isValidScheme(processedURL)) {
       processedURL = this.$engine.urlProcessor(processedURL, 'link');
@@ -114,11 +114,11 @@ export default class Link extends SyntaxBase {
     return match;
   }
 
-  makeHtml(str) {
+  makeHtml(str, sentenceMakeFunc = (md) => ({ sign: '', html: md })) {
     if (isLookbehindSupported()) {
-      return str.replace(this.RULE.reg, this.toHtml.bind(this));
+      return str.replace(this.RULE.reg, this.toHtml.bind(this, sentenceMakeFunc));
     }
-    return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this), true, 1);
+    return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this, sentenceMakeFunc), true, 1);
   }
 
   rule() {

@@ -86,9 +86,14 @@ export default class CommentReference extends ParagraphBase {
         return lineFeeds.join('');
       });
       // 替换实际引用
-      const refRegex = /(\[[^\]]*?\])?(?:\[([^\]\n]+?)\])/g; // 匹配[xxx][ref]形式的内容，不严格大小写
+      const refRegex = /(\[[^\]]*?\])?(?:\[([^\]\n]*?)\])/g; // 匹配[xxx][ref]形式的内容，不严格大小写
       $str = $str.replace(refRegex, (match, leadingContent, key) => {
-        const cache = this.getCommentReferenceCache(key);
+        let $key = key;
+        // 如果没有ref，使用leadingContent作为key，从而支持 [ref][] 形式
+        if (!key && leadingContent) {
+          $key = leadingContent.replace(/\[|\]/g, '');
+        }
+        const cache = this.getCommentReferenceCache($key);
         if (cache) {
           if (leadingContent) {
             return `${leadingContent}(${cache})`; // 替换为[xx](cache)形式，交给Link或多媒体标签处理
