@@ -1,0 +1,13 @@
+@use 'sass:meta';
+
+// Keep both CSS entry points in the same cascade order.
+@mixin built-in {
+  @include meta.load-css('./default');
+  @include meta.load-css('./dark');
+  @include meta.load-css('./abyss');
+  @include meta.load-css('./green');
+  @include meta.load-css('./red');
+  @include meta.load-css('./gray');
+  @include meta.load-css('./violet');
+  @include meta.load-css('./blue');
+}

@@ -17,6 +17,7 @@ import mergeWith from '@/utils/toolkit/mergeWith';
 import Logger from '@/Logger';
 import { getExternal } from '@/utils/external';
 import { isBrowser } from '@/utils/env';
+import { readThemeColor } from '@/theme-compat/colors';
 
 // 主题与常量集中管理
 const THEME = {
@@ -388,9 +389,10 @@ export default class EChartsTableEngine {
       this.themeRuntime = cached.runtime;
       return;
     }
-    const primary = this.$readCssVar(el, '--primary-color', THEME.color.primary);
-    const bg = this.$readCssVar(el, '--base-previewer-bg', this.$readCssVar(el, '--base-editor-bg', 'transparent'));
-    const text = this.$readCssVar(el, '--base-font-color', THEME.color.text);
+    const read = (name) => this.$readCssVar(el, name, undefined);
+    const primary = readThemeColor('--color-brand-primary', read, THEME.color.primary);
+    const bg = readThemeColor('--color-bg-surface', read, readThemeColor('--color-bg-canvas', read, 'transparent'));
+    const text = readThemeColor('--color-text-primary', read, THEME.color.text);
     const border = this.$readCssVar(el, '--md-table-border', THEME.color.border);
     const split = this.$readCssVar(el, '--md-hr-border', THEME.color.border);
 

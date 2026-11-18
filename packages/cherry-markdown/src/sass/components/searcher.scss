@@ -1,3 +1,5 @@
+@use '../../theme-compat/colors' as compat;
+
 /**
  * Searcher 插件样式
  * 参考 TEditor te-searcher 单行搜索框设计
@@ -22,8 +24,8 @@
   // 选中（大小写 / 全字匹配开启）
   &.is-active {
     background-color: rgba(51, 112, 255, 0.15);
-    border-color: var(--primary-color);
-    color: var(--primary-color);
+    border-color: #{compat.color('color-brand-primary')};
+    color: #{compat.color('color-brand-primary')};
   }
 
   // 不可操作（无匹配、未输入关键词、替换内容为空等）
@@ -120,7 +122,7 @@
     transition: border-color 0.15s ease;
 
     &:focus-within {
-      border-color: var(--primary-color);
+      border-color: #{compat.color('color-brand-primary')};
     }
   }
 
@@ -133,7 +135,7 @@
     transition: border-color 0.15s ease;
 
     &:focus-within {
-      border-color: var(--primary-color);
+      border-color: #{compat.color('color-brand-primary')};
     }
   }
 

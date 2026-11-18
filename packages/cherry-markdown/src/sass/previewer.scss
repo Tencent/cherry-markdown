@@ -1,4 +1,5 @@
 @use './components/bubble';
+@use '../theme-compat/colors' as compat;
 
 .cherry {
   .doing-resize-img {
@@ -19,8 +20,8 @@
     border-radius: 5px;
     z-index: 11;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    background: var(--base-editor-bg);
-    border: 1px solid var(--base-border-color);
+    background: #{compat.color('color-bg-canvas')};
+    border: 1px solid #{compat.color('color-border-default')};
   }
   .footnote.hidden {
     display: none;
@@ -28,7 +29,7 @@
   .cherry-previewer-img-size-handler {
     position:absolute;
     box-shadow: 0 1px 4px 0 rgba(20,81,154, 0.5);
-    border:1px solid var(--primary-color);
+    border:1px solid #{compat.color('color-brand-primary')};
     box-sizing: content-box;
     pointer-events:none;
     .cherry-previewer-img-size-handler__points {
@@ -38,7 +39,7 @@
       margin-top: -7px;
       margin-left: -7px;
       border-radius: 9px;
-      background: var(--primary-color);
+      background: #{compat.color('color-brand-primary')};
       border: 2px solid var(--oc-white);
       box-sizing: content-box;
       box-shadow: 0px 2px 2px 0px rgba(20,81,154,0.5);
@@ -125,7 +126,7 @@
       width: 100%;
       margin: var(--border-width-4) 0;
       height: var(--border-width-1);
-      border-bottom: var(--border-width-1) var(--base-border-color) dashed;
+      border-bottom: var(--border-width-1) #{compat.color('color-border-default')} dashed;
     }
 
     .img-tool-icon {
@@ -144,7 +145,7 @@
         border: 0;
         box-sizing: border-box;
         resize: none;
-        outline: 1px solid var(--primary-color);
+        outline: 1px solid #{compat.color('color-brand-primary')};
         word-break: break-all;
       }
     }
@@ -183,7 +184,7 @@
       cursor: pointer;
       transition: all 0.3s;
       &:hover {
-        background-color: var(--secondary-color);
+        background-color: #{compat.color('color-bg-active')};
       }
     }
 
@@ -200,7 +201,7 @@
       font-size: var(--font-size-xs);
       border: 1px solid var(--md-table-operator-color);
       border-radius: 999px;
-      background-color: var(--base-previewer-bg);
+      background-color: #{compat.color('color-bg-surface')};
       cursor: pointer;
       transition: all 0.3s;
       z-index: 1001;
@@ -294,7 +295,7 @@
       width: var(--bubble-btn-height);
       height: var(--bubble-btn-height);
       cursor: pointer;
-      color: var(--base-font-color);
+      color: #{compat.color('color-text-primary')};
       font-size: var(--font-size-sm);
       transition: background-color 0.2s ease, color 0.2s ease;
       border-radius: calc(var(--bubble-radius) - 2px);
@@ -341,7 +342,7 @@
       background-color: var(--md-paragraph-highlight-line-bg);
     }
     100% {
-      background-color: var(--base-previewer-bg);
+      background-color: #{compat.color('color-bg-surface')};
     }
   }
   .cherry-highlight-line {

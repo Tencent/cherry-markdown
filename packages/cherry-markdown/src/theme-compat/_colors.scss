@@ -1,0 +1,38 @@
+@use 'sass:map';
+
+$aliases: (
+  'color-brand-primary': 'primary-color',
+  'color-bg-active': 'secondary-color',
+  'color-text-primary': 'base-font-color',
+  'color-bg-canvas': 'base-editor-bg',
+  'color-bg-surface': 'base-previewer-bg',
+  'color-border-default': 'base-border-color',
+  'color-text-secondary': 'base-sub-font-color',
+  'color-text-link': 'md-link-color',
+  'color-brand-primary-hover': 'md-link-hover-color',
+);
+
+@mixin aliases($theme: false) {
+  @each $role, $old in $aliases {
+    // Secondary text inherits the editor default; themes do not set it.
+    @if not $theme or $role != 'color-text-secondary' {
+      --#{$old}: var(--#{$role});
+    }
+  }
+}
+
+// Resolve the old override on the consuming element, including descendants.
+@function color($role, $fallback: null) {
+  $old: map.get($aliases, $role);
+  @if $old == null {
+    @error 'Unknown Cherry theme role #{$role}.';
+  }
+  @if $fallback != null {
+    @return var(--#{$old}, var(--#{$role}, #{$fallback}));
+  }
+  @return var(--#{$old}, var(--#{$role}));
+}
+
+@function default-link-hover() {
+  @return var(--color-link-hover, currentColor);
+}

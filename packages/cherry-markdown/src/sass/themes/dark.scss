@@ -1,56 +1,58 @@
+@use '../../theme-compat/colors' as compat;
+
 /*
  * 暗黑主题
  */
 
 .cherry.theme__dark {
+  @include compat.aliases($theme: true);
   /* ========== 基础色彩变量覆盖 ========== */
-  --primary-color: var(--oc-orange-5);
-  --secondary-color: #513838;
+  --color-brand-primary: var(--oc-orange-5);
+  --color-bg-active: #513838;
 
-  --base-font-color: var(--oc-gray-4);
-  --base-editor-bg: var(--oc-gray-9);
-  --base-previewer-bg: var(--oc-gray-8);
-  --base-border-color: var(--oc-gray-5);
+  --color-text-primary: var(--oc-gray-4);
+  --color-bg-canvas: var(--oc-gray-9);
+  --color-bg-surface: var(--oc-gray-8);
+  --color-border-default: var(--oc-gray-5);
 
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: var(--oc-gray-7);
   --toolbar-btn-color: var(--oc-gray-4);
   --toolbar-btn-hover-bg: var(--oc-gray-6);
   --toolbar-btn-hover-color: var(--oc-white);
-  --toolbar-btn-active-bg:var(--oc-gray-8);
+  --toolbar-btn-active-bg: var(--oc-gray-8);
   --toolbar-split-color: var(--oc-gray-5);
 
   /* ========== 编辑器相关变量 ========== */
-  --editor-header-color: var(--primary-color);
+  --editor-header-color: #{compat.color('color-brand-primary')};
   --editor-string-color: var(--oc-yellow-3);
   --editor-comment-color: var(--oc-yellow-3);
   --editor-quote-color: var(--oc-gray-4);
   --editor-link-color: var(--oc-yellow-3);
   --editor-url-color: rgb(81, 56, 56);
   --editor-v2-color: var(--oc-gray-4);
-  --editor-v3-color: var(--primary-color);
+  --editor-v3-color: #{compat.color('color-brand-primary')};
   --editor-keyword-color: var(--oc-yellow-3);
   --editor-selection-bg: rgba(134, 142, 150, 0.8);
   --editor-active-line-bg: rgba(134, 142, 150, 0.4);
 
   --dropdown-item-hover-bg: var(--oc-gray-9);
   --dropdown-item-hover-color: var(--oc-orange-5);
-  --dropdown-item-active-bg: var(--secondary-color);
-  --dropdown-item-active-color: var(--primary-color);
+  --dropdown-item-active-bg: #{compat.color('color-bg-active')};
+  --dropdown-item-active-color: #{compat.color('color-brand-primary')};
 
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--oc-orange-5);
   --md-paragraph-color: var(--oc-gray-4);
-  --md-link-color: var(--oc-yellow-3);
-  --md-link-hover-color: var(--oc-orange-5);
+  --color-text-link: var(--oc-yellow-3);
+  --color-brand-primary-hover: var(--oc-orange-5);
   --md-inline-code-color: var(--oc-yellow-3);
   --md-inline-code-bg: rgb(81, 56, 56);
   --md-blockquote-bg: rgba(102, 128, 153, 0.05);
   --md-hr-border: var(--oc-gray-5);
-  --md-table-border: var(--oc-gray-5);
   /* ========== table 相关变量 ========== */
   --md-table-border: var(--oc-gray-5);
-  --md-table-drag-border-bg: var(--primary-color);
+  --md-table-drag-border-bg: #{compat.color('color-brand-primary')};
   --md-table-sort-active-bg: rgba(141, 104, 51, 0.493);
 
   --md-toc-bg: var(--oc-gray-9);
@@ -96,6 +98,9 @@
   --timeline-milestone-title-color: var(--oc-yellow-4);
   --timeline-error-color: var(--oc-red-5);
   --timeline-error-title-color: var(--oc-red-4);
+}
+
+.cherry.theme__dark {
 
   /* 目录区域样式 */
   .cherry-flex-toc {
