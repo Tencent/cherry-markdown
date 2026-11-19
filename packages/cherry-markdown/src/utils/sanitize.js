@@ -388,6 +388,10 @@ export const inlineNames = [
 ].join('|');
 export const inlineBlock = 'br|img|hr';
 export const whiteList = new RegExp(`^(${blockNames}|${inlineNames}|${inlineBlock})( |$|/)`, 'i');
+/**
+ * 用于判断一段 html 片段中是否包含任意块级标签。
+ */
+export const CONTAIN_BLOCK_TEST_REG = new RegExp(`<(${blockNames})[^>]*>`, 'i');
 
 export function escapeHTMLSpecialChar(content, enableQuote) {
   if (typeof content !== 'string') {
