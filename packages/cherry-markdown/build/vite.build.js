@@ -72,6 +72,14 @@ const builds = [
     external: engineExternal,
   },
   {
+    id: 'engine-core-node-esm',
+    entry: resolve(src, 'index.engine.core.js'),
+    file: 'cherry-markdown.engine.core.node.js',
+    format: 'es',
+    external: engineExternal,
+    sanitizer: resolve(src, 'Sanitizer.node.js'),
+  },
+  {
     id: 'engine-core-umd',
     entry: resolve(src, 'index.engine.core.js'),
     file: 'cherry-markdown.engine.core.js',
@@ -116,6 +124,7 @@ for (const current of selectBuilds(builds, buildArguments(import.meta.url))) {
         },
         resolve: {
           alias: {
+            ...(current.sanitizer ? { '@/Sanitizer': current.sanitizer } : {}),
             '@': src,
             '@cherry': src,
           },

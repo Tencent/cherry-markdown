@@ -49,6 +49,7 @@ const bundleMatrix = [
   ['index.engine.js', 'cherry-markdown.engine.esm.js', 'es'],
   ['index.engine.js', 'cherry-markdown.engine.js', 'umd', 'CherryEngine'],
   ['index.engine.core.js', 'cherry-markdown.engine.core.esm.js', 'es'],
+  ['index.engine.core.js', 'cherry-markdown.engine.core.node.js', 'es'],
   ['index.engine.core.js', 'cherry-markdown.engine.core.js', 'umd', 'CherryEngine'],
   ['index.stream.js', 'cherry-markdown.stream.esm.js', 'es'],
   ['index.stream.umd.js', 'cherry-markdown.stream.js', 'umd', 'Cherry'],
@@ -116,6 +117,7 @@ describe('Cherry Markdown published artifact configuration', () => {
       'cherry-markdown.engine.esm.js': ['jsdom', 'mermaid'],
       'cherry-markdown.engine.js': ['jsdom', 'mermaid'],
       'cherry-markdown.engine.core.esm.js': ['jsdom', 'mermaid'],
+      'cherry-markdown.engine.core.node.js': ['jsdom', 'mermaid'],
       'cherry-markdown.engine.core.js': ['jsdom', 'mermaid'],
       'cherry-markdown.stream.esm.js': ['jsdom', 'mermaid', 'codemirror', /^codemirror\//],
       'cherry-markdown.stream.js': ['jsdom', 'mermaid', 'codemirror', /^codemirror\//],
@@ -136,7 +138,11 @@ describe('Cherry Markdown published artifact configuration', () => {
         'process.env.BUILD_VERSION': JSON.stringify(packageJson.version),
         'process.env.NODE_ENV': JSON.stringify('production'),
       });
-      expect(config.resolve.alias).toEqual({ '@': src, '@cherry': src });
+      const aliases = { '@': src, '@cherry': src };
+      if (filename(config) === 'cherry-markdown.engine.core.node.js') {
+        aliases['@/Sanitizer'] = resolve(src, 'Sanitizer.node.js');
+      }
+      expect(config.resolve.alias).toEqual(aliases);
     }
   });
 

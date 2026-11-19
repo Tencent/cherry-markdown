@@ -46,6 +46,7 @@ it.each(['build:core', 'build:engine', 'build:stream'])(
       'cherry-markdown.core.js',
       'cherry-markdown.engine.core.esm.js',
       'cherry-markdown.engine.core.js',
+      'cherry-markdown.engine.core.node.js',
       'cherry-markdown.engine.esm.js',
       'cherry-markdown.engine.js',
       'cherry-markdown.esm.js',
