@@ -27,7 +27,9 @@ const bundleNames = [
   'cherry-markdown.stream.js',
 ];
 
-const declarationNames = bundleNames.map((file) => file.replace(/\.js$/, '.d.ts'));
+const nodeBundleName = 'cherry-markdown.engine.core.node.js';
+const publishedBundleNames = [...bundleNames, nodeBundleName];
+const declarationNames = publishedBundleNames.map((file) => file.replace(/\.js$/, '.d.ts'));
 const umdFiles = [
   ...bundleNames.filter((file) => !file.endsWith('.esm.js')),
   ...glob.sync('src/addons/**/*-plugin.js', { cwd: projectRoot }).map((file) => file.replace(/^src\//, '')),
@@ -57,11 +59,89 @@ describe('built Cherry Markdown artifact contract', () => {
     35000,
   );
 
+  it('preserves the ELK notice and matching source references in both full browser bundles', () => {
+    const mermaidRequire = createRequire(require.resolve('mermaid'));
+    const { version } = mermaidRequire('elkjs/package.json');
+    const fullBundles = ['cherry-markdown.js', 'cherry-markdown.esm.js'];
+
+    for (const file of fullBundles) {
+      const source = readDistFile(file);
+      expect(source, file).toContain(`elkjs ${version}`);
+      expect(source, file).toContain('Copyright (c) 2017 Kiel University and others.');
+      expect(source, file).toContain('Copyright (c) 2021 Kiel University and others.');
+      expect(source, file).toContain('SPDX-License-Identifier: EPL-2.0 OR GPL-3.0-or-later');
+      expect(source, file).toContain('https://www.eclipse.org/legal/epl-2.0/');
+      expect(source, file).toContain(`https://github.com/kieler/elkjs/releases/tag/${version}`);
+      expect(source, file).toContain('https://github.com/eclipse-elk/elk/releases/tag/v0.12.1');
+    }
+    for (const file of publishedBundleNames.filter((name) => !fullBundles.includes(name))) {
+      expect(readDistFile(file), file).not.toContain('https://github.com/kieler/elkjs/releases/tag/');
+    }
+  });
+
+  it('publishes the notices referenced by the complete bundle and addon build', () => {
+    const files = glob.sync('**/*.js', { cwd: distRoot });
+    const referenced = new Set();
+    const noticeByBundle = new Map();
+    for (const file of files) {
+      const match = readDistFile(file).match(/Third-party licenses: \.\/(THIRD_PARTY_NOTICES\.[a-f\d]{16}\.txt)/);
+      if (!match) continue;
+      const notice = resolve(distRoot, dirname(file), match[1]);
+      referenced.add(notice);
+      noticeByBundle.set(file, readFileSync(notice, 'utf8'));
+    }
+
+    expect([...referenced].sort()).toEqual(
+      glob.sync('**/THIRD_PARTY_NOTICES.*.txt', { cwd: distRoot, absolute: true }).sort(),
+    );
+    expect(glob.sync('**/cherry-bundled-dependency-licenses.json', { cwd: distRoot })).toEqual([]);
+
+    for (const file of ['cherry-markdown.js', 'cherry-markdown.esm.js']) {
+      expect(noticeByBundle.get(file), file).toContain('js-yaml@4.3.2 (MIT)');
+      expect(noticeByBundle.get(file), file).toContain('https://github.com/nodeca/js-yaml/tree/4.3.2');
+      expect(noticeByBundle.get(file), file).toContain('elkjs@0.12.1');
+      expect(noticeByBundle.get(file), file).toContain('Copyright (c) 2021 Kiel University and others.');
+      expect(noticeByBundle.get(file), file).toContain('dompurify@3.4.18');
+      expect(noticeByBundle.get(file), file).toContain('katex@0.18.11');
+    }
+
+    const nodeNotices = noticeByBundle.get(nodeBundleName);
+    expect(nodeNotices).toContain('dompurify@3.4.18');
+    expect(nodeNotices).not.toMatch(/^(?:jsdom|mermaid|elkjs)@/m);
+    expect(noticeByBundle.get('addons/cherry-code-block-plantuml-plugin.esm.js')).toMatch(/^pako@/m);
+  });
+
   it('publishes the complete UMD and ESM bundle matrix with declarations', () => {
-    expect(glob.sync('*.js', { cwd: distRoot }).sort()).toEqual([...bundleNames].sort());
-    [...bundleNames, ...declarationNames].forEach((file) => {
+    expect(glob.sync('*.js', { cwd: distRoot }).sort()).toEqual([...publishedBundleNames].sort());
+    [...publishedBundleNames, ...declarationNames].forEach((file) => {
       expect(existsSync(resolve(distRoot, file)), file).toBe(true);
     });
+  });
+
+  it('renders and sanitizes Markdown in a fresh Node process', () => {
+    execFileSync(
+      process.execPath,
+      [
+        '--input-type=module',
+        '--eval',
+        `
+          import assert from 'node:assert/strict';
+
+          assert.equal(typeof globalThis.window, 'undefined');
+          assert.equal(typeof globalThis.document, 'undefined');
+          const { default: CherryEngine } = await import('./dist/${nodeBundleName}');
+          const engine = new CherryEngine();
+          const html = engine.makeHtml('# Headless\\n\\n<p data-lines="1"><em>Cherry</em></p>');
+
+          assert.match(html, /<h1\\b[^>]*>.*Headless.*<\\/h1>/);
+          assert.match(html, /<em>Cherry<\\/em>/);
+          assert.doesNotMatch(html, /data-lines=/);
+          assert.equal(typeof globalThis.window, 'undefined');
+          assert.equal(typeof globalThis.document, 'undefined');
+        `,
+      ],
+      { cwd: projectRoot, stdio: 'pipe', timeout: 10000 },
+    );
   });
 
   it('publishes every addon in both formats with its declaration', () => {

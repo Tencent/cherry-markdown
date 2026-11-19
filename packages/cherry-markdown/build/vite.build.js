@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { legacyUmdPlugin } from './legacy-umd.plugin.js';
 import { getBuildVersion } from './revision.js';
 import { prismLanguagePlugin } from './prism.plugin.js';
+import { bundledLicenses, thirdPartyNoticesPlugin } from './third-party-notices.plugin.js';
 import { createLibraryBuild } from '../../../build/library.mjs';
 import { buildArguments, selectBuilds } from './build-targets.js';
 
@@ -71,6 +72,14 @@ const builds = [
     external: engineExternal,
   },
   {
+    id: 'engine-core-node-esm',
+    entry: resolve(src, 'index.engine.core.js'),
+    file: 'cherry-markdown.engine.core.node.js',
+    format: 'es',
+    external: engineExternal,
+    sanitizer: resolve(src, 'Sanitizer.node.js'),
+  },
+  {
     id: 'engine-core-umd',
     entry: resolve(src, 'index.engine.core.js'),
     file: 'cherry-markdown.engine.core.js',
@@ -106,6 +115,7 @@ for (const current of selectBuilds(builds, buildArguments(import.meta.url))) {
           ...(current.format === 'umd'
             ? [legacyUmdPlugin({ compact: current.id !== 'full-umd', sourceMaps: Boolean(current.sourcemap) })]
             : []),
+          thirdPartyNoticesPlugin(),
         ],
         define: {
           BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
@@ -114,11 +124,13 @@ for (const current of selectBuilds(builds, buildArguments(import.meta.url))) {
         },
         resolve: {
           alias: {
+            ...(current.sanitizer ? { '@/Sanitizer': current.sanitizer } : {}),
             '@': src,
             '@cherry': src,
           },
         },
         build: {
+          license: bundledLicenses,
           // The historical full UMD bundle is Babel-transformed but not minified.
           // Other bundles retain their Terser contract.
           minify: current.id === 'full-umd' ? false : 'terser',
