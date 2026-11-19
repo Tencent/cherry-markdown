@@ -104,14 +104,6 @@ UMD 产物会暴露全局变量 `Cherry`。需要使用原生 ESM 时：
 
 Cherry 提供多种构建产物（完整包 / 核心包 / 流式输出包 / 引擎包），以适配浏览器、Node.js、AI Chat 流式输出等不同场景。使用示例、构建包差异、mermaid 集成方式及异步动态加载等详细内容，请参考 **[构建产物介绍](https://github.com/Tencent/cherry-markdown/wiki/%E6%9E%84%E5%BB%BA%E4%BA%A7%E7%89%A9%E4%BB%8B%E7%BB%8D)**。
 
-在 Node.js 中渲染 Markdown 时，使用引擎的 Node ESM 入口。
-
-```js
-import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core.node.js';
-
-const html = new CherryEngine().makeHtml('# Hello');
-```
-
 ## 贡献指南
 
 欢迎加入我们，一起打造强大的 Markdown 编辑器。在实现新功能或提交特性前，请先阅读：

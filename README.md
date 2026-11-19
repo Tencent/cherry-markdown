@@ -104,14 +104,6 @@ The UMD artifact exposes the global `Cherry` variable. For native ESM:
 
 Cherry provides multiple build artifacts (Full / Core / Stream / Engine) to fit different scenarios such as browser, Node.js, and AI Chat streaming. For usage examples, bundle differences, mermaid integration and dynamic import, please refer to **[Build Artifacts Guide](https://github.com/Tencent/cherry-markdown/wiki/%E6%9E%84%E5%BB%BA%E4%BA%A7%E7%89%A9%E4%BB%8B%E7%BB%8D)**.
 
-To render Markdown in Node.js, import the Node ESM build of the engine.
-
-```js
-import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core.node.js';
-
-const html = new CherryEngine().makeHtml('# Hello');
-```
-
 ## Contribution Guidelines
 
 Welcome to join us in building a powerful Markdown editor. Before implementing new features or submitting a pull request, please read:
