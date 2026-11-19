@@ -79,36 +79,23 @@ describe('built Cherry Markdown artifact contract', () => {
     }
   });
 
-  it('publishes the notices referenced by the complete bundle and addon build', () => {
-    const files = glob.sync('**/*.js', { cwd: distRoot });
-    const referenced = new Set();
-    const noticeByBundle = new Map();
-    for (const file of files) {
-      const match = readDistFile(file).match(/Third-party licenses: \.\/(THIRD_PARTY_NOTICES\.[a-f\d]{16}\.txt)/);
-      if (!match) continue;
-      const notice = resolve(distRoot, dirname(file), match[1]);
-      referenced.add(notice);
-      noticeByBundle.set(file, readFileSync(notice, 'utf8'));
-    }
-
-    expect([...referenced].sort()).toEqual(
-      glob.sync('**/THIRD_PARTY_NOTICES.*.txt', { cwd: distRoot, absolute: true }).sort(),
-    );
-    expect(glob.sync('**/cherry-bundled-dependency-licenses.json', { cwd: distRoot })).toEqual([]);
+  it('keeps bundled dependency source and license links in JS without emitting notice assets', () => {
+    const assets = glob.sync('**/*', { cwd: distRoot, nodir: true });
+    expect(assets.filter((file) => /THIRD_PARTY_NOTICES|cherry-bundled-dependency-licenses/.test(file))).toEqual([]);
 
     for (const file of ['cherry-markdown.js', 'cherry-markdown.esm.js']) {
-      expect(noticeByBundle.get(file), file).toContain('js-yaml@4.3.2 (MIT)');
-      expect(noticeByBundle.get(file), file).toContain('https://github.com/nodeca/js-yaml/tree/4.3.2');
-      expect(noticeByBundle.get(file), file).toContain('elkjs@0.12.1');
-      expect(noticeByBundle.get(file), file).toContain('Copyright (c) 2021 Kiel University and others.');
-      expect(noticeByBundle.get(file), file).toContain('dompurify@3.4.18');
-      expect(noticeByBundle.get(file), file).toContain('katex@0.18.11');
+      const code = readDistFile(file);
+      expect(code, file).toContain(
+        'js-yaml@4.3.2 (MIT) | Source: https://github.com/nodeca/js-yaml/tree/4.3.2 | License: https://spdx.org/licenses/MIT.html',
+      );
+      expect(code, file).toContain('dompurify@3.4.18');
+      expect(code, file).toContain('katex@0.18.11');
     }
 
-    const nodeNotices = noticeByBundle.get(nodeBundleName);
-    expect(nodeNotices).toContain('dompurify@3.4.18');
-    expect(nodeNotices).not.toMatch(/^(?:jsdom|mermaid|elkjs)@/m);
-    expect(noticeByBundle.get('addons/cherry-code-block-plantuml-plugin.esm.js')).toMatch(/^pako@/m);
+    const nodeNotice = readDistFile(nodeBundleName).split('Bundled third-party dependencies')[1];
+    expect(nodeNotice).toContain('dompurify@3.4.18');
+    expect(nodeNotice).not.toMatch(/^ \* (?:jsdom|mermaid|elkjs)@/m);
+    expect(readDistFile('addons/cherry-code-block-plantuml-plugin.esm.js')).toContain('pako@');
   });
 
   it('publishes the complete UMD and ESM bundle matrix with declarations', () => {
