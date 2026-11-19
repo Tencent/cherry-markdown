@@ -292,7 +292,7 @@ describe('Cherry chart mounting boundary', () => {
     expect(library.registerMap).toHaveBeenCalledWith('china', data);
     expect(globalLibrary.getMap).not.toHaveBeenCalled();
     expect(globalLibrary.registerMap).not.toHaveBeenCalled();
-    expect(window.echarts).toBe(globalLibrary);
+    expect(Reflect.get(window, 'echarts')).toBe(globalLibrary);
     window.dispatchEvent(new Event('cherry:export:done'));
     expect(fetchMap).toHaveBeenCalledTimes(1);
   });
