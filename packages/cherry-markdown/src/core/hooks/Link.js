@@ -84,6 +84,8 @@ export default class Link extends SyntaxBase {
    * @returns
    */
   toHtml(sentenceMakeFunc, match, leadingChar, text, link, title, target) {
+    // 不支持 lookbehind 时，跨行的图片 alt（`![a\nb](src)`）由这里跳过，与 getLinkRule 中的 (?<!!\[) 一致
+    if (leadingChar === '!' && text.includes('\n')) return match;
     const { isValid, coreText, extraLeadingChar } = this.checkBrackets(text);
     if (!isValid) return match;
     let attrs = title && title.trim() !== '' ? ` title="${e(title.replace(/["']/g, ''))}"` : '';
