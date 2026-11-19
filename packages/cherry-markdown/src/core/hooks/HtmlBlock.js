@@ -166,6 +166,82 @@ export default class HtmlBlock extends ParagraphBase {
     return str;
   }
 
+  /**
+   * 按顶层块级边界拆分 HTML 字符串。
+   * 遍历标签的同时维护嵌套深度，仅在 depth === 0 时进行切分。
+   * 这样可以保证每一段都是一个完整闭合的"第一层 child"，
+   * 从而让下游的分批处理与 sanitize 缓存不依赖于具体的块级标签类型
+   * （p / div / blockquote / pre / h* / table ...）都能正确工作。
+   * @param {string} html
+   * @returns {string[]}
+   */
+  $splitTopLevelChildren(html) {
+    // 自闭合（void）元素，不会增加嵌套深度
+    const voidTags = new Set([
+      'area',
+      'base',
+      'br',
+      'col',
+      'embed',
+      'hr',
+      'img',
+      'input',
+      'link',
+      'meta',
+      'param',
+      'source',
+      'track',
+      'wbr',
+    ]);
+    // 匹配：HTML 注释 | 结束标签 | 起始标签（可带自闭合斜杠）
+    // 这里使用贪婪的 [^>]* 是安全的，因为 beforeMakeHtml 已经把游离的 '<' / '>' 做过转义
+    const tagRe = /<!--[\s\S]*?-->|<\/([a-zA-Z][\w:-]*)\s*>|<([a-zA-Z][\w:-]*)\b[^>]*?(\/)?>/g;
+
+    const result = [];
+    let depth = 0;
+    let lastCut = 0;
+    let match;
+
+    while ((match = tagRe.exec(html)) !== null) {
+      const whole = match[0];
+      const closeName = match[1];
+      const openName = match[2];
+      const selfClose = match[3];
+      const start = match.index;
+
+      // 直接跳过 HTML 注释（不作为切分点，也不影响 depth）
+      if (whole.charCodeAt(0) === 60 && whole.charCodeAt(1) === 33) {
+        continue;
+      }
+
+      if (openName) {
+        // 遇到顶层起始标签时，标志着一个新的 child 切片开始
+        if (depth === 0 && start > lastCut) {
+          result.push(html.slice(lastCut, start));
+          lastCut = start;
+        }
+        // 自闭合标签或 void 元素不增加嵌套深度
+        if (!selfClose && !voidTags.has(openName.toLowerCase())) {
+          depth += 1;
+        }
+      } else if (closeName) {
+        if (!voidTags.has(closeName.toLowerCase())) {
+          depth = depth > 0 ? depth - 1 : 0;
+        }
+      }
+    }
+
+    // 收尾：把剩余部分作为最后一段
+    if (lastCut < html.length) {
+      result.push(html.slice(lastCut));
+    }
+    // 兜底：如果一个标签都没匹配到（例如纯文本），则整个字符串作为单个切片返回
+    if (result.length === 0 && html.length > 0) {
+      result.push(html);
+    }
+    return result;
+  }
+
   afterMakeHtml(str) {
     let $str = str;
     const config = {
@@ -229,7 +305,7 @@ export default class HtmlBlock extends ParagraphBase {
     }
     config.HTML_INTEGRATION_POINTS.foreignobject = true;
 
-    const $strArr = $str.split(/(?=<p data-sign=)/);
+    const $strArr = this.$splitTopLevelChildren($str);
     // 如果内容很大，则分批处理，用空间换sanitizer.sanitize消耗的时间
     const batch = 50;
     // 最大缓存容量（冗余20%）
