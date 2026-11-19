@@ -101,6 +101,6 @@
     "pako": "^2.2.0"
   },
   "optionalDependencies": {
-    "mermaid": "^11.14.0"
+    "mermaid": "^12.3.0"
   }
 }
