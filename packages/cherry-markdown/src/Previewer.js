@@ -1141,10 +1141,21 @@ export default class Previewer {
       }
     });
 
-    let $id = id.replace(/^\s*#/, '').trim();
-    $id = /[%:]/.test($id) ? $id : encodeURIComponent($id);
-    const target = previewDom.querySelector(`[id="${$id}"]`) ?? false;
-    if (target === false) {
+    const rawId = id.replace(/^\s*#/, '').trim();
+    // 先按字面值匹配（兼容含空格、未编码 unicode 等情况），
+    // 未命中时再回退到 encodeURIComponent 匹配（兼容 Header 把 unicode 编码到 id 的历史生成规则）。
+    let target = previewDom.querySelector(`[id="${rawId.replace(/(["\\])/g, '\\$1')}"]`);
+    if (!target && !/[%:]/.test(rawId)) {
+      try {
+        const encodedId = encodeURIComponent(rawId);
+        if (encodedId !== rawId) {
+          target = previewDom.querySelector(`[id="${encodedId}"]`);
+        }
+      } catch {
+        // encodeURIComponent 对非法代理对会抛，吞掉即可
+      }
+    }
+    if (!target) {
       return false;
     }
 
