@@ -85,6 +85,17 @@ describe('core/hooks/Table', () => {
     TestChartEngine.latestRender = undefined;
   });
 
+  it('keeps repeated table checks independent of the shared rendering rules', () => {
+    const { hook: first } = createTable();
+    const { hook: second } = createTable();
+    const markdown = '| A | B |\n| --- | --- |\n| 1 | 2 |';
+
+    expect(first.test(markdown, 'strict')).toBe(true);
+    expect(second.test(markdown, 'strict')).toBe(true);
+    expect(first.test(markdown, 'strict')).toBe(true);
+    expect(first.test('Plain text', 'strict')).toBe(false);
+  });
+
   it('extends short rows while preserving complete rows', () => {
     const { hook } = createTable();
     const complete = ['a', 'b'];
