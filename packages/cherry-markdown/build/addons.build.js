@@ -5,7 +5,7 @@ import { mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { legacyUmdPlugin } from './legacy-umd.plugin.js';
-import { bundledDependencyLinks, createLibraryBuild, formatDependencyBanner } from '../../../build/library.mjs';
+import { createLibraryBuild } from '../../../build/library.mjs';
 import { buildArguments, selectBuilds } from './build-targets.js';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
@@ -18,9 +18,6 @@ const builds = addonEntries.flatMap((entry) =>
     format,
   })),
 );
-
-/** @param {{ moduleIds: string[] }} chunk */
-const dependencyBanner = (chunk) => formatDependencyBanner(bundledDependencyLinks(chunk).values());
 
 for (const { entry, format } of selectBuilds(builds, buildArguments(import.meta.url))) {
   const input = resolve(root, entry);
@@ -39,7 +36,7 @@ for (const { entry, format } of selectBuilds(builds, buildArguments(import.meta.
     createLibraryBuild(
       { root, entry: input, file: `${baseName}${suffix}`, format, name: globalName },
       {
-        plugins: format === 'umd' ? [legacyUmdPlugin({ banner: dependencyBanner })] : [],
+        plugins: format === 'umd' ? [legacyUmdPlugin()] : [],
         define: {
           BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
         },
@@ -53,7 +50,6 @@ for (const { entry, format } of selectBuilds(builds, buildArguments(import.meta.
           outDir: outputDir,
           rolldownOptions: {
             output: {
-              ...(format === 'es' ? { banner: dependencyBanner } : {}),
               format,
               name: globalName,
               entryFileNames: `${baseName}${suffix}`,
