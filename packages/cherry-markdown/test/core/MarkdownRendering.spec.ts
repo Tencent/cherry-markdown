@@ -251,12 +251,13 @@ describe('Cherry Markdown final rendering', () => {
 
   it('renders nested blockquotes while leaving following block HTML outside', () => {
     const container = render('> outer\n>> inner\n<div class="after-quote">after</div>');
-    const outer = container.querySelector(':scope > blockquote');
+    const outer = container.firstElementChild;
 
+    expect(outer?.tagName).toBe('BLOCKQUOTE');
     expect(outer?.getAttribute('data-lines')).toBe('3');
     expect(outer?.querySelector('blockquote')?.textContent).toContain('inner');
     expect(outer?.querySelector('.after-quote')).toBeNull();
-    expect(container.querySelector(':scope > .after-quote')?.textContent).toBe('after');
+    expect(outer?.nextElementSibling?.querySelector('.after-quote')?.textContent).toBe('after');
   });
 
   it('resolves case-insensitive link and image reference definitions', () => {

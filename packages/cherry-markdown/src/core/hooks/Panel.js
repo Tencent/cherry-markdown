@@ -16,7 +16,8 @@
 import ParagraphBase from '@/core/ParagraphBase';
 import { prependLineFeedForParagraph } from '@/utils/lineFeed';
 import { getPanelRule } from '@/utils/regexp';
-import { blockNames } from '@/utils/sanitize';
+import { CONTAIN_BLOCK_TEST_REG } from '@/utils/sanitize';
+
 /**
  * 面板语法
  * 例：
@@ -137,8 +138,7 @@ export default class Panel extends ParagraphBase {
       // 如果包含html块级标签（比如 p、div、blockquote 等），说明 html 已经是渲染后的块级结构，
       // 此时块级标签之间残留的 \n 仅是分隔符，不应被 $cleanParagraph 转成 <br>，
       // 直接去除这些 \n 后用 div 包裹即可
-      const isContainBlockTest = new RegExp(`<(${blockNames})[^>]*>`, 'i');
-      if (isContainBlockTest.test(html)) {
+      if (CONTAIN_BLOCK_TEST_REG.test(html)) {
         return `<div>${html.replace(/\n+/g, '')}</div>`;
       }
       // 纯文本段落（无块级标签）才走 $cleanParagraph 处理用户手动换行 -> <br>

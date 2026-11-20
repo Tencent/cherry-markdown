@@ -3,11 +3,13 @@ import { editorViewCtx } from '@milkdown/kit/core';
 import { TextSelection } from '@milkdown/kit/prose/state';
 import { createTestEditor } from './helpers/create-editor';
 
+const imageSelector = 'img:not(.ProseMirror-separator)';
+
 it('preserves a closing parenthesis in an imported image URL', async () => {
   const el = document.body.appendChild(document.createElement('div'));
   const instance = await createTestEditor({ el, value: '![photo](<https://example.com/a)b.png>)' });
   try {
-    expect(el.querySelector('img')?.getAttribute('src')).toBe('https://example.com/a%29b.png');
+    expect(el.querySelector(imageSelector)?.getAttribute('src')).toBe('https://example.com/a%29b.png');
   } finally {
     await instance.destroy();
     el.remove();
@@ -18,8 +20,8 @@ it('keeps Cherry image decorations when the title contains quotes', async () => 
   const el = document.body.appendChild(document.createElement('div'));
   const instance = await createTestEditor({ el, value: `![photo#border](https://example.com/a.png 'A "quote"')` });
   try {
-    expect(el.querySelector('img')?.getAttribute('title')).toBe('A "quote"');
-    expect(el.querySelector('img')?.classList.contains('cherry-img-deco-border')).toBe(true);
+    expect(el.querySelector(imageSelector)?.getAttribute('title')).toBe('A "quote"');
+    expect(el.querySelector(imageSelector)?.classList.contains('cherry-img-deco-border')).toBe(true);
   } finally {
     await instance.destroy();
     el.remove();
@@ -79,8 +81,8 @@ it.each([
   const value = `![photo#border](<https://example.com/${path}>)`;
   const instance = await createTestEditor({ el, value });
   try {
-    expect(el.querySelector('img')?.getAttribute('src')).toBe(`https://example.com/${encoded}`);
-    expect(el.querySelector('img')?.classList.contains('cherry-img-deco-border')).toBe(true);
+    expect(el.querySelector(imageSelector)?.getAttribute('src')).toBe(`https://example.com/${encoded}`);
+    expect(el.querySelector(imageSelector)?.classList.contains('cherry-img-deco-border')).toBe(true);
     expect(instance.getMarkdown()).toBe(value);
   } finally {
     await instance.destroy();
@@ -100,9 +102,9 @@ it('keeps literal image alt delimiters from selecting a different image', async 
       });
       view.dispatch(view.state.tr.replaceWith(1, 6, node));
     });
-    expect(el.querySelector('img')?.getAttribute('src')).toBe('https://example.com/photo.png');
-    expect(el.querySelector('img')?.getAttribute('alt')).toBe('a](wrong.png) ![b#border');
-    expect(el.querySelector('img')?.classList.contains('cherry-img-deco-border')).toBe(true);
+    expect(el.querySelector(imageSelector)?.getAttribute('src')).toBe('https://example.com/photo.png');
+    expect(el.querySelector(imageSelector)?.getAttribute('alt')).toBe('a](wrong.png) ![b#border');
+    expect(el.querySelector(imageSelector)?.classList.contains('cherry-img-deco-border')).toBe(true);
   } finally {
     await instance.destroy();
     el.remove();
@@ -125,10 +127,10 @@ it('retains Cherry image URL hooks and lazy source attributes', async () => {
     },
   });
   try {
-    expect(el.querySelector('img')?.getAttribute('data-src')).toBe('https://cdn.example.com/b.png');
-    expect(el.querySelector('img')?.hasAttribute('src')).toBe(false);
-    expect(el.querySelector('img')?.getAttribute('title')).toBe('A "quote"');
-    expect(el.querySelector('img')?.classList.contains('cherry-img-deco-border')).toBe(true);
+    expect(el.querySelector(imageSelector)?.getAttribute('data-src')).toBe('https://cdn.example.com/b.png');
+    expect(el.querySelector(imageSelector)?.hasAttribute('src')).toBe(false);
+    expect(el.querySelector(imageSelector)?.getAttribute('title')).toBe('A "quote"');
+    expect(el.querySelector(imageSelector)?.classList.contains('cherry-img-deco-border')).toBe(true);
   } finally {
     await instance.destroy();
     el.remove();

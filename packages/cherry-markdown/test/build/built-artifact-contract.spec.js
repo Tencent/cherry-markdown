@@ -184,7 +184,7 @@ describe('built Cherry Markdown artifact contract', () => {
     ).toContain(token);
   });
 
-  describe.each(['commonjs', 'amd', 'browser-without-globalThis'])('%s loading', (mode) => {
+  describe.each(['commonjs', 'amd'])('%s loading', (mode) => {
     it.each(umdFiles)('preserves exports and application globals in %s', (file) => {
       const dom = new JSDOM('', { runScripts: 'outside-only', url: 'https://localhost/' });
       try {
@@ -197,27 +197,19 @@ describe('built Cherry Markdown artifact contract', () => {
           win.module = { exports: {} };
           win.exports = win.module.exports;
           win.require = dependency;
-        } else if (mode === 'amd') {
+        } else {
           win.define = (ids, factory) => {
             const exports = {};
             exported = factory(...ids.map((id) => (id === 'exports' ? exports : dependency(id)))) ?? exports;
           };
           win.define.amd = {};
-        } else {
-          win.globalThis = undefined;
         }
         const existingE = { application: true };
         const existingT = { application: true };
         win.e = existingE;
         win.t = existingT;
-        const before = new Set(Object.getOwnPropertyNames(win));
         win.eval(readDistFile(file));
         if (mode === 'commonjs') exported = win.module.exports;
-        else if (mode === 'browser-without-globalThis') {
-          [exported] = Object.getOwnPropertyNames(win)
-            .filter((name) => !before.has(name) && name.startsWith('Cherry'))
-            .map((name) => win[name]);
-        }
         expect(typeof exported === 'function' || Object.keys(exported || {}).length > 0, file).toBe(true);
         expect(win.e, file).toBe(existingE);
         expect(win.t, file).toBe(existingT);

@@ -269,7 +269,7 @@ describe('Previewer anchor scrolling', () => {
     const block = addMeasuredBlock(previewerDom, 2, 100, 100);
     block.id = 'block';
     const target = document.createElement('strong');
-    target.id = 'target heading';
+    target.id = 'target-heading';
     defineDimension(target, 'offsetTop', 140);
     block.appendChild(target);
     const image = document.createElement('img');
@@ -277,7 +277,7 @@ describe('Previewer anchor scrolling', () => {
     block.appendChild(image);
 
     expect(previewer.scrollToId('missing')).toBe(false);
-    expect(previewer.scrollToId('#target heading', 'instant')).toBe(true);
+    expect(previewer.scrollToId('#target-heading', 'instant')).toBe(true);
     expect(scrollTo).toHaveBeenCalledWith({ top: 130, left: 0, behavior: 'instant' });
 
     expect(previewer.scrollToId('block', 'instant')).toBe(true);

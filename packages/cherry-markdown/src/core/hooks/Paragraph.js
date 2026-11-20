@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 import ParagraphBase from '@/core/ParagraphBase';
-import { blockNames } from '@/utils/sanitize';
+import { CONTAIN_BLOCK_TEST_REG } from '@/utils/sanitize';
+
 /**
  * 段落级语法
  * 段落级语法可以具备以下特性：
@@ -59,8 +60,7 @@ export default class Paragraph extends ParagraphBase {
         const { sign, html } = this.cacheAndGetData(p, sentenceMakeFunc, 3000, -100);
         let domName = 'p';
         // 如果包含html块级标签（比如div、blockquote等），则当前段落外层用div包裹，反之用p包裹
-        const isContainBlockTest = new RegExp(`<(${blockNames})[^>]*>`, 'i');
-        if (isContainBlockTest.test(html)) {
+        if (CONTAIN_BLOCK_TEST_REG.test(html)) {
           domName = 'div';
         }
         // 计算行号
