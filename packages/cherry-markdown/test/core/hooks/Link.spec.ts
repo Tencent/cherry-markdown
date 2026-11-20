@@ -85,6 +85,37 @@ describe('core/hooks/Link', () => {
     expect(renderLink(hook, '[text](https://example.com/f(o)o)')).toContain('href="https://example.com/f(o)o"');
   });
 
+  it('renders link text that wraps onto the next line', () => {
+    const hook = createLinkHook();
+
+    const html = renderLink(hook, 'See [the Trace Event\nformat](https://example.com/spec) for details.');
+    expect(html).toContain('See <a href="https://example.com/spec"');
+    expect(html).toContain('>the Trace Event\nformat</a> for details.');
+    expect(renderLink(hook, '[one\ntwo\nthree](https://example.com)')).toContain('>one\ntwo\nthree</a>');
+    expect(renderLink(hook, '- [ ] todo\nsee [x](https://example.com)')).toContain(
+      '- [ ] todo\nsee <a href="https://example.com"',
+    );
+  });
+
+  it('does not join link text across a blank line, more than three lines, or nested brackets', () => {
+    const hook = createLinkHook();
+
+    expect(hook.makeHtml('[a\n\nb](https://example.com)')).toBe('[a\n\nb](https://example.com)');
+    expect(hook.makeHtml('[a\n \nb](https://example.com)')).toBe('[a\n \nb](https://example.com)');
+    expect(hook.makeHtml('[a\nb\nc\nd](https://example.com)')).toBe('[a\nb\nc\nd](https://example.com)');
+    expect(hook.makeHtml('[a [b]\nc](https://example.com)')).toBe('[a [b]\nc](https://example.com)');
+    expect(renderLink(hook, 'a[i] b\nsee [docs](https://example.com)')).toContain('a[i] b\nsee <a href="https://example.com"');
+  });
+
+  it('leaves an image whose alt text wraps onto the next line alone', () => {
+    const hook = createLinkHook();
+
+    expect(hook.makeHtml('![alt\ntext](a.png)')).toBe('![alt\ntext](a.png)');
+    expect(hook.makeHtml('[![npm\nversion](badge.svg)](https://example.com)')).toBe(
+      '[![npm\nversion](badge.svg)](https://example.com)',
+    );
+  });
+
   it('leaves references, escaped links, and malformed bracket text unchanged', () => {
     const hook = createLinkHook();
 

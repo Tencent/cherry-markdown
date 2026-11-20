@@ -277,6 +277,34 @@ describe('Cherry Markdown final rendering', () => {
     expect(container.textContent).not.toContain('[asset]:');
   });
 
+  it('renders inline and reference links whose text wraps onto the next line', () => {
+    const container = render(
+      'See [the Trace Event\nformat](https://example.com/spec) and [the\nguide][docs].\n\n[docs]: https://example.com/guide',
+    );
+    const inline = container.querySelector('a[href="https://example.com/spec"]');
+    const reference = container.querySelector('a[href="https://example.com/guide"]');
+
+    expect(inline?.innerHTML).toBe('the Trace Event<br>format');
+    expect(reference?.innerHTML).toBe('the<br>guide');
+    expect(container.textContent).not.toContain('](');
+  });
+
+  it('does not turn an image whose alt text wraps onto the next line into a link', () => {
+    const container = render('![a fun logo\nmade of glob](https://example.com/logo.png)');
+
+    expect(container.textContent).toContain('![a fun logo');
+  });
+
+  it('keeps formulas on lines above a link rendered when an earlier line has a stray bracket', () => {
+    const inline = render('Let a[i] be $x^2$,\nsee [docs](https://example.com)');
+    const block = render('see [1]\n$$ x $$\n[docs](https://example.com)');
+
+    expect(inline.querySelector('.Cherry-InlineMath')).not.toBeNull();
+    expect(inline.querySelector('a[href="https://example.com"]')?.textContent).toBe('docs');
+    expect(block.querySelector('.Cherry-Math')).not.toBeNull();
+    expect(block.querySelector('a[href="https://example.com"]')?.textContent).toBe('docs');
+  });
+
   it('renders inline and block formulas with their source attached', () => {
     const container = render('Inline $x^2$ formula.\n\n$$\ny = x + 1\n$$');
     const inlineMath = container.querySelector('.Cherry-InlineMath');
