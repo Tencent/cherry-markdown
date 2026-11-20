@@ -13,7 +13,7 @@ import { cursor } from '@milkdown/kit/plugin/cursor';
 import { history } from '@milkdown/kit/plugin/history';
 import { indent } from '@milkdown/kit/plugin/indent';
 import { trailing } from '@milkdown/kit/plugin/trailing';
-import { commonmark } from '@milkdown/kit/preset/commonmark';
+import { commonmark, inlineCodeSchema } from '@milkdown/kit/preset/commonmark';
 import { gfm } from '@milkdown/kit/preset/gfm';
 import type { Node as ProseMirrorNode } from '@milkdown/kit/prose/model';
 import { Plugin } from '@milkdown/kit/prose/state';
@@ -190,6 +190,11 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     .config((ctx) => {
       ctx.set(rootCtx, mountRoot);
       ctx.set(defaultValueCtx, currentMarkdown);
+      // Keep typing at the end of an inline code span inside the span.
+      ctx.update(inlineCodeSchema.key, (getSchema) => (schemaCtx) => ({
+        ...getSchema(schemaCtx),
+        inclusive: true,
+      }));
       ctx.update(remarkStringifyOptionsCtx, (previous) => ({
         ...previous,
         bullet: '-' as const,

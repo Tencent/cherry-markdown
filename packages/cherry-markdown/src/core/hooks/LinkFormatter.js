@@ -39,14 +39,15 @@ import { getLinkRule } from '@/utils/regexp';
  * 这样数学 hook 及后续任何依赖 `~D` / `\[` / `\(` 的语法，都可以不再感知链接的存在。
  */
 
-// 转义映射：将 link 内部的敏感字符 → 不会被下游 hook 误识别的占位符
-const ESCAPE_MAP = [
-  { from: /~D/g, to: '~1D' },
-  { from: /\\\[/g, to: '~1LB' },
-  { from: /\\\]/g, to: '~1RB' },
-  { from: /\\\(/g, to: '~1LP' },
-  { from: /\\\)/g, to: '~1RP' },
-];
+// 转义映射：将 link 内部的敏感字符一次性替换为不会被下游 hook 误识别的占位符。
+const ESCAPE_REG = /(~D|\\\[|\\\]|\\\(|\\\))/g;
+const ESCAPE_MAP = {
+  '~D': '~1D',
+  '\\[': '~1LB',
+  '\\]': '~1RB',
+  '\\(': '~1LP',
+  '\\)': '~1RP',
+};
 
 // 还原映射：afterMakeHtml 时将占位符还原为原字符
 const UNESCAPE_REG = /~1(D|LB|RB|LP|RP)/g;
@@ -70,14 +71,8 @@ export default class LinkFormatter extends ParagraphBase {
     if (!str) {
       return str;
     }
-    // 只针对完整命中链接语法的片段做转义，避免误伤正文中的 ~D / \[ / \( 等
-    return str.replace(this.linkRule, (match) => {
-      let escaped = match;
-      for (const { from, to } of ESCAPE_MAP) {
-        escaped = escaped.replace(from, to);
-      }
-      return escaped;
-    });
+    // 只针对完整命中链接语法的片段做转义，避免误伤正文中的 ~D / \[ / \( 等。
+    return str.replace(this.linkRule, (match) => match.replace(ESCAPE_REG, (token) => ESCAPE_MAP[token]));
   }
 
   makeHtml(str) {

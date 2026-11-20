@@ -25,6 +25,15 @@ const CUSTOM_WRAPPER = {
   figure: 'figure',
 };
 
+/**
+ * 缩进代码块的匹配正则
+ * 源字符串拆分如下
+ *   begin  : (?:^|\n\s*\n)(?: {4}|\t)                          — 开头：行首或空行后，紧跟 4 个空格或 1 个 tab
+ *   content: ([\s\S]+?)                                        — 代码主体（非贪婪）
+ *   end    : (?=$|\n( {0,3}[^ \t\n]|\n[^ \t\n]))                — 结束：文末或遇到非缩进新段落
+ */
+const INDENTED_CODE_REG = /(?:^|\n\s*\n)(?: {4}|\t)([\s\S]+?)(?=$|\n( {0,3}[^ \t\n]|\n[^ \t\n]))/g;
+
 export default class CodeBlock extends ParagraphBase {
   static HOOK_NAME = 'codeBlock';
   static inlineCodeCache = {};
@@ -336,26 +345,13 @@ export default class CodeBlock extends ParagraphBase {
   }
 
   /**
-   * 获取缩进代码块语法的正则
-   * 缩进代码块必须要以连续两个以上的换行符开头
-   */
-  $getIndentedCodeReg() {
-    const ret = {
-      begin: '(?:^|\\n\\s*\\n)(?: {4}|\\t)',
-      end: '(?=$|\\n( {0,3}[^ \\t\\n]|\\n[^ \\t\\n]))',
-      content: '([\\s\\S]+?)',
-    };
-    return new RegExp(ret.begin + ret.content + ret.end, 'g');
-  }
-
-  /**
    * 生成缩进代码块（没有行号、没有代码高亮）
    */
   $getIndentCodeBlock(str) {
     if (!this.indentedCodeBlock) {
       return str;
     }
-    return this.$recoverCodeInIndent(str).replace(this.$getIndentedCodeReg(), (match, code) => {
+    return this.$recoverCodeInIndent(str).replace(INDENTED_CODE_REG, (match, code) => {
       const lineCount = (match.match(/\n/g) || []).length;
       const sign = this.$engine.hash(match);
       const html = `<pre data-sign="${sign}" data-lines="${lineCount}"><code class="indent-code">${escapeHTMLSpecialChar(
@@ -373,7 +369,7 @@ export default class CodeBlock extends ParagraphBase {
     if (!this.indentedCodeBlock) {
       return str;
     }
-    return str.replace(this.$getIndentedCodeReg(), (match) => {
+    return str.replace(INDENTED_CODE_REG, (match) => {
       return match.replace(/`/g, '~~~IndentCode');
     });
   }
@@ -385,7 +381,7 @@ export default class CodeBlock extends ParagraphBase {
     if (!this.indentedCodeBlock) {
       return str;
     }
-    return str.replace(this.$getIndentedCodeReg(), (match) => {
+    return str.replace(INDENTED_CODE_REG, (match) => {
       return match.replace(/~~~IndentCode/g, '`');
     });
   }
