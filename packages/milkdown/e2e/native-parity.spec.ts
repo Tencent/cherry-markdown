@@ -15,7 +15,7 @@ const cases = [
     editableSelector: 'table.children',
     editSelector: 'table.children td p',
   },
-  { name: 'image', markdown: '![dog#100px](assets/images/demo-dog.png)', selector: 'img' },
+  { name: 'image', markdown: '![dog#100px](assets/images/demo-dog.png)', selector: 'img[src]' },
   {
     name: 'panel',
     markdown: '::: warning Title\nContent\n:::',
