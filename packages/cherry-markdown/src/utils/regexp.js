@@ -317,7 +317,10 @@ export function getLinkRule() {
     // lookbehind启用分组是为了和不兼容lookbehind的场景共用一个回调
     begin: isLookbehindSupported() ? '((?<!\\\\))' : '(^|[^\\\\])',
     content: [
-      '\\[([^\\n]*?)\\]', // ?<text>
+      // ?<text> 单行时保持原规则；跨行（软换行）时最多 3 行、不跨空行，且文字内不能再有 [ ]，
+      // 避免从前几行的 `[`（如 a[i]、[0, 1)）开始匹配，导致 LinkFormatter 把中间的公式也转义掉；
+      // 跨行时也不匹配 `![`，图片 alt 跨行的情况保持原样，不渲染成 `!` + 链接
+      `\\[([^\\n]*?|${isLookbehindSupported() ? '(?<!!\\[)' : ''}[^\\[\\]\\n]*(?:\\n(?![ \\t]*\\n)[^\\[\\]\\n]*){1,2})\\]`,
       '[ \\t]*', // any spaces
       '\\(',
       /**
