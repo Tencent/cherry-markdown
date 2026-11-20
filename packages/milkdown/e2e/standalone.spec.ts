@@ -666,7 +666,7 @@ for (const directive of [
 
 test('image controls update Cherry-compatible layout directives without Cherry UI internals', async ({ page }) => {
   await setMarkdown(page, '![dog#100px](assets/images/demo-dog.png)');
-  const image = page.locator('.ProseMirror img').first();
+  const image = page.locator('.ProseMirror img[src]');
   await image.click();
   const toolbar = page.getByRole('toolbar', { name: '图片设置' });
   const frame = page.locator('.cherry-milkdown-image-frame');

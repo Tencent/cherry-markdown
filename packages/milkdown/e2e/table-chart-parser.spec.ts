@@ -25,7 +25,26 @@ test('map data URLs retain query separators through Cherry parsing', async ({ pa
     requested = route.request().url();
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify({ type: 'FeatureCollection', features: [] }),
+      body: JSON.stringify({
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: { name: '北京市' },
+            geometry: {
+              type: 'Polygon',
+              coordinates: [
+                [
+                  [116, 39],
+                  [117, 39],
+                  [117, 40],
+                  [116, 39],
+                ],
+              ],
+            },
+          },
+        ],
+      }),
     });
   });
   const source =
