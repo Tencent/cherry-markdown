@@ -13,6 +13,8 @@ const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const require = createRequire(import.meta.url);
 const distRoot = resolve(projectRoot, 'dist');
 const readDistFile = (filePath) => readFileSync(resolve(distRoot, filePath), 'utf-8');
+const dependencyHeaderPattern = /^\/\*! Bundled third-party dependencies\r?\n[\s\S]*?\*\//;
+const readDependencyHeader = (file) => readDistFile(file).match(dependencyHeaderPattern)?.[0] ?? '';
 
 const bundleNames = [
   'cherry-markdown.esm.js',
@@ -57,43 +59,48 @@ describe('built Cherry Markdown artifact contract', () => {
     35000,
   );
 
-  it('preserves the ELK notice and matching source references in both full browser bundles', () => {
+  it('keeps the ELK license and matching source links at the top of the full browser bundles', () => {
     const mermaidRequire = createRequire(require.resolve('mermaid'));
     const { version } = mermaidRequire('elkjs/package.json');
     const fullBundles = ['cherry-markdown.js', 'cherry-markdown.esm.js'];
 
     for (const file of fullBundles) {
-      const source = readDistFile(file);
-      expect(source, file).toContain(`elkjs ${version}`);
-      expect(source, file).toContain('Copyright (c) 2017 Kiel University and others.');
-      expect(source, file).toContain('Copyright (c) 2021 Kiel University and others.');
-      expect(source, file).toContain('SPDX-License-Identifier: EPL-2.0 OR GPL-3.0-or-later');
-      expect(source, file).toContain('https://www.eclipse.org/legal/epl-2.0/');
-      expect(source, file).toContain(`https://github.com/kieler/elkjs/releases/tag/${version}`);
-      expect(source, file).toContain('https://github.com/eclipse-elk/elk/releases/tag/v0.12.1');
+      const header = readDependencyHeader(file);
+      expect(header, file).toContain(
+        `elkjs@${version} | Source: https://github.com/kieler/elkjs/releases/tag/${version}`,
+      );
+      expect(header, file).toContain('License: https://www.eclipse.org/legal/epl-2.0/');
+      expect(header, file).toContain('https://github.com/eclipse-elk/elk/releases/tag/v0.12.1');
     }
     for (const file of bundleNames.filter((name) => !fullBundles.includes(name))) {
-      expect(readDistFile(file), file).not.toContain('https://github.com/kieler/elkjs/releases/tag/');
+      expect(readDependencyHeader(file), file).not.toContain('https://github.com/kieler/elkjs/releases/tag/');
     }
   });
 
-  it('keeps bundled dependency source and license links in JS without emitting notice assets', () => {
+  it('keeps bundled dependency source and license links in JS headers without emitting notice assets', () => {
     const assets = glob.sync('**/*', { cwd: distRoot, nodir: true });
     expect(assets.filter((file) => /THIRD_PARTY_NOTICES|cherry-bundled-dependency-licenses/.test(file))).toEqual([]);
 
     for (const file of ['cherry-markdown.js', 'cherry-markdown.esm.js']) {
-      const code = readDistFile(file);
-      expect(code, file).toContain(
-        'js-yaml@4.3.2 (MIT) | Source: https://github.com/nodeca/js-yaml/tree/4.3.2 | License: https://spdx.org/licenses/MIT.html',
+      const header = readDependencyHeader(file);
+      expect(header, file).toMatch(
+        /js-yaml@([\d.]+) \| Source: https:\/\/github\.com\/nodeca\/js-yaml\/tree\/\1 \| License: https:\/\/spdx\.org\/licenses\/MIT\.html/,
       );
-      expect(code, file).toContain('dompurify@3.4.18');
-      expect(code, file).toContain('katex@0.18.11');
+      expect(header, file).toContain('katex@');
     }
 
-    const coreNotice = readDistFile('cherry-markdown.engine.core.esm.js').split('Bundled third-party dependencies')[1];
-    expect(coreNotice).toContain('dompurify@3.4.18');
-    expect(coreNotice).not.toMatch(/^ \* (?:jsdom|mermaid|elkjs)@/m);
-    expect(readDistFile('addons/cherry-code-block-plantuml-plugin.esm.js')).toContain('pako@');
+    for (const file of bundleNames) {
+      const header = readDependencyHeader(file);
+      expect(header, file).toContain('dompurify@3.4.18 | Source: https://github.com/cure53/DOMPurify');
+      expect(header, file).not.toMatch(/^\s*\* jsdom@/m);
+    }
+    for (const suffix of ['.js', '.esm.js']) {
+      const header = readDependencyHeader(`addons/cherry-code-block-plantuml-plugin${suffix}`);
+      expect(header).toContain('pako@');
+      expect(header).toContain('https://spdx.org/licenses/Zlib.html');
+      expect(readDependencyHeader(`addons/advance/cherry-codeblock-echarts-plugin${suffix}`)).toContain('json5@');
+      expect(readDependencyHeader(`addons/cherry-code-block-mermaid-plugin${suffix}`)).toBe('');
+    }
   });
 
   it('publishes the complete UMD and ESM bundle matrix with declarations', () => {
@@ -161,7 +168,7 @@ describe('built Cherry Markdown artifact contract', () => {
     bundleNames
       .filter((file) => !file.endsWith('.esm.js'))
       .forEach((file) => {
-        const source = readDistFile(file);
+        const source = readDistFile(file).replace(dependencyHeaderPattern, '').trimStart();
         expect(source, file).toMatch(/^(?:!function|\(function)/);
       });
   });

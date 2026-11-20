@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import mergeWith from '@/utils/toolkit/mergeWith';
+// JSON5 source: https://github.com/json5/json5
+// License: https://spdx.org/licenses/MIT.html
 import JSON5 from 'json5';
 import { getExternal } from '@/utils/external';
 

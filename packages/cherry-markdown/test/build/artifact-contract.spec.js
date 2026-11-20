@@ -95,15 +95,15 @@ describe('Cherry Markdown published artifact configuration', () => {
           unsafe_math: true,
         },
         mangle: { toplevel: true },
-        format: { comments: false },
+        format: { comments: /^! Bundled third-party dependencies/ },
       });
       const pluginNames = ['cherry-prism-languages'];
       if (config.build.lib.formats[0] === 'umd') pluginNames.push('cherry-legacy-umd');
-      pluginNames.push('cherry-third-party-notices');
       expect(
         config.plugins.map((plugin) => plugin.name),
         file,
       ).toEqual(pluginNames);
+      expect(config.build).not.toHaveProperty('license');
     }
   });
 
@@ -163,10 +163,13 @@ describe('Cherry Markdown published artifact configuration', () => {
         expect(config.build.minify).toBe('oxc');
         expect(config.build.outDir).toBe(resolve(projectRoot, 'dist/addons', dirname(relative)));
         expect(config.build.lib.name).toBe(globalName);
-        expect(config.build.rolldownOptions.output).toMatchObject({ format, name: globalName, entryFileNames: file });
-        expect(config.plugins.map((plugin) => plugin.name)).toEqual(
-          format === 'umd' ? ['cherry-legacy-umd', 'cherry-third-party-notices'] : ['cherry-third-party-notices'],
-        );
+        expect(config.build.rolldownOptions.output).toMatchObject({
+          format,
+          name: globalName,
+          entryFileNames: file,
+        });
+        expect(config.plugins.map((plugin) => plugin.name)).toEqual(format === 'umd' ? ['cherry-legacy-umd'] : []);
+        expect(config.build).not.toHaveProperty('license');
         expect(config.resolve.alias).toEqual({ '@': src, '@cherry': src });
         expect(config.define).toEqual({ BUILD_ENV: JSON.stringify('production') });
       }

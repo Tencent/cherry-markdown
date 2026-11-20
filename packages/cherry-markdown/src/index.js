@@ -17,6 +17,10 @@ import Cherry from './index.core';
 import MermaidCodeEngine from '@/addons/cherry-code-block-mermaid-plugin';
 import PlantUMLCodeEngine from '@/addons/cherry-code-block-plantuml-plugin';
 import EChartsTableEngine from '@/addons/advance/cherry-table-echarts-plugin';
+// Mermaid source: https://github.com/mermaid-js/mermaid
+// License: https://spdx.org/licenses/MIT.html
+// ELK sources: https://github.com/kieler/elkjs and https://github.com/eclipse-elk/elk
+// License: https://www.eclipse.org/legal/epl-2.0/
 import mermaid from 'mermaid';
 
 // v9 及以下有 mermaid.mermaidAPI，v10+ 为 undefined

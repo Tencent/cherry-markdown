@@ -1,12 +1,12 @@
 import { build } from 'vite';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { legacyUmdPlugin } from './legacy-umd.plugin.js';
 import { getBuildVersion } from './revision.js';
 import { prismLanguagePlugin } from './prism.plugin.js';
-import { bundledLicenses, thirdPartyNoticesPlugin } from './third-party-notices.plugin.js';
-import { createLibraryBuild } from '../../../build/library.mjs';
+import { bundledDependencyLinks, createLibraryBuild, formatDependencyBanner } from '../../../build/library.mjs';
 import { buildArguments, selectBuilds } from './build-targets.js';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
@@ -16,6 +16,39 @@ const baseExternal = ['jsdom'];
 const coreExternal = [...baseExternal, 'mermaid', '@replit/codemirror-vim', 'codemirror', /^codemirror\//];
 const engineExternal = [...baseExternal, 'mermaid'];
 const streamExternal = [...engineExternal, 'codemirror', /^codemirror\//];
+
+/** @param {{ moduleIds: string[] }} chunk */
+function dependencyBanner(chunk) {
+  const links = bundledDependencyLinks(chunk);
+  for (const key of links.keys()) {
+    if (!key.startsWith('elkjs@')) continue;
+    const version = key.slice('elkjs@'.length);
+    links.set(
+      key,
+      `${key} | Source: https://github.com/kieler/elkjs/releases/tag/${version} | License: https://www.eclipse.org/legal/epl-2.0/`,
+    );
+    if (version === '0.12.1') {
+      links.set(
+        'Eclipse Layout Kernel',
+        'Eclipse Layout Kernel | Source: https://github.com/eclipse-elk/elk/releases/tag/v0.12.1 | License: https://www.eclipse.org/legal/epl-2.0/',
+      );
+    }
+  }
+
+  // Mermaid vendors js-yaml in its compiled chunks, outside the module graph.
+  for (const id of chunk.moduleIds) {
+    if (!/\/mermaid\/dist\/chunks\/mermaid\.core\/chunk-[^/]+\.mjs$/.test(id)) continue;
+    const version = readFileSync(id, 'utf8').match(/\/\.pnpm\/js-yaml@(\d+\.\d+\.\d+)\//)?.[1];
+    if (!version) continue;
+    const key = `js-yaml@${version}`;
+    links.set(
+      key,
+      `${key} | Source: https://github.com/nodeca/js-yaml/tree/${version} | License: https://spdx.org/licenses/MIT.html`,
+    );
+    break;
+  }
+  return formatDependencyBanner(links.values());
+}
 
 const builds = [
   {
@@ -100,14 +133,25 @@ for (const current of selectBuilds(builds, buildArguments(import.meta.url))) {
   console.log(`[vite build] ${current.id}`);
   await build(
     createLibraryBuild(
-      { root, entry: current.entry, file: current.file, format: current.format, name: current.name },
+      {
+        root,
+        entry: current.entry,
+        file: current.file,
+        format: current.format,
+        name: current.name,
+      },
       {
         plugins: [
           prismLanguagePlugin(),
           ...(current.format === 'umd'
-            ? [legacyUmdPlugin({ compact: current.id !== 'full-umd', sourceMaps: Boolean(current.sourcemap) })]
+            ? [
+                legacyUmdPlugin({
+                  compact: current.id !== 'full-umd',
+                  sourceMaps: Boolean(current.sourcemap),
+                  banner: dependencyBanner,
+                }),
+              ]
             : []),
-          thirdPartyNoticesPlugin(),
         ],
         define: {
           BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
@@ -121,7 +165,6 @@ for (const current of selectBuilds(builds, buildArguments(import.meta.url))) {
           },
         },
         build: {
-          license: bundledLicenses,
           // The historical full UMD bundle is Babel-transformed but not minified.
           // Other bundles retain their Terser contract.
           minify: current.id === 'full-umd' ? false : 'terser',
@@ -138,7 +181,7 @@ for (const current of selectBuilds(builds, buildArguments(import.meta.url))) {
               toplevel: true,
             },
             format: {
-              comments: false,
+              comments: /^! Bundled third-party dependencies/,
             },
           },
           sourcemap: current.sourcemap || false,
@@ -148,6 +191,7 @@ for (const current of selectBuilds(builds, buildArguments(import.meta.url))) {
             treeshake: false,
             external: current.external,
             output: {
+              ...(current.format === 'es' ? { banner: dependencyBanner } : {}),
               exports: 'named',
               generatedCode: { preset: 'es5' },
               globals: current.format === 'umd' && current.external.includes('mermaid') ? { mermaid: 'mermaid' } : {},
