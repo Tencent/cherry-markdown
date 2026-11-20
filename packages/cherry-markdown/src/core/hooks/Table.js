@@ -367,10 +367,8 @@ export default class Table extends ParagraphBase {
     return $str;
   }
 
-  /** 判断文本是否包含指定模式的表格。 */
   test(str, flavor) {
-    const { reg } = this.RULE[flavor];
-    return reg && new RegExp(reg).test(str);
+    return this.RULE[flavor].reg && this.RULE[flavor].reg.test(str);
   }
 
   /**

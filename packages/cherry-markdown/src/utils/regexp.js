@@ -170,14 +170,14 @@ function buildTableRuleSplit() {
 }
 
 export function getTableRule(merge = false) {
-  if (TABLE_RULE_SPLIT === null) {
-    TABLE_RULE_SPLIT = buildTableRuleSplit();
-  }
   if (merge === false) {
+    if (TABLE_RULE_SPLIT === null) {
+      TABLE_RULE_SPLIT = buildTableRuleSplit();
+    }
     return TABLE_RULE_SPLIT;
   }
   if (TABLE_RULE_MERGED === null) {
-    const { strict, loose } = TABLE_RULE_SPLIT;
+    const { strict, loose } = TABLE_RULE_SPLIT ?? buildTableRuleSplit();
     const regStr = `(?:${strict.begin + strict.content + strict.end}|${loose.begin + loose.content + loose.end})`;
     TABLE_RULE_MERGED = compileRegExp({ begin: '', content: regStr, end: '' }, 'g', true);
   }
