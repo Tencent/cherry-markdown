@@ -138,14 +138,21 @@ export default class HtmlBlock extends ParagraphBase {
     $str = $str.replace(/<(?=(\w|\n|$))/g, '&#60;');
     // 替换所有形如「</」的左尖括号
     $str = $str.replace(/<\//g, '&#60;/');
-    // 还原被替换的尖括号
-    $str = $str.replace(/\$#60;/g, '<').replace(/\$#62;/g, '>');
-    // 针对 \< 和 \> 进行转义
-    $str = $str
-      .replace(/\\&#60;/g, '&lt;')
-      .replace(/\\&#62;/g, '&gt;')
-      .replace(/\\</g, '&lt;')
-      .replace(/\\>/g, '&gt;');
+    // 还原被替换的尖括号占位符：$#60; -> <, $#62; -> >
+    $str = $str.replace(/\$#6([02]);/g, (_, d) => (d === '0' ? '<' : '>'));
+    // 针对 \<、\>、\&#60;、\&#62; 统一转义为 &lt; / &gt;
+    // 注意：\&#60; / \&#62; 必须优先于 \< / \> 匹配，交替分支从左到右尝试即可保证顺序
+    $str = $str.replace(/\\(?:&#60;|&#62;|<|>)/g, (m) => {
+      // 结尾字符决定方向：
+      //   \<     -> 末字符 '<'  -> &lt;
+      //   \>     -> 末字符 '>'  -> &gt;
+      //   \&#60; -> 末字符 ';' 且倒数第二位 '0' -> &lt;
+      //   \&#62; -> 末字符 ';' 且倒数第二位 '2' -> &gt;
+      if (m.length === 2) {
+        return m.charCodeAt(1) === 60 /* '<' */ ? '&lt;' : '&gt;';
+      }
+      return m.charCodeAt(m.length - 2) === 48 /* '0' */ ? '&lt;' : '&gt;';
+    });
     // 过滤HTML标签的style属性
     if (this.filterStyle) {
       $str = $str.replace(/<([^/][^>]+?) style="[^>\n]+?"([^>\n]*)>/gi, '<$1$2>');

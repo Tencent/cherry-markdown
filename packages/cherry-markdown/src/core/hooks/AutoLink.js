@@ -24,6 +24,21 @@ import { compileRegExp, EMAIL, EMAIL_INLINE, URL_INLINE_NO_SLASH, URL, URL_NO_SL
 const FULL_WIDTH_BREAK_CHARS = '，。！？；：、（）【】《》「」“”‘’·～｜…—';
 
 /**
+ * 用于判断字符串片段是否位于 HTML 标签属性值内的 XML 标签正则
+ * 提升到模块作用域避免每次调用 isLinkInHtmlAttribute 时重复构建
+ * 使用 g 标志，使用前需显式重置 lastIndex
+ */
+const XML_TAG_REG =
+  /<([a-zA-Z][a-zA-Z0-9-]*)(\s+[a-zA-Z_:][a-zA-Z0-9_.:-]*(\s*=\s*(([^\s"'=<>`]+)|('[^']*')|("[^"]*")))?)*\s*[/]?>/g;
+
+/**
+ * 用于判断字符串片段是否位于 <a> 标签内部的正则
+ * 提升到模块作用域避免每次调用 isLinkInATag 时重复构建
+ * 使用 g 标志，使用前需显式重置 lastIndex
+ */
+const A_TAG_REG = /<a\s+[^>]*>[^<]*<\/a>/gi;
+
+/**
  * 将breakChars配置数组解析为一个用于中断URL识别的字符集合字符串
  * @param {Array<string>|undefined} breakChars
  * @returns {string} 需要中断的字符集合，若不启用则返回空字符串
@@ -115,33 +130,10 @@ export default class AutoLink extends SyntaxBase {
    * @returns {boolean} 如果链接位于HTML属性值中则返回true，否则返回false
    */
   isLinkInHtmlAttribute(str, index, linkLength) {
-    const xmlTagRegex = new RegExp(
-      [
-        '<', // tag start
-        '([a-zA-Z][a-zA-Z0-9-]*)', // tagName
-        '(', // attrs start
-        [
-          '\\s+[a-zA-Z_:][a-zA-Z0-9_.:-]*', // attr name
-          '(', // attr value start
-          [
-            '\\s*=\\s*',
-            '(',
-            [
-              '([^\\s"\'=<>`]+)', // unquoted value
-              "('[^']*')", // single-quoted value
-              '("[^"]*")', // double-quoted value
-            ].join('|'), // either is ok
-            ')',
-          ].join(''),
-          ')?', // attr value end
-        ].join(''),
-        ')*', // attrs end
-        '\\s*[/]?>', // tag end
-      ].join(''),
-      'g',
-    );
+    // g 标志的正则在模块作用域共享，调用前必须重置 lastIndex
+    XML_TAG_REG.lastIndex = 0;
     let match;
-    while ((match = xmlTagRegex.exec(str)) !== null) {
+    while ((match = XML_TAG_REG.exec(str)) !== null) {
       // 搜索范围超过了字符串匹配到的位置
       if (match.index > index + linkLength) {
         break;
@@ -161,9 +153,10 @@ export default class AutoLink extends SyntaxBase {
    * @param {number} linkLength
    */
   isLinkInATag(str, index, linkLength) {
-    const aTagRegex = /<a\s+[^>]*>[^<]*<\/a>/gi;
+    // g 标志的正则在模块作用域共享，调用前必须重置 lastIndex
+    A_TAG_REG.lastIndex = 0;
     let match;
-    while ((match = aTagRegex.exec(str)) !== null) {
+    while ((match = A_TAG_REG.exec(str)) !== null) {
       // 搜索范围超过了字符串匹配到的位置
       if (match.index > index + linkLength) {
         break;

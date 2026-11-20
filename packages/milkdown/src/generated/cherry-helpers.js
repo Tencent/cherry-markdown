@@ -394,6 +394,7 @@ var inlineNames = [
 ].join('|');
 var inlineBlock = 'br|img|hr';
 var whiteList = new RegExp(`^(${blockNames}|${inlineNames}|${inlineBlock})( |$|/)`, 'i');
+var CONTAIN_BLOCK_TEST_REG = new RegExp(`<(${blockNames})[^>]*>`, 'i');
 function unescapeHTMLNumberEntities(html) {
   const entities = /&#(\d+);?/g;
   return html.replace(entities, (match, codePoint) => {
