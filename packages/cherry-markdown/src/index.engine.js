@@ -15,8 +15,6 @@
  */
 import CherryEngine from './index.engine.core';
 import MermaidCodeEngine from './addons/cherry-code-block-mermaid-plugin';
-// Mermaid source: https://github.com/mermaid-js/mermaid
-// License: https://spdx.org/licenses/MIT.html
 import mermaid from 'mermaid';
 
 // v9 及以下有 mermaid.mermaidAPI，v10+ 为 undefined

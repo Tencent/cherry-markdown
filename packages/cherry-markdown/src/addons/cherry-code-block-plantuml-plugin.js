@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 import mergeWith from '@/utils/toolkit/mergeWith';
-// pako source: https://github.com/nodeca/pako
-// Licenses: https://spdx.org/licenses/MIT.html and https://spdx.org/licenses/Zlib.html
 import { deflateRaw } from 'pako';
 
 /**
