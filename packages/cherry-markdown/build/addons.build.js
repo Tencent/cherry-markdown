@@ -5,7 +5,6 @@ import { mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { legacyUmdPlugin } from './legacy-umd.plugin.js';
-import { bundledLicenses, thirdPartyNoticesPlugin } from './third-party-notices.plugin.js';
 import { createLibraryBuild } from '../../../build/library.mjs';
 import { buildArguments, selectBuilds } from './build-targets.js';
 
@@ -37,7 +36,7 @@ for (const { entry, format } of selectBuilds(builds, buildArguments(import.meta.
     createLibraryBuild(
       { root, entry: input, file: `${baseName}${suffix}`, format, name: globalName },
       {
-        plugins: [...(format === 'umd' ? [legacyUmdPlugin()] : []), thirdPartyNoticesPlugin()],
+        plugins: format === 'umd' ? [legacyUmdPlugin()] : [],
         define: {
           BUILD_ENV: JSON.stringify(process.env.NODE_ENV || 'production'),
         },
@@ -48,7 +47,6 @@ for (const { entry, format } of selectBuilds(builds, buildArguments(import.meta.
           },
         },
         build: {
-          license: bundledLicenses,
           outDir: outputDir,
           rolldownOptions: {
             output: {

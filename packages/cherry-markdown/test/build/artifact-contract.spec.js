@@ -98,13 +98,14 @@ describe('Cherry Markdown published artifact configuration', () => {
         mangle: { toplevel: true },
         format: { comments: false },
       });
-      const pluginNames = ['cherry-prism-languages'];
-      if (config.build.lib.formats[0] === 'umd') pluginNames.push('cherry-legacy-umd');
-      pluginNames.push('cherry-third-party-notices');
       expect(
         config.plugins.map((plugin) => plugin.name),
         file,
-      ).toEqual(pluginNames);
+      ).toEqual(
+        config.build.lib.formats[0] === 'umd'
+          ? ['cherry-prism-languages', 'cherry-legacy-umd']
+          : ['cherry-prism-languages'],
+      );
     }
   });
 
@@ -170,9 +171,7 @@ describe('Cherry Markdown published artifact configuration', () => {
         expect(config.build.outDir).toBe(resolve(projectRoot, 'dist/addons', dirname(relative)));
         expect(config.build.lib.name).toBe(globalName);
         expect(config.build.rolldownOptions.output).toMatchObject({ format, name: globalName, entryFileNames: file });
-        expect(config.plugins.map((plugin) => plugin.name)).toEqual(
-          format === 'umd' ? ['cherry-legacy-umd', 'cherry-third-party-notices'] : ['cherry-third-party-notices'],
-        );
+        expect(config.plugins.map((plugin) => plugin.name)).toEqual(format === 'umd' ? ['cherry-legacy-umd'] : []);
         expect(config.resolve.alias).toEqual({ '@': src, '@cherry': src });
         expect(config.define).toEqual({ BUILD_ENV: JSON.stringify('production') });
       }
