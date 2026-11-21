@@ -72,6 +72,10 @@ describe('built Cherry Markdown artifact contract', () => {
     for (const entry of entries) {
       expect(existsSync(resolve(distRoot, 'types/addons', entry.replace(/\.js$/, '.d.ts'))), entry).toBe(true);
     }
+    for (const bundle of bundles) {
+      const declaration = readDistFile(`addons/${bundle.replace(/\.js$/, '.d.ts')}`);
+      expect(declaration, bundle).toMatch(/^export \{ default \} from "\.\..+\.js";/);
+    }
   });
 
   it('publishes the full and markdown-only stylesheets with their module declarations', () => {

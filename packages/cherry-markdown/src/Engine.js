@@ -422,10 +422,31 @@ export default class Engine {
   }
 
   /**
+   * @overload
+   * @param {string} md
+   * @param {'string'} [returnType]
+   * @param {boolean} [forceNoCursor]
+   * @returns {string}
+   */
+  /**
+   * @overload
+   * @param {string} md
+   * @param {'object'} returnType
+   * @param {boolean} [forceNoCursor]
+   * @returns {ReturnType<typeof htmlparser2.parseDocument>}
+   */
+  /**
+   * @overload
+   * @param {string} md
+   * @param {'string' | 'object'} [returnType]
+   * @param {boolean} [forceNoCursor]
+   * @returns {string | ReturnType<typeof htmlparser2.parseDocument>}
+   */
+  /**
    * @param {string} md md字符串
-   * @param {'string'|'object'} returnType 返回格式，string：返回html字符串，object：返回结构化数据
-   * @param {boolean} forceNoCursor 是否强制不添加光标占位
-   * @returns {string|object} 获取html
+   * @param {'string' | 'object'} [returnType] 返回格式，string：返回html字符串，object：返回结构化数据
+   * @param {boolean} [forceNoCursor] 是否强制不添加光标占位
+   * @returns {string | ReturnType<typeof htmlparser2.parseDocument>} 获取html
    */
   makeHtml(md, returnType = 'string', forceNoCursor = false) {
     this.$prepareMakeHtml(md);

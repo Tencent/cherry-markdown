@@ -35,12 +35,12 @@ declare module 'cherry-markdown/dist/cherry-markdown.markdown.min.css';
 
 /** Mermaid 代码块插件（独立构建产物，需单独引入） */
 declare module 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin' {
-  const plugin: any;
+  const plugin: typeof import('cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin.js').default;
   export default plugin;
 }
 
 /** PlantUML 代码块插件（独立构建产物，需单独引入） */
 declare module 'cherry-markdown/dist/addons/cherry-code-block-plantuml-plugin' {
-  const plugin: any;
+  const plugin: typeof import('cherry-markdown/dist/addons/cherry-code-block-plantuml-plugin.js').default;
   export default plugin;
 }

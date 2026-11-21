@@ -17,6 +17,8 @@ import SyntaxBase, { HOOKS_TYPE_LIST } from './core/SyntaxBase';
 import ParagraphBase from './core/ParagraphBase';
 import MenuBase from './toolbars/MenuBase';
 
+/** @import { SubMenuConfigItem } from './toolbars/MenuBase' */
+
 /**
  * 属性类型匹配
  * @param {object} obj 待匹配的对象
@@ -158,6 +160,7 @@ export function createMenuHook(name, options) {
       } else {
         this.setName(name, filteredOptions.iconName);
       }
+      /** @type {SubMenuConfigItem[]} */
       this.subMenuConfig = filteredOptions.subMenuConfig || [];
     }
 

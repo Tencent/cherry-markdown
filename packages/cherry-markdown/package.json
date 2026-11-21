@@ -13,6 +13,22 @@
   "module": "./dist/cherry-markdown.esm.js",
   "style": "./dist/cherry-markdown.min.css",
   "types": "./dist/types/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "types/*.d.ts": [
+        "dist/public-types/*.d.ts",
+        "types/*.d.ts"
+      ],
+      "types/*.js": [
+        "dist/public-types/*.d.ts",
+        "types/*.d.ts"
+      ],
+      "types/*": [
+        "dist/public-types/*.d.ts",
+        "types/*.d.ts"
+      ]
+    }
+  },
   "directories": {
     "example": "examples"
   },
