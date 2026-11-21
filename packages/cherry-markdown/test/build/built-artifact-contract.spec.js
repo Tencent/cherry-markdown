@@ -108,7 +108,7 @@ describe('built Cherry Markdown artifact contract', () => {
       // @ts-expect-error SyntaxHookBase is a constructor.
       const invalid: number = SyntaxHookBase;
     `;
-    const options = { module, moduleResolution, noEmit: true, strict: true, skipLibCheck: true, types: [] };
+    const options = { module, moduleResolution, noEmit: true, strict: true, skipLibCheck: false, types: [] };
     const host = ts.createCompilerHost(options);
     const readSourceFile = host.getSourceFile.bind(host);
     host.getSourceFile = (file, ...args) =>

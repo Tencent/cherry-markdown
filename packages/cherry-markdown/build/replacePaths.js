@@ -16,7 +16,7 @@
 import replaceInFile from 'replace-in-file';
 import glob from 'glob';
 import ts from 'typescript';
-import { readFileSync, writeFileSync } from 'fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, relative, resolve } from 'path';
 
 const declarationEntries = [
@@ -33,24 +33,26 @@ const declarationEntries = [
   ['cherry-markdown.stream.esm.d.ts', 'index.stream', 'Cherry', ['SyntaxHookBase']],
 ];
 
-function addDeclarationExtensions(file, source, declarationRoot, declarations, publicDeclarations) {
-  const directory = dirname(resolve(file));
-  const sourceDirectory = resolve('src', relative(declarationRoot, directory));
+function normalizeDeclarationImports(file, sourceFile, source, destinations, declarations) {
+  const directory = dirname(file);
+  const sourceDirectory = dirname(sourceFile);
   const parsed = ts.createSourceFile(file, source, ts.ScriptTarget.Latest);
   const edits = [];
 
   function update(specifier) {
     if (!specifier || !ts.isStringLiteral(specifier) || !/^\.\.?(?:\/|$)/.test(specifier.text)) return;
 
-    // TypeScript can emit a reference to a public type relative to the original src file.
-    const sourceTarget = resolve(sourceDirectory, specifier.text).replace(/\.js$/, '');
-    const target = publicDeclarations.has(`${sourceTarget}.d.ts`)
-      ? sourceTarget
-      : resolve(directory, specifier.text).replace(/\.js$/, '');
-    const destination = declarations.has(`${target}.d.ts`) ? `${target}.js` : resolve(target, 'index.js');
-    if (!declarations.has(destination.replace(/\.js$/, '.d.ts'))) return;
+    const request = specifier.text.replace(/\.js$/, '');
+    const target = resolve(directory, request);
+    const sourceTarget = resolve(sourceDirectory, request);
+    // TypeScript can emit a reference relative to the original src file.
+    const declaration =
+      destinations.get(`${target}.d.ts`) ??
+      destinations.get(`${sourceTarget}.d.ts`) ??
+      [`${target}.d.ts`, resolve(target, 'index.d.ts')].find((path) => declarations.has(path));
+    if (!declaration) return;
 
-    const path = relative(directory, destination).replace(/\\/g, '/');
+    const path = relative(directory, declaration.replace(/\.d\.ts$/, '.js')).replace(/\\/g, '/');
     const replacement = path.startsWith('.') ? path : `./${path}`;
     if (replacement === specifier.text) return;
     edits.push({ start: specifier.getStart(parsed) + 1, end: specifier.end - 1, replacement });
@@ -72,14 +74,36 @@ function addDeclarationExtensions(file, source, declarationRoot, declarations, p
 async function replacePaths() {
   const declarationRoot = resolve('dist/types');
   const publicTypesRoot = resolve('types');
-  const files = glob.sync('dist/types/**/*.d.ts');
+  const publishedTypesRoot = resolve('dist/public-types');
+  const files = glob.sync('dist/types/**/*.d.ts').map((file) => resolve(file));
   const publicDeclarations = new Set(
     glob.sync('types/**/*.d.ts', { ignore: 'types/env.d.ts' }).map((file) => resolve(file)),
   );
-  const declarations = new Set([...files.map((file) => resolve(file)), ...publicDeclarations]);
+  // These handwritten declarations refer to src, which is absent from the npm package.
+  const publishedDeclarations = ['cherry', 'editor', 'previewer', 'syntax'].map((name) => [
+    resolve(publicTypesRoot, `${name}.d.ts`),
+    resolve(publishedTypesRoot, `${name}.d.ts`),
+  ]);
+  const destinations = new Map([...publicDeclarations].map((file) => [file, file]));
+  for (const [sourceFile, file] of publishedDeclarations) {
+    destinations.set(sourceFile, file);
+  }
+  const declarations = new Set([...files, ...destinations.values()]);
 
   for (const file of files) {
-    const fileDirectory = dirname(resolve(file));
+    const path = relative(declarationRoot, file);
+    destinations.set(resolve('src', path), file);
+  }
+  mkdirSync(publishedTypesRoot, { recursive: true });
+  for (const [sourceFile, file] of publishedDeclarations) {
+    writeFileSync(file, readFileSync(sourceFile, 'utf-8'));
+  }
+  const inputs = [
+    ...files.map((file) => [resolve('src', relative(declarationRoot, file)), file]),
+    ...publishedDeclarations,
+  ];
+  for (const [sourceFile, file] of inputs) {
+    const fileDirectory = dirname(file);
     const publicTypesPath = relative(fileDirectory, publicTypesRoot).replace(/\\/g, '/');
     const declarationTypesPath = relative(fileDirectory, declarationRoot).replace(/\\/g, '/') || '.';
     const results = await replaceInFile({
@@ -93,7 +117,7 @@ async function replacePaths() {
       }
     }
     const source = readFileSync(file, 'utf-8');
-    const updated = addDeclarationExtensions(file, source, declarationRoot, declarations, publicDeclarations);
+    const updated = normalizeDeclarationImports(file, sourceFile, source, destinations, declarations);
     if (updated !== source) writeFileSync(file, updated);
   }
 

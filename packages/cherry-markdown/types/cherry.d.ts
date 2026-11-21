@@ -174,7 +174,7 @@ export interface CherryOptionsBase<T extends CherryCustomOptions = CherryCustomO
     /** 编辑器完成所有异步渲染后触发 */
     afterAsyncRender?: CherryLifecycle;
     /** 编辑器选区变化时触发 */
-    selectionChange?: ({ selections: [], lastSelections: [], info }) => void;
+    selectionChange?: (event: { selections: unknown[]; lastSelections: unknown[]; info: unknown }) => void;
     /** 变更语言时触发 */
     afterChangeLocale?: (locale: string) => void;
     /** 变更主题时触发 */
