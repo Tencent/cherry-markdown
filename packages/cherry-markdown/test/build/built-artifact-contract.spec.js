@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import glob from 'glob';
 import { JSDOM } from 'jsdom';
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
+import ts from 'typescript';
 import { describe, expect, it } from 'vite-plus/test';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -90,6 +91,31 @@ describe('built Cherry Markdown artifact contract', () => {
       ],
       { cwd: projectRoot, stdio: 'pipe', timeout: 10000 },
     );
+  });
+
+  it.each([
+    ['NodeNext', ts.ModuleKind.NodeNext, ts.ModuleResolutionKind.NodeNext],
+    ['bundler', ts.ModuleKind.ESNext, ts.ModuleResolutionKind.Bundler],
+  ])('resolves the Node engine types with %s', (_name, module, moduleResolution) => {
+    const entry = resolve(distRoot, 'node-engine-consumer.mts');
+    const source = `
+      import CherryEngine, { SyntaxHookBase } from './${nodeBundleName}';
+      const engine = new CherryEngine();
+      const markdown: string = engine.makeMarkdown('<h1>Heading</h1>');
+      const html: string | object = engine.makeHtml(markdown);
+      // @ts-expect-error Markdown input must be a string.
+      engine.makeHtml(123);
+      // @ts-expect-error SyntaxHookBase is a constructor.
+      const invalid: number = SyntaxHookBase;
+    `;
+    const options = { module, moduleResolution, noEmit: true, strict: true, skipLibCheck: true, types: [] };
+    const host = ts.createCompilerHost(options);
+    const readSourceFile = host.getSourceFile.bind(host);
+    host.getSourceFile = (file, ...args) =>
+      file === entry ? ts.createSourceFile(file, source, args[0]) : readSourceFile(file, ...args);
+
+    const diagnostics = ts.getPreEmitDiagnostics(ts.createProgram([entry], options, host));
+    expect(diagnostics.map(({ messageText }) => ts.flattenDiagnosticMessageText(messageText, '\n'))).toEqual([]);
   });
 
   it('publishes every addon in both formats with its declaration', () => {

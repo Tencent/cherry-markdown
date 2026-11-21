@@ -15,6 +15,7 @@
  */
 import replaceInFile from 'replace-in-file';
 import glob from 'glob';
+import ts from 'typescript';
 import { readFileSync, writeFileSync } from 'fs';
 import { dirname, relative, resolve } from 'path';
 
@@ -32,11 +33,52 @@ const declarationEntries = [
   ['cherry-markdown.stream.esm.d.ts', 'index.stream', 'Cherry', ['SyntaxHookBase']],
 ];
 
+function addDeclarationExtensions(file, source, declarationRoot, declarations, publicDeclarations) {
+  const directory = dirname(resolve(file));
+  const sourceDirectory = resolve('src', relative(declarationRoot, directory));
+  const parsed = ts.createSourceFile(file, source, ts.ScriptTarget.Latest);
+  const edits = [];
+
+  function update(specifier) {
+    if (!specifier || !ts.isStringLiteral(specifier) || !/^\.\.?(?:\/|$)/.test(specifier.text)) return;
+
+    // TypeScript can emit a reference to a public type relative to the original src file.
+    const sourceTarget = resolve(sourceDirectory, specifier.text).replace(/\.js$/, '');
+    const target = publicDeclarations.has(`${sourceTarget}.d.ts`)
+      ? sourceTarget
+      : resolve(directory, specifier.text).replace(/\.js$/, '');
+    const destination = declarations.has(`${target}.d.ts`) ? `${target}.js` : resolve(target, 'index.js');
+    if (!declarations.has(destination.replace(/\.js$/, '.d.ts'))) return;
+
+    const path = relative(directory, destination).replace(/\\/g, '/');
+    const replacement = path.startsWith('.') ? path : `./${path}`;
+    if (replacement === specifier.text) return;
+    edits.push({ start: specifier.getStart(parsed) + 1, end: specifier.end - 1, replacement });
+  }
+
+  function visit(node) {
+    if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) update(node.moduleSpecifier);
+    if (ts.isImportTypeNode(node) && ts.isLiteralTypeNode(node.argument)) update(node.argument.literal);
+    ts.forEachChild(node, visit);
+  }
+
+  visit(parsed);
+  for (const { start, end, replacement } of edits.reverse()) {
+    source = source.slice(0, start) + replacement + source.slice(end);
+  }
+  return source;
+}
+
 async function replacePaths() {
   const declarationRoot = resolve('dist/types');
   const publicTypesRoot = resolve('types');
+  const files = glob.sync('dist/types/**/*.d.ts');
+  const publicDeclarations = new Set(
+    glob.sync('types/**/*.d.ts', { ignore: 'types/env.d.ts' }).map((file) => resolve(file)),
+  );
+  const declarations = new Set([...files.map((file) => resolve(file)), ...publicDeclarations]);
 
-  for (const file of glob.sync('dist/types/**/*.d.ts')) {
+  for (const file of files) {
     const fileDirectory = dirname(resolve(file));
     const publicTypesPath = relative(fileDirectory, publicTypesRoot).replace(/\\/g, '/');
     const declarationTypesPath = relative(fileDirectory, declarationRoot).replace(/\\/g, '/') || '.';
@@ -50,6 +92,9 @@ async function replacePaths() {
         console.log(result);
       }
     }
+    const source = readFileSync(file, 'utf-8');
+    const updated = addDeclarationExtensions(file, source, declarationRoot, declarations, publicDeclarations);
+    if (updated !== source) writeFileSync(file, updated);
   }
 
   // 在产物主入口顶部插入三斜线引用，使消费者自动加载环境模块声明（CSS、addon 等）
@@ -64,7 +109,7 @@ async function replacePaths() {
     const names = namedExports.join(', ');
     writeFileSync(
       `dist/${file}`,
-      `import ${defaultName}, { ${names} } from "./types/${entry}";\nexport { ${names} };\nexport default ${defaultName};\n`,
+      `import ${defaultName}, { ${names} } from "./types/${entry}.js";\nexport { ${names} };\nexport default ${defaultName};\n`,
     );
   }
 }
