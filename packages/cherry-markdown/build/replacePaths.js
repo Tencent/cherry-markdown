@@ -108,6 +108,7 @@ async function replacePaths() {
     const declarationTypesPath = relative(fileDirectory, declarationRoot).replace(/\\/g, '/') || '.';
     const results = await replaceInFile({
       files: file,
+      disableGlobs: true,
       from: [/~types\//g, /@cherry\//g, /@\//g],
       to: [`${publicTypesPath}/`, `${declarationTypesPath}/`, `${declarationTypesPath}/`],
     });
