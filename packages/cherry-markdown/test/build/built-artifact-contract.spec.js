@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import glob from 'glob';
 import { JSDOM } from 'jsdom';
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
+import ts from 'typescript';
 import { describe, expect, it } from 'vite-plus/test';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -27,7 +28,9 @@ const bundleNames = [
   'cherry-markdown.stream.js',
 ];
 
-const declarationNames = bundleNames.map((file) => file.replace(/\.js$/, '.d.ts'));
+const nodeBundleName = 'cherry-markdown.engine.core.node.js';
+const publishedBundleNames = [...bundleNames, nodeBundleName];
+const declarationNames = publishedBundleNames.map((file) => file.replace(/\.js$/, '.d.ts'));
 const umdFiles = [
   ...bundleNames.filter((file) => !file.endsWith('.esm.js')),
   ...glob.sync('src/addons/**/*-plugin.js', { cwd: projectRoot }).map((file) => file.replace(/^src\//, '')),
@@ -58,10 +61,61 @@ describe('built Cherry Markdown artifact contract', () => {
   );
 
   it('publishes the complete UMD and ESM bundle matrix with declarations', () => {
-    expect(glob.sync('*.js', { cwd: distRoot }).sort()).toEqual([...bundleNames].sort());
-    [...bundleNames, ...declarationNames].forEach((file) => {
+    expect(glob.sync('*.js', { cwd: distRoot }).sort()).toEqual([...publishedBundleNames].sort());
+    [...publishedBundleNames, ...declarationNames].forEach((file) => {
       expect(existsSync(resolve(distRoot, file)), file).toBe(true);
     });
+  });
+
+  it('renders and sanitizes Markdown in a fresh Node process', () => {
+    execFileSync(
+      process.execPath,
+      [
+        '--input-type=module',
+        '--eval',
+        `
+          import assert from 'node:assert/strict';
+
+          assert.equal(typeof globalThis.window, 'undefined');
+          assert.equal(typeof globalThis.document, 'undefined');
+          const { default: CherryEngine } = await import('./dist/${nodeBundleName}');
+          const engine = new CherryEngine();
+          const html = engine.makeHtml('# Headless\\n\\n<p data-lines="1"><em>Cherry</em></p>');
+
+          assert.match(html, /<h1\\b[^>]*>.*Headless.*<\\/h1>/);
+          assert.match(html, /<em>Cherry<\\/em>/);
+          assert.doesNotMatch(html, /data-lines=/);
+          assert.equal(typeof globalThis.window, 'undefined');
+          assert.equal(typeof globalThis.document, 'undefined');
+        `,
+      ],
+      { cwd: projectRoot, stdio: 'pipe', timeout: 10000 },
+    );
+  });
+
+  it.each([
+    ['NodeNext', ts.ModuleKind.NodeNext, ts.ModuleResolutionKind.NodeNext],
+    ['bundler', ts.ModuleKind.ESNext, ts.ModuleResolutionKind.Bundler],
+  ])('resolves the Node engine types with %s', (_name, module, moduleResolution) => {
+    const entry = resolve(distRoot, 'node-engine-consumer.mts');
+    const source = `
+      import CherryEngine, { SyntaxHookBase } from './${nodeBundleName}';
+      const engine = new CherryEngine();
+      const markdown: string = engine.makeMarkdown('<h1>Heading</h1>');
+      const html: string | object = engine.makeHtml(markdown);
+      // @ts-expect-error Markdown input must be a string.
+      engine.makeHtml(123);
+      // @ts-expect-error SyntaxHookBase is a constructor.
+      const invalid: number = SyntaxHookBase;
+    `;
+    const options = { module, moduleResolution, noEmit: true, strict: true, skipLibCheck: false, types: [] };
+    const host = ts.createCompilerHost(options);
+    const readSourceFile = host.getSourceFile.bind(host);
+    host.getSourceFile = (file, ...args) =>
+      file === entry ? ts.createSourceFile(file, source, args[0]) : readSourceFile(file, ...args);
+
+    const diagnostics = ts.getPreEmitDiagnostics(ts.createProgram([entry], options, host));
+    expect(diagnostics.map(({ messageText }) => ts.flattenDiagnosticMessageText(messageText, '\n'))).toEqual([]);
   });
 
   it('publishes every addon in both formats with its declaration', () => {
