@@ -54,7 +54,7 @@ function onStreamComplete() {
 
 Pass the complete accumulated Markdown to `setMarkdown()`, matching Web `CherryStream.setMarkdown()`. It re-renders the current complete content, which preserves valid rendering for incomplete syntax. The package does not implement SSE requests, decoding, framing, or provider payload extraction.
 
-`setMarkdown()` re-renders the accumulated Markdown for correctness with incomplete syntax. While a stream is active, pass `deferImages: true` to render image placeholders; call it once with `deferImages: false` when the stream completes. For high-frequency model output, batch page-level `setData` calls (for example, every 50-100 ms) instead of updating for every chunk.
+`setMarkdown()` re-renders the accumulated Markdown for correctness with incomplete syntax. While a stream is active, pass `deferImages: true` to render image placeholders; call it once with `deferImages: false` when the stream completes. To render a flow cursor, configure `engine.global.flowSessionCursor: 'default'` and pass `forceNoCursor: false` while streaming. For high-frequency model output, batch page-level `setData` calls (for example, every 50-100 ms) instead of updating for every chunk.
 
 ## Module Formats
 
@@ -81,13 +81,13 @@ Pass the complete accumulated Markdown to `setMarkdown()`, matching Web `CherryS
 | Bold          | `**text**`                      | `class="md-strong"`                                            | ✅     |
 | Italic        | `*text*`                        | `class="md-em"`                                                | ✅     |
 | Inline Code   | `` `code` ``                    | `class="md-inline-code"`                                       | ✅     |
-| Underline     | `++text++`                      | `class="md-underline"`                                         | ✅     |
+| Underline     | `/text/`                        | `class="md-underline"`                                         | ✅     |
 | Strikethrough | `~~text~~`                      | `class="md-strike"`                                            | ✅     |
-| Sub / Sup     | `~text~` / `^text^`             | Inline text with class                                         | ✅     |
+| Sub / Sup     | `^^text^^` / `^text^`           | Inline text with class                                         | ✅     |
 | Line Break    | two trailing spaces             | `\n` in text run                                               | ✅     |
 | AutoLink      | `https://...`                   | Same as link                                                   | ✅     |
-| Emoji         | `:smile:`                       | Image component                                                | ✅     |
-| Cursor        | stream only                     | `\|` cursor symbol                                             | ✅     |
+| Emoji         | `:smile:`                       | Unicode text run                                               | ✅     |
+| Cursor        | stream only                     | `\|` cursor symbol; opt-in configuration                       | ✅     |
 | Footnote ref  | `[^key]`                        | Sup/link data; template owns navigation                        | ✅     |
 | Panel         | `:::tip/warning/danger/success` | Plain paragraph, styling lost                                  | ❌     |
 | Footnote body | generated content               | Plain paragraphs, styling lost                                 | ❌     |
