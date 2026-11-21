@@ -125,7 +125,15 @@ export const URL = new RegExp(`^${URL_INLINE.source}$`);
 export const LIST_CONTENT =
   /^([ \t]*)([*+-][ ](\[[ x]\])?|[0-9一二三四五六七八九十零]+\.|[a-z]\.|\b(?:M{0,3}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3}))\b\.)([^\r\n]*)/;
 
-export function getTableRule(merge = false) {
+// 表格规则的模块级缓存：
+// - TABLE_RULE_SPLIT 缓存 merge=false 的返回值（{ strict, loose } 结构体，内部各含 reg）
+// - TABLE_RULE_MERGED 缓存 merge=true 的返回值（合并后的单个 RegExp）
+/** @type {ReturnType<typeof buildTableRuleSplit> | null} */
+let TABLE_RULE_SPLIT = null;
+/** @type {RegExp | null} */
+let TABLE_RULE_MERGED = null;
+
+function buildTableRuleSplit() {
   // ^(\|[^\n]+\|\r?\n)((?:\|:?[-]+:?)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$
   // (\\|?[^\\n|]+\\|?\\n)(?:\\|?[\\s]*:?[-]{2,}:?[\\s]*
   // (?:\\|[\\s]*:?[-]{2,}:?[\\s]*)+\\|?)(\\n\\|?(\\|[^\\n|]+)*\\|?)?
@@ -144,7 +152,6 @@ export function getTableRule(merge = false) {
     ].join(''),
     end: '(?=$|\\n)',
   };
-
   strict.reg = compileRegExp(strict, 'g', true);
 
   const loose = {
@@ -157,14 +164,24 @@ export function getTableRule(merge = false) {
     ].join(''),
     end: '(?=$|\\n)',
   };
-
   loose.reg = compileRegExp(loose, 'g', true);
 
+  return { strict, loose };
+}
+
+export function getTableRule(merge = false) {
   if (merge === false) {
-    return { strict, loose };
+    if (TABLE_RULE_SPLIT === null) {
+      TABLE_RULE_SPLIT = buildTableRuleSplit();
+    }
+    return TABLE_RULE_SPLIT;
   }
-  const regStr = `(?:${strict.begin + strict.content + strict.end}|${loose.begin + loose.content + loose.end})`;
-  return compileRegExp({ begin: '', content: regStr, end: '' }, 'g', true);
+  if (TABLE_RULE_MERGED === null) {
+    const { strict, loose } = TABLE_RULE_SPLIT ?? buildTableRuleSplit();
+    const regStr = `(?:${strict.begin + strict.content + strict.end}|${loose.begin + loose.content + loose.end})`;
+    TABLE_RULE_MERGED = compileRegExp({ begin: '', content: regStr, end: '' }, 'g', true);
+  }
+  return TABLE_RULE_MERGED;
 }
 
 export function getCodeBlockRule() {
@@ -300,7 +317,10 @@ export function getLinkRule() {
     // lookbehind启用分组是为了和不兼容lookbehind的场景共用一个回调
     begin: isLookbehindSupported() ? '((?<!\\\\))' : '(^|[^\\\\])',
     content: [
-      '\\[([^\\n]*?)\\]', // ?<text>
+      // ?<text> 单行时保持原规则；跨行（软换行）时最多 3 行、不跨空行，且文字内不能再有 [ ]，
+      // 避免从前几行的 `[`（如 a[i]、[0, 1)）开始匹配，导致 LinkFormatter 把中间的公式也转义掉；
+      // 跨行时也不匹配 `![`，图片 alt 跨行的情况保持原样，不渲染成 `!` + 链接
+      `\\[([^\\n]*?|${isLookbehindSupported() ? '(?<!!\\[)' : ''}[^\\[\\]\\n]*(?:\\n(?![ \\t]*\\n)[^\\[\\]\\n]*){1,2})\\]`,
       '[ \\t]*', // any spaces
       '\\(',
       /**

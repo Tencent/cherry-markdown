@@ -37,5 +37,17 @@ describe('core/hooks/Link lookbehind fallback', () => {
     expect(html).toContain('before <a href="https://example.com"');
     expect(html).toContain('>text</a>');
     expect(hook.makeHtml('\\[escaped](https://example.com)')).toBe('\\[escaped](https://example.com)');
+    expect(UrlCache.restoreAll(hook.makeHtml('see [wrapped\ntext](https://example.com)'))).toContain(
+      '>wrapped\ntext</a>',
+    );
+  });
+
+  it('leaves an image whose alt text wraps onto the next line alone', () => {
+    const hook = createLink();
+    // 不支持 lookbehind 时 leadingChar 是 `[` 前的那个字符
+    const sentenceMakeFunc = (md: string) => ({ sign: '', html: md });
+    const html = hook.toHtml(sentenceMakeFunc, '![alt\ntext](a.png)', '!', 'alt\ntext', 'a.png', undefined, undefined);
+
+    expect(html).toBe('![alt\ntext](a.png)');
   });
 });

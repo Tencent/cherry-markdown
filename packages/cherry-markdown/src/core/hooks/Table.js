@@ -210,8 +210,6 @@ export default class Table extends ParagraphBase {
     /**
      * ~CTHD: <thead>
      * ~CTHD$: </thead>
-     * ~CTBD: <tbody>
-     * ~CTBD$: </tbody>
      * ~CTR: <tr>
      * ~CTR$: </tr>
      * ~CTH(L|R|C|U): <th>
@@ -307,15 +305,13 @@ export default class Table extends ParagraphBase {
 
   $renderTable(COLUMN_ALIGN_MAP, tableHeader, tableRows, dataLines) {
     const cacheSrc = this.$testHeadEmpty(tableHeader)
-      ? `~CTHD${tableHeader}~CTHD$~CTBD${tableRows}~CTBD$`
-      : `~CTBD${tableRows}~CTBD$`;
+      ? `~CTHD${tableHeader}~CTHD$<tbody>${tableRows}</tbody>`
+      : `<tbody>${tableRows}</tbody>`;
     const html = cacheSrc;
     const sign = this.$engine.hash(html);
     const renderHtml = html
       .replace(/~CTHD\$/g, '</thead>')
       .replace(/~CTHD/g, '<thead>')
-      .replace(/~CTBD\$/g, '</tbody>')
-      .replace(/~CTBD/g, '</tbody>')
       .replace(/~CTR\$/g, '</tr>')
       .replace(/~CTR/g, '<tr>')
       .replace(/[ ]?~CTH\$/g, '</th>')
@@ -346,33 +342,28 @@ export default class Table extends ParagraphBase {
       }
     }
     // strict fenced mode
-    if (this.test($str, TABLE_STRICT)) {
-      $str = $str.replace(this.RULE[TABLE_STRICT].reg, (match, leading) => {
-        const dataLines = this.getLineCount(match, leading);
-        // 必须先trim，否则分割出来的结果不对
-        // 将fenced mode转换为loose mode
-        const lines = match
-          .trim()
-          .split(/\n/)
-          .map((line) => String(line).trim());
-        const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc, dataLines, $str);
-        return this.getCacheWithSpace(this.pushCache(table, sign, dataLines), match);
-      });
-    }
+    $str = $str.replace(this.RULE[TABLE_STRICT].reg, (match, leading) => {
+      const dataLines = this.getLineCount(match, leading);
+      // 必须先trim，否则分割出来的结果不对
+      // 将fenced mode转换为loose mode
+      const lines = match
+        .trim()
+        .split(/\n/)
+        .map((line) => String(line).trim());
+      const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc, dataLines, $str);
+      return this.getCacheWithSpace(this.pushCache(table, sign, dataLines), match);
+    });
     // loose mode
-    if (this.test($str, TABLE_LOOSE)) {
-      // console.log(TABLE_LOOSE);
-      $str = $str.replace(this.RULE[TABLE_LOOSE].reg, (match, leading) => {
-        const dataLines = this.getLineCount(match, leading);
-        // 必须先trim，否则分割出来的结果不对
-        const lines = match
-          .trim()
-          .split(/\n/)
-          .map((line) => String(line).trim());
-        const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc, dataLines, $str);
-        return this.getCacheWithSpace(this.pushCache(table, sign, dataLines), match);
-      });
-    }
+    $str = $str.replace(this.RULE[TABLE_LOOSE].reg, (match, leading) => {
+      const dataLines = this.getLineCount(match, leading);
+      // 必须先trim，否则分割出来的结果不对
+      const lines = match
+        .trim()
+        .split(/\n/)
+        .map((line) => String(line).trim());
+      const { html: table, sign } = this.$parseTable(lines, sentenceMakeFunc, dataLines, $str);
+      return this.getCacheWithSpace(this.pushCache(table, sign, dataLines), match);
+    });
     return $str;
   }
 
