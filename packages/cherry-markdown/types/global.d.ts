@@ -10,14 +10,14 @@
  * ```json
  * {
  *   "compilerOptions": {
- *     "types": ["cherry-markdown/types/global"]
+ *     "types": ["cherry-markdown/types/global.js"]
  *   }
  * }
  * ```
  *
  * 或在任意 .d.ts 文件中：
  * ```ts
- * /// <reference types="cherry-markdown/types/global" />
+ * /// <reference types="cherry-markdown/types/global.js" />
  * ```
  */
 

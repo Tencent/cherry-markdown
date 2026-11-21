@@ -74,16 +74,14 @@ function normalizeDeclarationImports(file, sourceFile, source, destinations, dec
 async function replacePaths() {
   const declarationRoot = resolve('dist/types');
   const publicTypesRoot = resolve('types');
-  const publishedTypesRoot = resolve('dist/public-types');
   const files = glob.sync('dist/types/**/*.d.ts').map((file) => resolve(file));
   const publicDeclarations = new Set(
-    glob.sync('types/**/*.d.ts', { ignore: 'types/env.d.ts' }).map((file) => resolve(file)),
+    glob.sync('types/*.d.ts', { ignore: 'types/env.d.ts' }).map((file) => resolve(file)),
   );
-  // These handwritten declarations refer to src, which is absent from the npm package.
-  const publishedDeclarations = ['cherry', 'editor', 'previewer', 'syntax'].map((name) => [
-    resolve(publicTypesRoot, `${name}.d.ts`),
-    resolve(publishedTypesRoot, `${name}.d.ts`),
-  ]);
+  // Keep the source declarations separate from the published paths so repeated builds read src.
+  const publishedDeclarations = glob
+    .sync('*.d.ts', { cwd: resolve(publicTypesRoot, 'source') })
+    .map((name) => [resolve(publicTypesRoot, 'source', name), resolve(publicTypesRoot, name)]);
   const destinations = new Map([...publicDeclarations].map((file) => [file, file]));
   for (const [sourceFile, file] of publishedDeclarations) {
     destinations.set(sourceFile, file);
@@ -94,7 +92,6 @@ async function replacePaths() {
     const path = relative(declarationRoot, file);
     destinations.set(resolve('src', path), file);
   }
-  mkdirSync(publishedTypesRoot, { recursive: true });
   for (const [sourceFile, file] of publishedDeclarations) {
     writeFileSync(file, readFileSync(sourceFile, 'utf-8'));
   }

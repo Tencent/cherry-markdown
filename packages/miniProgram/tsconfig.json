@@ -11,7 +11,7 @@
     "strict": false,
     "paths": {
       "@/*": ["../cherry-markdown/src/*"],
-      "~types/*": ["../cherry-markdown/types/*"]
+      "~types/*": ["../cherry-markdown/types/source/*", "../cherry-markdown/types/*"]
     }
   },
   "include": ["src/index.js"],

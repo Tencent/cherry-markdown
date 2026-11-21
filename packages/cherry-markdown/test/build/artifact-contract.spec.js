@@ -201,6 +201,7 @@ describe('Cherry Markdown published artifact configuration', () => {
     expect(packageJson.style).toBe('./dist/cherry-markdown.min.css');
     expect(packageJson.types).toBe('./dist/types/index.d.ts');
     expect(packageJson.exports).toBeUndefined();
-    expect(packageJson.files).toEqual(['dist', 'types', '!types/env.d.ts']);
+    expect(packageJson.typesVersions).toBeUndefined();
+    expect(packageJson.files).toEqual(['dist', 'types', '!types/env.d.ts', '!types/source']);
   });
 });

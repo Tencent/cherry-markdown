@@ -11,14 +11,14 @@
  * ```json
  * {
  *   "compilerOptions": {
- *     "types": ["cherry-markdown/types/modules"]
+ *     "types": ["cherry-markdown/types/modules.js"]
  *   }
  * }
  * ```
  *
  * 或在任意 .d.ts 文件中：
  * ```ts
- * /// <reference types="cherry-markdown/types/modules" />
+ * /// <reference types="cherry-markdown/types/modules.js" />
  * ```
  */
 
@@ -35,12 +35,12 @@ declare module 'cherry-markdown/dist/cherry-markdown.markdown.min.css';
 
 /** Mermaid 代码块插件（独立构建产物，需单独引入） */
 declare module 'cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin' {
-  const plugin: typeof import('cherry-markdown/dist/addons/cherry-code-block-mermaid-plugin.js').default;
+  const plugin: typeof import('../dist/addons/cherry-code-block-mermaid-plugin.js').default;
   export default plugin;
 }
 
 /** PlantUML 代码块插件（独立构建产物，需单独引入） */
 declare module 'cherry-markdown/dist/addons/cherry-code-block-plantuml-plugin' {
-  const plugin: typeof import('cherry-markdown/dist/addons/cherry-code-block-plantuml-plugin.js').default;
+  const plugin: typeof import('../dist/addons/cherry-code-block-plantuml-plugin.js').default;
   export default plugin;
 }

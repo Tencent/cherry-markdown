@@ -17,7 +17,7 @@
 // 可选依赖的类型声明
 import { EditorView, ViewUpdate, Rect, BlockInfo } from '@codemirror/view';
 import { EditorState, SelectionRange, TransactionSpec } from '@codemirror/state';
-import Cherry from '../src/Cherry.js';
+import Cherry from '../../src/Cherry.js';
 import { EditorMode, CherryToolbarsOptions } from './cherry.js';
 declare module '@replit/codemirror-vim' {
   import { Extension } from '@codemirror/state';
