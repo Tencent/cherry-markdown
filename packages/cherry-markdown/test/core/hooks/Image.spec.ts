@@ -136,6 +136,35 @@ describe('core/hooks/Image', () => {
     expect(html).not.toContain('title=');
   });
 
+  it('renders an image whose alt text wraps onto the next line', () => {
+    const { hook } = createImage();
+    const html = render(hook, '![a fun cartoon logo made of glob\ncharacters](logo.png)');
+
+    expect(html).toContain('<img src="image/logo.png"');
+    expect(html).toContain('alt="a fun cartoon logo made of glob characters"');
+    expect(html).not.toContain('\n');
+  });
+
+  it('renders a wrapped-alt image inside a link and wrapped-alt media', () => {
+    const { hook } = createImage();
+    const badge = render(hook, '[![npm\n  version](badge.svg)](https://example.com)');
+    const video = render(hook, '!video[a short\ndemo](movie.mp4)');
+
+    expect(badge).toMatch(/^\[<img src="image\/badge\.svg"/);
+    expect(badge).toContain('alt="npm version"');
+    expect(badge).toContain('](https://example.com)');
+    expect(video).toContain('<video src="video/movie.mp4"');
+    expect(video).toContain('controls="controls">a short demo</video>');
+  });
+
+  it('does not join alt text across a blank line, more than three lines, or brackets', () => {
+    const { hook } = createImage();
+
+    expect(render(hook, '![alt\n\ntext](a.png)')).toBe('![alt\n\ntext](a.png)');
+    expect(render(hook, '![a\nb\nc\nd](a.png)')).toBe('![a\nb\nc\nd](a.png)');
+    expect(render(hook, '![a [b]\nc](a.png)')).toBe('![a [b]\nc](a.png)');
+  });
+
   it('leaves unsupported and unresolved media syntax unchanged', () => {
     const { hook } = createImage();
 
