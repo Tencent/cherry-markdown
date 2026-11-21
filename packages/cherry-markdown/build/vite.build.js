@@ -76,7 +76,10 @@ const builds = [
     file: 'cherry-markdown.engine.core.node.js',
     format: 'es',
     external: engineExternal,
-    sanitizer: resolve(src, 'Sanitizer.node.js'),
+    aliases: {
+      '@/Sanitizer': resolve(src, 'Sanitizer.node.js'),
+      '@/Engine': resolve(src, 'Engine.node.js'),
+    },
   },
   {
     id: 'engine-core-umd',
@@ -122,7 +125,7 @@ for (const current of selectBuilds(builds, buildArguments(import.meta.url))) {
         },
         resolve: {
           alias: {
-            ...(current.sanitizer ? { '@/Sanitizer': current.sanitizer } : {}),
+            ...current.aliases,
             '@': src,
             '@cherry': src,
           },

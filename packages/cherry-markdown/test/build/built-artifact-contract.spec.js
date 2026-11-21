@@ -93,6 +93,38 @@ describe('built Cherry Markdown artifact contract', () => {
     );
   });
 
+  it('uses an asynchronous URL update on the next Node render', () => {
+    execFileSync(
+      process.execPath,
+      [
+        '--input-type=module',
+        '--eval',
+        `
+          import assert from 'node:assert/strict';
+          import CherryEngine from './dist/${nodeBundleName}';
+
+          const original = 'https://example.com/original.png';
+          const updated = 'https://example.com/updated.png';
+          const engine = new CherryEngine({
+            engine: {
+              global: {
+                urlProcessor(url, type, done) {
+                  setTimeout(() => done(updated), 0);
+                  return url;
+                },
+              },
+            },
+          });
+          const markdown = '![image](' + original + ')';
+          assert.ok(engine.makeHtml(markdown).includes('src="' + original + '"'));
+          await new Promise((resolve) => setTimeout(resolve, 0));
+          assert.ok(engine.makeHtml(markdown).includes('src="' + updated + '"'));
+        `,
+      ],
+      { cwd: projectRoot, stdio: 'pipe', timeout: 10000 },
+    );
+  });
+
   it.each([
     ['NodeNext', ts.ModuleKind.NodeNext, ts.ModuleResolutionKind.NodeNext],
     ['bundler', ts.ModuleKind.ESNext, ts.ModuleResolutionKind.Bundler],

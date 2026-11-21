@@ -142,6 +142,7 @@ describe('Cherry Markdown published artifact configuration', () => {
       const aliases = { '@': src, '@cherry': src };
       if (filename(config) === 'cherry-markdown.engine.core.node.js') {
         aliases['@/Sanitizer'] = resolve(src, 'Sanitizer.node.js');
+        aliases['@/Engine'] = resolve(src, 'Engine.node.js');
       }
       expect(config.resolve.alias).toEqual(aliases);
     }
