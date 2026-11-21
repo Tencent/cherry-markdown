@@ -1,3 +1,5 @@
+@use '../theme-compat/colors' as compat;
+
 // CodeMirror v6 样式补充
 .cherry {
   .cm-editor .cm-cursor {
@@ -9,8 +11,8 @@
   }
   
   .cm-editor .cm-gutter {
-    border-right: 1px solid var(--base-border-color);
-    background-color: var(--base-editor-bg);
+    border-right: 1px solid #{compat.color('color-border-default')};
+    background-color: #{compat.color('color-bg-canvas')};
   }
   
   .cm-editor .cm-lineNumbers {

@@ -1,4 +1,5 @@
-@use 'sass:meta';
+@use './themes';
+@use '../theme-compat/colors' as compat;
 
 @use './variables/index';
 @use './base';
@@ -106,8 +107,8 @@
 .cherry {
   @include cherryFont;
   line-height: var(--md-paragraph-line-height);
-  color: var(--base-font-color);
-  background: var(--base-editor-bg);
+  color: #{compat.color('color-text-primary')};
+  background: #{compat.color('color-bg-canvas')};
   box-shadow: var(--shadow-md);
 
   .ch-icon {
@@ -161,7 +162,7 @@
 
     &-item {
       padding: 7px;
-      border: 1px solid var(--base-border-color);
+      border: 1px solid #{compat.color('color-border-default')};
 
       &.active {
         background-color: var(--toolbar-btn-hover-bg);
@@ -293,7 +294,7 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       font-size: 16px;
-      color: var(--primary-color);
+      color: #{compat.color('color-brand-primary')};
       margin-left: 2px;
       margin-top: -2px;
     }
@@ -582,7 +583,7 @@
   width: 50%;
   box-sizing: border-box;
   overflow: hidden;
-  background-color: var(--base-editor-bg);
+  background-color: #{compat.color('color-bg-canvas')};
   z-index: 1;
 
   &.cherry-editor--full {
@@ -626,8 +627,8 @@
   // 通过 editor.disableBuiltinCmStyle=true 可以关闭 cherry 对 CodeMirror 的默认样式覆盖
   &:not(.cherry-editor--no-cm-style) .cm-editor {
     font-family: var(--font-family-sans);
-    background-color: var(--base-editor-bg);
-    color: var(--base-font-color);
+    background-color: #{compat.color('color-bg-canvas')};
+    color: #{compat.color('color-text-primary')};
 
     // codemirror 依赖隐藏的 textarea 计算行高，这里将字体大小设置为行高，避免输入法遮挡内容
     // Fixed https://github.com/Tencent/cherry-markdown/issues/82
@@ -642,7 +643,7 @@
       .cm-strong,
       .cm-em,
       .cm-meta {
-        color: var(--base-font-color);
+        color: #{compat.color('color-text-primary')};
       }
 
       .cm-image-marker,
@@ -730,7 +731,7 @@
       &.cm-header-6 {
         font-size: var(--font-size-md) !important;
         font-weight: normal !important;
-        color: var(--base-font-color) !important;
+        color: #{compat.color('color-text-primary')} !important;
         text-decoration: none !important;
       }
     }
@@ -912,8 +913,8 @@
   z-index: 1;
   .cm-editor {
     font-family: var(--font-family-sans);
-    background-color: var(--base-editor-bg);
-    color: var(--base-font-color);
+    background-color: #{compat.color('color-bg-canvas')};
+    color: #{compat.color('color-text-primary')};
   }
 }
 
@@ -999,9 +1000,9 @@
     box-shadow: 5px 0 5px rgba(0, 0, 0, 0.05);
     transition: all 0.3s;
     z-index: 2;
-    color: var(--base-font-color);
+    color: #{compat.color('color-text-primary')};
     background-color: var(--toolbar-bg);
-    border: 1px solid var(--base-border-color);
+    border: 1px solid #{compat.color('color-border-default')};
   }
   .cherry-code-block-custom-btn {
     width: auto;
@@ -1022,8 +1023,8 @@
     transition: all 0.3s;
     z-index: 2;
     color: var(--toolbar-btn-color);
-    background-color: var(--primary-color);
-    border: 1px solid var(--base-border-color);
+    background-color: #{compat.color('color-brand-primary')};
+    border: 1px solid #{compat.color('color-border-default')};
   }
   .cherry-expand-code-block {
     top: 45px;
@@ -1080,8 +1081,8 @@
   .cherry-unExpand-code-block:focus-visible,
   .cherry-edit-code-block:focus-visible {
     box-shadow:
-      0 0 0 2px var(--base-previewer-bg),
-      0 0 0 4px var(--primary-color);
+      0 0 0 2px #{compat.color('color-bg-surface')},
+      0 0 0 4px #{compat.color('color-brand-primary')};
   }
 
   .cherry-code-preview-lang-select {
@@ -1089,9 +1090,9 @@
     -webkit-appearance: none;
 
     font-size: 14px;
-    color: var(--base-font-color);
+    color: #{compat.color('color-text-primary')};
     background-color: var(--toolbar-bg);
-    border: 1px solid var(--base-border-color);
+    border: 1px solid #{compat.color('color-border-default')};
     border-radius: 6px;
     padding: 5px 36px 5px 12px;
     cursor: pointer;
@@ -1105,16 +1106,16 @@
   }
 
   .cherry-code-preview-lang-select:focus {
-    border-color: var(--primary-color);
+    border-color: #{compat.color('color-brand-primary')};
     outline: 0;
     box-shadow:
-      0 0 0 2px var(--base-previewer-bg),
-      0 0 0 4px var(--primary-color);
+      0 0 0 2px #{compat.color('color-bg-surface')},
+      0 0 0 4px #{compat.color('color-brand-primary')};
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23495057' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 11 6-6 6 6'/%3e%3c/svg%3e");
   }
 
   .cherry-code-preview-lang-select option {
-    color: var(--base-font-color);
+    color: #{compat.color('color-text-primary')};
     font-size: 14px;
     background-color: var(--toolbar-bg);
     cursor: cursor;
@@ -1125,8 +1126,8 @@
     color: var(--toolbar-btn-hover-color);
   }
   .cherry-code-preview-lang-select:disabled {
-    background-color: var(--base-border-color);
-    color: var(--base-font-color);
+    background-color: #{compat.color('color-border-default')};
+    color: #{compat.color('color-text-primary')};
     cursor: not-allowed;
   }
 }
@@ -1139,7 +1140,7 @@
   width: 0.7em;
   height: 0.7em;
   border-radius: 100%;
-  border: var(--primary-color) solid 1px;
+  border: #{compat.color('color-brand-primary')} solid 1px;
   margin-left: 0.2em;
   box-sizing: border-box;
 }
@@ -1192,7 +1193,7 @@
   border-left: 2px solid var(--drag-border-color);
   width: 50%;
   box-sizing: border-box;
-  background-color: var(--base-previewer-bg);
+  background-color: #{compat.color('color-bg-surface')};
   min-height: auto;
   overflow-y: auto;
   -webkit-print-color-adjust: exact;
@@ -1252,7 +1253,7 @@
     .cherry-expand-code-block,
     .cherry-unExpand-code-block,
     .cherry-edit-code-block {
-      background-color: var(--primary-color);
+      background-color: #{compat.color('color-brand-primary')};
     }
   }
 
@@ -1576,7 +1577,7 @@
     .cherry-toc-title {
       font-size: var(--font-size-md);
       font-weight: bold;
-      color: var(--primary-color);
+      color: #{compat.color('color-brand-primary')};
       padding-left: 5px;
     }
     .ch-icon-chevronsLeft {
@@ -1619,8 +1620,8 @@
       cursor: pointer;
       &:hover,
       &.current {
-        border-left-color: var(--primary-color);
-        color: var(--primary-color);
+        border-left-color: #{compat.color('color-brand-primary')};
+        color: #{compat.color('color-brand-primary')};
       }
       .cherry-toc-in-blockquote {
         font-size: 0.6em;
@@ -1733,12 +1734,4 @@
   }
 }
 
-/** 引入自带的主题 */
-@include meta.load-css('./themes/default');
-@include meta.load-css('./themes/dark');
-@include meta.load-css('./themes/abyss');
-@include meta.load-css('./themes/green');
-@include meta.load-css('./themes/red');
-@include meta.load-css('./themes/gray');
-@include meta.load-css('./themes/violet');
-@include meta.load-css('./themes/blue');
+@include themes.built-in;

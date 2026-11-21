@@ -1,38 +1,41 @@
+@use '../../theme-compat/colors' as compat;
+
 /*
  * Editary-inspired theme — professional writing, forest-green accent, paper-like
  */
 
 .cherry.theme__blue {
+  @include compat.aliases($theme: true);
   /* ========== 基础色彩变量覆盖 ========== */
-  --primary-color: #2b7a4b;
-  --secondary-color: #f4f8f6;
+  --color-brand-primary: #2b7a4b;
+  --color-bg-active: #f4f8f6;
 
-  --base-font-color: #1a1a1a;
-  --base-editor-bg: #fbfbfa;
-  --base-previewer-bg: #fbfbfa;
-  --base-border-color: #e2e2e0;
+  --color-text-primary: #1a1a1a;
+  --color-bg-canvas: #fbfbfa;
+  --color-bg-surface: #fbfbfa;
+  --color-border-default: #e2e2e0;
 
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: #fbfbfa;
   --toolbar-btn-color: #4a4a48;
   --toolbar-btn-hover-bg: #eef2f0;
-  --toolbar-btn-hover-color: var(--primary-color);
+  --toolbar-btn-hover-color: #{compat.color('color-brand-primary')};
   --toolbar-btn-active-bg: #e2e2e0;
   --toolbar-split-color: #e2e2e0;
 
   --dropdown-bg: #ffffff;
   --dropdown-item-hover-bg: #eef2f0;
-  --dropdown-item-hover-color: var(--primary-color);
+  --dropdown-item-hover-color: #{compat.color('color-brand-primary')};
 
   /* ========== 编辑器相关变量 ========== */
-  --editor-header-color: var(--primary-color);
+  --editor-header-color: #{compat.color('color-brand-primary')};
   --editor-string-color: #2b7a4b;
   --editor-comment-color: #9c9c9a;
   --editor-quote-color: #5a5a58;
   --editor-link-color: #1a6b8a;
   --editor-url-color: rgba(43, 122, 75, 0.1);
   --editor-v2-color: #1a1a1a;
-  --editor-v3-color: var(--primary-color);
+  --editor-v3-color: #{compat.color('color-brand-primary')};
   --editor-keyword-color: #1a6b8a;
   --editor-selection-bg: #c8e6d4;
   --editor-active-line-bg: rgba(43, 122, 75, 0.05);
@@ -40,8 +43,8 @@
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: #1a1a1a;
   --md-paragraph-color: #1a1a1a;
-  --md-link-color: #1a6b8a;
-  --md-link-hover-color: var(--primary-color);
+  --color-text-link: #1a6b8a;
+  --color-brand-primary-hover: #{compat.color('color-brand-primary')};
   --md-inline-code-color: #121212;
   --md-inline-code-bg: #f2f2f0;
   --md-blockquote-bg: #f7f9f8;
@@ -50,7 +53,7 @@
   --md-hr-border: #e2e2e0;
   /* ========== table 相关变量 ========== */
   --md-table-border: #e2e2e0;
-  --md-table-drag-border-bg: var(--primary-color);
+  --md-table-drag-border-bg: #{compat.color('color-brand-primary')};
   --md-table-sort-active-bg: rgba(43, 122, 75, 0.1);
 
   --md-paragraph-highlight-line-bg: #f4f8f6;
@@ -122,6 +125,9 @@
   --accordion-body-bg: #fbfbfa;
   --accordion-body-border: #eef2f0;
   --accordion-body-color: #1a1a1a;
+}
+
+.cherry.theme__blue {
   
   .cherry-toolbar {
     box-shadow: none;

@@ -1,23 +1,26 @@
+@use '../../theme-compat/colors' as compat;
+
 /*
  * 清新主题
  */
 
 .cherry.theme__green {
+  @include compat.aliases($theme: true);
   /* ========== 基础色彩变量覆盖 ========== */
-  --primary-color: var(--oc-green-9);
-  --secondary-color: var(--oc-green-0);
+  --color-brand-primary: var(--oc-green-9);
+  --color-bg-active: var(--oc-green-0);
 
-  --base-font-color: var(--primary-color);
-  --base-editor-bg: var(--oc-white);
-  --base-previewer-bg: var(--secondary-color);
-  --base-border-color: var(--oc-green-8);
+  --color-text-primary: #{compat.color('color-brand-primary')};
+  --color-bg-canvas: var(--oc-white);
+  --color-bg-surface: #{compat.color('color-bg-active')};
+  --color-border-default: var(--oc-green-8);
 
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: var(--oc-white);
-  --toolbar-btn-color: var(--primary-color);
-  --toolbar-btn-hover-bg: var(--primary-color);
-  --toolbar-btn-hover-color: var(--secondary-color);
-  --toolbar-btn-active-bg:var(--oc-green-7);
+  --toolbar-btn-color: #{compat.color('color-brand-primary')};
+  --toolbar-btn-hover-bg: #{compat.color('color-brand-primary')};
+  --toolbar-btn-hover-color: #{compat.color('color-bg-active')};
+  --toolbar-btn-active-bg: var(--oc-green-7);
   --toolbar-split-color: var(--oc-green-8);
   --dropdown-item-hover-bg: var(--toolbar-btn-hover-bg);
   --dropdown-item-hover-color: var(--toolbar-btn-hover-color);
@@ -26,10 +29,10 @@
   --editor-header-color: var(--oc-green-7);
   --editor-string-color: var(--oc-green-6);
   --editor-comment-color: var(--oc-green-6);
-  --editor-quote-color: var(--primary-color);
+  --editor-quote-color: #{compat.color('color-brand-primary')};
   --editor-link-color: var(--oc-green-6);
-  --editor-url-color: var(--secondary-color);
-  --editor-v2-color: var(--primary-color);
+  --editor-url-color: #{compat.color('color-bg-active')};
+  --editor-v2-color: #{compat.color('color-brand-primary')};
   --editor-v3-color: var(--oc-green-7);
   --editor-keyword-color: var(--oc-green-6);
   --editor-selection-bg: var(--oc-green-2);
@@ -40,16 +43,16 @@
 
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: var(--oc-green-7);
-  --md-paragraph-color: var(--primary-color);
-  --md-link-color: var(--oc-green-6);
-  --md-link-hover-color: var(--oc-green-7);
+  --md-paragraph-color: #{compat.color('color-brand-primary')};
+  --color-text-link: var(--oc-green-6);
+  --color-brand-primary-hover: var(--oc-green-7);
   --md-inline-code-color: var(--oc-green-6);
   --md-inline-code-bg: var(--oc-green-1);
   --md-blockquote-bg: var(--oc-green-1);
   --md-hr-border: var(--oc-green-8);
   /* ========== table 相关变量 ========== */
   --md-table-border: var(--oc-green-8);
-  --md-table-drag-border-bg: var(--primary-color);
+  --md-table-drag-border-bg: #{compat.color('color-brand-primary')};
   --md-table-sort-active-bg: rgba(137, 245, 171, 0.493);
   
   --md-paragraph-highlight-line-bg: var(--oc-green-1);
@@ -117,7 +120,7 @@
   --accordion-summary-hover-bg: var(--oc-green-5);
   --accordion-body-bg: var(--oc-green-0);
   --accordion-body-border: var(--oc-green-1);
-  --accordion-body-color: var(--primary-color);
+  --accordion-body-color: #{compat.color('color-brand-primary')};
 }
 
 /** 预览区域样式 */

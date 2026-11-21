@@ -1,15 +1,18 @@
+@use '../../theme-compat/colors' as compat;
+
 /*
  * 热情主题
  */
 
 .cherry.theme__red {
-  --primary-color: var(--oc-pink-7);
-  --secondary-color: var(--oc-pink-0);
+  @include compat.aliases($theme: true);
+  --color-brand-primary: var(--oc-pink-7);
+  --color-bg-active: var(--oc-pink-0);
 
-  --base-font-color: var(--oc-pink-9);
-  --base-editor-bg: var(--oc-pink-0);
-  --base-previewer-bg: var(--oc-pink-0);
-  --base-border-color: var(--oc-pink-8);
+  --color-text-primary: var(--oc-pink-9);
+  --color-bg-canvas: var(--oc-pink-0);
+  --color-bg-surface: var(--oc-pink-0);
+  --color-border-default: var(--oc-pink-8);
 
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: var(--oc-pink-1);
@@ -24,31 +27,30 @@
   --dropdown-item-hover-color: var(--toolbar-btn-hover-color);
 
   /* ========== 编辑器相关变量 ========== */
-  --editor-header-color: var(--primary-color);
+  --editor-header-color: #{compat.color('color-brand-primary')};
   --editor-string-color: var(--oc-pink-5);
   --editor-comment-color: var(--oc-pink-5);
   --editor-quote-color: var(--oc-pink-9);
   --editor-link-color: var(--oc-pink-5);
   --editor-url-color: var(--oc-pink-1);
   --editor-v2-color: var(--oc-pink-9);
-  --editor-v3-color: var(--primary-color);
+  --editor-v3-color: #{compat.color('color-brand-primary')};
   --editor-keyword-color: var(--oc-pink-5);
   --editor-selection-bg: var(--oc-pink-2);
   --editor-active-line-bg: #fcc2d733;
 
   /* ========== Markdown 相关变量 ========== */
-  --md-heading-color: var(--primary-color);
+  --md-heading-color: #{compat.color('color-brand-primary')};
   --md-paragraph-color: var(--oc-pink-9);
-  --md-link-color: var(--oc-pink-5);
-  --md-link-hover-color: var(--primary-color);
+  --color-text-link: var(--oc-pink-5);
+  --color-brand-primary-hover: #{compat.color('color-brand-primary')};
   --md-inline-code-color: var(--oc-pink-5);
   --md-inline-code-bg: var(--oc-pink-1);
   --md-blockquote-bg: var(--oc-pink-1);
   --md-hr-border: var(--oc-pink-8);
-  --md-table-border: var(--oc-pink-8);
   /* ========== table 相关变量 ========== */
   --md-table-border: var(--oc-pink-8);
-  --md-table-drag-border-bg: var(--primary-color);
+  --md-table-drag-border-bg: #{compat.color('color-brand-primary')};
   --md-table-sort-active-bg: var(--oc-pink-2);
 
   --md-paragraph-highlight-line-bg: var(--oc-red-1);
@@ -107,22 +109,22 @@
   --panel-success-body-bg: var(--oc-teal-0);
   --panel-success-body-color: var(--oc-teal-8);
   --md-toc-bg: var(--oc-white);
-  --md-toc-border-color: var(--base-border-color);
+  --md-toc-border-color: #{compat.color('color-border-default')};
   --md-toc-indicator-color: var(--oc-pink-1);
   --md-toc-link-hover-bg: var(--oc-pink-0);
   --md-toc-link-active-bg: var(--oc-pink-1);
 
   /* ========== 手风琴组件变量覆盖 ========== */
-    --accordion-bg: var(--oc-pink-0);
-    --accordion-border: var(--oc-pink-2);
-    --accordion-summary-bg: linear-gradient(135deg, var(--oc-pink-6), var(--oc-pink-7));
-    --accordion-summary-hover-bg: linear-gradient(135deg, var(--oc-pink-5), var(--oc-pink-6));
-    --accordion-accent-color: linear-gradient(to bottom, var(--oc-pink-4), var(--oc-pink-6));
-    --accordion-body-bg: var(--oc-pink-0);
-    --accordion-body-border: var(--oc-pink-1);
-    --accordion-body-color: var(--oc-pink-9);
-    --accordion-multiple-border: var(--oc-pink-2);
-    --accordion-multiple-item-border: var(--oc-pink-1);
+  --accordion-bg: var(--oc-pink-0);
+  --accordion-border: var(--oc-pink-2);
+  --accordion-summary-bg: linear-gradient(135deg, var(--oc-pink-6), var(--oc-pink-7));
+  --accordion-summary-hover-bg: linear-gradient(135deg, var(--oc-pink-5), var(--oc-pink-6));
+  --accordion-accent-color: linear-gradient(to bottom, var(--oc-pink-4), var(--oc-pink-6));
+  --accordion-body-bg: var(--oc-pink-0);
+  --accordion-body-border: var(--oc-pink-1);
+  --accordion-body-color: var(--oc-pink-9);
+  --accordion-multiple-border: var(--oc-pink-2);
+  --accordion-multiple-item-border: var(--oc-pink-1);
 }
 
 /** 预览区域样式 */
