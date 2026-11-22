@@ -120,6 +120,13 @@ describe('built Cherry Markdown artifact contract', () => {
     });
   });
 
+  it('re-exports CherryOptions only from the package root declaration', () => {
+    expect(readDistFile('types/index.d.ts')).toContain('export type { CherryOptions } from "../../types/cherry.js";');
+    for (const file of declarationNames) {
+      expect(readDistFile(file), file).not.toContain('CherryOptions');
+    }
+  });
+
   it('keeps ESM entries free of browser-global registration', () => {
     bundleNames
       .filter((file) => file.endsWith('.esm.js'))
