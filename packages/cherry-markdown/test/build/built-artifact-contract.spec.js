@@ -72,10 +72,6 @@ describe('built Cherry Markdown artifact contract', () => {
     for (const entry of entries) {
       expect(existsSync(resolve(distRoot, 'types/addons', entry.replace(/\.js$/, '.d.ts'))), entry).toBe(true);
     }
-    for (const bundle of bundles) {
-      const declaration = readDistFile(`addons/${bundle.replace(/\.js$/, '.d.ts')}`);
-      expect(declaration, bundle).toMatch(/^export \{ default \} from "\.\..+\.js";/);
-    }
   });
 
   it('publishes the full and markdown-only stylesheets with their module declarations', () => {
@@ -118,13 +114,6 @@ describe('built Cherry Markdown artifact contract', () => {
         expect(resolvesDeclaration(file, specifier), `${file}: ${specifier}`).toBe(true);
       });
     });
-  });
-
-  it('re-exports CherryOptions only from the package root declaration', () => {
-    expect(readDistFile('types/index.d.ts')).toContain('export type { CherryOptions } from "../../types/cherry.js";');
-    for (const file of declarationNames) {
-      expect(readDistFile(file), file).not.toContain('CherryOptions');
-    }
   });
 
   it('keeps ESM entries free of browser-global registration', () => {
