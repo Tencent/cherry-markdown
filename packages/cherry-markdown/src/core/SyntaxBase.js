@@ -186,7 +186,7 @@ export default class SyntaxBase {
   /**
    *
    * @param {Partial<EditorConfig>} editorConfig
-   * @returns {Partial<HookRegexpRule>}
+   * @returns {HookRegexpRule}
    */
   rule(editorConfig) {
     return { begin: '', end: '', content: '', reg: new RegExp('') };
