@@ -160,7 +160,6 @@ export function createMenuHook(name, options) {
       } else {
         this.setName(name, filteredOptions.iconName);
       }
-      /** @type {SubMenuConfigItem[]} */
       this.subMenuConfig = filteredOptions.subMenuConfig || [];
     }
 
