@@ -19,7 +19,8 @@
   "files": [
     "dist",
     "types",
-    "!types/env.d.ts"
+    "!types/env.d.ts",
+    "!types/source"
   ],
   "sideEffects": [
     "./dist/*.css"

@@ -54,7 +54,7 @@ export const transformWechat = async (rawHtml) => {
 /**
  * 将 cherry-markdown 渲染的 html 转换为对应平台支持的格式
  * @param {string} htmlStr html 字符串
- * @param {import('../../types/cherry').SupportPlatform} platform 平台
+ * @param {import('~types/cherry').SupportPlatform} platform 平台
  */
 export const platformTransform = async (htmlStr, platform) => {
   if (typeof htmlStr !== 'string' || !htmlStr) {

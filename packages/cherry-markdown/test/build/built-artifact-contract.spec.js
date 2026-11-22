@@ -184,7 +184,11 @@ describe('built Cherry Markdown artifact contract', () => {
   });
 
   it('emits consumer-resolvable declaration imports without source aliases', () => {
-    const declarationFiles = glob.sync('**/*.d.ts', { cwd: distRoot, absolute: true });
+    const typesRoot = resolve(projectRoot, 'types');
+    const declarationFiles = [
+      ...glob.sync('**/*.d.ts', { cwd: distRoot, absolute: true }),
+      ...glob.sync('*.d.ts', { cwd: resolve(typesRoot, 'source') }).map((file) => resolve(typesRoot, file)),
+    ];
 
     expect(declarationFiles.length).toBeGreaterThan(10);
     declarationFiles.forEach((file) => {
