@@ -175,8 +175,8 @@ export interface CherryOptionsBase<T extends CherryCustomOptions = CherryCustomO
     afterAsyncRender?: CherryLifecycle;
     /** 编辑器选区变化时触发 */
     selectionChange?: (event: {
-      selections: Iterable<any, void, undefined>;
-      lastSelections: Iterable<any, void, undefined>;
+      selections: { [Symbol.iterator](): Iterator<any, void, undefined> };
+      lastSelections: { [Symbol.iterator](): Iterator<any, void, undefined> };
       info: any;
     }) => void;
     /** 变更语言时触发 */
