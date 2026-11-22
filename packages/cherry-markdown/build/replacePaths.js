@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import replaceInFile from 'replace-in-file';
 import glob from 'glob';
 import ts from 'typescript';
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
@@ -71,7 +70,7 @@ function normalizeDeclarationImports(file, sourceFile, source, destinations, dec
   return source;
 }
 
-async function replacePaths() {
+function replacePaths() {
   const declarationRoot = resolve('dist/types');
   const publicTypesRoot = resolve('types');
   const files = glob.sync('dist/types/**/*.d.ts').map((file) => resolve(file));
@@ -103,19 +102,11 @@ async function replacePaths() {
     const fileDirectory = dirname(file);
     const publicTypesPath = relative(fileDirectory, publicTypesRoot).replace(/\\/g, '/');
     const declarationTypesPath = relative(fileDirectory, declarationRoot).replace(/\\/g, '/') || '.';
-    const results = await replaceInFile({
-      files: file,
-      disableGlobs: true,
-      from: [/~types\//g, /@cherry\//g, /@\//g],
-      to: [`${publicTypesPath}/`, `${declarationTypesPath}/`, `${declarationTypesPath}/`],
-    });
-    for (const result of results) {
-      if (result.hasChanged) {
-        console.log(result);
-      }
-    }
     const source = readFileSync(file, 'utf-8');
-    const updated = normalizeDeclarationImports(file, sourceFile, source, destinations, declarations);
+    const aliasesReplaced = source
+      .replace(/~types\//g, `${publicTypesPath}/`)
+      .replace(/@(?:cherry)?\//g, `${declarationTypesPath}/`);
+    const updated = normalizeDeclarationImports(file, sourceFile, aliasesReplaced, destinations, declarations);
     if (updated !== source) writeFileSync(file, updated);
   }
 
