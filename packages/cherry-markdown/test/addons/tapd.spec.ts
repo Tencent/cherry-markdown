@@ -22,7 +22,8 @@ describe('addons/TAPD checklist', () => {
     expect(plugin.afterMakeHtml(source)).toBe(
       ' <span class="ch-icon ch-icon-check"></span>  done  <span class="ch-icon ch-icon-square"></span>  pending  <span class="ch-icon ch-icon-square"></span>  empty',
     );
-    expect(plugin.rule()).toEqual({});
+    expect(plugin.rule()).toEqual({ begin: '', end: '', content: '' });
+    expect(plugin.test(source)).toBe(false);
   });
 });
 
@@ -44,7 +45,9 @@ describe('addons/TAPD raw HTML', () => {
     expect(html).toContain('frame');
     expect(html).not.toContain('<script');
     expect(html).not.toContain('<iframe');
-    expect(plugin.rule().reg.test('[html]content[/html]')).toBe(true);
+    expect(plugin.rule()).toEqual({ begin: '', end: '', content: '', reg: /\[html\]([\s\S]*?)\[\/html\]/g });
+    expect(plugin.test('plain text')).toBe(false);
+    expect(plugin.test('[html]content[/html]')).toBe(true);
   });
 
   it('removes script tags case-insensitively', () => {
@@ -78,7 +81,8 @@ describe('addons/TAPD simple table', () => {
     expect(html).toContain('<th align="right"><span>Count</span></th>');
     expect(html).toContain('<td align="center" ><span>Cherry</span></td>');
     expect(html).toContain('<span>**10**</span>');
-    expect(plugin.rule()).toEqual({});
+    expect(plugin.rule()).toEqual({ begin: '', end: '', content: '' });
+    expect(plugin.test(source)).toBe(false);
   });
 
   it('renders merged cells for triple-pipe tables', () => {
