@@ -74,26 +74,42 @@ describe('core/Engine', () => {
 
   it('re-renders the current document once after a burst of URL updates', () => {
     vi.useFakeTimers();
-    const engine = createEngine();
+    const image = 'https://example.com/original.png';
+    const link = 'https://example.com/original';
+    const markdownText = `![image](${image}) [link](${link})`;
+    const callbacks = new Map<string, (url: string) => void>();
+    const engine = createEngine({
+      engine: {
+        global: {
+          urlProcessor(url: string, _type: string, done: (url: string) => void) {
+            callbacks.set(url, done);
+            return url;
+          },
+        },
+      },
+    });
     const refresh = vi.fn();
     const emit = vi.fn();
     Object.assign(engine.$cherry, {
-      editor: { editor: { view: { state: { doc: { toString: () => '# Updated' } } } } },
+      getMarkdown: () => markdownText,
       previewer: { refresh },
       $event: { emit },
     });
-    const makeHtml = vi.spyOn(engine, 'makeHtml').mockReturnValue('<h1>Updated</h1>');
+    expect(engine.makeHtml(markdownText)).toContain(`src="${image}"`);
+    const makeHtml = vi.spyOn(engine, 'makeHtml');
 
-    engine.reMakeHtml();
-    engine.reMakeHtml();
+    callbacks.get(image)?.('https://example.com/updated.png');
+    callbacks.get(link)?.('https://example.com/updated');
     vi.advanceTimersByTime(1000);
 
     expect(makeHtml).toHaveBeenCalledOnce();
-    expect(makeHtml).toHaveBeenCalledWith('# Updated');
-    expect(refresh).toHaveBeenCalledWith('<h1>Updated</h1>');
+    expect(makeHtml).toHaveBeenCalledWith(markdownText);
+    const html = String(refresh.mock.calls[0]?.[0]);
+    expect(html).toContain('src="https://example.com/updated.png"');
+    expect(html).toContain('href="https://example.com/updated"');
     expect(emit).toHaveBeenCalledWith('afterChange', {
-      markdownText: '# Updated',
-      html: '<h1>Updated</h1>',
+      markdownText,
+      html,
     });
   });
 
