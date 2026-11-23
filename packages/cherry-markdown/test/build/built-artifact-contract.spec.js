@@ -66,6 +66,10 @@ describe('built Cherry Markdown artifact contract', () => {
     });
   });
 
+  it('re-exports the original generic CherryOptions type from the package root', () => {
+    expect(readDistFile('types/index.d.ts')).toContain('export type { CherryOptions } from "../../types/cherry.js";');
+  });
+
   it('publishes every addon in both formats with its declaration', () => {
     const entries = glob.sync('**/*-plugin.js', { cwd: resolve(projectRoot, 'src/addons') });
     const bundles = entries.flatMap((entry) => [entry, entry.replace(/\.js$/, '.esm.js')]);
