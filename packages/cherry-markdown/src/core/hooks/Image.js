@@ -20,6 +20,16 @@ import { compileRegExp, isLookbehindSupported, NOT_ALL_WHITE_SPACES_INLINE } fro
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import UrlCache from '@/UrlCache';
 
+/**
+ * alt 跨行（软换行）时把换行连同两侧空白合成一个空格，
+ * 否则换行会留在 alt 属性里，之后被段落处理成 `<br>`
+ * @param {string} alt
+ * @returns {string}
+ */
+function joinAltLines(alt) {
+  return typeof alt === 'string' && alt.indexOf('\n') !== -1 ? alt.replace(/[ \t]*\n[ \t]*/g, ' ') : alt;
+}
+
 export default class Image extends SyntaxBase {
   static HOOK_NAME = 'image';
 
@@ -31,7 +41,8 @@ export default class Image extends SyntaxBase {
     this.RULE = this.rule(this.extendMedia);
   }
 
-  replaceToHtml(type, match, leadingChar, alt, link, title, poster) {
+  replaceToHtml(type, match, leadingChar, rawAlt, link, title, poster) {
+    const alt = joinAltLines(rawAlt);
     const refType = typeof link === 'undefined' ? 'ref' : 'url';
     let attrs = '';
     if (refType === 'ref') {
@@ -65,8 +76,9 @@ export default class Image extends SyntaxBase {
     return match;
   }
 
-  toHtml(match, leadingChar, alt, link, title, ref, extendAttrs) {
+  toHtml(match, leadingChar, rawAlt, link, title, ref, extendAttrs) {
     // console.log(match, alt, link, ref, title);
+    const alt = joinAltLines(rawAlt);
     const refType = typeof link === 'undefined' ? 'ref' : 'url';
     let attrs = '';
     if (refType === 'ref') {
@@ -143,7 +155,8 @@ export default class Image extends SyntaxBase {
       // lookbehind启用分组是为了和不兼容lookbehind的场景共用一个回调
       begin: isLookbehindSupported() ? '((?<!\\\\))!' : '(^|[^\\\\])!',
       content: [
-        '\\[([^\\n]*?)\\]', // ?<alt>
+        // ?<alt> 单行时保持原规则；跨行（软换行）时与链接文字相同：最多 3 行、不跨空行、alt 内不能再有 [ ]
+        '\\[([^\\n]*?|[^\\[\\]\\n]*(?:\\n(?![ \\t]*\\n)[^\\[\\]\\n]*){1,2})\\]',
         '[ \\t]*', // any spaces
         `${
           '(?:' +

@@ -289,10 +289,17 @@ describe('Cherry Markdown final rendering', () => {
     expect(container.textContent).not.toContain('](');
   });
 
-  it('does not turn an image whose alt text wraps onto the next line into a link', () => {
-    const container = render('![a fun logo\nmade of glob](https://example.com/logo.png)');
+  it('renders an image whose alt text wraps onto the next line', () => {
+    const container = render(
+      '![a fun logo\nmade of glob](https://example.com/logo.png)\n\n[![npm\nversion](https://example.com/badge.svg)](https://example.com/pkg)',
+    );
+    const logo = container.querySelector('img[src="https://example.com/logo.png"]');
+    const badge = container.querySelector('a[href="https://example.com/pkg"] img[src="https://example.com/badge.svg"]');
 
-    expect(container.textContent).toContain('![a fun logo');
+    expect(logo?.getAttribute('alt')).toBe('a fun logo made of glob');
+    expect(badge?.getAttribute('alt')).toBe('npm version');
+    expect(container.innerHTML).not.toContain('&lt;br');
+    expect(container.textContent).not.toContain('![');
   });
 
   it('keeps formulas on lines above a link rendered when an earlier line has a stray bracket', () => {
