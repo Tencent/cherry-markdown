@@ -147,8 +147,7 @@ export default class Engine {
   }
 
   $beforeMakeHtml(str) {
-    let $str = this.$encodeReservedKeywords(str);
-    $str = $str.replace(/\r\n/g, '\n'); // DOS to Unix
+    let $str = str.replace(/\r\n/g, '\n'); // DOS to Unix
     $str = $str.replace(/\r/g, '\n'); // Mac to Unix
     // 避免正则性能问题，如/.+\n/.test(' '.repeat(99999)), 回溯次数过多
     // 参考文章：http://www.alloyteam.com/2019/07/13574/
@@ -312,21 +311,24 @@ export default class Engine {
     });
 
     $md = $md.replace(base64Reg, (dataUri) => {
-      const cacheKey = `bigDataBegin${this.hash(dataUri)}bigDataEnd`;
+      // 关键：cacheKey 以 `~` 包裹。由于 $encodeReservedKeywords 已在本方法之前执行，
+      // 用户输入的所有裸 `~` 均已被替换为 `~T`，因此攻击者无法在触发文档中构造出
+      // 带裸 `~` 前后缀的占位符来命中 cachedBigData，彻底阻断跨文档缓存回显。
+      const cacheKey = `~bigDataBegin${this.hash(dataUri)}bigDataEnd~`;
       // 还原点位于属性值上下文（img/audio/video 的 src），必须按属性上下文转义，
       // 否则 blob 内部的 " 可闭合 src 属性并注入事件处理器，绕过 DOMPurify
       this.cachedBigData[cacheKey] = escapeHTMLAttribute(dataUri);
       return cacheKey;
     });
     $md = $md.replace(imgBase64Reg, (whole, m1, m2) => {
-      const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
+      const cacheKey = `~bigDataBegin${this.hash(m2)}bigDataEnd~`;
       // 还原点位于 <img src="..."> 的属性值上下文，必须按属性上下文转义，
       // 否则 blob 内部的 " 可闭合 src 属性并注入事件处理器，绕过 DOMPurify
       this.cachedBigData[cacheKey] = escapeHTMLAttribute(m2);
       return `${m1}${cacheKey})`;
     });
     $md = $md.replace(imgDrawioXmlReg, (whole, m1, m2) => {
-      const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
+      const cacheKey = `~bigDataBegin${this.hash(m2)}bigDataEnd~`;
       // data-xml 会被还原到属性值上下文中，缓存时先按属性上下文转义，
       // 避免 DOMPurify 之后还原的内容闭合属性并注入事件属性
       this.cachedBigData[cacheKey] = escapeHTMLSpecialChar(m2);
@@ -337,7 +339,7 @@ export default class Engine {
     for (let i = 0; i < tmpArr.length; i++) {
       if (tmpArr[i].length > 6000) {
         tmpArr[i] = tmpArr[i].replace(longTextReg, (whole) => {
-          const cacheKey = `bigDataBegin${this.hash(whole)}bigDataEnd`;
+          const cacheKey = `~bigDataBegin${this.hash(whole)}bigDataEnd~`;
           // 长文本可能被还原到文本节点或属性值上下文，完整转义 < > & " ' 以同时覆盖两种场景，
           // 避免 DOMPurify 之后写回的内容被浏览器解析为新标签或闭合属性
           this.cachedBigData[cacheKey] = escapeHTMLSpecialChar(whole);
@@ -359,7 +361,12 @@ export default class Engine {
    * @param {string} md
    */
   $deCacheBigData(md) {
-    return md.replace(/bigDataBegin[^\n]+?bigDataEnd/g, (whole) => {
+    // 严格匹配 `~bigDataBegin...bigDataEnd~`：前后缀必须为裸 `~`。
+    // 由于用户原文中的 `~` 在 $encodeReservedKeywords 阶段已被替换为 `~T`，
+    // 因此只有 $cacheBigData 自身写入的占位符才能命中该正则，
+    // 彻底阻断攻击者用纯文本 token 触发回显他人缓存内容。
+    // 中间字符集排除 `~`，防止贪婪跨越多个相邻占位符。
+    return md.replace(/~bigDataBegin[^\n~]+?bigDataEnd~/g, (whole) => {
       // 未命中缓存时（如用户原文中恰好包含该形态的文本）保留原文，避免被替换成 "undefined"
       return this.cachedBigData[whole] ?? whole;
     });
@@ -437,7 +444,12 @@ export default class Engine {
    */
   makeHtml(md, returnType = 'string', forceNoCursor = false) {
     this.$prepareMakeHtml(md);
+    this.cachedBigData = {};
     let $md = this.$setFlowSessionCursorCache(md, forceNoCursor);
+    // 必须在 $cacheBigData 之前执行 $encodeReservedKeywords：
+    // 1. 用户文档中的裸 `~` 会被转义为 `~T`，使攻击者无法伪造带裸 `~` 的占位符；
+    // 2. $cacheBigData 自身写入的 cacheKey 中的 `~` 则是在 encode 之后，不会被转义。
+    $md = this.$encodeReservedKeywords($md);
     $md = this.$cacheBigData($md);
     $md = this.$beforeMakeHtml($md);
     $md = this.$dealParagraph($md);
