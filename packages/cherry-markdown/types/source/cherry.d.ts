@@ -1,5 +1,5 @@
 import { EditorView } from '@codemirror/view';
-import SyntaxBase from '../src/core/SyntaxBase';
+import SyntaxBase from '../../src/core/SyntaxBase.js';
 import { FormulaMenu } from '@/toolbars/BubbleFormula';
 
 export interface CherryExternalsOptions {
@@ -174,7 +174,11 @@ export interface CherryOptionsBase<T extends CherryCustomOptions = CherryCustomO
     /** 编辑器完成所有异步渲染后触发 */
     afterAsyncRender?: CherryLifecycle;
     /** 编辑器选区变化时触发 */
-    selectionChange?: ({ selections: [], lastSelections: [], info }) => void;
+    selectionChange?: (event: {
+      selections: { [Symbol.iterator](): Iterator<any, void, undefined> };
+      lastSelections: { [Symbol.iterator](): Iterator<any, void, undefined> };
+      info: any;
+    }) => void;
     /** 变更语言时触发 */
     afterChangeLocale?: (locale: string) => void;
     /** 变更主题时触发 */

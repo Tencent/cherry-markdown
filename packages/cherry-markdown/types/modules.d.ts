@@ -11,14 +11,14 @@
  * ```json
  * {
  *   "compilerOptions": {
- *     "types": ["cherry-markdown/types/modules"]
+ *     "types": ["cherry-markdown/types/modules.js"]
  *   }
  * }
  * ```
  *
  * 或在任意 .d.ts 文件中：
  * ```ts
- * /// <reference types="cherry-markdown/types/modules" />
+ * /// <reference types="cherry-markdown/types/modules.js" />
  * ```
  */
 

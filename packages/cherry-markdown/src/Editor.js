@@ -1302,7 +1302,7 @@ export default class Editor {
    * 收集标记项（不立即应用，用于批量处理）
    * @param {RegExp} reg - 正则表达式
    * @param {string} className - CSS 类名
-   * @param {Array<import('../types/editor').BatchMarkItem>} targetArray - 目标数组，用于收集标记项
+   * @param {Array<import('~types/editor').BatchMarkItem>} targetArray - 目标数组，用于收集标记项
    * @param {Set<string>} [existingMarksSet] - 已有标记集合（用于避免 O(n²) 检查）
    */
   collectMarkItems = (reg, className, targetArray, existingMarksSet) => {

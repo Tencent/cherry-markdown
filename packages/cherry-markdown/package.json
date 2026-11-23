@@ -19,7 +19,8 @@
   "files": [
     "dist",
     "types",
-    "!types/env.d.ts"
+    "!types/env.d.ts",
+    "!types/source"
   ],
   "sideEffects": [
     "./dist/*.css"
@@ -95,9 +96,9 @@
     "@codemirror/view": "^6.40.0",
     "@lezer/highlight": "^1.2.1",
     "@replit/codemirror-vim": "^6.3.0",
-    "dompurify": "^3.2.6",
+    "dompurify": "^3.4.18",
     "htmlparser2": "^10.0.0",
-    "jsdom": "~19.0.0",
+    "jsdom": "20.0.3",
     "pako": "^2.2.0"
   },
   "optionalDependencies": {

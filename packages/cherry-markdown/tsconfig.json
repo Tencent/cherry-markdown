@@ -12,7 +12,7 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@/*": ["./src/*"],
-      "~types/*": ["./types/*"]
+      "~types/*": ["./types/source/*", "./types/*"]
     },
     "experimentalDecorators": true
   },

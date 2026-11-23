@@ -47,8 +47,7 @@ export default class TapdCheckListPlugin extends ParagraphBase {
     );
   }
 
-  // @ts-ignore
   rule() {
-    return {};
+    return { begin: '', end: '', content: '' };
   }
 }

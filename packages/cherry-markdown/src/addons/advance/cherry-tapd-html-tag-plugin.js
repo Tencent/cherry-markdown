@@ -50,9 +50,11 @@ export default class TapdHtmlTagPlugin extends ParagraphBase {
     });
   }
 
-  // @ts-ignore
   rule() {
     return {
+      begin: '',
+      end: '',
+      content: '',
       reg: /\[html\]([\s\S]*?)\[\/html\]/g,
     };
   }
