@@ -122,12 +122,8 @@ function replacePaths() {
     writeFileSync(entryPath, `${entryHeader}\n${content}`);
   }
 
-  // The standalone TAPD hooks require compatible custom-syntax registration.
-  const addonDeclarations = glob.sync('addons/**/*-plugin.d.ts', {
-    cwd: declarationRoot,
-    ignore: 'addons/advance/cherry-tapd-*-plugin.d.ts',
-  });
-  for (const file of addonDeclarations) {
+  // Each runtime addon has a declaration alongside its UMD and ESM files.
+  for (const file of glob.sync('addons/**/*-plugin.d.ts', { cwd: declarationRoot })) {
     const addon = resolve('dist', file);
     mkdirSync(dirname(addon), { recursive: true });
     const entry = relative(dirname(addon), resolve(declarationRoot, file))

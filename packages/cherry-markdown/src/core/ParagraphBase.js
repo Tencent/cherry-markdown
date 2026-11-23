@@ -19,12 +19,16 @@ import { getIsClassicBrFromLocal, testKeyInLocal } from '@/utils/config';
 import { blockNames } from '@/utils/sanitize';
 import LRUCache from '../utils/LRUCache';
 
+// The editor and standalone addon bundles each contain a copy of this base class.
+export const PARAGRAPH_HOOK = 'Cherry$$PARAGRAPH_HOOK';
+
 let cacheCounter = 0;
 // ~~C${cacheCounter}I${cacheIndex}$
 // let cacheMap = {};
 
 export default class ParagraphBase extends SyntaxBase {
   static HOOK_TYPE = HOOKS_TYPE_LIST.PAR;
+  static [PARAGRAPH_HOOK] = true;
   // 不需要排他的sign前缀，如~~C0I${IN_PARAGRAPH_CACHE_KEY_PREFIX}sign$
   static IN_PARAGRAPH_CACHE_KEY_PREFIX = '!';
   static IN_PARAGRAPH_CACHE_KEY_PREFIX_REGEX = '\\!';
@@ -38,14 +42,19 @@ export default class ParagraphBase extends SyntaxBase {
     cacheCounter = 0;
   }
 
+  static allocateCacheKey() {
+    const key = `~~C${cacheCounter}`;
+    cacheCounter += 1;
+    return key;
+  }
+
   constructor({ needCache, defaultCache = {} } = { needCache: false }) {
     super({});
     this.needCache = !!needCache;
     this.sign = '';
     if (needCache) {
       this.cache = new LRUCache(2000);
-      this.cacheKey = `~~C${cacheCounter}`;
-      cacheCounter += 1;
+      this.cacheKey = ParagraphBase.allocateCacheKey();
     }
     this.cacheData = {};
     this.cacheDataMap = [];

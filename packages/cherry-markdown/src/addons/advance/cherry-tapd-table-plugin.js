@@ -244,7 +244,8 @@ export default class TapdTablePlugin extends ParagraphBase {
     return ret;
   }
 
-  makeHtml(html, sentenceMakeFunc) {
+  /** @param {string} html */
+  makeHtml(html, sentenceMakeFunc = (md) => ({ sign: '', html: md })) {
     return html.replace(/(^|\n)\s*?((?:\|\|[^\n]+(?:$|\n))+)/g, (match, prev, content) => {
       const sign = this.$engine.md5(content);
       const lineCount = content.match(/\n/g).length;
