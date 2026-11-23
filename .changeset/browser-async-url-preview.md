@@ -2,4 +2,4 @@
 'cherry-markdown': patch
 ---
 
-fix(engine): 修复 Full、Core 和 Stream 中异步 URL 改写后预览未正确刷新的问题
+fix(engine): 修复异步改写 URL 后 Full/Core 预览未更新、Stream 预览被清空的问题
