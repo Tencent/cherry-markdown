@@ -107,6 +107,43 @@ describe('rendering hardening', () => {
     expect(className).not.toContain('onerror');
     expect(className).not.toContain('<img');
   });
+
+  it('escapes cached inline base64 image blobs before cache restoration', () => {
+    // GHSA-ww5r-cmg5-3mpm PoC: imgBase64Reg 分支在缓存值未转义时会让 blob 内的 " 闭合 src 属性
+    const html = createEngine().makeHtml(
+      '![a](data:image/png;base64,"><svg/onload=alert(1)><img/src=")',
+    );
+    expect(findUnsafeAttributes(html)).toHaveLength(0);
+    expect(parse(html).querySelectorAll('svg')).toHaveLength(0);
+    expect(html).not.toMatch(/<svg[^>]*onload/i);
+  });
+
+  it('escapes cached raw data URI blobs before cache restoration', () => {
+    // base64Reg 分支：HTML 原文中直接出现的 data URI，经缓存还原后也不得能闭合属性
+    const html = createEngine().makeHtml(
+      '<img src="data:image/png;base64,abc"><svg onload=alert(1)><img src="y">',
+    );
+    expect(findUnsafeAttributes(html)).toHaveLength(0);
+    expect(html).not.toMatch(/<svg[^>]*onload/i);
+  });
+
+  it('escapes cached long text runs before cache restoration', () => {
+    // longTextReg 分支：>=6000 非空白字符会被缓存，还原时不转义会导致 XSS
+    const payload = `${'a'.repeat(6000)}"><svg/onload=alert(1)><img/src="`;
+    const html = createEngine().makeHtml(payload);
+    expect(findUnsafeAttributes(html)).toHaveLength(0);
+    expect(parse(html).querySelectorAll('svg')).toHaveLength(0);
+    expect(html).not.toMatch(/<svg[^>]*onload/i);
+  });
+
+  it('keeps legitimate inline base64 images renderable after the cache fix', () => {
+    // 正常 base64 图片：转义对合法字符集是幂等空操作，图片仍可正常渲染
+    const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+    const html = createEngine().makeHtml(`![pic](data:image/png;base64,${b64})`);
+    const img = parse(html).querySelector('img');
+    expect(img).not.toBeNull();
+    expect(img?.getAttribute('src')).toBe(`data:image/png;base64,${b64}`);
+  });
 });
 
 describe('drawio dialog message handling', () => {

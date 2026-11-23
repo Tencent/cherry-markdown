@@ -20,7 +20,7 @@ import { hashHex } from './utils/hash';
 import SyntaxBase from './core/SyntaxBase';
 import ParagraphBase from './core/ParagraphBase';
 import { PUNCTUATION, longTextReg, imgBase64Reg, imgDrawioXmlReg, base64Reg, getCodeBlockRule } from './utils/regexp';
-import { escapeHTMLSpecialChar } from './utils/sanitize';
+import { escapeHTMLSpecialChar, escapeHTMLAttribute } from './utils/sanitize';
 import Logger from './Logger';
 import AsyncRenderHandler from './utils/async-render-handler';
 import UrlCache from './UrlCache';
@@ -313,12 +313,16 @@ export default class Engine {
 
     $md = $md.replace(base64Reg, (dataUri) => {
       const cacheKey = `bigDataBegin${this.hash(dataUri)}bigDataEnd`;
-      this.cachedBigData[cacheKey] = dataUri;
+      // 还原点位于属性值上下文（img/audio/video 的 src），必须按属性上下文转义，
+      // 否则 blob 内部的 " 可闭合 src 属性并注入事件处理器，绕过 DOMPurify
+      this.cachedBigData[cacheKey] = escapeHTMLAttribute(dataUri);
       return cacheKey;
     });
     $md = $md.replace(imgBase64Reg, (whole, m1, m2) => {
       const cacheKey = `bigDataBegin${this.hash(m2)}bigDataEnd`;
-      this.cachedBigData[cacheKey] = m2;
+      // 还原点位于 <img src="..."> 的属性值上下文，必须按属性上下文转义，
+      // 否则 blob 内部的 " 可闭合 src 属性并注入事件处理器，绕过 DOMPurify
+      this.cachedBigData[cacheKey] = escapeHTMLAttribute(m2);
       return `${m1}${cacheKey})`;
     });
     $md = $md.replace(imgDrawioXmlReg, (whole, m1, m2) => {
@@ -334,7 +338,9 @@ export default class Engine {
       if (tmpArr[i].length > 6000) {
         tmpArr[i] = tmpArr[i].replace(longTextReg, (whole) => {
           const cacheKey = `bigDataBegin${this.hash(whole)}bigDataEnd`;
-          this.cachedBigData[cacheKey] = whole;
+          // 长文本可能被还原到文本节点或属性值上下文，完整转义 < > & " ' 以同时覆盖两种场景，
+          // 避免 DOMPurify 之后写回的内容被浏览器解析为新标签或闭合属性
+          this.cachedBigData[cacheKey] = escapeHTMLSpecialChar(whole);
           return cacheKey;
         });
       }
