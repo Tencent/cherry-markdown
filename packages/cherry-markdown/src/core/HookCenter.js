@@ -227,7 +227,7 @@ export default class HookCenter {
       if (typeof HookClass === 'function') {
         const funcHook = HookClass;
         instance = funcHook(editorConfig);
-        if (!instance || !isHookValid(instance.constructor)) {
+        if (!instance || !isProtoOfSyntaxBase(instance.constructor)) {
           return WARN_NOT_A_VALID_HOOK;
         }
         hookName = instance.getName();

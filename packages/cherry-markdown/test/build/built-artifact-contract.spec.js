@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runInNewContext } from 'node:vm';
 import glob from 'glob';
 import { JSDOM } from 'jsdom';
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
@@ -162,6 +163,19 @@ describe('built Cherry Markdown artifact contract', () => {
       expect(dom.window.t, file).toBe(existingT);
       dom.window.close();
     });
+  });
+
+  it.each([
+    ['checklist', 'CherryTapdChecklistPlugin'],
+    ['html-tag', 'CherryTapdHtmlTagPlugin'],
+    ['table', 'CherryTapdTablePlugin'],
+  ])('loads the TAPD %s UMD addon without Symbol or Symbol.for', (name, globalName) => {
+    const source = readDistFile(`addons/advance/cherry-tapd-${name}-plugin.js`);
+    for (const setup of ['Symbol.for = undefined;', 'globalThis.Symbol = undefined;']) {
+      const globals = {};
+      runInNewContext(`${setup}\n${source}`, globals);
+      expect(typeof globals[globalName]).toBe('function');
+    }
   });
 
   it('publishes a chained source map for the full UMD browser bundle', () => {

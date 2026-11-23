@@ -20,7 +20,7 @@ import { blockNames } from '@/utils/sanitize';
 import LRUCache from '../utils/LRUCache';
 
 // The editor and standalone addon bundles each contain a copy of this base class.
-export const PARAGRAPH_HOOK = Symbol.for('cherry-markdown.ParagraphBase');
+export const PARAGRAPH_HOOK = 'Cherry$$PARAGRAPH_HOOK';
 
 let cacheCounter = 0;
 // ~~C${cacheCounter}I${cacheIndex}$

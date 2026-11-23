@@ -137,6 +137,9 @@ describe('core/HookCenter', () => {
     const hooks = hookCenter.getHookList().paragraph as ParagraphBase[];
     expect(hooks.map((hook) => hook.getName())).toEqual(['localParagraph', 'tapdCheckList', 'tapdTable']);
     expect(hooks.map((hook) => hook.cacheKey)).toEqual(['~~C0', '~~C1', '~~C2']);
+
+    const factoryHookCenter = createHookCenter();
+    expect(factoryHookCenter.register(() => new Table(), createEditorConfig())).toBe(WARN_NOT_A_VALID_HOOK);
   });
 
   describe('registerInternalHooks', () => {
