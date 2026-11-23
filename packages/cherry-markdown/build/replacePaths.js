@@ -113,16 +113,10 @@ function replacePaths() {
   // 在产物主入口顶部插入三斜线引用，使消费者自动加载环境模块声明（CSS、addon 等）
   const entryPath = resolve(declarationRoot, 'index.d.ts');
   const modulesReference = '/// <reference path="../../types/modules.d.ts" />';
-  const cherryOptionsExport = 'export type { CherryOptions } from "../../types/cherry.js";';
   const content = readFileSync(entryPath, 'utf-8');
-  let entry = content;
-  if (!entry.startsWith(modulesReference)) {
-    entry = `${modulesReference}\n${entry}`;
+  if (!content.startsWith(modulesReference)) {
+    writeFileSync(entryPath, `${modulesReference}\n${content}`);
   }
-  if (!entry.includes(cherryOptionsExport)) {
-    entry = `${entry.trimEnd()}\n${cherryOptionsExport}\n`;
-  }
-  if (entry !== content) writeFileSync(entryPath, entry);
 
   // Each runtime addon has a declaration alongside its UMD and ESM files.
   for (const file of glob.sync('addons/**/*-plugin.d.ts', { cwd: declarationRoot })) {
