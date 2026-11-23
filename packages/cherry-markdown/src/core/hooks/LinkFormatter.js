@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import ParagraphBase from '@/core/ParagraphBase';
-import { getLinkRule } from '@/utils/regexp';
+import { getLinkRule, protectLongLines } from '@/utils/regexp';
 
 /**
  * LinkFormatter：超链接内容的“护栏”预处理
@@ -71,8 +71,14 @@ export default class LinkFormatter extends ParagraphBase {
     if (!str) {
       return str;
     }
+    // ReDoS 防护：先把超长行替换为占位符，避免 linkRule 在异常超长行上触发回溯放大。
+    // 挖/贴在本函数内闭合，不污染下游 hook 以及 afterMakeHtml 的占位符体系。
+    const { safeStr, restore } = protectLongLines(str);
     // 只针对完整命中链接语法的片段做转义，避免误伤正文中的 ~D / \[ / \( 等。
-    return str.replace(this.linkRule, (match) => match.replace(ESCAPE_REG, (token) => ESCAPE_MAP[token]));
+    const processed = safeStr.replace(this.linkRule, (match) =>
+      match.replace(ESCAPE_REG, (token) => ESCAPE_MAP[token]),
+    );
+    return restore(processed);
   }
 
   makeHtml(str) {
