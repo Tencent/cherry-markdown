@@ -15,10 +15,10 @@
  */
 import glob from 'glob';
 import ts from 'typescript';
-import { readFileSync, writeFileSync } from 'fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, relative, resolve } from 'path';
 
-const editorExports = ['MenuHookBase', 'SyntaxHookBase'];
+const editorExports = ['MenuHookBase', 'SyntaxHookBase', 'MermaidCodeEngine', 'MermaidPlugin'];
 const declarationEntries = [
   ['cherry-markdown.d.ts', 'index', 'Cherry', editorExports],
   ['cherry-markdown.esm.d.ts', 'index', 'Cherry', editorExports],
@@ -111,12 +111,31 @@ function replacePaths() {
     if (updated !== source) writeFileSync(file, updated);
   }
 
-  // 在产物主入口顶部插入三斜线引用，使消费者自动加载环境模块声明（CSS、addon 等）
+  // Load ambient modules and re-export the original generic from the npm entry.
   const entryPath = resolve(declarationRoot, 'index.d.ts');
-  const modulesReference = '/// <reference path="../../types/modules.d.ts" />';
+  const entryHeader = [
+    '/// <reference path="../../types/modules.d.ts" />',
+    'export type { CherryOptions } from "../../types/cherry.js";',
+  ].join('\n');
   const content = readFileSync(entryPath, 'utf-8');
-  if (!content.startsWith(modulesReference)) {
-    writeFileSync(entryPath, `${modulesReference}\n${content}`);
+  if (!content.startsWith(entryHeader)) {
+    writeFileSync(entryPath, `${entryHeader}\n${content}`);
+  }
+
+  // The standalone TAPD hooks require compatible custom-syntax registration.
+  const addonDeclarations = glob.sync('addons/**/*-plugin.d.ts', {
+    cwd: declarationRoot,
+    ignore: 'addons/advance/cherry-tapd-*-plugin.d.ts',
+  });
+  for (const file of addonDeclarations) {
+    const addon = resolve('dist', file);
+    mkdirSync(dirname(addon), { recursive: true });
+    const entry = relative(dirname(addon), resolve(declarationRoot, file))
+      .replace(/\\/g, '/')
+      .replace(/\.d\.ts$/, '.js');
+    const shim = `export { default } from "${entry}";\n`;
+    writeFileSync(addon, shim);
+    writeFileSync(addon.replace(/\.d\.ts$/, '.esm.d.ts'), shim);
   }
 
   for (const [file, entry, defaultName, namedExports] of declarationEntries) {
