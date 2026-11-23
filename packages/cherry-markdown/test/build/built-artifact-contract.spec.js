@@ -27,7 +27,9 @@ const bundleNames = [
   'cherry-markdown.stream.js',
 ];
 
-const declarationNames = bundleNames.map((file) => file.replace(/\.js$/, '.d.ts'));
+const nodeBundleName = 'cherry-markdown.engine.core.node.js';
+const publishedBundleNames = [...bundleNames, nodeBundleName];
+const declarationNames = publishedBundleNames.map((file) => file.replace(/\.js$/, '.d.ts'));
 const umdFiles = [
   ...bundleNames.filter((file) => !file.endsWith('.esm.js')),
   ...glob.sync('src/addons/**/*-plugin.js', { cwd: projectRoot }).map((file) => file.replace(/^src\//, '')),
@@ -58,8 +60,8 @@ describe('built Cherry Markdown artifact contract', () => {
   );
 
   it('publishes the complete UMD and ESM bundle matrix with declarations', () => {
-    expect(glob.sync('*.js', { cwd: distRoot }).sort()).toEqual([...bundleNames].sort());
-    [...bundleNames, ...declarationNames].forEach((file) => {
+    expect(glob.sync('*.js', { cwd: distRoot }).sort()).toEqual([...publishedBundleNames].sort());
+    [...publishedBundleNames, ...declarationNames].forEach((file) => {
       expect(existsSync(resolve(distRoot, file)), file).toBe(true);
     });
   });

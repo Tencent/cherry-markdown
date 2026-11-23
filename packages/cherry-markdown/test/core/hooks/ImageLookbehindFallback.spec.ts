@@ -40,4 +40,11 @@ describe('core/hooks/Image lookbehind fallback', () => {
     expect(html).toContain('prefix <video src="video/movie.mp4"');
     expect(html).toContain('controls="controls">demo</video>');
   });
+
+  it('renders an image whose alt text wraps onto the next line without RegExp lookbehind support', () => {
+    const html = UrlCache.restoreAll(createImage().makeHtml('prefix ![wrapped\nalt](image.png) suffix'));
+
+    expect(html).toContain('prefix <img src="image/image.png"');
+    expect(html).toContain('alt="wrapped alt"');
+  });
 });
