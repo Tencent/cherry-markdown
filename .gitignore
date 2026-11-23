@@ -1,6 +1,11 @@
 .DS_Store
 node_modules
 dist
+# Public declarations generated from the Cherry Markdown type sources.
+packages/cherry-markdown/types/cherry.d.ts
+packages/cherry-markdown/types/editor.d.ts
+packages/cherry-markdown/types/previewer.d.ts
+packages/cherry-markdown/types/syntax.d.ts
 coverage
 packages/milkdown/preview/
 packages/milkdown/test-results/

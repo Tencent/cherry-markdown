@@ -1,4 +1,4 @@
-import Cherry from '../src/Cherry.js';
+import Cherry from '../../src/Cherry.js';
 export type AfterUpdateCallbackFunc = () => void;
 
 export interface PreviewerOptions {

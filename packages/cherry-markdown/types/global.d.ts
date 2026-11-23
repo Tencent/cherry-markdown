@@ -10,22 +10,22 @@
  * ```json
  * {
  *   "compilerOptions": {
- *     "types": ["cherry-markdown/types/global"]
+ *     "types": ["cherry-markdown/types/global.js"]
  *   }
  * }
  * ```
  *
  * 或在任意 .d.ts 文件中：
  * ```ts
- * /// <reference types="cherry-markdown/types/global" />
+ * /// <reference types="cherry-markdown/types/global.js" />
  * ```
  */
 
-import type Cherry from '../dist/types/Cherry';
-import type CherryStream from '../dist/types/CherryStream';
-import type CherryEngine from '../dist/types/index.engine.core';
-import type MermaidCodeEngine from '../dist/types/addons/cherry-code-block-mermaid-plugin';
-import type PlantUMLCodeEngine from '../dist/types/addons/cherry-code-block-plantuml-plugin';
+import type Cherry from '../dist/types/Cherry.js';
+import type CherryStream from '../dist/types/CherryStream.js';
+import type CherryEngine from '../dist/types/index.engine.core.js';
+import type MermaidCodeEngine from '../dist/types/addons/cherry-code-block-mermaid-plugin.js';
+import type PlantUMLCodeEngine from '../dist/types/addons/cherry-code-block-plantuml-plugin.js';
 
 export {};
 

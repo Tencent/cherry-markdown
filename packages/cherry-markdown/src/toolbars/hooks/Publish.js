@@ -17,7 +17,7 @@ import MenuBase from '@/toolbars/MenuBase';
 import { isBrowser } from '@/utils/env';
 import platformTransform from '@/utils/platformTransform';
 
-/** @typedef {import('../../../types/cherry').SupportPlatform} SupportPlatform */
+/** @typedef {import('~types/cherry').SupportPlatform} SupportPlatform */
 
 /** @type {Array<SupportPlatform>} */
 const supportPlatforms = ['wechat'];
@@ -59,7 +59,7 @@ export default class Publish extends MenuBase {
   /**
    * 子菜单点击事件
    * @param {string} selection 编辑器中选中的内容
-   * @param {import('../../../types/cherry').CherryPublishToolbarOption} shortcut 子菜单配置项
+   * @param {import('~types/cherry').CherryPublishToolbarOption} shortcut 子菜单配置项
    */
   onClick(selection, shortcut) {
     if (!isBrowser()) return;
