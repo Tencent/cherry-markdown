@@ -76,7 +76,9 @@ export default class Engine {
     }
     this.timer = setTimeout(() => {
       this.hashCache.clear();
-      const markdownText = this.$cherry.editor?.editor?.view?.state?.doc?.toString() || '';
+      this.clearCache();
+      const markdownText =
+        this.$cherry.editor?.editor?.view?.state?.doc?.toString() ?? this.$cherry.getMarkdown?.() ?? '';
       const html = this.makeHtml(markdownText);
       this.$cherry.previewer?.refresh(html);
       this.$cherry.$event.emit('afterChange', {
