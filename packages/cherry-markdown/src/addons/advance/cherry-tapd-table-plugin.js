@@ -291,8 +291,7 @@ export default class TapdTablePlugin extends ParagraphBase {
     });
   }
 
-  // @ts-ignore
   rule() {
-    return {};
+    return { begin: '', end: '', content: '' };
   }
 }
