@@ -16,7 +16,7 @@
 import mergeWith from '@/utils/toolkit/mergeWith';
 import cloneDeep from '@/utils/toolkit/cloneDeep';
 
-import Engine from './Engine';
+import Engine from '@/Engine';
 import { CherryStatic } from './CherryStatic';
 import SyntaxHookBase from './core/SyntaxBase';
 import MenuHookBase from './toolbars/MenuBase';
