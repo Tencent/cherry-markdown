@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import SyntaxBase from './SyntaxBase';
-import ParagraphBase from './ParagraphBase';
+import ParagraphBase, { PARAGRAPH_HOOK } from './ParagraphBase';
 import { $expectTarget } from '@/utils/error';
 import Logger from '@/Logger';
 
@@ -75,7 +75,10 @@ function isProtoOfSyntaxBase(value) {
  * @returns { value is typeof ParagraphBase }
  */
 function isProtoOfParagraphBase(value) {
-  return Object.prototype.isPrototypeOf.call(ParagraphBase, value);
+  return (
+    Object.prototype.isPrototypeOf.call(ParagraphBase, value) ||
+    (typeof value === 'function' && value[PARAGRAPH_HOOK] === true && value.HOOK_TYPE === ParagraphBase.HOOK_TYPE)
+  );
 }
 
 /**
@@ -162,7 +165,7 @@ export default class HookCenter {
       let HookClass;
       const customHookConfig = {};
       const hookClassOrConfig = customHooks[hookName];
-      if (isProtoOfSyntaxBase(hookClassOrConfig)) {
+      if (isHookValid(hookClassOrConfig)) {
         HookClass = hookClassOrConfig;
       } else if (isCustomSyntaxConfig(hookClassOrConfig)) {
         HookClass = hookClassOrConfig.syntaxClass;
@@ -236,6 +239,9 @@ export default class HookCenter {
       // TODO: 需要考虑自定义 hook 配置的传入方式
       const config = syntax?.[hookName] || {};
       instance = new HookClass({ externals, config, globalConfig: engine.global, cherry: $cherry, needCache: false });
+      if (isProtoOfParagraphBase(HookClass) && !(instance instanceof ParagraphBase) && 'cacheKey' in instance) {
+        instance.cacheKey = ParagraphBase.allocateCacheKey();
+      }
       // @hack inject externals
       instance.$externals = externals;
       instance.afterInit(() => {

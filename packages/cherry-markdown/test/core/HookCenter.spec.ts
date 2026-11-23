@@ -115,6 +115,30 @@ describe('core/HookCenter', () => {
     });
   });
 
+  it('registers paragraph hooks from a separate addon bundle without sharing cache keys', async () => {
+    vi.resetModules();
+    const { default: Checklist } = await import('../../src/addons/advance/cherry-tapd-checklist-plugin');
+    const { default: Table } = await import('../../src/addons/advance/cherry-tapd-table-plugin');
+    expect(ParagraphBase.isPrototypeOf(Checklist)).toBe(false);
+
+    class LocalParagraph extends ParagraphBase {
+      static HOOK_NAME = 'localParagraph';
+
+      constructor() {
+        super({ needCache: true });
+      }
+    }
+
+    ParagraphBase.resetCacheCounter();
+    const hookCenter = createHookCenter(
+      [LocalParagraph],
+      createEditorConfig({ customSyntax: { checklist: Checklist, table: { syntaxClass: Table } } }),
+    );
+    const hooks = hookCenter.getHookList().paragraph as ParagraphBase[];
+    expect(hooks.map((hook) => hook.getName())).toEqual(['localParagraph', 'tapdCheckList', 'tapdTable']);
+    expect(hooks.map((hook) => hook.cacheKey)).toEqual(['~~C0', '~~C1', '~~C2']);
+  });
+
   describe('registerInternalHooks', () => {
     it('应该按顺序注册所有内部 hooks', () => {
       const hook1 = createMockHookClass('hook1');

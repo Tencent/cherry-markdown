@@ -34,7 +34,8 @@ export default class TapdHtmlTagPlugin extends ParagraphBase {
     super({ needCache: true });
   }
 
-  makeHtml(html, sentenceMakeFunc) {
+  /** @param {string} html */
+  makeHtml(html, sentenceMakeFunc = (md) => ({ sign: '', html: md })) {
     return html.replace(this.RULE.reg, (whole) => {
       const lines = whole.split(/[\r\n]/).length;
       let $whole = whole
