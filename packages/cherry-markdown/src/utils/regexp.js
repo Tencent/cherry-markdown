@@ -324,15 +324,70 @@ export function getLinkRule() {
       '[ \\t]*', // any spaces
       '\\(',
       /**
-       * allow double quotes
-       * e.g.
-       * [link](") ⭕️ valid
-       * [link]("") ⭕️ valid
-       * [link](()) ⭕️ valid
-       * [link](" ") ❌ invalid
+       * URL 分支：对齐 CommonMark 规范，并消除分支内部的交替歧义
+       *
+       * 原规则 `((?:[^\s()]*\([^\s()]*\)[^\s()]*)+|[^\s)]+)` 存在两个问题：
+       *   - 两个顶层分支的字符集高度重叠（都能吃到普通字符），匹配普通 URL 时等价，
+       *     属于经典的 `(a+)+` 式交替歧义，会放大外层回溯开销；
+       *   - 括号分支是「单层嵌套」`[^\s()]*\([^\s()]*\)[^\s()]*`，只认一层括号，
+       *     不支持 CommonMark 496 的双层嵌套 `foo(and(bar))`；
+       *   - 两个分支都没有处理 `\(` `\)` 转义（CommonMark 498），也没有处理
+       *     angle-bracketed 形式 `<...>`（CommonMark 499）。
+       *
+       * 新设计将 URL 拆为两条「首字符互斥」的顶层分支，普通分支内部由若干互斥原子
+       * 组成，彼此之间没有重叠，分支内部不再产生回溯空间：
+       *   1) angle-bracketed 形式 `<...>`：首字符为 `<`，内部任意非 `<>` 非换行字符。
+       *   2) 普通形式：由若干「URL 原子」构成，首字符互斥的三条路径：
+       *        a. 反斜杠转义 `\.` —— 以 `\` 开头，吃掉下一个字符，支持 `\(` `\)` 字面量；
+       *        b. 成对括号 `( ... )` —— 以 `(` 开头，内部允许「普通字符 | 反斜杠转义 |
+       *           再一层成对括号」，覆盖 CommonMark 496 的双层嵌套；
+       *        c. 单个普通字符 —— 非空白、非 `\`、非 `()`。
+       *
+       * 覆盖的 CommonMark 用例：
+       *   - 496  `[link](foo(and(bar)))`      能正确解析嵌套括号
+       *   - 497  `[link](foo(and(bar))`       括号不平衡时按规范不渲染
+       *   - 498  `[link](foo\(and\(bar\))`    支持反斜杠转义括号
+       *   - 499  `[link](<foo(and(bar)>)`     走 angle-bracketed 分支的 fallback
+       *
+       * 说明：本次改动「减少」了 URL 分支内部的回溯空间，但 ReDoS 并未被彻底根除——
+       * 外层 text 分支的二选一结构 + `g` 标志下的多起点匹配仍可能被恶意构造输入触发
+       * 回溯放大，参见本函数所在 issue 的后续熔断/预检方案。
        */
-      '((?:[^\\s()]*\\([^\\s()]*\\)[^\\s()]*)+|[^\\s)]+)', // ?<link> url
-      '(?:[ \\t]((?:".*?")|(?:\'.*?\')))?', // ?<title> optional
+      '(' +
+        // 分支 1：<...>
+        '<[^<>\\n]*>' +
+        '|' +
+        // 分支 2：普通 URL，由互斥的原子组成
+        '(?:' +
+        '\\\\.' + // 反斜杠转义
+        '|' +
+        // 成对括号（允许内部再嵌一层成对括号，支持 CommonMark 双层嵌套）
+        '\\((?:\\\\.|\\((?:\\\\.|[^\\s\\\\()])*\\)|[^\\s\\\\()])*\\)' +
+        '|' +
+        '[^\\s\\\\()]' + // 普通字符
+        ')+' +
+        ')', // ?<link> url
+      /**
+       * title 分支：对齐 CommonMark 规范，并消除分支内部的交替歧义
+       *
+       * 原规则 `("..*?"|'.*?')` 的 `.*?` 懒惰匹配在引号未闭合时会沿行扩张、反复试探
+       * 下游 `\)` 的位置，产生 O(n) 的分支内回溯；且 `.*?` 不认 `\"` `\'` 转义，
+       * CommonMark 506 的 `[link](/url "title \"&quot;")` 会被错误地截断在首个
+       * 未转义 `"` 处而无法完整识别 title。
+       *
+       * 新规则将 title 内部拆为两个首字符互斥的原子：
+       *   a. 反斜杠转义 `\.` —— 以 `\` 开头，吃掉下一个字符，支持 `\"` / `\'` 字面量；
+       *   b. 普通字符 —— 非 `"`（或 `'`）、非 `\`、非 `\n`。
+       * 两个原子不重叠；结构一旦无法成立即失败，分支内部不再有回溯空间。
+       *
+       * 覆盖的 CommonMark 用例：
+       *   - 506  `[link](/url "title \"&quot;")`   支持 title 内 `\"` 转义
+       *   - 508  `[link](/url "title "and" title")` title 含未转义 `"` 时按规范不渲染
+       *
+       * 说明：同 URL 分支的说明——此改动只消除了 title 分支内部的歧义/回溯，
+       * 对由外层 text 分支与多起点匹配叠加触发的 ReDoS 仍无能为力。
+       */
+      '(?:[ \\t](' + '"(?:\\\\.|[^"\\\\\\n])*"' + '|' + "'(?:\\\\.|[^'\\\\\\n])*'" + '))?', // ?<title> optional
       '\\)',
       '(\\{target\\s*=\\s*(_blank|parent|self|top)\\})?',
     ].join(''),
@@ -388,3 +443,56 @@ export const getValueWithoutCode = (value = '') =>
       // 把行内代码的符号去掉
       return whole.replace(/[![\]()]/g, '.');
     });
+
+/**
+ * 超长行熔断工具：防止 getLinkRule() 等正则对单行过长的异常输入触发 ReDoS 回溯放大。
+ *
+ * 背景：
+ *   getLinkRule() 的分支内部虽然已经消除了交替歧义，但外层 text 分支的二选一结构 +
+ *   `g` 标志下的多起点匹配，在面对 `[a](b "[a](b "...` 这类单行内大量未闭合链接开头
+ *   的攻击载荷时，仍会在正则引擎的"反复失败回溯"阶段消耗 O(n²)~O(n³) 的 CPU。
+ *   这个开销发生在 `.replace()` 调用内部、回调函数还未被触发时，所以无法在回调里熔断，
+ *   必须在 `.replace()` 调用之前介入。
+ *
+ * 方案：
+ *   1. 调用方在 `.replace(linkRule, ...)` 之前先调 `protectLongLines(str)` 得到
+ *      `{ safeStr, restore }`；
+ *   2. 将原字符串中每一条长度超过 `maxLineLength` 的行替换成一个占位符（`~__LL${idx}__~`）
+ *      存入 stash，返回"已挖洞"的 safeStr；
+ *   3. 调用方对 safeStr 跑正则（超长行被占位符保护在外，正则接触不到攻击载荷）；
+ *   4. 处理完毕后调用 `restore(processed)` 把占位符替换回原超长行。
+ *
+ * 性能：
+ *   - 快速路径：若整段字符串长度小于 maxLineLength，直接返回原串与恒等 restore，
+ *     对正常文档几乎零额外开销；
+ *   - 命中路径：一次 O(n) 的扫描 + 替换，开销相对正则本身而言可忽略；
+ *   - 攻击路径：把 O(n³) 的正则回溯降为 O(n) 的字符串替换。
+ *
+ * 占位符命名：
+ *   `~__LL${idx}__~` 采用 Cherry 内部统一的 `~` 系前缀，与 LinkFormatter 的
+ *   `~1D` / `~1LB` 等占位符处于同一命名空间但不会冲突；且绝不会被 getLinkRule()
+ *   命中（内部不含 `[` `]` `(` `)`），对正则完全透明。
+ *
+ * 注意：占位符的挖/贴必须在同一个函数调用内闭合，不要跨越多个 hook 的生命周期，
+ *       否则占位符可能漏到最终 HTML。
+ *
+ * @param {string} str 原字符串
+ * @param {number} [maxLineLength=10000] 单行长度阈值；超过即视为疑似 ReDoS 载荷
+ * @returns {{ safeStr: string, restore: (processed: string) => string }}
+ */
+export function protectLongLines(str, maxLineLength = 10000) {
+  if (!str || str.length <= maxLineLength) {
+    return { safeStr: str, restore: (x) => x };
+  }
+  const stash = [];
+  const safeStr = str.replace(/[^\n]+/g, (line) => {
+    if (line.length <= maxLineLength) return line;
+    const idx = stash.push(line) - 1;
+    return `~__LL${idx}__~`;
+  });
+  if (stash.length === 0) {
+    return { safeStr: str, restore: (x) => x };
+  }
+  const restore = (processed) => processed.replace(/~__LL(\d+)__~/g, (_, i) => stash[+i]);
+  return { safeStr, restore };
+}

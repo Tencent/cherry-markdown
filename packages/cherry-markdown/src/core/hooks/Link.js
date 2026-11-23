@@ -15,7 +15,7 @@
  */
 import SyntaxBase from '@/core/SyntaxBase';
 import { escapeHTMLSpecialChar as e, isValidScheme, encodeURIOnce } from '@/utils/sanitize';
-import { getLinkRule, isLookbehindSupported } from '@/utils/regexp';
+import { getLinkRule, isLookbehindSupported, protectLongLines } from '@/utils/regexp';
 import { replaceLookbehind } from '@/utils/lookbehind-replace';
 import UrlCache from '@/UrlCache';
 
@@ -117,10 +117,14 @@ export default class Link extends SyntaxBase {
   }
 
   makeHtml(str, sentenceMakeFunc = (md) => ({ sign: '', html: md })) {
-    if (isLookbehindSupported()) {
-      return str.replace(this.RULE.reg, this.toHtml.bind(this, sentenceMakeFunc));
-    }
-    return replaceLookbehind(str, this.RULE.reg, this.toHtml.bind(this, sentenceMakeFunc), true, 1);
+    // ReDoS 防护：先把超长行替换为占位符，避免 linkRule 的 `g` 标志 + 多起点回溯
+    // 在恶意构造输入（如 `[a](b "`.repeat(N)）上触发 O(n²)~O(n³) 的回溯放大。
+    // 占位符对 linkRule 完全透明（不含 [ ] ( )），正常行渲染路径不受影响。
+    const { safeStr, restore } = protectLongLines(str);
+    const processed = isLookbehindSupported()
+      ? safeStr.replace(this.RULE.reg, this.toHtml.bind(this, sentenceMakeFunc))
+      : replaceLookbehind(safeStr, this.RULE.reg, this.toHtml.bind(this, sentenceMakeFunc), true, 1);
+    return restore(processed);
   }
 
   rule() {

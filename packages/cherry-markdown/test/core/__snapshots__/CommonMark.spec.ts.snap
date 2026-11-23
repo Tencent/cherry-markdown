@@ -2915,12 +2915,12 @@ exports[`engine > CommonMark-495 1`] = `
 `;
 
 exports[`engine > CommonMark-496 1`] = `
-"<p data-sign="e906cfd5e4c676191" data-type="p" data-lines="1"><a href="foo(and(bar">link</a>))</p>
+"<p data-sign="e906cfd5e4c676191" data-type="p" data-lines="1"><a href="foo(and(bar))">link</a></p>
 "
 `;
 
 exports[`engine > CommonMark-497 1`] = `
-"<p data-sign="0a0b75edae4bdd251" data-type="p" data-lines="1"><a href="foo(and(bar">link</a>)</p>
+"<p data-sign="0a0b75edae4bdd251" data-type="p" data-lines="1">[link](foo(and(bar))</p>
 "
 `;
 
@@ -2930,7 +2930,7 @@ exports[`engine > CommonMark-498 1`] = `
 `;
 
 exports[`engine > CommonMark-499 1`] = `
-"<p data-sign="550b1872141d20091" data-type="p" data-lines="1"><a href="<foo(and(bar">link</a>&gt;)</p>
+"<p data-sign="550b1872141d20091" data-type="p" data-lines="1">[link](&lt;foo(and(bar)&gt;)</p>
 "
 `;
 
@@ -2975,7 +2975,7 @@ exports[`engine > CommonMark-507 1`] = `
 `;
 
 exports[`engine > CommonMark-508 1`] = `
-"<p data-sign="c1b0e545dc859f871" data-type="p" data-lines="1"><a href="/url" title="title and title">link</a></p>
+"<p data-sign="c1b0e545dc859f871" data-type="p" data-lines="1">[link](/url "title "and" title")</p>
 "
 `;
 
