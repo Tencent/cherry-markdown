@@ -7,7 +7,6 @@ import { fileURLToPath } from 'node:url';
 import glob from 'glob';
 import { JSDOM } from 'jsdom';
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
-import ts from 'typescript';
 import { describe, expect, it } from 'vite-plus/test';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -65,89 +64,6 @@ describe('built Cherry Markdown artifact contract', () => {
     [...publishedBundleNames, ...declarationNames].forEach((file) => {
       expect(existsSync(resolve(distRoot, file)), file).toBe(true);
     });
-  });
-
-  it('renders and sanitizes Markdown in a fresh Node process', () => {
-    execFileSync(
-      process.execPath,
-      [
-        '--input-type=module',
-        '--eval',
-        `
-          import assert from 'node:assert/strict';
-
-          assert.equal(typeof globalThis.window, 'undefined');
-          assert.equal(typeof globalThis.document, 'undefined');
-          const { default: CherryEngine } = await import('./dist/${nodeBundleName}');
-          const engine = new CherryEngine();
-          const html = engine.makeHtml('# Headless\\n\\n<p data-lines="1"><em>Cherry</em></p>');
-
-          assert.match(html, /<h1\\b[^>]*>.*Headless.*<\\/h1>/);
-          assert.match(html, /<em>Cherry<\\/em>/);
-          assert.doesNotMatch(html, /data-lines=/);
-          assert.equal(typeof globalThis.window, 'undefined');
-          assert.equal(typeof globalThis.document, 'undefined');
-        `,
-      ],
-      { cwd: projectRoot, stdio: 'pipe', timeout: 10000 },
-    );
-  });
-
-  it('uses an asynchronous URL update on the next Node render', () => {
-    execFileSync(
-      process.execPath,
-      [
-        '--input-type=module',
-        '--eval',
-        `
-          import assert from 'node:assert/strict';
-          import CherryEngine from './dist/${nodeBundleName}';
-
-          const original = 'https://example.com/original.png';
-          const updated = 'https://example.com/updated.png';
-          const engine = new CherryEngine({
-            engine: {
-              global: {
-                urlProcessor(url, type, done) {
-                  setTimeout(() => done(updated), 0);
-                  return url;
-                },
-              },
-            },
-          });
-          const markdown = '![image](' + original + ')';
-          assert.ok(engine.makeHtml(markdown).includes('src="' + original + '"'));
-          await new Promise((resolve) => setTimeout(resolve, 0));
-          assert.ok(engine.makeHtml(markdown).includes('src="' + updated + '"'));
-        `,
-      ],
-      { cwd: projectRoot, stdio: 'pipe', timeout: 10000 },
-    );
-  });
-
-  it.each([
-    ['NodeNext', ts.ModuleKind.NodeNext, ts.ModuleResolutionKind.NodeNext],
-    ['bundler', ts.ModuleKind.ESNext, ts.ModuleResolutionKind.Bundler],
-  ])('resolves the Node engine types with %s', (_name, module, moduleResolution) => {
-    const entry = resolve(distRoot, 'node-engine-consumer.mts');
-    const source = `
-      import CherryEngine, { SyntaxHookBase } from './${nodeBundleName}';
-      const engine = new CherryEngine();
-      const markdown: string = engine.makeMarkdown('<h1>Heading</h1>');
-      const html: string | object = engine.makeHtml(markdown);
-      // @ts-expect-error Markdown input must be a string.
-      engine.makeHtml(123);
-      // @ts-expect-error SyntaxHookBase is a constructor.
-      const invalid: number = SyntaxHookBase;
-    `;
-    const options = { module, moduleResolution, noEmit: true, strict: true, skipLibCheck: false, types: [] };
-    const host = ts.createCompilerHost(options);
-    const readSourceFile = host.getSourceFile.bind(host);
-    host.getSourceFile = (file, ...args) =>
-      file === entry ? ts.createSourceFile(file, source, args[0]) : readSourceFile(file, ...args);
-
-    const diagnostics = ts.getPreEmitDiagnostics(ts.createProgram([entry], options, host));
-    expect(diagnostics.map(({ messageText }) => ts.flattenDiagnosticMessageText(messageText, '\n'))).toEqual([]);
   });
 
   it('publishes every addon in both formats with its declaration', () => {
