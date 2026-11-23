@@ -34,7 +34,5 @@ Cherry.usePlugin(MermaidCodeEngine, {
 Cherry.usePlugin(PlantUMLCodeEngine, {});
 Cherry.usePlugin(EChartsTableEngine);
 
-/** @typedef {import('~types/cherry').CherryOptions} CherryOptions */
-
 export * from './index.core';
 export default Cherry;
