@@ -12,8 +12,8 @@ export default class Image extends SyntaxBase {
         content: string;
         end: string;
     };
-    replaceToHtml(type: any, match: any, leadingChar: any, alt: any, link: any, title: any, poster: any): any;
-    toHtml(match: any, leadingChar: any, alt: any, link: any, title: any, ref: any, extendAttrs: any): any;
+    replaceToHtml(type: any, match: any, leadingChar: any, rawAlt: any, link: any, title: any, poster: any): any;
+    toHtml(match: any, leadingChar: any, rawAlt: any, link: any, title: any, ref: any, extendAttrs: any): any;
     toMediaHtml(match: any, leadingChar: any, mediaType: any, alt: any, link: any, title: any, ref: any, posterWrap: any, poster: any, ...args: any[]): any;
     makeHtml(str: any): any;
     testMedia(str: any): any;
@@ -23,4 +23,4 @@ export default class Image extends SyntaxBase {
         end: string;
     };
 }
-import SyntaxBase from '../../core/SyntaxBase';
+import SyntaxBase from '../SyntaxBase.js';

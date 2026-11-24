@@ -13,7 +13,7 @@ export default class SearcherBridge {
      * @param {SearcherCherryHost} cherry
      */
     constructor(cherry: SearcherCherryHost);
-    cherry: import("./bridge-utils").SearcherCherryHost;
+    cherry: import("./bridge-utils.js").SearcherCherryHost;
     /** @type {SearcherConfig} 初始化时解析，运行期不随 options 变更 */
     config: SearcherConfig;
     handleLocaleChange(): void;
@@ -34,7 +34,7 @@ export default class SearcherBridge {
     handleTrigger(selection?: string, aliasName?: string): void;
     destroy(): void;
 }
-export type SearcherCherryHost = import("./bridge-utils").SearcherCherryHost;
-export type SearcherConfig = import("./config").SearcherConfig;
-import SearcherPanel from './SearcherPanel';
-export { getSearcherToolbarConfig, isSearcherReplaceEnabled, pickSearcherLocale, resolveSearcherConfig } from "./config";
+export type SearcherCherryHost = import("./bridge-utils.js").SearcherCherryHost;
+export type SearcherConfig = import("./config.js").SearcherConfig;
+import SearcherPanel from './SearcherPanel.js';
+export { getSearcherToolbarConfig, isSearcherReplaceEnabled, pickSearcherLocale, resolveSearcherConfig } from "./config.js";

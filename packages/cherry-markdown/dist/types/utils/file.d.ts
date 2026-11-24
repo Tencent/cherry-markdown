@@ -32,5 +32,31 @@ export function handleUpload(editor: any, type?: string, accept?: string, callba
  * @param params?.height 设置高度，可以是像素、也可以是百分比（图片、视频场景下生效）
  */
 export function handleParams(params: any): string;
-export function handleFileUploadCallback(url: any, params: any, file: any): string;
-export function handleDropType(file: File, url: string): string;
+export function handleFileUploadCallback(url: any, params: any, file: any, imageCaption: any): string;
+/**
+ * 去掉文件名的扩展名，用于生成图片名称
+ * @param {string} name 文件名
+ * @returns {string}
+ */
+export function stripFileExtension(name: string): string;
+/**
+ * 解析图片名称：上传回调返回的 params.name 优先（调用方可以自定义标题），
+ * 否则使用去掉扩展名的文件名
+ * @param {string} fileName 原始文件名
+ * @param {object} [params] 上传回调返回的参数
+ * @returns {string}
+ */
+export function resolveImageName(fileName: string, params?: object): string;
+/**
+ * 根据 imageCaption 配置生成「图片名称」追加文本（#1767）
+ * 图片名称会作为独立的一段追加在图片语法后面
+ * @param {boolean|string|Function} imageCaption 配置项
+ *   - true：追加图片名称
+ *   - string：作为前缀，例如 '图片: ' -> '图片: 图片名称'
+ *   - Function(imageName, url)：返回要追加的文本，返回空串则不追加
+ * @param {string} imageName 图片名称
+ * @param {string} url 图片地址
+ * @returns {string} 需要追加到图片语法后面的文本，空串表示不追加
+ */
+export function getImageCaptionText(imageCaption: boolean | string | Function, imageName: string, url: string): string;
+export function handleDropType(file: File, url: string, imageCaption?: boolean | string | Function): string;

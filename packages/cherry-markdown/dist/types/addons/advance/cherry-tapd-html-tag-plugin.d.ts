@@ -9,8 +9,11 @@ export default class TapdHtmlTagPlugin extends ParagraphBase {
     constructor();
     makeHtml(html: any, sentenceMakeFunc: any): any;
     rule(): {
+        begin: string;
+        end: string;
+        content: string;
         reg: RegExp;
     };
     _trimScripTag(str: any): any;
 }
-import ParagraphBase from '../../core/ParagraphBase';
+import ParagraphBase from '../../core/ParagraphBase.js';

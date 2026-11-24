@@ -26,12 +26,12 @@ export default class MenuBase {
     $cherry: MenuBaseConstructorParams;
     bubbleMenu: boolean;
     subMenu: any;
-    $currentMenuOptions: import("../../../types/menus").CustomMenuConfig;
+    $currentMenuOptions: import("../../../types/menus.js").CustomMenuConfig;
     name: string;
     iconName: string;
     /** @type {import('../../../types/menus').MenuIconType} */
-    iconType: import("../../../types/menus").MenuIconType;
-    editor: import("../Editor").default;
+    iconType: import("../../../types/menus.js").MenuIconType;
+    editor: import("../Editor.js").default;
     locale: {
         bold: string;
         code: string;
@@ -740,12 +740,12 @@ export default class MenuBase {
      * 创建一个SVG类型的图标
      * @param {import('../../../types/menus').CustomMenuIcon} options
      */
-    createSvgIcon(options: import("../../../types/menus").CustomMenuIcon): Element;
+    createSvgIcon(options: import("../../../types/menus.js").CustomMenuIcon): Element;
     /**
      * 创建一个Image类型的图标
      * @param {import('../../../types/menus').CustomMenuIcon} options
      */
-    createImageIcon(options: import("../../../types/menus").CustomMenuIcon): HTMLImageElement;
+    createImageIcon(options: import("../../../types/menus.js").CustomMenuIcon): HTMLImageElement;
     /**
      * 在创建菜单后执行的钩子
      */
@@ -824,7 +824,7 @@ export default class MenuBase {
      * 更新菜单图标
      * @param {import('../../../types/menus').CustomMenuConfig['icon']} options 图标配置
      */
-    updateMenuIcon(options: import("../../../types/menus").CustomMenuConfig["icon"]): boolean;
+    updateMenuIcon(options: import("../../../types/menus.js").CustomMenuConfig["icon"]): boolean;
     /**
      * 获取当前菜单的位置
      */
@@ -860,8 +860,8 @@ export type SubMenuConfigItem = {
      */
     disabledHideAllSubMenu?: boolean | undefined;
 };
-export type HookShortcutKeyMap = Record<string, import("../../../types/cherry").ShortcutKeyMapStruct>;
-export type Editor = import("../Editor").default;
-export type MenuBaseConstructorParams = Partial<import("../Cherry").default> & {
-    $currentMenuOptions?: import("../../../types/menus").CustomMenuConfig;
+export type HookShortcutKeyMap = Record<string, import("../../../types/cherry.js").ShortcutKeyMapStruct>;
+export type Editor = import("../Editor.js").default;
+export type MenuBaseConstructorParams = Partial<import("../Cherry.js").default> & {
+    $currentMenuOptions?: import("../../../types/menus.js").CustomMenuConfig;
 };

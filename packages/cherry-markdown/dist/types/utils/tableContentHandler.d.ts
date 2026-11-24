@@ -103,9 +103,9 @@ export default class TableHandler {
      */
     $getTdOffset(tableCode: string, isTHead: boolean, trIndex: number, tdIndex: number, isInBlock?: boolean): {
         preLine: number;
-        preCh: number;
-        plusCh: number;
-        currentTd: string;
+        preCh: any;
+        plusCh: any;
+        currentTd: any;
     };
     /**
      * 获取引用语法中表格对应单元格的偏移量
@@ -116,9 +116,9 @@ export default class TableHandler {
      */
     $getBlockquoteTdOffset(tableCode: string, isTHead: boolean, trIndex: number, tdIndex: number): {
         preLine: number;
-        preCh: number;
-        plusCh: number;
-        currentTd: string;
+        preCh: any;
+        plusCh: any;
+        currentTd: any;
     };
     /**
      * 获取HTML表格中对应单元格的偏移量

@@ -4,4 +4,4 @@
 export default class Align extends Panel {
     $getTitle(): string;
 }
-import Panel from './Panel';
+import Panel from './Panel.js';

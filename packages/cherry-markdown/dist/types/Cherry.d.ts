@@ -1334,7 +1334,7 @@ export default class Cherry extends CherryStatic {
     /**
      * @type {import('./Engine').default}
      */
-    engine: import("./Engine").default;
+    engine: import("./Engine.js").default;
     /**
      * 初始化工具栏、编辑区、预览区等
      * @private
@@ -2326,16 +2326,16 @@ export default class Cherry extends CherryStatic {
      */
     clearFlowSessionCursor(): void;
 }
-export type CherryOptions = import("../../types/cherry").CherryOptions;
-export type CM6AdapterType = import("../../types/editor").CM6Adapter;
-import { CherryStatic } from './CherryStatic';
-import Event from './Event';
-import Toc from './toolbars/Toc';
-import Previewer from './Previewer';
-import Toolbar from './toolbars/Toolbar';
-import ToolbarRight from './toolbars/ToolbarRight';
-import Sidebar from './toolbars/Sidebar';
-import HiddenToolbar from './toolbars/HiddenToolbar';
-import FloatMenu from './toolbars/FloatMenu';
-import Bubble from './toolbars/Bubble';
-import Editor from './Editor';
+export type CherryOptions = import("../../types/cherry.js").CherryOptions;
+export type CM6AdapterType = import("../../types/editor.js").CM6Adapter;
+import { CherryStatic } from './CherryStatic.js';
+import Event from './Event.js';
+import Toc from './toolbars/Toc.js';
+import Previewer from './Previewer.js';
+import Toolbar from './toolbars/Toolbar.js';
+import ToolbarRight from './toolbars/ToolbarRight.js';
+import Sidebar from './toolbars/Sidebar.js';
+import HiddenToolbar from './toolbars/HiddenToolbar.js';
+import FloatMenu from './toolbars/FloatMenu.js';
+import Bubble from './toolbars/Bubble.js';
+import Editor from './Editor.js';

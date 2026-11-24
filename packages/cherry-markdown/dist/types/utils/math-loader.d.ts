@@ -3,7 +3,7 @@
  * @param {import('../Engine').default} engine Engine 实例
  * @param {Partial<import('../Cherry').CherryOptions>} opts 初始化选项
  */
-export function initMathEngines(engine: import("../Engine").default, opts: Partial<import("../Cherry").CherryOptions>): void;
+export function initMathEngines(engine: import("../Engine.js").default, opts: Partial<import("../Cherry.js").CherryOptions>): void;
 export type MathBlockOptions = {
     engine?: "katex" | "MathJax";
     src?: string;

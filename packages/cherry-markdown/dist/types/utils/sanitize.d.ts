@@ -28,3 +28,7 @@ export const blockNames: string;
 export const inlineNames: string;
 export const inlineBlock: "br|img|hr";
 export const whiteList: RegExp;
+/**
+ * 用于判断一段 html 片段中是否包含任意块级标签。
+ */
+export const CONTAIN_BLOCK_TEST_REG: RegExp;

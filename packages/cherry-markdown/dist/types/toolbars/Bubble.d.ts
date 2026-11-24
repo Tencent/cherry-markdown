@@ -52,4 +52,4 @@ export default class Bubble extends Toolbar {
      */
     destroy(): void;
 }
-import Toolbar from './Toolbar';
+import Toolbar from './Toolbar.js';

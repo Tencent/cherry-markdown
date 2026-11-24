@@ -6,14 +6,14 @@ export default class FormulaHandler {
      * @param {HTMLDivElement} previewerDom 预览器dom
      * @param {import('../Cherry').default} $cherry Cherry实例（流式渲染场景下不依赖 editor）
      */
-    constructor(trigger: string, target: Element, container: HTMLDivElement, previewerDom: HTMLDivElement, $cherry: import("../Cherry").default);
+    constructor(trigger: string, target: Element, container: HTMLDivElement, previewerDom: HTMLDivElement, $cherry: import("../Cherry.js").default);
     /** @type{HTMLElement} */
     bubbleContainer: HTMLElement;
     trigger: string;
     target: Element;
     container: HTMLDivElement;
     previewerDom: HTMLDivElement;
-    $cherry: import("..").default;
+    $cherry: import("../index.js").default;
     /**
      * 触发事件
      * @param {string} type 事件类型

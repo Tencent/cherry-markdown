@@ -2,8 +2,8 @@ export default class MermaidBubbleSession {
     /**
      * @param {import('./PreviewerBubble').default} host PreviewerBubble 实例
      */
-    constructor(host: import("./PreviewerBubble").default);
-    host: import("./PreviewerBubble").default;
+    constructor(host: import("./PreviewerBubble.js").default);
+    host: import("./PreviewerBubble.js").default;
     /** 重置会话状态（移除操作框时调用） */
     reset(): void;
     anchorBody: string;

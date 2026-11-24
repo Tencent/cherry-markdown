@@ -70,7 +70,7 @@ export default class Toolbar {
     previewOnly(): void;
     showToolbar(): void;
     level2MenuList(name: any): string[];
-    hasConfigMenuList(name: any): import("./MenuBase").SubMenuConfigItem[];
+    hasConfigMenuList(name: any): import("./MenuBase.js").SubMenuConfigItem[];
     /**
      * 判断是否有子菜单，目前有两种子菜单配置方式：1、通过`subMenuConfig`属性 2、通过`buttonConfig`配置属性
      * @param {string} name
@@ -190,4 +190,4 @@ export type Insert = (insert: "hr" | "br" | "code" | "formula" | "checklist" | "
  * - gantt(6)甘特图
  */
 export type Graph = (type: "1" | "2" | "3" | "4" | "5" | "6" | 1 | 2 | 3 | 4 | 5 | 6 | "flow" | "sequence" | "state" | "class" | "pie" | "gantt") => void;
-import HookCenter from './HookCenter';
+import HookCenter from './HookCenter.js';

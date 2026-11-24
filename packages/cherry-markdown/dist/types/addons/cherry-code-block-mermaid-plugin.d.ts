@@ -94,21 +94,21 @@ export default class MermaidCodeEngine {
      * @param {import('../Engine').default} $engine
      * @returns {string}
      */
-    $getContentCacheKey(src: string, $engine: import("../Engine").default): string;
+    $getContentCacheKey(src: string, $engine: import("../Engine.js").default): string;
     /**
      * 读取已缓存的 mermaid 渲染结果
      * @param {string} src
      * @param {import('../Engine').default} $engine
      * @returns {string}
      */
-    $getCachedRenderHtml(src: string, $engine: import("../Engine").default): string;
+    $getCachedRenderHtml(src: string, $engine: import("../Engine.js").default): string;
     /**
      * 缓存 mermaid 渲染结果（仅缓存含 svg 的成功结果）
      * @param {string} src
      * @param {import('../Engine').default} $engine
      * @param {string} html
      */
-    $setCachedRenderHtml(src: string, $engine: import("../Engine").default, html: string): void;
+    $setCachedRenderHtml(src: string, $engine: import("../Engine.js").default, html: string): void;
     hasExplicitMermaid: boolean;
     mermaidScriptLoading: boolean;
     mermaidScriptLoaded: boolean;
@@ -119,7 +119,7 @@ export default class MermaidCodeEngine {
      * @param {import('../Engine').default} $engine
      * @returns {HTMLDivElement}
      */
-    createAsyncRenderCanvas($engine: import("../Engine").default): HTMLDivElement;
+    createAsyncRenderCanvas($engine: import("../Engine.js").default): HTMLDivElement;
     /**
      * 移除异步渲染使用的临时画布
      * @param {HTMLElement} canvas

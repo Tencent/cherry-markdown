@@ -4,16 +4,16 @@ export default class Engine {
      * @param {Partial<import('./Cherry').CherryOptions>} markdownParams 初始化Cherry时传入的选项
      * @param {import('./Cherry').default} cherry Cherry实例
      */
-    constructor(markdownParams: Partial<import("./Cherry").CherryOptions>, cherry: import("./Cherry").default);
-    $cherry: import("./Cherry").default;
+    constructor(markdownParams: Partial<import("./Cherry.js").CherryOptions>, cherry: import("./Cherry.js").default);
+    $cherry: import("./Cherry.js").default;
     hookCenter: HookCenter;
-    hooks: Record<import("../types/syntax").HookType, SyntaxBase[]>;
+    hooks: Record<import("../../types/syntax.js").HookType, SyntaxBase[]>;
     asyncRenderHandler: AsyncRenderHandler;
     hashCache: LRUCache;
     hashStrMap: LRUCache;
     cachedBigData: {};
     urlProcessorMap: {};
-    markdownParams: Partial<Partial<import("../types/cherry").CherryOptionsBase<import("../types/cherry").CherryCustomOptions>>>;
+    markdownParams: Partial<Partial<import("../../types/cherry.js").CherryOptionsBase<import("../../types/cherry.js").CherryCustomOptions>>>;
     currentStrMd5: any[];
     globalConfig: {
         classicBr?: boolean;
@@ -101,6 +101,7 @@ export default class Engine {
      * @returns {string|object} 获取html
      */
     makeHtml(md: string, returnType?: "string" | "object", forceNoCursor?: boolean): string | object;
+    makeHtmlForMe(md: any, name: any): any;
     makeHtmlForBlockquote(md: any): any;
     makeHtmlForFootnote(md: any): any;
     mounted(): void;
@@ -114,7 +115,7 @@ export default class Engine {
      */
     clearCache(): void;
 }
-import HookCenter from './core/HookCenter';
-import SyntaxBase from './core/SyntaxBase';
-import AsyncRenderHandler from './utils/async-render-handler';
-import LRUCache from './utils/LRUCache';
+import HookCenter from './core/HookCenter.js';
+import SyntaxBase from './core/SyntaxBase.js';
+import AsyncRenderHandler from './utils/async-render-handler.js';
+import LRUCache from './utils/LRUCache.js';

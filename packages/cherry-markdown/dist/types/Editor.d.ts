@@ -50,7 +50,7 @@ export default class Editor {
     isDestroyed: boolean;
     /** @type {((key: string) => boolean) | null} */
     arrowKeyInterceptor: ((key: string) => boolean) | null;
-    $cherry: import("./Cherry").default;
+    $cherry: import("./Cherry.js").default;
     refresh(): void;
     /**
      * 禁用快捷键
@@ -84,10 +84,10 @@ export default class Editor {
      * 收集标记项（不立即应用，用于批量处理）
      * @param {RegExp} reg - 正则表达式
      * @param {string} className - CSS 类名
-     * @param {Array<import('../types/editor').BatchMarkItem>} targetArray - 目标数组，用于收集标记项
+     * @param {Array<import('../../types/editor').BatchMarkItem>} targetArray - 目标数组，用于收集标记项
      * @param {Set<string>} [existingMarksSet] - 已有标记集合（用于避免 O(n²) 检查）
      */
-    collectMarkItems: (reg: RegExp, className: string, targetArray: Array<import("../types/editor").BatchMarkItem>, existingMarksSet?: Set<string>) => void;
+    collectMarkItems: (reg: RegExp, className: string, targetArray: Array<import("../../types/editor.js").BatchMarkItem>, existingMarksSet?: Set<string>) => void;
     /**
      * 收集全角字符标记项（不立即应用）
      * @param {Array} targetArray - 目标数组，用于收集标记项
@@ -100,7 +100,7 @@ export default class Editor {
      * @param {Array<import('../../types/editor').BatchMarkItem>} markItems - 标记项数组
      * @returns {void}
      */
-    applyBatchMarks: (editor: CM6Adapter, markItems: Array<import("../../types/editor").BatchMarkItem>) => void;
+    applyBatchMarks: (editor: CM6Adapter, markItems: Array<import("../../types/editor.js").BatchMarkItem>) => void;
     /**
      * 计算 mark 范围
      * @param {Array} matchResult - 正则匹配结果
@@ -352,14 +352,14 @@ export default class Editor {
      */
     clearUndoRedo(): void;
 }
-export type EditorConfiguration = import("../../types/editor").EditorConfiguration;
-export type EditorEventCallback = import("../../types/editor").EditorEventCallback<keyof import("../../types/editor").EditorEventMap>;
-export type CM6AdapterType = import("../../types/editor").CM6Adapter;
-export type TextMarker = import("../../types/editor").TextMarker;
-export type MarkInfo = import("../../types/editor").MarkInfo;
-export type MarkTextOptions = import("../../types/editor").MarkTextOptions;
-export type SearchCursor = import("../../types/editor").SearchCursor;
-export type ScrollInfo = import("../../types/editor").ScrollInfo;
+export type EditorConfiguration = import("../../types/editor.js").EditorConfiguration;
+export type EditorEventCallback = import("../../types/editor.js").EditorEventCallback<keyof import("../../types/editor.js").EditorEventMap>;
+export type CM6AdapterType = import("../../types/editor.js").CM6Adapter;
+export type TextMarker = import("../../types/editor.js").TextMarker;
+export type MarkInfo = import("../../types/editor.js").MarkInfo;
+export type MarkTextOptions = import("../../types/editor.js").MarkTextOptions;
+export type SearchCursor = import("../../types/editor.js").SearchCursor;
+export type ScrollInfo = import("../../types/editor.js").ScrollInfo;
 export type SelectionRange = import("@codemirror/state").SelectionRange;
 export type Rect = import("@codemirror/view").Rect;
 export type MarkEffectValue = {

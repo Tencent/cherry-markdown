@@ -246,7 +246,7 @@ export type SearcherPanelParams = {
      */
     onVisibilityChange?: (visible: boolean) => void;
 };
-export type SearcherEditorAdapter = import("./bridge-utils").SearcherEditorAdapter;
+export type SearcherEditorAdapter = import("./bridge-utils.js").SearcherEditorAdapter;
 /**
  * 面板显示选项
  */

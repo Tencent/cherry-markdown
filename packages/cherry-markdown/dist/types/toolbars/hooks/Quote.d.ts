@@ -10,4 +10,4 @@ export default class Quote extends MenuBase {
      */
     onClick(selection: string): string;
 }
-import MenuBase from '../../toolbars/MenuBase';
+import MenuBase from '../MenuBase.js';

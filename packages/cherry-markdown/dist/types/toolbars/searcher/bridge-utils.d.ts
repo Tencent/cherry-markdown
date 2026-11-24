@@ -2,13 +2,13 @@
  * @param {import('../../../../types/cherry').CherryToolbarsOptions | undefined} toolbars
  * @returns {boolean}
  */
-export function isSearcherToolbarEnabled(toolbars: import("../../../../types/cherry").CherryToolbarsOptions | undefined): boolean;
+export function isSearcherToolbarEnabled(toolbars: import("../../../../types/cherry.js").CherryToolbarsOptions | undefined): boolean;
 /**
  * 获取 Search hook（任一已挂载工具栏均可；按钮态通过 DOM 选择器统一更新）
  * @param {SearcherCherryHost | undefined} cherry
  * @returns {import('../../toolbars/hooks/Search').default | undefined}
  */
-export function getSearchHook(cherry: SearcherCherryHost | undefined): import("../../toolbars/hooks/Search").default | undefined;
+export function getSearchHook(cherry: SearcherCherryHost | undefined): import("../hooks/Search.js").default | undefined;
 /**
  * @param {SearcherCherryHost} cherry
  * @returns {SearcherEditorAdapter}
@@ -19,17 +19,17 @@ export const SEARCH_HOOK_NAME: "search";
 export type SearcherCherryHost = {
     locale?: Record<string, string | undefined>;
     options?: {
-        toolbars?: import("../../../../types/cherry").CherryToolbarsOptions;
+        toolbars?: import("../../../../types/cherry.js").CherryToolbarsOptions;
     };
     editor?: object;
     wrapperDom?: HTMLElement;
-    toolbar?: import("../../toolbars/Toolbar").default;
-    toolbarRight?: import("../../toolbars/ToolbarRight").default;
-    sidebar?: import("../../toolbars/Sidebar").default;
-    hiddenToolbar?: import("../../toolbars/HiddenToolbar").default;
-    bubble?: import("../../toolbars/Bubble").default;
-    floatMenu?: import("../../toolbars/FloatMenu").default;
-    $event?: import("../../Event").default;
+    toolbar?: import("../Toolbar.js").default;
+    toolbarRight?: import("../ToolbarRight.js").default;
+    sidebar?: import("../Sidebar.js").default;
+    hiddenToolbar?: import("../HiddenToolbar.js").default;
+    bubble?: import("../Bubble.js").default;
+    floatMenu?: import("../FloatMenu.js").default;
+    $event?: import("../../Event.js").default;
 };
 export type SearcherEditorAdapter = {
     getDocString: () => string;

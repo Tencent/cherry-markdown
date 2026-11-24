@@ -18,13 +18,13 @@ export function createMenuHook(name: any, options: any): {
         onClick(...args: any[]): any;
         get shortcutKeys(): any;
         _onClick: MenuBase["fire"];
-        $cherry: import("./toolbars/MenuBase").MenuBaseConstructorParams;
+        $cherry: import("./toolbars/MenuBase.js").MenuBaseConstructorParams;
         bubbleMenu: boolean;
         subMenu: any;
-        $currentMenuOptions: import("../types/menus").CustomMenuConfig;
+        $currentMenuOptions: import("../../types/menus.js").CustomMenuConfig;
         iconName: string;
-        iconType: import("../types/menus").MenuIconType;
-        editor: import("./Editor").default;
+        iconType: import("../../types/menus.js").MenuIconType;
+        editor: import("./Editor.js").default;
         locale: {
             bold: string;
             code: string;
@@ -672,15 +672,15 @@ export function createMenuHook(name: any, options: any): {
         cacheOnce: boolean;
         positionModel: "absolute" | "fixed" | "sidebar";
         fire(event?: MouseEvent | KeyboardEvent | undefined, shortKey?: string): void;
-        shortcutKeyMap: import("./toolbars/MenuBase").HookShortcutKeyMap;
-        getSubMenuConfig(): import("./toolbars/MenuBase").SubMenuConfigItem[];
+        shortcutKeyMap: import("./toolbars/MenuBase.js").HookShortcutKeyMap;
+        getSubMenuConfig(): SubMenuConfigItem[];
         setName(name: string, iconName?: string): void;
         setCacheOnce(info: any): void;
         getAndCleanCacheOnce(): any;
         hasCacheOnce(): boolean;
         createIconFontIcon(iconName: string, options?: object): HTMLElement;
-        createSvgIcon(options: import("../types/menus").CustomMenuIcon): Element;
-        createImageIcon(options: import("../types/menus").CustomMenuIcon): HTMLImageElement;
+        createSvgIcon(options: import("../../types/menus.js").CustomMenuIcon): Element;
+        createImageIcon(options: import("../../types/menus.js").CustomMenuIcon): HTMLImageElement;
         createBtn(asSubMenu?: boolean): HTMLSpanElement;
         createSubBtnByConfig(config: SubMenuConfigItem): HTMLSpanElement;
         isSelections: boolean;
@@ -702,7 +702,7 @@ export function createMenuHook(name: any, options: any): {
         getMoreSelection(appendBefore?: string, appendAfter?: string, cb?: Function): void;
         getSelection(selection: string, type?: string, focus?: boolean): string;
         bindSubClick(shortcut: any, selection: any): void;
-        updateMenuIcon(options: import("../types/menus").CustomMenuConfig["icon"]): boolean;
+        updateMenuIcon(options: import("../../types/menus.js").CustomMenuConfig["icon"]): boolean;
         getMenuPosition(): Pick<DOMRect, "top" | "width" | "height" | "left">;
         hide(): void;
         show(): void;
@@ -710,4 +710,5 @@ export function createMenuHook(name: any, options: any): {
     };
     getTargetParentByButton(dom: HTMLElement): HTMLElement;
 };
-import MenuBase from './toolbars/MenuBase';
+import MenuBase from './toolbars/MenuBase.js';
+import type { SubMenuConfigItem } from './toolbars/MenuBase.js';

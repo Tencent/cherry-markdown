@@ -20,4 +20,4 @@ export default class Detail extends ParagraphBase {
     $getDetailHtml(defaultOpen: any, title: any, str: any, sentenceMakeFunc: any): string;
     rule(): any;
 }
-import ParagraphBase from '../../core/ParagraphBase';
+import ParagraphBase from '../ParagraphBase.js';

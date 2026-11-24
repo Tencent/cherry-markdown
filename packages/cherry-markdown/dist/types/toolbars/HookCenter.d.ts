@@ -5,7 +5,7 @@ export default class HookCenter {
      * @type {{[key: string]: import('../toolbars/MenuBase').default}} 保存所有菜单实例
      */
     hooks: {
-        [key: string]: import("../toolbars/MenuBase").default;
+        [key: string]: import("./MenuBase.js").default;
     };
     /**
      * @type {string[]} 所有注册的菜单名称
@@ -28,7 +28,7 @@ export default class HookCenter {
      * @param {null|import('../../../types/menus').CustomMenuConfig} options 菜单配置项
      * @returns
      */
-    $newMenu(name: string, options?: null | import("../../../types/menus").CustomMenuConfig): void;
+    $newMenu(name: string, options?: null | import("../../../types/menus.js").CustomMenuConfig): void;
     /**
      * 根据配置动态渲染、绑定工具栏
      * @returns

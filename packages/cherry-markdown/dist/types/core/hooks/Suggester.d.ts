@@ -41,7 +41,7 @@ export default class Suggester extends SyntaxBase {
     rule(): any;
 }
 export type EditorView = import("@codemirror/view").EditorView;
-export type CM6Adapter = import("../../../../types/editor").CM6Adapter;
+export type CM6Adapter = import("../../../../types/editor.js").CM6Adapter;
 /**
  * 推荐列表项对象
  */
@@ -95,7 +95,7 @@ export type SuggesterConfig = {
      */
     suggester: Array<SuggesterConfigItem>;
 };
-import SyntaxBase from '../../core/SyntaxBase';
+import SyntaxBase from '../SyntaxBase.js';
 declare class SuggesterPanel {
     constructor(cherry: any);
     searchCache: boolean;
@@ -116,8 +116,8 @@ declare class SuggesterPanel {
      * 设置编辑器
      * @param {import('../../Editor').default} editor
      */
-    setEditor(editor: import("../../Editor").default): void;
-    editor: import("../../Editor").default;
+    setEditor(editor: import("../../Editor.js").default): void;
+    editor: import("../../Editor.js").default;
     setSuggester(suggester: any): void;
     bindEvent(): void;
     boundOnChange: (codemirror: any, evt: any) => void;

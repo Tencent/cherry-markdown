@@ -3,11 +3,11 @@ export default class ShortcutKeyConfigPanel {
      *
      * @param {Partial<import('../Cherry').default> & {$currentMenuOptions?:import('../../../types/menus').CustomMenuConfig}} $cherry
      */
-    constructor($cherry: Partial<import("../Cherry").default> & {
-        $currentMenuOptions?: import("../../../types/menus").CustomMenuConfig;
+    constructor($cherry: Partial<import("../Cherry.js").default> & {
+        $currentMenuOptions?: import("../../../types/menus.js").CustomMenuConfig;
     });
-    $cherry: Partial<import("../Cherry").default> & {
-        $currentMenuOptions?: import("../../../types/menus").CustomMenuConfig;
+    $cherry: Partial<import("../Cherry.js").default> & {
+        $currentMenuOptions?: import("../../../types/menus.js").CustomMenuConfig;
     };
     shortcutUlClassName: string;
     shortcutUlId: string;

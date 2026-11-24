@@ -29,8 +29,8 @@ export function keyStackIsModifierkeys(keyStack: string[]): boolean;
 export function setDisableShortcutKey(nameSpace: any, value?: string): void;
 export function isEnableShortcutKey(nameSpace: any): boolean;
 export function clearStorageKeyMap(nameSpace: string): void;
-export function storageKeyMap(nameSpace: string, keyMap: import("../toolbars/MenuBase").HookShortcutKeyMap): void;
-export function getStorageKeyMap(nameSpace: string): Record<string, import("../../types/cherry").ShortcutKeyMapStruct>;
+export function storageKeyMap(nameSpace: string, keyMap: import("../toolbars/MenuBase.js").HookShortcutKeyMap): void;
+export function getStorageKeyMap(nameSpace: string): Record<string, import("../../../types/cherry.js").ShortcutKeyMapStruct>;
 export function keyStack2UniqueString(keyStack: string[]): string;
 export function shortcutCode2Key(code: string, isMac: boolean): {
     text: string;

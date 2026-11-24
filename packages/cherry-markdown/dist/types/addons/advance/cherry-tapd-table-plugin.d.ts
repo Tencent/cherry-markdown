@@ -75,6 +75,10 @@ export default class TapdTablePlugin extends ParagraphBase {
         content: string;
     };
     makeHtml(html: any, sentenceMakeFunc: any): any;
-    rule(): {};
+    rule(): {
+        begin: string;
+        end: string;
+        content: string;
+    };
 }
-import ParagraphBase from '../../core/ParagraphBase';
+import ParagraphBase from '../../core/ParagraphBase.js';

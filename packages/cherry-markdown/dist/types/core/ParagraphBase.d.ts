@@ -109,5 +109,5 @@ export default class ParagraphBase extends SyntaxBase {
     checkCache(wholeMatch: string, sentenceMakeFunc: any, lineCount?: number): any;
     signWithCache(html: any): boolean;
 }
-import SyntaxBase from './SyntaxBase';
-import LRUCache from '../utils/LRUCache';
+import SyntaxBase from './SyntaxBase.js';
+import LRUCache from '../utils/LRUCache.js';

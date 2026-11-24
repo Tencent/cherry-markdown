@@ -9,7 +9,7 @@ export default class Previewer {
      *
      * @param {Partial<import('../../types/previewer').PreviewerOptions>} options 预览区域设置
      */
-    constructor(options: Partial<import("../../types/previewer").PreviewerOptions>);
+    constructor(options: Partial<import("../../types/previewer.js").PreviewerOptions>);
     /**
      * @property
      * @private
@@ -56,8 +56,8 @@ export default class Previewer {
      * @property
      * @type {import('../../types/previewer').PreviewerOptions}
      */
-    options: import("../../types/previewer").PreviewerOptions;
-    $cherry: import("./Cherry").default;
+    options: import("../../types/previewer.js").PreviewerOptions;
+    $cherry: import("./Cherry.js").default;
     instanceId: string;
     /**
      * @property
@@ -190,6 +190,12 @@ export default class Previewer {
      * 获取有滚动条的dom
      */
     getDomCanScroll(currentDom?: HTMLElement): any;
+    /**
+     * 元素是否自身具备滚动机制（可产生滚动条）
+     * @param {Element} dom 目标元素
+     * @return {boolean} overflow-y 为 auto/scroll/overlay 时视为可滚动
+     */
+    $isScrollable(dom: Element): boolean;
     scrollToHeadByIndex(index: any): void;
     bindClick(): void;
     onMouseDown(): void;
@@ -208,5 +214,5 @@ export default class Previewer {
      */
     destroy(): void;
 }
-import LazyLoadImg from './utils/lazyLoadImg';
-import PreviewerBubble from './toolbars/PreviewerBubble';
+import LazyLoadImg from './utils/lazyLoadImg.js';
+import PreviewerBubble from './toolbars/PreviewerBubble.js';

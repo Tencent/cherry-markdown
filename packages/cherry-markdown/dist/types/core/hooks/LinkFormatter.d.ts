@@ -11,4 +11,4 @@ export default class LinkFormatter extends ParagraphBase {
         reg: RegExp;
     };
 }
-import ParagraphBase from '../../core/ParagraphBase';
+import ParagraphBase from '../ParagraphBase.js';

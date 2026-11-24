@@ -1,4 +1,5 @@
 /// <reference path="../../types/modules.d.ts" />
-export * from "./index.core";
+export type { CherryOptions } from "../../types/cherry.js";
+export * from "./index.core.js";
 export default Cherry;
-import Cherry from './index.core';
+import Cherry from './index.core.js';

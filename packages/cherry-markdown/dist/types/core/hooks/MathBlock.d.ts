@@ -47,4 +47,4 @@ export default class MathBlock extends ParagraphBase {
         end: string;
     };
 }
-import ParagraphBase from '../../core/ParagraphBase';
+import ParagraphBase from '../ParagraphBase.js';

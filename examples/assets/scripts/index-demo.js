@@ -152,7 +152,8 @@ const basicConfig = {
         editCode: true,
         changeLang: true,
         wrapperRender: (lang, code, html) => {
-          return `<div class="custom-codeblock-wrapper language-${lang}" data-tips="可以自定义代码块外层容器">${html}</div>`;
+          const $lang = lang.replace(/[<>"']/g, '');
+          return `<div class="custom-codeblock-wrapper language-${$lang}" data-tips="可以自定义代码块外层容器">${html}</div>`;
         },
         mermaid: {
           svg2img: false, // 是否将mermaid生成的画图变成img格式

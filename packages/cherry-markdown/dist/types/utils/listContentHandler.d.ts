@@ -6,7 +6,7 @@ export default class ListHandler {
      * @param {HTMLDivElement} previewerDom 预览器dom
      * @param {import('../Editor').default} editor 编辑器实例
      */
-    constructor(trigger: string, target: HTMLParagraphElement, container: HTMLDivElement, previewerDom: HTMLDivElement, editor: import("../Editor").default, options?: {});
+    constructor(trigger: string, target: HTMLParagraphElement, container: HTMLDivElement, previewerDom: HTMLDivElement, editor: import("../Editor.js").default, options?: {});
     /** @type{HTMLElement} */
     bubbleContainer: HTMLElement;
     regList: RegExp;
@@ -20,7 +20,7 @@ export default class ListHandler {
     target: HTMLParagraphElement;
     container: HTMLDivElement;
     previewerDom: HTMLDivElement;
-    editor: import("../Editor").default;
+    editor: import("../Editor.js").default;
     insertLineBreak: boolean;
     handleEditablesInputBinded: any;
     handleEditablesUnfocusBinded: any;

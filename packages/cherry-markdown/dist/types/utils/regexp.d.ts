@@ -85,6 +85,46 @@ export function getLinkRule(): {
     content: string;
     end: string;
 };
+/**
+ * 超长行熔断工具：防止 getLinkRule() 等正则对单行过长的异常输入触发 ReDoS 回溯放大。
+ *
+ * 背景：
+ *   getLinkRule() 的分支内部虽然已经消除了交替歧义，但外层 text 分支的二选一结构 +
+ *   `g` 标志下的多起点匹配，在面对 `[a](b "[a](b "...` 这类单行内大量未闭合链接开头
+ *   的攻击载荷时，仍会在正则引擎的"反复失败回溯"阶段消耗 O(n²)~O(n³) 的 CPU。
+ *   这个开销发生在 `.replace()` 调用内部、回调函数还未被触发时，所以无法在回调里熔断，
+ *   必须在 `.replace()` 调用之前介入。
+ *
+ * 方案：
+ *   1. 调用方在 `.replace(linkRule, ...)` 之前先调 `protectLongLines(str)` 得到
+ *      `{ safeStr, restore }`；
+ *   2. 将原字符串中每一条长度超过 `maxLineLength` 的行替换成一个占位符（`~__LL${idx}__~`）
+ *      存入 stash，返回"已挖洞"的 safeStr；
+ *   3. 调用方对 safeStr 跑正则（超长行被占位符保护在外，正则接触不到攻击载荷）；
+ *   4. 处理完毕后调用 `restore(processed)` 把占位符替换回原超长行。
+ *
+ * 性能：
+ *   - 快速路径：若整段字符串长度小于 maxLineLength，直接返回原串与恒等 restore，
+ *     对正常文档几乎零额外开销；
+ *   - 命中路径：一次 O(n) 的扫描 + 替换，开销相对正则本身而言可忽略；
+ *   - 攻击路径：把 O(n³) 的正则回溯降为 O(n) 的字符串替换。
+ *
+ * 占位符命名：
+ *   `~__LL${idx}__~` 采用 Cherry 内部统一的 `~` 系前缀，与 LinkFormatter 的
+ *   `~1D` / `~1LB` 等占位符处于同一命名空间但不会冲突；且绝不会被 getLinkRule()
+ *   命中（内部不含 `[` `]` `(` `)`），对正则完全透明。
+ *
+ * 注意：占位符的挖/贴必须在同一个函数调用内闭合，不要跨越多个 hook 的生命周期，
+ *       否则占位符可能漏到最终 HTML。
+ *
+ * @param {string} str 原字符串
+ * @param {number} [maxLineLength=10000] 单行长度阈值；超过即视为疑似 ReDoS 载荷
+ * @returns {{ safeStr: string, restore: (processed: string) => string }}
+ */
+export function protectLongLines(str: string, maxLineLength?: number): {
+    safeStr: string;
+    restore: (processed: string) => string;
+};
 export const mathBlockReg: RegExp;
 export const HORIZONTAL_WHITESPACE: "[ \\t\\u00a0]";
 export const ALLOW_WHITESPACE_MULTILINE: "(?:.*?)(?:(?:\\n.*?)*?)";

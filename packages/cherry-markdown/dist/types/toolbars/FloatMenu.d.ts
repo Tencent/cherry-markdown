@@ -58,4 +58,4 @@ export default class FloatMenu extends Toolbar {
      */
     getLineHeight(line: number, codeMirror: any): number;
 }
-import Toolbar from './Toolbar';
+import Toolbar from './Toolbar.js';

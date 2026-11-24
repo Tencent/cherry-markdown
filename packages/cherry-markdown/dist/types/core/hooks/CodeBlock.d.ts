@@ -81,11 +81,6 @@ export default class CodeBlock extends ParagraphBase {
     renderCodeBlock($code: string, $lang: string, sign: string, lines: number): string;
     customWrapperRender(lang: any, code: any, html: any): any;
     /**
-     * 获取缩进代码块语法的正则
-     * 缩进代码块必须要以连续两个以上的换行符开头
-     */
-    $getIndentedCodeReg(): RegExp;
-    /**
      * 生成缩进代码块（没有行号、没有代码高亮）
      */
     $getIndentCodeBlock(str: any): any;
@@ -114,4 +109,4 @@ export default class CodeBlock extends ParagraphBase {
         reg: RegExp;
     };
 }
-import ParagraphBase from '../../core/ParagraphBase';
+import ParagraphBase from '../ParagraphBase.js';

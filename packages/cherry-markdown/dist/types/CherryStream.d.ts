@@ -49,7 +49,7 @@ export default class CherryStream extends CherryStatic {
     /**
      * @type {import('./Engine').default}
      */
-    engine: import("./Engine").default;
+    engine: import("./Engine.js").default;
     /**
      * 初始化预览区
      * @private
@@ -156,7 +156,7 @@ export default class CherryStream extends CherryStatic {
      */
     clearFlowSessionCursor(): void;
 }
-export type CherryOptions = import("../../types/cherry").CherryOptions;
-import { CherryStatic } from './CherryStatic';
-import Event from './Event';
-import Previewer from './Previewer';
+export type CherryOptions = import("../../types/cherry.js").CherryOptions;
+import { CherryStatic } from './CherryStatic.js';
+import Event from './Event.js';
+import Previewer from './Previewer.js';

@@ -15,7 +15,7 @@ export default class Link extends SyntaxBase {
         extraLeadingChar: string;
     };
     /**
-     *
+     * @param {Function} sentenceMakeFunc 行内语法处理函数
      * @param {string} match 匹配的完整字符串
      * @param {string} leadingChar 正则分组一：前置字符
      * @param {string} text 正则分组二：链接文字
@@ -24,13 +24,16 @@ export default class Link extends SyntaxBase {
      * @param {string|undefined} target 正则分组五：新窗口打开
      * @returns
      */
-    toHtml(match: string, leadingChar: string, text: string, link: string, title: string | undefined, target: string | undefined): string;
+    toHtml(sentenceMakeFunc: Function, match: string, leadingChar: string, text: string, link: string, title: string | undefined, target: string | undefined): string;
     toStdMarkdown(match: any): any;
-    makeHtml(str: any): any;
+    makeHtml(str: any, sentenceMakeFunc?: (md: any) => {
+        sign: string;
+        html: any;
+    }): string;
     rule(): {
         begin: string;
         content: string;
         end: string;
     };
 }
-import SyntaxBase from '../../core/SyntaxBase';
+import SyntaxBase from '../SyntaxBase.js';

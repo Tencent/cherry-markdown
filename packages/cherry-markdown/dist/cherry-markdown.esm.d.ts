@@ -1,3 +1,3 @@
-import Cherry, { MenuHookBase, SyntaxHookBase } from "./types/index";
-export { MenuHookBase, SyntaxHookBase };
+import Cherry, { MenuHookBase, SyntaxHookBase, MermaidCodeEngine, MermaidPlugin } from "./types/index.js";
+export { MenuHookBase, SyntaxHookBase, MermaidCodeEngine, MermaidPlugin };
 export default Cherry;

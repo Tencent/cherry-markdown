@@ -387,7 +387,7 @@ var f = d(d(d(d(d(d({}, {
 });
 Object.keys(f).map((e) => f[e].replace(/^&(\w+);$/g, (e, t) => t.toLowerCase()));
 var p = "h1|h2|h3|h4|h5|h6|ul|ol|li|dd|dl|dt|table|thead|tbody|tfoot|col|colgroup|th|td|tr|div|article|section|footer|aside|details|summary|code|audio|video|canvas|figure|address|center|cite|p|pre|blockquote|marquee|caption|figcaption|track|source|output|svg";
-RegExp(`^(${p}|span|a|link|b|s|i|del|u|em|strong|sup|sub|kbd|nav|font|bdi|samp|map|area|small|time|bdo|var|wbr|meter|dfn|ruby|rt|rp|mark|q|progress|input|textarea|select|ins|br|img|hr)( |$|/)`, "i");
+RegExp(`^(${p}|span|a|link|b|s|i|del|u|em|strong|sup|sub|kbd|nav|font|bdi|samp|map|area|small|time|bdo|var|wbr|meter|dfn|ruby|rt|rp|mark|q|progress|input|textarea|select|ins|br|img|hr)( |$|/)`, "i"), RegExp(`<(${p})[^>]*>`, "i");
 // src/utils/LRUCache.js
 var m = class {
 	constructor(e) {
@@ -558,7 +558,12 @@ var _ = class extends g {
 		});
 	}
 	rule() {
-		return { reg: /\[html\]([\s\S]*?)\[\/html\]/g };
+		return {
+			begin: "",
+			end: "",
+			content: "",
+			reg: /\[html\]([\s\S]*?)\[\/html\]/g
+		};
 	}
 	_trimScripTag(e) {
 		return e.replace(/(<(?:script|script\s[^>]*)>)([\s\S]*?)(<\/script>)/gi, "").replace(/(<iframe [^>]*>)|(<\/iframe>)/gi, "");

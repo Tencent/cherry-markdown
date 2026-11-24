@@ -6,19 +6,19 @@ export default class PreviewerBubble {
      *
      * @param {import('../Previewer').default} previewer
      */
-    constructor(previewer: import("../Previewer").default);
+    constructor(previewer: import("../Previewer.js").default);
     /**
      * @property
      * @type {import('../Previewer').default}
      */
-    previewer: import("../Previewer").default;
+    previewer: import("../Previewer.js").default;
     /**
      * @property
      * @type {import('../Editor').default|null}
      */
-    editor: import("../Editor").default | null;
+    editor: import("../Editor.js").default | null;
     previewerDom: HTMLDivElement;
-    $cherry: import("..").default;
+    $cherry: import("../index.js").default;
     /**
      * @property
      * @type {{ [key: string]: HTMLDivElement}}
@@ -260,5 +260,5 @@ export default class PreviewerBubble {
      */
     destroy(): void;
 }
-import MermaidBubbleSession from '../toolbars/MermaidBubbleSession';
-import TableHandler from '../utils/tableContentHandler';
+import MermaidBubbleSession from './MermaidBubbleSession.js';
+import TableHandler from '../utils/tableContentHandler.js';

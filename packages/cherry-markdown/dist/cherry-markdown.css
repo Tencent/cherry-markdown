@@ -6618,7 +6618,7 @@ div[data-code-wrap=wrap] div[data-type=codeBlock] code[class*=language-] {
 .cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-lineWrapping .url-truncated {
   max-width: 200px;
 }
-.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-lineWrapping .cm-invalidchar[title=\\u200b] {
+.cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-lineWrapping .cm-invalidchar[title="\\\\u200b"] {
   display: none;
 }
 .cherry-editor:not(.cherry-editor--no-cm-style) .cm-editor .cm-header {
