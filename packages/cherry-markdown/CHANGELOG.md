@@ -1,5 +1,43 @@
 # Change Log
 
+## 0.11.14
+
+### Patch Changes
+
+- fix: #1155 修复Panel和Detail语法无法嵌套List语法的问题 [@sunsonliu](https://github.com/sunsonliu)([#1952](https://github.com/Tencent/cherry-markdown/pull/1952))([`e454aa8`](https://github.com/Tencent/cherry-markdown/commit/e454aa8b5bc092b60a2d24e8a41615c5795554a2))
+- fix(engine): 修复异步改写 URL 后 Full/Core 预览未更新、Stream 预览被清空的问题 [@RSS1102](https://github.com/RSS1102)([#1969](https://github.com/Tencent/cherry-markdown/pull/1969))([`62248d3`](https://github.com/Tencent/cherry-markdown/commit/62248d3c6d0d16ac5755461df3d2d6d9e2c42e7d))
+- fix: #1955 修复四点语法报错的问题 [@sunsonliu](https://github.com/sunsonliu)([#1957](https://github.com/Tencent/cherry-markdown/pull/1957))([`a6b0d1f`](https://github.com/Tencent/cherry-markdown/commit/a6b0d1fb53a1e449c95582ff62c5ed9e2d4361c1))
+- feat: 支持配置 imageCaption，上传/插入图片后自动追加图片名称（#1767） [@lnuxe](https://github.com/lnuxe)([#1949](https://github.com/Tencent/cherry-markdown/pull/1949))([`0221c4c`](https://github.com/Tencent/cherry-markdown/commit/0221c4c98ad86537a54ebd299121730853983f18))
+- fix(list): panel/detail 结束标记不再被列表吞掉，修复 #1155 [@lnuxe](https://github.com/lnuxe)([#1951](https://github.com/Tencent/cherry-markdown/pull/1951))([`4a7626a`](https://github.com/Tencent/cherry-markdown/commit/4a7626a54422bfdc047f3c562172066c47edf8a7))
+- perf(parser): 减少表格、代码块和链接解析中的重复正则处理
+
+- 表格渲染直接匹配并转换内容，省去转换前的单独扫描。
+- 预览区跳转时优先匹配自定义锚点的原始 ID，找不到时再尝试编码后的 ID，以兼容已有的标题锚点。 [@sunsonliu](https://github.com/sunsonliu)([#1962](https://github.com/Tencent/cherry-markdown/pull/1962))([`392fee3`](https://github.com/Tencent/cherry-markdown/commit/392fee359a1f59daf806c512cb71e5e43e53069a))
+- feat(engine): 新增纯 Node.js 环境的 ESM 渲染入口
+
+  - 提供 Node ESM 子路径及对应类型声明。
+  - 修复 Node 渲染时异步 `urlProcessor` 回调触发浏览器刷新并抛错的问题。 [@RSS1102](https://github.com/RSS1102)([#1964](https://github.com/Tencent/cherry-markdown/pull/1964))([`49454d6`](https://github.com/Tencent/cherry-markdown/commit/49454d6b2bc87b07eb1b352cb6e904d3000beb8e))
+
+- fix(types): 补齐编辑器和浏览器插件的公开声明
+
+  - 支持从 `cherry-markdown` 导入 `CherryOptions`，原有类型导入路径继续可用。
+  - 补齐 Full 和 Core 的 `MermaidCodeEngine`、`MermaidPlugin` 具名导出声明。
+  - 补齐独立 Mermaid、PlantUML、ECharts 代码块和 ECharts 表格插件的 UMD 与 ESM 声明。 [@RSS1102](https://github.com/RSS1102)([#1971](https://github.com/Tencent/cherry-markdown/pull/1971))([`155afac`](https://github.com/Tencent/cherry-markdown/commit/155afac71f27e0f8dd35993c66f2c4c09dc320d9))
+
+- fix(types): 修复 npm 包在 NodeNext 下的类型声明解析 [@RSS1102](https://github.com/RSS1102)([#1968](https://github.com/Tencent/cherry-markdown/pull/1968))([`41cd08a`](https://github.com/Tencent/cherry-markdown/commit/41cd08aeff025c277422d60e1af1450c4fecc51c))
+- chore(deps): 更新 Mermaid 和 ECharts
+
+  - 桌面客户端内置的 ECharts 从 6.0.0 升级至 6.1.0。该版本中，`tooltip.valueFormatter` 的第二个参数改为原始数据索引。如需将 `axis.startValue` 同时用作坐标轴最小值，请显式设置 `axis.min`。这些变化也适用于使用 ECharts 6.1 的 Milkdown 项目。 [@RSS1102](https://github.com/RSS1102)([#1965](https://github.com/Tencent/cherry-markdown/pull/1965))([`89af8d9`](https://github.com/Tencent/cherry-markdown/commit/89af8d9e0117a7ac6abbf50463cd19cdfce9a567))
+
+- fix(types): 修复 TAPD 插件的语法规则声明
+
+  - 补齐复选框、HTML 标签和表格插件的规则字段，使其符合公开的 `SyntaxHookBase.rule()` 类型。
+  - 保留插件原有的渲染和正则匹配行为。 [@RSS1102](https://github.com/RSS1102)([#1970](https://github.com/Tencent/cherry-markdown/pull/1970))([`561d59c`](https://github.com/Tencent/cherry-markdown/commit/561d59c5895a5b83be8b462c85ab3bdac16d17ca))
+
+- fix: 修复表格预览编辑时转义竖线导致选错单元格、以及省略边框竖线时替换内容错位的问题 [@yuxino](https://github.com/yuxino)([#1954](https://github.com/Tencent/cherry-markdown/pull/1954))([`4feb275`](https://github.com/Tencent/cherry-markdown/commit/4feb275e2bfe4fdd86b15eab16282f33862496be))
+- fix: 图片 alt 跨行（软换行）时也能渲染成图片 [@0z5a](https://github.com/0z5a)([#1967](https://github.com/Tencent/cherry-markdown/pull/1967))([`3981731`](https://github.com/Tencent/cherry-markdown/commit/3981731391d0e0de2a06bf187fc67c50e523564d))
+- fix: #1960 修复链接文字跨行（软换行）时无法渲染成链接的问题 [@0z5a](https://github.com/0z5a)([#1961](https://github.com/Tencent/cherry-markdown/pull/1961))([`ce2664f`](https://github.com/Tencent/cherry-markdown/commit/ce2664f25e21107e41d271b0b00af070cbd79a7e))
+
 ## 0.11.13
 
 ### Patch Changes
