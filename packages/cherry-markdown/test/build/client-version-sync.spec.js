@@ -1,5 +1,7 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
@@ -10,17 +12,39 @@ const clientRoot = resolve(repoRoot, 'packages/client');
 
 const clientPackage = JSON.parse(readFileSync(resolve(clientRoot, 'package.json'), 'utf-8'));
 const tauriConf = JSON.parse(readFileSync(resolve(clientRoot, 'src-tauri/tauri.conf.json'), 'utf-8'));
-const cargoToml = readFileSync(resolve(clientRoot, 'src-tauri/Cargo.toml'), 'utf-8');
-
-function cargoVersion(toml) {
-  const match = toml.match(/^version\s*=\s*"([^"]*)"/m);
-  return match ? match[1] : undefined;
-}
 
 describe('packages/client version sync', () => {
-  it('keeps tauri.conf.json and Cargo.toml on the package.json version', () => {
-    expect(cargoVersion(cargoToml)).toBe(clientPackage.version);
-    expect(tauriConf.version).toBe(clientPackage.version);
+  it('syncs stale Tauri and Cargo versions after a package version bump', () => {
+    const fixtureRoot = mkdtempSync(resolve(tmpdir(), 'cherry-client-version-'));
+    const version = '0.5.4';
+
+    try {
+      mkdirSync(resolve(fixtureRoot, 'scripts'));
+      mkdirSync(resolve(fixtureRoot, 'src-tauri'));
+      writeFileSync(resolve(fixtureRoot, 'package.json'), JSON.stringify({ type: 'module', version }));
+      writeFileSync(
+        resolve(fixtureRoot, 'src-tauri/tauri.conf.json'),
+        JSON.stringify({ ...tauriConf, version: '0.5.3' }),
+      );
+      writeFileSync(
+        resolve(fixtureRoot, 'src-tauri/Cargo.toml'),
+        '[package]\nname = "cherry-markdown-client"\nversion = "0.5.3"\n',
+      );
+      const syncScript = resolve(fixtureRoot, 'scripts/sync-version.js');
+      copyFileSync(resolve(clientRoot, 'scripts/sync-version.js'), syncScript);
+
+      execFileSync(process.execPath, [syncScript], { cwd: fixtureRoot });
+
+      expect(JSON.parse(readFileSync(resolve(fixtureRoot, 'src-tauri/tauri.conf.json'), 'utf-8'))).toEqual({
+        ...tauriConf,
+        version,
+      });
+      expect(readFileSync(resolve(fixtureRoot, 'src-tauri/Cargo.toml'), 'utf-8')).toBe(
+        '[package]\nname = "cherry-markdown-client"\nversion = "0.5.4"\n',
+      );
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
   });
 
   it('keeps exactly one entry point for the version sync', () => {
