@@ -3,10 +3,10 @@
   "version": "0.5.3",
   "type": "module",
   "scripts": {
-    "dev": "node ./scripts/sync-version.js && vp dev",
-    "tauri:dev": "node ./scripts/sync-version.js && tauri dev",
-    "build": "node ./scripts/sync-version.js && vue-tsc --noEmit && vp build",
-    "tauri:build": "node ./scripts/sync-version.js && tauri build",
+    "dev": "vp dev",
+    "tauri:dev": "npm run version:sync && tauri dev",
+    "build": "vue-tsc --noEmit && vp build",
+    "tauri:build": "npm run version:sync && tauri build",
     "preview": "vp preview",
     "version:sync": "node ./scripts/sync-version.js"
   },
