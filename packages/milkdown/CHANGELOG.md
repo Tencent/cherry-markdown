@@ -1,5 +1,16 @@
 # @cherry-markdown/milkdown
 
+## 0.0.3
+
+### Patch Changes
+
+- chore(deps): 更新 Mermaid 和 ECharts
+
+  - 桌面客户端内置的 ECharts 从 6.0.0 升级至 6.1.0。该版本中，`tooltip.valueFormatter` 的第二个参数改为原始数据索引。如需将 `axis.startValue` 同时用作坐标轴最小值，请显式设置 `axis.min`。这些变化也适用于使用 ECharts 6.1 的 Milkdown 项目。 [@RSS1102](https://github.com/RSS1102)([#1965](https://github.com/Tencent/cherry-markdown/pull/1965))([`89af8d9`](https://github.com/Tencent/cherry-markdown/commit/89af8d9e0117a7ac6abbf50463cd19cdfce9a567))
+
+- Updated dependencies [[`e454aa8`](https://github.com/Tencent/cherry-markdown/commit/e454aa8b5bc092b60a2d24e8a41615c5795554a2), [`62248d3`](https://github.com/Tencent/cherry-markdown/commit/62248d3c6d0d16ac5755461df3d2d6d9e2c42e7d), [`a6b0d1f`](https://github.com/Tencent/cherry-markdown/commit/a6b0d1fb53a1e449c95582ff62c5ed9e2d4361c1), [`0221c4c`](https://github.com/Tencent/cherry-markdown/commit/0221c4c98ad86537a54ebd299121730853983f18), [`4a7626a`](https://github.com/Tencent/cherry-markdown/commit/4a7626a54422bfdc047f3c562172066c47edf8a7), [`392fee3`](https://github.com/Tencent/cherry-markdown/commit/392fee359a1f59daf806c512cb71e5e43e53069a), [`49454d6`](https://github.com/Tencent/cherry-markdown/commit/49454d6b2bc87b07eb1b352cb6e904d3000beb8e), [`155afac`](https://github.com/Tencent/cherry-markdown/commit/155afac71f27e0f8dd35993c66f2c4c09dc320d9), [`41cd08a`](https://github.com/Tencent/cherry-markdown/commit/41cd08aeff025c277422d60e1af1450c4fecc51c), [`89af8d9`](https://github.com/Tencent/cherry-markdown/commit/89af8d9e0117a7ac6abbf50463cd19cdfce9a567), [`561d59c`](https://github.com/Tencent/cherry-markdown/commit/561d59c5895a5b83be8b462c85ab3bdac16d17ca), [`4feb275`](https://github.com/Tencent/cherry-markdown/commit/4feb275e2bfe4fdd86b15eab16282f33862496be), [`3981731`](https://github.com/Tencent/cherry-markdown/commit/3981731391d0e0de2a06bf187fc67c50e523564d), [`ce2664f`](https://github.com/Tencent/cherry-markdown/commit/ce2664f25e21107e41d271b0b00af070cbd79a7e)]:
+  - cherry-markdown@0.11.14
+
 ## 0.0.2
 
 ### Patch Changes
