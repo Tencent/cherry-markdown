@@ -1,3 +1,5 @@
+@use '../../theme-compat/colors' as compat;
+
 .cherry {
   --shortcut-key-config-panel-bg: var(--dropdown-bg);
   --shortcut-key-config-panel-text-color: var(--dropdown-item-color);
@@ -22,7 +24,7 @@
 
     @mixin hover-color {
       &:hover {
-        color: var(--primary-color);
+        color: #{compat.color('color-brand-primary')};
       }
     }
 
@@ -62,8 +64,8 @@
           }
 
           &.active {
-            color: var(--primary-color);
-            background-color: var(--secondary-color);
+            color: #{compat.color('color-brand-primary')};
+            background-color: #{compat.color('color-bg-active')};
           }
         }
       }
@@ -104,10 +106,10 @@
             background-color: var(--dropdown-item-hover-bg);
 
             .shortcut-key-config-panel-kbd {
-              border: 1px dashed var(--primary-color);
+              border: 1px dashed #{compat.color('color-brand-primary')};
               border-radius: var(--shortcut-panel-border-radius);
               padding: 2px 4px;
-              background: var(--secondary-color);
+              background: #{compat.color('color-bg-active')};
               transform: translateX(0) !important;
             }
 

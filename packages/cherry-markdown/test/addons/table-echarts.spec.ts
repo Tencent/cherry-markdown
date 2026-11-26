@@ -333,9 +333,9 @@ describe('addons/EChartsTableEngine', () => {
 
   it('builds theme-only updates without replacing chart data', () => {
     const environment = createEnvironment();
-    environment.root.style.setProperty('--primary-color', '#123456');
-    environment.root.style.setProperty('--base-previewer-bg', '#111111');
-    environment.root.style.setProperty('--base-font-color', '#eeeeee');
+    environment.root.style.setProperty('--color-brand-primary', '#123456');
+    environment.root.style.setProperty('--color-bg-surface', '#111111');
+    environment.root.style.setProperty('--color-text-primary', '#eeeeee');
     const renderer = new EChartsTableEngine({ echarts: environment.echarts, cherry: environment.cherry });
     renderer.$buildEchartsThemeFromCss(environment.root);
     renderer.$buildEchartsThemeFromCss(environment.root);

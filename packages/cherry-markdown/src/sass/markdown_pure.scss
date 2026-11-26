@@ -1,13 +1,4 @@
-@use 'sass:meta';
-
 @use './markdown';
+@use './themes';
 
-/** 引入自带的主题（保持与 cherry 一致的主题覆盖顺序） */
-@include meta.load-css('./themes/default');
-@include meta.load-css('./themes/dark');
-@include meta.load-css('./themes/abyss');
-@include meta.load-css('./themes/green');
-@include meta.load-css('./themes/red');
-@include meta.load-css('./themes/gray');
-@include meta.load-css('./themes/violet');
-@include meta.load-css('./themes/blue');
+@include themes.built-in;

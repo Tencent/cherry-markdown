@@ -1,36 +1,39 @@
+@use '../../theme-compat/colors' as compat;
+
 /*
  * Bear-inspired theme — warm, minimal, content-focused
  */
 
 .cherry.theme__violet {
+  @include compat.aliases($theme: true);
   /* ========== 基础色彩变量覆盖 ========== */
-  --primary-color: #c05040;
-  --secondary-color: #faf6f0;
+  --color-brand-primary: #c05040;
+  --color-bg-active: #faf6f0;
 
-  --base-font-color: #3b3330;
-  --base-editor-bg: #faf6f0;
-  --base-previewer-bg: #faf6f0;
-  --base-border-color: #e0d6cc;
+  --color-text-primary: #3b3330;
+  --color-bg-canvas: #faf6f0;
+  --color-bg-surface: #faf6f0;
+  --color-border-default: #e0d6cc;
 
   /* ========== 工具栏相关变量 ========== */
   --toolbar-bg: #f5efe7;
   --toolbar-btn-color: #6b5e55;
   --toolbar-btn-hover-bg: #ebe3d9;
-  --toolbar-btn-hover-color: var(--primary-color);
+  --toolbar-btn-hover-color: #{compat.color('color-brand-primary')};
   --toolbar-btn-active-bg: #e0d6cc;
   --toolbar-split-color: #e0d6cc;
   --dropdown-item-hover-bg: #ebe3d9;
-  --dropdown-item-hover-color: var(--primary-color);
+  --dropdown-item-hover-color: #{compat.color('color-brand-primary')};
 
   /* ========== 编辑器相关变量 ========== */
-  --editor-header-color: var(--primary-color);
+  --editor-header-color: #{compat.color('color-brand-primary')};
   --editor-string-color: #8a6d3b;
   --editor-comment-color: #a89a8c;
   --editor-quote-color: #8a7968;
   --editor-link-color: #b85a4e;
   --editor-url-color: #a89a8c;
   --editor-v2-color: #3b3330;
-  --editor-v3-color: var(--primary-color);
+  --editor-v3-color: #{compat.color('color-brand-primary')};
   --editor-keyword-color: #8a6d3b;
   --editor-selection-bg: #e8d8c8;
   --editor-active-line-bg: rgba(224, 214, 204, 0.4);
@@ -38,8 +41,8 @@
   /* ========== Markdown 相关变量 ========== */
   --md-heading-color: #3b3330;
   --md-paragraph-color: #3b3330;
-  --md-link-color: var(--primary-color);
-  --md-link-hover-color: #a03828;
+  --color-text-link: #{compat.color('color-brand-primary')};
+  --color-brand-primary-hover: #a03828;
   --md-inline-code-color: #302b29;
   --md-inline-code-bg: #f0e8de;
   --md-blockquote-bg: #f0e8de;
@@ -48,7 +51,7 @@
   --md-hr-border: #e0d6cc;
   /* ========== table 相关变量 ========== */
   --md-table-border: #e0d6cc;
-  --md-table-drag-border-bg: var(--primary-color);
+  --md-table-drag-border-bg: #{compat.color('color-brand-primary')};
   --md-table-sort-active-bg: #ebe3d9;
 
   /* ========== Panel 相关变量 ========== */
