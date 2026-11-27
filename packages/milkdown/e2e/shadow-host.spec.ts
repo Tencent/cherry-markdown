@@ -188,7 +188,7 @@ test('Chromium composition commits Chinese once in both prose and embedded sourc
   await input.detach();
 });
 
-test('Chromium copies a real selection and pastes through the browser clipboard', async ({ page, browserName }) => {
+test('Chromium copies, pastes and cuts real selections through the browser clipboard', async ({ page, browserName }) => {
   test.skip(browserName !== 'chromium', 'Playwright clipboard permissions are exercised in Chromium.');
   await openDemo(page);
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
@@ -205,4 +205,14 @@ test('Chromium copies a real selection and pastes through the browser clipboard'
   await page.keyboard.press('ControlOrMeta+v');
   await expect(paragraph).toHaveText('Paste this/Paste this');
   expect(await markdown(page)).toContain('Paste this/Paste this');
+
+  await setMarkdown(page, 'Cut this');
+  await paragraph.click({ position: { x: 2, y: 8 } });
+  for (const _ of 'Cut this') await page.keyboard.press('Shift+ArrowRight');
+  await expect.poll(() => page.evaluate(() => document.getSelection()?.toString())).toBe('Cut this');
+  await page.keyboard.press('ControlOrMeta+x');
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('Cut this');
+  await expect.poll(async () => (await markdown(page)).trim()).toBe('');
+  await page.keyboard.press('ControlOrMeta+z');
+  await expect.poll(async () => (await markdown(page)).trim()).toBe('Cut this');
 });

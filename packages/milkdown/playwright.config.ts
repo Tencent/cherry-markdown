@@ -9,6 +9,7 @@ const demoBuildScript = process.env.MILKDOWN_E2E_PREBUILT ? 'build:demo:prepared
 // CI sets this only after building and restoring the demo from the same run.
 const demoIsPrebuilt = process.env.MILKDOWN_E2E_DEMO_PREBUILT === '1';
 const browserMatrix = Boolean(process.env.MILKDOWN_BROWSER_MATRIX);
+const useChrome = process.env.MILKDOWN_CHROME === '1';
 const sharedBehaviorTests = [
   'shared-behavior.spec.ts',
   'editing-boundaries.spec.ts',
@@ -23,7 +24,12 @@ const browserProjects = browserMatrix
       { name: 'webkit-matrix', use: { ...devices['Desktop Safari'] }, testMatch: sharedBehaviorTests },
       { name: 'chromium-touch', use: { ...devices['Pixel 5'] }, testMatch: sharedBehaviorTests },
     ]
-  : [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }];
+  : [
+      {
+        name: useChrome ? 'google-chrome' : 'chromium',
+        use: { ...devices['Desktop Chrome'], ...(useChrome ? { channel: 'chrome' } : {}) },
+      },
+    ];
 
 export default defineConfig({
   testDir: './e2e',

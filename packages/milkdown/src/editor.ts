@@ -16,6 +16,7 @@ import { trailing } from '@milkdown/kit/plugin/trailing';
 import { commonmark, inlineCodeSchema } from '@milkdown/kit/preset/commonmark';
 import { gfm } from '@milkdown/kit/preset/gfm';
 import type { Node as ProseMirrorNode } from '@milkdown/kit/prose/model';
+import { closeHistory } from '@milkdown/kit/prose/history';
 import { Plugin } from '@milkdown/kit/prose/state';
 import { $prose, getMarkdown } from '@milkdown/kit/utils';
 import CherryEngine from './cherry-engine.js';
@@ -27,13 +28,13 @@ import type {
   CherryEngineLike,
   CherryMilkdownInstance,
   CherryMilkdownOptions,
-  CherryMilkdownTheme,
 } from './types.js';
 import { cherryWysiwyg, cherryWysiwygConfigCtx } from './wysiwyg/index.js';
 import { TableChartDescriptorEngine } from './wysiwyg/table-chart-render-engine.js';
 import { cherryTableFocusPlugin } from './wysiwyg/table-focus.js';
 import { CHERRY_THEME_CHANGE } from './wysiwyg/theme.js';
 import { createCompositionGate } from './composition-gate.js';
+import { cherryClipboardSelection, syncNativeTextSelection } from './wysiwyg/clipboard-selection.js';
 import {
   createDocumentUpdate,
   createEditableTail,
@@ -243,6 +244,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     .use(gfm)
     .use(history)
     .use(clipboard)
+    .use(cherryClipboardSelection)
     .use(cursor)
     .use(indent)
     .use(trailing)
@@ -285,6 +287,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     try {
       editor.action((ctx) => {
         const view = ctx.get(editorViewCtx);
+        syncNativeTextSelection(view);
         const parsed = ctx.get(parserCtx)(markdown);
         if (!parsed) throw new Error('Unable to parse external Markdown.');
         const next = withEditableTail(parsed);
@@ -314,7 +317,9 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
         if (update.steps.length) {
           const transaction = view.state.tr;
           update.steps.forEach((step) => transaction.step(step));
-          view.dispatch(transaction.setMeta('addToHistory', false).setMeta(EXTERNAL_MARKDOWN_UPDATE, true));
+          // Edits after an external revision must not join an earlier typing
+          // group whose steps were mapped through that replacement.
+          view.dispatch(closeHistory(transaction).setMeta('addToHistory', false).setMeta(EXTERNAL_MARKDOWN_UPDATE, true));
         }
         currentMarkdown = reconciled;
         serializedBaseline = editor.action(getMarkdown());

@@ -59,6 +59,7 @@
     "test": "vp run build:cherry-runtime && node ./scripts/sync-cherry-prism.mjs && node ./scripts/build-shadow-style.mjs && vp test run --config vitest.config.ts",
     "test:coverage": "COVERAGE_THRESHOLDS=true vp run test",
     "test:e2e": "playwright test --config playwright.config.ts",
+    "test:e2e:chrome": "MILKDOWN_CHROME=1 vp run test:e2e",
     "test:e2e:matrix": "MILKDOWN_BROWSER_MATRIX=1 vp run test:e2e",
     "test:consumer": "vp run -F cherry-markdown build && vp run build && vp run test:consumer:prepared",
     "test:consumer:prepared": "node ./scripts/verify-consumer.mjs",

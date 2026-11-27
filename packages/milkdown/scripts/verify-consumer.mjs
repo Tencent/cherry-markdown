@@ -172,7 +172,10 @@ async function checkRuntime(label, mode = 'charts') {
   let page;
   const errors = [];
   try {
-    browser = await chromium.launch();
+    browser = await chromium.launch(process.env.MILKDOWN_CHROME === '1' ? { channel: 'chrome' } : {});
+    console.log(
+      `Consumer browser: ${process.env.MILKDOWN_CHROME === '1' ? 'Google Chrome' : 'Chromium'} ${browser.version()}`,
+    );
     page = await browser.newPage();
     page.on('pageerror', (error) => errors.push(String(error)));
     page.on('console', (message) => {

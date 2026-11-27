@@ -27,13 +27,14 @@ export async function replaceTableCell(
 /** All interaction and visual tests share the same runtime-error gate. */
 export const test = base.extend<{ runtimeErrors: string[] }>({
   runtimeErrors: [
-    async ({ page }, use, info) => {
+    async ({ page, browser }, use, info) => {
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(String(error)));
       page.on('console', (message) => {
         if (message.type() === 'error') errors.push(message.text());
       });
       await use(errors);
+      await info.attach('browser-version', { body: browser.version(), contentType: 'text/plain' });
       const renderErrors = await page
         .locator('[role="alert"]:visible, [data-render-error="true"]:visible')
         .allTextContents();
