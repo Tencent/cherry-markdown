@@ -82,12 +82,12 @@ export function checkPackageFiles(manifest, filenames) {
     'LICENSE',
     'README.md',
     'README.CN.md',
-    'styles.css',
     'dist/generated/cherry-helpers.js',
     'dist/generated/cherry-helpers.d.ts',
     'dist/generated/cherry-prism.js',
+    'dist/generated/cherry-styles.js',
     'dist/generated/cherry-prism.d.ts',
-    ...[manifest.main, manifest.module, manifest.types, manifest.style, ...targets(manifest.exports)]
+    ...[manifest.main, manifest.module, manifest.types, ...targets(manifest.exports)]
       .filter(Boolean)
       .map((target) => target.replace(/^\.\//, '')),
   ];

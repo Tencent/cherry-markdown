@@ -1,5 +1,24 @@
-@import "cherry-markdown/dist/cherry-markdown.css";
-@import "@milkdown/kit/prose/view/style/prosemirror.css";
+/* Loaded inside the editor's Shadow Root. */
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.cherry.cherry-milkdown {
+  font-family: var(--milkdown-font-family, var(--font-family-sans));
+  font-size: var(--milkdown-font-size, var(--font-size-md));
+  line-height: var(--milkdown-line-height, var(--md-paragraph-line-height));
+}
+
+.cherry-milkdown .ProseMirror.cherry-milkdown__editor {
+  color: var(--milkdown-text-color, inherit);
+  background-color: var(--milkdown-background, transparent);
+}
+
+.cherry-milkdown .cherry-echarts-wrapper[part~='chart'] {
+  width: 100%;
+  height: var(--milkdown-chart-height, 300px);
+}
 
 /* Editing controls are outside the native columns' grid. Only content items
  * participate in layout; the NodeView wrapper must not become a spare column. */
@@ -22,7 +41,7 @@
 }
 
 .cherry-milkdown {
-  --cherry-milkdown-primary: var(--md-link-color, #366ef4);
+  --cherry-milkdown-primary: var(--milkdown-accent-color, var(--md-link-color, #366ef4));
   --cherry-milkdown-border: var(--base-border-color, #d8dce5);
   --cherry-milkdown-muted: var(--base-sub-font-color, #646a73);
   --cherry-milkdown-soft: var(--md-inline-code-bg, #f5f7fa);

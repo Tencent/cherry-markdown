@@ -274,7 +274,7 @@ const cherryBlockDragDrop = $prose((ctx) => {
         moved = true;
         event.preventDefault();
         const direct = topLevelBlockAt(view, event.target);
-        const hit = topLevelBlockAt(view, view.dom.ownerDocument.elementFromPoint(event.clientX, event.clientY));
+        const hit = topLevelBlockAt(view, view.root.elementFromPoint?.(event.clientX, event.clientY) ?? null);
         const block = direct && direct.from !== dragged.from ? direct : hit;
         clearOver();
         if (block && block.from !== dragged.from) {
@@ -287,7 +287,7 @@ const cherryBlockDragDrop = $prose((ctx) => {
         event.preventDefault();
         if (moved) {
           const direct = topLevelBlockAt(view, event.target);
-          const hit = topLevelBlockAt(view, view.dom.ownerDocument.elementFromPoint(event.clientX, event.clientY));
+          const hit = topLevelBlockAt(view, view.root.elementFromPoint?.(event.clientX, event.clientY) ?? null);
           const remembered = topLevelBlockAt(view, over ?? null);
           let target = remembered;
           if (direct && direct.from !== dragged.from) target = direct;

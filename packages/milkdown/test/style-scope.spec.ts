@@ -14,7 +14,7 @@ describe('stylesheet ownership', () => {
       if (!selectorList || selectorList.startsWith('@')) continue;
       for (const selector of selectorList.split(',')) {
         const normalized = selector.trim();
-        if (normalized && !normalized.includes('.cherry-milkdown')) unscoped.push(normalized);
+        if (normalized && normalized !== ':host' && !normalized.includes('.cherry-milkdown')) unscoped.push(normalized);
       }
     }
 

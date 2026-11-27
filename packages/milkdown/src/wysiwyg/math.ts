@@ -1,3 +1,4 @@
+import { activeElementFor } from './editor-dom.js';
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
 import { InputRule } from '@milkdown/kit/prose/inputrules';
 import { TextSelection } from '@milkdown/kit/prose/state';
@@ -155,7 +156,8 @@ class MathNodeView implements NodeView {
     if (node.type !== this.node.type) return false;
     this.node = node;
     this.setFieldValue(String(node.attrs.value ?? ''));
-    if (this.source && document.activeElement !== this.source) this.source.textContent = String(node.attrs.value ?? '');
+    if (this.source && activeElementFor(this.dom) !== this.source)
+      this.source.textContent = String(node.attrs.value ?? '');
     return true;
   }
 

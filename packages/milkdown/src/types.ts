@@ -46,7 +46,7 @@ export type CherryMilkdownFileUpload = (
 export type CherryMilkdownTheme = 'default' | 'dark' | 'abyss' | 'green' | 'red' | 'gray' | 'violet' | 'blue';
 
 export interface CherryMilkdownOptions {
-  /** Standalone host. Cherry editor and Previewer instances are not created. */
+  /** Container for the editor’s owned Shadow DOM host. */
   root: string | HTMLElement;
   value?: string;
   /** Reuse an existing CherryEngine instance. */

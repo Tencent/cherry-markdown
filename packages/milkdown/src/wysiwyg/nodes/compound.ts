@@ -1,3 +1,4 @@
+import { activeElementFor } from '../editor-dom.js';
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
 import { NodeSelection, type Transaction } from '@milkdown/kit/prose/state';
 import type { EditorView, NodeView, ViewMutationRecord } from '@milkdown/kit/prose/view';
@@ -82,7 +83,7 @@ class CompoundItemView implements NodeView {
   update(node: ProseNode) {
     if (node.type !== this.node.type || node.attrs.role !== this.node.attrs.role) return false;
     this.node = node;
-    if (document.activeElement !== this.label) this.label.value = String(node.attrs.label ?? '');
+    if (activeElementFor(this.dom) !== this.label) this.label.value = String(node.attrs.label ?? '');
     this.dom.dataset.role = String(node.attrs.role);
     this.disclosure.textContent = node.attrs.open ? '⌄' : '›';
     this.disclosure.setAttribute('aria-expanded', String(Boolean(node.attrs.open)));
@@ -302,7 +303,7 @@ class CompoundView implements NodeView {
     this.add.hidden =
       this.readonly ||
       (node.type.name !== 'cherry_detail' && !['cols', 'tabs', 'timeline'].includes(String(node.attrs.kind)));
-    if (document.activeElement !== this.title) this.title.value = String(node.attrs.title ?? '');
+    if (activeElementFor(this.dom) !== this.title) this.title.value = String(node.attrs.title ?? '');
   }
 
   private setAttrs(attrs: Record<string, unknown>) {

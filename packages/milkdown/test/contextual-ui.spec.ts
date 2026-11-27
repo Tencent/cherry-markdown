@@ -64,7 +64,7 @@ describe('contextual control behavior contract', () => {
     const resize = vi.fn();
     const target = document.createElement('div');
     document.body.append(target);
-    const release = watchContextViewport(document, scroll, resize);
+    const release = watchContextViewport(document.body, scroll, resize);
     target.dispatchEvent(new Event('scroll'));
     window.dispatchEvent(new Event('resize'));
     expect(scroll).toHaveBeenCalledOnce();
@@ -82,7 +82,7 @@ describe('contextual control behavior contract', () => {
     const form = document.body.appendChild(document.createElement('form'));
     form.className = 'cherry-milkdown-context-form';
     const input = form.appendChild(document.createElement('input'));
-    const release = watchContextViewport(document, scroll);
+    const release = watchContextViewport(document.body, scroll);
     try {
       input.dispatchEvent(new Event('scroll'));
       expect(scroll).not.toHaveBeenCalled();
@@ -97,8 +97,8 @@ describe('contextual control behavior contract', () => {
   it('destroying one subscription does not remove a sibling control subscription', () => {
     const first = vi.fn();
     const second = vi.fn();
-    const releaseFirst = watchContextViewport(document, first);
-    const releaseSecond = watchContextViewport(document, second);
+    const releaseFirst = watchContextViewport(document.body, first);
+    const releaseSecond = watchContextViewport(document.body, second);
     releaseFirst();
     window.dispatchEvent(new Event('resize'));
     expect(first).not.toHaveBeenCalled();
@@ -110,7 +110,7 @@ describe('contextual control behavior contract', () => {
     const iframe = document.createElement('iframe');
     document.body.append(iframe);
     const callback = vi.fn();
-    const release = watchContextViewport(iframe.contentDocument!, callback);
+    const release = watchContextViewport(iframe.contentDocument!.body, callback);
     window.dispatchEvent(new Event('resize'));
     expect(callback).not.toHaveBeenCalled();
     iframe.contentWindow!.dispatchEvent(new Event('resize'));

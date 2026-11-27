@@ -2,7 +2,7 @@ import { expect, it, vi } from 'vite-plus/test';
 import { editorViewCtx } from '@milkdown/kit/core';
 import CherryEngine from '../src/cherry-engine';
 import { parseTableChart } from '../src/wysiwyg/table-chart';
-import { createTestEditor } from './helpers/create-editor';
+import { editorShadow, createTestEditor } from './helpers/create-editor';
 import { TextSelection } from '@milkdown/kit/prose/state';
 
 it('coalesces full Cherry parsing while editing one of several large tables', async () => {
@@ -30,7 +30,7 @@ it('coalesces full Cherry parsing while editing one of several large tables', as
     view.state.doc.descendants((node, pos) => {
       if (position < 0 && node.isText && node.text === 'Row 0') position = pos;
     });
-    const tableDOM = root.querySelector('.milkdown-table-block');
+    const tableDOM = editorShadow(root).querySelector('.milkdown-table-block');
     const fullParses = () => makeHtml.mock.calls.filter(([source]) => String(source).includes('Row 99')).length;
     const initialParses = fullParses();
     const initialCalls = makeHtml.mock.calls.length;
@@ -43,7 +43,7 @@ it('coalesces full Cherry parsing while editing one of several large tables', as
     expect(makeHtml.mock.calls.length).toBe(initialCalls);
     await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(6));
     expect(fullParses()).toBe(initialParses + 1);
-    expect(root.querySelector('.milkdown-table-block')).toBe(tableDOM);
+    expect(editorShadow(root).querySelector('.milkdown-table-block')).toBe(tableDOM);
   } finally {
     await instance.destroy();
     root.remove();

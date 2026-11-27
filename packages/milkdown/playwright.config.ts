@@ -9,7 +9,13 @@ const demoBuildScript = process.env.MILKDOWN_E2E_PREBUILT ? 'build:demo:prepared
 // CI sets this only after building and restoring the demo from the same run.
 const demoIsPrebuilt = process.env.MILKDOWN_E2E_DEMO_PREBUILT === '1';
 const browserMatrix = Boolean(process.env.MILKDOWN_BROWSER_MATRIX);
-const sharedBehaviorTests = ['shared-behavior.spec.ts', 'editing-boundaries.spec.ts', 'table-chart-parser.spec.ts'];
+const sharedBehaviorTests = [
+  'shared-behavior.spec.ts',
+  'editing-boundaries.spec.ts',
+  'table-chart-parser.spec.ts',
+  'shadow-host.spec.ts',
+  'echarts-transform.spec.ts',
+];
 const browserProjects = browserMatrix
   ? [
       { name: 'firefox-matrix', use: { ...devices['Desktop Firefox'] }, testMatch: sharedBehaviorTests },

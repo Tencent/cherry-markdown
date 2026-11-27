@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 import {
+  editorShadow,
   createTestEditor as cherryMilkdown,
   type TestCherryMilkdownInstance as CherryMilkdownInstance,
 } from './helpers/create-editor';
@@ -124,14 +125,14 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
 
-    expect(element.querySelector('h1')?.textContent).toBe('Hello');
-    expect(element.querySelector('.toc')).not.toBeNull();
-    expect(element.querySelector('.cherry-wysiwyg-color')?.textContent).toBe('color');
-    expect(element.querySelector('.cherry-wysiwyg-highlight')?.textContent).toBe('highlight');
-    expect(element.querySelector('math-field')).not.toBeNull();
-    expect(element.querySelector('[data-cherry-raw]')).toBeNull();
-    expect(element.querySelector('.cherry-editor, .cm-editor')).toBeNull();
-    expect(element.querySelectorAll('.ProseMirror')).toHaveLength(1);
+    expect(editorShadow(element).querySelector('h1')?.textContent).toBe('Hello');
+    expect(editorShadow(element).querySelector('.toc')).not.toBeNull();
+    expect(editorShadow(element).querySelector('.cherry-wysiwyg-color')?.textContent).toBe('color');
+    expect(editorShadow(element).querySelector('.cherry-wysiwyg-highlight')?.textContent).toBe('highlight');
+    expect(editorShadow(element).querySelector('math-field')).not.toBeNull();
+    expect(editorShadow(element).querySelector('[data-cherry-raw]')).toBeNull();
+    expect(editorShadow(element).querySelector('.cherry-editor, .cm-editor')).toBeNull();
+    expect(editorShadow(element).querySelectorAll('.ProseMirror')).toHaveLength(1);
   });
 
   it('keeps native controls limited to compound labels', async () => {
@@ -156,10 +157,10 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
 
-    expect(element.querySelectorAll('input')).not.toHaveLength(0);
-    expect(element.querySelector('.ProseMirror select, .ProseMirror textarea')).toBeNull();
-    expect(element.querySelector('.cherry-milkdown-node-controls')).toBeNull();
-    expect(element.querySelectorAll('[contenteditable="true"]')).not.toHaveLength(0);
+    expect(editorShadow(element).querySelectorAll('input')).not.toHaveLength(0);
+    expect(editorShadow(element).querySelector('.ProseMirror select, .ProseMirror textarea')).toBeNull();
+    expect(editorShadow(element).querySelector('.cherry-milkdown-node-controls')).toBeNull();
+    expect(editorShadow(element).querySelectorAll('[contenteditable="true"]')).not.toHaveLength(0);
   });
 
   it('keeps Cherry visual syntax reversible through Markdown serialization', async () => {
@@ -189,8 +190,8 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
 
-    const link = element.querySelector<HTMLAnchorElement>('.ProseMirror a');
-    expect(element.querySelector('.ProseMirror')?.textContent).toBe('Cherry');
+    const link = editorShadow(element).querySelector<HTMLAnchorElement>('.ProseMirror a');
+    expect(editorShadow(element).querySelector('.ProseMirror')?.textContent).toBe('Cherry');
     expect(link?.target).toBe('');
     const paragraphHtml = link?.parentElement?.innerHTML;
     link?.addEventListener('click', (event) => event.preventDefault());
@@ -217,7 +218,7 @@ describe('cherryMilkdown WYSIWYG', () => {
 
     view.dispatch(view.state.tr.insertText(' vivid', colorTextPosition + 2));
 
-    expect(element.querySelector('.cherry-wysiwyg-color')?.textContent).toBe('co vividlor');
+    expect(editorShadow(element).querySelector('.cherry-wysiwyg-color')?.textContent).toBe('co vividlor');
     expect(instance.getMarkdown()).toContain('!!red co vividlor!!');
   });
 
@@ -229,9 +230,9 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
 
-    const color = element.querySelector('.cherry-wysiwyg-color');
-    const size = element.querySelector('.cherry-wysiwyg-size');
-    const ruby = element.querySelector('.cherry-wysiwyg-ruby');
+    const color = editorShadow(element).querySelector('.cherry-wysiwyg-color');
+    const size = editorShadow(element).querySelector('.cherry-wysiwyg-size');
+    const ruby = editorShadow(element).querySelector('.cherry-wysiwyg-ruby');
     expect(color?.getAttribute('data-cherry-color')).toBe('#f00');
     expect(size?.getAttribute('data-cherry-size')).toBe('20');
     expect(ruby?.getAttribute('data-cherry-annotation')).toBe('zi');
@@ -243,8 +244,8 @@ describe('cherryMilkdown WYSIWYG', () => {
     const instance = await cherryMilkdown({ el: element, value });
     instances.push(instance);
 
-    const foreground = element.querySelector<HTMLElement>('.cherry-wysiwyg-color');
-    const background = element.querySelector<HTMLElement>('.cherry-wysiwyg-bg');
+    const foreground = editorShadow(element).querySelector<HTMLElement>('.cherry-wysiwyg-color');
+    const background = editorShadow(element).querySelector<HTMLElement>('.cherry-wysiwyg-bg');
     expect(foreground?.textContent).toBe('black on white');
     expect(background?.textContent).toBe('black on white');
     expect(foreground?.style.color).toBe('rgb(255, 255, 255)');
@@ -259,9 +260,9 @@ describe('cherryMilkdown WYSIWYG', () => {
       value: '| Name | Value |\n| --- | --- |\n| Milkdown | WYSIWYG |',
     });
     instances.push(instance);
-    expect(element.querySelector('.ProseMirror table')).not.toBeNull();
-    expect(element.querySelectorAll('.ProseMirror td')).toHaveLength(2);
-    expect(element.querySelector('.ProseMirror table')?.closest('[data-cherry-visual]')).toBeNull();
+    expect(editorShadow(element).querySelector('.ProseMirror table')).not.toBeNull();
+    expect(editorShadow(element).querySelectorAll('.ProseMirror td')).toHaveLength(2);
+    expect(editorShadow(element).querySelector('.ProseMirror table')?.closest('[data-cherry-visual]')).toBeNull();
   });
 
   it('uses Cherry icon-font task markers instead of Unicode checkbox glyphs', async () => {
@@ -272,7 +273,7 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
 
-    const items = [...element.querySelectorAll<HTMLLIElement>('li[data-item-type="task"]')];
+    const items = [...editorShadow(element).querySelectorAll<HTMLLIElement>('li[data-item-type="task"]')];
     expect(items).toHaveLength(2);
     expect(items.every((item) => item.classList.contains('cherry-list-item'))).toBe(true);
     expect(items.every((item) => item.classList.contains('check-list-item'))).toBe(true);
@@ -288,7 +289,7 @@ describe('cherryMilkdown WYSIWYG', () => {
     const first = await cherryMilkdown({ el: firstRoot, value: '- [ ] first', debounce: 0 });
     const second = await cherryMilkdown({ el: secondRoot, value: '- [ ] second', debounce: 0 });
     instances.push(first, second);
-    firstRoot
+    editorShadow(firstRoot)
       .querySelector<HTMLElement>('[data-cherry-task-checkbox]')
       ?.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true, button: 0 }));
     await vi.waitFor(() => expect(first.getMarkdown()).toContain('- [x] first'));
@@ -307,8 +308,8 @@ describe('cherryMilkdown WYSIWYG', () => {
     instances.push(instance);
 
     expect(instance.getMarkdown().trim()).toBe(value);
-    await vi.waitFor(() => expect(element.querySelector('[data-table-chart]')).not.toBeNull());
-    expect(element.querySelector('.milkdown-table-block')).not.toBeNull();
+    await vi.waitFor(() => expect(editorShadow(element).querySelector('[data-table-chart]')).not.toBeNull());
+    expect(editorShadow(element).querySelector('.milkdown-table-block')).not.toBeNull();
     replaceText(instance, 'Trend', 'Updated');
     replaceText(instance, 'Sales', 'Revenue');
 
@@ -338,11 +339,11 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
 
-    const chart = element.querySelector('.cherry-table-chart');
+    const chart = editorShadow(element).querySelector('.cherry-table-chart');
     expect(chart).not.toBeNull();
     expect(chart?.nextElementSibling?.classList.contains('milkdown-table-block')).toBe(true);
     expect(chart?.nextElementSibling?.nextElementSibling?.classList.contains('cherry-panel')).toBe(true);
-    expect(element.querySelector('.milkdown-table-block + p:empty + .cherry-panel')).toBeNull();
+    expect(editorShadow(element).querySelector('.milkdown-table-block + p:empty + .cherry-panel')).toBeNull();
   });
 
   it('does not patch Cherry-owned column DOM to mount or edit a nested table chart', async () => {
@@ -362,9 +363,9 @@ describe('cherryMilkdown WYSIWYG', () => {
     instances.push(instance);
 
     expect(renderer).not.toHaveBeenCalled();
-    expect(element.querySelector('[data-nested-table-chart]')).toBeNull();
-    expect(element.querySelector('.cherry-native-table-chart__controls')).toBeNull();
-    expect(element.querySelector<HTMLButtonElement>('[aria-label="编辑整个区块源码"]')).not.toBeNull();
+    expect(editorShadow(element).querySelector('[data-nested-table-chart]')).toBeNull();
+    expect(editorShadow(element).querySelector('.cherry-native-table-chart__controls')).toBeNull();
+    expect(editorShadow(element).querySelector<HTMLButtonElement>('[aria-label="编辑整个区块源码"]')).not.toBeNull();
   });
 
   it('mounts the complete Cherry manual once without an initial synchronization write', async () => {
@@ -386,7 +387,7 @@ describe('cherryMilkdown WYSIWYG', () => {
 
     expect(frontmatterCount).toBe(0);
     expect(onChange.mock.calls.length).toBe(0);
-    expect(element.querySelectorAll('.milkdown-table-block')).toHaveLength(12);
+    expect(editorShadow(element).querySelectorAll('.milkdown-table-block')).toHaveLength(12);
 
     await instance.destroy();
     instances.splice(instances.indexOf(instance), 1);
@@ -404,7 +405,7 @@ describe('cherryMilkdown WYSIWYG', () => {
 
     view.dispatch(view.state.tr.insertText('After', headingTextPosition, headingTextPosition + 'Before'.length));
 
-    expect(element.querySelector('.toc')?.textContent).toContain('After');
+    expect(editorShadow(element).querySelector('.toc')?.textContent).toContain('After');
   });
 
   it('shows Cherry panels and Mermaid as rendered visual nodes by default', async () => {
@@ -414,7 +415,9 @@ describe('cherryMilkdown WYSIWYG', () => {
       value: '::: warning\nPanel body\n:::\n\n```mermaid\ngraph TD; A-->B;\n```',
     });
     instances.push(instance);
-    const nodes = element.querySelectorAll<HTMLElement>('.cherry-compound, .cherry-embed--cherry_diagram');
+    const nodes = editorShadow(element).querySelectorAll<HTMLElement>(
+      '.cherry-compound, .cherry-embed--cherry_diagram',
+    );
     expect(nodes).toHaveLength(2);
     expect(nodes[0]?.textContent).toContain('Panel body');
     expect(nodes[0]?.classList.contains('cherry-panel')).toBe(true);
@@ -436,7 +439,7 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
 
-    const panel = element.querySelector<HTMLElement>('.cherry-compound');
+    const panel = editorShadow(element).querySelector<HTMLElement>('.cherry-compound');
     expect(panel).not.toBeNull();
     expect(panel?.classList.contains('cherry-panel__primary')).toBe(true);
     expect(panel?.querySelector('[title="在节点内编辑源码"]')).toBeNull();
@@ -454,7 +457,7 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
 
-    await vi.waitFor(() => expect(element.querySelector('[data-rendered-echarts]')).not.toBeNull());
+    await vi.waitFor(() => expect(editorShadow(element).querySelector('[data-rendered-echarts]')).not.toBeNull());
     expect(renderer).toHaveBeenCalledWith(
       expect.objectContaining({ syntax: 'echarts', source: expect.stringContaining('"series"') }),
     );
@@ -475,7 +478,7 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     view.dispatch(view.state.tr.insertText('After', position, position + 'Before'.length));
     expect(instance.getMarkdown()).toContain('After');
-    expect(element.querySelector('.cherry-compound textarea')).toBeNull();
+    expect(editorShadow(element).querySelector('.cherry-compound textarea')).toBeNull();
   });
 
   it('edits compound titles in place with native text controls', async () => {
@@ -485,7 +488,7 @@ describe('cherryMilkdown WYSIWYG', () => {
       value: ':::warning Before\nBody\n:::',
     });
     instances.push(instance);
-    const title = element.querySelector<HTMLInputElement>('.cherry-compound__title');
+    const title = editorShadow(element).querySelector<HTMLInputElement>('.cherry-compound__title');
 
     expect(title?.readOnly).toBe(false);
     if (title) {
@@ -504,7 +507,7 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
-    const detail = element.querySelector<HTMLElement>('[data-role="detail-item"]');
+    const detail = editorShadow(element).querySelector<HTMLElement>('[data-role="detail-item"]');
     const header = detail?.querySelector<HTMLElement>('.cherry-compound-item__header');
     const label = detail?.querySelector<HTMLElement>('.cherry-compound-item__label');
     const disclosure = detail?.querySelector<HTMLButtonElement>('.cherry-compound-item__disclosure');
@@ -535,7 +538,7 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
 
-    const codeBlock = element.querySelector<HTMLElement>('.cherry-milkdown-code-block');
+    const codeBlock = editorShadow(element).querySelector<HTMLElement>('.cherry-milkdown-code-block');
     expect(codeBlock).not.toBeNull();
     expect(codeBlock?.classList.contains('cherry-milkdown-code-block')).toBe(true);
     expect(codeBlock?.closest('.cherry-embed')).toBeNull();
@@ -597,7 +600,7 @@ describe('cherryMilkdown WYSIWYG', () => {
       }
       return characters;
     };
-    const editable = element.querySelector('.cherry-milkdown-code-block');
+    const editable = editorShadow(element).querySelector('.cherry-milkdown-code-block');
     expect(editable).not.toBeNull();
     expect(styledCharacters(editable!)).toEqual(styledCharacters(native));
   });
@@ -606,7 +609,7 @@ describe('cherryMilkdown WYSIWYG', () => {
     const element = root();
     const instance = await cherryMilkdown({ el: element, value: 'Formula $x+1$.' });
     instances.push(instance);
-    const field = element.querySelector<HTMLElement & { value: string }>('math-field');
+    const field = editorShadow(element).querySelector<HTMLElement & { value: string }>('math-field');
     expect(field?.textContent).toBe('x+1');
     if (field) {
       field.value = '\\frac{a}{b}';
@@ -622,7 +625,7 @@ describe('cherryMilkdown WYSIWYG', () => {
       value: '| A | B |\n| --- | --- |\n| 1 | 2 |',
     });
     instances.push(instance);
-    expect(element.querySelector('.milkdown-table-block')).not.toBeNull();
+    expect(editorShadow(element).querySelector('.milkdown-table-block')).not.toBeNull();
   });
 
   it('keeps frontmatter compact and edits its source in place', async () => {
@@ -632,9 +635,11 @@ describe('cherryMilkdown WYSIWYG', () => {
       value: '---\ntitle: Before\nowner: Cherry\n---\n\nBody',
     });
     instances.push(instance);
-    expect(element.querySelector('.cherry-source-node--cherry_frontmatter input')).toBeNull();
-    element.querySelector<HTMLElement>('.cherry-source-node--cherry_frontmatter .cherry-source-node__header')?.click();
-    const source = element.querySelector<HTMLElement>('.cherry-source-node--cherry_frontmatter code');
+    expect(editorShadow(element).querySelector('.cherry-source-node--cherry_frontmatter input')).toBeNull();
+    editorShadow(element)
+      .querySelector<HTMLElement>('.cherry-source-node--cherry_frontmatter .cherry-source-node__header')
+      ?.click();
+    const source = editorShadow(element).querySelector<HTMLElement>('.cherry-source-node--cherry_frontmatter code');
     expect(source?.hidden).toBe(false);
     if (source) {
       source.textContent = source.textContent?.replace('Before', 'After') ?? '';
@@ -649,9 +654,9 @@ describe('cherryMilkdown WYSIWYG', () => {
     const instance = await cherryMilkdown({ el: element, value });
     instances.push(instance);
     expect(instance.getMarkdown().trim()).toBe(value.trim());
-    expect(element.querySelector('.cherry-embed--cherry_native_block .cherry-tabs')).not.toBeNull();
-    element.querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
-    const source = element.querySelector<HTMLElement>('.cherry-embed__source code');
+    expect(editorShadow(element).querySelector('.cherry-embed--cherry_native_block .cherry-tabs')).not.toBeNull();
+    editorShadow(element).querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
+    const source = editorShadow(element).querySelector<HTMLElement>('.cherry-embed__source code');
     expect(source).not.toBeNull();
     if (source) {
       source.textContent = source.textContent?.replace('First', 'Renamed') ?? '';
@@ -669,9 +674,9 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
     selectNode(instance, 'cherry_diagram');
-    const sourcePanel = element.querySelector<HTMLElement>('.cherry-embed__source');
+    const sourcePanel = editorShadow(element).querySelector<HTMLElement>('.cherry-embed__source');
     expect(sourcePanel?.hidden).toBe(true);
-    const toggle = element.querySelector<HTMLButtonElement>('.cherry-embed__controls button');
+    const toggle = editorShadow(element).querySelector<HTMLButtonElement>('.cherry-embed__controls button');
     expect(toggle?.getAttribute('aria-expanded')).toBe('false');
     toggle?.click();
     expect(sourcePanel?.hidden).toBe(false);
@@ -687,7 +692,7 @@ describe('cherryMilkdown WYSIWYG', () => {
     expect(instance.getMarkdown()).toContain('B-->C');
     expect(sourcePanel?.hidden).toBe(false);
 
-    const disclosure = element.querySelector<HTMLButtonElement>('.cherry-compound-item__disclosure');
+    const disclosure = editorShadow(element).querySelector<HTMLButtonElement>('.cherry-compound-item__disclosure');
     disclosure?.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true }));
     disclosure?.click();
     expect(sourcePanel?.hidden).toBe(false);
@@ -709,19 +714,19 @@ describe('cherryMilkdown WYSIWYG', () => {
     });
     instances.push(instance);
     selectNode(instance, 'cherry_html_block');
-    const shell = element.querySelector<HTMLElement>('.cherry-native-html');
+    const shell = editorShadow(element).querySelector<HTMLElement>('.cherry-native-html');
     expect(makeHtml).toHaveBeenCalledWith(expect.stringContaining('<div>'));
     expect(shell).not.toBeNull();
     expect(shell?.hasAttribute('onclick')).toBe(false);
     expect(shell?.querySelector('script')).toBeNull();
-    expect(element.querySelector('iframe')).toBeNull();
+    expect(editorShadow(element).querySelector('iframe')).toBeNull();
     const links = shell?.querySelectorAll('a');
     expect(links?.[0]?.hasAttribute('href')).toBe(false);
     expect(links?.[1]?.getAttribute('href')).toBe('https://example.com');
     expect(shell?.querySelector('span')?.hasAttribute('style')).toBe(false);
-    element.querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
-    expect(element.querySelector('.cherry-embed__source code')).not.toBeNull();
-    expect(element.querySelector('.cherry-embed textarea')).toBeNull();
+    editorShadow(element).querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
+    expect(editorShadow(element).querySelector('.cherry-embed__source code')).not.toBeNull();
+    expect(editorShadow(element).querySelector('.cherry-embed textarea')).toBeNull();
     expect((window as typeof window & { __bad?: boolean }).__bad).toBeUndefined();
   });
 
@@ -734,10 +739,10 @@ describe('cherryMilkdown WYSIWYG', () => {
       engine: { makeHtml: (value: string) => value },
     });
     instances.push(instance);
-    expect(element.querySelector('.cherry-embed--cherry_native_block')).not.toBeNull();
+    expect(editorShadow(element).querySelector('.cherry-embed--cherry_native_block')).not.toBeNull();
     selectNode(instance, 'cherry_native_block');
-    element.querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
-    const editor = element.querySelector<HTMLElement>('.cherry-embed__source code');
+    editorShadow(element).querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.click();
+    const editor = editorShadow(element).querySelector<HTMLElement>('.cherry-embed__source code');
     expect(editor).not.toBeNull();
     if (editor) {
       editor.textContent = ':::business-card\nUpdated source\n:::';
@@ -776,7 +781,7 @@ describe('cherryMilkdown WYSIWYG', () => {
     instances.push(instance);
     instance.setMarkdown('# Updated\n\n$E=mc^2$');
     await vi.waitFor(() => {
-      expect(element.querySelector('h1')?.textContent).toBe('Updated');
+      expect(editorShadow(element).querySelector('h1')?.textContent).toBe('Updated');
       expect(onChange).toHaveBeenCalledWith(
         expect.objectContaining({ markdown: expect.stringContaining('# Updated') }),
       );
@@ -879,9 +884,9 @@ describe('cherryMilkdown WYSIWYG', () => {
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     expect(view.editable).toBe(false);
     selectNode(instance, 'cherry_diagram');
-    expect(element.querySelector('.cherry-milkdown-toolbar')).toBeNull();
-    expect(element.querySelector<HTMLElement>('.cherry-embed__source')?.hidden).toBe(true);
-    expect(element.querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.hidden).toBe(true);
+    expect(editorShadow(element).querySelector('.cherry-milkdown-toolbar')).toBeNull();
+    expect(editorShadow(element).querySelector<HTMLElement>('.cherry-embed__source')?.hidden).toBe(true);
+    expect(editorShadow(element).querySelector<HTMLButtonElement>('.cherry-embed__controls button')?.hidden).toBe(true);
   });
 
   it('focuses and destroys the editor cleanly', async () => {

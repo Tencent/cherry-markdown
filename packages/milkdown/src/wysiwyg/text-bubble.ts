@@ -3,6 +3,7 @@ import type { MarkType } from '@milkdown/kit/prose/model';
 import { Plugin, TextSelection, type EditorState } from '@milkdown/kit/prose/state';
 import { $prose } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
+import { editorSelectionRange } from './editor-dom.js';
 import {
   createContextBubble,
   createContextButton,
@@ -87,18 +88,8 @@ export const cherryTextBubble = $prose((ctx) => {
         if (dismissedSelection?.from === from && dismissedSelection.to === to) return hide();
         dismissedSelection = undefined;
         if (linkUiOpen || !view.hasFocus() || !supportsTextFormatting(view.state)) return hide();
-        const selection = document.getSelection();
-        if (
-          !selection ||
-          selection.isCollapsed ||
-          !selection.anchorNode ||
-          !selection.focusNode ||
-          !view.dom.contains(selection.anchorNode) ||
-          !view.dom.contains(selection.focusNode)
-        ) {
-          return hide();
-        }
-        const range = selection.getRangeAt(0);
+        const range = editorSelectionRange(view.dom);
+        if (!range || range.collapsed) return hide();
         const rect = range.getBoundingClientRect();
         if (!rect.width && !rect.height) return hide();
         bubble.hidden = false;
@@ -136,7 +127,7 @@ export const cherryTextBubble = $prose((ctx) => {
       bubble.addEventListener('pointerdown', preserveContextSelection);
       actions.forEach(({ button }) => button.addEventListener('click', onClick));
       view.dom.addEventListener('cherry-milkdown:link-ui-change', onLinkUi);
-      const releaseViewport = watchContextViewport(document, onScroll, hide);
+      const releaseViewport = watchContextViewport(host, onScroll, hide);
 
       return {
         update,

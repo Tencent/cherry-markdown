@@ -3,6 +3,7 @@ import { mountCherryChart } from '../src/cherry-echarts';
 import { cherryChartLocale } from '../src/cherry-chart-locale';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
+import { util } from 'echarts';
 
 const table = { header: ['', 'Jan'], rows: [['Sales', '1']], colLength: 2, rowLength: 1 };
 const option = { series: [{ type: 'line', data: [1] }] };
@@ -42,6 +43,7 @@ function fixture() {
   const registry = new Map<HTMLElement, Chart>();
   const charts: Chart[] = [];
   const library = {
+    util,
     getInstanceByDom: vi.fn((element: HTMLElement) => registry.get(element)),
     getMap: vi.fn(),
     registerMap: vi.fn(),
@@ -112,7 +114,7 @@ describe('Cherry chart mounting boundary', () => {
     });
     const chartRoot = container.querySelector<HTMLElement>('.cherry-echarts-wrapper')!;
     expect(library.init).toHaveBeenCalledTimes(1);
-    expect(chartRoot.style.height).toBe('300px');
+    expect(chartRoot.getAttribute('part')).toBe('chart');
     if (kind === 'table') expect(JSON.parse(chartRoot.dataset.tableData!)).toEqual(table);
     expect(charts[0].setOption).toHaveBeenCalledWith(
       expect.objectContaining({ series: [expect.objectContaining({ type: 'line', data: [1] })] }),
@@ -172,6 +174,56 @@ describe('Cherry chart mounting boundary', () => {
       .filter(([name]) => name === 'cherry:export:done')
       .forEach(([name, handler]) => expect(removeListener).toHaveBeenCalledWith(name, handler));
   });
+
+  it.each(['table', 'codeblock'])(
+    'transforms a fresh %s option on every rebuild, including after theme changes',
+    async (kind) => {
+      const { container, root, mount, registry } = fixture();
+      const code = { title: { text: 'Original' }, series: [{ type: 'line', data: [1] }] };
+      let increment = 10;
+      const transformOption: NonNullable<ChartMountOptions['transformOption']> = vi.fn((options) => {
+        const series = Array.isArray(options.series) ? options.series[0] : options.series;
+        if (series?.type === 'line') series.data = [Number(series.data?.[0]) + increment];
+        return kind === 'table' ? options : undefined;
+      });
+      mount({
+        ...(kind === 'codeblock'
+          ? { type: 'codeblock', options: code, table: undefined }
+          : { options: { title: 'Original' } }),
+        transformOption,
+      });
+      const element = container.querySelector<HTMLElement>('.cherry-echarts-wrapper')!;
+      const current = () => registry.get(element)!;
+      const expectData = (value: number) =>
+        expect(current().setOption).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: expect.objectContaining({ text: 'Original' }),
+            series: [expect.objectContaining({ type: 'line', data: [value] })],
+          }),
+          true,
+        );
+      expectData(11);
+      if (kind === 'table') expect(JSON.parse(element.dataset.tableData!)).toEqual(table);
+      root.classList.replace('theme__default', 'theme__dark');
+      await Promise.resolve();
+      expect(transformOption).toHaveBeenCalledTimes(1);
+      expect(
+        current()
+          .setOption.mock.calls.slice(1)
+          .every(([value]) => !JSON.stringify(value).includes('"data"')),
+      ).toBe(true);
+      increment = 20;
+      window.dispatchEvent(new Event('cherry:export:done'));
+      expectData(21);
+      window.dispatchEvent(new Event('cherry:export:done'));
+      expectData(21);
+      expect(transformOption).toHaveBeenCalledTimes(3);
+      expect(code.series[0].data).toEqual([1]);
+      if (kind === 'table') {
+        expect(current().getOption().tooltip).toEqual(expect.objectContaining({ formatter: expect.any(Function) }));
+      }
+    },
+  );
 
   it('cleans an instance whose initial setOption fails before Cherry tracks it', () => {
     const { mount, library, charts, registry, container, sibling } = fixture();
@@ -295,6 +347,36 @@ describe('Cherry chart mounting boundary', () => {
     expect(Reflect.get(window, 'echarts')).toBe(globalLibrary);
     window.dispatchEvent(new Event('cherry:export:done'));
     expect(fetchMap).toHaveBeenCalledTimes(1);
+  });
+
+  it('transforms map data when the deferred map resolves and again on export', async () => {
+    const { container, mount, library, registry } = fixture();
+    library.registerMap.mockImplementation(() => library.getMap.mockReturnValue({}));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({ type: 'FeatureCollection', features: [] }) }),
+    );
+    const transformOption: NonNullable<ChartMountOptions['transformOption']> = vi.fn((options) => {
+      const series = Array.isArray(options.series) ? options.series[0] : options.series;
+      if (series?.type === 'map') series.data = [{ name: '北京市', value: 42 }];
+    });
+    mount({
+      type: 'map',
+      options: { mapDataSource: 'china' },
+      table: { header: ['Province', 'Value'], rows: [['北京', '10']], colLength: 2, rowLength: 1 },
+      transformOption,
+    });
+    expect(transformOption).not.toHaveBeenCalled();
+    const element = container.querySelector<HTMLElement>('.cherry-echarts-wrapper')!;
+    const expectData = () => {
+      expect(registry.get(element)?.getOption().series).toEqual([
+        expect.objectContaining({ type: 'map', map: 'china', data: [{ name: '北京市', value: 42 }] }),
+      ]);
+    };
+    await vi.waitFor(expectData);
+    window.dispatchEvent(new Event('cherry:export:done'));
+    expectData();
+    expect(transformOption).toHaveBeenCalledTimes(2);
   });
 
   it('tries fallback map sources and retries failures with the same owned cancellation signal', async () => {

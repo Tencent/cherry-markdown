@@ -101,6 +101,7 @@ export const cherryImageControls = $prose((ctx) => {
 
       const form = document.createElement('form');
       form.className = 'cherry-milkdown-context-form cherry-milkdown-image-source';
+      form.setAttribute('part', 'image-form');
       form.hidden = true;
       form.setAttribute('role', 'dialog');
       form.setAttribute('aria-label', '编辑图片');
@@ -482,9 +483,9 @@ export const cherryImageControls = $prose((ctx) => {
         commitLayout({ width: finished.nextWidth, height: finished.nextHeight });
       };
       const onOutside = (event: PointerEvent) => {
-        if (!(event.target instanceof Node)) return;
-        if (frame.contains(event.target) || toolbar.contains(event.target) || form.contains(event.target)) return;
-        if (activeTarget?.contains(event.target)) return;
+        const path = event.composedPath();
+        if (path.includes(frame) || path.includes(toolbar) || path.includes(form)) return;
+        if (activeTarget && path.includes(activeTarget)) return;
         if (sourceOpen) closeSource(false);
       };
       const onKeyDown = (event: KeyboardEvent) => {
@@ -505,7 +506,7 @@ export const cherryImageControls = $prose((ctx) => {
       document.addEventListener('pointerup', finishResize, true);
       document.addEventListener('pointerdown', onOutside, true);
       document.addEventListener('keydown', onKeyDown, true);
-      const releaseViewport = watchContextViewport(document, onViewportChange);
+      const releaseViewport = watchContextViewport(host, onViewportChange);
       form.addEventListener('submit', onSubmit);
       cancel.addEventListener('click', onCancel);
       choose.addEventListener('click', chooseImage);

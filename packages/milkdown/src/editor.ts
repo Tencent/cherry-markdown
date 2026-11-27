@@ -20,6 +20,7 @@ import { Plugin } from '@milkdown/kit/prose/state';
 import { $prose, getMarkdown } from '@milkdown/kit/utils';
 import CherryEngine from './cherry-engine.js';
 import { reconcileSerializedMarkdown } from './markdown-reconcile.js';
+import { createShadowHost } from './shadow-host.js';
 import type {
   CherryEngineInput,
   CherryEngineLike,
@@ -95,8 +96,11 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
   let serializedBaseline = '';
 
   let tableBlockComponent: typeof import('@milkdown/kit/component/table-block');
+  let shadow: Awaited<ReturnType<typeof createShadowHost>>;
 
   try {
+    shadow = await createShadowHost(root.ownerDocument);
+    shadow.root.append(mountRoot);
     tableBlockComponent = await import('@milkdown/kit/component/table-block');
     // CherryEngine is the only Cherry runtime used by this standalone editor.
     // It contributes Markdown semantics and HTML presentation, not an editor,
@@ -234,6 +238,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
         editable: () => !options.readonly,
         attributes: {
           class: `cherry-previewer cherry-previewer--full cherry-markdown theme__${currentTheme} cherry-milkdown__editor`,
+          part: 'content',
         },
       }));
     })
@@ -267,7 +272,8 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
   serializedBaseline = editor.action(getMarkdown());
   acceptingChanges = true;
 
-  root.append(mountRoot);
+  root.append(shadow.host);
+  editor.action((ctx) => ctx.get(editorViewCtx).updateRoot());
 
   const composition = createCompositionGate(
     editor.action((ctx) => ctx.get(editorViewCtx).dom),
@@ -382,7 +388,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
         await editor.destroy();
       } finally {
         internalEditors.delete(instance);
-        mountRoot.remove();
+        shadow.host.remove();
       }
     },
   };
