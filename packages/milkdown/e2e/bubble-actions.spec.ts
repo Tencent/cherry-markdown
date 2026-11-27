@@ -5,8 +5,34 @@ async function selectParagraph(page: Page) {
   const paragraph = page.locator('.ProseMirror > p').first();
   await paragraph.click({ position: { x: 16, y: 8 } });
   const text = (await paragraph.textContent()) ?? '';
-  for (let index = 0; index < text.length + 2; index += 1) await page.keyboard.press('ArrowLeft');
-  for (const _ of text) await page.keyboard.press('Shift+ArrowRight');
+  const caretAtStart = () =>
+    paragraph.evaluate((element) => {
+      const selection = document.getSelection();
+      if (!selection) return false;
+      const root = element.getRootNode();
+      const range =
+        root instanceof ShadowRoot ? selection.getComposedRanges?.({ shadowRoots: [root] })[0] : undefined;
+      if (!(range?.collapsed ?? selection.isCollapsed)) return false;
+      const node = range?.startContainer ?? selection.anchorNode;
+      const offset = range?.startOffset ?? selection.anchorOffset;
+      if (!node || !element.contains(node)) return false;
+      const before = document.createRange();
+      before.selectNodeContents(element);
+      before.setEnd(node, offset);
+      return before.toString() === '';
+    });
+  // Observe native movement: sending extra arrows at the boundary can race
+  // Chrome's pending selectionchange and does not prove where Shift starts.
+  for (let index = 0; index < text.length + 2; index += 1) {
+    if (await caretAtStart()) break;
+    await page.keyboard.press('ArrowLeft');
+  }
+  await expect.poll(caretAtStart).toBe(true);
+  for (let index = 0; index < text.length + 2; index += 1) {
+    await page.keyboard.press('Shift+ArrowRight');
+    if ((await page.evaluate(() => document.getSelection()?.toString())) === text) break;
+  }
+  await expect.poll(() => page.evaluate(() => document.getSelection()?.toString())).toBe(text);
   await expect(page.getByRole('toolbar', { name: '文本格式' })).toBeVisible();
   return paragraph;
 }
