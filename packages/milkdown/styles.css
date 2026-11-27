@@ -457,7 +457,7 @@
 .cherry-milkdown .cherry-milkdown-code-block > pre {
   position: relative;
   box-sizing: border-box;
-  min-height: 53px;
+  min-height: 3.75em;
   margin: 0.5em 0;
   overflow: auto;
 }
@@ -637,6 +637,7 @@
 
 .cherry-milkdown .cherry-detail .cherry-compound-item--detail > .cherry-compound-item__header {
   position: relative;
+  font-weight: 600;
   padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) calc(var(--spacing-lg) + var(--spacing-xl));
   cursor: pointer;
   user-select: none;
