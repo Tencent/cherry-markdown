@@ -1,4 +1,5 @@
-import type { CherryOptions } from 'cherry-markdown';
+// This published declaration also exists before Cherry's dist build.
+import type { CherryOptions } from 'cherry-markdown/types/cherry.js';
 import type { MilkdownPlugin } from '@milkdown/kit/ctx';
 import type { CherryVisualRenderer } from './wysiwyg/index.js';
 

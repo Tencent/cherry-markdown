@@ -5,8 +5,7 @@
     "noEmit": true,
     "paths": {
       "@cherry-markdown/milkdown": ["../../src/index.ts"],
-      "@cherry-markdown/milkdown/echarts": ["../../src/renderers/echarts.ts"],
-      "cherry-markdown": ["../../../cherry-markdown/dist/types/index.d.ts"]
+      "@cherry-markdown/milkdown/echarts": ["../../src/renderers/echarts.ts"]
     },
     "types": ["node", "vite/client"]
   },
