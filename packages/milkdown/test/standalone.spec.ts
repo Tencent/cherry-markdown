@@ -628,8 +628,8 @@ describe('standalone contracts', () => {
     expect(view.dom.classList.contains('theme__red')).toBe(true);
     expect(instance.getMarkdown()).toBe('# Theme');
 
-    instance.setTheme('unknown' as 'default');
-    expect(surface?.classList.contains('theme__default')).toBe(true);
+    expect(() => instance.setTheme('unknown' as 'default')).toThrow('theme');
+    expect(surface?.classList.contains('theme__red')).toBe(true);
   });
 
   it('aborts an in-flight image upload when its editor closes', async () => {

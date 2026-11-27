@@ -5,3 +5,5 @@
 `cherryMilkdown()` 现在统一使用 Shadow DOM 并自动加载样式。移除 `@cherry-markdown/milkdown/style.css` 入口，接入方可以通过 CSS 变量和 `::part()` 定制编辑区。
 
 新增 `createEChartsRenderers({ transformOption })`，代码块和表格图表都可以覆盖预览数据，原配置和 Markdown 按原样保存。
+
+收紧公开配置和 Engine 渲染钩子的类型与运行时校验。未知字段、非法值和冲突配置返回明确错误，随包提供配置范围说明。

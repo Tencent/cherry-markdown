@@ -1,3 +1,4 @@
+import { configurationObject, supportedKeys } from '../options.js';
 import type { EChartsOption } from 'echarts';
 import type { CherryVisualRenderer } from '../types.js';
 import { parseTableChart } from '../wysiwyg/table-chart.js';
@@ -18,10 +19,16 @@ export interface EChartsRendererOptions {
 }
 
 /** Create optional renderers sharing a preview-only ECharts option transform. */
-export function createEChartsRenderers({ transformOption }: EChartsRendererOptions = {}): {
+export function createEChartsRenderers(options: EChartsRendererOptions = {}): {
   echarts: CherryVisualRenderer;
   tableChart: CherryVisualRenderer;
 } {
+  const config = configurationObject(options, 'echarts');
+  supportedKeys(config, ['transformOption'], 'echarts');
+  const { transformOption } = options;
+  if (transformOption !== undefined && typeof transformOption !== 'function') {
+    throw new TypeError('Invalid Milkdown configuration "echarts.transformOption": expected a synchronous function.');
+  }
   return {
     async echarts({ container, source, signal }) {
       const library = await import('echarts');

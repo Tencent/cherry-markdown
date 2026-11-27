@@ -36,6 +36,8 @@ export function Editor() {
 
 ## API
 
+每项配置的默认值、生效范围、依赖和不支持的配置见[配置范围](./CONFIGURATION.md)。创建时会校验未知字段、类型和冲突配置。
+
 - `cherryMilkdown(options)`：创建独立编辑器。
 - `getMarkdown()`：读取 Markdown。
 - `setMarkdown(markdown, { emit? })`：普通调用仍为全文替换，默认触发 `onChange`。输入法组合输入期间暂存最新外部回写，提交后合并不冲突的变化，保留中文、光标和撤销历史；同值回写不会覆盖输入或取消其它回写。重叠或无法安全映射的更新保留本地输入，并通过 `onError(error, 'parse')` 报告；这不是协同编辑协议。`emit: false` 仅静默外部修改，同时提交的本地输入仍触发包含合并结果的 `onChange`。

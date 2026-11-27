@@ -36,6 +36,8 @@ The package creates a default `CherryEngine`. Pass `engine` only when reusing cu
 
 ## API
 
+See [configuration scope](./CONFIGURATION.md) for defaults, dependencies and supported options. Unknown keys, invalid values and conflicting Engine options reject creation with a field-specific TypeError.
+
 - `cherryMilkdown(options)` creates an independent editor.
 - `getMarkdown()` reads Markdown.
 - `setMarkdown(markdown, { emit? })` remains a full replacement outside IME and emits by default. During composition, the latest external write is rebased after commit when non-conflicting, preserving input, caret and undo history. Same-value echoes neither replay preedit text nor cancel other queued updates. Overlapping or unsafe updates preserve local input and report `onError(error, 'parse')`; this is not a collaborative-editing protocol. `emit: false` silences the external edit, not concurrently committed local input, whose `onChange` contains the merged result.

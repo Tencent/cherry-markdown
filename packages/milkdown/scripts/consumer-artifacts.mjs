@@ -82,6 +82,7 @@ export function checkPackageFiles(manifest, filenames) {
     'LICENSE',
     'README.md',
     'README.CN.md',
+    'CONFIGURATION.md',
     'dist/generated/cherry-helpers.js',
     'dist/generated/cherry-helpers.d.ts',
     'dist/generated/cherry-prism.js',

@@ -9,6 +9,7 @@ const files = [
   'LICENSE',
   'README.md',
   'README.CN.md',
+  'CONFIGURATION.md',
   'dist/index.js',
   'dist/index.d.ts',
   'dist/renderers/echarts.js',

@@ -12,6 +12,7 @@ export type {
   CherryMilkdownInstance,
   CherryMilkdownMathliveOptions,
   CherryMilkdownOptions,
+  CherryMilkdownEngineOptions,
   CherryMilkdownTheme,
   CherryVisualRenderer,
   CherryVisualRenderContext,
