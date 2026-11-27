@@ -5,6 +5,7 @@ import { $prose } from '@milkdown/kit/utils';
 import { cherryWysiwygConfigCtx } from './config.js';
 import { openSelectionLinkEditor } from './link-editor.js';
 import { activeElementFor, editorSelectionRange } from './editor-dom.js';
+import { syncNativeTextSelection } from './clipboard-selection.js';
 import {
   createContextBubble,
   createContextButton,
@@ -197,8 +198,12 @@ export const cherryTextBubble = $prose((ctx) => {
         else update();
       };
       const onScroll = () => hide();
+      const onPointerDown = (event: PointerEvent) => {
+        syncNativeTextSelection(view);
+        preserveContextSelection(event);
+      };
 
-      bubble.addEventListener('pointerdown', preserveContextSelection);
+      bubble.addEventListener('pointerdown', onPointerDown);
       bubble.addEventListener('keydown', onKeyDown);
       link.addEventListener('click', onLink);
       more.addEventListener('click', onMore);
@@ -212,7 +217,7 @@ export const cherryTextBubble = $prose((ctx) => {
         update,
         destroy: () => {
           updateFrame.cancel();
-          bubble.removeEventListener('pointerdown', preserveContextSelection);
+          bubble.removeEventListener('pointerdown', onPointerDown);
           bubble.removeEventListener('keydown', onKeyDown);
           link.removeEventListener('click', onLink);
           more.removeEventListener('click', onMore);

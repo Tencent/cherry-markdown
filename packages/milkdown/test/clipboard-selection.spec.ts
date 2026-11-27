@@ -3,7 +3,7 @@ import { editorViewCtx } from '@milkdown/kit/core';
 import { TextSelection } from '@milkdown/kit/prose/state';
 import { undo } from '@milkdown/kit/prose/history';
 import * as editorDom from '../src/wysiwyg/editor-dom';
-import { createTestEditor } from './helpers/create-editor';
+import { createTestEditor, editorShadow } from './helpers/create-editor';
 
 it.each(['copy', 'cut'])('%s uses the visible range when the editor selection is one event behind', async (type) => {
   const root = document.body.appendChild(document.createElement('div'));
@@ -28,6 +28,33 @@ it.each(['copy', 'cut'])('%s uses the visible range when the editor selection is
       expect(data.get('text/plain')).toBe('Paste this');
       expect(event.defaultPrevented).toBe(true);
       expect(view.state.doc.textContent).toBe(type === 'cut' ? '' : 'Paste this');
+    });
+  } finally {
+    vi.restoreAllMocks();
+    await instance.destroy();
+    root.remove();
+  }
+});
+
+it('formats the visible range when a Bubble pointer action precedes selectionchange', async () => {
+  const root = document.body.appendChild(document.createElement('div'));
+  const instance = await createTestEditor({ el: root, value: 'Selected text' });
+  try {
+    instance.editor.action((ctx) => {
+      const view = ctx.get(editorViewCtx);
+      view.focus();
+      view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, 3, 14)));
+      const text = view.dom.querySelector('p')!.lastChild!;
+      const range = document.createRange();
+      range.setStart(text, 0);
+      range.setEnd(text, 13);
+      vi.spyOn(editorDom, 'editorSelectionRange').mockReturnValue(range);
+      const button = editorShadow(root).querySelector<HTMLButtonElement>('[aria-label="行内代码"]')!;
+      button.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true, button: 0 }));
+      button.click();
+      expect(view.state.doc.firstChild!.childCount).toBe(1);
+      expect(view.state.doc.firstChild!.firstChild!.text).toBe('Selected text');
+      expect(view.state.doc.firstChild!.firstChild!.marks.some((mark) => mark.type.spec.code)).toBe(true);
     });
   } finally {
     vi.restoreAllMocks();
