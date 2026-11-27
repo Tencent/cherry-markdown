@@ -71,16 +71,17 @@ test('real text selection, Bubble formatting, undo, and no layout shift', async 
   await expect(bubble).toHaveCSS('border-color', 'rgb(51, 154, 240)');
   await expect(bubble.locator('[title="加粗"]')).toHaveCSS('height', '38px');
   const buttonWidths = await bubble
-    .locator('button')
+    .locator('button:visible')
     .evaluateAll((buttons) => buttons.map((button) => Math.round(button.getBoundingClientRect().width)));
   expect(new Set(buttonWidths)).toEqual(new Set([38]));
-  const glyphSizes = await bubble.locator('.cherry-milkdown-text-bubble__glyph').evaluateAll((glyphs) =>
+  const glyphSizes = await bubble.locator('.cherry-milkdown-text-bubble__glyph:visible').evaluateAll((glyphs) =>
     glyphs.map((glyph) => {
       const rect = glyph.getBoundingClientRect();
       return [Math.round(rect.width), Math.round(rect.height)];
     }),
   );
   expect(glyphSizes).toEqual([
+    [32, 32],
     [32, 32],
     [32, 32],
     [32, 32],
@@ -179,7 +180,7 @@ for (const item of [
     await expect.poll(() => page.evaluate(() => window.getSelection()?.toString().trim())).toBe('Selected text');
     const bubble = page.getByRole('toolbar', { name: '文本格式' });
     await expect(bubble).toBeVisible();
-    await expect(bubble.locator('button')).toHaveCount(4);
+    await expect(bubble.locator('button:visible')).toHaveCount(7);
     await bubble.locator(`[title="${item.title}"]`).click();
     await expect(paragraph.locator(item.selector)).toHaveText('Selected text');
     await expect.poll(() => markdown(page)).toBe(item.markdown);

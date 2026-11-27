@@ -599,6 +599,15 @@ describe('standalone contracts', () => {
     expect(supportsTextFormatting(view.state)).toBe(false);
   });
 
+  it('allows formatting selections containing invisible link target metadata', async () => {
+    const instance = await create('[**Link**](https://example.com){target=_blank}');
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    view.dispatch(
+      view.state.tr.setSelection(TextSelection.create(view.state.doc, 1, view.state.doc.firstChild!.nodeSize - 1)),
+    );
+    expect(supportsTextFormatting(view.state)).toBe(true);
+  });
+
   it('keeps readonly editors presentation-only', async () => {
     const value = '[Link](https://example.com)\n\n- [ ] Task\n\nMovable';
     const instance = await create(value, { readonly: true });

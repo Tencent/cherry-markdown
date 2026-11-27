@@ -1374,3 +1374,26 @@
 .cherry-milkdown math-field:focus-within::part(virtual-keyboard-toggle) {
   opacity: 1;
 }
+
+.cherry-milkdown .cherry-milkdown-text-bubble {
+  max-width: calc(100vw - 16px);
+  flex-wrap: wrap;
+}
+
+.cherry-milkdown .cherry-milkdown-text-bubble__more {
+  display: flex;
+  flex-basis: 100%;
+  gap: 4px;
+  padding-top: 4px;
+}
+
+.cherry-milkdown .cherry-milkdown-text-bubble__more[hidden] {
+  display: none;
+}
+
+.cherry-milkdown .cherry-milkdown-text-bubble__more .cherry-milkdown-context-button,
+.cherry-milkdown .cherry-milkdown-text-bubble__more .cherry-milkdown-context-button__content {
+  width: auto;
+  flex-basis: auto;
+  padding-inline: 8px;
+}

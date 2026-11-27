@@ -86,6 +86,15 @@ function lastClientRect(element: Element) {
   return rects.length ? rects[rects.length - 1] : element.getBoundingClientRect();
 }
 
+/** Open the same form used by the link keyboard shortcut. */
+export function openSelectionLinkEditor(view: EditorView) {
+  const { from, to } = view.state.selection;
+  const range = linkAtRange(view, from, to) ?? (from !== to ? { from, to } : undefined);
+  if (!range) return false;
+  view.dom.dispatchEvent(new CustomEvent('cherry-milkdown:edit-link', { bubbles: true, detail: range }));
+  return true;
+}
+
 /**
  * Link text remains normal editable document content. Placing a caret in a
  * link opens one shared inspector outside ProseMirror's DOM, so exposing the
@@ -105,11 +114,8 @@ export const cherryLinkEditor = $prose((ctx) => {
           return true;
         }
         if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'k') return false;
-        const { from, to } = view.state.selection;
-        const range = linkAtRange(view, from, to) ?? (from !== to ? { from, to } : undefined);
-        if (!range) return false;
+        if (!openSelectionLinkEditor(view)) return false;
         event.preventDefault();
-        view.dom.dispatchEvent(new CustomEvent('cherry-milkdown:edit-link', { bubbles: true, detail: range }));
         return true;
       },
     },

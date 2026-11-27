@@ -23,7 +23,7 @@ const editor = await cherryMilkdown(options);
 | `root`          | 必填                         | 创建拥有独立 Shadow Root 的子宿主   | 可匹配的选择器或 HTMLElement                                                      |
 | `value`         | 空字符串                     | 初始 Markdown                       | 字符串                                                                            |
 | `readonly`      | `false`                      | 禁用用户编辑和编辑控件              | API 的 setMarkdown 仍可写入                                                       |
-| `bubble`        | `true`                       | 文本选区格式工具条                  | 布尔值，只读时隐藏；当前提供加粗、斜体、下划线、删除线                            |
+| `bubble`        | `true`                       | 文本选区格式工具条                  | 布尔值，只读时隐藏；默认提供加粗、斜体、下划线、删除线、链接、行内代码；更多提供高亮和清除格式（保留链接）                            |
 | `theme`         | `default`                    | 正文、控件及内置图表主题            | default、dark、abyss、green、red、gray、violet、blue                              |
 | `debounce`      | `30` 毫秒                    | Markdown 变更通知及节点预览更新调度 | 大于等于零的有限数；不延迟 getMarkdown                                            |
 | `onChange`      | 无                           | 接收防抖后的 `{ markdown }`         | 函数；不因初始 value 通知；setMarkdown 默认通知，emit:false 静默外部写入          |

@@ -44,7 +44,7 @@ export function Editor() {
 - `setTheme(theme)`：切换 Cherry 主题，不改变 Markdown 和撤销历史。ECharts 复用 Cherry 的轻量主题更新，保留图表数据；Mermaid 在原节点内重绘，不替换源码编辑面板。
 - `focus()`：聚焦编辑器。
 - `destroy()`：销毁编辑器及其浮层、NodeView 和渲染资源。
-- `bubble`：是否启用文本选区浮层，默认 `true`。首期提供加粗、斜体、下划线、删除线。
+- `bubble`：是否启用文本选区浮层，默认 `true`。默认提供加粗、斜体、下划线、删除线、链接和行内代码；“更多”中提供高亮、清除格式。清除格式保留链接及其目标设置。
 - `readonly`：只读展示。
 - `theme`：Cherry 主题，默认 `default`；支持 `dark`、`abyss`、`green`、`red`、`gray`、`violet` 和 `blue`。
 - `plugins`：附加 Milkdown 插件。

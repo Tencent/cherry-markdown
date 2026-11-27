@@ -15,6 +15,7 @@ const sharedBehaviorTests = [
   'table-chart-parser.spec.ts',
   'shadow-host.spec.ts',
   'echarts-transform.spec.ts',
+  'bubble-actions.spec.ts',
 ];
 const browserProjects = browserMatrix
   ? [

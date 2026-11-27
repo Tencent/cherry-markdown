@@ -44,7 +44,7 @@ See [configuration scope](./CONFIGURATION.md) for defaults, dependencies and sup
 - `setTheme(theme)` switches the Cherry theme without changing Markdown or history. ECharts reuses Cherry's lightweight theme update without replacing chart data; Mermaid redraws inside its node without replacing the source editor.
 - `focus()` focuses the editor.
 - `destroy()` releases the editor, overlays, NodeViews, and renderer resources.
-- `bubble` enables the selection Bubble (default `true`), initially with bold, italic, underline, and strikethrough.
+- `bubble` enables the selection Bubble (default `true`), with bold, italic, underline, strikethrough, links, and inline code. More provides highlight and clear formatting; clearing formatting retains links.
 - `readonly` creates a read-only surface.
 - `theme` selects a Cherry theme and defaults to `default`; `dark`, `abyss`, `green`, `red`, `gray`, `violet`, and `blue` are supported.
 - `plugins` adds Milkdown plugins.
