@@ -41,8 +41,8 @@ const editor = await cherryMilkdown(options);
 
 | 字段                                        | 默认值                  | 生效范围                                           | 约束                                                            |
 | ------------------------------------------- | ----------------------- | -------------------------------------------------- | --------------------------------------------------------------- |
-| `engineOptions.callback.urlProcessor`       | Cherry 默认 URL 处理    | 经过 Cherry 渲染的 URL，包括图片和 Cherry 扩展内容 | 使用 Cherry 发布类型；不承诺影响 Milkdown 原生链接 mark 的 href |
-| `engineOptions.callback.beforeImageMounted` | Cherry 默认图片属性处理 | 图片渲染前改写 src 和 srcProp                      | 函数签名复用 Cherry 发布类型                                    |
+| `engineOptions.callback.urlProcessor`       | Cherry 默认 URL 处理    | 经过 Cherry 渲染的 URL，包括图片和 Cherry 扩展内容 | Milkdown 定义受支持的钩子签名；不承诺影响 Milkdown 原生链接 mark 的 href |
+| `engineOptions.callback.beforeImageMounted` | Cherry 默认图片属性处理 | 图片渲染前改写 src 和 srcProp                      | Milkdown 定义受支持的钩子签名                                    |
 
 这两个钩子是渲染层配置。CommonMark/GFM 编辑由 Milkdown 管理。Cherry 的 toolbar、editor、previewer、engine.syntax、customSyntax 等配置不能直接传入 Milkdown。需要业务特有渲染时，通过业务配置的 `engine` 或 `renderers` 接入。通过自定义 engine 注入的行为由业务负责，该对象的内部配置不会由 Milkdown 校验。
 

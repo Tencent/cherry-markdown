@@ -1,5 +1,3 @@
-// This published declaration also exists before Cherry's dist build.
-import type { CherryOptions } from 'cherry-markdown/types/cherry.js';
 import type { MilkdownPlugin } from '@milkdown/kit/ctx';
 import type { CherryVisualRenderer } from './wysiwyg/index.js';
 
@@ -52,7 +50,15 @@ export type CherryMilkdownTheme = 'default' | 'dark' | 'abyss' | 'green' | 'red'
  * Advanced Cherry configuration belongs on an explicitly supplied engine.
  */
 export interface CherryMilkdownEngineOptions {
-  callback?: Pick<NonNullable<CherryOptions['callback']>, 'urlProcessor' | 'beforeImageMounted'>;
+  /** Milkdown's supported rendering contract, independent of generated Cherry declarations. */
+  callback?: {
+    urlProcessor?: (
+      url: string,
+      srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link',
+      callback?: (url: string) => void,
+    ) => string;
+    beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
+  };
 }
 
 export interface CherryMilkdownOptions {
