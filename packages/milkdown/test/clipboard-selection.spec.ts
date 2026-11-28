@@ -36,7 +36,7 @@ it.each(['copy', 'cut'])('%s uses the visible range when the editor selection is
   }
 });
 
-it('formats the visible range when a Bubble pointer action precedes selectionchange', async () => {
+it.each([false, true])('formats the visible range when a Bubble action races selectionchange (late update: %s)', async (lateUpdate) => {
   const root = document.body.appendChild(document.createElement('div'));
   const instance = await createTestEditor({ el: root, value: 'Selected text' });
   try {
@@ -51,6 +51,7 @@ it('formats the visible range when a Bubble pointer action precedes selectioncha
       vi.spyOn(editorDom, 'editorSelectionRange').mockReturnValue(range);
       const button = editorShadow(root).querySelector<HTMLButtonElement>('[aria-label="行内代码"]')!;
       button.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true, button: 0 }));
+      if (lateUpdate) view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, 3, 14)));
       button.click();
       expect(view.state.doc.firstChild!.childCount).toBe(1);
       expect(view.state.doc.firstChild!.firstChild!.text).toBe('Selected text');

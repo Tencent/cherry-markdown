@@ -202,8 +202,14 @@ export const cherryTextBubble = $prose((ctx) => {
         syncNativeTextSelection(view);
         preserveContextSelection(event);
       };
+      const onActionCapture = () => {
+        // A queued selectionchange may run between pointerdown and click.
+        // Read the visible range again immediately before any action runs.
+        syncNativeTextSelection(view);
+      };
 
       bubble.addEventListener('pointerdown', onPointerDown);
+      bubble.addEventListener('click', onActionCapture, true);
       bubble.addEventListener('keydown', onKeyDown);
       link.addEventListener('click', onLink);
       more.addEventListener('click', onMore);
@@ -218,6 +224,7 @@ export const cherryTextBubble = $prose((ctx) => {
         destroy: () => {
           updateFrame.cancel();
           bubble.removeEventListener('pointerdown', onPointerDown);
+          bubble.removeEventListener('click', onActionCapture, true);
           bubble.removeEventListener('keydown', onKeyDown);
           link.removeEventListener('click', onLink);
           more.removeEventListener('click', onMore);
