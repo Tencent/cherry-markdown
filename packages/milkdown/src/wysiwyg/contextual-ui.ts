@@ -41,8 +41,8 @@ export function preserveContextSelection(event: Event) {
 }
 
 /** One viewport subscription contract, disposed by its owning editor plugin. */
-export function watchContextViewport(document: Document, scroll: () => void, resize: () => void = scroll) {
-  const window = document.defaultView;
+export function watchContextViewport(host: Element, scroll: () => void, resize: () => void = scroll) {
+  const window = host.ownerDocument.defaultView;
   const onScroll = (event: Event) => {
     const target = event.target as Element | null;
     // Long URLs scroll their own input while typing. That does not move the
@@ -50,10 +50,17 @@ export function watchContextViewport(document: Document, scroll: () => void, res
     if (target?.nodeType === 1 && target.closest('.cherry-milkdown-context-form')) return;
     scroll();
   };
-  window?.addEventListener('scroll', onScroll, true);
+  // A scroll inside the shadow tree does not reach the document. Listening
+  // on the editor host also works when the editor is created off-document.
+  const onWindowScroll = (event: Event) => {
+    if (!event.composedPath().includes(host)) onScroll(event);
+  };
+  host.addEventListener('scroll', onScroll, true);
+  window?.addEventListener('scroll', onWindowScroll, true);
   window?.addEventListener('resize', resize);
   return () => {
-    window?.removeEventListener('scroll', onScroll, true);
+    host.removeEventListener('scroll', onScroll, true);
+    window?.removeEventListener('scroll', onWindowScroll, true);
     window?.removeEventListener('resize', resize);
   };
 }
@@ -82,6 +89,7 @@ export function setupContextBubble(element: HTMLElement, label: string) {
   element.classList.add('cherry-milkdown-context-bubble');
   element.hidden = true;
   element.setAttribute('role', 'toolbar');
+  element.setAttribute('part', 'toolbar');
   element.setAttribute('aria-label', label);
   return element;
 }

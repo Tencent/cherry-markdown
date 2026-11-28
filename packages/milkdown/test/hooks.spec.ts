@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 import {
+  editorShadow,
   createTestEditor as cherryMilkdown,
   type TestCherryMilkdownInstance as CherryMilkdownInstance,
 } from './helpers/create-editor';
@@ -151,7 +152,9 @@ describe('Cherry built-in hook fixtures', () => {
 
     instance.setMarkdown(first, { emit: false });
     expect(instance.getMarkdown()).toBe(first);
-    const flowHeading = [...root.querySelectorAll('h2')].find((element) => element.textContent?.includes('流程图'));
+    const flowHeading = [...editorShadow(root).querySelectorAll('h2')].find((element) =>
+      element.textContent?.includes('流程图'),
+    );
     expect(flowHeading?.outerHTML).toContain('cherry-footnote-number');
     expect(flowHeading?.textContent).not.toContain('^');
   }, 30_000);
@@ -164,7 +167,7 @@ describe('Cherry built-in hook fixtures', () => {
       value: '## 流程图[^不通用提醒]\n\n[^不通用提醒]: 该语法不是通用语法\n\n脚注之后的正文',
     });
     instances.push(instance);
-    const heading = root.querySelector('h2');
+    const heading = editorShadow(root).querySelector('h2');
     expect(heading?.outerHTML).toContain('cherry-footnote-number');
     expect(heading?.textContent).toBe('流程图[1]');
     expect(heading?.querySelector('sup.cherry-footnote-number a[href="#fn:1"]')).not.toBeNull();
@@ -176,8 +179,8 @@ describe('Cherry built-in hook fixtures', () => {
       ?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
     expect(scrollIntoView).toHaveBeenCalled();
 
-    const definition = root.querySelector<HTMLElement>('[data-type="footnote_definition"]');
-    const followingParagraph = [...root.querySelectorAll('p')].find(
+    const definition = editorShadow(root).querySelector<HTMLElement>('[data-type="footnote_definition"]');
+    const followingParagraph = [...editorShadow(root).querySelectorAll('p')].find(
       (paragraph) => paragraph.textContent === '脚注之后的正文',
     );
     expect(definition).not.toBeNull();

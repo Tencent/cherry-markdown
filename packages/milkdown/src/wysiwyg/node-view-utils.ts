@@ -65,13 +65,12 @@ export function selectEditableSource(event: KeyboardEvent) {
   // Linux Chromium can move Ctrl+End out of a nested contenteditable and into
   // ProseMirror's trailing paragraph. This source surface owns its navigation,
   // just as it owns select-all; subsequent native IME input must stay here.
+  const end = event.key === 'Home' ? 0 : source.childNodes.length;
   if (boundary && event.shiftKey && selection?.rangeCount) {
-    selection.extend(source, event.key === 'Home' ? 0 : source.childNodes.length);
+    selection.extend(source, end);
     return;
   }
-  const range = source.ownerDocument.createRange();
-  range.selectNodeContents(source);
-  if (boundary) range.collapse(event.key === 'Home');
-  selection?.removeAllRanges();
-  selection?.addRange(range);
+  // WebKit can leave the selection empty when addRange() targets an editor
+  // inside a shadow tree. Set both endpoints in the source in one operation.
+  selection?.setBaseAndExtent(source, boundary ? end : 0, source, end);
 }

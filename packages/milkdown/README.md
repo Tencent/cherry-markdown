@@ -9,7 +9,6 @@ Requires Node.js 22+ and `cherry-markdown >=0.11.11 <0.12.0`. The Cherry minimum
 ```tsx
 import { useEffect, useRef } from 'react';
 import { cherryMilkdown } from '@cherry-markdown/milkdown';
-import '@cherry-markdown/milkdown/style.css';
 
 export function Editor() {
   const root = useRef<HTMLDivElement>(null);
@@ -37,13 +36,15 @@ The package creates a default `CherryEngine`. Pass `engine` only when reusing cu
 
 ## API
 
+See [configuration scope](./CONFIGURATION.md) for defaults, dependencies and supported options. Unknown keys, invalid values and conflicting Engine options reject creation with a field-specific TypeError.
+
 - `cherryMilkdown(options)` creates an independent editor.
 - `getMarkdown()` reads Markdown.
 - `setMarkdown(markdown, { emit? })` remains a full replacement outside IME and emits by default. During composition, the latest external write is rebased after commit when non-conflicting, preserving input, caret and undo history. Same-value echoes neither replay preedit text nor cancel other queued updates. Overlapping or unsafe updates preserve local input and report `onError(error, 'parse')`; this is not a collaborative-editing protocol. `emit: false` silences the external edit, not concurrently committed local input, whose `onChange` contains the merged result.
 - `setTheme(theme)` switches the Cherry theme without changing Markdown or history. ECharts reuses Cherry's lightweight theme update without replacing chart data; Mermaid redraws inside its node without replacing the source editor.
 - `focus()` focuses the editor.
 - `destroy()` releases the editor, overlays, NodeViews, and renderer resources.
-- `bubble` enables the selection Bubble (default `true`), initially with bold, italic, underline, and strikethrough.
+- `bubble` enables the selection Bubble (default `true`), with bold, italic, underline, strikethrough, links, and inline code. More provides highlight and clear formatting; clearing formatting retains links.
 - `readonly` creates a read-only surface.
 - `theme` selects a Cherry theme and defaults to `default`; `dark`, `abyss`, `green`, `red`, `gray`, `violet`, and `blue` are supported.
 - `plugins` adds Milkdown plugins.
@@ -56,6 +57,8 @@ The package creates a default `CherryEngine`. Pass `engine` only when reusing cu
 import { echarts, tableChart } from '@cherry-markdown/milkdown/echarts';
 await cherryMilkdown({ root: '#markdown', value: markdown, renderers: { echarts, tableChart } });
 ```
+
+Use `createEChartsRenderers({ transformOption })` to adjust ECharts previews for both fences and table charts. The synchronous callback receives a copy of the generated option and a context with `kind`, `type`, and `source`. Mutate the copy or return a complete option. For a data-only override, assign `series.data` or `dataset.source` on the relevant entries. Markdown stays intact, full redraws run the callback on fresh options, and theme changes preserve the resulting data.
 
 A custom renderer does not require a Milkdown schema change. This renderer matches fences whose language is `custom-chart` and redraws only the affected node after its expanded source changes:
 
@@ -83,6 +86,12 @@ await cherryMilkdown({
 
 Placing the caret in a link opens compact actions to open, copy, edit or unlink it, styled with Cherry theme tokens. Press `Alt+F10` to focus the link actions, then use Tab to navigate and Escape to return to the editor; Tab retains its usual behavior in the editor. Unlinking preserves text and other formatting and supports undo. Unsaved link fields survive scrolling and viewport resizing. Use `Ctrl/Cmd+K` to edit a link or add one to selected text.
 
+## Styling
+
+The editor mounts an open Shadow Root on a child marked `data-cherry-milkdown` and loads its own stylesheet.
+
+Set these custom properties on your container: `--milkdown-font-family`, `--milkdown-font-size`, `--milkdown-line-height`, `--milkdown-text-color`, `--milkdown-background`, `--milkdown-accent-color` (editing control accents), and `--milkdown-chart-height`. Use a selector such as `#markdown > [data-cherry-milkdown]::part(content)` to style an exposed part. The available parts are `content`, `toolbar` (contextual toolbars), `link-form`, `image-form`, `source` (extension source panel), and `chart` (built-in ECharts mounts).
+
 ## Boundaries
 
 Editable code highlighting follows Cherry's language list, including TypeScript, JSON, Python and aliases. Live editing, language selection and copy controls remain available; unknown languages fall back to JavaScript.
@@ -93,7 +102,7 @@ Editable code highlighting follows Cherry's language list, including TypeScript,
 - Cherry Engine and its table-chart addon are imported through package-local adapters that isolate the current published dist paths. Recheck those adapters and Cherry's CSS path when upgrading Cherry.
 - Custom renderers may mutate the supplied `container`. Returned HTML strings are sanitized before insertion; do not concatenate untrusted Markdown into executable HTML.
 - Selection, link, and image UI belongs to this package and does not call Cherry editor internals.
-- The stylesheet imports Cherry's published CSS and scopes editing-only additions under `.cherry-milkdown` to reduce upgrade coupling.
+- The editor loads Cherry's published styles and Milkdown editing styles inside its Shadow Root.
 - `mathlive`, `mermaid`, and `echarts` are capability peers. Install the matching dependency when enabling formulas, Mermaid, or ECharts; runtime renderer failures stay isolated to the affected node and report through `onError` without blocking ordinary Markdown.
 - Fenced ECharts configuration accepts JSON5 data only and never executes JavaScript. Maps still require consumer-provided map data or a custom renderer.
 - Standalone table charts keep Milkdown's native GFM table as their editable source of truth; a package-owned derived preview hot-updates from its cells. Cherry-owned compound blocks such as Columns and Tabs remain whole-block renders and whole-block source editors; this package never injects child controls or chart mount points into Cherry-generated DOM.

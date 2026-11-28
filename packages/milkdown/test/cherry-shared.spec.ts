@@ -1,3 +1,4 @@
+import { editorShadow } from './helpers/create-editor';
 import { describe, expect, it, vi } from 'vite-plus/test';
 import { copyToClip, image, isValidScheme } from '../src/generated/cherry-helpers.js';
 import { imageLayoutState, imageAltText, replaceImageAltText } from '../src/native-layout';
@@ -83,9 +84,9 @@ describe('Cherry grammar after Markdown decoding', () => {
     const el = document.body.appendChild(document.createElement('div'));
     const instance = await createTestEditor({ el, value: '&amp; \\!!red escaped!! and !!blue active!!' });
     try {
-      expect(el.querySelectorAll('[data-cherry-mark="cherry_color"]')).toHaveLength(1);
-      expect(el.querySelector('[data-cherry-mark="cherry_color"]')?.textContent).toBe('active');
-      expect(el.textContent).toContain('& !!red escaped!! and active');
+      expect(editorShadow(el).querySelectorAll('[data-cherry-mark="cherry_color"]')).toHaveLength(1);
+      expect(editorShadow(el).querySelector('[data-cherry-mark="cherry_color"]')?.textContent).toBe('active');
+      expect(editorShadow(el).querySelector('.ProseMirror')?.textContent).toContain('& !!red escaped!! and active');
     } finally {
       await instance.destroy();
       el.remove();

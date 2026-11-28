@@ -1,13 +1,19 @@
 import { test, expect, markdown, replaceTableCell, setMarkdown } from './fixtures';
 import type { Page } from '@playwright/test';
 
+function caretPosition() {
+  const root = document.querySelector('[data-cherry-milkdown]')!.shadowRoot!;
+  const selection = document.getSelection();
+  const range = selection?.getComposedRanges?.({ shadowRoots: [root] })[0];
+  return {
+    text: (range?.startContainer ?? selection?.anchorNode)?.textContent,
+    offset: range?.startOffset ?? selection?.anchorOffset,
+  };
+}
+
 async function placeCaretAtTextOffset(page: Page, text: string, offset: number) {
   await page.keyboard.press('ControlOrMeta+End');
-  const position = () =>
-    page.evaluate(() => ({
-      text: window.getSelection()?.anchorNode?.nodeValue,
-      offset: window.getSelection()?.anchorOffset,
-    }));
+  const position = () => page.evaluate(caretPosition);
   // Native End can stop in the editor-only trailing paragraph. Observe each
   // real arrow-key movement instead of assuming a fixed number of positions.
   for (let count = 0; count < text.length + 3; count += 1) {
@@ -48,10 +54,7 @@ test('theme changes refresh charts without replacing table/code chart DOM or the
   const source = diagram.locator('.cherry-embed__source code');
   await source.click();
   await source.press('End');
-  const before = await page.evaluate(() => ({
-    node: window.getSelection()?.anchorNode?.textContent,
-    offset: window.getSelection()?.anchorOffset,
-  }));
+  const before = await page.evaluate(caretPosition);
   await page.evaluate(() => window.milkdownEditor!.setTheme('dark'));
   await expect.poll(() => title.getAttribute('fill')).not.toBe(lightTitle);
   await expect
@@ -63,12 +66,7 @@ test('theme changes refresh charts without replacing table/code chart DOM or the
     )
     .not.toBe(lightStroke);
   await expect(source).toBeFocused();
-  expect(
-    await page.evaluate(() => ({
-      node: window.getSelection()?.anchorNode?.textContent,
-      offset: window.getSelection()?.anchorOffset,
-    })),
-  ).toEqual(before);
+  expect(await page.evaluate(caretPosition)).toEqual(before);
   expect(await codeHandle!.evaluate((el) => el.isConnected)).toBe(true);
   expect(await tableHandle!.evaluate((el) => el.isConnected)).toBe(true);
   expect(await markdown(page)).toBe(value);
@@ -174,7 +172,7 @@ test('coalesces an external change before the composing range without discarding
   await input.send('Input.insertText', { text: '你好' });
   await expect.poll(async () => (await markdown(page)).trimEnd()).toBe('Remote final你好');
   await expect(paragraph).toHaveText('Remote final你好');
-  expect(await page.evaluate(() => window.getSelection()?.anchorOffset)).toBe('Remote final你好'.length);
+  expect((await page.evaluate(caretPosition)).offset).toBe('Remote final你好'.length);
   await input.detach();
 });
 
@@ -189,7 +187,8 @@ test('an external prepend received before the first preedit mutation preserves c
   await placeCaretAtTextOffset(page, '开始：结束', 3);
   await page.evaluate(() => {
     document
-      .querySelector('.ProseMirror')!
+      .querySelector('[data-cherry-milkdown]')!
+      .shadowRoot!.querySelector('.ProseMirror')!
       .addEventListener(
         'compositionupdate',
         () =>
@@ -204,12 +203,7 @@ test('an external prepend received before the first preedit mutation preserves c
   await expect(paragraph).toHaveText('开始：nihao结束');
   await input.send('Input.insertText', { text: '你好' });
   await expect.poll(async () => (await markdown(page)).trimEnd()).toBe('远程前缀\n\n开始：你好结束');
-  expect(
-    await page.evaluate(() => ({
-      text: window.getSelection()?.anchorNode?.textContent,
-      offset: window.getSelection()?.anchorOffset,
-    })),
-  ).toEqual({ text: '开始：你好结束', offset: 5 });
+  expect(await page.evaluate(caretPosition)).toEqual({ text: '开始：你好结束', offset: 5 });
   await page.keyboard.type('!');
   await expect.poll(async () => (await markdown(page)).trimEnd()).toBe('远程前缀\n\n开始：你好!结束');
   await input.detach();
@@ -235,13 +229,13 @@ test('an external preedit snapshot and subsequent echo preserve Chinese, caret a
   await input.send('Input.imeSetComposition', { text: 'nihao', selectionStart: 0, selectionEnd: 5 });
   await input.send('Input.insertText', { text: '你好' });
   await expect.poll(async () => (await markdown(page)).trimEnd()).toBe('远程前缀\n\n开始：你好结束');
-  expect(await page.evaluate(() => window.getSelection()?.anchorOffset)).toBe(5);
+  expect((await page.evaluate(caretPosition)).offset).toBe(5);
   await page.keyboard.press('ControlOrMeta+z');
   await expect.poll(async () => (await markdown(page)).trimEnd()).toBe('远程前缀\n\n开始：结束');
-  expect(await page.evaluate(() => window.getSelection()?.anchorOffset)).toBe(3);
+  expect((await page.evaluate(caretPosition)).offset).toBe(3);
   await page.keyboard.press('ControlOrMeta+Shift+z');
   await expect.poll(async () => (await markdown(page)).trimEnd()).toBe('远程前缀\n\n开始：你好结束');
-  expect(await page.evaluate(() => window.getSelection()?.anchorOffset)).toBe(5);
+  expect((await page.evaluate(caretPosition)).offset).toBe(5);
   await input.detach();
 });
 
@@ -353,7 +347,9 @@ test('native composition inside an owned source editor persists exactly one comm
   expect(
     await source.evaluate((element) => {
       const selection = element.ownerDocument.getSelection();
-      return Boolean(selection?.focusNode && element.contains(selection.focusNode));
+      const range = selection?.getComposedRanges?.({ shadowRoots: [element.getRootNode() as ShadowRoot] })[0];
+      const node = range?.endContainer ?? selection?.focusNode;
+      return Boolean(node && element.contains(node));
     }),
   ).toBe(true);
   const input = await page.context().newCDPSession(page);
@@ -380,7 +376,7 @@ test('an external prepend keeps the composed source editor focused and updates i
   await source.press('ArrowLeft');
   await source.press('ArrowLeft');
   await expect(source).toBeFocused();
-  expect(await page.evaluate(() => window.getSelection()?.anchorOffset)).toBe(3);
+  expect((await page.evaluate(caretPosition)).offset).toBe(3);
   const input = await page.context().newCDPSession(page);
   await input.send('Input.imeSetComposition', { text: 'ni', selectionStart: 0, selectionEnd: 2 });
   await page.evaluate(() =>
@@ -393,6 +389,6 @@ test('an external prepend keeps the composed source editor focused and updates i
   await expect(source).toHaveText('开始：你好结束');
   await expect(source).toBeFocused();
   await expect(page.locator('[data-custom-preview]')).toHaveText('开始：你好结束');
-  expect(await page.evaluate(() => window.getSelection()?.anchorOffset)).toBe(5);
+  expect((await page.evaluate(caretPosition)).offset).toBe(5);
   await input.detach();
 });

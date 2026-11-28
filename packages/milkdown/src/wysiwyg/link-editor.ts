@@ -1,3 +1,4 @@
+import { editorSelectionRange } from './editor-dom.js';
 import type { Mark, Node as ProseNode } from '@milkdown/kit/prose/model';
 import { Plugin, TextSelection } from '@milkdown/kit/prose/state';
 import type { EditorView } from '@milkdown/kit/prose/view';
@@ -85,6 +86,15 @@ function lastClientRect(element: Element) {
   return rects.length ? rects[rects.length - 1] : element.getBoundingClientRect();
 }
 
+/** Open the same form used by the link keyboard shortcut. */
+export function openSelectionLinkEditor(view: EditorView) {
+  const { from, to } = view.state.selection;
+  const range = linkAtRange(view, from, to) ?? (from !== to ? { from, to } : undefined);
+  if (!range) return false;
+  view.dom.dispatchEvent(new CustomEvent('cherry-milkdown:edit-link', { bubbles: true, detail: range }));
+  return true;
+}
+
 /**
  * Link text remains normal editable document content. Placing a caret in a
  * link opens one shared inspector outside ProseMirror's DOM, so exposing the
@@ -104,11 +114,8 @@ export const cherryLinkEditor = $prose((ctx) => {
           return true;
         }
         if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'k') return false;
-        const { from, to } = view.state.selection;
-        const range = linkAtRange(view, from, to) ?? (from !== to ? { from, to } : undefined);
-        if (!range) return false;
+        if (!openSelectionLinkEditor(view)) return false;
         event.preventDefault();
-        view.dom.dispatchEvent(new CustomEvent('cherry-milkdown:edit-link', { bubbles: true, detail: range }));
         return true;
       },
     },
@@ -149,6 +156,7 @@ export const cherryLinkEditor = $prose((ctx) => {
 
       const form = document.createElement('form');
       form.className = 'cherry-milkdown-context-form cherry-milkdown-link-editor';
+      form.setAttribute('part', 'link-form');
       form.hidden = true;
       form.setAttribute('role', 'dialog');
       form.setAttribute('aria-label', '编辑链接');
@@ -339,19 +347,11 @@ export const cherryLinkEditor = $prose((ctx) => {
         const { from, to } = view.state.selection;
         if (dismissedSelection?.from === from && dismissedSelection.to === to) return hideInspector();
         dismissedSelection = undefined;
-        const domSelection = document.getSelection();
-        const hasDocumentRange = Boolean(
-          domSelection &&
-          !domSelection.isCollapsed &&
-          domSelection.anchorNode &&
-          domSelection.focusNode &&
-          view.dom.contains(domSelection.anchorNode) &&
-          view.dom.contains(domSelection.focusNode),
-        );
+        const domRange = editorSelectionRange(view.dom);
         // A range selection belongs to Milkdown's text-formatting Bubble.
         // Link inspection only owns a collapsed caret inside the link;
         // Cmd/Ctrl+K remains the explicit editing path for selected text.
-        if (from !== to || hasDocumentRange) return hideInspector();
+        if (from !== to || (domRange && !domRange.collapsed)) return hideInspector();
         const range = linkAtRange(view, from, to);
         if (!range) return hideInspector();
         active = range;
@@ -388,7 +388,8 @@ export const cherryLinkEditor = $prose((ctx) => {
         if (!inspector.hidden) hrefPreview.focus({ preventScroll: true });
       };
       const onOutsidePointer = (event: PointerEvent) => {
-        if (!(event.target instanceof Node) || form.contains(event.target) || inspector.contains(event.target)) return;
+        const path = event.composedPath();
+        if (path.includes(form) || path.includes(inspector)) return;
         if (editorOpen) close();
         queueMicrotask(() => {
           if (!view.hasFocus()) {
@@ -521,7 +522,7 @@ export const cherryLinkEditor = $prose((ctx) => {
       unlink.addEventListener('click', removeLink);
       inspector.addEventListener('keydown', onInspectorKeyDown);
       document.addEventListener('pointerdown', onOutsidePointer, true);
-      const releaseViewport = watchContextViewport(document, viewportFrame.schedule);
+      const releaseViewport = watchContextViewport(overlayHost, viewportFrame.schedule);
       form.addEventListener('submit', onSubmit);
       textInput.addEventListener('input', () => {
         error.hidden = true;

@@ -24,13 +24,11 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "style": "./styles.css",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./style.css": "./styles.css",
     "./echarts": {
       "types": "./dist/renderers/echarts.d.ts",
       "import": "./dist/renderers/echarts.js"
@@ -39,31 +37,29 @@
   },
   "files": [
     "dist",
-    "styles.css",
     "README.md",
     "README.CN.md",
     "ARCHITECTURE.md",
+    "CONFIGURATION.md",
     "RELEASING.md",
     "LICENSE"
-  ],
-  "sideEffects": [
-    "./styles.css"
   ],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "node ./scripts/sync-chart-locale.mjs && node ./scripts/sync-cherry-helpers.mjs && node ./scripts/sync-cherry-prism.mjs && rimraf ./dist && tsc --project tsconfig.build.json && node ./scripts/sync-cherry-helpers.mjs --dist && node ./scripts/sync-cherry-prism.mjs --dist",
+    "build": "node ./scripts/sync-chart-locale.mjs && node ./scripts/sync-cherry-helpers.mjs && node ./scripts/sync-cherry-prism.mjs && rimraf ./dist && tsc --project tsconfig.build.json && node ./scripts/sync-cherry-helpers.mjs --dist && node ./scripts/sync-cherry-prism.mjs --dist && node ./scripts/build-shadow-style.mjs --dist",
     "build:demo": "vp run -F cherry-markdown build && vp run build:demo:prepared",
     "build:demo:prepared": "vp run build && node ./scripts/build-demo.mjs",
     "build:types": "tsc --project tsconfig.build.json",
-    "build:cherry-runtime": "NODE_ENV=production node ../cherry-markdown/build/vite.build.js --targets=engine-core-esm && node ../cherry-markdown/build/addons.build.js --targets=advance/cherry-table-echarts-plugin,advance/cherry-codeblock-echarts-plugin --formats=es",
+    "build:cherry-runtime": "node ../cherry-markdown/build/run-iconfont.js && NODE_ENV=production node ../cherry-markdown/build/styles.build.js && NODE_ENV=production node ../cherry-markdown/build/vite.build.js --targets=engine-core-esm && node ../cherry-markdown/build/addons.build.js --targets=advance/cherry-table-echarts-plugin,advance/cherry-codeblock-echarts-plugin --formats=es",
     "clean": "rimraf ./dist",
-    "dev:demo": "node ./scripts/sync-cherry-prism.mjs && vp dev --config vite.demo.config.mjs",
+    "dev:demo": "node ./scripts/sync-cherry-prism.mjs && node ./scripts/build-shadow-style.mjs && vp dev --config vite.demo.config.mjs",
     "preview:demo": "vp preview --config vite.demo.config.mjs",
-    "test": "vp run build:cherry-runtime && node ./scripts/sync-cherry-prism.mjs && vp test run --config vitest.config.ts",
+    "test": "vp run build:cherry-runtime && node ./scripts/sync-cherry-prism.mjs && node ./scripts/build-shadow-style.mjs && vp test run --config vitest.config.ts",
     "test:coverage": "COVERAGE_THRESHOLDS=true vp run test",
     "test:e2e": "playwright test --config playwright.config.ts",
+    "test:e2e:chrome": "MILKDOWN_CHROME=1 vp run test:e2e",
     "test:e2e:matrix": "MILKDOWN_BROWSER_MATRIX=1 vp run test:e2e",
     "test:consumer": "vp run -F cherry-markdown build && vp run build && vp run test:consumer:prepared",
     "test:consumer:prepared": "node ./scripts/verify-consumer.mjs",
@@ -104,6 +100,7 @@
     "mermaid": "^12.3.0",
     "pixelmatch": "^7.2.0",
     "pngjs": "^7.0.0",
+    "postcss": "^8.2.15",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rimraf": "^3.0.2"

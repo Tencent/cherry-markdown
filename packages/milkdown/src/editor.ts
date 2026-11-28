@@ -16,22 +16,25 @@ import { trailing } from '@milkdown/kit/plugin/trailing';
 import { commonmark, inlineCodeSchema } from '@milkdown/kit/preset/commonmark';
 import { gfm } from '@milkdown/kit/preset/gfm';
 import type { Node as ProseMirrorNode } from '@milkdown/kit/prose/model';
+import { closeHistory } from '@milkdown/kit/prose/history';
 import { Plugin } from '@milkdown/kit/prose/state';
 import { $prose, getMarkdown } from '@milkdown/kit/utils';
 import CherryEngine from './cherry-engine.js';
 import { reconcileSerializedMarkdown } from './markdown-reconcile.js';
+import { CHERRY_THEMES, validateOptions, validateTheme } from './options.js';
+import { createShadowHost } from './shadow-host.js';
 import type {
   CherryEngineInput,
   CherryEngineLike,
   CherryMilkdownInstance,
   CherryMilkdownOptions,
-  CherryMilkdownTheme,
 } from './types.js';
 import { cherryWysiwyg, cherryWysiwygConfigCtx } from './wysiwyg/index.js';
 import { TableChartDescriptorEngine } from './wysiwyg/table-chart-render-engine.js';
 import { cherryTableFocusPlugin } from './wysiwyg/table-focus.js';
 import { CHERRY_THEME_CHANGE } from './wysiwyg/theme.js';
 import { createCompositionGate } from './composition-gate.js';
+import { cherryClipboardSelection, syncNativeTextSelection } from './wysiwyg/clipboard-selection.js';
 import {
   createDocumentUpdate,
   createEditableTail,
@@ -41,7 +44,6 @@ import {
 } from './document-update.js';
 
 const DEFAULT_DEBOUNCE = 30;
-const CHERRY_THEMES = ['default', 'dark', 'abyss', 'green', 'red', 'gray', 'violet', 'blue'] as const;
 const CHERRY_THEME_CLASSES = CHERRY_THEMES.map((theme) => `theme__${theme}`);
 const internalEditors = new WeakMap<CherryMilkdownInstance, Editor>();
 
@@ -50,10 +52,6 @@ export function getInternalEditor(instance: CherryMilkdownInstance): Editor {
   const editor = internalEditors.get(instance);
   if (!editor) throw new Error('The Cherry Milkdown instance is not active.');
   return editor;
-}
-
-function normalizeTheme(theme: unknown): CherryMilkdownTheme {
-  return CHERRY_THEMES.includes(theme as CherryMilkdownTheme) ? (theme as CherryMilkdownTheme) : 'default';
 }
 
 function requireCherryEngine(engine: CherryEngineInput): CherryEngineLike {
@@ -70,8 +68,15 @@ function resolveRoot(root: string | HTMLElement): HTMLElement {
 }
 
 export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<CherryMilkdownInstance> {
-  const root = resolveRoot(options.root);
-  let currentTheme = normalizeTheme(options.theme);
+  let root: HTMLElement;
+  try {
+    validateOptions(options);
+    root = resolveRoot(options.root);
+  } catch (error) {
+    if (typeof options?.onError === 'function') options.onError(error, 'create');
+    throw error;
+  }
+  let currentTheme = options.theme ?? 'default';
   // Build away from the live host, then swap the editor DOM in atomically.
   const mountRoot = root.ownerDocument.createElement('div');
   // Cherry's published Bubble and Markdown tokens are scoped by a theme
@@ -95,26 +100,23 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
   let serializedBaseline = '';
 
   let tableBlockComponent: typeof import('@milkdown/kit/component/table-block');
+  let shadow: Awaited<ReturnType<typeof createShadowHost>>;
 
   try {
+    shadow = await createShadowHost(root.ownerDocument);
+    shadow.root.append(mountRoot);
     tableBlockComponent = await import('@milkdown/kit/component/table-block');
     // CherryEngine is the only Cherry runtime used by this standalone editor.
     // It contributes Markdown semantics and HTML presentation, not an editor,
     // Previewer, Bubble or mode lifecycle.
     engine = requireCherryEngine(options.engine ?? new CherryEngine(options.engineOptions ?? {}));
     if (!options.engine && options.renderers?.tableChart) {
-      const configuredEngine = (options.engineOptions?.engine ?? {}) as Record<string, unknown>;
-      const configuredSyntax = (configuredEngine.syntax ?? {}) as Record<string, unknown>;
-      const configuredTable = (configuredSyntax.table ?? {}) as Record<string, unknown>;
       nativeEngine = requireCherryEngine(
         new CherryEngine({
           ...options.engineOptions,
           engine: {
-            ...configuredEngine,
             syntax: {
-              ...configuredSyntax,
               table: {
-                ...configuredTable,
                 enableChart: true,
                 chartRenderEngine: TableChartDescriptorEngine,
               },
@@ -234,6 +236,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
         editable: () => !options.readonly,
         attributes: {
           class: `cherry-previewer cherry-previewer--full cherry-markdown theme__${currentTheme} cherry-milkdown__editor`,
+          part: 'content',
         },
       }));
     })
@@ -241,6 +244,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     .use(gfm)
     .use(history)
     .use(clipboard)
+    .use(cherryClipboardSelection)
     .use(cursor)
     .use(indent)
     .use(trailing)
@@ -267,7 +271,8 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
   serializedBaseline = editor.action(getMarkdown());
   acceptingChanges = true;
 
-  root.append(mountRoot);
+  root.append(shadow.host);
+  editor.action((ctx) => ctx.get(editorViewCtx).updateRoot());
 
   const composition = createCompositionGate(
     editor.action((ctx) => ctx.get(editorViewCtx).dom),
@@ -282,6 +287,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
     try {
       editor.action((ctx) => {
         const view = ctx.get(editorViewCtx);
+        syncNativeTextSelection(view);
         const parsed = ctx.get(parserCtx)(markdown);
         if (!parsed) throw new Error('Unable to parse external Markdown.');
         const next = withEditableTail(parsed);
@@ -311,7 +317,9 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
         if (update.steps.length) {
           const transaction = view.state.tr;
           update.steps.forEach((step) => transaction.step(step));
-          view.dispatch(transaction.setMeta('addToHistory', false).setMeta(EXTERNAL_MARKDOWN_UPDATE, true));
+          // Edits after an external revision must not join an earlier typing
+          // group whose steps were mapped through that replacement.
+          view.dispatch(closeHistory(transaction).setMeta('addToHistory', false).setMeta(EXTERNAL_MARKDOWN_UPDATE, true));
         }
         currentMarkdown = reconciled;
         serializedBaseline = editor.action(getMarkdown());
@@ -359,7 +367,8 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
       composition.run(() => applyMarkdown(markdown, emit, requested));
     },
     setTheme(theme) {
-      const nextTheme = normalizeTheme(theme);
+      validateTheme(theme);
+      const nextTheme = theme;
       if (destroyed || nextTheme === currentTheme) return;
       currentTheme = nextTheme;
       const view = editor.action((ctx) => ctx.get(editorViewCtx));
@@ -382,7 +391,7 @@ export async function cherryMilkdown(options: CherryMilkdownOptions): Promise<Ch
         await editor.destroy();
       } finally {
         internalEditors.delete(instance);
-        mountRoot.remove();
+        shadow.host.remove();
       }
     },
   };

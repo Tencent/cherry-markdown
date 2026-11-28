@@ -9,7 +9,7 @@ const files = [
   'LICENSE',
   'README.md',
   'README.CN.md',
-  'styles.css',
+  'CONFIGURATION.md',
   'dist/index.js',
   'dist/index.d.ts',
   'dist/renderers/echarts.js',
@@ -17,12 +17,18 @@ const files = [
   'dist/generated/cherry-helpers.js',
   'dist/generated/cherry-helpers.d.ts',
   'dist/generated/cherry-prism.js',
+  'dist/generated/cherry-styles.js',
   'dist/generated/cherry-prism.d.ts',
 ];
 
 test('requires every public export, stylesheet and generated runtime in the tarball', () => {
   checkPackageFiles(manifest, files);
-  for (const missing of ['styles.css', 'dist/renderers/echarts.d.ts', 'dist/generated/cherry-prism.js', 'LICENSE'])
+  for (const missing of [
+    'dist/renderers/echarts.d.ts',
+    'dist/generated/cherry-prism.js',
+    'dist/generated/cherry-styles.js',
+    'LICENSE',
+  ])
     assert.throws(
       () =>
         checkPackageFiles(

@@ -115,17 +115,18 @@ chartLibrary.registerMap('consumer-map', {
 });`
     : ''
 }
-import '@cherry-markdown/milkdown/style.css';
 ${capabilities ? "import 'mathlive/fonts.css';" : ''}
 declare global { interface Window { consumerEditor?: CherryMilkdownInstance; } }
 function App() {
   const el = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!el.current) return;
+    const host = el.current;
     let disposed = false;
     let editor: CherryMilkdownInstance | undefined;
     void cherryMilkdown({
-      root: el.current,
+      root: host,
+      onChange: ({ markdown }) => { host.dataset.markdown = markdown; },
       engine: new CherryEngine({}),
       onError: (error, phase) => console.error(phase, error),
       value: ${JSON.stringify(
@@ -171,7 +172,10 @@ async function checkRuntime(label, mode = 'charts') {
   let page;
   const errors = [];
   try {
-    browser = await chromium.launch();
+    browser = await chromium.launch(process.env.MILKDOWN_CHROME === '1' ? { channel: 'chrome' } : {});
+    console.log(
+      `Consumer browser: ${process.env.MILKDOWN_CHROME === '1' ? 'Google Chrome' : 'Chromium'} ${browser.version()}`,
+    );
     page = await browser.newPage();
     page.on('pageerror', (error) => errors.push(String(error)));
     page.on('console', (message) => {
@@ -180,23 +184,41 @@ async function checkRuntime(label, mode = 'charts') {
     const { port } = server.httpServer.address();
     await page.goto(`http://127.0.0.1:${port}/`);
     await page.waitForFunction(() => Boolean(window.consumerEditor));
+    if (!(await page.locator('[data-cherry-milkdown]').evaluate((host) => Boolean(host.shadowRoot))))
+      throw new Error('The package entry did not mount its Shadow Root.');
     if (mode === 'capabilities') {
       await page.locator('[data-type="mermaid"] svg').waitFor();
       await page.waitForFunction(() => Boolean(customElements.get('math-field')));
-      await page.waitForFunction(() => document.querySelector('math-field')?.value === 'x^2');
+      await page.waitForFunction(
+        () => document.querySelector('[data-cherry-milkdown]').shadowRoot.querySelector('math-field')?.value === 'x^2',
+      );
       await page.getByRole('button', { name: '编辑块公式源码' }).click();
       await page.locator('.cherry-math__source code').fill('x^3');
       await page.waitForFunction(() => window.consumerEditor.getMarkdown().includes('x^3'));
-      await page.waitForFunction(() => document.querySelector('math-field')?.value === 'x^3');
+      await page.waitForFunction(
+        () => document.querySelector('[data-cherry-milkdown]').shadowRoot.querySelector('math-field')?.value === 'x^3',
+      );
     } else if (mode === 'base') {
       await page.locator('.ProseMirror h1').filter({ hasText: 'Published package' }).waitFor();
+      await page.addStyleTag({
+        content:
+          '#root { --milkdown-font-size: 18px } #root [data-cherry-milkdown]::part(content) { padding-top: 32px }',
+      });
+      const style = await page.locator('.ProseMirror').evaluate((el) => {
+        const computed = getComputedStyle(el);
+        return [computed.fontSize, computed.paddingTop];
+      });
+      if (style.join(',') !== '18px,32px') throw new Error('Public CSS overrides did not reach the editor.');
       for (const language of ['typescript', 'json', 'python'])
         await page.locator(`pre.language-${language} .token`).first().waitFor();
       await page.evaluate(() => window.consumerEditor.setMarkdown('# Base\n\nEditable'));
       await page.locator('.ProseMirror p').click();
       await page.keyboard.press('End');
       await page.keyboard.type(' typed');
-      await page.waitForFunction(() => window.consumerEditor.getMarkdown().includes('Editable typed'));
+      await page.waitForFunction(() => {
+        const current = window.consumerEditor.getMarkdown();
+        return current.includes('Editable typed') && document.querySelector('#root > div').dataset.markdown === current;
+      });
     } else {
       try {
         await page.locator('.ProseMirror .cherry-echarts-wrapper svg').nth(1).waitFor();
@@ -226,16 +248,20 @@ async function checkRuntime(label, mode = 'charts') {
       const original = await page.evaluate(() => window.consumerEditor.getMarkdown());
       await page.evaluate(() => window.consumerEditor.setTheme('dark'));
       await page.waitForFunction((color) => {
-        const title = [...document.querySelectorAll('.cherry-echarts-codeblock-wrapper svg text')].find(
-          (el) => el.textContent === 'Code chart',
-        );
+        const title = [
+          ...document
+            .querySelector('[data-cherry-milkdown]')
+            .shadowRoot.querySelectorAll('.cherry-echarts-codeblock-wrapper svg text'),
+        ].find((el) => el.textContent === 'Code chart');
         return Boolean(title) && title.getAttribute('fill') !== color;
       }, before);
       await page.evaluate(() => window.consumerEditor.setTheme('default'));
       await page.waitForFunction((color) => {
-        const title = [...document.querySelectorAll('.cherry-echarts-codeblock-wrapper svg text')].find(
-          (el) => el.textContent === 'Code chart',
-        );
+        const title = [
+          ...document
+            .querySelector('[data-cherry-milkdown]')
+            .shadowRoot.querySelectorAll('.cherry-echarts-codeblock-wrapper svg text'),
+        ].find((el) => el.textContent === 'Code chart');
         return title?.getAttribute('fill') === color;
       }, before);
       if ((await page.evaluate(() => window.consumerEditor.getMarkdown())) !== original)

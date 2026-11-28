@@ -46,9 +46,7 @@ describe('public API compatibility contract', () => {
     const manifest = JSON.parse(readFileSync(resolve(import.meta.dirname, '../package.json'), 'utf8')) as {
       exports: Record<string, unknown>;
     };
-    expect(Object.keys(manifest.exports)).toEqual(
-      expect.arrayContaining(['.', './style.css', './echarts', './package.json']),
-    );
+    expect(Object.keys(manifest.exports)).toEqual(expect.arrayContaining(['.', './echarts', './package.json']));
   });
 
   it('accepts the stable option, callback and instance shapes', () => {
@@ -69,6 +67,17 @@ describe('public API compatibility contract', () => {
     expectTypeOf<StablePublicTypes>().toBeObject();
     expectTypeOf(theme).toMatchTypeOf<CherryMilkdownTheme>();
     expect(options.fileUpload).toBe(uploadWithLegacyArity);
+  });
+
+  it('limits default Engine options to the supported rendering hooks', () => {
+    const options: CherryMilkdownOptions = {
+      root: '#editor',
+      engineOptions: {
+        // @ts-expect-error Cherry syntax settings require a custom engine.
+        engine: { syntax: {} },
+      },
+    };
+    expect(options.root).toBe('#editor');
   });
 
   it('keeps the exploratory instance surface compact', async () => {

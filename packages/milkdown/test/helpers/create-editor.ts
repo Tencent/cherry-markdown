@@ -14,3 +14,9 @@ export async function createTestEditor(options: TestEditorOptions): Promise<Test
 }
 
 export type TestCherryMilkdownInstance = CherryMilkdownInstance & { editor: Editor };
+
+export function editorShadow(container: ParentNode = document): ShadowRoot {
+  const root = container.querySelector('[data-cherry-milkdown]')?.shadowRoot;
+  if (!root) throw new Error('Expected a mounted Milkdown editor');
+  return root;
+}

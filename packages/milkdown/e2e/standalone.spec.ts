@@ -20,10 +20,8 @@ test('standalone editor boots without Cherry editor, Previewer or top toolbar', 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
     await page.evaluate(() => document.documentElement.clientWidth),
   );
-  await expect(
-    page.locator('#markdown > .cherry.cherry-milkdown .cherry-previewer.cherry-markdown.ProseMirror'),
-  ).toHaveCount(1);
-  const root = page.locator('#markdown > .cherry.cherry-milkdown');
+  await expect(page.locator('.cherry.cherry-milkdown .cherry-previewer.cherry-markdown.ProseMirror')).toHaveCount(1);
+  const root = page.locator('.cherry.cherry-milkdown');
   const editor = page.locator('.ProseMirror.cherry-previewer');
   await expect(root).toHaveClass(/theme__default/);
   await expect(root).toHaveClass(/cherry--no-toolbar/);
@@ -38,12 +36,12 @@ test('standalone editor boots without Cherry editor, Previewer or top toolbar', 
 test('runtime theme switching updates both Cherry scopes without editing Markdown', async ({ page }) => {
   await setMarkdown(page, '# Theme');
   await page.evaluate(() => window.milkdownEditor?.setTheme('dark'));
-  await expect(page.locator('#markdown > .cherry.cherry-milkdown')).toHaveClass(/theme__dark/);
+  await expect(page.locator('.cherry.cherry-milkdown')).toHaveClass(/theme__dark/);
   await expect(page.locator('.ProseMirror.cherry-markdown')).toHaveClass(/theme__dark/);
   expect(await markdown(page)).toBe('# Theme');
 
   await page.evaluate(() => window.milkdownEditor?.setTheme('default'));
-  await expect(page.locator('#markdown > .cherry.cherry-milkdown')).toHaveClass(/theme__default/);
+  await expect(page.locator('.cherry.cherry-milkdown')).toHaveClass(/theme__default/);
   await expect(page.locator('.ProseMirror.cherry-markdown')).toHaveClass(/theme__default/);
 });
 
@@ -73,16 +71,17 @@ test('real text selection, Bubble formatting, undo, and no layout shift', async 
   await expect(bubble).toHaveCSS('border-color', 'rgb(51, 154, 240)');
   await expect(bubble.locator('[title="加粗"]')).toHaveCSS('height', '38px');
   const buttonWidths = await bubble
-    .locator('button')
+    .locator('button:visible')
     .evaluateAll((buttons) => buttons.map((button) => Math.round(button.getBoundingClientRect().width)));
   expect(new Set(buttonWidths)).toEqual(new Set([38]));
-  const glyphSizes = await bubble.locator('.cherry-milkdown-text-bubble__glyph').evaluateAll((glyphs) =>
+  const glyphSizes = await bubble.locator('.cherry-milkdown-text-bubble__glyph:visible').evaluateAll((glyphs) =>
     glyphs.map((glyph) => {
       const rect = glyph.getBoundingClientRect();
       return [Math.round(rect.width), Math.round(rect.height)];
     }),
   );
   expect(glyphSizes).toEqual([
+    [32, 32],
     [32, 32],
     [32, 32],
     [32, 32],
@@ -125,9 +124,12 @@ test('Bubble hides on scroll and never becomes detached from its selection', asy
 
   const scrollEditor = (delta: number) =>
     page.evaluate((amount) => {
-      const target = document.querySelector('.ProseMirror > p:nth-child(11)');
-      let scroller = target?.parentElement ?? null;
+      const target = document
+        .querySelector('[data-cherry-milkdown]')!
+        .shadowRoot!.querySelector('.ProseMirror > p:nth-child(11)');
+      let scroller: Element | null = target?.parentElement ?? null;
       while (scroller && scroller.scrollHeight <= scroller.clientHeight) scroller = scroller.parentElement;
+      scroller ??= document.scrollingElement;
       if (!scroller) throw new Error('No scrollable Milkdown ancestor');
       scroller.scrollTop += amount;
       return scroller.scrollTop;
@@ -178,7 +180,7 @@ for (const item of [
     await expect.poll(() => page.evaluate(() => window.getSelection()?.toString().trim())).toBe('Selected text');
     const bubble = page.getByRole('toolbar', { name: '文本格式' });
     await expect(bubble).toBeVisible();
-    await expect(bubble.locator('button')).toHaveCount(4);
+    await expect(bubble.locator('button:visible')).toHaveCount(7);
     await bubble.locator(`[title="${item.title}"]`).click();
     await expect(paragraph.locator(item.selector)).toHaveText('Selected text');
     await expect.poll(() => markdown(page)).toBe(item.markdown);
@@ -640,7 +642,9 @@ for (const directive of [
   test(`Cherry owns the complete native ${directive.name} structure`, async ({ page }) => {
     await setMarkdown(page, directive.markdown);
     const result = await page.evaluate(({ markdown, selector }) => {
-      const actual = document.querySelector(`.cherry-embed__preview ${selector}`);
+      const actual = document
+        .querySelector('[data-cherry-milkdown]')!
+        .shadowRoot!.querySelector(`.cherry-embed__preview ${selector}`);
       const oracle = document.createElement('div');
       oracle.innerHTML = window.milkdownEditor!.engine.makeHtml(markdown);
       const expected = oracle.querySelector(selector);
@@ -859,7 +863,9 @@ test('table chart uses the native table editor and redraws without a blank frame
   const sales = table.locator('td p').first();
   await expect(descriptor).toContainText(':line:');
   await page.evaluate(() => {
-    const chart = document.querySelector<HTMLElement>('.cherry-table-chart');
+    const chart = document
+      .querySelector('[data-cherry-milkdown]')!
+      .shadowRoot!.querySelector<HTMLElement>('.cherry-table-chart');
     if (!chart) throw new Error('Missing table chart');
     const result = { blankSnapshots: 0, minHeight: Number.POSITIVE_INFINITY, maxHeight: 0 };
     const inspect = () => {
@@ -1072,6 +1078,8 @@ test('table insertion guides allow text clicks and their add buttons still creat
 });
 
 test('native heading computed styles match without copying styles', async ({ page }) => {
+  await page.goto('/?native-preview');
+  await page.waitForFunction(() => Boolean(window.milkdownEditor));
   await setMarkdown(page, '# Heading\n\n- [ ] Task');
   const result = await page.evaluate(() => {
     const editor = window.milkdownEditor!;
@@ -1079,7 +1087,9 @@ test('native heading computed styles match without copying styles', async ({ pag
     native.className = 'cherry-markdown';
     native.innerHTML = editor.engine.makeHtml(editor.getMarkdown());
     const shell = document.createElement('div');
-    shell.className = document.querySelector<HTMLElement>('#markdown > .cherry')!.className;
+    shell.className = document
+      .querySelector('[data-cherry-milkdown]')!
+      .shadowRoot!.querySelector<HTMLElement>('.cherry')!.className;
     shell.append(native);
     document.body.append(shell);
     const properties = ['color', 'fontSize', 'fontWeight', 'lineHeight'];
@@ -1087,7 +1097,9 @@ test('native heading computed styles match without copying styles', async ({ pag
       properties.map((key) =>
         getComputedStyle(element).getPropertyValue(key.replace(/[A-Z]/g, (value) => `-${value.toLowerCase()}`)),
       );
-    const actual = read(document.querySelector('.ProseMirror h1')!);
+    const actual = read(
+      document.querySelector('[data-cherry-milkdown]')!.shadowRoot!.querySelector('.ProseMirror h1')!,
+    );
     const expected = read(native.querySelector('h1')!);
     shell.remove();
     return { actual, expected };

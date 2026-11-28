@@ -45,31 +45,55 @@ export type CherryMilkdownFileUpload = (
 
 export type CherryMilkdownTheme = 'default' | 'dark' | 'abyss' | 'green' | 'red' | 'gray' | 'violet' | 'blue';
 
+/**
+ * Rendering hooks supported by the built-in Engine adapter.
+ * Advanced Cherry configuration belongs on an explicitly supplied engine.
+ */
+export interface CherryMilkdownEngineOptions {
+  /** Milkdown's supported rendering contract, independent of generated Cherry declarations. */
+  callback?: {
+    urlProcessor?: (
+      url: string,
+      srcType: 'image' | 'audio' | 'video' | 'autolink' | 'link',
+      callback?: (url: string) => void,
+    ) => string;
+    beforeImageMounted?: (srcProp: string, src: string) => { srcProp: string; src: string };
+  };
+}
+
 export interface CherryMilkdownOptions {
-  /** Standalone host. Cherry editor and Previewer instances are not created. */
+  /** Container for the editor’s owned Shadow DOM host. */
   root: string | HTMLElement;
+  /** Initial Markdown. Defaults to an empty string. */
   value?: string;
-  /** Reuse an existing CherryEngine instance. */
+  /** Custom Cherry renderer. Defaults to the built-in Engine; excludes engineOptions. */
   engine?: CherryEngineInput;
-  /** Used only when this package creates the default CherryEngine. */
-  engineOptions?: Record<string, unknown>;
-  /** Selection formatting controls. No top toolbar is mounted. */
+  /** Default Engine rendering hooks. Defaults to Cherry behavior; excludes engine. */
+  engineOptions?: CherryMilkdownEngineOptions;
+  /** Selection formatting controls. Defaults to true; hidden in readonly mode. */
   bubble?: boolean;
+  /** Disable user editing. Defaults to false; API writes still work. */
   readonly?: boolean;
-  /** Cherry theme token scope used by both rendered content and contextual controls. */
+  /** Theme for content and controls. Defaults to 'default'. */
   theme?: CherryMilkdownTheme;
+  /** Non-negative finite milliseconds. Defaults to 30; notifications and preview scheduling. */
   debounce?: number;
+  /** Formula options. Defaults to MathLive behavior; requires the optional mathlive peer. */
   mathlive?: CherryMilkdownMathliveOptions;
-  /** Optional Cherry-compatible uploader used by the image editor. */
+  /** Image uploader. Defaults to no upload handler; URL editing remains available. */
   fileUpload?: CherryMilkdownFileUpload;
+  /** Additional plugins. Defaults to []; schema/NodeView overrides require integration checks. */
   plugins?: MilkdownPlugin[];
   /**
+   * Defaults to no custom renderers; Mermaid has a built-in lazy renderer.
    * Visual renderers keyed by fenced-code language. A configured language is
    * automatically exposed as a live source block; `tableChart` is reserved
    * for Cherry table-chart previews.
    */
   renderers?: Record<string, CherryVisualRenderer>;
+  /** Optional debounced Markdown notification. Defaults to no callback. */
   onChange?: (result: CherryMilkdownChange) => void;
+  /** Optional create/parse/render error callback. Defaults to no callback. */
   onError?: (error: unknown, phase: CherryMilkdownErrorPhase) => void;
 }
 

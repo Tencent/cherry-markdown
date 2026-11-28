@@ -9,9 +9,14 @@ export async function setMarkdown(page: Page, value: string) {
 }
 
 /** Keep table edits on the real pointer/keyboard path, not fill()'s DOM-only range. */
-export async function replaceTableCell(page: Page, paragraph: Locator, value: string) {
+export async function replaceTableCell(
+  page: Page,
+  paragraph: Locator,
+  value: string,
+  position?: { x: number; y: number },
+) {
   // ProseMirror tables use triple-click for CellSelection, not a DOM text range.
-  await paragraph.click({ clickCount: 3 });
+  await paragraph.click({ clickCount: 3, position });
   await expect(paragraph.locator('..')).toHaveClass(/selectedCell/);
   await expect(page.locator('.ProseMirror .selectedCell')).toHaveCount(1);
   if (value) await page.keyboard.type(value);
@@ -22,13 +27,14 @@ export async function replaceTableCell(page: Page, paragraph: Locator, value: st
 /** All interaction and visual tests share the same runtime-error gate. */
 export const test = base.extend<{ runtimeErrors: string[] }>({
   runtimeErrors: [
-    async ({ page }, use, info) => {
+    async ({ page, browser }, use, info) => {
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(String(error)));
       page.on('console', (message) => {
         if (message.type() === 'error') errors.push(message.text());
       });
       await use(errors);
+      await info.attach('browser-version', { body: browser.version(), contentType: 'text/plain' });
       const renderErrors = await page
         .locator('[role="alert"]:visible, [data-render-error="true"]:visible')
         .allTextContents();

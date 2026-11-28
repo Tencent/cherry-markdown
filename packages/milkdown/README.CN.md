@@ -9,7 +9,6 @@
 ```tsx
 import { useEffect, useRef } from 'react';
 import { cherryMilkdown } from '@cherry-markdown/milkdown';
-import '@cherry-markdown/milkdown/style.css';
 
 export function Editor() {
   const root = useRef<HTMLDivElement>(null);
@@ -37,13 +36,15 @@ export function Editor() {
 
 ## API
 
+每项配置的默认值、生效范围、依赖和不支持的配置见[配置范围](./CONFIGURATION.md)。创建时会校验未知字段、类型和冲突配置。
+
 - `cherryMilkdown(options)`：创建独立编辑器。
 - `getMarkdown()`：读取 Markdown。
 - `setMarkdown(markdown, { emit? })`：普通调用仍为全文替换，默认触发 `onChange`。输入法组合输入期间暂存最新外部回写，提交后合并不冲突的变化，保留中文、光标和撤销历史；同值回写不会覆盖输入或取消其它回写。重叠或无法安全映射的更新保留本地输入，并通过 `onError(error, 'parse')` 报告；这不是协同编辑协议。`emit: false` 仅静默外部修改，同时提交的本地输入仍触发包含合并结果的 `onChange`。
 - `setTheme(theme)`：切换 Cherry 主题，不改变 Markdown 和撤销历史。ECharts 复用 Cherry 的轻量主题更新，保留图表数据；Mermaid 在原节点内重绘，不替换源码编辑面板。
 - `focus()`：聚焦编辑器。
 - `destroy()`：销毁编辑器及其浮层、NodeView 和渲染资源。
-- `bubble`：是否启用文本选区浮层，默认 `true`。首期提供加粗、斜体、下划线、删除线。
+- `bubble`：是否启用文本选区浮层，默认 `true`。默认提供加粗、斜体、下划线、删除线、链接和行内代码；“更多”中提供高亮、清除格式。清除格式保留链接及其目标设置。
 - `readonly`：只读展示。
 - `theme`：Cherry 主题，默认 `default`；支持 `dark`、`abyss`、`green`、`red`、`gray`、`violet` 和 `blue`。
 - `plugins`：附加 Milkdown 插件。
@@ -58,6 +59,24 @@ export function Editor() {
 import { echarts, tableChart } from '@cherry-markdown/milkdown/echarts';
 await cherryMilkdown({ root: '#markdown', value: markdown, renderers: { echarts, tableChart } });
 ```
+
+用 `createEChartsRenderers` 可以同时覆盖代码块和表格图表的预览数据。下面只替换名为 `Sales` 的折线系列数据，标题、坐标轴等配置和 Markdown 都保持原样。
+
+```ts
+import { createEChartsRenderers } from '@cherry-markdown/milkdown/echarts';
+
+const renderers = createEChartsRenderers({
+  transformOption(option) {
+    const series = Array.isArray(option.series) ? option.series : [option.series];
+    for (const item of series) {
+      if (item?.type === 'line' && item.name === 'Sales') item.data = [42, 73];
+    }
+  },
+});
+await cherryMilkdown({ root: '#markdown', value: markdown, renderers });
+```
+
+回调同步执行，可修改传入的副本，也可返回完整的 ECharts option。第二个参数提供 `kind`、`type` 和 `source`，可按图表来源筛选。编辑和导出引起完整重绘时，会基于原始配置再次执行。主题切换保留已覆盖的数据。
 
 自定义 renderer 不需要修改 Milkdown schema。下面的 `custom-chart` 会匹配语言为 `custom-chart` 的代码围栏；修改展开的源码后，仅重绘当前节点：
 
@@ -83,6 +102,23 @@ await cherryMilkdown({
 });
 ```
 
+## 样式定制
+
+`cherryMilkdown()` 会在传入的容器内创建带有 `data-cherry-milkdown` 属性的 Shadow 宿主，并自动加载样式。
+
+在容器上设置 CSS 变量可以按实例定制。支持 `--milkdown-font-family`、`--milkdown-font-size`、`--milkdown-line-height`、`--milkdown-text-color`、`--milkdown-background`、`--milkdown-accent-color`（编辑控件强调色）和 `--milkdown-chart-height`。还可以通过 `::part()` 定制 `content`、`toolbar`（上下文工具条）、`link-form`、`image-form`、`source`（扩展块源码面板）和 `chart`（内置 ECharts 容器）。
+
+```css
+#markdown {
+  --milkdown-font-size: 16px;
+  --milkdown-chart-height: 360px;
+}
+
+#markdown > [data-cherry-milkdown]::part(content) {
+  padding: 24px;
+}
+```
+
 ## 边界
 
 - Markdown 是唯一的持久化数据格式。
@@ -91,7 +127,7 @@ await cherryMilkdown({
 - Cherry Engine 和表格图表 addon 当前通过包内适配入口引用 Cherry 发布的 dist 文件；升级 Cherry 时应集中核对这些入口及 Cherry 发布 CSS 路径。
 - 自定义 renderer 可以直接操作传入的 `container`；如返回 HTML 字符串，字符串会先经过安全清洗再挂载。不要把未经处理的用户输入拼成可执行 HTML。
 - 文本 Bubble、链接编辑、图片控件属于本包，不调用 Cherry 编辑器内部 UI。
-- 样式直接引入 Cherry 发布 CSS，并仅在 `.cherry-milkdown` 下补充编辑态样式，降低 Cherry 升级耦合。
+- 编辑器在自己的 Shadow Root 内加载 Cherry 发布样式和 Milkdown 编辑态样式。
 - `mathlive`、`mermaid` 和 `echarts` 是按能力启用的 Peer：使用公式、Mermaid 或 ECharts 时安装对应依赖；运行期渲染失败会隔离在当前节点并通过 `onError` 报告，不阻断普通 Markdown。
 - 普通代码块的高亮跟随 Cherry 的语言清单，支持 TypeScript、JSON、Python 等语言及其别名；保留实时编辑、语言切换与复制控件，未知语言沿用 JavaScript 回退。
 - ECharts 代码围栏配置只解析 JSON5 数据，不执行 JavaScript；地图仍需业务提供地图数据或自定义 renderer。
@@ -99,6 +135,7 @@ await cherryMilkdown({
 - 通用拖动仅覆盖顶层段落和引用。标题保留 Cherry 原生锚点交互；列表与复合 Cherry 节点保留文本选择、剪切和粘贴语义，避免拖动手柄抢占内部交互。
 
 运行 Demo：`yarn workspace @cherry-markdown/milkdown dev:demo`。
+
 
 ### 表格图表语法与性能边界
 

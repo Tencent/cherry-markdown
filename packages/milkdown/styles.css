@@ -1,5 +1,24 @@
-@import "cherry-markdown/dist/cherry-markdown.css";
-@import "@milkdown/kit/prose/view/style/prosemirror.css";
+/* Loaded inside the editor's Shadow Root. */
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.cherry.cherry-milkdown {
+  font-family: var(--milkdown-font-family, var(--font-family-sans));
+  font-size: var(--milkdown-font-size, var(--font-size-md));
+  line-height: var(--milkdown-line-height, var(--md-paragraph-line-height));
+}
+
+.cherry-milkdown .ProseMirror.cherry-milkdown__editor {
+  color: var(--milkdown-text-color, inherit);
+  background-color: var(--milkdown-background, transparent);
+}
+
+.cherry-milkdown .cherry-echarts-wrapper[part~='chart'] {
+  width: 100%;
+  height: var(--milkdown-chart-height, 300px);
+}
 
 /* Editing controls are outside the native columns' grid. Only content items
  * participate in layout; the NodeView wrapper must not become a spare column. */
@@ -22,7 +41,7 @@
 }
 
 .cherry-milkdown {
-  --cherry-milkdown-primary: var(--md-link-color, #366ef4);
+  --cherry-milkdown-primary: var(--milkdown-accent-color, var(--md-link-color, #366ef4));
   --cherry-milkdown-border: var(--base-border-color, #d8dce5);
   --cherry-milkdown-muted: var(--base-sub-font-color, #646a73);
   --cherry-milkdown-soft: var(--md-inline-code-bg, #f5f7fa);
@@ -438,7 +457,7 @@
 .cherry-milkdown .cherry-milkdown-code-block > pre {
   position: relative;
   box-sizing: border-box;
-  min-height: 53px;
+  min-height: 3.75em;
   margin: 0.5em 0;
   overflow: auto;
 }
@@ -618,6 +637,7 @@
 
 .cherry-milkdown .cherry-detail .cherry-compound-item--detail > .cherry-compound-item__header {
   position: relative;
+  font-weight: 600;
   padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) calc(var(--spacing-lg) + var(--spacing-xl));
   cursor: pointer;
   user-select: none;
@@ -1354,4 +1374,27 @@
 .cherry-milkdown math-field:focus-within::part(menu-toggle),
 .cherry-milkdown math-field:focus-within::part(virtual-keyboard-toggle) {
   opacity: 1;
+}
+
+.cherry-milkdown .cherry-milkdown-text-bubble {
+  max-width: calc(100vw - 16px);
+  flex-wrap: wrap;
+}
+
+.cherry-milkdown .cherry-milkdown-text-bubble__more {
+  display: flex;
+  flex-basis: 100%;
+  gap: 4px;
+  padding-top: 4px;
+}
+
+.cherry-milkdown .cherry-milkdown-text-bubble__more[hidden] {
+  display: none;
+}
+
+.cherry-milkdown .cherry-milkdown-text-bubble__more .cherry-milkdown-context-button,
+.cherry-milkdown .cherry-milkdown-text-bubble__more .cherry-milkdown-context-button__content {
+  width: auto;
+  flex-basis: auto;
+  padding-inline: 8px;
 }

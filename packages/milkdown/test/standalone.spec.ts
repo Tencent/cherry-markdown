@@ -5,6 +5,7 @@ import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
 import { supportsTextFormatting } from '../src/wysiwyg/text-bubble';
 import { echarts } from '../src/renderers/echarts';
 import {
+  editorShadow,
   createTestEditor as cherryMilkdown,
   type TestCherryMilkdownInstance as CherryMilkdownInstance,
 } from './helpers/create-editor';
@@ -67,7 +68,7 @@ describe('standalone contracts', () => {
       renderers: { 'business-chart': renderer, tableChart: renderer },
       onError,
     });
-    await vi.waitFor(() => expect(document.querySelectorAll('svg')).toHaveLength(2));
+    await vi.waitFor(() => expect(editorShadow().querySelectorAll('svg')).toHaveLength(2));
     instance.setMarkdown('Replacement');
     await vi.waitFor(() => expect(cleanup).toHaveBeenCalledTimes(2));
     expect(onError).toHaveBeenCalledTimes(2);
@@ -89,12 +90,12 @@ describe('standalone contracts', () => {
     const source = sourcePanel.firstElementChild as HTMLElement;
     source.tabIndex = 0; // jsdom does not make contentEditable properties focusable.
     source.focus();
-    expect(document.activeElement).toBe(source);
+    expect(editorShadow().activeElement).toBe(source);
     const { selection } = view.state;
     first.setTheme('dark');
     await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(3));
     expect(sourcePanel.hidden).toBe(false);
-    expect(document.activeElement).toBe(source);
+    expect(editorShadow().activeElement).toBe(source);
     expect(view.state.selection.eq(selection)).toBe(true);
     expect(first.getMarkdown()).toBe(value);
     expect(second.getMarkdown()).toBe(value);
@@ -117,12 +118,12 @@ describe('standalone contracts', () => {
     });
     await create(['::: 2cols', 'Example', '::', chart, ':::'].join('\n'), { renderers: { tableChart: renderer } });
 
-    await vi.waitFor(() => expect(document.querySelector('[data-nested-table-chart]')).not.toBeNull());
+    await vi.waitFor(() => expect(editorShadow().querySelector('[data-nested-table-chart]')).not.toBeNull());
     expect(renderer).toHaveBeenCalledTimes(1);
     expect(renderer.mock.calls[0]?.[0]).toEqual(
       expect.objectContaining({ syntax: 'line', source: expect.stringContaining(':line:{"title":"Nested"}') }),
     );
-    expect(document.querySelector('.cherry-panel-cols__2cols')).not.toBeNull();
+    expect(editorShadow().querySelector('.cherry-panel-cols__2cols')).not.toBeNull();
   });
 
   it('cleans completed nested renderers when a sibling chart fails', async () => {
@@ -143,7 +144,9 @@ describe('standalone contracts', () => {
 
     await vi.waitFor(() => expect(onError).toHaveBeenCalled());
     expect(cleanup).toHaveBeenCalledTimes(1);
-    expect(document.querySelector('[data-render-pending]')).toBeNull();
+    expect(
+      document.querySelector('[data-cherry-milkdown]')?.shadowRoot?.querySelector('[data-render-pending]') ?? null,
+    ).toBeNull();
   });
 
   it.each(['sibling failure', 'replacement', 'destruction'])(
@@ -176,7 +179,9 @@ describe('standalone contracts', () => {
       await vi.waitFor(() => expect(cleanup).toHaveBeenCalledTimes(1));
       await instance.destroy();
       expect(cleanup).toHaveBeenCalledTimes(1);
-      expect(document.querySelector('[data-render-pending]')).toBeNull();
+      expect(
+        document.querySelector('[data-cherry-milkdown]')?.shadowRoot?.querySelector('[data-render-pending]') ?? null,
+      ).toBeNull();
     },
   );
 
@@ -185,13 +190,13 @@ describe('standalone contracts', () => {
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, 9)));
     view.focus();
-    document.querySelector<HTMLButtonElement>('.cherry-milkdown-link-bubble [aria-label="取消链接"]')!.click();
+    editorShadow().querySelector<HTMLButtonElement>('.cherry-milkdown-link-bubble [aria-label="取消链接"]')!.click();
     expect(instance.getMarkdown().trimEnd()).toBe('Before **Link** after.');
-    expect(document.querySelector('.cherry-link-target')).toBeNull();
+    expect(editorShadow().querySelector('.cherry-link-target')).toBeNull();
     expect(undo(view.state, view.dispatch)).toBe(true);
     expect(instance.getMarkdown()).toContain('[Link](https://example.com)');
     expect(instance.getMarkdown()).toContain('{target=_blank}');
-    expect(document.querySelector('.ProseMirror strong')?.textContent).toBe('Link');
+    expect(editorShadow().querySelector('.ProseMirror strong')?.textContent).toBe('Link');
     expect(redo(view.state, view.dispatch)).toBe(true);
     expect(instance.getMarkdown().trimEnd()).toBe('Before **Link** after.');
   });
@@ -199,12 +204,14 @@ describe('standalone contracts', () => {
   it('gives each link form its own validation description', async () => {
     await create('[first](https://one.example)');
     await create('[second](https://two.example)');
-    const inputs = [...document.querySelectorAll<HTMLInputElement>('.cherry-milkdown-link-editor input[name="href"]')];
+    const inputs = [...document.querySelectorAll('[data-cherry-milkdown]')].flatMap((host) => [
+      ...host.shadowRoot!.querySelectorAll<HTMLInputElement>('.cherry-milkdown-link-editor input[name="href"]'),
+    ]);
     expect(inputs).toHaveLength(2);
     const ids = inputs.map((input) => input.getAttribute('aria-describedby'));
     expect(new Set(ids).size).toBe(2);
     for (const input of inputs) {
-      const description = document.getElementById(input.getAttribute('aria-describedby')!);
+      const description = (input.getRootNode() as ShadowRoot).getElementById(input.getAttribute('aria-describedby')!);
       expect(description?.closest('form')).toBe(input.closest('form'));
     }
   });
@@ -227,17 +234,17 @@ describe('standalone contracts', () => {
       view.dom.dispatchEvent(
         new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true, cancelable: true }),
       );
-      const form = document.querySelector<HTMLFormElement>('.cherry-milkdown-link-editor')!;
+      const form = editorShadow().querySelector<HTMLFormElement>('.cherry-milkdown-link-editor')!;
       const input = form.querySelector<HTMLInputElement>('input[name="href"]')!;
       input.value = './draft.md';
-      await vi.waitFor(() => expect(document.activeElement).toBe(input));
+      await vi.waitFor(() => expect(editorShadow().activeElement).toBe(input));
       window.dispatchEvent(new Event('scroll'));
       window.dispatchEvent(new Event('resize'));
       await vi.waitFor(() => expect(form.style.top).toBe('8px'));
       expect(form.hidden).toBe(false);
       expect(form.style.width).toBe('344px');
       expect(input.value).toBe('./draft.md');
-      expect(document.activeElement).toBe(input);
+      expect(editorShadow().activeElement).toBe(input);
       expect(instance.getMarkdown()).toBe('[Link](https://example.com)');
       form.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
       expect(form.hidden).toBe(true);
@@ -257,15 +264,17 @@ describe('standalone contracts', () => {
     });
     for (const source of ['first', 'second']) {
       if (source === 'second') instance.setMarkdown('```business-chart\nsecond\n```');
-      await vi.waitFor(() => expect(document.querySelector('.cherry-embed__preview p')?.textContent).toBe(source));
-      expect(document.querySelector('.cherry-embed__preview img')?.hasAttribute('onerror')).toBe(false);
-      expect(document.querySelector('.cherry-embed__preview script')).toBeNull();
+      await vi.waitFor(() =>
+        expect(editorShadow().querySelector('.cherry-embed__preview p')?.textContent).toBe(source),
+      );
+      expect(editorShadow().querySelector('.cherry-embed__preview img')?.hasAttribute('onerror')).toBe(false);
+      expect(editorShadow().querySelector('.cherry-embed__preview script')).toBeNull();
     }
   });
 
   it('uses Cherry native preview structure without duplicating its layout styles', async () => {
     await create('# Native preview');
-    const surface = document.querySelector<HTMLElement>('.cherry.cherry-milkdown');
+    const surface = editorShadow().querySelector<HTMLElement>('.cherry.cherry-milkdown');
     const editor = surface?.querySelector<HTMLElement>('.ProseMirror.cherry-previewer.cherry-markdown');
     expect(editor).not.toBeNull();
     expect(editor?.style.padding).toBe('');
@@ -274,7 +283,7 @@ describe('standalone contracts', () => {
 
   it('does not mount the removed imitation node controls', async () => {
     await create('![first#100px](first.png)');
-    expect(document.querySelector('.cherry-milkdown-node-controls')).toBeNull();
+    expect(editorShadow().querySelector('.cherry-milkdown-node-controls')).toBeNull();
   });
 
   it('isolates synchronous renderer failures and clears the error after a valid update', async () => {
@@ -286,8 +295,8 @@ describe('standalone contracts', () => {
     const instance = await create('```echarts\ninvalid\n```', { renderers: { echarts: renderer }, onError });
     await vi.waitFor(() => expect(onError).toHaveBeenCalled());
     instance.setMarkdown('```echarts\nvalid\n```');
-    await vi.waitFor(() => expect(document.querySelector('[data-chart="valid"]')).not.toBeNull());
-    expect(document.querySelector('[data-render-error]')).toBeNull();
+    await vi.waitFor(() => expect(editorShadow().querySelector('[data-chart="valid"]')).not.toBeNull());
+    expect(editorShadow().querySelector('[data-render-error]')).toBeNull();
   });
 
   it('prevents a late diagram renderer from overwriting a newer chart', async () => {
@@ -308,10 +317,12 @@ describe('standalone contracts', () => {
     const instance = await create('```echarts\nold\n```', { renderers: { echarts: renderer } });
     await vi.waitFor(() => expect(completeOld).toBeDefined());
     instance.setMarkdown('```echarts\nnew\n```');
-    await vi.waitFor(() => expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('New chart'));
+    await vi.waitFor(() =>
+      expect(editorShadow().querySelector('.cherry-embed__preview')?.textContent).toBe('New chart'),
+    );
     completeOld?.();
     await vi.waitFor(() => expect(cleanup).toHaveBeenCalledTimes(1));
-    expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('New chart');
+    expect(editorShadow().querySelector('.cherry-embed__preview')?.textContent).toBe('New chart');
   });
 
   it('aborts replaced and destroyed renderer revisions', async () => {
@@ -342,14 +353,18 @@ describe('standalone contracts', () => {
       debounce: 0,
       renderers: { 'custom-chart': renderer },
     });
-    await vi.waitFor(() => expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('Custom: old'));
+    await vi.waitFor(() =>
+      expect(editorShadow().querySelector('.cherry-embed__preview')?.textContent).toBe('Custom: old'),
+    );
 
-    document.querySelector<HTMLButtonElement>('[aria-label="在节点内编辑源码"]')?.click();
-    const source = document.querySelector<HTMLElement>('.cherry-embed__source code')!;
+    editorShadow().querySelector<HTMLButtonElement>('[aria-label="在节点内编辑源码"]')?.click();
+    const source = editorShadow().querySelector<HTMLElement>('.cherry-embed__source code')!;
     source.textContent = 'new';
     source.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: 'new' }));
 
-    await vi.waitFor(() => expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('Custom: new'));
+    await vi.waitFor(() =>
+      expect(editorShadow().querySelector('.cherry-embed__preview')?.textContent).toBe('Custom: new'),
+    );
     expect(renderer).toHaveBeenLastCalledWith(expect.objectContaining({ syntax: 'custom-chart', source: 'new' }));
     expect(instance.getMarkdown()).toBe('```custom-chart\nnew\n```');
   });
@@ -363,15 +378,19 @@ describe('standalone contracts', () => {
             complete = resolve;
           });
     const instance = await create('```echarts\nold\n```', { renderers: { echarts: renderer } });
-    await vi.waitFor(() => expect(document.querySelector('.cherry-embed__preview')?.textContent).toBe('Old chart'));
+    await vi.waitFor(() =>
+      expect(editorShadow().querySelector('.cherry-embed__preview')?.textContent).toBe('Old chart'),
+    );
     instance.setMarkdown('```echarts\nnew\n```');
     await vi.waitFor(() => expect(complete).toBeDefined());
-    expect(document.querySelector('.cherry-embed > .cherry-embed__preview')?.textContent).toBe('Old chart');
+    expect(editorShadow().querySelector('.cherry-embed > .cherry-embed__preview')?.textContent).toBe('Old chart');
     complete?.('<span>New chart</span>');
     await vi.waitFor(() =>
-      expect(document.querySelector('.cherry-embed > .cherry-embed__preview')?.textContent).toBe('New chart'),
+      expect(editorShadow().querySelector('.cherry-embed > .cherry-embed__preview')?.textContent).toBe('New chart'),
     );
-    expect(document.querySelector('[data-render-pending]')).toBeNull();
+    expect(
+      document.querySelector('[data-cherry-milkdown]')?.shadowRoot?.querySelector('[data-render-pending]') ?? null,
+    ).toBeNull();
   });
 
   it('preserves renderer-owned styles and avoids redrawing unchanged diagram content', async () => {
@@ -380,14 +399,14 @@ describe('standalone contracts', () => {
       return '<svg data-chart="styled"></svg>';
     });
     const instance = await create('```mermaid #100px\ngraph LR\n A-->B\n```', { renderers: { mermaid: renderer } });
-    await vi.waitFor(() => expect(document.querySelector('.cherry-embed [data-chart="styled"]')).not.toBeNull());
-    const preview = document.querySelector<HTMLElement>('.cherry-embed > .cherry-embed__preview')!;
+    await vi.waitFor(() => expect(editorShadow().querySelector('.cherry-embed [data-chart="styled"]')).not.toBeNull());
+    const preview = editorShadow().querySelector<HTMLElement>('.cherry-embed > .cherry-embed__preview')!;
     expect(preview.style.backgroundColor).toBe('rgb(1, 2, 3)');
     instance.setMarkdown('```mermaid #200px\ngraph LR\n A-->B\n```');
     await Promise.resolve();
     expect(renderer).toHaveBeenCalledTimes(1);
-    expect(document.querySelector<HTMLElement>('.cherry-embed')?.style.width).toBe('200px');
-    expect(document.querySelector('.cherry-embed > .cherry-embed__preview')).toBe(preview);
+    expect(editorShadow().querySelector<HTMLElement>('.cherry-embed')?.style.width).toBe('200px');
+    expect(editorShadow().querySelector('.cherry-embed > .cherry-embed__preview')).toBe(preview);
   });
 
   it('keeps a failed table chart local and clears its status when repaired', async () => {
@@ -397,10 +416,10 @@ describe('standalone contracts', () => {
     });
     const value = '| :line:{} | A |\n| --- | --- |\n| Broken | 1 |';
     const instance = await create(value, { renderers: { tableChart: renderer } });
-    await vi.waitFor(() => expect(document.querySelector('.cherry-table-chart [role="alert"]')).not.toBeNull());
+    await vi.waitFor(() => expect(editorShadow().querySelector('.cherry-table-chart [role="alert"]')).not.toBeNull());
     instance.setMarkdown(value.replace('Broken', 'Repaired'));
-    await vi.waitFor(() => expect(document.querySelector('[data-chart="repaired"]')).not.toBeNull());
-    expect(document.querySelector('[role="alert"], [data-render-error]')).toBeNull();
+    await vi.waitFor(() => expect(editorShadow().querySelector('[data-chart="repaired"]')).not.toBeNull());
+    expect(editorShadow().querySelector('[role="alert"], [data-render-error]')).toBeNull();
   });
 
   it('recognizes table chart options containing an external URL', async () => {
@@ -448,11 +467,11 @@ describe('standalone contracts', () => {
     const value = '| :line:{"title":"Before"} | A |\n| --- | --- |\n| Row | 1 |';
     const instance = await create(value, { renderers: { tableChart: renderer }, debounce: 10 });
     await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(1));
-    const table = document.querySelector('.milkdown-table-block');
+    const table = editorShadow().querySelector('.milkdown-table-block');
     replaceText(instance, 'Before', '输入中');
     expect(instance.getMarkdown()).toContain('输入中');
     await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(2));
-    expect(document.querySelector('.milkdown-table-block')).toBe(table);
+    expect(editorShadow().querySelector('.milkdown-table-block')).toBe(table);
   });
 
   it('keeps the last valid chart through an incomplete descriptor without remounting its widget', async () => {
@@ -461,14 +480,14 @@ describe('standalone contracts', () => {
     const value = `| ${descriptor} | A |\n| --- | --- |\n| Row | 1 |`;
     const instance = await create(value, { renderers: { tableChart: renderer }, debounce: 0 });
     await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(1));
-    const widget = document.querySelector('[data-cherry-milkdown-table-chart-widget]');
+    const widget = editorShadow().querySelector('[data-cherry-milkdown-table-chart-widget]');
     replaceText(instance, descriptor, ':bar:{');
     expect(instance.getMarkdown()).toContain(':bar:{');
-    expect(document.querySelector('[data-cherry-milkdown-table-chart-widget]')).toBe(widget);
+    expect(editorShadow().querySelector('[data-cherry-milkdown-table-chart-widget]')).toBe(widget);
 
     replaceText(instance, ':bar:{', ':bar:{"title":"After"}');
     await vi.waitFor(() => expect(renderer).toHaveBeenCalledTimes(2));
-    expect(document.querySelector('[data-cherry-milkdown-table-chart-widget]')).toBe(widget);
+    expect(editorShadow().querySelector('[data-cherry-milkdown-table-chart-widget]')).toBe(widget);
     expect(renderer).toHaveBeenLastCalledWith(
       expect.objectContaining({ syntax: 'bar', source: expect.stringContaining('After') }),
     );
@@ -478,11 +497,11 @@ describe('standalone contracts', () => {
     const descriptor = ':line:{"title":"Before"}';
     const value = `| ${descriptor} | A |\n| --- | --- |\n| Row | 1 |`;
     const instance = await create(value, { renderers: { tableChart: () => '<svg></svg>' }, debounce: 0 });
-    await vi.waitFor(() => expect(document.querySelector('.cherry-table-chart svg')).not.toBeNull());
+    await vi.waitFor(() => expect(editorShadow().querySelector('.cherry-table-chart svg')).not.toBeNull());
     const view = replaceText(instance, descriptor, ':bar:{');
-    const widget = document.querySelector('.cherry-table-chart');
+    const widget = editorShadow().querySelector('.cherry-table-chart');
     view.dispatch(view.state.tr.insertText('"title":').setMeta('addToHistory', false));
-    expect(document.querySelector('.cherry-table-chart')).toBe(widget);
+    expect(editorShadow().querySelector('.cherry-table-chart')).toBe(widget);
   });
 
   it.each(['selection', 'blur', 'external', 'delete'])(
@@ -496,9 +515,9 @@ describe('standalone contracts', () => {
       const descriptor = ':line:{"title":"Before"}';
       const value = `| ${descriptor} | A |\n| --- | --- |\n| Row | 1 |`;
       const instance = await create(value, { renderers: { tableChart: renderer }, debounce: 0 });
-      await vi.waitFor(() => expect(document.querySelector('.cherry-table-chart svg')).not.toBeNull());
+      await vi.waitFor(() => expect(editorShadow().querySelector('.cherry-table-chart svg')).not.toBeNull());
       const view = replaceText(instance, descriptor, ':bar:{');
-      expect(document.querySelector('.cherry-table-chart svg')).not.toBeNull();
+      expect(editorShadow().querySelector('.cherry-table-chart svg')).not.toBeNull();
 
       if (boundary === 'selection') {
         view.dispatch(view.state.tr.setSelection(TextSelection.atEnd(view.state.doc)));
@@ -511,7 +530,7 @@ describe('standalone contracts', () => {
         view.dispatch(view.state.tr.delete(0, view.state.doc.firstChild!.nodeSize));
       }
 
-      await vi.waitFor(() => expect(document.querySelector('.cherry-table-chart')).toBeNull());
+      await vi.waitFor(() => expect(editorShadow().querySelector('.cherry-table-chart')).toBeNull());
       expect(cleanup).toHaveBeenCalledTimes(1);
     },
   );
@@ -529,7 +548,7 @@ describe('standalone contracts', () => {
     expect(instance.getMarkdown()).not.toContain('Local');
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     expect(view.state.doc.textContent).toContain('External');
-    expect(document.querySelectorAll('[data-cherry-milkdown-table-chart-widget]')).toHaveLength(1);
+    expect(editorShadow().querySelectorAll('[data-cherry-milkdown-table-chart-widget]')).toHaveLength(1);
     await vi.waitFor(() =>
       expect(renderer).toHaveBeenLastCalledWith(
         expect.objectContaining({ source: expect.stringContaining('External') }),
@@ -580,15 +599,24 @@ describe('standalone contracts', () => {
     expect(supportsTextFormatting(view.state)).toBe(false);
   });
 
+  it('allows formatting selections containing invisible link target metadata', async () => {
+    const instance = await create('[**Link**](https://example.com){target=_blank}');
+    const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
+    view.dispatch(
+      view.state.tr.setSelection(TextSelection.create(view.state.doc, 1, view.state.doc.firstChild!.nodeSize - 1)),
+    );
+    expect(supportsTextFormatting(view.state)).toBe(true);
+  });
+
   it('keeps readonly editors presentation-only', async () => {
     const value = '[Link](https://example.com)\n\n- [ ] Task\n\nMovable';
     const instance = await create(value, { readonly: true });
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     expect(view.editable).toBe(false);
-    expect(document.querySelector('.cherry-milkdown-text-bubble')).toBeNull();
-    expect(document.querySelector('.cherry-milkdown-link-bubble')).toBeNull();
-    expect(document.querySelector('.cherry-milkdown-image-controls')).toBeNull();
-    expect(document.querySelector('[data-cherry-block-drag-handle]')).toBeNull();
+    expect(editorShadow().querySelector('.cherry-milkdown-text-bubble')).toBeNull();
+    expect(editorShadow().querySelector('.cherry-milkdown-link-bubble')).toBeNull();
+    expect(editorShadow().querySelector('.cherry-milkdown-image-controls')).toBeNull();
+    expect(editorShadow().querySelector('[data-cherry-block-drag-handle]')).toBeNull();
     document
       .querySelector<HTMLElement>('[data-cherry-task-checkbox]')
       ?.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true, button: 0 }));
@@ -597,7 +625,7 @@ describe('standalone contracts', () => {
 
   it('switches Cherry theme scopes without changing document state', async () => {
     const instance = await create('# Theme', { theme: 'dark' });
-    const surface = document.querySelector<HTMLElement>('.cherry.cherry-milkdown');
+    const surface = editorShadow().querySelector<HTMLElement>('.cherry.cherry-milkdown');
     const view = instance.editor.action((ctx) => ctx.get(editorViewCtx));
     expect(surface?.classList.contains('theme__dark')).toBe(true);
     expect(view.dom.classList.contains('theme__dark')).toBe(true);
@@ -609,8 +637,8 @@ describe('standalone contracts', () => {
     expect(view.dom.classList.contains('theme__red')).toBe(true);
     expect(instance.getMarkdown()).toBe('# Theme');
 
-    instance.setTheme('unknown' as 'default');
-    expect(surface?.classList.contains('theme__default')).toBe(true);
+    expect(() => instance.setTheme('unknown' as 'default')).toThrow('theme');
+    expect(surface?.classList.contains('theme__red')).toBe(true);
   });
 
   it('aborts an in-flight image upload when its editor closes', async () => {
@@ -626,13 +654,13 @@ describe('standalone contracts', () => {
       if (node.type.name === 'image') imagePosition = position;
     });
     view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, imagePosition)));
-    document.querySelector<HTMLButtonElement>('[aria-label="编辑图片"]')?.click();
-    const input = document.querySelector<HTMLInputElement>('.cherry-milkdown-image-source input[type="file"]');
+    editorShadow().querySelector<HTMLButtonElement>('[aria-label="编辑图片"]')?.click();
+    const input = editorShadow().querySelector<HTMLInputElement>('.cherry-milkdown-image-source input[type="file"]');
     Object.defineProperty(input, 'files', { configurable: true, value: [new File(['image'], 'dog.png')] });
     input?.dispatchEvent(new Event('change', { bubbles: true }));
 
     expect(uploadSignal?.aborted).toBe(false);
-    [...document.querySelectorAll<HTMLButtonElement>('.cherry-milkdown-image-source button')]
+    [...editorShadow().querySelectorAll<HTMLButtonElement>('.cherry-milkdown-image-source button')]
       .find((button) => button.textContent === '取消')
       ?.click();
     expect(uploadSignal?.aborted).toBe(true);

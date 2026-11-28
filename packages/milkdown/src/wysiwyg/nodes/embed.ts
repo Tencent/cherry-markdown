@@ -1,3 +1,4 @@
+import { activeElementFor } from '../editor-dom.js';
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
 import { NodeSelection, TextSelection } from '@milkdown/kit/prose/state';
 import type { EditorView, NodeView } from '@milkdown/kit/prose/view';
@@ -68,6 +69,7 @@ class EmbedView implements NodeView {
     this.controls.append(edit);
     this.sourcePanel = document.createElement(node.isInline ? 'span' : 'pre');
     this.sourcePanel.className = 'cherry-embed__source';
+    this.sourcePanel.setAttribute('part', 'source');
     this.sourcePanel.hidden = true;
     this.source = document.createElement('code');
     this.source.contentEditable = String(!config.readonly);
@@ -94,7 +96,7 @@ class EmbedView implements NodeView {
     if (
       contentChanged &&
       (this.renderActivated || node.type.name !== 'cherry_diagram') &&
-      document.activeElement !== this.source
+      activeElementFor(this.dom) !== this.source
     ) {
       this.render();
     }
@@ -168,7 +170,7 @@ class EmbedView implements NodeView {
   };
 
   private syncSource() {
-    if (document.activeElement === this.source) return;
+    if (activeElementFor(this.dom) === this.source) return;
     this.source.textContent =
       this.node.type.name === 'cherry_diagram'
         ? String(this.node.attrs.value ?? '')
@@ -206,13 +208,17 @@ class EmbedView implements NodeView {
   }
 
   private closeSourceOnOutsidePointer = (event: PointerEvent) => {
-    const target = event.target instanceof Element ? event.target : null;
-    if (this.dom.contains(event.target as Node)) return;
+    const path = event.composedPath();
+    const origin = path[0];
+    if (path.includes(this.dom)) return;
     // Disclosure and node-action buttons are editor controls. Their
     // mousedown intentionally does not take focus, but the pointer still
     // bubbles through document capture. Do not interpret expanding a sibling
     // Detail/Panel as an explicit request to close this source editor.
-    if (target?.closest('.cherry-compound-item__disclosure, .cherry-compound__kind, .cherry-node-actions')) {
+    if (
+      origin instanceof Element &&
+      origin.closest('.cherry-compound-item__disclosure, .cherry-compound__kind, .cherry-node-actions')
+    ) {
       return;
     }
     this.setSourceOpen(false);
@@ -259,11 +265,11 @@ class EmbedView implements NodeView {
     // Updating an atom's attributes can make the browser blur a contenteditable
     // inside its NodeView even though the user is still typing there. Restore
     // that same editing owner without changing the document selection.
-    if (this.sourceEditing && document.activeElement !== this.source) {
+    if (this.sourceEditing && activeElementFor(this.dom) !== this.source) {
       this.source.focus({ preventScroll: true });
     }
     queueMicrotask(() => {
-      if (!this.destroyed && this.sourceEditing && document.activeElement !== this.source) {
+      if (!this.destroyed && this.sourceEditing && activeElementFor(this.dom) !== this.source) {
         this.source.focus({ preventScroll: true });
       }
     });

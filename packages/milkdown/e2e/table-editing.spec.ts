@@ -126,13 +126,17 @@ test('an incomplete chart descriptor keeps its preview only until leaving that h
     const chart = page.locator('.cherry-table-chart');
     const descriptor = page.locator('.milkdown-table-block th p').first();
     await expect(chart.locator('svg')).toBeVisible();
-    await replaceTableCell(page, descriptor, ':bar:{');
+    // Leave the column menu from the last edit and click inside the header text.
+    await page.mouse.move(0, 0);
+    await replaceTableCell(page, descriptor, ':bar:{', { x: 4, y: 4 });
     await expect(chart.locator('svg')).toBeVisible();
     expect(await markdown(page)).toContain(':bar:{');
     if (boundary === 'cell') {
       await page.locator('.milkdown-table-block td p').first().click();
     } else if (boundary === 'blur') {
-      await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      await page.evaluate(() =>
+        (document.querySelector('[data-cherry-milkdown]')?.shadowRoot?.activeElement as HTMLElement | null)?.blur(),
+      );
     } else {
       await setMarkdown(page, value.replace(':line:{"title":"Draft"}', 'Series'));
     }

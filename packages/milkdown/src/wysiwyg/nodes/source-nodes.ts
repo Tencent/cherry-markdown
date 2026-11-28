@@ -1,3 +1,4 @@
+import { activeElementFor } from '../editor-dom.js';
 import type { Node as ProseNode } from '@milkdown/kit/prose/model';
 import { Plugin } from '@milkdown/kit/prose/state';
 import { Decoration, DecorationSet } from '@milkdown/kit/prose/view';
@@ -177,7 +178,7 @@ class SourceLeafView implements NodeView {
     if (node.type !== this.node.type) return false;
     this.node = node;
     if (node.type.name === 'cherry_toc') this.scheduleTocRefresh();
-    if (this.source && document.activeElement !== this.source) {
+    if (this.source && activeElementFor(this.dom) !== this.source) {
       this.source.textContent = String(node.attrs.source ?? '');
     }
     return true;

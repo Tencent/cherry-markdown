@@ -28,7 +28,7 @@ const cases = [
 
 for (const item of cases) {
   test(`native layout and focus stability: ${item.name}`, async ({ page }, info) => {
-    await page.goto('/');
+    await page.goto('/?native-preview');
     await page.waitForFunction(() => Boolean(window.milkdownEditor));
     await page.evaluate(({ markdown }) => window.milkdownEditor!.setMarkdown(markdown), item);
     const actual = page
@@ -41,7 +41,9 @@ for (const item of cases) {
       // Match Cherry's real preview-only DOM contract. Comparing against a
       // bare `.cherry-markdown` would omit preview padding and use a false
       // full-viewport baseline.
-      const actualPreview = document.querySelector<HTMLElement>('#markdown > .cherry .ProseMirror')!;
+      const actualPreview = document
+        .querySelector('[data-cherry-milkdown]')!
+        .shadowRoot!.querySelector<HTMLElement>('.ProseMirror')!;
       oracle.className = actualPreview.className
         .replace(/\bcherry-milkdown\b/g, '')
         .replace(/\b(?:ProseMirror|cherry-milkdown__editor|editor)\b/g, '')
@@ -55,7 +57,7 @@ for (const item of cases) {
       oracle.style.width = `${actualPreview.getBoundingClientRect().width}px`;
       oracle.innerHTML = window.milkdownEditor!.engine.makeHtml(markdown);
       const shell = document.createElement('div');
-      const actualShell = document.querySelector<HTMLElement>('#markdown > .cherry')!;
+      const actualShell = actualPreview.closest<HTMLElement>('.cherry')!;
       for (const attribute of actualShell.attributes) shell.setAttribute(attribute.name, attribute.value);
       shell.dataset.nativeShell = '';
       shell.append(oracle);
